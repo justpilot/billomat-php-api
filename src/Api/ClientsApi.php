@@ -14,7 +14,7 @@ final class ClientsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->get('/clients', $filters);
+        $data = $this->getJson('/clients', $filters);
 
         $clientsNode = $data['clients']['client'] ?? [];
 
@@ -22,7 +22,6 @@ final class ClientsApi extends AbstractApi
             return [];
         }
 
-        // Normalisieren auf list<array>
         if (is_array($clientsNode) && array_is_list($clientsNode)) {
             $rows = $clientsNode;
         } elseif (is_array($clientsNode)) {
@@ -38,5 +37,22 @@ final class ClientsApi extends AbstractApi
         );
 
         return $models;
+    }
+
+    public function get(int $id): ?Client
+    {
+        $data = $this->getJsonOrNull("/clients/{$id}");
+
+        if ($data === null) {
+            return null;
+        }
+
+        $clientData = $data['client'] ?? null;
+
+        if (!is_array($clientData)) {
+            return null;
+        }
+
+        return Client::fromArray($clientData);
     }
 }

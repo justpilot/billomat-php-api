@@ -42,4 +42,33 @@ final class BillomatClientIntegrationTest extends TestCase
             self::assertNotSame('', $first->name);
         }
     }
+
+    public function test_can_get_single_client_from_sandbox_by_id(): void
+    {
+        $billomatId = getenv('BILLOMAT_ID') ?: null;
+        $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
+
+        if (!$billomatId || !$apiKey) {
+            $this->markTestSkipped('BILLOMAT_ID or BILLOMAT_API_KEY not set in .env.test/.env.test.local');
+        }
+
+        $client = BillomatClient::create(
+            billomatId: $billomatId,
+            apiKey: $apiKey,
+        );
+
+        $clients = $client->clients->list(['per_page' => 1]);
+
+        if ($clients === []) {
+            $this->markTestSkipped('No clients found in sandbox to test get().');
+        }
+
+        $first = $clients[0];
+
+        $fetched = $client->clients->get($first->id);
+
+        self::assertNotNull($fetched);
+        self::assertSame($first->id, $fetched->id);
+        self::assertSame($first->name, $fetched->name);
+    }
 }

@@ -31,6 +31,7 @@ final class BillomatHttpClient implements BillomatHttpClientInterface
         $headers = [
             'X-BillomatApiKey' => $this->config->apiKey,
             'Accept' => 'application/json',
+            'Accept-Language' => 'de-de'
         ];
 
         if ($this->config->appId !== null && $this->config->appSecret !== null) {

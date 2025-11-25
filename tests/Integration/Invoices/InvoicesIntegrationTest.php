@@ -369,11 +369,11 @@ final class InvoicesIntegrationTest extends TestCase
         $cancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $cancelled);
 
-        // je nach Billomat: "CANCELLED"
+        // je nach Billomat: "CANCELED"
         $this->assertContains(
             $cancelled->status,
             [InvoiceStatus::CANCELED],
-            'Invoice status after cancel() should be CANCELLED.'
+            'Invoice status after cancel() should be CANCELED.'
         );
     }
 
@@ -449,7 +449,7 @@ final class InvoicesIntegrationTest extends TestCase
         $this->assertContains(
             $cancelled->status,
             [InvoiceStatus::CANCELED],
-            'Invoice status after cancel() should be CANCELLED.'
+            'Invoice status after cancel() should be CANCELED.'
         );
 
         // 5) Stornierung zurücknehmen
@@ -459,11 +459,11 @@ final class InvoicesIntegrationTest extends TestCase
         $uncancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $uncancelled);
 
-        // Status sollte nicht mehr CANCELLED sein
+        // Status sollte nicht mehr CANCELED sein
         $this->assertNotContains(
             $uncancelled->status,
             [InvoiceStatus::CANCELED],
-            'Invoice status after uncancel() should no longer be CANCELLED.'
+            'Invoice status after uncancel() should no longer be CANCELED.'
         );
     }
 }

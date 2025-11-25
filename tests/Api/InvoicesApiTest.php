@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
@@ -325,5 +326,63 @@ final class InvoicesApiTest extends TestCase
             $templateId,
             $payload['invoice']['template_id'] ?? null
         );
+    }
+
+    public function test_it_deletes_draft_invoice_via_delete(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            // Billomat kann 200 oder 204 ohne Body zurückgeben
+            return new MockResponse('', ['http_code' => 204]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $result = $api->delete(777);
+
+        self::assertTrue($result);
+
+        self::assertSame('DELETE', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/777',
+            $captured['url']
+        );
+    }
+
+    public function test_delete_propagates_validation_exception_for_non_draft_invoice(): void
+    {
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) {
+            // Billomat meldet z.B. 400, wenn Rechnung nicht DRAFT ist
+            $body = json_encode([
+                'errors' => [
+                    'error' => 'Invoice can only be deleted in status DRAFT.',
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 400]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $this->expectException(ValidationException::class);
+
+        $api->delete(777);
     }
 }

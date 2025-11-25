@@ -98,6 +98,12 @@ abstract class AbstractApi
         return $this->http->request('PUT', $path, [], $body);
     }
 
+    protected function deleteVoid(string $path): void
+    {
+        $response = $this->http->request('DELETE', $path);
+        $this->handleErrors($response);
+    }
+
     /**
      * Liest eine JSON-Response und mapped HTTP-Fehler auf SDK-Exceptions.
      *
@@ -151,5 +157,19 @@ abstract class AbstractApi
             default =>
             new BillomatHttpException($message, $statusCode, $rawBody, $e),
         };
+    }
+
+    /**
+     * Führt nur die Fehlerbehandlung aus, ohne JSON zu dekodieren.
+     *
+     * Wird z.B. von deleteVoid() verwendet, wenn wir keinen JSON-Body erwarten.
+     */
+    private function handleErrors(ResponseInterface $response): void
+    {
+        try {
+            $response->getContent();
+        } catch (HttpExceptionInterface $e) {
+            throw $this->mapHttpException($e);
+        }
     }
 }

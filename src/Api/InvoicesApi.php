@@ -130,4 +130,17 @@ final class InvoicesApi extends AbstractApi
         $response = $this->putEmptyResponse("/invoices/{$id}/complete", $payload);
         return $response->getStatusCode() === 200;
     }
+
+    /**
+     * Löscht eine Rechnung.
+     *
+     * Nur Rechnungen im Status DRAFT können gelöscht werden.
+     *
+     * @throws ValidationException wenn die Rechnung nicht DRAFT ist
+     */
+    public function delete(int $id): bool
+    {
+        $this->deleteVoid("/invoices/{$id}");
+        return true;
+    }
 }

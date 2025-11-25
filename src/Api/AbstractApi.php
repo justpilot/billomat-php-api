@@ -78,6 +78,23 @@ abstract class AbstractApi
     }
 
     /**
+     * Führt einen PUT-Request mit JSON-Body aus und gibt den JSON-Body als Array zurück.
+     *
+     * Wird z. B. für PUT /invoices/{id}/complete verwendet.
+     *
+     * @param array<string,mixed> $body
+     * @return array<string,mixed>
+     */
+    protected function putJson(string $path, array $body): array
+    {
+        $response = $this->http->request('PUT', $path, [], $body);
+
+        $decoded = $this->decodeJsonResponse($response);
+
+        return $decoded;
+    }
+
+    /**
      * Liest eine JSON-Response und mapped HTTP-Fehler auf SDK-Exceptions.
      *
      * @return array<string,mixed>

@@ -102,4 +102,41 @@ final class InvoicesApi extends AbstractApi
 
         return Invoice::fromArray($created);
     }
+
+    /**
+     * Schließt eine Rechnung im Entwurfsstatus (DRAFT) ab.
+     *
+     * Entspricht PUT /invoices/{id}/complete
+     *
+     * - Status wird von DRAFT auf OPEN / OVERDUE / PAID gesetzt (laut Billomat-Logik)
+     * - Es wird ein PDF erzeugt
+     * - Die Rechnungsnummer (invoice_number) wird vergeben
+     *
+     * @param int $id ID der Rechnung
+     * @param int|null $templateId Optionale ID der Vorlage für die PDF-Erzeugung
+     */
+    public function complete(int $id, ?int $templateId = null): Invoice
+    {
+        $body = [];
+
+        if ($templateId !== null) {
+            // laut Doku: optionaler Parameter template_id
+            // Wir senden ihn im invoice-Block
+            $body['template_id'] = $templateId;
+        }
+
+        $payload = $body === []
+            ? []                // kein Body nötig, Billomat nutzt Defaults
+            : ['invoice' => $body];
+
+        $data = $this->putJson("/invoices/{$id}/complete", $payload);
+
+        $invoiceData = $data['invoice'] ?? null;
+
+        if (!is_array($invoiceData)) {
+            throw new \RuntimeException('Unexpected response from Billomat when completing invoice.');
+        }
+
+        return Invoice::fromArray($invoiceData);
+    }
 }

@@ -272,4 +272,80 @@ final class InvoicesApiTest extends TestCase
         // id darf im Payload NICHT gesetzt sein
         self::assertArrayNotHasKey('id', $invoicePayload);
     }
+
+    public function test_it_completes_invoice_via_put_and_optional_template_id(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            // Response einer abgeschlossenen Rechnung
+            $body = json_encode([
+                'invoice' => [
+                    'id' => 777,
+                    'client_id' => 123,
+                    'status' => 'OPEN',
+                    'invoice_number' => 'RE-2025-0007',
+                    'date' => '2025-03-01',
+                    'due_date' => '2025-03-15',
+                    'currency_code' => 'EUR',
+                    'total_gross' => 119.0,
+                    'total_net' => 100.0,
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $templateId = 5;
+
+        $completed = $api->complete(777, $templateId);
+
+        // Response-Mapping prüfen
+        self::assertInstanceOf(Invoice::class, $completed);
+        self::assertSame(777, $completed->id);
+        self::assertSame(123, $completed->clientId);
+        self::assertSame('OPEN', $completed->status);
+        self::assertSame('RE-2025-0007', $completed->invoiceNumber);
+        self::assertSame('2025-03-01', $completed->date);
+        self::assertSame('2025-03-15', $completed->dueDate);
+        self::assertSame('EUR', $completed->currencyCode);
+        self::assertSame(119.0, $completed->totalGross);
+        self::assertSame(100.0, $completed->totalNet);
+
+        // Request prüfen
+        self::assertSame('PUT', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/777/complete',
+            $captured['url']
+        );
+
+        $options = $captured['options'] ?? [];
+        $payload = $options['json'] ?? null;
+
+        if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+            $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
+        }
+
+        // Template-ID im Payload prüfen (falls gesendet)
+        if ($payload !== [] && $payload !== null) {
+            self::assertIsArray($payload);
+            self::assertArrayHasKey('invoice', $payload);
+            self::assertSame(
+                $templateId,
+                $payload['invoice']['template_id'] ?? null
+            );
+        }
+    }
 }

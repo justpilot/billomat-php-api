@@ -32,7 +32,7 @@ final class InvoicesApiTest extends TestCase
                         [
                             'id' => 1,
                             'client_id' => 123,
-                            'status' => 'DRAFT',
+                            'status' => InvoiceStatus::DRAFT->value,
                             'invoice_number' => null,
                             'date' => '2025-01-01',
                             'due_date' => '2025-01-15',
@@ -43,7 +43,7 @@ final class InvoicesApiTest extends TestCase
                         [
                             'id' => 2,
                             'client_id' => 456,
-                            'status' => 'PAID',
+                            'status' => InvoiceStatus::PAID->value,
                             'invoice_number' => 'RE-2025-0002',
                             'date' => '2025-01-02',
                             'due_date' => '2025-01-16',
@@ -114,7 +114,7 @@ final class InvoicesApiTest extends TestCase
                 'invoice' => [
                     'id' => 1234,
                     'client_id' => 999,
-                    'status' => 'OPEN',
+                    'status' => InvoiceStatus::OPEN->value,
                     'invoice_number' => 'RE-2025-0001',
                     'date' => '2025-02-01',
                     'due_date' => '2025-02-15',
@@ -169,7 +169,7 @@ final class InvoicesApiTest extends TestCase
                 'invoice' => [
                     'id' => 777,
                     'client_id' => 123,
-                    'status' => 'DRAFT',
+                    'status' => InvoiceStatus::DRAFT->value,
                     'invoice_number' => null, // laut Doku: bei DRAFT leer
                     'date' => '2025-03-01',
                     'due_date' => '2025-03-15',

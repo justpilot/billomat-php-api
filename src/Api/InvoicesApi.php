@@ -143,4 +143,30 @@ final class InvoicesApi extends AbstractApi
         $this->deleteVoid("/invoices/{$id}");
         return true;
     }
+
+    /**
+     * Markiert eine Rechnung als storniert.
+     *
+     * Entspricht PUT /invoices/{id}/cancel
+     *
+     * @return bool true bei Erfolg
+     */
+    public function cancel(int $id): bool
+    {
+        $response = $this->putEmptyResponse("/invoices/{$id}/cancel");
+        return $response->getStatusCode() === 200;
+    }
+
+    /**
+     * Hebt die Stornierung einer Rechnung wieder auf.
+     *
+     * Entspricht PUT /invoices/{id}/uncancel
+     *
+     * @return bool true bei Erfolg
+     */
+    public function uncancel(int $id): bool
+    {
+        $response = $this->putEmptyResponse("/invoices/{$id}/uncancel");
+        return $response->getStatusCode() === 200;
+    }
 }

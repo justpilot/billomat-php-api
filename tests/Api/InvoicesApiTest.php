@@ -385,4 +385,56 @@ final class InvoicesApiTest extends TestCase
 
         $api->delete(777);
     }
+
+    public function test_it_cancels_invoice(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
+            $captured = compact('method', 'url', 'options');
+
+            return new MockResponse('', ['http_code' => 200]);
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $result = $api->cancel(999);
+
+        self::assertTrue($result);
+
+        self::assertSame('PUT', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/999/cancel',
+            $captured['url']
+        );
+    }
+
+    public function test_it_uncancels_invoice(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
+            $captured = compact('method', 'url', 'options');
+
+            return new MockResponse('', ['http_code' => 200]);
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $result = $api->uncancel(999);
+
+        self::assertTrue($result);
+
+        self::assertSame('PUT', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/999/uncancel',
+            $captured['url']
+        );
+    }
 }

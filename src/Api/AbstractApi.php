@@ -93,7 +93,7 @@ abstract class AbstractApi
         return $decoded;
     }
 
-    protected function putEmptyResponse(string $path, array $body): ResponseInterface
+    protected function putEmptyResponse(string $path, array $body = []): ResponseInterface
     {
         return $this->http->request('PUT', $path, [], $body);
     }

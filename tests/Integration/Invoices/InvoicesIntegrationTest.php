@@ -229,7 +229,7 @@ final class InvoicesIntegrationTest extends TestCase
     public function test_can_delete_draft_invoice_in_sandbox(): void
     {
         $billomatId = getenv('BILLOMAT_ID');
-        $apiKey     = getenv('BILLOMAT_API_KEY');
+        $apiKey = getenv('BILLOMAT_API_KEY');
 
         if (!$billomatId || !$apiKey) {
             $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
@@ -246,14 +246,14 @@ final class InvoicesIntegrationTest extends TestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ($clients === []) {
-            $clientOptions              = new ClientCreateOptions(
+            $clientOptions = new ClientCreateOptions(
                 name: $faker->company(),
             );
-            $clientOptions->email       = $faker->unique()->safeEmail();
+            $clientOptions->email = $faker->unique()->safeEmail();
             $clientOptions->countryCode = 'DE';
 
             $createdClient = $billomat->clients->create($clientOptions);
-            $clientId      = $createdClient->id;
+            $clientId = $createdClient->id;
         } else {
             $clientId = $clients[0]->id;
         }
@@ -261,18 +261,18 @@ final class InvoicesIntegrationTest extends TestCase
         self::assertNotNull($clientId);
 
         // 2) Draft-Rechnung erstellen
-        $invoiceOpts              = new InvoiceCreateOptions(clientId: $clientId);
+        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
         $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title       = 'Delete-Test ' . date('d.m.Y H:i:s');
+        $invoiceOpts->title = 'Delete-Test ' . date('d.m.Y H:i:s');
 
-        $item             = new InvoiceItemCreateOptions(
+        $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
             unitPrice: $faker->randomFloat(2, 20, 100),
         );
-        $item->title       = 'Testposition Delete';
+        $item->title = 'Testposition Delete';
         $item->description = 'Position für Delete-Flow';
-        $item->unit        = 'Stück';
-        $item->taxRate     = 19.0;
+        $item->unit = 'Stück';
+        $item->taxRate = 19.0;
 
         $invoiceOpts->addItem($item);
 
@@ -294,5 +294,176 @@ final class InvoicesIntegrationTest extends TestCase
         $deleted = $billomat->invoices->get($draftId);
 
         self::assertNull($deleted);
+    }
+
+    #[Group("integration")]
+    public function test_can_cancel_invoice_in_sandbox(): void
+    {
+        $billomatId = getenv('BILLOMAT_ID');
+        $apiKey = getenv('BILLOMAT_API_KEY');
+
+        if (!$billomatId || !$apiKey) {
+            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
+        }
+
+        $billomat = BillomatClient::create(
+            billomatId: $billomatId,
+            apiKey: $apiKey,
+        );
+
+        $faker = FakerFactory::create('de_DE');
+
+        // 1) Client besorgen oder anlegen
+        $clients = $billomat->clients->list(['per_page' => 1]);
+
+        if ($clients === []) {
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+            );
+            $clientOptions->email = $faker->unique()->safeEmail();
+            $clientOptions->countryCode = 'DE';
+
+            $createdClient = $billomat->clients->create($clientOptions);
+            $clientId = $createdClient->id;
+        } else {
+            $clientId = $clients[0]->id;
+        }
+
+        self::assertNotNull($clientId);
+
+        // 2) Draft-Rechnung erstellen
+        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
+        $invoiceOpts->currencyCode = 'EUR';
+        $invoiceOpts->title = 'Cancel-Test ' . date('d.m.Y H:i:s');
+        $invoiceOpts->label = 'Integrationstest Invoice Cancel';
+
+        $item = new InvoiceItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: $faker->randomFloat(2, 20, 100),
+        );
+        $item->title = 'Testposition Cancel';
+        $item->description = 'Position für Cancel-Flow';
+        $item->unit = 'Stück';
+        $item->taxRate = 19.0;
+
+        $invoiceOpts->addItem($item);
+
+        $draft = $billomat->invoices->create($invoiceOpts);
+
+        self::assertInstanceOf(Invoice::class, $draft);
+        self::assertNotNull($draft->id);
+
+        $draftId = $draft->id;
+
+        // 3) Rechnung zuerst abschließen (cancel geht i.d.R. nur auf nicht-DRAFT)
+        $completedResult = $billomat->invoices->complete($draftId);
+        self::assertTrue($completedResult);
+
+        $completed = $billomat->invoices->get($draftId);
+        self::assertInstanceOf(Invoice::class, $completed);
+
+        // 4) Stornieren
+        $cancelResult = $billomat->invoices->cancel($draftId);
+        self::assertTrue($cancelResult);
+
+        $cancelled = $billomat->invoices->get($draftId);
+        self::assertInstanceOf(Invoice::class, $cancelled);
+
+        // je nach Billomat: "CANCELLED"
+        $this->assertContains(
+            $cancelled->status,
+            [InvoiceStatus::CANCELED],
+            'Invoice status after cancel() should be CANCELLED.'
+        );
+    }
+
+    #[Group("integration")]
+    public function test_can_uncancel_invoice_in_sandbox(): void
+    {
+        $billomatId = getenv('BILLOMAT_ID');
+        $apiKey = getenv('BILLOMAT_API_KEY');
+
+        if (!$billomatId || !$apiKey) {
+            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
+        }
+
+        $billomat = BillomatClient::create(
+            billomatId: $billomatId,
+            apiKey: $apiKey,
+        );
+
+        $faker = FakerFactory::create('de_DE');
+
+        // 1) Client besorgen oder anlegen
+        $clients = $billomat->clients->list(['per_page' => 1]);
+
+        if ($clients === []) {
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+            );
+            $clientOptions->email = $faker->unique()->safeEmail();
+            $clientOptions->countryCode = 'DE';
+
+            $createdClient = $billomat->clients->create($clientOptions);
+            $clientId = $createdClient->id;
+        } else {
+            $clientId = $clients[0]->id;
+        }
+
+        self::assertNotNull($clientId);
+
+        // 2) Draft-Rechnung erstellen
+        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
+        $invoiceOpts->currencyCode = 'EUR';
+        $invoiceOpts->title = 'Uncancel-Test ' . date('d.m.Y H:i:s');
+        $invoiceOpts->label = 'Integrationstest Invoice Uncancel';
+
+        $item = new InvoiceItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: $faker->randomFloat(2, 20, 100),
+        );
+        $item->title = 'Testposition Uncancel';
+        $item->description = 'Position für Uncancel-Flow';
+        $item->unit = 'Stück';
+        $item->taxRate = 19.0;
+
+        $invoiceOpts->addItem($item);
+
+        $draft = $billomat->invoices->create($invoiceOpts);
+
+        self::assertInstanceOf(Invoice::class, $draft);
+        self::assertNotNull($draft->id);
+
+        $draftId = $draft->id;
+
+        // 3) Abschließen
+        $completedResult = $billomat->invoices->complete($draftId);
+        self::assertTrue($completedResult);
+
+        // 4) Stornieren
+        $cancelResult = $billomat->invoices->cancel($draftId);
+        self::assertTrue($cancelResult);
+
+        $cancelled = $billomat->invoices->get($draftId);
+        self::assertInstanceOf(Invoice::class, $cancelled);
+        $this->assertContains(
+            $cancelled->status,
+            [InvoiceStatus::CANCELED],
+            'Invoice status after cancel() should be CANCELLED.'
+        );
+
+        // 5) Stornierung zurücknehmen
+        $uncancelResult = $billomat->invoices->uncancel($draftId);
+        self::assertTrue($uncancelResult);
+
+        $uncancelled = $billomat->invoices->get($draftId);
+        self::assertInstanceOf(Invoice::class, $uncancelled);
+
+        // Status sollte nicht mehr CANCELLED sein
+        $this->assertNotContains(
+            $uncancelled->status,
+            [InvoiceStatus::CANCELED],
+            'Invoice status after uncancel() should no longer be CANCELLED.'
+        );
     }
 }

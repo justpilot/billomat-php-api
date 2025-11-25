@@ -11,7 +11,7 @@ enum InvoiceStatus: string
     case OVERDUE = 'OVERDUE';
     case PAID = 'PAID';
     case VOID = 'VOID';
-    case CANCELLED = 'CANCELLED';
+    case CANCELED = 'CANCELED';
 
     /**
      * Convert raw API string into enum.

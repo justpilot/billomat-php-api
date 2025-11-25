@@ -4,31 +4,18 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration\Clients;
 
-use Faker\Factory as FakerFactory;
 use Justpilot\Billomat\Api\ClientCreateOptions;
-use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\TestCase;
 
-final class ClientsCreateIntegrationTest extends TestCase
+final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegrationTestCase
 {
     #[Group("integration")]
     public function test_can_create_client_in_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID');
-        $apiKey = getenv('BILLOMAT_API_KEY');
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
-        }
-
-        $billomat = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
-        $faker = FakerFactory::create('de_DE');
+        $billomat = $this->createBillomatClientOrSkip();
+        $faker = $this->faker();
 
         $options = new ClientCreateOptions(
             name: $faker->company(),

@@ -12,26 +12,15 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\TestCase;
 
-final class InvoicesIntegrationTest extends TestCase
+final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
     #[Group("integration")]
     public function test_can_list_invoices_from_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID');
-        $apiKey = getenv('BILLOMAT_API_KEY');
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
-        }
-
-        $billomat = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
+        $billomat = $this->createBillomatClientOrSkip();
         $invoices = $billomat->invoices->list(['per_page' => 5]);
 
         self::assertIsArray($invoices);
@@ -48,19 +37,8 @@ final class InvoicesIntegrationTest extends TestCase
     #[Group("integration")]
     public function test_can_create_invoice_draft_in_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID');
-        $apiKey = getenv('BILLOMAT_API_KEY');
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
-        }
-
-        $billomat = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
-        $faker = FakerFactory::create('de_DE');
+        $billomat = $this->createBillomatClientOrSkip();
+        $faker = $this->faker();
 
         // 1) Einen Client für die Rechnung bestimmen
         $clients = $billomat->clients->list(['per_page' => 1]);
@@ -141,19 +119,8 @@ final class InvoicesIntegrationTest extends TestCase
     #[Group("integration")]
     public function test_can_complete_invoice_in_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID');
-        $apiKey = getenv('BILLOMAT_API_KEY');
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
-        }
-
-        $billomat = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
-        $faker = FakerFactory::create('de_DE');
+        $billomat = $this->createBillomatClientOrSkip();
+        $faker = $this->faker();
 
         // 1) Einen Client besorgen (oder anlegen)
         $clients = $billomat->clients->list(['per_page' => 1]);
@@ -228,19 +195,8 @@ final class InvoicesIntegrationTest extends TestCase
     #[Group("integration")]
     public function test_can_delete_draft_invoice_in_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID');
-        $apiKey = getenv('BILLOMAT_API_KEY');
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
-        }
-
-        $billomat = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
-        $faker = FakerFactory::create('de_DE');
+        $billomat = $this->createBillomatClientOrSkip();
+        $faker = $this->faker();
 
         // 1) Client besorgen/anlegen (wie im Complete-Test)
         $clients = $billomat->clients->list(['per_page' => 1]);
@@ -299,19 +255,8 @@ final class InvoicesIntegrationTest extends TestCase
     #[Group("integration")]
     public function test_can_cancel_invoice_in_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID');
-        $apiKey = getenv('BILLOMAT_API_KEY');
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
-        }
-
-        $billomat = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
-        $faker = FakerFactory::create('de_DE');
+        $billomat = $this->createBillomatClientOrSkip();
+        $faker = $this->faker();
 
         // 1) Client besorgen oder anlegen
         $clients = $billomat->clients->list(['per_page' => 1]);
@@ -380,19 +325,8 @@ final class InvoicesIntegrationTest extends TestCase
     #[Group("integration")]
     public function test_can_uncancel_invoice_in_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID');
-        $apiKey = getenv('BILLOMAT_API_KEY');
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
-        }
-
-        $billomat = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
-        $faker = FakerFactory::create('de_DE');
+        $billomat = $this->createBillomatClientOrSkip();
+        $faker = $this->faker();
 
         // 1) Client besorgen oder anlegen
         $clients = $billomat->clients->list(['per_page' => 1]);

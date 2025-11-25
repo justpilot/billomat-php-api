@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Faker\Factory as FakerFactory;
 use Faker\Generator;
 
-abstract class AbstractBillomatIntegrationTest extends TestCase
+abstract class AbstractBillomatIntegrationTestCase extends TestCase
 {
     private ?Generator $faker = null;
 

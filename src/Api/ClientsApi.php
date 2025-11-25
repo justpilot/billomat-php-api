@@ -4,24 +4,39 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Model\Client;
+
 final class ClientsApi extends AbstractApi
 {
     /**
      * @param array<string, scalar|array|null> $filters
-     * @return list<array<string, mixed>>
+     * @return list<Client>
      */
     public function list(array $filters = []): array
     {
         $data = $this->get('/clients', $filters);
 
-        $clients = $data['clients']['client'] ?? [];
+        $clientsNode = $data['clients']['client'] ?? [];
 
-        if (!is_array($clients)) {
+        if ($clientsNode === null || $clientsNode === []) {
             return [];
         }
 
-        // Wir geben vorerst einfache Arrays zurück; später können wir hier auf Modelle (Client-Objekte) umbauen
-        /** @var list<array<string, mixed>> $clients */
-        return $clients;
+        // Normalisieren auf list<array>
+        if (is_array($clientsNode) && array_is_list($clientsNode)) {
+            $rows = $clientsNode;
+        } elseif (is_array($clientsNode)) {
+            $rows = [$clientsNode];
+        } else {
+            $rows = [];
+        }
+
+        /** @var list<Client> $models */
+        $models = array_map(
+            static fn(array $row): Client => Client::fromArray($row),
+            $rows
+        );
+
+        return $models;
     }
 }

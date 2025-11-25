@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests;
 
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Model\Client;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -35,14 +36,24 @@ final class BillomatClientTest extends TestCase
 
         $result = $client->clients->list(['per_page' => 1]);
 
+        // jetzt: list<Client>
+        self::assertIsArray($result);
         self::assertCount(1, $result);
-        self::assertSame('Client A', $result[0]['name']);
+        self::assertContainsOnlyInstancesOf(Client::class, $result);
+
+        $first = $result[0];
+        self::assertSame('Client A', $first->name);
+        self::assertSame(1, $first->id);
     }
 
     public function test_static_create_helper_builds_config(): void
     {
         $mockHttp = new MockHttpClient([
-            new MockResponse('{"ok": true}'),
+            new MockResponse(json_encode([
+                'clients' => [
+                    'client' => [],
+                ],
+            ], JSON_THROW_ON_ERROR)),
         ]);
 
         $client = BillomatClient::create(
@@ -51,7 +62,9 @@ final class BillomatClientTest extends TestCase
             httpClient: $mockHttp,
         );
 
-        // nur ein Smoke-Test: clients-API existiert
-        $this->assertNotNull($client->clients);
+        $clients = $client->clients->list(['per_page' => 1]);
+
+        self::assertIsArray($clients);
+        self::assertContainsOnlyInstancesOf(Client::class, $clients);
     }
 }

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Model\Client;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -47,9 +48,9 @@ final class ClientsApiTest extends TestCase
         $clients = $api->list($filters);
 
         // Rückgabe prüfen
-        self::assertCount(2, $clients);
-        self::assertSame('Client A', $clients[0]['name']);
-        self::assertSame(1, $clients[0]['id']);
+        self::assertIsArray($clients);
+        self::assertContainsOnlyInstancesOf(Client::class, $clients);
+        self::assertSame('Client A', $clients[0]->name);
 
         // Request prüfen
         self::assertSame('GET', $captured['method']);

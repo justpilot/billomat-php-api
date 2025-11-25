@@ -72,6 +72,7 @@ final class BillomatClientIntegrationTest extends TestCase
             street: $faker->streetName(),
             zip: $faker->postcode(),
             city: $faker->city(),
+            debitorAccountNumber: $faker->randomNumber(5),
         );
 
         $created = $client->clients->create($new);

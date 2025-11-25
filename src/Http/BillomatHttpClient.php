@@ -8,7 +8,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-final class BillomatHttpClient
+final class BillomatHttpClient implements BillomatHttpClientInterface
 {
     public function __construct(
         private HttpClientInterface $client,

@@ -8,7 +8,7 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -24,7 +24,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 abstract class AbstractApi
 {
     public function __construct(
-        protected BillomatHttpClient $http,
+        protected BillomatHttpClientInterface $http,
     )
     {
     }

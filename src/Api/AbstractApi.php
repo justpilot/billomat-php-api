@@ -83,7 +83,6 @@ abstract class AbstractApi
      * Wird z. B. für PUT /invoices/{id}/complete verwendet.
      *
      * @param array<string,mixed> $body
-     * @return array<string,mixed>
      */
     protected function putJson(string $path, array $body): array
     {
@@ -92,6 +91,11 @@ abstract class AbstractApi
         $decoded = $this->decodeJsonResponse($response);
 
         return $decoded;
+    }
+
+    protected function putEmptyResponse(string $path, array $body): ResponseInterface
+    {
+        return $this->http->request('PUT', $path, [], $body);
     }
 
     /**

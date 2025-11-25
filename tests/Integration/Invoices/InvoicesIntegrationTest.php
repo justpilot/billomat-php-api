@@ -11,13 +11,12 @@ use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Model\Invoice;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 final class InvoicesIntegrationTest extends TestCase
 {
-    /**
-     * @group integration
-     */
+    #[Group("integration")]
     public function test_can_list_invoices_from_sandbox(): void
     {
         $billomatId = getenv('BILLOMAT_ID');
@@ -45,9 +44,7 @@ final class InvoicesIntegrationTest extends TestCase
         }
     }
 
-    /**
-     * @group integration
-     */
+    #[Group("integration")]
     public function test_can_create_invoice_draft_in_sandbox(): void
     {
         $billomatId = getenv('BILLOMAT_ID');
@@ -137,6 +134,93 @@ final class InvoicesIntegrationTest extends TestCase
         // In DRAFT ist invoiceNumber meist null/leer – keine harte Assertion
         if ($invoice->invoiceNumber !== null) {
             self::assertIsString($invoice->invoiceNumber);
+        }
+    }
+
+    #[Group("integration")]
+    public function test_can_complete_invoice_in_sandbox(): void
+    {
+        $billomatId = getenv('BILLOMAT_ID');
+        $apiKey = getenv('BILLOMAT_API_KEY');
+
+        if (!$billomatId || !$apiKey) {
+            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
+        }
+
+        $billomat = BillomatClient::create(
+            billomatId: $billomatId,
+            apiKey: $apiKey,
+        );
+
+        $faker = FakerFactory::create('de_DE');
+
+        // 1) Einen Client besorgen (oder anlegen)
+        $clients = $billomat->clients->list(['per_page' => 1]);
+
+        if ($clients === []) {
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+            );
+            $clientOptions->email = $faker->unique()->safeEmail();
+            $clientOptions->countryCode = 'DE';
+
+            $createdClient = $billomat->clients->create($clientOptions);
+            $clientId = $createdClient->id;
+        } else {
+            $clientId = $clients[0]->id;
+        }
+
+        self::assertNotNull($clientId, 'Client ID must not be null for invoice completion');
+
+        // 2) Draft-Rechnung erstellen
+        $today = new \DateTimeImmutable('today');
+
+        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
+        $invoiceOpts->date = $today->format('Y-m-d');
+        $invoiceOpts->currencyCode = 'EUR';
+        $invoiceOpts->title = 'Completion-Test ' . date('d.m.Y H:i:s');
+        $invoiceOpts->label = 'Integrationstest Invoice Complete';
+        $invoiceOpts->note = 'Erstellt durch automatisierten Integrationstest für complete().';
+
+        $unitPrice = $faker->randomFloat(2, 20, 100);
+
+        $item = new InvoiceItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: $unitPrice,
+        );
+        $item->title = 'Testposition Completion';
+        $item->description = 'Position für Completion-Flow';
+        $item->unit = 'Stück';
+        $item->taxRate = 19.0;
+
+        $invoiceOpts->addItem($item);
+
+        $draft = $billomat->invoices->create($invoiceOpts);
+
+        self::assertInstanceOf(Invoice::class, $draft);
+        self::assertNotNull($draft->id);
+        self::assertGreaterThan(0, $draft->id);
+
+        $draftId = $draft->id;
+
+        // 3) Rechnung abschließen (ohne template_id, damit Defaults greifen)
+        $result = $billomat->invoices->complete($draftId);
+
+        self::assertTrue($result);
+
+        // 4) Invoice neu laden und prüfen
+        $completed = $billomat->invoices->get($draftId);
+
+        self::assertInstanceOf(Invoice::class, $completed);
+        self::assertSame($draftId, $completed->id);
+        self::assertSame($clientId, $completed->clientId);
+
+        self::assertNotNull($completed->status);
+        self::assertIsString($completed->status);
+        self::assertNotSame('DRAFT', $completed->status, 'Invoice status should not remain DRAFT after complete().');
+
+        if ($completed->invoiceNumber !== null) {
+            self::assertNotSame('', trim($completed->invoiceNumber));
         }
     }
 }

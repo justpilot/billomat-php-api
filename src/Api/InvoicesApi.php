@@ -115,7 +115,7 @@ final class InvoicesApi extends AbstractApi
      * @param int $id ID der Rechnung
      * @param int|null $templateId Optionale ID der Vorlage für die PDF-Erzeugung
      */
-    public function complete(int $id, ?int $templateId = null): Invoice
+    public function complete(int $id, ?int $templateId = null): bool
     {
         $body = [];
 
@@ -127,14 +127,7 @@ final class InvoicesApi extends AbstractApi
 
         $payload = ['invoice' => $body];
 
-        $data = $this->putJson("/invoices/{$id}/complete", $payload);
-
-        $invoiceData = $data['invoice'] ?? null;
-
-        if (!is_array($invoiceData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when completing invoice.');
-        }
-
-        return Invoice::fromArray($invoiceData);
+        $response = $this->putEmptyResponse("/invoices/{$id}/complete", $payload);
+        return $response->getStatusCode() === 200;
     }
 }

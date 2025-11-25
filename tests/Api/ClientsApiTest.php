@@ -26,8 +26,18 @@ final class ClientsApiTest extends TestCase
             $body = json_encode([
                 'clients' => [
                     'client' => [
-                        ['id' => 1, 'name' => 'Client A'],
-                        ['id' => 2, 'name' => 'Client B'],
+                        [
+                            'id' => 1,
+                            'name' => 'Client A',
+                            'first_name' => 'Max',
+                            'last_name' => 'Mustermann',
+                            'salutation' => 'Herr',
+                            'client_number' => 'C001',
+                        ],
+                        [
+                            'id' => 2,
+                            'name' => 'Client B',
+                        ],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -52,8 +62,12 @@ final class ClientsApiTest extends TestCase
         self::assertContainsOnlyInstancesOf(Client::class, $clients);
 
         $first = $clients[0];
-        self::assertSame('Client A', $first->name);
         self::assertSame(1, $first->id);
+        self::assertSame('Client A', $first->name);
+        self::assertSame('Max', $first->firstName);
+        self::assertSame('Mustermann', $first->lastName);
+        self::assertSame('Herr', $first->salutation);
+        self::assertSame('C001', $first->clientNumber);
 
         // Request prüfen
         self::assertSame('GET', $captured['method']);
@@ -84,6 +98,8 @@ final class ClientsApiTest extends TestCase
                 'client' => [
                     'id' => 123,
                     'name' => 'Single Client',
+                    'first_name' => 'Erika',
+                    'last_name' => 'Musterfrau',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -103,6 +119,8 @@ final class ClientsApiTest extends TestCase
         self::assertInstanceOf(Client::class, $client);
         self::assertSame(123, $client->id);
         self::assertSame('Single Client', $client->name);
+        self::assertSame('Erika', $client->firstName);
+        self::assertSame('Musterfrau', $client->lastName);
 
         self::assertSame('GET', $captured['method']);
         self::assertSame(
@@ -120,11 +138,14 @@ final class ClientsApiTest extends TestCase
             $captured['url'] = $url;
             $captured['options'] = $options;
 
-            // Was der Server zurückliefert (id gesetzt)
+            // Server-Response mit gesetzter ID
             $body = json_encode([
                 'client' => [
                     'id' => 999,
-                    'name' => 'New Client',
+                    'name' => 'New Client GmbH',
+                    'first_name' => 'Max',
+                    'last_name' => 'Mustermann',
+                    'salutation' => 'Herr',
                     'client_number' => 'C-100',
                     'email' => 'new@example.com',
                 ],
@@ -141,9 +162,11 @@ final class ClientsApiTest extends TestCase
         $http = new BillomatHttpClient($mock, $config);
         $api = new ClientsApi($http);
 
-        $newClient = new Client(
-            id: null,
-            name: 'New Client',
+        $newClient = Client::new(
+            name: 'New Client GmbH',
+            firstName: 'Max',
+            lastName: 'Mustermann',
+            salutation: 'Herr',
             clientNumber: 'C-100',
             email: 'new@example.com',
         );
@@ -151,7 +174,10 @@ final class ClientsApiTest extends TestCase
         $created = $api->create($newClient);
 
         self::assertSame(999, $created->id);
-        self::assertSame('New Client', $created->name);
+        self::assertSame('New Client GmbH', $created->name);
+        self::assertSame('Max', $created->firstName);
+        self::assertSame('Mustermann', $created->lastName);
+        self::assertSame('Herr', $created->salutation);
         self::assertSame('C-100', $created->clientNumber);
         self::assertSame('new@example.com', $created->email);
 
@@ -163,8 +189,6 @@ final class ClientsApiTest extends TestCase
         );
 
         $options = $captured['options'] ?? [];
-
-        // robust: entweder json-Option oder body-String
         $payload = $options['json'] ?? null;
 
         if ($payload === null && isset($options['body']) && is_string($options['body'])) {
@@ -173,7 +197,10 @@ final class ClientsApiTest extends TestCase
 
         self::assertIsArray($payload);
         self::assertArrayHasKey('client', $payload);
-        self::assertSame('New Client', $payload['client']['name'] ?? null);
+        self::assertSame('New Client GmbH', $payload['client']['name'] ?? null);
+        self::assertSame('Max', $payload['client']['first_name'] ?? null);
+        self::assertSame('Mustermann', $payload['client']['last_name'] ?? null);
+        self::assertSame('Herr', $payload['client']['salutation'] ?? null);
         self::assertSame('C-100', $payload['client']['client_number'] ?? null);
         self::assertSame('new@example.com', $payload['client']['email'] ?? null);
         self::assertArrayNotHasKey('id', $payload['client']);

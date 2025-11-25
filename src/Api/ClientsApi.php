@@ -9,6 +9,8 @@ use Justpilot\Billomat\Model\Client;
 final class ClientsApi extends AbstractApi
 {
     /**
+     * Listet Clients mit optionalen Filtern.
+     *
      * @param array<string, scalar|array|null> $filters
      * @return list<Client>
      */
@@ -39,6 +41,9 @@ final class ClientsApi extends AbstractApi
         return $models;
     }
 
+    /**
+     * Holt einen einzelnen Client, oder null wenn nicht gefunden.
+     */
     public function get(int $id): ?Client
     {
         $data = $this->getJsonOrNull("/clients/{$id}");
@@ -57,7 +62,7 @@ final class ClientsApi extends AbstractApi
     }
 
     /**
-     * Legt einen neuen Kunden an.
+     * Legt einen neuen Client an.
      */
     public function create(Client $client): Client
     {
@@ -70,7 +75,7 @@ final class ClientsApi extends AbstractApi
         $created = $data['client'] ?? null;
 
         if (!is_array($created)) {
-            // hier könntest du später eine Domain-Exception werfen
+            // Später ggf. Exception werfen
             return $client;
         }
 

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Integration;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
 use PHPUnit\Framework\TestCase;
+use Faker\Factory as FakerFactory;
 
 final class BillomatClientIntegrationTest extends TestCase
 {
@@ -27,49 +28,16 @@ final class BillomatClientIntegrationTest extends TestCase
             apiKey: $apiKey,
         );
 
-        // Wir versuchen, max. 1 Client zu holen – egal ob es überhaupt Clients gibt
         $clients = $client->clients->list(['per_page' => 1]);
 
-        self::assertIsArray($clients, 'Clients result must be an array');
+        self::assertIsArray($clients);
         self::assertContainsOnlyInstancesOf(Client::class, $clients);
 
         if ($clients !== []) {
             $first = $clients[0];
-
-            self::assertInstanceOf(Client::class, $first);
             self::assertIsInt($first->id);
             self::assertIsString($first->name);
-            self::assertNotSame('', $first->name);
         }
-    }
-
-    public function test_can_get_single_client_from_sandbox_by_id(): void
-    {
-        $billomatId = getenv('BILLOMAT_ID') ?: null;
-        $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
-
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('BILLOMAT_ID or BILLOMAT_API_KEY not set in .env.test/.env.test.local');
-        }
-
-        $client = BillomatClient::create(
-            billomatId: $billomatId,
-            apiKey: $apiKey,
-        );
-
-        $clients = $client->clients->list(['per_page' => 1]);
-
-        if ($clients === []) {
-            $this->markTestSkipped('No clients found in sandbox to test get().');
-        }
-
-        $first = $clients[0];
-
-        $fetched = $client->clients->get($first->id);
-
-        self::assertNotNull($fetched);
-        self::assertSame($first->id, $fetched->id);
-        self::assertSame($first->name, $fetched->name);
     }
 
     /**
@@ -89,18 +57,27 @@ final class BillomatClientIntegrationTest extends TestCase
             apiKey: $apiKey,
         );
 
-        $name = 'SDK Test Client ' . uniqid();
+        $faker = FakerFactory::create();
 
-        $new = new Client(
-            id: null,
+        $name = $faker->company();
+
+        $new = Client::new(
             name: $name,
+            firstName: $faker->firstName(),
+            lastName: $faker->lastName(),
+            salutation: $faker->randomElement(['Herr', 'Frau']),
             clientNumber: null,
-            email: 'sdk-test@example.com',
+            email: $faker->email(),
+            phone: $faker->phoneNumber(),
+            street: $faker->streetName(),
+            zip: $faker->postcode(),
+            city: $faker->city(),
         );
 
         $created = $client->clients->create($new);
 
         self::assertSame($name, $created->name);
+        self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
     }
 }

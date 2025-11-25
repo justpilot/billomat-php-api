@@ -142,7 +142,7 @@ final class ClientsApiTest extends TestCase
         $api = new ClientsApi($http);
 
         $newClient = new Client(
-            id: 0, // wird bei create ignoriert
+            id: null,
             name: 'New Client',
             clientNumber: 'C-100',
             email: 'new@example.com',

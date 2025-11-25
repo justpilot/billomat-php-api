@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Model;
 final readonly class Client
 {
     public function __construct(
-        public int     $id,
+        public ?int    $id,
         public string  $name,
         public ?string $clientNumber = null,
         public ?string $email = null,
@@ -25,7 +25,7 @@ final readonly class Client
     public static function fromArray(array $data): self
     {
         return new self(
-            id: (int)($data['id'] ?? 0),
+            id: isset($data['id']) ? (int)$data['id'] : null,
             name: (string)($data['name'] ?? ''),
             clientNumber: $data['client_number'] ?? null,
             email: $data['email'] ?? null,

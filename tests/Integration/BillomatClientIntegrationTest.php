@@ -92,7 +92,7 @@ final class BillomatClientIntegrationTest extends TestCase
         $name = 'SDK Test Client ' . uniqid();
 
         $new = new Client(
-            id: 0,
+            id: null,
             name: $name,
             clientNumber: null,
             email: 'sdk-test@example.com',

@@ -272,10 +272,31 @@ final class InvoiceCreateOptions
     public ?int $templateId = null;
 
     /**
-     * Serialisiert die Options in ein Billomat-Payload-Array.
-     *
-     * @return array<string,mixed>
+     * @var list<InvoiceItemCreateOptions>
      */
+    private array $items = [];
+
+    /**
+     * Fügt eine Rechnungsposition hinzu.
+     *
+     * @return $this
+     */
+    public function addItem(InvoiceItemCreateOptions $item): self
+    {
+        $this->items[] = $item;
+
+        return $this;
+    }
+
+    /**
+     * @return list<InvoiceItemCreateOptions>
+     */
+    public function getItems(): array
+    {
+        return $this->items;
+    }
+
+    // in toArray() am Ende:
     public function toArray(): array
     {
         $data = [
@@ -310,7 +331,17 @@ final class InvoiceCreateOptions
             'template_id' => $this->templateId,
         ];
 
-        // Null-Werte entfernen, damit Billomat Defaults anwenden kann
-        return array_filter($data, static fn($v) => $v !== null);
+        $data = array_filter($data, static fn($v) => $v !== null);
+
+        if ($this->items !== []) {
+            $data['items'] = [
+                'item' => array_map(
+                    static fn(InvoiceItemCreateOptions $item): array => $item->toArray(),
+                    $this->items
+                ),
+            ];
+        }
+
+        return $data;
     }
 }

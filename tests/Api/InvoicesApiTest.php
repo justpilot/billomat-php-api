@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
+use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -168,7 +169,7 @@ final class InvoicesApiTest extends TestCase
                     'id' => 777,
                     'client_id' => 123,
                     'status' => 'DRAFT',
-                    'invoice_number' => null, // laut Doku: bei DRAFT noch leer
+                    'invoice_number' => null, // laut Doku: bei DRAFT leer
                     'date' => '2025-03-01',
                     'due_date' => '2025-03-15',
                     'currency_code' => 'EUR',
@@ -188,6 +189,7 @@ final class InvoicesApiTest extends TestCase
         $http = new BillomatHttpClient($mock, $config);
         $api = new InvoicesApi($http);
 
+        // --- Build invoice create options ---
         $opts = new InvoiceCreateOptions(
             clientId: 123,
         );
@@ -198,9 +200,22 @@ final class InvoicesApiTest extends TestCase
         $opts->label = 'Leistungen März 2025';
         $opts->note = 'Vielen Dank für Ihren Auftrag.';
 
+        // --- Add a single invoice item ---
+        $item = new InvoiceItemCreateOptions(
+            quantity: 2.0,
+            unitPrice: 100.0,
+        );
+        $item->title = 'Beratung';
+        $item->description = 'Leistungspaket März';
+        $item->unit = 'Stunde';
+        $item->taxRate = 19.0;
+
+        $opts->addItem($item);
+
+        // --- Execute ---
         $created = $api->create($opts);
 
-        // Response-Mapping prüfen
+        // --- Assertions on response mapping ---
         self::assertInstanceOf(Invoice::class, $created);
         self::assertSame(777, $created->id);
         self::assertSame(123, $created->clientId);
@@ -210,7 +225,7 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('2025-03-15', $created->dueDate);
         self::assertSame('EUR', $created->currencyCode);
 
-        // Request prüfen
+        // --- Assertions on outgoing request ---
         self::assertSame('POST', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/invoices',
@@ -229,6 +244,7 @@ final class InvoicesApiTest extends TestCase
 
         $invoicePayload = $payload['invoice'];
 
+        // Basic fields
         self::assertSame(123, $invoicePayload['client_id'] ?? null);
         self::assertSame('2025-03-01', $invoicePayload['date'] ?? null);
         self::assertSame('EUR', $invoicePayload['currency_code'] ?? null);
@@ -236,7 +252,24 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('Leistungen März 2025', $invoicePayload['label'] ?? null);
         self::assertSame('Vielen Dank für Ihren Auftrag.', $invoicePayload['note'] ?? null);
 
-        // id darf im Payload nicht gesetzt sein
+        // Items block
+        self::assertArrayHasKey('items', $invoicePayload);
+        self::assertArrayHasKey('item', $invoicePayload['items']);
+
+        $items = $invoicePayload['items']['item'];
+        self::assertIsArray($items);
+        self::assertCount(1, $items);
+
+        $firstItem = $items[0];
+
+        self::assertSame(2.0, $firstItem['quantity'] ?? null);
+        self::assertSame(100.0, $firstItem['unit_price'] ?? null);
+        self::assertSame('Beratung', $firstItem['title'] ?? null);
+        self::assertSame('Leistungspaket März', $firstItem['description'] ?? null);
+        self::assertSame('Stunde', $firstItem['unit'] ?? null);
+        self::assertSame(19.0, $firstItem['tax_rate'] ?? null);
+
+        // id darf im Payload NICHT gesetzt sein
         self::assertArrayNotHasKey('id', $invoicePayload);
     }
 }

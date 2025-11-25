@@ -125,9 +125,7 @@ final class InvoicesApi extends AbstractApi
             $body['template_id'] = $templateId;
         }
 
-        $payload = $body === []
-            ? []                // kein Body nötig, Billomat nutzt Defaults
-            : ['invoice' => $body];
+        $payload = ['invoice' => $body];
 
         $data = $this->putJson("/invoices/{$id}/complete", $payload);
 

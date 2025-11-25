@@ -1,0 +1,21 @@
+# PHP composer vendor dir
+/vendor/
+
+# composer.lock file should not be committed for reusable libraries
+composer.lock
+
+# composer PHAR
+composer.phar
+
+# PHPUnit
+.phpunit.result.cache
+
+# PHPStorm / IntelliJ
+.idea/
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

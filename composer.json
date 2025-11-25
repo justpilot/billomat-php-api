@@ -1,0 +1,23 @@
+{
+  "name": "justpilot/billomat-php-api",
+  "description": "Modern PHP 8.4+ SDK for the Billomat API, powered by Symfony components.",
+  "type": "library",
+  "require": {
+    "symfony/http-client": "^7.3",
+    "symfony/serializer": "^7.3",
+    "symfony/options-resolver": "^7.3"
+  },
+  "license": "proprietary",
+  "autoload": {
+    "psr-4": {
+      "Justpilot\\Billomat\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Dimitri Dovgan",
+      "email": "dimitri@justpilot.io"
+    }
+  ],
+  "minimum-stability": "stable"
+}

@@ -9,6 +9,9 @@ composer.phar
 
 # PHPUnit
 .phpunit.result.cache
+.phpunit.cache
+
+phpunit.xml.dist
 
 # PHPStorm / IntelliJ
 .idea/

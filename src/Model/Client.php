@@ -42,6 +42,9 @@ final readonly class Client
     /** ISO 3166-1 Alpha-2 Ländercode */
     public ?string $country;
 
+    /** Debitorennummer */
+    public ?int $debitorAccountNumber;
+
     /**
      * @param int|null $id Billomat-ID
      * @param string $name Firmenname
@@ -50,10 +53,12 @@ final readonly class Client
      * @param string|null $salutation Anrede
      * @param string|null $clientNumber Kundennummer
      * @param string|null $email E-Mail-Adresse
+     * @param string|null $phone Telefon
      * @param string|null $street Straße
      * @param string|null $zip PLZ
      * @param string|null $city Ort
      * @param string|null $country ISO-Ländercode (DE, AT, CH, ...)
+     * @param ?int $debitorAccountNumber Debitorennummer
      */
     public function __construct(
         ?int    $id,
@@ -68,6 +73,7 @@ final readonly class Client
         ?string $zip = null,
         ?string $city = null,
         ?string $country = null,
+        ?int    $debitorAccountNumber = null
     )
     {
         $this->id = $id;
@@ -82,6 +88,7 @@ final readonly class Client
         $this->zip = $zip;
         $this->city = $city;
         $this->country = $country;
+        $this->debitorAccountNumber = $debitorAccountNumber;
     }
 
     /**
@@ -99,10 +106,12 @@ final readonly class Client
             salutation: $data['salutation'] ?? null,
             clientNumber: $data['client_number'] ?? null,
             email: $data['email'] ?? null,
+            phone: $data['phone'] ?? null,
             street: $data['street'] ?? null,
             zip: $data['zip'] ?? null,
             city: $data['city'] ?? null,
             country: $data['country'] ?? null,
+            debitorAccountNumber: isset($data['debitor_account_number']) ? (int)$data['debitor_account_number'] : null
         );
     }
 
@@ -125,6 +134,7 @@ final readonly class Client
             'zip' => $this->zip,
             'city' => $this->city,
             'country' => $this->country,
+            'debitor_account_number' => $this->debitorAccountNumber,
         ];
     }
 
@@ -142,10 +152,12 @@ final readonly class Client
             'salutation' => $this->salutation,
             'client_number' => $this->clientNumber,
             'email' => $this->email,
+            'phone' => $this->phone,
             'street' => $this->street,
             'zip' => $this->zip,
             'city' => $this->city,
             'country' => $this->country,
+            'debitor_account_number' => $this->debitorAccountNumber,
         ];
     }
 
@@ -164,6 +176,7 @@ final readonly class Client
         ?string $zip = null,
         ?string $city = null,
         ?string $country = null,
+        ?int    $debitorAccountNumber = null
     ): self
     {
         return new self(
@@ -179,6 +192,7 @@ final readonly class Client
             zip: $zip,
             city: $city,
             country: $country,
+            debitorAccountNumber: $debitorAccountNumber
         );
     }
 }

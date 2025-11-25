@@ -8,13 +8,12 @@ use Faker\Factory as FakerFactory;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 final class ClientsCreateIntegrationTest extends TestCase
 {
-    /**
-     * @group integration
-     */
+    #[Group("integration")]
     public function test_can_create_client_in_sandbox(): void
     {
         $billomatId = getenv('BILLOMAT_ID');

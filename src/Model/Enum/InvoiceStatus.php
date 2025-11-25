@@ -6,11 +6,19 @@ namespace Justpilot\Billomat\Model\Enum;
 
 enum InvoiceStatus: string
 {
+    /** Entwurf */
     case DRAFT = 'DRAFT';
+
+    /** offen */
     case OPEN = 'OPEN';
+
+    /** überfällig */
     case OVERDUE = 'OVERDUE';
+
+    /** bezahlt */
     case PAID = 'PAID';
-    case VOID = 'VOID';
+
+    /** storniert */
     case CANCELED = 'CANCELED';
 
     /**
@@ -23,5 +31,16 @@ enum InvoiceStatus: string
         }
 
         return self::tryFrom($status) ?? null;
+    }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::DRAFT => 'Entwurf',
+            self::OPEN => 'Offen',
+            self::OVERDUE => 'Überfällig',
+            self::PAID => 'Bezahlt',
+            self::CANCELED => 'Storniert',
+        };
     }
 }

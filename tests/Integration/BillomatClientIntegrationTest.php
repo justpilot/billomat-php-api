@@ -71,4 +71,36 @@ final class BillomatClientIntegrationTest extends TestCase
         self::assertSame($first->id, $fetched->id);
         self::assertSame($first->name, $fetched->name);
     }
+
+    /**
+     * @group integration
+     */
+    public function test_can_create_client_in_sandbox(): void
+    {
+        $billomatId = getenv('BILLOMAT_ID') ?: null;
+        $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
+
+        if (!$billomatId || !$apiKey) {
+            $this->markTestSkipped('BILLOMAT_ID or BILLOMAT_API_KEY not set in .env.test/.env.test.local');
+        }
+
+        $client = BillomatClient::create(
+            billomatId: $billomatId,
+            apiKey: $apiKey,
+        );
+
+        $name = 'SDK Test Client ' . uniqid();
+
+        $new = new Client(
+            id: 0,
+            name: $name,
+            clientNumber: null,
+            email: 'sdk-test@example.com',
+        );
+
+        $created = $client->clients->create($new);
+
+        self::assertSame($name, $created->name);
+        self::assertGreaterThan(0, $created->id);
+    }
 }

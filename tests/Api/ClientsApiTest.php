@@ -110,4 +110,72 @@ final class ClientsApiTest extends TestCase
             $captured['url']
         );
     }
+
+    public function test_it_creates_a_new_client_via_post(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            // Was der Server zurückliefert (id gesetzt)
+            $body = json_encode([
+                'client' => [
+                    'id' => 999,
+                    'name' => 'New Client',
+                    'client_number' => 'C-100',
+                    'email' => 'new@example.com',
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 201]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new ClientsApi($http);
+
+        $newClient = new Client(
+            id: 0, // wird bei create ignoriert
+            name: 'New Client',
+            clientNumber: 'C-100',
+            email: 'new@example.com',
+        );
+
+        $created = $api->create($newClient);
+
+        self::assertSame(999, $created->id);
+        self::assertSame('New Client', $created->name);
+        self::assertSame('C-100', $created->clientNumber);
+        self::assertSame('new@example.com', $created->email);
+
+        // Request prüfen
+        self::assertSame('POST', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/clients',
+            $captured['url']
+        );
+
+        $options = $captured['options'] ?? [];
+
+        // robust: entweder json-Option oder body-String
+        $payload = $options['json'] ?? null;
+
+        if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+            $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
+        }
+
+        self::assertIsArray($payload);
+        self::assertArrayHasKey('client', $payload);
+        self::assertSame('New Client', $payload['client']['name'] ?? null);
+        self::assertSame('C-100', $payload['client']['client_number'] ?? null);
+        self::assertSame('new@example.com', $payload['client']['email'] ?? null);
+        self::assertArrayNotHasKey('id', $payload['client']);
+    }
 }

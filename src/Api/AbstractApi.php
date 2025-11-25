@@ -56,4 +56,23 @@ abstract class AbstractApi
             throw $e;
         }
     }
+
+    /**
+     * Führt einen POST-Request aus und gibt den JSON-Body als Array zurück.
+     *
+     * @param array<string,mixed> $body
+     * @return array<string,mixed>
+     */
+    protected function postJson(string $path, array $body): array
+    {
+        // Wichtig: dritter Parameter ist query (leer), vierter ist json-body
+        $response = $this->http->request('POST', $path, [], $body);
+
+        $content = $response->getContent(); // 2xx erwartet
+
+        /** @var array<string,mixed> $decoded */
+        $decoded = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
+
+        return $decoded;
+    }
 }

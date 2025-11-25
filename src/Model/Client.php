@@ -52,4 +52,22 @@ final readonly class Client
             'country' => $this->country,
         ];
     }
+
+    /**
+     * Payload für POST /clients (id wird nicht gesendet).
+     *
+     * @return array<string,mixed>
+     */
+    public function toArrayForCreate(): array
+    {
+        return [
+            'name' => $this->name,
+            'client_number' => $this->clientNumber,
+            'email' => $this->email,
+            'street' => $this->street,
+            'zip' => $this->zip,
+            'city' => $this->city,
+            'country' => $this->country,
+        ];
+    }
 }

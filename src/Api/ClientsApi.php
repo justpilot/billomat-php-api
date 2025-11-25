@@ -55,4 +55,25 @@ final class ClientsApi extends AbstractApi
 
         return Client::fromArray($clientData);
     }
+
+    /**
+     * Legt einen neuen Kunden an.
+     */
+    public function create(Client $client): Client
+    {
+        $payload = [
+            'client' => $client->toArrayForCreate(),
+        ];
+
+        $data = $this->postJson('/clients', $payload);
+
+        $created = $data['client'] ?? null;
+
+        if (!is_array($created)) {
+            // hier könntest du später eine Domain-Exception werfen
+            return $client;
+        }
+
+        return Client::fromArray($created);
+    }
 }

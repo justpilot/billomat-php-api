@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
@@ -40,7 +41,7 @@ final class InvoicesIntegrationTest extends TestCase
             $first = $invoices[0];
             self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
-            self::assertIsString($first->status);
+            self::assertInstanceOf(InvoiceStatus::class, $first->status);
         }
     }
 
@@ -119,7 +120,7 @@ final class InvoicesIntegrationTest extends TestCase
 
         // Status sollte gesetzt sein (bei Erstellung typischerweise "DRAFT")
         self::assertNotNull($invoice->status);
-        self::assertIsString($invoice->status);
+        self::assertInstanceOf(InvoiceStatus::class, $invoice->status);
 
         // Rechnungsdatum prüfen, wenn vom Server zurückgegeben
         if ($invoice->date !== null) {
@@ -216,8 +217,8 @@ final class InvoicesIntegrationTest extends TestCase
         self::assertSame($clientId, $completed->clientId);
 
         self::assertNotNull($completed->status);
-        self::assertIsString($completed->status);
-        self::assertNotSame('DRAFT', $completed->status, 'Invoice status should not remain DRAFT after complete().');
+        self::assertInstanceOf(InvoiceStatus::class, $completed->status);
+        self::assertNotSame(InvoiceStatus::DRAFT, $completed->status, 'Invoice status should not remain DRAFT after complete().');
 
         if ($completed->invoiceNumber !== null) {
             self::assertNotSame('', trim($completed->invoiceNumber));

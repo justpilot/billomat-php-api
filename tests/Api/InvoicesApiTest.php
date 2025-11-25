@@ -9,6 +9,7 @@ use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -76,7 +77,7 @@ final class InvoicesApiTest extends TestCase
         $first = $invoices[0];
         self::assertSame(1, $first->id);
         self::assertSame(123, $first->clientId);
-        self::assertSame('DRAFT', $first->status);
+        self::assertSame(InvoiceStatus::DRAFT, $first->status);
         self::assertNull($first->invoiceNumber);
         self::assertSame('2025-01-01', $first->date);
         self::assertSame('2025-01-15', $first->dueDate);
@@ -139,7 +140,7 @@ final class InvoicesApiTest extends TestCase
         self::assertInstanceOf(Invoice::class, $invoice);
         self::assertSame(1234, $invoice->id);
         self::assertSame(999, $invoice->clientId);
-        self::assertSame('OPEN', $invoice->status);
+        self::assertSame(InvoiceStatus::OPEN, $invoice->status);
         self::assertSame('RE-2025-0001', $invoice->invoiceNumber);
         self::assertSame('2025-02-01', $invoice->date);
         self::assertSame('2025-02-15', $invoice->dueDate);
@@ -219,7 +220,7 @@ final class InvoicesApiTest extends TestCase
         self::assertInstanceOf(Invoice::class, $created);
         self::assertSame(777, $created->id);
         self::assertSame(123, $created->clientId);
-        self::assertSame('DRAFT', $created->status);
+        self::assertSame(InvoiceStatus::DRAFT, $created->status);
         self::assertNull($created->invoiceNumber);
         self::assertSame('2025-03-01', $created->date);
         self::assertSame('2025-03-15', $created->dueDate);

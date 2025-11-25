@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+
 /**
  * Repräsentiert eine Rechnung aus der Billomat-API.
  *
@@ -34,7 +36,7 @@ final readonly class Invoice
     public ?string $currencyCode;
 
     /** Status, z. B. "DRAFT", "OPEN", "PAID". */
-    public ?string $status;
+    public ?InvoiceStatus $status;
 
     /** Bruttosumme der Rechnung (falls von API bereitgestellt). */
     public ?float $totalGross;
@@ -43,16 +45,16 @@ final readonly class Invoice
     public ?float $totalNet;
 
     public function __construct(
-        ?int    $id,
-        int     $clientId,
-        ?int    $contactId = null,
-        ?string $invoiceNumber = null,
-        ?string $date = null,
-        ?string $dueDate = null,
-        ?string $currencyCode = null,
-        ?string $status = null,
-        ?float  $totalGross = null,
-        ?float  $totalNet = null,
+        ?int           $id,
+        int            $clientId,
+        ?int           $contactId = null,
+        ?string        $invoiceNumber = null,
+        ?string        $date = null,
+        ?string        $dueDate = null,
+        ?string        $currencyCode = null,
+        ?InvoiceStatus $status = null,
+        ?float         $totalGross = null,
+        ?float         $totalNet = null,
     )
     {
         $this->id = $id;
@@ -82,7 +84,7 @@ final readonly class Invoice
             date: $data['date'] ?? null,
             dueDate: $data['due_date'] ?? null,
             currencyCode: $data['currency_code'] ?? null,
-            status: $data['status'] ?? null,
+            status: InvoiceStatus::fromApi($data['status'] ?? null),
             totalGross: isset($data['total_gross']) ? (float)$data['total_gross'] : null,
             totalNet: isset($data['total_net']) ? (float)$data['total_net'] : null,
         );

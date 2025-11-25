@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -28,15 +29,21 @@ final class ClientsApiTest extends TestCase
                     'client' => [
                         [
                             'id' => 1,
-                            'name' => 'Client A',
+                            'name' => 'Client A GmbH',
+                            'client_number' => 'C001',
+                            'street' => 'Musterstraße 1',
+                            'zip' => '12345',
+                            'city' => 'Berlin',
+                            'country_code' => 'DE',
                             'first_name' => 'Max',
                             'last_name' => 'Mustermann',
-                            'salutation' => 'Herr',
-                            'client_number' => 'C001',
+                            'email' => 'max@example.com',
+                            'debitor_account_number' => 4711,
                         ],
                         [
                             'id' => 2,
-                            'name' => 'Client B',
+                            'name' => 'Client B AG',
+                            'client_number' => 'C002',
                         ],
                     ],
                 ],
@@ -63,11 +70,16 @@ final class ClientsApiTest extends TestCase
 
         $first = $clients[0];
         self::assertSame(1, $first->id);
-        self::assertSame('Client A', $first->name);
+        self::assertSame('Client A GmbH', $first->name);
+        self::assertSame('C001', $first->clientNumber);
+        self::assertSame('Musterstraße 1', $first->street);
+        self::assertSame('12345', $first->zip);
+        self::assertSame('Berlin', $first->city);
+        self::assertSame('DE', $first->countryCode);
         self::assertSame('Max', $first->firstName);
         self::assertSame('Mustermann', $first->lastName);
-        self::assertSame('Herr', $first->salutation);
-        self::assertSame('C001', $first->clientNumber);
+        self::assertSame('max@example.com', $first->email);
+        self::assertSame(4711, $first->debitorAccountNumber);
 
         // Request prüfen
         self::assertSame('GET', $captured['method']);
@@ -97,9 +109,12 @@ final class ClientsApiTest extends TestCase
             $body = json_encode([
                 'client' => [
                     'id' => 123,
-                    'name' => 'Single Client',
+                    'name' => 'Single Client GmbH',
+                    'client_number' => 'SC-123',
                     'first_name' => 'Erika',
                     'last_name' => 'Musterfrau',
+                    'email' => 'erika@example.com',
+                    'debitor_account_number' => 9001,
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -118,9 +133,12 @@ final class ClientsApiTest extends TestCase
 
         self::assertInstanceOf(Client::class, $client);
         self::assertSame(123, $client->id);
-        self::assertSame('Single Client', $client->name);
+        self::assertSame('Single Client GmbH', $client->name);
+        self::assertSame('SC-123', $client->clientNumber);
         self::assertSame('Erika', $client->firstName);
         self::assertSame('Musterfrau', $client->lastName);
+        self::assertSame('erika@example.com', $client->email);
+        self::assertSame(9001, $client->debitorAccountNumber);
 
         self::assertSame('GET', $captured['method']);
         self::assertSame(
@@ -138,16 +156,18 @@ final class ClientsApiTest extends TestCase
             $captured['url'] = $url;
             $captured['options'] = $options;
 
-            // Server-Response mit gesetzter ID
+            // Server-Response mit gesetzter ID und zurückgespiegelten Daten
             $body = json_encode([
                 'client' => [
                     'id' => 999,
                     'name' => 'New Client GmbH',
+                    'client_number' => 'C-100',
                     'first_name' => 'Max',
                     'last_name' => 'Mustermann',
                     'salutation' => 'Herr',
-                    'client_number' => 'C-100',
                     'email' => 'new@example.com',
+                    'country_code' => 'DE',
+                    'debitor_account_number' => 4711,
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -162,24 +182,27 @@ final class ClientsApiTest extends TestCase
         $http = new BillomatHttpClient($mock, $config);
         $api = new ClientsApi($http);
 
-        $newClient = Client::new(
-            name: 'New Client GmbH',
-            firstName: 'Max',
-            lastName: 'Mustermann',
-            salutation: 'Herr',
-            clientNumber: 'C-100',
-            email: 'new@example.com',
-        );
+        $opts = new ClientCreateOptions('New Client GmbH');
+        $opts->firstName = 'Max';
+        $opts->lastName = 'Mustermann';
+        $opts->salutation = 'Herr';
+        $opts->clientNumber = 'C-100';
+        $opts->email = 'new@example.com';
+        $opts->countryCode = 'DE';
+        $opts->debitorAccountNumber = 4711;
 
-        $created = $api->create($newClient);
+        $created = $api->create($opts);
 
+        self::assertInstanceOf(Client::class, $created);
         self::assertSame(999, $created->id);
         self::assertSame('New Client GmbH', $created->name);
+        self::assertSame('C-100', $created->clientNumber);
         self::assertSame('Max', $created->firstName);
         self::assertSame('Mustermann', $created->lastName);
         self::assertSame('Herr', $created->salutation);
-        self::assertSame('C-100', $created->clientNumber);
         self::assertSame('new@example.com', $created->email);
+        self::assertSame('DE', $created->countryCode);
+        self::assertSame(4711, $created->debitorAccountNumber);
 
         // Request prüfen
         self::assertSame('POST', $captured['method']);
@@ -197,12 +220,19 @@ final class ClientsApiTest extends TestCase
 
         self::assertIsArray($payload);
         self::assertArrayHasKey('client', $payload);
-        self::assertSame('New Client GmbH', $payload['client']['name'] ?? null);
-        self::assertSame('Max', $payload['client']['first_name'] ?? null);
-        self::assertSame('Mustermann', $payload['client']['last_name'] ?? null);
-        self::assertSame('Herr', $payload['client']['salutation'] ?? null);
-        self::assertSame('C-100', $payload['client']['client_number'] ?? null);
-        self::assertSame('new@example.com', $payload['client']['email'] ?? null);
-        self::assertArrayNotHasKey('id', $payload['client']);
+
+        $clientPayload = $payload['client'];
+
+        self::assertSame('New Client GmbH', $clientPayload['name'] ?? null);
+        self::assertSame('Max', $clientPayload['first_name'] ?? null);
+        self::assertSame('Mustermann', $clientPayload['last_name'] ?? null);
+        self::assertSame('Herr', $clientPayload['salutation'] ?? null);
+        self::assertSame('C-100', $clientPayload['client_number'] ?? null);
+        self::assertSame('new@example.com', $clientPayload['email'] ?? null);
+        self::assertSame('DE', $clientPayload['country_code'] ?? null);
+        self::assertSame(4711, $clientPayload['debitor_account_number'] ?? null);
+
+        // id darf im Payload nicht gesetzt sein
+        self::assertArrayNotHasKey('id', $clientPayload);
     }
 }

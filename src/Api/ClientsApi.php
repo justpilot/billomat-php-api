@@ -6,10 +6,20 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Client;
 
+/**
+ * API-Wrapper für die Billomat-Clients-Ressource.
+ *
+ * Kapselt Zugriffe auf:
+ *  - GET  /clients
+ *  - GET  /clients/{id}
+ *  - POST /clients
+ */
 final class ClientsApi extends AbstractApi
 {
     /**
      * Listet Clients mit optionalen Filtern.
+     *
+     * Entspricht GET /clients
      *
      * @param array<string, scalar|array|null> $filters
      * @return list<Client>
@@ -43,6 +53,8 @@ final class ClientsApi extends AbstractApi
 
     /**
      * Holt einen einzelnen Client, oder null wenn nicht gefunden.
+     *
+     * Entspricht GET /clients/{id}
      */
     public function get(int $id): ?Client
     {
@@ -63,11 +75,15 @@ final class ClientsApi extends AbstractApi
 
     /**
      * Legt einen neuen Client an.
+     *
+     * Entspricht POST /clients
+     *
+     * @throws \RuntimeException Wenn die Response-Struktur unerwartet ist
      */
-    public function create(Client $client): Client
+    public function create(ClientCreateOptions $options): Client
     {
         $payload = [
-            'client' => $client->toArrayForCreate(),
+            'client' => $options->toArray(),
         ];
 
         $data = $this->postJson('/clients', $payload);
@@ -75,8 +91,7 @@ final class ClientsApi extends AbstractApi
         $created = $data['client'] ?? null;
 
         if (!is_array($created)) {
-            // Später ggf. Exception werfen
-            return $client;
+            throw new \RuntimeException('Unexpected response from Billomat when creating client.');
         }
 
         return Client::fromArray($created);

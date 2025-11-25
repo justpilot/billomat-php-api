@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration;
 
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Model\Client;
 use PHPUnit\Framework\TestCase;
 use Faker\Factory as FakerFactory;
@@ -16,11 +17,11 @@ final class BillomatClientIntegrationTest extends TestCase
      */
     public function test_can_list_clients_from_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID') ?: null;
-        $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
+        $billomatId = getenv('BILLOMAT_ID');
+        $apiKey = getenv('BILLOMAT_API_KEY');
 
         if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('BILLOMAT_ID or BILLOMAT_API_KEY not set in .env.test/.env.test.local');
+            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
         }
 
         $client = BillomatClient::create(
@@ -35,7 +36,7 @@ final class BillomatClientIntegrationTest extends TestCase
 
         if ($clients !== []) {
             $first = $clients[0];
-            self::assertIsInt($first->id);
+            self::assertNotNull($first->id);
             self::assertIsString($first->name);
         }
     }
@@ -45,11 +46,11 @@ final class BillomatClientIntegrationTest extends TestCase
      */
     public function test_can_create_client_in_sandbox(): void
     {
-        $billomatId = getenv('BILLOMAT_ID') ?: null;
-        $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
+        $billomatId = getenv('BILLOMAT_ID');
+        $apiKey = getenv('BILLOMAT_API_KEY');
 
         if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('BILLOMAT_ID or BILLOMAT_API_KEY not set in .env.test/.env.test.local');
+            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
         }
 
         $client = BillomatClient::create(
@@ -57,28 +58,38 @@ final class BillomatClientIntegrationTest extends TestCase
             apiKey: $apiKey,
         );
 
-        $faker = FakerFactory::create();
+        $faker = FakerFactory::create('de_DE'); // realistische deutsche Daten
 
-        $name = $faker->company();
-
-        $new = Client::new(
-            name: $name,
-            firstName: $faker->firstName(),
-            lastName: $faker->lastName(),
-            salutation: $faker->randomElement(['Herr', 'Frau']),
-            clientNumber: null,
-            email: $faker->email(),
-            phone: $faker->phoneNumber(),
-            street: $faker->streetName(),
-            zip: $faker->postcode(),
-            city: $faker->city(),
-            debitorAccountNumber: $faker->randomNumber(5),
+        // Realistische minimale Client-Daten
+        $options = new ClientCreateOptions(
+            name: $faker->company()
         );
 
-        $created = $client->clients->create($new);
+        // Sinnvolle Faker-Werte setzen
+        $options->firstName = $faker->firstName();
+        $options->lastName = $faker->lastName();
+        $options->salutation = $faker->randomElement(['Herr', 'Frau']);
+        $options->email = $faker->unique()->safeEmail();
+        $options->phone = $faker->phoneNumber();
+        $options->street = $faker->streetName();
+        $options->zip = $faker->postcode();
+        $options->city = $faker->city();
+        $options->countryCode = 'DE'; // Sandbox sicher
+        $options->debitorAccountNumber = $faker->numberBetween(10000, 99999);
 
-        self::assertSame($name, $created->name);
+        // Client erstellen
+        $created = $client->clients->create($options);
+
+        // Assertions
+        self::assertInstanceOf(Client::class, $created);
         self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
+
+        // Name 1:1 wiedererkennbar?
+        self::assertSame($options->name, $created->name);
+
+        // Optional weitere Prüfungen
+        self::assertSame('DE', $created->countryCode);
+        self::assertSame($options->email, $created->email);
     }
 }

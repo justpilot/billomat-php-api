@@ -126,7 +126,7 @@ abstract class AbstractApi
     /**
      * Mappt eine Symfony-HttpException auf unsere eigenen Exception-Typen.
      */
-    private function mapHttpException(HttpExceptionInterface $e): BillomatHttpException
+    protected function mapHttpException(HttpExceptionInterface $e): BillomatHttpException
     {
         $symfonyResponse = $e->getResponse();
         $statusCode = $symfonyResponse->getStatusCode();

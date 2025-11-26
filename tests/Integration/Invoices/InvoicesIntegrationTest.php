@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration\Invoices;
 
-use Faker\Factory as FakerFactory;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
@@ -17,6 +15,65 @@ use PHPUnit\Framework\Attributes\Group;
 
 final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
+    private function ensureInvoiceId(): int
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        // Versuche, eine existierende Rechnung zu holen
+        $invoices = $billomat->invoices->list(['per_page' => 1]);
+
+        if ($invoices !== []) {
+            return $invoices[0]->id;
+        }
+
+        // Falls keine Rechnung existiert → Client & Rechnung anlegen und abschließen
+        $faker = $this->faker();
+
+        // 1) Client anlegen
+        $clientOptions = new ClientCreateOptions(
+            name: $faker->company(),
+        );
+        $clientOptions->email = $faker->unique()->safeEmail();
+        $clientOptions->countryCode = 'DE';
+
+        $client = $billomat->clients->create($clientOptions);
+        $clientId = $client->id;
+
+        // 2) Draft-Rechnung anlegen
+        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
+        $invoiceOpts->currencyCode = 'EUR';
+        $invoiceOpts->title = 'PDF-Test ' . date('d.m.Y H:i:s');
+        $invoiceOpts->label = 'Integrationstest Invoice PDF';
+        $invoiceOpts->note = 'Erstellt durch automatisierten Integrationstest für PDF.';
+
+        $item = new InvoiceItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: $faker->randomFloat(2, 20, 100),
+        );
+        $item->title = 'PDF Testposition';
+        $item->description = 'Position für PDF-Test';
+        $item->unit = 'Stück';
+        $item->taxRate = 19.0;
+
+        $invoiceOpts->addItem($item);
+
+        $draft = $billomat->invoices->create($invoiceOpts);
+
+        if (!$draft instanceof Invoice || $draft->id === null) {
+            throw new \RuntimeException('Failed to create draft invoice for PDF integration test.');
+        }
+
+        $draftId = $draft->id;
+
+        // 3) Abschließen – hier wird in der Regel das PDF erzeugt
+        $completed = $billomat->invoices->complete($draftId);
+        if (!$completed) {
+            throw new \RuntimeException('Failed to complete invoice for PDF integration test.');
+        }
+
+        return $draftId;
+    }
+
     #[Group("integration")]
     public function test_can_list_invoices_from_sandbox(): void
     {
@@ -399,5 +456,22 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
             [InvoiceStatus::CANCELED],
             'Invoice status after uncancel() should no longer be CANCELED.'
         );
+    }
+
+    #[Group("integration")]
+    public function test_can_fetch_invoice_pdf_from_sandbox_as_raw_binary(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $invoiceId = $this->ensureInvoiceId();
+
+        $binary = $billomat->invoices->pdf(
+            id: $invoiceId,
+            type: null,
+            rawPdf: true,
+        );
+
+        self::assertIsString($binary);
+        self::assertNotSame('', $binary);
+        self::assertStringContainsString('PDF', $binary);
     }
 }

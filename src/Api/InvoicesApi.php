@@ -7,7 +7,10 @@ namespace Justpilot\Billomat\Api;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoicePdf;
+use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Invoices-Ressource.
@@ -168,5 +171,55 @@ final class InvoicesApi extends AbstractApi
     {
         $response = $this->putEmptyResponse("/invoices/{$id}/uncancel");
         return $response->getStatusCode() === 200;
+    }
+
+    /**
+     * Ruft das PDF einer Rechnung ab.
+     *
+     * Entspricht GET /invoices/{id}/pdf
+     *
+     * - Optionaler Typ:
+     *   - InvoicePdfType::SIGNED → type=signed
+     *   - InvoicePdfType::PRINT  → type=print
+     *
+     * - Raw-PDF-Modus:
+     *   - $rawPdf = true → format=pdf, Rückgabe ist der binäre PDF-String
+     *   - $rawPdf = false (Default) → JSON-Response mit base64file, Rückgabe ist InvoicePdf-Model
+     *
+     * @return InvoicePdf|string  InvoicePdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
+     */
+    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string
+    {
+        $query = [];
+
+        if ($type !== null) {
+            // Enum → API-String (signed / print)
+            $query['type'] = $type->value;
+        }
+
+        // Raw-PDF-Modus: format=pdf → direkt application/pdf
+        if ($rawPdf === true) {
+            $query['format'] = 'pdf';
+
+            $response = $this->http->request('GET', "/invoices/{$id}/pdf", $query);
+
+            try {
+                // Binärer PDF-Content
+                return $response->getContent();
+            } catch (HttpExceptionInterface $e) {
+                throw $this->mapHttpException($e);
+            }
+        }
+
+        // Standard-Modus: JSON → { "pdf": { ... } }
+        $data = $this->getJson("/invoices/{$id}/pdf", $query);
+
+        $pdfData = $data['pdf'] ?? null;
+
+        if (!is_array($pdfData)) {
+            throw new \RuntimeException('Unexpected response from Billomat when fetching invoice PDF.');
+        }
+
+        return InvoicePdf::fromArray($pdfData);
     }
 }

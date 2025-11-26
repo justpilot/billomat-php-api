@@ -334,8 +334,8 @@ final class InvoiceCreateOptions
         $data = array_filter($data, static fn($v) => $v !== null);
 
         if ($this->items !== []) {
-            $data['items'] = [
-                'item' => array_map(
+            $data['invoice-items'] = [
+                'invoice-item' => array_map(
                     static fn(InvoiceItemCreateOptions $item): array => $item->toArray(),
                     $this->items
                 ),

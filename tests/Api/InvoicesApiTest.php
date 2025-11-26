@@ -257,10 +257,10 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('Vielen Dank für Ihren Auftrag.', $invoicePayload['note'] ?? null);
 
         // Items block
-        self::assertArrayHasKey('items', $invoicePayload);
-        self::assertArrayHasKey('item', $invoicePayload['items']);
+        self::assertArrayHasKey('invoice-items', $invoicePayload);
+        self::assertArrayHasKey('invoice-item', $invoicePayload['invoice-items']);
 
-        $items = $invoicePayload['items']['item'];
+        $items = $invoicePayload['invoice-items']['invoice-item'];
         self::assertIsArray($items);
         self::assertCount(1, $items);
 

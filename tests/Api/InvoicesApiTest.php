@@ -80,8 +80,8 @@ final class InvoicesApiTest extends TestCase
         self::assertSame(123, $first->clientId);
         self::assertSame(InvoiceStatus::DRAFT, $first->status);
         self::assertNull($first->invoiceNumber);
-        self::assertSame('2025-01-01', $first->date);
-        self::assertSame('2025-01-15', $first->dueDate);
+        self::assertSame('2025-01-01', $first->date?->format('Y-m-d'));
+        self::assertSame('2025-01-15', $first->dueDate?->format('Y-m-d'));
         self::assertSame('EUR', $first->currencyCode);
         self::assertSame(119.0, $first->totalGross);
         self::assertSame(100.0, $first->totalNet);
@@ -143,8 +143,8 @@ final class InvoicesApiTest extends TestCase
         self::assertSame(999, $invoice->clientId);
         self::assertSame(InvoiceStatus::OPEN, $invoice->status);
         self::assertSame('RE-2025-0001', $invoice->invoiceNumber);
-        self::assertSame('2025-02-01', $invoice->date);
-        self::assertSame('2025-02-15', $invoice->dueDate);
+        self::assertSame('2025-02-01', $invoice->date?->format('Y-m-d'));
+        self::assertSame('2025-02-15', $invoice->dueDate?->format('Y-m-d'));
         self::assertSame('EUR', $invoice->currencyCode);
         self::assertSame(238.0, $invoice->totalGross);
         self::assertSame(200.0, $invoice->totalNet);
@@ -196,7 +196,7 @@ final class InvoicesApiTest extends TestCase
             clientId: 123,
         );
 
-        $opts->date = '2025-03-01';
+        $opts->date = new \DateTimeImmutable('2025-03-01');
         $opts->currencyCode = 'EUR';
         $opts->title = 'Rechnung März';
         $opts->label = 'Leistungen März 2025';
@@ -223,8 +223,8 @@ final class InvoicesApiTest extends TestCase
         self::assertSame(123, $created->clientId);
         self::assertSame(InvoiceStatus::DRAFT, $created->status);
         self::assertNull($created->invoiceNumber);
-        self::assertSame('2025-03-01', $created->date);
-        self::assertSame('2025-03-15', $created->dueDate);
+        self::assertSame('2025-03-01', $created->date?->format('Y-m-d'));
+        self::assertSame('2025-03-15', $created->dueDate?->format('Y-m-d'));
         self::assertSame('EUR', $created->currencyCode);
 
         // --- Assertions on outgoing request ---

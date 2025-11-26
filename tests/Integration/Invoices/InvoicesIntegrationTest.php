@@ -70,7 +70,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
             clientId: $clientId,
         );
 
-        $invoiceOpts->date = $today->format('Y-m-d');
+        $invoiceOpts->date = $today;
         $invoiceOpts->currencyCode = 'EUR';
         $invoiceOpts->title = 'Integrationstest-Rechnung';
         $invoiceOpts->label = 'Leistungen Integrationstest';
@@ -102,7 +102,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         // Rechnungsdatum prüfen, wenn vom Server zurückgegeben
         if ($invoice->date !== null) {
-            self::assertSame($invoiceOpts->date, $invoice->date);
+            self::assertSame($invoiceOpts->date?->format('Y-m-d'), $invoice->date?->format('Y-m-d'));
         }
 
         // Währung prüfen, wenn zurückgegeben
@@ -144,7 +144,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $today = new \DateTimeImmutable('today');
 
         $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->date = $today->format('Y-m-d');
+        $invoiceOpts->date = $today;
         $invoiceOpts->currencyCode = 'EUR';
         $invoiceOpts->title = 'Completion-Test ' . date('d.m.Y H:i:s');
         $invoiceOpts->label = 'Integrationstest Invoice Complete';

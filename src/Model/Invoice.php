@@ -27,10 +27,10 @@ final readonly class Invoice
     public ?string $invoiceNumber;
 
     /** Rechnungsdatum (YYYY-MM-DD). */
-    public ?string $date;
+    public ?\DateTimeImmutable $date;
 
     /** Fälligkeitsdatum (YYYY-MM-DD). */
-    public ?string $dueDate;
+    public ?\DateTimeImmutable $dueDate;
 
     /** Währungscode, z. B. "EUR". */
     public ?string $currencyCode;
@@ -45,16 +45,16 @@ final readonly class Invoice
     public ?float $totalNet;
 
     public function __construct(
-        ?int           $id,
-        int            $clientId,
-        ?int           $contactId = null,
-        ?string        $invoiceNumber = null,
-        ?string        $date = null,
-        ?string        $dueDate = null,
-        ?string        $currencyCode = null,
-        ?InvoiceStatus $status = null,
-        ?float         $totalGross = null,
-        ?float         $totalNet = null,
+        ?int                $id,
+        int                 $clientId,
+        ?int                $contactId = null,
+        ?string             $invoiceNumber = null,
+        ?\DateTimeImmutable $date = null,
+        ?\DateTimeImmutable $dueDate = null,
+        ?string             $currencyCode = null,
+        ?InvoiceStatus      $status = null,
+        ?float              $totalGross = null,
+        ?float              $totalNet = null,
     )
     {
         $this->id = $id;
@@ -81,8 +81,8 @@ final readonly class Invoice
             clientId: (int)($data['client_id'] ?? 0),
             contactId: isset($data['contact_id']) ? (int)$data['contact_id'] : null,
             invoiceNumber: $data['invoice_number'] ?? null,
-            date: $data['date'] ?? null,
-            dueDate: $data['due_date'] ?? null,
+            date: $data['date'] ? new \DateTimeImmutable($data['date']) : null,
+            dueDate: $data['due_date'] ? new \DateTimeImmutable($data['due_date']) : null,
             currencyCode: $data['currency_code'] ?? null,
             status: InvoiceStatus::fromApi($data['status'] ?? null),
             totalGross: isset($data['total_gross']) ? (float)$data['total_gross'] : null,

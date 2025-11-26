@@ -80,7 +80,7 @@ final class InvoiceCreateOptions
      * Typ: DATE
      * Default: heute
      */
-    public ?string $date = null;
+    public ?\DateTimeImmutable $date = null;
 
     /**
      * Liefer-/Leistungsdatum.
@@ -88,7 +88,7 @@ final class InvoiceCreateOptions
      * Billomat-Feld: supply_date
      * Typ: MIXED (DATE/ALNUM)
      */
-    public ?string $supplyDate = null;
+    public ?\DateTimeImmutable $supplyDate = null;
 
     /**
      * Typ des Liefer-/Leistungsdatums.
@@ -114,7 +114,7 @@ final class InvoiceCreateOptions
      * Typ: DATE
      * Default: date + due_days
      */
-    public ?string $dueDate = null;
+    public ?\DateTimeImmutable $dueDate = null;
 
     /**
      * Skonto in Prozent.
@@ -141,7 +141,7 @@ final class InvoiceCreateOptions
      * Typ: DATE
      * Default: date + discount_days
      */
-    public ?string $discountDate = null;
+    public ?\DateTimeImmutable $discountDate = null;
 
     /**
      * Dokumentenüberschrift.
@@ -306,8 +306,8 @@ final class InvoiceCreateOptions
             'number_pre' => $this->numberPre,
             'number' => $this->number,
             'number_length' => $this->numberLength,
-            'date' => $this->date,
-            'supply_date' => $this->supplyDate,
+            'date' => $this->date?->format('Y-m-d'),
+            'supply_date' => $this->supplyDate?->format('Y-m-d'),
             'supply_date_type' => $this->supplyDateType,
             'due_days' => $this->dueDays,
             'due_date' => $this->dueDate,

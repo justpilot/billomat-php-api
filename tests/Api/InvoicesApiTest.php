@@ -10,8 +10,10 @@ use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoicePdf;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -435,6 +437,158 @@ final class InvoicesApiTest extends TestCase
         self::assertSame(
             'https://mycompany.billomat.net/api/invoices/999/uncancel',
             $captured['url']
+        );
+    }
+
+    public function test_it_fetches_invoice_pdf_in_json_mode(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            $body = json_encode([
+                'pdf' => [
+                    'id' => 4882,
+                    'created' => '2009-09-02T12:04:15+02:00',
+                    'invoice_id' => 240,
+                    'filename' => 'invoice_123.pdf',
+                    'mimetype' => 'application/pdf',
+                    'filesize' => 70137,
+                    'base64file' => base64_encode('%PDF-FAKE%'),
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $pdf = $api->pdf(240);
+
+        self::assertInstanceOf(InvoicePdf::class, $pdf);
+        self::assertSame(4882, $pdf->id);
+        self::assertSame(240, $pdf->invoiceId);
+        self::assertSame('invoice_123.pdf', $pdf->filename);
+        self::assertSame('application/pdf', $pdf->mimeType);
+        self::assertSame(70137, $pdf->fileSize);
+
+        self::assertInstanceOf(\DateTimeImmutable::class, $pdf->created);
+        self::assertSame(
+            '2009-09-02T12:04:15+02:00',
+            $pdf->created?->format('c')
+        );
+
+        $binary = $pdf->getBinary();
+        self::assertNotSame('', $binary);
+        self::assertStringStartsWith('%PDF-FAKE%', $binary);
+
+        // Request-Checks
+        self::assertSame('GET', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/240/pdf',
+            $captured['url']
+        );
+    }
+
+    public function test_it_passes_type_query_parameter_for_pdf(): void
+    {
+        $capturedUrl = null;
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$capturedUrl) {
+            $capturedUrl = $url;
+
+            $body = json_encode([
+                'pdf' => [
+                    'id' => 1,
+                    'created' => '2025-01-01T10:00:00+01:00',
+                    'invoice_id' => 999,
+                    'filename' => 'dummy.pdf',
+                    'mimetype' => 'application/pdf',
+                    'filesize' => 1234,
+                    'base64file' => base64_encode('PDF'),
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $api->pdf(999, InvoicePdfType::SIGNED);
+
+        self::assertNotNull($capturedUrl);
+        self::assertStringContainsString(
+            '/invoices/999/pdf',
+            $capturedUrl
+        );
+        self::assertStringContainsString(
+            'type=signed',
+            $capturedUrl,
+            'Expected type=signed query parameter in PDF URL'
+        );
+    }
+
+    public function test_it_can_fetch_raw_pdf_binary(): void
+    {
+        $capturedUrl = null;
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$capturedUrl) {
+            $capturedUrl = $url;
+
+            $binaryPdf = '%PDF-1.4 FAKE BINARY%';
+
+            return new MockResponse(
+                $binaryPdf,
+                [
+                    'http_code' => 200,
+                    'response_headers' => [
+                        'content-type' => 'application/pdf',
+                    ],
+                ]
+            );
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $result = $api->pdf(
+            id: 777,
+            type: null,
+            rawPdf: true
+        );
+
+        self::assertIsString($result);
+        self::assertStringStartsWith('%PDF-1.4', $result);
+
+        self::assertNotNull($capturedUrl);
+        self::assertStringContainsString(
+            '/invoices/777/pdf',
+            $capturedUrl
+        );
+        self::assertStringContainsString(
+            'format=pdf',
+            $capturedUrl,
+            'Expected format=pdf query parameter in raw PDF URL'
         );
     }
 }

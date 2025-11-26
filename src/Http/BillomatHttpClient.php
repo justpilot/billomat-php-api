@@ -43,12 +43,17 @@ final class BillomatHttpClient implements BillomatHttpClientInterface
             $headers['Content-Type'] = 'application/json';
         }
 
+        $queryBuild = [];
+        foreach ($query as $key => $value) {
+            $queryBuild[] = $key . '=' . $value;
+        }
+
         return $this->client->request(
             $method,
-            $this->config->getBaseUri() . ltrim($path, '/'),
+            $this->config->getBaseUri() . ltrim($path, '/') . '?' . implode('&', $queryBuild),
             [
                 'headers' => $headers,
-                'query' => $query,
+                //'query' => $query,
                 'json' => $json,
                 'timeout' => $this->config->timeout,
             ]

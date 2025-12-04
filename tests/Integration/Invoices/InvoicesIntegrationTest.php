@@ -92,6 +92,23 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
     }
 
     #[Group("integration")]
+    public function test_can_list_invoices_from_sandbox_order_by(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $invoices = $billomat->invoices->list(['per_page' => 5, 'order_by' => 'date+DESC']);
+
+        self::assertIsArray($invoices);
+        self::assertContainsOnlyInstancesOf(Invoice::class, $invoices);
+
+        if ($invoices !== []) {
+            $first = $invoices[0];
+            self::assertNotNull($first->id);
+            self::assertIsInt($first->clientId);
+            self::assertInstanceOf(InvoiceStatus::class, $first->status);
+        }
+    }
+
+    #[Group("integration")]
     public function test_can_create_invoice_draft_in_sandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();

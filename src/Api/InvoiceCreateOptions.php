@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Model\Enum\NetGross;
+
 /**
  * Typisierter Payload für POST /invoices gemäß Billomat-API.
  *
@@ -194,13 +196,13 @@ final class InvoiceCreateOptions
     public ?string $currencyCode = null;
 
     /**
-     * Preisbasis (NET oder GROSS).
+     * Preisbasis (NET, GROSS oder SETTINGS).
      *
      * Billomat-Feld: net_gross
-     * Typ: ALNUM („NET“, „GROSS“)
+     * Typ: ENUM („NET“, „GROSS“, „SETTINGS“)
      * Default: Wert aus Einstellungen
      */
-    public ?string $netGross = null;
+    public ?NetGross $netGross = null;
 
     /**
      * Währungskurs.
@@ -296,7 +298,11 @@ final class InvoiceCreateOptions
         return $this->items;
     }
 
-    // in toArray() am Ende:
+    /**
+     * Serialisiert die Optionen in das Billomat-Payload-Array.
+     *
+     * @return array<string,mixed>
+     */
     public function toArray(): array
     {
         $data = [
@@ -310,17 +316,17 @@ final class InvoiceCreateOptions
             'supply_date' => $this->supplyDate?->format('Y-m-d'),
             'supply_date_type' => $this->supplyDateType,
             'due_days' => $this->dueDays,
-            'due_date' => $this->dueDate,
+            'due_date' => $this->dueDate?->format('Y-m-d'),
             'discount_rate' => $this->discountRate,
             'discount_days' => $this->discountDays,
-            'discount_date' => $this->discountDate,
+            'discount_date' => $this->discountDate?->format('Y-m-d'),
             'title' => $this->title,
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
             'reduction' => $this->reduction,
             'currency_code' => $this->currencyCode,
-            'net_gross' => $this->netGross,
+            'net_gross' => $this->netGross?->value,
             'quote' => $this->quote,
             'payment_types' => $this->paymentTypes,
             'invoice_id' => $this->invoiceId,
@@ -331,6 +337,7 @@ final class InvoiceCreateOptions
             'template_id' => $this->templateId,
         ];
 
+        // Null-Werte entfernen, damit Billomat Defaults ziehen kann
         $data = array_filter($data, static fn($v) => $v !== null);
 
         if ($this->items !== []) {

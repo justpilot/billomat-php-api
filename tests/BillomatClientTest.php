@@ -36,7 +36,6 @@ final class BillomatClientTest extends TestCase
 
         $result = $client->clients->list(['per_page' => 1]);
 
-        // jetzt: list<Client>
         self::assertIsArray($result);
         self::assertCount(1, $result);
         self::assertContainsOnlyInstancesOf(Client::class, $result);
@@ -46,7 +45,7 @@ final class BillomatClientTest extends TestCase
         self::assertSame(1, $first->id);
     }
 
-    public function test_static_create_helper_builds_config(): void
+    public function test_static_create_helper_builds_config_and_wires_apis(): void
     {
         $mockHttp = new MockHttpClient([
             new MockResponse(json_encode([
@@ -62,9 +61,14 @@ final class BillomatClientTest extends TestCase
             httpClient: $mockHttp,
         );
 
+        // Smoke-Test: Clients-API funktioniert und liefert ein Array von Client-Objekten
         $clients = $client->clients->list(['per_page' => 1]);
 
         self::assertIsArray($clients);
         self::assertContainsOnlyInstancesOf(Client::class, $clients);
+
+        // zusätzliche Sicherstellung: weitere APIs sind verdrahtet
+        self::assertNotNull($client->invoices);
+        self::assertNotNull($client->taxes);
     }
 }

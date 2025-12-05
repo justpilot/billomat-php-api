@@ -6,6 +6,7 @@ namespace Justpilot\Billomat;
 
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\InvoicesApi;
+use Justpilot\Billomat\Api\TaxesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Symfony\Component\HttpClient\HttpClient;
@@ -17,6 +18,7 @@ final class BillomatClient
 
     public readonly ClientsApi $clients;
     public readonly InvoicesApi $invoices;
+    public readonly TaxesApi $taxes;
 
     public function __construct(
         BillomatConfig       $config,
@@ -30,6 +32,7 @@ final class BillomatClient
         // APIs
         $this->clients = new ClientsApi($this->http);
         $this->invoices = new InvoicesApi($this->http);
+        $this->taxes = new TaxesApi($this->http);
     }
 
     public static function create(

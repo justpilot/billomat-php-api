@@ -16,6 +16,19 @@ use Justpilot\Billomat\Model\Client;
  */
 final class ClientsApi extends AbstractApi
 {
+    public function getMyself(): Client
+    {
+        $data = $this->getJson('/clients/myself');
+
+        $clientData = $data['client'] ?? null;
+
+        if (!is_array($clientData)) {
+            throw new \RuntimeException('Unexpected response from Billomat when fetching own account via /clients/myself.');
+        }
+
+        return Client::fromArray($clientData);
+    }
+
     /**
      * Listet Clients mit optionalen Filtern.
      *

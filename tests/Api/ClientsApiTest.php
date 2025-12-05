@@ -15,6 +15,53 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 final class ClientsApiTest extends TestCase
 {
+    public function test_it_fetches_own_account_via_clients_myself(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            $body = json_encode([
+                'client' => [
+                    'id' => 12345,
+                    'name' => 'Mein Account',
+                    'client_number' => 'ACC1',
+                    'email' => 'info@example.com',
+                    'country_code' => 'DE',
+                    'customfield' => 'external-acc-id',
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new ClientsApi($http);
+
+        $me = $api->getMyself();
+
+        self::assertInstanceOf(Client::class, $me);
+        self::assertSame(12345, $me->id);
+        self::assertSame('Mein Account', $me->name);
+        self::assertSame('ACC1', $me->clientNumber);
+        self::assertSame('info@example.com', $me->email);
+        self::assertSame('DE', $me->countryCode);
+
+        self::assertSame('GET', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/clients/myself',
+            $captured['url']
+        );
+    }
+
     public function test_it_lists_clients_and_passes_filters(): void
     {
         $captured = [];

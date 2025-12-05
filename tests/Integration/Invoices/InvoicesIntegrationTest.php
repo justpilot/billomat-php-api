@@ -30,9 +30,9 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $faker = $this->faker();
 
         // 1) Client anlegen
-        $clientOptions = new ClientCreateOptions(
-            name: $faker->company(),
-        );
+        $clientOptions = new ClientCreateOptions();
+
+        $clientOptions->name = $faker->company();
         $clientOptions->email = $faker->unique()->safeEmail();
         $clientOptions->countryCode = 'DE';
 
@@ -119,9 +119,9 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ($clients === []) {
             // Fallback: Minimalen Client erstellen, falls noch keiner existiert
-            $clientOptions = new ClientCreateOptions(
-                name: $faker->company(),
-            );
+            $clientOptions = new ClientCreateOptions();
+
+            $clientOptions->name = $faker->company();
             $clientOptions->email = $faker->unique()->safeEmail();
             $clientOptions->countryCode = 'DE';
 
@@ -200,9 +200,9 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ($clients === []) {
-            $clientOptions = new ClientCreateOptions(
-                name: $faker->company(),
-            );
+            $clientOptions = new ClientCreateOptions();
+
+            $clientOptions->name = $faker->company();
             $clientOptions->email = $faker->unique()->safeEmail();
             $clientOptions->countryCode = 'DE';
 
@@ -276,9 +276,9 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ($clients === []) {
-            $clientOptions = new ClientCreateOptions(
-                name: $faker->company(),
-            );
+            $clientOptions = new ClientCreateOptions();
+
+            $clientOptions->name = $faker->company();
             $clientOptions->email = $faker->unique()->safeEmail();
             $clientOptions->countryCode = 'DE';
 
@@ -336,9 +336,9 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ($clients === []) {
-            $clientOptions = new ClientCreateOptions(
-                name: $faker->company(),
-            );
+            $clientOptions = new ClientCreateOptions();
+
+            $clientOptions->name = $faker->company();
             $clientOptions->email = $faker->unique()->safeEmail();
             $clientOptions->countryCode = 'DE';
 
@@ -406,9 +406,9 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ($clients === []) {
-            $clientOptions = new ClientCreateOptions(
-                name: $faker->company(),
-            );
+            $clientOptions = new ClientCreateOptions();
+
+            $clientOptions->name = $faker->company();
             $clientOptions->email = $faker->unique()->safeEmail();
             $clientOptions->countryCode = 'DE';
 

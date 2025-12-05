@@ -17,10 +17,9 @@ final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegration
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
-        $options = new ClientCreateOptions(
-            name: $faker->company(),
-        );
+        $options = new ClientCreateOptions();
 
+        $options->name = $faker->company();
         $options->firstName = $faker->firstName();
         $options->lastName = $faker->lastName();
         $options->salutation = $faker->randomElement(['Herr', 'Frau']);

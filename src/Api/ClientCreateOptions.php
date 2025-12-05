@@ -19,18 +19,8 @@ final class ClientCreateOptions
      *
      * Billomat-Feld: name
      * Typ: ALNUM
-     * Pflicht: JA
      */
-    public string $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = $name;
-    }
-
-    // ---------------------------------------------------------------------
-    // Basisdaten
-    // ---------------------------------------------------------------------
+    public ?string $name = null;
 
     /**
      * Archivierungsstatus.

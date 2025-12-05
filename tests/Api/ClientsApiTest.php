@@ -182,7 +182,8 @@ final class ClientsApiTest extends TestCase
         $http = new BillomatHttpClient($mock, $config);
         $api = new ClientsApi($http);
 
-        $opts = new ClientCreateOptions('New Client GmbH');
+        $opts = new ClientCreateOptions();
+        $opts->name = 'New Client GmbH';
         $opts->firstName = 'Max';
         $opts->lastName = 'Mustermann';
         $opts->salutation = 'Herr';

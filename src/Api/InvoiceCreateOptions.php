@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
 /**
  * Typisierter Payload für POST /invoices gemäß Billomat-API.
@@ -98,7 +99,7 @@ final class InvoiceCreateOptions
      * Billomat-Feld: supply_date_type
      * Typ: ALNUM („SUPPLY_DATE“, „DELIVERY_DATE“, „SUPPLY_TEXT“, „DELIVERY_TEXT“)
      */
-    public ?string $supplyDateType = null;
+    public ?SupplyDateType $supplyDateType = null;
 
     /**
      * Tage bis Fälligkeit.
@@ -314,7 +315,7 @@ final class InvoiceCreateOptions
             'number_length' => $this->numberLength,
             'date' => $this->date?->format('Y-m-d'),
             'supply_date' => $this->supplyDate?->format('Y-m-d'),
-            'supply_date_type' => $this->supplyDateType,
+            'supply_date_type' => $this->supplyDateType?->value,
             'due_days' => $this->dueDays,
             'due_date' => $this->dueDate?->format('Y-m-d'),
             'discount_rate' => $this->discountRate,

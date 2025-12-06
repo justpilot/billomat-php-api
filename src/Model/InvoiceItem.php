@@ -6,6 +6,12 @@ namespace Justpilot\Billomat\Model;
 
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 
+/**
+ * Repräsentiert eine Rechnungsposition (Invoice Item) aus der Billomat-API.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/rechnungen/positionen/
+ */
 final readonly class InvoiceItem
 {
     /** Interne Billomat-ID der Position. */
@@ -62,7 +68,7 @@ final readonly class InvoiceItem
     /** Unreduzierter Gesamtbetrag netto. */
     public ?float $totalNetUnreduced;
 
-    /** Erstellungszeitpunkt. */
+    /** Erstellungszeitpunkt der Position. */
     public ?\DateTimeImmutable $created;
 
     public function __construct(
@@ -156,7 +162,7 @@ final readonly class InvoiceItem
     }
 
     /**
-     * Exportiert die Position wieder als Array mit Billomat-Feldnamen.
+     * Exportiert die Position als Array mit Billomat-Feldnamen.
      *
      * @return array<string,mixed>
      */

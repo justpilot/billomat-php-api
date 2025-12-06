@@ -26,16 +26,16 @@ final readonly class Invoice
     /** Rechnungsnummer (kann bei DRAFT leer sein). */
     public ?string $invoiceNumber;
 
-    /** Rechnungsdatum (YYYY-MM-DD). */
+    /** Rechnungsdatum. */
     public ?\DateTimeImmutable $date;
 
-    /** Fälligkeitsdatum (YYYY-MM-DD). */
+    /** Fälligkeitsdatum. */
     public ?\DateTimeImmutable $dueDate;
 
     /** Währungscode, z. B. "EUR". */
     public ?string $currencyCode;
 
-    /** Status, z. B. "DRAFT", "OPEN", "PAID". */
+    /** Status, z. B. DRAFT, OPEN, PAID. */
     public ?InvoiceStatus $status;
 
     /** Bruttosumme der Rechnung (falls von API bereitgestellt). */
@@ -44,6 +44,16 @@ final readonly class Invoice
     /** Nettosumme der Rechnung (falls von API bereitgestellt). */
     public ?float $totalNet;
 
+    /**
+     * Rechnungspositionen, falls im API-Response enthalten.
+     *
+     * @var list<InvoiceItem>
+     */
+    public array $items;
+
+    /**
+     * @param list<InvoiceItem> $items
+     */
     public function __construct(
         ?int                $id,
         int                 $clientId,
@@ -55,6 +65,7 @@ final readonly class Invoice
         ?InvoiceStatus      $status = null,
         ?float              $totalGross = null,
         ?float              $totalNet = null,
+        array               $items = [],
     )
     {
         $this->id = $id;
@@ -67,6 +78,7 @@ final readonly class Invoice
         $this->status = $status;
         $this->totalGross = $totalGross;
         $this->totalNet = $totalNet;
+        $this->items = $items;
     }
 
     /**
@@ -76,17 +88,54 @@ final readonly class Invoice
      */
     public static function fromArray(array $data): self
     {
+        $date = null;
+        if (!empty($data['date'])) {
+            try {
+                $date = new \DateTimeImmutable((string)$data['date']);
+            } catch (\Throwable) {
+                $date = null;
+            }
+        }
+
+        $dueDate = null;
+        if (!empty($data['due_date'])) {
+            try {
+                $dueDate = new \DateTimeImmutable((string)$data['due_date']);
+            } catch (\Throwable) {
+                $dueDate = null;
+            }
+        }
+
+        // Invoice-Items, falls vorhanden (z. B. bei bestimmten GET-Requests)
+        $items = [];
+        if (isset($data['invoice-items']['invoice-item'])) {
+            $rawItems = $data['invoice-items']['invoice-item'];
+
+            // Billomat liefert bei 1 Item teilweise ein einzelnes Array statt Liste
+            if (isset($rawItems['id'])) {
+                $rawItems = [$rawItems];
+            }
+
+            if (\is_array($rawItems)) {
+                $items = array_map(
+                    static fn(array $row): InvoiceItem => InvoiceItem::fromArray($row),
+                    $rawItems,
+                );
+            }
+        }
+
         return new self(
             id: isset($data['id']) ? (int)$data['id'] : null,
             clientId: (int)($data['client_id'] ?? 0),
             contactId: isset($data['contact_id']) ? (int)$data['contact_id'] : null,
             invoiceNumber: $data['invoice_number'] ?? null,
-            date: $data['date'] ? new \DateTimeImmutable($data['date']) : null,
-            dueDate: $data['due_date'] ? new \DateTimeImmutable($data['due_date']) : null,
+            date: $date,
+            dueDate: $dueDate,
             currencyCode: $data['currency_code'] ?? null,
             status: InvoiceStatus::fromApi($data['status'] ?? null),
             totalGross: isset($data['total_gross']) ? (float)$data['total_gross'] : null,
             totalNet: isset($data['total_net']) ? (float)$data['total_net'] : null,
+            items: $items,
         );
     }
 
@@ -97,17 +146,28 @@ final readonly class Invoice
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
             'invoice_number' => $this->invoiceNumber,
-            'date' => $this->date,
-            'due_date' => $this->dueDate,
+            'date' => $this->date?->format('Y-m-d'),
+            'due_date' => $this->dueDate?->format('Y-m-d'),
             'currency_code' => $this->currencyCode,
-            'status' => $this->status,
+            'status' => $this->status?->value,
             'total_gross' => $this->totalGross,
             'total_net' => $this->totalNet,
         ];
+
+        if ($this->items !== []) {
+            $data['invoice-items'] = [
+                'invoice-item' => array_map(
+                    static fn(InvoiceItem $item): array => $item->toArray(),
+                    $this->items,
+                ),
+            ];
+        }
+
+        return $data;
     }
 }

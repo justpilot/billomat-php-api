@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
 use Justpilot\Billomat\Api\InvoicesApi;
+use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\TaxesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -18,6 +19,7 @@ final class BillomatClient
 {
     private BillomatHttpClient $http;
 
+    public readonly SettingsApi $settings;
     public readonly ClientsApi $clients;
     public readonly InvoicesApi $invoices;
     public readonly InvoiceItemsApi $invoiceItems;
@@ -34,6 +36,7 @@ final class BillomatClient
         $this->http = new BillomatHttpClient($httpClient, $config);
 
         // APIs
+        $this->settings = new SettingsApi($this->http);
         $this->clients = new ClientsApi($this->http);
         $this->invoices = new InvoicesApi($this->http);
         $this->invoiceItems = new InvoiceItemsApi($this->http);

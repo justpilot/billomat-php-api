@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Integration\Invoices;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
@@ -490,5 +491,50 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertIsString($binary);
         self::assertNotSame('', $binary);
         self::assertStringContainsString('PDF', $binary);
+    }
+
+    #[Group('integration')]
+    public function test_can_update_draft_invoice_in_sandbox(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $faker = $this->faker();
+
+        // Minimal: wir erzeugen Draft wie in create-test
+        $clients = $billomat->clients->list(['per_page' => 1]);
+        if ($clients === []) {
+            $clientOptions = new ClientCreateOptions(name: $faker->company());
+            $clientOptions->email = $faker->unique()->safeEmail();
+            $clientOptions->countryCode = 'DE';
+            $createdClient = $billomat->clients->create($clientOptions);
+            $clientId = $createdClient->id;
+        } else {
+            $clientId = $clients[0]->id;
+        }
+
+        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
+        $invoiceOpts->currencyCode = 'EUR';
+        $invoiceOpts->title = 'Update-Draft-Test ' . date('d.m.Y H:i:s');
+
+        $item = new InvoiceItemCreateOptions(1.0, $faker->randomFloat(2, 10, 50));
+        $item->title = 'Update Draft Position';
+        $invoiceOpts->addItem($item);
+
+        $draft = $billomat->invoices->create($invoiceOpts);
+        self::assertNotNull($draft->id);
+
+        // Draft bearbeiten: date ändern
+        $newDate = new \DateTimeImmutable('today');
+
+        $update = new InvoiceUpdateOptions();
+        $update->date = $newDate;
+
+        $updated = $billomat->invoices->update($draft->id, $update);
+
+        self::assertSame($draft->id, $updated->id);
+        self::assertSame($newDate->format('Y-m-d'), $updated->date?->format('Y-m-d'));
+
+        // optional: nochmal neu holen
+        $fetched = $billomat->invoices->get($draft->id);
+        self::assertSame($newDate->format('Y-m-d'), $fetched->date?->format('Y-m-d'));
     }
 }

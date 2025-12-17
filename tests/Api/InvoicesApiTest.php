@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
+use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -590,5 +591,88 @@ final class InvoicesApiTest extends TestCase
             $capturedUrl,
             'Expected format=pdf query parameter in raw PDF URL'
         );
+    }
+
+    public function test_it_updates_invoice_draft_via_put(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            $body = json_encode([
+                'invoice' => [
+                    'id' => 777,
+                    'client_id' => 123,
+                    'status' => 'DRAFT',
+                    'date' => '2025-03-10',
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $opts = new InvoiceUpdateOptions();
+        $opts->date = new \DateTimeImmutable('2025-03-10');
+
+        $updated = $api->update(777, $opts);
+
+        self::assertInstanceOf(Invoice::class, $updated);
+        self::assertSame(777, $updated->id);
+        self::assertSame('2025-03-10', $updated->date?->format('Y-m-d'));
+
+        // Request prüfen
+        self::assertSame('PUT', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/777',
+            $captured['url']
+        );
+
+        $options = $captured['options'] ?? [];
+
+        // Payload robust extrahieren: Symfony kann json -> body normalisieren
+        $payload = $options['json'] ?? null;
+
+        if ($payload === null && isset($options['body'])) {
+            $body = $options['body'];
+
+            if (is_string($body) && $body !== '') {
+                $payload = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            } elseif (is_array($body)) {
+                // selten, aber möglich
+                $payload = $body;
+            }
+        }
+
+        self::assertIsArray($payload);
+        self::assertSame(['invoice' => ['date' => '2025-03-10']], $payload);
+
+        // Optional: Content-Type prüfen (kann als "headers" array oder "normalized_headers" auftauchen)
+        $headers = $options['headers'] ?? [];
+        $flat = [];
+
+        foreach ($headers as $k => $v) {
+            if (is_int($k) && is_string($v) && str_contains($v, ':')) {
+                [$hn, $hv] = explode(':', $v, 2);
+                $flat[strtolower(trim($hn))] = trim($hv);
+            } elseif (is_string($k)) {
+                $flat[strtolower($k)] = is_array($v) ? implode(', ', $v) : (string)$v;
+            }
+        }
+
+        // je nach Symfony-Version kann das auch intern gesetzt werden – daher "optional soft check"
+        if (isset($flat['content-type'])) {
+            self::assertStringContainsString('application/json', strtolower($flat['content-type']));
+        }
     }
 }

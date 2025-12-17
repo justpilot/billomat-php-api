@@ -107,6 +107,31 @@ final class InvoicesApi extends AbstractApi
     }
 
     /**
+     * Bearbeitet eine Rechnung im Status DRAFT.
+     *
+     * Entspricht PUT /invoices/{id}
+     *
+     * Hinweis:
+     * - Nur DRAFT ist editierbar.
+     * - Positionen/Kommentare nicht hier, sondern über die jeweilige Ressource.
+     */
+    public function update(int $id, InvoiceUpdateOptions $options): Invoice
+    {
+        $payload = [
+            'invoice' => $options->toArray(),
+        ];
+
+        $data = $this->putJson("/invoices/{$id}", $payload);
+
+        $invoiceData = $data['invoice'] ?? null;
+        if (!is_array($invoiceData)) {
+            throw new \RuntimeException('Unexpected response from Billomat when updating invoice.');
+        }
+
+        return Invoice::fromArray($invoiceData);
+    }
+
+    /**
      * Schließt eine Rechnung im Entwurfsstatus (DRAFT) ab.
      *
      * Entspricht PUT /invoices/{id}/complete

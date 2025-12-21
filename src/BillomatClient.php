@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\InvoicePaymentsApi;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\TaxesApi;
+use Justpilot\Billomat\Api\TemplatesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Symfony\Component\HttpClient\HttpClient;
@@ -24,6 +25,8 @@ final class BillomatClient
     public readonly InvoicesApi $invoices;
     public readonly InvoiceItemsApi $invoiceItems;
     public readonly InvoicePaymentsApi $invoicePayments;
+
+    public readonly TemplatesApi $templates;
     public readonly TaxesApi $taxes;
 
     public function __construct(
@@ -42,6 +45,7 @@ final class BillomatClient
         $this->invoiceItems = new InvoiceItemsApi($this->http);
         $this->invoicePayments = new InvoicePaymentsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
+        $this->templates = new TemplatesApi($this->http);
     }
 
     public static function create(

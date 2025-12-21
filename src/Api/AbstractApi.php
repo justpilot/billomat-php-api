@@ -172,4 +172,20 @@ abstract class AbstractApi
             throw $this->mapHttpException($e);
         }
     }
+
+    /**
+     * Führt einen GET-Request aus und gibt den Response-Body roh zurück (z. B. für Binary wie /thumb).
+     *
+     * @param array<string, scalar|array|null> $query
+     */
+    protected function getRaw(string $path, array $query = []): string
+    {
+        $response = $this->http->request('GET', $path, $query);
+
+        try {
+            return $response->getContent(); // 2xx erwartet
+        } catch (HttpExceptionInterface $e) {
+            throw $this->mapHttpException($e);
+        }
+    }
 }

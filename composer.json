@@ -1,6 +1,6 @@
 {
   "name": "justpilot/billomat-php-api",
-  "description": "Modern PHP 8.4+ SDK for the Billomat API, powered by Symfony components.",
+  "description": "Unofficial PHP 8.4+ SDK for the Billomat API, powered by Symfony components.",
   "type": "library",
   "require": {
     "php": ">=8.4",

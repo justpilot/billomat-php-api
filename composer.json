@@ -2,6 +2,7 @@
   "name": "justpilot/billomat-php-api",
   "description": "Unofficial PHP 8.4+ SDK for the Billomat API, powered by Symfony components.",
   "type": "library",
+  "license": "MIT",
   "require": {
     "php": ">=8.4",
     "symfony/http-client": "^7.3",
@@ -15,7 +16,6 @@
     "symfony/var-dumper": "^7.3",
     "fakerphp/faker": "^1.24"
   },
-  "license": "proprietary",
   "autoload": {
     "psr-4": {
       "Justpilot\\Billomat\\": "src/"
@@ -31,6 +31,5 @@
       "name": "Dimitri Dovgan",
       "email": "dimitri@justpilot.io"
     }
-  ],
-  "minimum-stability": "stable"
+  ]
 }

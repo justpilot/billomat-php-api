@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Exception\AuthenticationException;
+use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
 
 /**
@@ -108,5 +111,63 @@ final class ClientsApi extends AbstractApi
         }
 
         return Client::fromArray($created);
+    }
+
+    /**
+     * Aktualisiert einen bestehenden Kunden in Billomat.
+     *
+     * Entspricht:
+     * PUT /api/clients/{id}
+     *
+     * ⚠️ Einschränkungen laut Billomat:
+     * - Ein Kunde kann nur aktualisiert werden, wenn er nicht archiviert ist.
+     * - Es werden ausschließlich die im Payload gesetzten Felder geändert
+     *   (Partial Update).
+     * - Nicht unterstützte oder leere Felder werden ignoriert.
+     *
+     * Der Request wird mit einem "client"-Wrapper gesendet, wie von der
+     * Billomat-API erwartet:
+     *
+     * {
+     *   "client": { ... }
+     * }
+     *
+     * @param int $id
+     *   Die interne Billomat-ID des Kunden.
+     *
+     * @param ClientUpdateOptions $options
+     *   Die zu ändernden Kundendaten. Nur gesetzte Felder werden übertragen.
+     *
+     * @return Client
+     *   Das aktualisierte Client-Objekt, wie von der Billomat-API zurückgegeben.
+     *
+     * @throws ValidationException
+     *   Bei ungültigen oder nicht erlaubten Änderungen (HTTP 400/422).
+     *
+     * @throws AuthenticationException
+     *   Bei ungültigen API-Zugangsdaten (HTTP 401/403).
+     *
+     * @throws HttpException
+     *   Bei allen sonstigen HTTP-Fehlern.
+     *
+     * @throws \RuntimeException
+     *   Wenn die API ein unerwartetes oder unvollständiges Response-Format liefert.
+     */
+    public function update(int $id, ClientUpdateOptions $options): Client
+    {
+        $payload = [
+            'client' => $options->toArray(),
+        ];
+
+        $data = $this->putJson("/clients/{$id}", $payload);
+
+        /** @var array<string,mixed>|null $clientData */
+        $clientData = $data['client'] ?? null;
+
+        if (!is_array($clientData)) {
+            throw new \RuntimeException('Unexpected response from Billomat when updating client.');
+        }
+
+        return Client::fromArray($clientData);
     }
 }

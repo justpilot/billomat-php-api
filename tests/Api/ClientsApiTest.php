@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\ClientsApi;
+use Justpilot\Billomat\Api\ClientUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Client;
@@ -282,5 +283,63 @@ final class ClientsApiTest extends TestCase
 
         // id darf im Payload nicht gesetzt sein
         self::assertArrayNotHasKey('id', $clientPayload);
+    }
+
+    public function test_it_updates_client_via_put_and_sends_wrapper_payload(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            $body = json_encode([
+                'client' => [
+                    'id' => 123,
+                    'name' => 'Die super Musterfirma',
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new ClientsApi($http);
+
+        $opts = new ClientUpdateOptions();
+        $opts->name = 'Die super Musterfirma';
+
+        $updated = $api->update(123, $opts);
+
+        self::assertInstanceOf(Client::class, $updated);
+        self::assertSame(123, $updated->id);
+        self::assertSame('Die super Musterfirma', $updated->name);
+
+        self::assertSame('PUT', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/clients/123',
+            $captured['url']
+        );
+
+        $options = $captured['options'] ?? [];
+
+        // Payload robust lesen: options['json'] oder options['body']
+        $payload = $options['json'] ?? null;
+
+        if ($payload === null && isset($options['body']) && is_string($options['body']) && $options['body'] !== '') {
+            $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
+        }
+
+        self::assertIsArray($payload, 'Expected JSON payload array (options[json] or decoded options[body]).');
+        self::assertArrayHasKey('client', $payload);
+        self::assertIsArray($payload['client']);
+
+        self::assertSame('Die super Musterfirma', $payload['client']['name'] ?? null);
     }
 }

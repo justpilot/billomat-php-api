@@ -1363,12 +1363,6 @@ parameters:
 			path: tests/Api/TaxesApiTest.php
 
 		-
-			message: '#^Class Justpilot\\Billomat\\Model\\Tax not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: tests/Api/TaxesApiTest.php
-
-		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Template'' and Justpilot\\Billomat\\Model\\Template will always evaluate to true\.$#'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1

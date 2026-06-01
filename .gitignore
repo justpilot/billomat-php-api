@@ -24,3 +24,6 @@ phpunit.xml.dist
 Thumbs.db
 
 .env.test.local
+
+# graphify knowledge graph (local-only, auto-generated)
+/graphify-out/

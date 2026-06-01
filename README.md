@@ -169,6 +169,8 @@ Lauffähige, kommentierte Skripte liegen unter [examples/](examples/) — vom An
 
 Pull Requests sind willkommen. Der Beitragsleitfaden inklusive Coding-Standards, Test-Anforderungen und dem Drei-Schichten-Muster pro Ressource liegt in [CONTRIBUTING.md](CONTRIBUTING.md).
 
+AI-Coding-Agents (Claude Code, Cursor, GitHub Copilot, Codex, …) finden den projektspezifischen Kontext in [AGENTS.md](AGENTS.md) nach der [agents.md](https://agents.md/)-Konvention.
+
 ## Sicherheit
 
 Hinweise zum Umgang mit API-Keys und zur verantwortlichen Meldung von Sicherheitslücken stehen in [SECURITY.md](SECURITY.md).

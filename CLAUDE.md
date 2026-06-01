@@ -1,6 +1,8 @@
-# CLAUDE.md
+@AGENTS.md
 
-See @AGENTS.md for the canonical project guide (architecture, commands, conventions). The block below is Claude-Code-specific tooling that is only useful when the local knowledge graph at `graphify-out/` exists.
+# Claude Code specifics
+
+The section below is only useful when the local knowledge graph at `graphify-out/` exists. External contributors without `graphify` installed can ignore it.
 
 ## graphify
 

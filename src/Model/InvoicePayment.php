@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Throwable;
+
+use const DATE_ATOM;
 
 /**
  * Repräsentiert eine Zahlung einer Rechnung in Billomat.
@@ -14,54 +18,26 @@ use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
  */
 final readonly class InvoicePayment
 {
-    /** Interne ID der Zahlung */
-    public ?int $id;
-
-    /** Erstellungszeitpunkt der Zahlung. */
-    public ?\DateTimeImmutable $created;
-
-    /** ID der zugehörigen Rechnung */
-    public int $invoiceId;
-
-    /** ID des Users, der die Zahlung erfasst hat. */
-    public ?int $userId;
-
-    /** Zahlungsdatum */
-    public ?\DateTimeImmutable $date;
-
-    /** Zahlungsbetrag */
-    public float $amount;
-
-    /** Zahlungsart, z. B. BANK_TRANSFER, PAYPAL … */
-    public ?InvoicePaymentType $type;
-
-    /** Optionaler Kommentar */
-    public ?string $comment;
-
-    /** Verwendungszweck (z. B. Buchungstext aus dem Bankexport). */
-    public ?string $transactionPurpose;
-
     public function __construct(
-        ?int                $id,
-        int                 $invoiceId,
-        ?\DateTimeImmutable $date,
-        float               $amount,
-        ?InvoicePaymentType $type,
-        ?string             $comment,
-        ?\DateTimeImmutable $created = null,
-        ?int                $userId = null,
-        ?string             $transactionPurpose = null,
-    )
-    {
-        $this->id = $id;
-        $this->invoiceId = $invoiceId;
-        $this->date = $date;
-        $this->amount = $amount;
-        $this->type = $type;
-        $this->comment = $comment;
-        $this->created = $created;
-        $this->userId = $userId;
-        $this->transactionPurpose = $transactionPurpose;
+        /** Interne ID der Zahlung */
+        public ?int $id,
+        /** ID der zugehörigen Rechnung */
+        public int $invoiceId,
+        /** Zahlungsdatum */
+        public ?DateTimeImmutable $date,
+        /** Zahlungsbetrag */
+        public float $amount,
+        /** Zahlungsart, z. B. BANK_TRANSFER, PAYPAL … */
+        public ?InvoicePaymentType $type,
+        /** Optionaler Kommentar */
+        public ?string $comment,
+        /** Erstellungszeitpunkt der Zahlung. */
+        public ?DateTimeImmutable $created = null,
+        /** ID des Users, der die Zahlung erfasst hat. */
+        public ?int $userId = null,
+        /** Verwendungszweck (z. B. Buchungstext aus dem Bankexport). */
+        public ?string $transactionPurpose = null
+    ) {
     }
 
     /**
@@ -72,15 +48,15 @@ final readonly class InvoicePayment
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int)$data['id'] : null,
-            invoiceId: (int)($data['invoice_id'] ?? 0),
+            id: isset($data['id']) ? (int) $data['id'] : null,
+            invoiceId: (int) ($data['invoice_id'] ?? 0),
             date: self::parseDateTime($data['date'] ?? null),
-            amount: isset($data['amount']) ? (float)$data['amount'] : 0.0,
+            amount: isset($data['amount']) ? (float) $data['amount'] : 0.0,
             type: InvoicePaymentType::fromApi($data['type'] ?? null),
             comment: $data['comment'] ?? null,
             created: self::parseDateTime($data['created'] ?? null),
-            userId: isset($data['user_id']) && $data['user_id'] !== ''
-                ? (int)$data['user_id']
+            userId: isset($data['user_id']) && '' !== $data['user_id']
+                ? (int) $data['user_id']
                 : null,
             transactionPurpose: $data['transaction_purpose'] ?? null,
         );
@@ -95,7 +71,7 @@ final readonly class InvoicePayment
     {
         return [
             'id' => $this->id,
-            'created' => $this->created?->format(\DATE_ATOM),
+            'created' => $this->created?->format(DATE_ATOM),
             'invoice_id' => $this->invoiceId,
             'user_id' => $this->userId,
             'date' => $this->date?->format('Y-m-d'),
@@ -106,15 +82,15 @@ final readonly class InvoicePayment
         ];
     }
 
-    private static function parseDateTime(mixed $value): ?\DateTimeImmutable
+    private static function parseDateTime(mixed $value): ?DateTimeImmutable
     {
-        if (!is_string($value) || trim($value) === '') {
+        if (!\is_string($value) || '' === trim($value)) {
             return null;
         }
 
         try {
-            return new \DateTimeImmutable($value);
-        } catch (\Throwable) {
+            return new DateTimeImmutable($value);
+        } catch (Throwable) {
             return null;
         }
     }

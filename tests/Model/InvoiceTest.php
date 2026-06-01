@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use DateTimeImmutable;
+use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceItem;
-use Justpilot\Billomat\Model\Enum\InvoiceStatus;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+#[CoversClass(Invoice::class)]
 final class InvoiceTest extends TestCase
 {
-    public function test_it_hydrates_invoice_with_items_from_array(): void
+    #[Test]
+    public function itHydratesInvoiceWithItemsFromArray(): void
     {
         $data = [
             'id' => '123',
@@ -65,10 +70,10 @@ final class InvoiceTest extends TestCase
         self::assertSame(119.0, $invoice->totalGross);
         self::assertSame(100.0, $invoice->totalNet);
 
-        self::assertInstanceOf(\DateTimeImmutable::class, $invoice->date);
+        self::assertInstanceOf(DateTimeImmutable::class, $invoice->date);
         self::assertSame('2025-03-01', $invoice->date?->format('Y-m-d'));
 
-        self::assertInstanceOf(\DateTimeImmutable::class, $invoice->dueDate);
+        self::assertInstanceOf(DateTimeImmutable::class, $invoice->dueDate);
         self::assertSame('2025-03-15', $invoice->dueDate?->format('Y-m-d'));
 
         self::assertInstanceOf(InvoiceStatus::class, $invoice->status);
@@ -79,7 +84,6 @@ final class InvoiceTest extends TestCase
         self::assertCount(1, $invoice->items);
         self::assertContainsOnlyInstancesOf(InvoiceItem::class, $invoice->items);
 
-        /** @var InvoiceItem $item */
         $item = $invoice->items[0];
 
         self::assertSame(1, $item->id);
@@ -107,14 +111,15 @@ final class InvoiceTest extends TestCase
         self::assertSame(130.0, $item->totalGrossUnreduced);
         self::assertSame(110.0, $item->totalNetUnreduced);
 
-        self::assertInstanceOf(\DateTimeImmutable::class, $item->created);
+        self::assertInstanceOf(DateTimeImmutable::class, $item->created);
         self::assertSame(
             '2025-03-01T12:00:00+01:00',
             $item->created?->format('Y-m-d\TH:i:sP')
         );
     }
 
-    public function test_it_hydrates_invoice_without_items_to_empty_items_array(): void
+    #[Test]
+    public function itHydratesInvoiceWithoutItemsToEmptyItemsArray(): void
     {
         $data = [
             'id' => '123',
@@ -135,7 +140,8 @@ final class InvoiceTest extends TestCase
         self::assertCount(0, $invoice->items);
     }
 
-    public function test_it_handles_single_item_array_shape_from_api(): void
+    #[Test]
+    public function itHandlesSingleItemArrayShapeFromApi(): void
     {
         // Billomat liefert bei genau einer Position manchmal kein numerisches Array,
         // sondern direkt ein assoziatives Array mit einem "invoice-item".
@@ -169,7 +175,8 @@ final class InvoiceTest extends TestCase
         self::assertSame(InvoiceItemType::PRODUCT, $item->type);
     }
 
-    public function test_it_hydrates_full_invoice_from_array(): void
+    #[Test]
+    public function itHydratesFullInvoiceFromArray(): void
     {
         $data = [
             'id' => '1',
@@ -227,22 +234,22 @@ final class InvoiceTest extends TestCase
         self::assertSame(123, $invoice->clientId);
         self::assertNull($invoice->contactId);
 
-        self::assertInstanceOf(\DateTimeImmutable::class, $invoice->created);
+        self::assertInstanceOf(DateTimeImmutable::class, $invoice->created);
         self::assertSame('RE123', $invoice->invoiceNumber);
         self::assertSame(123, $invoice->number);
         self::assertSame('RE', $invoice->numberPre);
         self::assertSame(0, $invoice->numberLength);
 
         self::assertSame(InvoiceStatus::OPEN, $invoice->status);
-        self::assertInstanceOf(\DateTimeImmutable::class, $invoice->date);
-        self::assertInstanceOf(\DateTimeImmutable::class, $invoice->supplyDate);
+        self::assertInstanceOf(DateTimeImmutable::class, $invoice->date);
+        self::assertInstanceOf(DateTimeImmutable::class, $invoice->supplyDate);
         self::assertSame(SupplyDateType::SUPPLY_DATE, $invoice->supplyDateType);
-        self::assertInstanceOf(\DateTimeImmutable::class, $invoice->dueDate);
+        self::assertInstanceOf(DateTimeImmutable::class, $invoice->dueDate);
         self::assertSame(10, $invoice->dueDays);
 
         self::assertSame($data['address'], $invoice->address);
         self::assertSame(2.0, $invoice->discountRate);
-        self::assertInstanceOf(\DateTimeImmutable::class, $invoice->discountDate);
+        self::assertInstanceOf(DateTimeImmutable::class, $invoice->discountDate);
         self::assertSame(7, $invoice->discountDays);
         self::assertSame(2.0, $invoice->discountAmount);
 

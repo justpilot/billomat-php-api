@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration\InvoicePayments;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
@@ -13,12 +14,16 @@ use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoicePayment;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
+#[CoversNothing]
 final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
     #[Group('integration')]
-    public function test_can_create_payment_and_mark_invoice_as_paid_in_sandbox(): void
+    #[Test]
+    public function canCreatePaymentAndMarkInvoiceAsPaidInSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
@@ -26,7 +31,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         // 1) Client besorgen oder anlegen
         $clients = $billomat->clients->list(['per_page' => 1]);
 
-        if ($clients === []) {
+        if ([] === $clients) {
             $clientOptions = new ClientCreateOptions(
                 name: $faker->company(),
             );
@@ -44,7 +49,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         // 2) Draft-Rechnung erstellen
         $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
         $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Payment-Integrationstest ' . date('d.m.Y H:i:s');
+        $invoiceOpts->title = 'Payment-Integrationstest '.date('d.m.Y H:i:s');
         $invoiceOpts->label = 'SDK Invoice Payment Test';
 
         $item = new InvoiceItemCreateOptions(
@@ -58,7 +63,6 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
 
         $invoiceOpts->addItem($item);
 
-        /** @var Invoice $draft */
         $draft = $billomat->invoices->create($invoiceOpts);
 
         self::assertInstanceOf(Invoice::class, $draft);
@@ -81,10 +85,10 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
             invoiceId: $invoiceId,
             amount: $amount,
         );
-        $paymentOpts->date = new \DateTimeImmutable('today');
+        $paymentOpts->date = new DateTimeImmutable('today');
         $paymentOpts->type = InvoicePaymentType::BANK_TRANSFER;
         $paymentOpts->comment = 'Integrationstest Zahlung';
-        $paymentOpts->transactionPurpose = 'Testzahlung für Invoice #' . $invoiceId;
+        $paymentOpts->transactionPurpose = 'Testzahlung für Invoice #'.$invoiceId;
         $paymentOpts->markInvoiceAsPaid = true;
 
         $payment = $billomat->invoicePayments->create($paymentOpts);

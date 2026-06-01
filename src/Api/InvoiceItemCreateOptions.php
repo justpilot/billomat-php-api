@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 
+use const ARRAY_FILTER_USE_BOTH;
+
 /**
  * Typisierter Payload für POST /invoices (invoice-items-Block)
  * bzw. POST /invoice-items.
@@ -46,22 +48,6 @@ final class InvoiceItemCreateOptions
      * Typ: ALNUM
      */
     public ?string $description = null;
-
-    /**
-     * Menge.
-     *
-     * Billomat-Feld: quantity
-     * Typ: FLOAT
-     */
-    public float $quantity;
-
-    /**
-     * Preis pro Einheit.
-     *
-     * Billomat-Feld: unit_price
-     * Typ: FLOAT
-     */
-    public float $unitPrice;
 
     /**
      * Einheit (z. B. "Stück", "Stunde").
@@ -119,12 +105,21 @@ final class InvoiceItemCreateOptions
     public ?int $position = null;
 
     public function __construct(
-        float $quantity,
-        float $unitPrice,
-    )
-    {
-        $this->quantity = $quantity;
-        $this->unitPrice = $unitPrice;
+        /**
+         * Menge.
+         *
+         * Billomat-Feld: quantity
+         * Typ: FLOAT
+         */
+        public float $quantity,
+        /**
+         * Preis pro Einheit.
+         *
+         * Billomat-Feld: unit_price
+         * Typ: FLOAT
+         */
+        public float $unitPrice
+    ) {
     }
 
     /**
@@ -152,7 +147,7 @@ final class InvoiceItemCreateOptions
         // Null-Werte raus, aber quantity/unit_price bleiben drin
         return array_filter(
             $data,
-            static fn($v, string $k) => $v !== null || \in_array($k, ['quantity', 'unit_price'], true),
+            static fn ($v, string $k): bool => null !== $v || \in_array($k, ['quantity', 'unit_price'], true),
             ARRAY_FILTER_USE_BOTH,
         );
     }

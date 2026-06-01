@@ -6,17 +6,21 @@ namespace Justpilot\Billomat\Tests\Http;
 
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+#[CoversClass(BillomatHttpClient::class)]
 final class BillomatHttpClientTest extends TestCase
 {
-    public function test_it_sends_requests_with_expected_headers_and_url(): void
+    #[Test]
+    public function itSendsRequestsWithExpectedHeadersAndUrl(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             // capture info for later assertions
             $captured['method'] = $method;
             $captured['url'] = $url;
@@ -52,15 +56,15 @@ final class BillomatHttpClientTest extends TestCase
         $normalized = [];
 
         foreach ($rawHeaders as $key => $value) {
-            if (is_int($key)) {
+            if (\is_int($key)) {
                 // "Header-Name: value" style
-                if (is_string($value) && str_contains($value, ':')) {
+                if (\is_string($value) && str_contains($value, ':')) {
                     [$name, $val] = explode(':', $value, 2);
                     $normalized[strtolower(trim($name))] = trim($val);
                 }
             } else {
                 // "Header-Name" => "value" style
-                $normalized[strtolower($key)] = is_array($value) ? implode(', ', $value) : $value;
+                $normalized[strtolower((string) $key)] = \is_array($value) ? implode(', ', $value) : $value;
             }
         }
 

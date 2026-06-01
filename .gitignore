@@ -1,17 +1,22 @@
 # PHP composer vendor dir
 /vendor/
 
-# composer.lock file should not be committed for reusable libraries
-composer.lock
-
 # composer PHAR
 composer.phar
 
 # PHPUnit
 .phpunit.result.cache
 .phpunit.cache
+phpunit.xml
 
-phpunit.xml.dist
+# PHP-CS-Fixer
+.php-cs-fixer.cache
+
+# PHPStan
+phpstan.neon
+
+# Build & report output (coverage, infection, rector cache, phpstan tmp)
+/build/
 
 # PHPStorm / IntelliJ
 .idea/
@@ -23,7 +28,10 @@ phpunit.xml.dist
 .DS_Store
 Thumbs.db
 
+# Local env overrides
 .env.test.local
+.env.local
+.env.*.local
 
 # graphify knowledge graph (local-only, auto-generated)
 /graphify-out/

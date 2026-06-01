@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InvoiceItem;
+use RuntimeException;
 
 /**
  * API-Wrapper für Rechnungspositionen (Invoice Items).
@@ -21,8 +22,8 @@ final class InvoiceItemsApi extends AbstractApi
     /**
      * Listet alle Positionen einer Rechnung.
      *
-     * @param int $invoiceId ID der Rechnung
-     * @param array<string, scalar|array|null> $query Zusätzliche Filter (page, per_page, etc.)
+     * @param int                              $invoiceId ID der Rechnung
+     * @param array<string, scalar|array|null> $query     Zusätzliche Filter (page, per_page, etc.)
      *
      * @return list<InvoiceItem>
      */
@@ -40,13 +41,13 @@ final class InvoiceItemsApi extends AbstractApi
             $itemsData = [$itemsData];
         }
 
-        if (!\is_array($itemsData) || $itemsData === []) {
+        if (!\is_array($itemsData) || [] === $itemsData) {
             return [];
         }
 
         /** @var list<InvoiceItem> $items */
         $items = array_map(
-            static fn(array $row): InvoiceItem => InvoiceItem::fromArray($row),
+            InvoiceItem::fromArray(...),
             $itemsData,
         );
 
@@ -62,14 +63,14 @@ final class InvoiceItemsApi extends AbstractApi
     {
         $data = $this->getJsonOrNull("/invoice-items/{$id}");
 
-        if ($data === null) {
+        if (null === $data) {
             return null;
         }
 
         $itemData = $data['invoice-item'] ?? null;
 
         if (!\is_array($itemData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when fetching invoice item.');
+            throw new RuntimeException('Unexpected response from Billomat when fetching invoice item.');
         }
 
         return InvoiceItem::fromArray($itemData);
@@ -102,7 +103,7 @@ final class InvoiceItemsApi extends AbstractApi
         $itemData = $data['invoice-item'] ?? null;
 
         if (!\is_array($itemData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when creating invoice item.');
+            throw new RuntimeException('Unexpected response from Billomat when creating invoice item.');
         }
 
         return InvoiceItem::fromArray($itemData);
@@ -124,7 +125,7 @@ final class InvoiceItemsApi extends AbstractApi
         $itemData = $data['invoice-item'] ?? null;
 
         if (!\is_array($itemData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when updating invoice item.');
+            throw new RuntimeException('Unexpected response from Billomat when updating invoice item.');
         }
 
         return InvoiceItem::fromArray($itemData);

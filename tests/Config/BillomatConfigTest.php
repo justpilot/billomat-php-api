@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Config;
 
 use Justpilot\Billomat\Config\BillomatConfig;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+#[CoversClass(BillomatConfig::class)]
 final class BillomatConfigTest extends TestCase
 {
-    public function test_it_exposes_basic_configuration(): void
+    #[Test]
+    public function itExposesBasicConfiguration(): void
     {
         $config = new BillomatConfig(
             billomatId: 'mycompany',
@@ -26,7 +30,8 @@ final class BillomatConfigTest extends TestCase
         self::assertSame(5.0, $config->timeout);
     }
 
-    public function test_it_builds_the_correct_base_uri(): void
+    #[Test]
+    public function itBuildsTheCorrectBaseUri(): void
     {
         $config = new BillomatConfig(
             billomatId: 'mycompany',

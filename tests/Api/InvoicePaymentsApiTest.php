@@ -4,23 +4,31 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\InvoicePayment;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(InvoicePaymentsApi::class)]
+#[CoversClass(InvoicePayment::class)]
 final class InvoicePaymentsApiTest extends TestCase
 {
-    public function test_it_lists_payments_and_passes_filters(): void
+    #[Test]
+    public function itListsPaymentsAndPassesFilters(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -75,7 +83,7 @@ final class InvoicePaymentsApiTest extends TestCase
         self::assertSame(1, $first->id);
         self::assertSame(100, $first->invoiceId);
         self::assertSame(119.0, $first->amount);
-        self::assertInstanceOf(\DateTimeImmutable::class, $first->date);
+        self::assertInstanceOf(DateTimeImmutable::class, $first->date);
         self::assertSame('2025-01-01', $first->date?->format('Y-m-d'));
         self::assertSame(InvoicePaymentType::BANK_TRANSFER, $first->type);
         self::assertSame('Testzahlung 1', $first->comment);
@@ -88,7 +96,8 @@ final class InvoicePaymentsApiTest extends TestCase
         );
     }
 
-    public function test_it_gets_single_payment(): void
+    #[Test]
+    public function itGetsSinglePayment(): void
     {
         $mock = new MockHttpClient([
             new MockResponse(json_encode([
@@ -122,11 +131,12 @@ final class InvoicePaymentsApiTest extends TestCase
         self::assertSame('PayPal-Zahlung', $payment->comment);
     }
 
-    public function test_it_creates_payment_via_post(): void
+    #[Test]
+    public function itCreatesPaymentViaPost(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -158,7 +168,7 @@ final class InvoicePaymentsApiTest extends TestCase
             invoiceId: 300,
             amount: 119.0,
         );
-        $opts->date = new \DateTimeImmutable('2025-03-01');
+        $opts->date = new DateTimeImmutable('2025-03-01');
         $opts->type = InvoicePaymentType::BANK_TRANSFER;
         $opts->comment = 'Testzahlung';
         $opts->transactionPurpose = 'Rechnung RE-300';
@@ -184,7 +194,7 @@ final class InvoicePaymentsApiTest extends TestCase
         $options = $captured['options'] ?? [];
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+        if (null === $payload && isset($options['body']) && \is_string($options['body'])) {
             $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
         }
 
@@ -200,11 +210,12 @@ final class InvoicePaymentsApiTest extends TestCase
         self::assertSame(1, $inner['mark_invoice_as_paid'] ?? null);
     }
 
-    public function test_it_deletes_payment_via_delete(): void
+    #[Test]
+    public function itDeletesPaymentViaDelete(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -230,7 +241,8 @@ final class InvoicePaymentsApiTest extends TestCase
         );
     }
 
-    public function test_payment_model_hydrates_created_userId_and_transaction_purpose(): void
+    #[Test]
+    public function paymentModelHydratesCreatedUserIdAndTransactionPurpose(): void
     {
         $payment = InvoicePayment::fromArray([
             'id' => 77,

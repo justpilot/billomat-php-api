@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 /**
- * Payload für PUT /api/templates/{id}
+ * Payload für PUT /api/templates/{id}.
  *
  * Laut Doku z.B. name editierbar; is_default ist sinnvoll als Option.
  */
@@ -23,9 +23,9 @@ final class TemplateUpdateOptions
     {
         $data = [
             'name' => $this->name,
-            'is_default' => $this->isDefault === null ? null : ($this->isDefault ? 1 : 0),
+            'is_default' => null === $this->isDefault ? null : ($this->isDefault ? 1 : 0),
         ];
 
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn (string|int|null $v): bool => null !== $v);
     }
 }

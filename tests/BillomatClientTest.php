@@ -7,13 +7,19 @@ namespace Justpilot\Billomat\Tests;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Model\Client;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(BillomatClient::class)]
 final class BillomatClientTest extends TestCase
 {
-    public function test_it_wires_clients_api_and_uses_config(): void
+    #[Test]
+    public function itWiresClientsApiAndUsesConfig(): void
     {
         $responses = [
             new MockResponse(json_encode([
@@ -45,7 +51,8 @@ final class BillomatClientTest extends TestCase
         self::assertSame(1, $first->id);
     }
 
-    public function test_static_create_helper_builds_config_and_wires_apis(): void
+    #[Test]
+    public function staticCreateHelperBuildsConfigAndWiresApis(): void
     {
         $mockHttp = new MockHttpClient([
             new MockResponse(json_encode([

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -12,13 +13,20 @@ use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\NumberRangeMode;
 use Justpilot\Billomat\Model\Enum\TemplateEngine;
 use Justpilot\Billomat\Model\Settings;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(SettingsApi::class)]
+#[CoversClass(Settings::class)]
 final class SettingsApiTest extends TestCase
 {
-    public function test_it_gets_settings_and_maps_types(): void
+    #[Test]
+    public function itGetsSettingsAndMapsTypes(): void
     {
         $body = json_encode([
             'settings' => [
@@ -60,8 +68,8 @@ final class SettingsApiTest extends TestCase
 
         self::assertInstanceOf(Settings::class, $settings);
 
-        self::assertInstanceOf(\DateTimeImmutable::class, $settings->created);
-        self::assertInstanceOf(\DateTimeImmutable::class, $settings->updated);
+        self::assertInstanceOf(DateTimeImmutable::class, $settings->created);
+        self::assertInstanceOf(DateTimeImmutable::class, $settings->updated);
 
         self::assertSame('999999', $settings->bgcolor);
         self::assertSame('EUR', $settings->currencyCode);
@@ -94,11 +102,12 @@ final class SettingsApiTest extends TestCase
         ], $settings->priceGroups);
     }
 
-    public function test_it_updates_settings_via_put_and_sends_expected_payload(): void
+    #[Test]
+    public function itUpdatesSettingsViaPutAndSendsExpectedPayload(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -145,7 +154,7 @@ final class SettingsApiTest extends TestCase
         // Payload robust lesen: json-Option oder body-String
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body']) && is_string($options['body']) && $options['body'] !== '') {
+        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
             $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
         }
 
@@ -164,7 +173,8 @@ final class SettingsApiTest extends TestCase
         self::assertArrayNotHasKey('locale', $payload['settings']);
     }
 
-    public function test_update_options_serialize_all_new_writable_fields(): void
+    #[Test]
+    public function updateOptionsSerializeAllNewWritableFields(): void
     {
         $opts = new SettingsUpdateOptions();
 
@@ -242,7 +252,8 @@ final class SettingsApiTest extends TestCase
         self::assertArrayNotHasKey('currency_code', $payload);
     }
 
-    public function test_it_parses_bcc_addresses_from_csv_string(): void
+    #[Test]
+    public function itParsesBccAddressesFromCsvString(): void
     {
         $body = json_encode([
             'settings' => [

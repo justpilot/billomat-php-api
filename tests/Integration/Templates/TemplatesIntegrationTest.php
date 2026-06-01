@@ -7,12 +7,16 @@ namespace Justpilot\Billomat\Tests\Integration\Templates;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
+#[CoversNothing]
 final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
     #[Group('integration')]
-    public function test_can_list_templates_from_sandbox(): void
+    #[Test]
+    public function canListTemplatesFromSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
@@ -23,7 +27,7 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertIsArray($templates);
         self::assertContainsOnlyInstancesOf(Template::class, $templates);
 
-        if ($templates !== []) {
+        if ([] !== $templates) {
             $first = $templates[0];
 
             self::assertNotNull($first->id);
@@ -38,19 +42,20 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
     }
 
     #[Group('integration')]
-    public function test_can_get_single_template_from_sandbox_when_available(): void
+    #[Test]
+    public function canGetSingleTemplateFromSandboxWhenAvailable(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
         $templates = $billomat->templates->list(['per_page' => 1]);
 
-        if ($templates === []) {
+        if ([] === $templates) {
             $this->markTestSkipped('No templates available in sandbox to test get().');
         }
 
         $id = $templates[0]->id;
 
-        if ($id === null) {
+        if (null === $id) {
             $this->markTestSkipped('Template id missing in list response.');
         }
 
@@ -62,7 +67,7 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($tpl->templateType);
 
         // Für UPLOADED kann format/base64file gesetzt sein – muss aber nicht immer
-        if ($tpl->templateType?->value === 'UPLOADED') {
+        if ('UPLOADED' === $tpl->templateType?->value) {
             // format/base64file sind laut Doku erst beim single GET vorhanden
             // aber wir prüfen nur "nicht kaputt"
             self::assertTrue(true);
@@ -70,19 +75,20 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
     }
 
     #[Group('integration')]
-    public function test_can_fetch_template_thumb_from_sandbox_when_available(): void
+    #[Test]
+    public function canFetchTemplateThumbFromSandboxWhenAvailable(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
         $templates = $billomat->templates->list(['per_page' => 1]);
 
-        if ($templates === []) {
+        if ([] === $templates) {
             $this->markTestSkipped('No templates available in sandbox to test thumb().');
         }
 
         $id = $templates[0]->id;
 
-        if ($id === null) {
+        if (null === $id) {
             $this->markTestSkipped('Template id missing in list response.');
         }
 

@@ -6,14 +6,17 @@ namespace Justpilot\Billomat\Tests\Integration\Clients;
 
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Client;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+#[CoversNothing]
 final class ClientsListIntegrationTest extends TestCase
 {
-    /**
-     * @group integration
-     */
-    public function test_can_list_clients_from_sandbox(): void
+    #[Group('integration')]
+    #[Test]
+    public function canListClientsFromSandbox(): void
     {
         $billomatId = getenv('BILLOMAT_ID');
         $apiKey = getenv('BILLOMAT_API_KEY');
@@ -32,7 +35,7 @@ final class ClientsListIntegrationTest extends TestCase
         self::assertIsArray($clients);
         self::assertContainsOnlyInstancesOf(Client::class, $clients);
 
-        if ($clients !== []) {
+        if ([] !== $clients) {
             $first = $clients[0];
             self::assertNotNull($first->id);
             self::assertIsString($first->name);

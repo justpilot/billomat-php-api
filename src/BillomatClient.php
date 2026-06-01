@@ -16,24 +16,23 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class BillomatClient
+final readonly class BillomatClient
 {
     private BillomatHttpClient $http;
 
-    public readonly SettingsApi $settings;
-    public readonly ClientsApi $clients;
-    public readonly InvoicesApi $invoices;
-    public readonly InvoiceItemsApi $invoiceItems;
-    public readonly InvoicePaymentsApi $invoicePayments;
+    public SettingsApi $settings;
+    public ClientsApi $clients;
+    public InvoicesApi $invoices;
+    public InvoiceItemsApi $invoiceItems;
+    public InvoicePaymentsApi $invoicePayments;
 
-    public readonly TemplatesApi $templates;
-    public readonly TaxesApi $taxes;
+    public TemplatesApi $templates;
+    public TaxesApi $taxes;
 
     public function __construct(
-        BillomatConfig       $config,
+        BillomatConfig $config,
         ?HttpClientInterface $httpClient = null,
-    )
-    {
+    ) {
         $httpClient ??= HttpClient::create();
 
         $this->http = new BillomatHttpClient($httpClient, $config);
@@ -49,14 +48,13 @@ final class BillomatClient
     }
 
     public static function create(
-        string               $billomatId,
-        string               $apiKey,
-        ?string              $appId = null,
-        ?string              $appSecret = null,
-        float                $timeout = 10.0,
+        string $billomatId,
+        string $apiKey,
+        ?string $appId = null,
+        ?string $appSecret = null,
+        float $timeout = 10.0,
         ?HttpClientInterface $httpClient = null,
-    ): self
-    {
+    ): self {
         $config = new BillomatConfig(
             billomatId: $billomatId,
             apiKey: $apiKey,

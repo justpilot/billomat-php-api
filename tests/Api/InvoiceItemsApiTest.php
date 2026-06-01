@@ -4,23 +4,31 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
-use Justpilot\Billomat\Model\InvoiceItem;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\InvoiceItem;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(InvoiceItemsApi::class)]
+#[CoversClass(InvoiceItem::class)]
 final class InvoiceItemsApiTest extends TestCase
 {
-    public function test_it_lists_items_by_invoice_and_passes_filters(): void
+    #[Test]
+    public function itListsItemsByInvoiceAndPassesFilters(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -114,7 +122,7 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertSame(100.0, $first->totalNet);
         self::assertSame(130.0, $first->totalGrossUnreduced);
         self::assertSame(110.0, $first->totalNetUnreduced);
-        self::assertInstanceOf(\DateTimeImmutable::class, $first->created);
+        self::assertInstanceOf(DateTimeImmutable::class, $first->created);
 
         $second = $items[1];
         self::assertSame(2, $second->id);
@@ -127,15 +135,16 @@ final class InvoiceItemsApiTest extends TestCase
             'https://mycompany.billomat.net/api/invoice-items',
             $captured['url']
         );
-        self::assertStringContainsString('invoice_id=123', $captured['url']);
-        self::assertStringContainsString('per_page=50', $captured['url']);
+        self::assertStringContainsString('invoice_id=123', (string) $captured['url']);
+        self::assertStringContainsString('per_page=50', (string) $captured['url']);
     }
 
-    public function test_it_gets_single_item_by_id(): void
+    #[Test]
+    public function itGetsSingleItemById(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -189,7 +198,8 @@ final class InvoiceItemsApiTest extends TestCase
         );
     }
 
-    public function test_it_returns_null_when_item_not_found(): void
+    #[Test]
+    public function itReturnsNullWhenItemNotFound(): void
     {
         $mock = new MockHttpClient([
             new MockResponse('', ['http_code' => 404]),
@@ -208,11 +218,12 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertNull($item);
     }
 
-    public function test_it_creates_invoice_item_via_post(): void
+    #[Test]
+    public function itCreatesInvoiceItemViaPost(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -220,7 +231,7 @@ final class InvoiceItemsApiTest extends TestCase
             // Payload robust ermitteln (json oder body)
             $payload = $options['json'] ?? null;
 
-            if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+            if (null === $payload && isset($options['body']) && \is_string($options['body'])) {
                 $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
             }
 
@@ -290,11 +301,12 @@ final class InvoiceItemsApiTest extends TestCase
         );
     }
 
-    public function test_it_updates_invoice_item_via_put(): void
+    #[Test]
+    public function itUpdatesInvoiceItemViaPut(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -302,7 +314,7 @@ final class InvoiceItemsApiTest extends TestCase
             // Payload robust ermitteln (json oder body)
             $payload = $options['json'] ?? null;
 
-            if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+            if (null === $payload && isset($options['body']) && \is_string($options['body'])) {
                 $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
             }
 
@@ -374,11 +386,12 @@ final class InvoiceItemsApiTest extends TestCase
         );
     }
 
-    public function test_it_deletes_invoice_item_via_delete(): void
+    #[Test]
+    public function itDeletesInvoiceItemViaDelete(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;

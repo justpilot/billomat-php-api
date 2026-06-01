@@ -84,23 +84,23 @@ final class InvoiceEmailOptions
     public function toArray(): array
     {
         $recipients = array_filter([
-            'to' => $this->to !== [] ? $this->to : null,
-            'cc' => $this->cc !== [] ? $this->cc : null,
-            'bcc' => $this->bcc !== [] ? $this->bcc : null,
-        ], static fn($v) => $v !== null);
+            'to' => [] !== $this->to ? $this->to : null,
+            'cc' => [] !== $this->cc ? $this->cc : null,
+            'bcc' => [] !== $this->bcc ? $this->bcc : null,
+        ], static fn ($v): bool => null !== $v);
 
         $data = [
             'from' => $this->from,
-            'recipients' => $recipients !== [] ? $recipients : null,
+            'recipients' => [] !== $recipients ? $recipients : null,
             'subject' => $this->subject,
             'body' => $this->body,
             'filename' => $this->filename,
         ];
 
-        if ($this->attachments !== []) {
+        if ([] !== $this->attachments) {
             $data['attachments'] = [
                 'attachment' => array_map(
-                    static fn(array $a): array => [
+                    static fn (array $a): array => [
                         'filename' => $a['filename'],
                         'mimetype' => $a['mimetype'],
                         'base64file' => $a['base64file'],
@@ -110,6 +110,6 @@ final class InvoiceEmailOptions
             ];
         }
 
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn ($v): bool => null !== $v);
     }
 }

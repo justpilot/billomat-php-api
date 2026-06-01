@@ -17,6 +17,6 @@ enum TemplateFormat: string
 
     public static function fromApi(?string $value): ?self
     {
-        return $value === null ? null : (self::tryFrom($value) ?? null);
+        return null === $value ? null : (self::tryFrom($value) ?? null);
     }
 }

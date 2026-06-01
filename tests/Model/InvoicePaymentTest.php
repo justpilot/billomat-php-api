@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\InvoicePayment;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+#[CoversClass(InvoicePayment::class)]
 final class InvoicePaymentTest extends TestCase
 {
-    public function test_from_array_hydrates_invoice_payment(): void
+    #[Test]
+    public function fromArrayHydratesInvoicePayment(): void
     {
         $data = [
             'id' => '55',
@@ -27,7 +32,7 @@ final class InvoicePaymentTest extends TestCase
         self::assertSame(55, $payment->id);
         self::assertSame(789, $payment->invoiceId);
 
-        self::assertInstanceOf(\DateTimeImmutable::class, $payment->date);
+        self::assertInstanceOf(DateTimeImmutable::class, $payment->date);
         self::assertSame('2025-03-10', $payment->date?->format('Y-m-d'));
 
         self::assertSame(119.90, $payment->amount);
@@ -35,12 +40,13 @@ final class InvoicePaymentTest extends TestCase
         self::assertSame('Testzahlung', $payment->comment);
     }
 
-    public function test_to_array_exports_values(): void
+    #[Test]
+    public function toArrayExportsValues(): void
     {
         $payment = new InvoicePayment(
             id: 10,
             invoiceId: 200,
-            date: new \DateTimeImmutable('2025-03-01'),
+            date: new DateTimeImmutable('2025-03-01'),
             amount: 89.5,
             type: InvoicePaymentType::CASH,
             comment: 'Barzahlung',
@@ -58,7 +64,8 @@ final class InvoicePaymentTest extends TestCase
         self::assertSame('Barzahlung', $array['comment']);
     }
 
-    public function test_from_array_handles_missing_optional_fields(): void
+    #[Test]
+    public function fromArrayHandlesMissingOptionalFields(): void
     {
         $data = [
             'id' => 1,

@@ -13,8 +13,8 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 
 /**
@@ -48,7 +48,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $faker = $this->faker();
 
         $clientOpts = new ClientCreateOptions();
-        $clientOpts->name = 'IntegrationActions ' . $faker->unique()->bothify('##??##');
+        $clientOpts->name = 'IntegrationActions '.$faker->unique()->bothify('##??##');
         $clientOpts->email = $faker->unique()->safeEmail();
         $clientOpts->countryCode = 'DE';
 
@@ -57,7 +57,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
         $invoiceOpts = new InvoiceCreateOptions(clientId: $client->id);
         $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Action-Integration ' . date('d.m.Y H:i:s');
+        $invoiceOpts->title = 'Action-Integration '.date('d.m.Y H:i:s');
         $invoiceOpts->label = 'Integrationstest Invoice Action';
 
         $item = new InvoiceItemCreateOptions(
@@ -84,15 +84,15 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
     #[Group('integration')]
     #[Test]
-    public function can_email_invoice_in_sandbox_when_explicitly_enabled(): void
+    public function canEmailInvoiceInSandboxWhenExplicitlyEnabled(): void
     {
         // Doppelte Sicherheitsbremse: nur wenn EXPLIZIT aktiviert UND ein
         // Empfänger gesetzt ist (der i. d. R. der/die User:in selbst ist).
         $enabled = getenv('BILLOMAT_TEST_EMAIL');
-        if ($enabled !== '1') {
+        if ('1' !== $enabled) {
             $this->markTestSkipped(
                 'Set BILLOMAT_TEST_EMAIL=1 to enable POST /invoices/{id}/email integration test. '
-                . 'WARNUNG: Billomat versendet daraufhin eine echte E-Mail aus dem Sandbox-Account.'
+                .'WARNUNG: Billomat versendet daraufhin eine echte E-Mail aus dem Sandbox-Account.'
             );
         }
 
@@ -100,7 +100,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         if (!$recipient) {
             $this->markTestSkipped(
                 'Set BILLOMAT_TEST_EMAIL_RECIPIENT to a real address (idealerweise deine eigene), '
-                . 'an die der Sandbox-Test die Test-Rechnung schicken darf.'
+                .'an die der Sandbox-Test die Test-Rechnung schicken darf.'
             );
         }
 
@@ -111,7 +111,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $opts->to = [$recipient];
         $opts->subject = 'SDK-Integrationstest – Bitte ignorieren';
         $opts->body = "Automatisierter Integrationstest des justpilot/billomat-php-api SDK.\n\n"
-            . 'Diese Mail wurde aus der Sandbox geschickt. Du kannst sie löschen.';
+            .'Diese Mail wurde aus der Sandbox geschickt. Du kannst sie löschen.';
 
         $result = $billomat->invoices->email($invoiceId, $opts);
         self::assertTrue($result);
@@ -119,12 +119,12 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
     #[Group('integration')]
     #[Test]
-    public function can_upload_signature_in_sandbox_when_explicitly_enabled(): void
+    public function canUploadSignatureInSandboxWhenExplicitlyEnabled(): void
     {
-        if (getenv('BILLOMAT_TEST_UPLOAD_SIGNATURE') !== '1') {
+        if ('1' !== getenv('BILLOMAT_TEST_UPLOAD_SIGNATURE')) {
             $this->markTestSkipped(
                 'Set BILLOMAT_TEST_UPLOAD_SIGNATURE=1 to enable PUT /invoices/{id}/upload-signature '
-                . 'integration test. (Der Test lädt ein Dummy-PDF in die Rechnung und mutiert deren Zustand.)'
+                .'integration test. (Der Test lädt ein Dummy-PDF in die Rechnung und mutiert deren Zustand.)'
             );
         }
 
@@ -133,14 +133,14 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
         // Minimal-PDF (1.4 header + EOF) – akzeptiert von Billomat als gültige PDF-Datei.
         $minimalPdf = "%PDF-1.4\n"
-            . "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
-            . "2 0 obj<</Type/Pages/Count 0>>endobj\n"
-            . "xref\n0 3\n"
-            . "0000000000 65535 f\n"
-            . "0000000009 00000 n\n"
-            . "0000000052 00000 n\n"
-            . "trailer<</Size 3/Root 1 0 R>>\n"
-            . "startxref\n92\n%%EOF";
+            ."1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+            ."2 0 obj<</Type/Pages/Count 0>>endobj\n"
+            ."xref\n0 3\n"
+            ."0000000000 65535 f\n"
+            ."0000000009 00000 n\n"
+            ."0000000052 00000 n\n"
+            ."trailer<</Size 3/Root 1 0 R>>\n"
+            ."startxref\n92\n%%EOF";
 
         $base64 = base64_encode($minimalPdf);
 
@@ -155,13 +155,13 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
     #[Group('integration')]
     #[Test]
-    public function can_send_invoice_via_pixelletter_when_explicitly_enabled(): void
+    public function canSendInvoiceViaPixelletterWhenExplicitlyEnabled(): void
     {
-        if (getenv('BILLOMAT_TEST_MAIL') !== '1') {
+        if ('1' !== getenv('BILLOMAT_TEST_MAIL')) {
             $this->markTestSkipped(
                 'Set BILLOMAT_TEST_MAIL=1 to enable POST /invoices/{id}/mail integration test. '
-                . '⚠ Pixelletter-Versand ist KOSTENPFLICHTIG (echte Briefzustellung). '
-                . 'Nur aktivieren, wenn du das tatsächlich willst.'
+                .'⚠ Pixelletter-Versand ist KOSTENPFLICHTIG (echte Briefzustellung). '
+                .'Nur aktivieren, wenn du das tatsächlich willst.'
             );
         }
 
@@ -180,14 +180,14 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
     #[Group('integration')]
     #[Test]
-    public function can_send_invoice_to_encash_when_explicitly_enabled(): void
+    public function canSendInvoiceToEncashWhenExplicitlyEnabled(): void
     {
-        if (getenv('BILLOMAT_TEST_ENCASH') !== '1') {
+        if ('1' !== getenv('BILLOMAT_TEST_ENCASH')) {
             $this->markTestSkipped(
                 'Set BILLOMAT_TEST_ENCASH=1 to enable PUT /invoices/{id}/encash integration test. '
-                . '⚠ Diese Aktion übergibt die Rechnung an Billomats Inkasso-Partner — '
-                . 'auch in der Sandbox können dabei reale Vorgänge angestoßen werden. '
-                . 'Nur aktivieren, wenn du dir sicher bist.'
+                .'⚠ Diese Aktion übergibt die Rechnung an Billomats Inkasso-Partner — '
+                .'auch in der Sandbox können dabei reale Vorgänge angestoßen werden. '
+                .'Nur aktivieren, wenn du dir sicher bist.'
             );
         }
 

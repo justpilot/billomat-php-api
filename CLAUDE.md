@@ -8,16 +8,36 @@ Unofficial PHP 8.4+ SDK for the [Billomat API](https://www.billomat.com/api/). L
 
 ## Commands
 
+All workflows run via Composer scripts — `composer.json` is the source of truth.
+
 ```bash
-composer install                       # Install dependencies
-vendor/bin/phpunit                     # Run all tests
-vendor/bin/phpunit --testdox           # Pretty output (already default via phpunit.xml.dist)
-vendor/bin/phpunit tests/Api/ClientsApiTest.php             # Single test file
-vendor/bin/phpunit --filter test_it_lists_clients_and_passes_filters  # Single test method
-vendor/bin/phpunit tests/Integration                        # Integration tests only
+composer install                # Install dependencies
+composer test                   # Unit tests only (fast, no network)
+composer test:integration       # Integration tests against Billomat sandbox
+composer test:all               # Unit + integration
+composer test:coverage          # PHPUnit with HTML+Clover coverage in build/
+
+composer lint                   # PHP-CS-Fixer (dry-run)
+composer lint:fix               # PHP-CS-Fixer (apply)
+composer analyse                # PHPStan level max (uses phpstan-baseline.neon)
+composer analyse:baseline       # Regenerate the PHPStan baseline
+composer refactor               # Apply Rector
+composer refactor:dry           # Show Rector suggestions
+composer mutate                 # Infection mutation testing (slow)
+composer audit                  # Security audit of dependencies
+composer ci                     # Full local CI: lint + analyse + refactor:dry + test:all
+```
+
+Single test file/method:
+
+```bash
+vendor/bin/phpunit tests/Api/ClientsApiTest.php
+vendor/bin/phpunit --filter it_lists_clients_and_passes_filters
 ```
 
 Integration tests under `tests/Integration/` hit the real Billomat sandbox. They `markTestSkipped` unless `BILLOMAT_ID` and `BILLOMAT_API_KEY` are set — put real credentials in `.env.test.local` (gitignored); `.env.test` is the placeholder template. Bootstrap (`tests/bootstrap.php`) loads both via `symfony/dotenv` with `usePutenv()`, so `getenv()` works in tests.
+
+CI runs via `.github/workflows/ci.yml` on PHP 8.4 (required) and 8.5 (experimental). Three jobs: tests, quality (lint + PHPStan + Rector + audit), and mutation testing on PRs.
 
 ## Architecture
 
@@ -74,6 +94,7 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 - All API classes are `final`; models are `final readonly`.
 - PSR-4: `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.
 - Unit tests use `Symfony\Component\HttpClient\MockHttpClient` + `MockResponse` to capture the outgoing request and assert URL/method/headers/body. Don't mock `BillomatHttpClient` itself.
+- Test methods use PHPUnit 12 attributes: `#[Test]` on each method (no `test_` prefix), `#[CoversClass]` on unit-test classes, `#[CoversNothing]` on integration tests, `#[DataProvider]` for providers. Assertions are called statically (`self::assertX()`).
 - Comments are in German throughout. Match the existing language when editing existing files; new files can follow the same style.
 
 ## graphify

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
@@ -18,18 +19,16 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
  */
 final class InvoiceCreateOptions
 {
-    /**
-     * ID des Kunden (client_id).
-     *
-     * Billomat-Feld: client_id
-     * Typ: INT
-     * Pflicht: ja
-     */
-    public int $clientId;
-
-    public function __construct(int $clientId)
-    {
-        $this->clientId = $clientId;
+    public function __construct(
+        /**
+         * ID des Kunden (client_id).
+         *
+         * Billomat-Feld: client_id
+         * Typ: INT
+         * Pflicht: ja
+         */
+        public int $clientId
+    ) {
     }
 
     /**
@@ -83,7 +82,7 @@ final class InvoiceCreateOptions
      * Typ: DATE
      * Default: heute
      */
-    public ?\DateTimeImmutable $date = null;
+    public ?DateTimeImmutable $date = null;
 
     /**
      * Liefer-/Leistungsdatum.
@@ -91,7 +90,7 @@ final class InvoiceCreateOptions
      * Billomat-Feld: supply_date
      * Typ: MIXED (DATE/ALNUM)
      */
-    public ?\DateTimeImmutable $supplyDate = null;
+    public ?DateTimeImmutable $supplyDate = null;
 
     /**
      * Typ des Liefer-/Leistungsdatums.
@@ -117,7 +116,7 @@ final class InvoiceCreateOptions
      * Typ: DATE
      * Default: date + due_days
      */
-    public ?\DateTimeImmutable $dueDate = null;
+    public ?DateTimeImmutable $dueDate = null;
 
     /**
      * Skonto in Prozent.
@@ -144,7 +143,7 @@ final class InvoiceCreateOptions
      * Typ: DATE
      * Default: date + discount_days
      */
-    public ?\DateTimeImmutable $discountDate = null;
+    public ?DateTimeImmutable $discountDate = null;
 
     /**
      * Dokumentenüberschrift.
@@ -339,12 +338,12 @@ final class InvoiceCreateOptions
         ];
 
         // Null-Werte entfernen, damit Billomat Defaults ziehen kann
-        $data = array_filter($data, static fn($v) => $v !== null);
+        $data = array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);
 
-        if ($this->items !== []) {
+        if ([] !== $this->items) {
             $data['invoice-items'] = [
                 'invoice-item' => array_map(
-                    static fn(InvoiceItemCreateOptions $item): array => $item->toArray(),
+                    static fn (InvoiceItemCreateOptions $item): array => $item->toArray(),
                     $this->items
                 ),
             ];

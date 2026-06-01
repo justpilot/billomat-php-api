@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateType;
+use Throwable;
 
 /**
  * Repräsentiert eine Vorlage (Template) aus der Billomat API.
@@ -17,41 +20,18 @@ use Justpilot\Billomat\Model\Enum\TemplateType;
  */
 final readonly class Template
 {
-    public ?int $id;
-    public ?\DateTimeImmutable $created;
-
-    public ?TemplateDocumentType $type;
-    public ?TemplateType $templateType;
-
-    public ?string $name;
-
-    /** Nur bei UPLOADED + single GET verfügbar */
-    public ?TemplateFormat $format;
-
-    /** Nur bei UPLOADED + single GET verfügbar */
-    public ?string $base64file;
-
-    public bool $isDefault;
-
     public function __construct(
-        ?int                  $id,
-        ?\DateTimeImmutable   $created = null,
-        ?TemplateDocumentType $type = null,
-        ?TemplateType         $templateType = null,
-        ?string               $name = null,
-        ?TemplateFormat       $format = null,
-        ?string               $base64file = null,
-        bool                  $isDefault = false,
-    )
-    {
-        $this->id = $id;
-        $this->created = $created;
-        $this->type = $type;
-        $this->templateType = $templateType;
-        $this->name = $name;
-        $this->format = $format;
-        $this->base64file = $base64file;
-        $this->isDefault = $isDefault;
+        public ?int $id,
+        public ?DateTimeImmutable $created = null,
+        public ?TemplateDocumentType $type = null,
+        public ?TemplateType $templateType = null,
+        public ?string $name = null,
+        /** Nur bei UPLOADED + single GET verfügbar */
+        public ?TemplateFormat $format = null,
+        /** Nur bei UPLOADED + single GET verfügbar */
+        public ?string $base64file = null,
+        public bool $isDefault = false
+    ) {
     }
 
     /**
@@ -62,17 +42,17 @@ final readonly class Template
         $created = null;
         if (!empty($data['created'])) {
             try {
-                $created = new \DateTimeImmutable((string)$data['created']);
-            } catch (\Throwable) {
+                $created = new DateTimeImmutable((string) $data['created']);
+            } catch (Throwable) {
                 $created = null;
             }
         }
 
         $isDefaultRaw = $data['is_default'] ?? 0;
-        $isDefault = (string)$isDefaultRaw === '1' || $isDefaultRaw === 1 || $isDefaultRaw === true;
+        $isDefault = '1' === (string) $isDefaultRaw || 1 === $isDefaultRaw || true === $isDefaultRaw;
 
         return new self(
-            id: isset($data['id']) ? (int)$data['id'] : null,
+            id: isset($data['id']) ? (int) $data['id'] : null,
             created: $created,
             type: TemplateDocumentType::fromApi($data['type'] ?? null),
             templateType: TemplateType::fromApi($data['template_type'] ?? null),
@@ -90,13 +70,13 @@ final readonly class Template
     {
         return array_filter([
             'id' => $this->id,
-            'created' => $this->created?->format(\DateTimeInterface::ATOM),
+            'created' => $this->created?->format(DateTimeInterface::ATOM),
             'type' => $this->type?->value,
             'template_type' => $this->templateType?->value,
             'name' => $this->name,
             'format' => $this->format?->value,
             'base64file' => $this->base64file,
             'is_default' => $this->isDefault ? 1 : 0,
-        ], static fn($v) => $v !== null);
+        ], static fn (int|string|null $v): bool => null !== $v);
     }
 }

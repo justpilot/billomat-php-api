@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+
+use const ARRAY_FILTER_USE_BOTH;
 
 /**
  * Typisierter Payload für POST /invoice-payments.
@@ -18,31 +21,13 @@ use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 final class InvoicePaymentCreateOptions
 {
     /**
-     * ID der Rechnung.
-     *
-     * Billomat-Feld: invoice_id
-     * Typ: INT
-     * Pflicht: ja
-     */
-    public int $invoiceId;
-
-    /**
-     * Gezahlter Betrag.
-     *
-     * Billomat-Feld: amount
-     * Typ: FLOAT
-     * Pflicht: ja
-     */
-    public float $amount;
-
-    /**
      * Zahlungsdatum (YYYY-MM-DD).
      *
      * Billomat-Feld: date
      * Typ: DATE
      * Default: heute
      */
-    public ?\DateTimeImmutable $date = null;
+    public ?DateTimeImmutable $date = null;
 
     /**
      * Kommentar zur Zahlung.
@@ -78,10 +63,24 @@ final class InvoicePaymentCreateOptions
      */
     public bool $markInvoiceAsPaid = false;
 
-    public function __construct(int $invoiceId, float $amount)
-    {
-        $this->invoiceId = $invoiceId;
-        $this->amount = $amount;
+    public function __construct(
+        /**
+         * ID der Rechnung.
+         *
+         * Billomat-Feld: invoice_id
+         * Typ: INT
+         * Pflicht: ja
+         */
+        public int $invoiceId,
+        /**
+         * Gezahlter Betrag.
+         *
+         * Billomat-Feld: amount
+         * Typ: FLOAT
+         * Pflicht: ja
+         */
+        public float $amount
+    ) {
     }
 
     /**
@@ -104,8 +103,8 @@ final class InvoicePaymentCreateOptions
         // invoice_id, amount & mark_invoice_as_paid dürfen nicht weggefiltert werden
         return array_filter(
             $data,
-            static fn(mixed $v, string $k): bool => $v !== null || \in_array($k, ['invoice_id', 'amount', 'mark_invoice_as_paid'], true),
-            \ARRAY_FILTER_USE_BOTH
+            static fn (mixed $v, string $k): bool => null !== $v || \in_array($k, ['invoice_id', 'amount', 'mark_invoice_as_paid'], true),
+            ARRAY_FILTER_USE_BOTH
         );
     }
 }

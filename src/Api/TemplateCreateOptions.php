@@ -8,7 +8,7 @@ use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Enum\TemplateFormat;
 
 /**
- * Payload für POST /api/templates
+ * Payload für POST /api/templates.
  *
  * Billomat:
  * - type ist Pflicht
@@ -17,8 +17,6 @@ use Justpilot\Billomat\Model\Enum\TemplateFormat;
  */
 final class TemplateCreateOptions
 {
-    public TemplateDocumentType $type;
-
     public ?string $name = null;
 
     public ?TemplateFormat $format = null;
@@ -29,9 +27,8 @@ final class TemplateCreateOptions
     /** Default-Template? */
     public ?bool $isDefault = null;
 
-    public function __construct(TemplateDocumentType $type)
+    public function __construct(public TemplateDocumentType $type)
     {
-        $this->type = $type;
     }
 
     /**
@@ -44,9 +41,9 @@ final class TemplateCreateOptions
             'name' => $this->name,
             'format' => $this->format?->value,
             'base64file' => $this->base64file,
-            'is_default' => $this->isDefault === null ? null : ($this->isDefault ? 1 : 0),
+            'is_default' => null === $this->isDefault ? null : ($this->isDefault ? 1 : 0),
         ];
 
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn (string|int|null $v): bool => null !== $v);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Exception;
 
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Throwable;
 
 /**
  * HTTP-bezogener Fehler bei einem Request an die Billomat-API.
@@ -12,12 +13,11 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class HttpException extends BillomatException
 {
     public function __construct(
-        string                   $message,
-        private readonly int     $statusCode,
+        string $message,
+        private readonly int $statusCode,
         private readonly ?string $responseBody = null,
-        ?\Throwable              $previous = null,
-    )
-    {
+        ?Throwable $previous = null,
+    ) {
         parent::__construct($message, $statusCode, $previous);
     }
 
@@ -41,11 +41,11 @@ class HttpException extends BillomatException
         $body = null;
         try {
             $body = $response->getContent(false); // Inhalt auch bei 4xx/5xx holen
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Body konnte nicht gelesen werden, ignorieren
         }
 
-        $message = $fallbackMessage . sprintf(' (status %d)', $statusCode);
+        $message = $fallbackMessage.\sprintf(' (status %d)', $statusCode);
 
         return new self($message, $statusCode, $body);
     }

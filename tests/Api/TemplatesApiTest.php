@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\TemplateCreateOptions;
-use Justpilot\Billomat\Api\TemplateUpdateOptions;
 use Justpilot\Billomat\Api\TemplatesApi;
+use Justpilot\Billomat\Api\TemplateUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
@@ -14,21 +14,28 @@ use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Enum\TemplateType;
 use Justpilot\Billomat\Model\Template;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(TemplatesApi::class)]
+#[CoversClass(Template::class)]
 final class TemplatesApiTest extends TestCase
 {
     /**
      * @param array<string,mixed> $options
+     *
      * @return array<string,mixed>
      */
     private function extractJsonPayload(array $options): array
     {
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body']) && is_string($options['body']) && $options['body'] !== '') {
+        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
             /** @var array<string,mixed> $decoded */
             $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
             $payload = $decoded;
@@ -40,7 +47,8 @@ final class TemplatesApiTest extends TestCase
         return $payload;
     }
 
-    public function test_it_lists_templates(): void
+    #[Test]
+    public function itListsTemplates(): void
     {
         $mock = new MockHttpClient([
             new MockResponse(json_encode([
@@ -76,7 +84,8 @@ final class TemplatesApiTest extends TestCase
         self::assertTrue($tpl->isDefault);
     }
 
-    public function test_it_gets_single_template_and_can_include_base64file_for_uploaded(): void
+    #[Test]
+    public function itGetsSingleTemplateAndCanIncludeBase64fileForUploaded(): void
     {
         $mock = new MockHttpClient([
             new MockResponse(json_encode([
@@ -105,12 +114,13 @@ final class TemplatesApiTest extends TestCase
         self::assertSame('BASE64...', $tpl->base64file);
     }
 
-    public function test_it_creates_template_via_post_and_sends_wrapper_payload(): void
+    #[Test]
+    public function itCreatesTemplateViaPostAndSendsWrapperPayload(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse(json_encode([
                 'template' => [
@@ -147,12 +157,13 @@ final class TemplatesApiTest extends TestCase
         self::assertSame('Neu', $payload['template']['name'] ?? null);
     }
 
-    public function test_it_updates_template_via_put(): void
+    #[Test]
+    public function itUpdatesTemplateViaPut(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse(json_encode([
                 'template' => [
@@ -191,7 +202,8 @@ final class TemplatesApiTest extends TestCase
         self::assertSame(1, $payload['template']['is_default'] ?? null);
     }
 
-    public function test_it_deletes_template(): void
+    #[Test]
+    public function itDeletesTemplate(): void
     {
         $mock = new MockHttpClient([
             new MockResponse('', ['http_code' => 200]),
@@ -203,14 +215,15 @@ final class TemplatesApiTest extends TestCase
         self::assertTrue($api->delete(10));
     }
 
-    public function test_it_fetches_thumb_as_raw_binary(): void
+    #[Test]
+    public function itFetchesThumbAsRawBinary(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
-            return new MockResponse("PNGDATA", [
+            return new MockResponse('PNGDATA', [
                 'http_code' => 200,
                 'response_headers' => [
                     'content-type: image/png',

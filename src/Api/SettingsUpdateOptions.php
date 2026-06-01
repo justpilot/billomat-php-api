@@ -8,7 +8,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\NumberRangeMode;
 
 /**
- * Payload für PUT /settings
+ * Payload für PUT /settings.
  *
  * Nur änderbare Felder – readonly Felder (`*_next`, `created`, `updated`)
  * sind hier bewusst nicht abbildbar.
@@ -226,12 +226,12 @@ final class SettingsUpdateOptions
             'letter_intro' => $this->letterIntro,
             'letter_filename' => $this->letterFilename,
 
-            'print_version' => $this->printVersion !== null
+            'print_version' => null !== $this->printVersion
                 ? ($this->printVersion ? 1 : 0)
                 : null,
 
             'default_email_sender' => $this->defaultEmailSender,
-            'bcc_addresses' => $this->bccAddresses !== []
+            'bcc_addresses' => [] !== $this->bccAddresses
                 ? implode(',', $this->bccAddresses)
                 : null,
 
@@ -240,9 +240,9 @@ final class SettingsUpdateOptions
 
         // Preisgruppen als price_group2, price_group3, …
         foreach ($this->priceGroups as $index => $name) {
-            $data['price_group' . $index] = $name;
+            $data['price_group'.$index] = $name;
         }
 
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn ($v): bool => null !== $v);
     }
 }

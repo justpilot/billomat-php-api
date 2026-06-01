@@ -139,7 +139,7 @@ final class ClientUpdateOptions
     public function toArray(): array
     {
         $data = [
-            'archived' => $this->archived === null ? null : ($this->archived ? 1 : 0),
+            'archived' => null === $this->archived ? null : ($this->archived ? 1 : 0),
             'name' => $this->name,
             'street' => $this->street,
             'zip' => $this->zip,
@@ -170,7 +170,7 @@ final class ClientUpdateOptions
 
             'debitor_account_number' => $this->debitorAccountNumber,
             'price_group' => $this->priceGroup,
-            'dunning_run' => $this->dunningRun === null ? null : ($this->dunningRun ? 1 : 0),
+            'dunning_run' => null === $this->dunningRun ? null : ($this->dunningRun ? 1 : 0),
 
             'bank_account_number' => $this->bankAccountNumber,
             'bank_account_owner' => $this->bankAccountOwner,
@@ -196,6 +196,6 @@ final class ClientUpdateOptions
             'offer_validity_days' => $this->offerValidityDays,
         ];
 
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn (string|int|float|null $v): bool => null !== $v);
     }
 }

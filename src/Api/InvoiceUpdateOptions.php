@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
@@ -55,14 +56,14 @@ final class InvoiceUpdateOptions
      *
      * Billomat-Feld: date
      */
-    public ?\DateTimeImmutable $date = null;
+    public ?DateTimeImmutable $date = null;
 
     /**
      * Liefer-/Leistungsdatum.
      *
      * Billomat-Feld: supply_date
      */
-    public ?\DateTimeImmutable $supplyDate = null;
+    public ?DateTimeImmutable $supplyDate = null;
 
     /**
      * Typ des Liefer-/Leistungsdatums.
@@ -83,7 +84,7 @@ final class InvoiceUpdateOptions
      *
      * Billomat-Feld: due_date
      */
-    public ?\DateTimeImmutable $dueDate = null;
+    public ?DateTimeImmutable $dueDate = null;
 
     /**
      * Skonto in Prozent.
@@ -104,7 +105,7 @@ final class InvoiceUpdateOptions
      *
      * Billomat-Feld: discount_date
      */
-    public ?\DateTimeImmutable $discountDate = null;
+    public ?DateTimeImmutable $discountDate = null;
 
     /** Dokumentenüberschrift. */
     public ?string $title = null;
@@ -188,6 +189,6 @@ final class InvoiceUpdateOptions
             'template_id' => $this->templateId,
         ];
 
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);
     }
 }

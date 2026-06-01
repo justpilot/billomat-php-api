@@ -26,7 +26,7 @@ enum InvoiceStatus: string
      */
     public static function fromApi(?string $status): ?self
     {
-        if ($status === null) {
+        if (null === $status) {
             return null;
         }
 

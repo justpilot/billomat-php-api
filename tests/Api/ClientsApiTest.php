@@ -11,17 +11,26 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Client;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(ClientsApi::class)]
+#[CoversClass(ClientCreateOptions::class)]
+#[CoversClass(ClientUpdateOptions::class)]
+#[CoversClass(Client::class)]
 final class ClientsApiTest extends TestCase
 {
-    public function test_it_fetches_own_account_via_clients_myself(): void
+    #[Test]
+    public function itFetchesOwnAccountViaClientsMyself(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -64,11 +73,12 @@ final class ClientsApiTest extends TestCase
         );
     }
 
-    public function test_it_lists_clients_and_passes_filters(): void
+    #[Test]
+    public function itListsClientsAndPassesFilters(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -143,14 +153,15 @@ final class ClientsApiTest extends TestCase
             parse_str($parts['query'], $query);
         }
 
-        self::assertSame(50, (int)($query['per_page'] ?? 0));
+        self::assertSame(50, (int) ($query['per_page'] ?? 0));
     }
 
-    public function test_it_gets_single_client_by_id(): void
+    #[Test]
+    public function itGetsSingleClientById(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -196,11 +207,12 @@ final class ClientsApiTest extends TestCase
         );
     }
 
-    public function test_it_creates_a_new_client_via_post(): void
+    #[Test]
+    public function itCreatesANewClientViaPost(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -264,7 +276,7 @@ final class ClientsApiTest extends TestCase
         $options = $captured['options'] ?? [];
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+        if (null === $payload && isset($options['body']) && \is_string($options['body'])) {
             $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
         }
 
@@ -286,11 +298,12 @@ final class ClientsApiTest extends TestCase
         self::assertArrayNotHasKey('id', $clientPayload);
     }
 
-    public function test_it_updates_client_via_put_and_sends_wrapper_payload(): void
+    #[Test]
+    public function itUpdatesClientViaPutAndSendsWrapperPayload(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -333,7 +346,7 @@ final class ClientsApiTest extends TestCase
         // Payload robust lesen: options['json'] oder options['body']
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body']) && is_string($options['body']) && $options['body'] !== '') {
+        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
             $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
         }
 
@@ -344,7 +357,8 @@ final class ClientsApiTest extends TestCase
         self::assertSame('Die super Musterfirma', $payload['client']['name'] ?? null);
     }
 
-    public function test_update_options_serializes_all_new_writable_fields(): void
+    #[Test]
+    public function updateOptionsSerializesAllNewWritableFields(): void
     {
         $opts = new ClientUpdateOptions();
 
@@ -415,7 +429,8 @@ final class ClientsApiTest extends TestCase
         self::assertArrayNotHasKey('archived', $payload);
     }
 
-    public function test_client_model_hydrates_bank_sepa_and_revenue_fields(): void
+    #[Test]
+    public function clientModelHydratesBankSepaAndRevenueFields(): void
     {
         $data = [
             'id' => 1,
@@ -473,11 +488,12 @@ final class ClientsApiTest extends TestCase
         self::assertSame('SETTINGS', $c->offerValidityDaysType);
     }
 
-    public function test_it_deletes_client_via_delete(): void
+    #[Test]
+    public function itDeletesClientViaDelete(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -498,9 +514,10 @@ final class ClientsApiTest extends TestCase
         );
     }
 
-    public function test_delete_propagates_validation_exception_when_client_has_documents(): void
+    #[Test]
+    public function deletePropagatesValidationExceptionWhenClientHasDocuments(): void
     {
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options): MockResponse {
             $body = json_encode([
                 'errors' => [
                     'error' => 'Client cannot be deleted because there are documents assigned.',
@@ -518,12 +535,13 @@ final class ClientsApiTest extends TestCase
         $api->delete(42);
     }
 
-    public function test_it_fetches_avatar_binary(): void
+    #[Test]
+    public function itFetchesAvatarBinary(): void
     {
         $captured = [];
         $pngBytes = "\x89PNG\r\n\x1a\nFAKE";
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured, $pngBytes) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured, $pngBytes): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -555,14 +573,15 @@ final class ClientsApiTest extends TestCase
             parse_str($parts['query'], $query);
         }
 
-        self::assertSame(256, (int)($query['size'] ?? 0));
+        self::assertSame(256, (int) ($query['size'] ?? 0));
     }
 
-    public function test_avatar_omits_size_query_when_not_provided(): void
+    #[Test]
+    public function avatarOmitsSizeQueryWhenNotProvided(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['url'] = $url;
 
             return new MockResponse('PNG', [

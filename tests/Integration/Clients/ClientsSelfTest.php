@@ -6,12 +6,16 @@ namespace Integration\Clients;
 
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
+#[CoversNothing]
 final class ClientsSelfTest extends AbstractBillomatIntegrationTestCase
 {
-    #[Group("integration")]
-    public function test_can_fetch_myself_from_sandbox(): void
+    #[Group('integration')]
+    #[Test]
+    public function canFetchMyselfFromSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 

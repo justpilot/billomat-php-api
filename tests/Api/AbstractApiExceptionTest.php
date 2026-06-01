@@ -6,9 +6,13 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractApi;
 use Justpilot\Billomat\Exception\AuthenticationException;
+use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpFoundation\Response as HttpStatus;
@@ -36,9 +40,16 @@ final class TestApi extends AbstractApi
     }
 }
 
+#[CoversClass(AbstractApi::class)]
+#[CoversClass(BillomatException::class)]
+#[CoversClass(AuthenticationException::class)]
+#[CoversClass(NotFoundException::class)]
+#[CoversClass(ValidationException::class)]
+#[CoversClass(BillomatHttpException::class)]
 final class AbstractApiExceptionTest extends TestCase
 {
-    public function test_getJson_maps_401_and_403_to_authentication_exception(): void
+    #[Test]
+    public function getJsonMaps401And403ToAuthenticationException(): void
     {
         $statuses = [HttpStatus::HTTP_UNAUTHORIZED, HttpStatus::HTTP_FORBIDDEN];
 
@@ -58,7 +69,7 @@ final class AbstractApiExceptionTest extends TestCase
 
             try {
                 $api->publicGetJson('/clients');
-                $this->fail(sprintf('Expected AuthenticationException for status %d', $status));
+                $this->fail(\sprintf('Expected AuthenticationException for status %d', $status));
             } catch (AuthenticationException $e) {
                 $this->assertSame($status, $e->getStatusCode());
             }
@@ -68,7 +79,8 @@ final class AbstractApiExceptionTest extends TestCase
         }
     }
 
-    public function test_getJson_maps_400_and_422_to_validation_exception(): void
+    #[Test]
+    public function getJsonMaps400And422ToValidationException(): void
     {
         $statuses = [HttpStatus::HTTP_BAD_REQUEST, HttpStatus::HTTP_UNPROCESSABLE_ENTITY];
 
@@ -88,7 +100,7 @@ final class AbstractApiExceptionTest extends TestCase
 
             try {
                 $api->publicGetJson('/clients');
-                $this->fail(sprintf('Expected ValidationException for status %d', $status));
+                $this->fail(\sprintf('Expected ValidationException for status %d', $status));
             } catch (ValidationException $e) {
                 $this->assertSame($status, $e->getStatusCode());
             }
@@ -97,7 +109,8 @@ final class AbstractApiExceptionTest extends TestCase
         }
     }
 
-    public function test_getJson_maps_other_4xx_5xx_to_generic_http_exception(): void
+    #[Test]
+    public function getJsonMapsOther4xx5xxToGenericHttpException(): void
     {
         $mockResponse = new MockResponse('', [
             'http_code' => HttpStatus::HTTP_INTERNAL_SERVER_ERROR,
@@ -118,7 +131,8 @@ final class AbstractApiExceptionTest extends TestCase
         $api->publicGetJson('/clients');
     }
 
-    public function test_getJsonOrNull_returns_null_on_404(): void
+    #[Test]
+    public function getJsonOrNullReturnsNullOn404(): void
     {
         $mockResponse = new MockResponse('', [
             'http_code' => HttpStatus::HTTP_NOT_FOUND,
@@ -138,7 +152,8 @@ final class AbstractApiExceptionTest extends TestCase
         $this->assertNull($result);
     }
 
-    public function test_getJsonOrNull_still_throws_for_non_404_errors(): void
+    #[Test]
+    public function getJsonOrNullStillThrowsForNon404Errors(): void
     {
         $mockResponse = new MockResponse('', [
             'http_code' => HttpStatus::HTTP_UNAUTHORIZED,
@@ -158,7 +173,8 @@ final class AbstractApiExceptionTest extends TestCase
         $api->publicGetJsonOrNull('/clients/1');
     }
 
-    public function test_postJson_uses_same_exception_mapping(): void
+    #[Test]
+    public function postJsonUsesSameExceptionMapping(): void
     {
         $mockResponse = new MockResponse('', [
             'http_code' => HttpStatus::HTTP_BAD_REQUEST,

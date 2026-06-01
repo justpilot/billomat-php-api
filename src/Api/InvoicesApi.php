@@ -10,6 +10,7 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoicePdf;
+use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -27,6 +28,7 @@ final class InvoicesApi extends AbstractApi
      * Entspricht GET /invoices
      *
      * @param array<string, scalar|array|null> $filters
+     *
      * @return list<Invoice>
      */
     public function list(array $filters = []): array
@@ -35,13 +37,13 @@ final class InvoicesApi extends AbstractApi
 
         $node = $data['invoices']['invoice'] ?? [];
 
-        if ($node === null || $node === []) {
+        if (null === $node || [] === $node) {
             return [];
         }
 
-        if (is_array($node) && array_is_list($node)) {
+        if (\is_array($node) && array_is_list($node)) {
             $rows = $node;
-        } elseif (is_array($node)) {
+        } elseif (\is_array($node)) {
             $rows = [$node];
         } else {
             $rows = [];
@@ -49,7 +51,7 @@ final class InvoicesApi extends AbstractApi
 
         /** @var list<Invoice> $models */
         $models = array_map(
-            static fn(array $row): Invoice => Invoice::fromArray($row),
+            Invoice::fromArray(...),
             $rows
         );
 
@@ -65,13 +67,13 @@ final class InvoicesApi extends AbstractApi
     {
         $data = $this->getJsonOrNull("/invoices/{$id}");
 
-        if ($data === null) {
+        if (null === $data) {
             return null;
         }
 
         $invoiceData = $data['invoice'] ?? null;
 
-        if (!is_array($invoiceData)) {
+        if (!\is_array($invoiceData)) {
             return null;
         }
 
@@ -99,8 +101,8 @@ final class InvoicesApi extends AbstractApi
 
         $created = $data['invoice'] ?? null;
 
-        if (!is_array($created)) {
-            throw new \RuntimeException('Unexpected response from Billomat when creating invoice.');
+        if (!\is_array($created)) {
+            throw new RuntimeException('Unexpected response from Billomat when creating invoice.');
         }
 
         return Invoice::fromArray($created);
@@ -124,8 +126,8 @@ final class InvoicesApi extends AbstractApi
         $data = $this->putJson("/invoices/{$id}", $payload);
 
         $invoiceData = $data['invoice'] ?? null;
-        if (!is_array($invoiceData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when updating invoice.');
+        if (!\is_array($invoiceData)) {
+            throw new RuntimeException('Unexpected response from Billomat when updating invoice.');
         }
 
         return Invoice::fromArray($invoiceData);
@@ -140,14 +142,14 @@ final class InvoicesApi extends AbstractApi
      * - Es wird ein PDF erzeugt
      * - Die Rechnungsnummer (invoice_number) wird vergeben
      *
-     * @param int $id ID der Rechnung
+     * @param int      $id         ID der Rechnung
      * @param int|null $templateId Optionale ID der Vorlage für die PDF-Erzeugung
      */
     public function complete(int $id, ?int $templateId = null): bool
     {
         $body = [];
 
-        if ($templateId !== null) {
+        if (null !== $templateId) {
             // laut Doku: optionaler Parameter template_id
             // Wir senden ihn im invoice-Block
             $body['template_id'] = $templateId;
@@ -156,7 +158,8 @@ final class InvoicesApi extends AbstractApi
         $payload = ['invoice' => $body];
 
         $response = $this->putEmptyResponse("/invoices/{$id}/complete", $payload);
-        return $response->getStatusCode() === 200;
+
+        return 200 === $response->getStatusCode();
     }
 
     /**
@@ -169,6 +172,7 @@ final class InvoicesApi extends AbstractApi
     public function delete(int $id): bool
     {
         $this->deleteVoid("/invoices/{$id}");
+
         return true;
     }
 
@@ -182,7 +186,8 @@ final class InvoicesApi extends AbstractApi
     public function cancel(int $id): bool
     {
         $response = $this->putEmptyResponse("/invoices/{$id}/cancel");
-        return $response->getStatusCode() === 200;
+
+        return 200 === $response->getStatusCode();
     }
 
     /**
@@ -195,7 +200,8 @@ final class InvoicesApi extends AbstractApi
     public function uncancel(int $id): bool
     {
         $response = $this->putEmptyResponse("/invoices/{$id}/uncancel");
-        return $response->getStatusCode() === 200;
+
+        return 200 === $response->getStatusCode();
     }
 
     /**
@@ -237,14 +243,15 @@ final class InvoicesApi extends AbstractApi
      *
      * Entspricht PUT /invoices/{id}/upload-signature.
      *
-     * @param string $base64Pdf Base64-codierter PDF-Inhalt der unterschriebenen Rechnung.
+     * @param string $base64Pdf base64-codierter PDF-Inhalt der unterschriebenen Rechnung
      */
     public function uploadSignature(int $id, string $base64Pdf): bool
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $response = $this->putEmptyResponse("/invoices/{$id}/upload-signature", $payload);
-        return $response->getStatusCode() === 200;
+
+        return 200 === $response->getStatusCode();
     }
 
     /**
@@ -257,7 +264,8 @@ final class InvoicesApi extends AbstractApi
     public function encash(int $id): bool
     {
         $response = $this->putEmptyResponse("/invoices/{$id}/encash");
-        return $response->getStatusCode() === 200;
+
+        return 200 === $response->getStatusCode();
     }
 
     /**
@@ -273,19 +281,19 @@ final class InvoicesApi extends AbstractApi
      *   - $rawPdf = true → format=pdf, Rückgabe ist der binäre PDF-String
      *   - $rawPdf = false (Default) → JSON-Response mit base64file, Rückgabe ist InvoicePdf-Model
      *
-     * @return InvoicePdf|string  InvoicePdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
+     * @return InvoicePdf|string InvoicePdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
      */
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string
     {
         $query = [];
 
-        if ($type !== null) {
+        if ($type instanceof InvoicePdfType) {
             // Enum → API-String (signed / print)
             $query['type'] = $type->value;
         }
 
         // Raw-PDF-Modus: format=pdf → direkt application/pdf
-        if ($rawPdf === true) {
+        if ($rawPdf) {
             $query['format'] = 'pdf';
 
             $response = $this->http->request('GET', "/invoices/{$id}/pdf", $query);
@@ -303,8 +311,8 @@ final class InvoicesApi extends AbstractApi
 
         $pdfData = $data['pdf'] ?? null;
 
-        if (!is_array($pdfData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when fetching invoice PDF.');
+        if (!\is_array($pdfData)) {
+            throw new RuntimeException('Unexpected response from Billomat when fetching invoice PDF.');
         }
 
         return InvoicePdf::fromArray($pdfData);

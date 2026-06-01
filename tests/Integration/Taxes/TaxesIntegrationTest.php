@@ -7,12 +7,16 @@ namespace Justpilot\Billomat\Tests\Integration\Taxes;
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
 use Justpilot\Billomat\Model\TaxRate;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
+#[CoversNothing]
 final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
     #[Group('integration')]
-    public function test_can_list_tax_rates_from_sandbox(): void
+    #[Test]
+    public function canListTaxRatesFromSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
@@ -23,7 +27,7 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertIsArray($taxes);
         self::assertContainsOnlyInstancesOf(TaxRate::class, $taxes);
 
-        if ($taxes !== []) {
+        if ([] !== $taxes) {
             $first = $taxes[0];
 
             self::assertNotNull($first->id);
@@ -35,13 +39,14 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
     }
 
     #[Group('integration')]
-    public function test_can_create_and_delete_tax_rate_in_sandbox(): void
+    #[Test]
+    public function canCreateAndDeleteTaxRateInSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
         // 1) neuen Steuersatz anlegen
-        $name = 'SDK Integration Test Tax ' . $faker->numberBetween(1000, 9999);
+        $name = 'SDK Integration Test Tax '.$faker->numberBetween(1000, 9999);
         $rate = $faker->randomElement([7.0, 9.5, 21.0]);
         $isDefault = false;
 

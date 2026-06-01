@@ -8,44 +8,42 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-final class BillomatHttpClient implements BillomatHttpClientInterface
+final readonly class BillomatHttpClient implements BillomatHttpClientInterface
 {
     public function __construct(
         private HttpClientInterface $client,
-        private BillomatConfig      $config,
-    )
-    {
+        private BillomatConfig $config,
+    ) {
     }
 
     /**
      * @param array<string, scalar|array|null> $query
-     * @param array<string, mixed>|null $json
+     * @param array<string, mixed>|null        $json
      */
     public function request(
         string $method,
         string $path,
-        array  $query = [],
+        array $query = [],
         ?array $json = null
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         $headers = [
             'X-BillomatApiKey' => $this->config->apiKey,
             'Accept' => 'application/json',
-            'Accept-Language' => 'de-de'
+            'Accept-Language' => 'de-de',
         ];
 
-        if ($this->config->appId !== null && $this->config->appSecret !== null) {
+        if (null !== $this->config->appId && null !== $this->config->appSecret) {
             $headers['X-AppId'] = $this->config->appId;
             $headers['X-AppSecret'] = $this->config->appSecret;
         }
 
-        if ($json !== null) {
+        if (null !== $json) {
             $headers['Content-Type'] = 'application/json';
         }
 
         $url = $this->config->getBaseUri()
-            . ltrim($path, '/')
-            . $this->buildBillomatQuery($query);
+            .ltrim($path, '/')
+            .$this->buildBillomatQuery($query);
 
         return $this->client->request(
             $method,
@@ -70,26 +68,26 @@ final class BillomatHttpClient implements BillomatHttpClientInterface
      */
     private function buildBillomatQuery(array $query): string
     {
-        if ($query === []) {
+        if ([] === $query) {
             return '';
         }
 
         $parts = [];
 
         foreach ($query as $key => $value) {
-            if ($value === null) {
+            if (null === $value) {
                 continue;
             }
 
-            $encodedKey = rawurlencode((string)$key);
+            $encodedKey = rawurlencode((string) $key);
 
-            if (is_array($value)) {
+            if (\is_array($value)) {
                 foreach ($value as $element) {
-                    if ($element === null) {
+                    if (null === $element) {
                         continue;
                     }
 
-                    $parts[] = sprintf(
+                    $parts[] = \sprintf(
                         '%s[]=%s',
                         $encodedKey,
                         $this->encodeBillomatQueryValue($element)
@@ -99,18 +97,18 @@ final class BillomatHttpClient implements BillomatHttpClientInterface
                 continue;
             }
 
-            $parts[] = sprintf(
+            $parts[] = \sprintf(
                 '%s=%s',
                 $encodedKey,
                 $this->encodeBillomatQueryValue($value)
             );
         }
 
-        if ($parts === []) {
+        if ([] === $parts) {
             return '';
         }
 
-        return '?' . implode('&', $parts);
+        return '?'.implode('&', $parts);
     }
 
     /**
@@ -122,14 +120,12 @@ final class BillomatHttpClient implements BillomatHttpClientInterface
      * - "%2B" wird wieder in "+" zurückverwandelt,
      *   weil Billomat z. B. "date+DESC" erwartet
      *   und "date%2BDESC" als unbekanntes Feld interpretiert.
-     *
-     * @param scalar $value
      */
     private function encodeBillomatQueryValue(int|float|string|bool $value): string
     {
         $string = match (true) {
-            is_bool($value) => $value ? '1' : '0',
-            default => (string)$value,
+            \is_bool($value) => $value ? '1' : '0',
+            default => (string) $value,
         };
 
         $encoded = rawurlencode($string);

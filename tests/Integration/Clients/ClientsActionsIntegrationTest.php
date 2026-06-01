@@ -12,8 +12,8 @@ use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 
 /**
@@ -29,14 +29,14 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
 {
     #[Group('integration')]
     #[Test]
-    public function can_delete_freshly_created_client_in_sandbox(): void
+    public function canDeleteFreshlyCreatedClientInSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
         // 1) Wegwerf-Kunden anlegen
         $options = new ClientCreateOptions();
-        $options->name = 'IntegrationDelete ' . $faker->unique()->bothify('##??##');
+        $options->name = 'IntegrationDelete '.$faker->unique()->bothify('##??##');
         $options->email = $faker->unique()->safeEmail();
         $options->countryCode = 'DE';
 
@@ -54,8 +54,8 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
             // Sollte bei frisch angelegtem Kunden ohne Dokumente eigentlich nicht passieren —
             // wenn doch (z. B. Account-Quirks), als Skip behandeln statt failen.
             $this->markTestSkipped(
-                'Billomat hat den Kunden nicht gelöscht (' . $e->getMessage() . '). '
-                . 'Möglicherweise ist Hard-Delete für diesen Account-Typ deaktiviert.'
+                'Billomat hat den Kunden nicht gelöscht ('.$e->getMessage().'). '
+                .'Möglicherweise ist Hard-Delete für diesen Account-Typ deaktiviert.'
             );
         }
 
@@ -68,7 +68,7 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
     #[Group('integration')]
     #[Test]
-    public function can_fetch_client_avatar_from_sandbox(): void
+    public function canFetchClientAvatarFromSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
@@ -83,7 +83,7 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
             // Avatar-Endpoint für diesen Account-Typ deaktiviert ist.
             $this->markTestSkipped(
                 'Avatar-Endpoint vom Account abgelehnt (401/403). '
-                . 'Vermutlich für diesen Account-Typ nicht verfügbar: ' . $e->getMessage()
+                .'Vermutlich für diesen Account-Typ nicht verfügbar: '.$e->getMessage()
             );
         }
 
@@ -99,13 +99,13 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         self::assertTrue(
             $isPng || $isJpg || $isGif,
             'Expected PNG/JPG/GIF magic bytes in avatar response, got: '
-            . bin2hex(substr($binary, 0, 8))
+            .bin2hex(substr($binary, 0, 8))
         );
     }
 
     #[Group('integration')]
     #[Test]
-    public function can_fetch_client_avatar_with_size_query(): void
+    public function canFetchClientAvatarWithSizeQuery(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
@@ -117,7 +117,7 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
             $this->markTestSkipped("Client {$clientId} hat keinen Avatar (404).");
         } catch (AuthenticationException $e) {
             $this->markTestSkipped(
-                'Avatar-Endpoint vom Account abgelehnt (401/403): ' . $e->getMessage()
+                'Avatar-Endpoint vom Account abgelehnt (401/403): '.$e->getMessage()
             );
         }
 
@@ -144,15 +144,15 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         }
 
         foreach ($list as $candidate) {
-            if ($candidate->id !== null) {
+            if (null !== $candidate->id) {
                 $candidates[] = $candidate->id;
             }
         }
 
-        if ($candidates === []) {
+        if ([] === $candidates) {
             try {
                 $me = $billomat->clients->getMyself();
-                if ($me->id !== null) {
+                if (null !== $me->id) {
                     $candidates[] = $me->id;
                 }
             } catch (HttpException) {
@@ -160,7 +160,7 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
             }
         }
 
-        if ($candidates === []) {
+        if ([] === $candidates) {
             $this->markTestSkipped('Konnte keine Client-ID für den Avatar-Test ermitteln.');
         }
 

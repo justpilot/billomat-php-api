@@ -1,0 +1,20 @@
+{
+    $schema: "vendor/infection/infection/resources/schema.json",
+    source: {
+        directories: ["src"],
+    },
+    timeout: 10,
+    testFramework: "phpunit",
+    testFrameworkOptions: "--testsuite=unit",
+    logs: {
+        text: "build/infection/infection.log",
+        html: "build/infection/infection.html",
+        summary: "build/infection/summary.log",
+    },
+    tmpDir: "build/infection/tmp",
+    minMsi: 70,
+    minCoveredMsi: 75,
+    mutators: {
+        "@default": true,
+    },
+}

@@ -1,0 +1,1579 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:getJson\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/AbstractApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:getRaw\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/AbstractApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:putEmptyResponse\(\) has parameter \$body with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/AbstractApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:putJson\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/AbstractApi.php
+
+		-
+			message: '#^Parameter \#4 \$json of method Justpilot\\Billomat\\Http\\BillomatHttpClientInterface\:\:request\(\) expects array\<string, mixed\>\|null, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/AbstractApi.php
+
+		-
+			message: '#^Cannot access offset ''client'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ClientsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ClientsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ClientsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Client given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ClientsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Client\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/ClientsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/ClientsApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/InvoiceItemsApi.php
+
+		-
+			message: '#^Cannot access offset ''invoice\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/InvoiceItemsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\InvoiceItemsApi\:\:listByInvoice\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/InvoiceItemsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceItem given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/InvoiceItemsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoiceItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/InvoiceItemsApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/InvoicePaymentsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\InvoicePaymentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/InvoicePaymentsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoicePayment given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/InvoicePaymentsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoicePayment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/InvoicePaymentsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/InvoicePaymentsApi.php
+
+		-
+			message: '#^Cannot access offset ''invoice'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/InvoicesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\InvoicesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/InvoicesApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Invoice given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/InvoicesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Invoice\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/InvoicesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoicePdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/InvoicesApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/InvoicesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Settings\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/SettingsApi.php
+
+		-
+			message: '#^Cannot access offset ''tax'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/TaxesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\TaxesApi\:\:list\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/TaxesApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\TaxRate given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/TaxesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\TaxRate\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/TaxesApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/TaxesApi.php
+
+		-
+			message: '#^Cannot access offset ''template'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/TemplatesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\TemplatesApi\:\:list\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/TemplatesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Http\\BillomatHttpClient\:\:buildBillomatQuery\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Http/BillomatHttpClient.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Http\\BillomatHttpClient\:\:request\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Http/BillomatHttpClient.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Justpilot\\Billomat\\Http\\BillomatHttpClient\:\:encodeBillomatQueryValue\(\) expects bool\|float\|int\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Http/BillomatHttpClient.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Http\\BillomatHttpClientInterface\:\:request\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Http/BillomatHttpClientInterface.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 5
+			path: src/Model/Client.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 8
+			path: src/Model/Client.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$bankAccountNumber of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$bankAccountOwner of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$bankIban of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$bankName of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$bankNumber of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$bankSwift of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$city of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$clientNumber of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$countryCode of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$defaultPaymentTypes of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$discountDaysType of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$discountRateType of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$dueDaysType of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$email of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$fax of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$firstName of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$lastName of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$locale of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$mobile of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$netGross of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$offerValidityDaysType of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$phone of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$reminderDueDaysType of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$salutation of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$sepaMandate of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$state of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$street of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$taxNumber of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$taxRule of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$vatNumber of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$www of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Parameter \$zip of class Justpilot\\Billomat\\Model\\Client constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Client.php
+
+		-
+			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
+			identifier: ternary.condNotBoolean
+			count: 1
+			path: src/Model/Enum/InvoiceItemType.php
+
+		-
+			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
+			identifier: ternary.condNotBoolean
+			count: 1
+			path: src/Model/Enum/InvoicePdfType.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Cannot access offset ''invoice\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Cannot access offset ''tax'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 11
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 12
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceItem given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \#1 \$status of static method Justpilot\\Billomat\\Model\\Enum\\InvoiceStatus\:\:fromApi\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Invoice\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 5
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$invoiceNumber of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Invoice constructor expects list\<Justpilot\\Billomat\\Model\\InvoiceItem\>, array\<Justpilot\\Billomat\\Model\\InvoiceItem\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$paymentTypes of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Invoice.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 7
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 4
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
+			identifier: empty.notAllowed
+			count: 1
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoiceItem.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 1
+			path: src/Model/InvoicePayment.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/InvoicePayment.php
+
+		-
+			message: '#^Parameter \#1 \$type of static method Justpilot\\Billomat\\Model\\Enum\\InvoicePaymentType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoicePayment.php
+
+		-
+			message: '#^Parameter \$comment of class Justpilot\\Billomat\\Model\\InvoicePayment constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoicePayment.php
+
+		-
+			message: '#^Parameter \$transactionPurpose of class Justpilot\\Billomat\\Model\\InvoicePayment constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/InvoicePayment.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/InvoicePdf.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: src/Model/InvoicePdf.php
+
+		-
+			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'
+			identifier: arrayFilter.strict
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:bool\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:dt\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:float\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:int\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:str\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Only booleans are allowed in &&, int\|false given on the right side\.$#'
+			identifier: booleanAnd.rightNotBoolean
+			count: 1
+			path: src/Model/Settings.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 1
+			path: src/Model/TaxRate.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/TaxRate.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/TaxRate.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Model/Template.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Model/Template.php
+
+		-
+			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
+			identifier: empty.notAllowed
+			count: 1
+			path: src/Model/Template.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\TemplateDocumentType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Template.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\TemplateFormat\:\:fromApi\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Template.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\TemplateType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Template.php
+
+		-
+			message: '#^Parameter \$base64file of class Justpilot\\Billomat\\Model\\Template constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Template.php
+
+		-
+			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\Template constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Template.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertNull\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 1
+			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertSame\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 2
+			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:fail\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 2
+			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\TestApi\:\:publicGetJson\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\TestApi\:\:publicGetJson\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\TestApi\:\:publicGetJsonOrNull\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\TestApi\:\:publicPostJson\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 3
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''client_number'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''country_code'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''debitor_account_number'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''first_name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''last_name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''salutation'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$url of function parse_url expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Parameter \#2 \$array of static method PHPUnit\\Framework\\Assert\:\:assertArrayNotHasKey\(\) expects array\<mixed\>\|ArrayAccess\<\(int\|string\), mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\InvoiceItem'' and Justpilot\\Billomat\\Model\\InvoiceItem will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''invoice_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''title'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Cannot cast array\|string to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertArrayHasKey\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 2
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertIsArray\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 2
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertSame\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 3
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of static method PHPUnit\\Framework\\Assert\:\:assertStringContainsString\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Parameter \#2 \$string of static method PHPUnit\\Framework\\Assert\:\:assertStringStartsWith\(\) expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/InvoiceItemsApiTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\InvoicePayment'' and Justpilot\\Billomat\\Model\\InvoicePayment will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''amount'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''comment'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''date'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''invoice_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''mark_invoice_as_paid'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''type'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTimeImmutable\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: tests/Api/InvoicePaymentsApiTest.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Invoice'' and Justpilot\\Billomat\\Model\\Invoice will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''attachment'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''bcc'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''body'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''cc'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''client_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''color'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''currency_code'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''date'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''description'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''duplex'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''filename'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''from'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''label'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''note'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''paper_weight'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''quantity'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''recipient_address'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''recipients'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''subject'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''tax_rate'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''template_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''title'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''to'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''unit'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''unit_price'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\InvoicesApiTest\:\:extractJsonPayload\(\) should return array\<string, mixed\>\|null but returns array\<mixed, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\InvoicesApiTest\:\:extractJsonPayload\(\) should return array\<string, mixed\>\|null but returns array\<mixed, mixed\>\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Justpilot\\Billomat\\Tests\\Api\\InvoicesApiTest\:\:extractJsonPayload\(\) expects array\<string, mixed\>, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Justpilot\\Billomat\\Tests\\Api\\InvoicesApiTest\:\:extractJsonPayload\(\) expects array\<string, mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$url of function parse_url expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Parameter \#2 \$array of static method PHPUnit\\Framework\\Assert\:\:assertArrayHasKey\(\) expects array\<mixed\>\|ArrayAccess\<\(int\|string\), mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTimeImmutable\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: tests/Api/InvoicesApiTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Settings'' and Justpilot\\Billomat\\Model\\Settings will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Api/SettingsApiTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\TaxRate'' and Justpilot\\Billomat\\Model\\TaxRate will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Api/TaxesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''is_default'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/TaxesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/TaxesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''rate'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/TaxesApiTest.php
+
+		-
+			message: '#^Class Justpilot\\Billomat\\Model\\Tax not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: tests/Api/TaxesApiTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Template'' and Justpilot\\Billomat\\Model\\Template will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Api/TemplatesApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Justpilot\\Billomat\\Tests\\Api\\TemplatesApiTest\:\:extractJsonPayload\(\) expects array\<string, mixed\>, array\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Api/TemplatesApiTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotNull\(\) with Justpilot\\Billomat\\Api\\InvoicesApi will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/BillomatClientTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotNull\(\) with Justpilot\\Billomat\\Api\\TaxesApi will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/BillomatClientTest.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: tests/Http/BillomatHttpClientTest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: tests/Http/BillomatHttpClientTest.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Http/BillomatHttpClientTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 1
+			path: tests/Integration/AbstractBillomatIntegrationTestCase.php
+
+		-
+			message: '#^Only booleans are allowed in a negated boolean, string\|null given\.$#'
+			identifier: booleanNot.exprNotBoolean
+			count: 2
+			path: tests/Integration/AbstractBillomatIntegrationTestCase.php
+
+		-
+			message: '#^Short ternary operator is not allowed\. Use null coalesce operator if applicable or consider using long ternary\.$#'
+			identifier: ternary.shortNotAllowed
+			count: 2
+			path: tests/Integration/AbstractBillomatIntegrationTestCase.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Clients/ClientsActionsIntegrationTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 6
+			path: tests/Integration/Clients/ClientsActionsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Clients/ClientsCreateIntegrationTestCase.php
+
+		-
+			message: '#^Property Justpilot\\Billomat\\Api\\ClientCreateOptions\:\:\$salutation \(string\|null\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: tests/Integration/Clients/ClientsCreateIntegrationTestCase.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 1
+			path: tests/Integration/Clients/ClientsListIntegrationTest.php
+
+		-
+			message: '#^Only booleans are allowed in a negated boolean, string\|false given\.$#'
+			identifier: booleanNot.exprNotBoolean
+			count: 2
+			path: tests/Integration/Clients/ClientsListIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Clients/ClientsSelfTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Integration/Clients/ClientsUpdateIntegrationTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 2
+			path: tests/Integration/Clients/ClientsUpdateIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Invoice'' and Justpilot\\Billomat\\Model\\Invoice will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/InvoicePayments/InvoicePaymentsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\InvoicePayment'' and Justpilot\\Billomat\\Model\\InvoicePayment will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/InvoicePayments/InvoicePaymentsIntegrationTest.php
+
+		-
+			message: '#^Class Justpilot\\Billomat\\Api\\ClientCreateOptions does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: tests/Integration/InvoicePayments/InvoicePaymentsIntegrationTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 5
+			path: tests/Integration/Invoices/InvoiceActionsIntegrationTest.php
+
+		-
+			message: '#^Only booleans are allowed in a negated boolean, string\|null given\.$#'
+			identifier: booleanNot.exprNotBoolean
+			count: 1
+			path: tests/Integration/Invoices/InvoiceActionsIntegrationTest.php
+
+		-
+			message: '#^Short ternary operator is not allowed\. Use null coalesce operator if applicable or consider using long ternary\.$#'
+			identifier: ternary.shortNotAllowed
+			count: 1
+			path: tests/Integration/Invoices/InvoiceActionsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Enum\\\\InvoiceStatus'' and Justpilot\\Billomat\\Model\\Enum\\InvoiceStatus will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Invoice'' and Justpilot\\Billomat\\Model\\Invoice will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 5
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Cannot access property \$date on Justpilot\\Billomat\\Model\\Invoice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Class Justpilot\\Billomat\\Api\\ClientCreateOptions does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertContains\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 2
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertNotContains\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 1
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\Invoices\\InvoicesIntegrationTest\:\:ensureInvoiceId\(\) should return int but returns int\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Parameter \$clientId of class Justpilot\\Billomat\\Api\\InvoiceCreateOptions constructor expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTimeImmutable\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''DateTimeImmutable'' and DateTimeImmutable will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Integration/Settings/SettingsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Enum\\\\NetGross'' and Justpilot\\Billomat\\Model\\Enum\\NetGross will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Settings/SettingsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Settings'' and Justpilot\\Billomat\\Model\\Settings will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 4
+			path: tests/Integration/Settings/SettingsIntegrationTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 1
+			path: tests/Integration/Settings/SettingsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\TaxRate'' and Justpilot\\Billomat\\Model\\TaxRate will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Taxes/TaxesIntegrationTest.php
+
+		-
+			message: '#^Parameter \$rate of class Justpilot\\Billomat\\Api\\TaxRateCreateOptions constructor expects float, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Integration/Taxes/TaxesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Templates/TemplatesIntegrationTest.php
+
+		-
+			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
+			identifier: staticMethod.dynamicCall
+			count: 4
+			path: tests/Integration/Templates/TemplatesIntegrationTest.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type Justpilot\\Billomat\\Model\\Enum\\TemplateType\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: tests/Integration/Templates/TemplatesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\InvoicePayment'' and Justpilot\\Billomat\\Model\\InvoicePayment will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Model/InvoicePaymentTest.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTimeImmutable\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: tests/Model/InvoicePaymentTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Invoice'' and Justpilot\\Billomat\\Model\\Invoice will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/Model/InvoiceTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\InvoiceItem'' and Justpilot\\Billomat\\Model\\InvoiceItem will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Model/InvoiceTest.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTimeImmutable\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: tests/Model/InvoiceTest.php

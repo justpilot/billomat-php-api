@@ -4,29 +4,34 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration\Clients;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
+#[CoversNothing]
 final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
     #[Group('integration')]
-    public function test_can_update_client_in_sandbox(): void
+    #[Test]
+    public function canUpdateClientInSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
         // 1) Einen Client holen (oder Test überspringen, wenn keiner existiert)
         $clients = $billomat->clients->list(['per_page' => 1]);
 
-        if ($clients === []) {
+        if ([] === $clients) {
             $this->markTestSkipped('No clients available in sandbox to test update().');
         }
 
         /** @var Client $client */
         $client = $clients[0];
 
-        if ($client->id === null) {
+        if (null === $client->id) {
             $this->markTestSkipped('Client id missing in list response.');
         }
 
@@ -37,7 +42,7 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
         $originalNote = $client->note ?? null;
 
         // 3) Update durchführen (minimal-invasiv: note ändern)
-        $newNote = sprintf('SDK integration test update %s', new \DateTimeImmutable()->format('c'));
+        $newNote = \sprintf('SDK integration test update %s', new DateTimeImmutable()->format('c'));
 
         $opts = new ClientUpdateOptions();
         $opts->note = $newNote;
@@ -62,7 +67,7 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
         $reset->note = $originalNote;
 
         // Wenn originalNote null war, setzen wir leer-string, um den Effekt zu demonstrieren.
-        if ($originalNote === null) {
+        if (null === $originalNote) {
             $reset->note = '';
         }
 
@@ -74,7 +79,7 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
         self::assertInstanceOf(Client::class, $fetchedAfterReset);
         self::assertSame($id, $fetchedAfterReset->id);
 
-        if ($originalNote === null) {
+        if (null === $originalNote) {
             self::assertSame('', $fetchedAfterReset->note ?? '');
         } else {
             self::assertSame($originalNote, $fetchedAfterReset->note);

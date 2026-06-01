@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration;
 
-use Justpilot\Billomat\BillomatClient;
-use PHPUnit\Framework\TestCase;
 use Faker\Factory as FakerFactory;
 use Faker\Generator;
+use Justpilot\Billomat\BillomatClient;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\TestCase;
 
+#[CoversNothing]
 abstract class AbstractBillomatIntegrationTestCase extends TestCase
 {
     private ?Generator $faker = null;
@@ -37,7 +39,7 @@ abstract class AbstractBillomatIntegrationTestCase extends TestCase
      */
     protected function faker(): Generator
     {
-        if ($this->faker === null) {
+        if (!$this->faker instanceof Generator) {
             $this->faker = FakerFactory::create('de_DE');
         }
 

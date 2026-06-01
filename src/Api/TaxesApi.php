@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\TaxRate;
+use RuntimeException;
 
 /**
  * API-Wrapper für Steuersätze.
@@ -25,6 +26,7 @@ final class TaxesApi extends AbstractApi
      * Listet alle Steuersätze auf.
      *
      * @param array<string, scalar|array|null> $query (z.B. page, per_page)
+     *
      * @return list<TaxRate>
      */
     public function list(array $query = []): array
@@ -33,7 +35,7 @@ final class TaxesApi extends AbstractApi
 
         $taxesData = $data['taxes']['tax'] ?? [];
 
-        if ($taxesData === [] || $taxesData === null) {
+        if ([] === $taxesData || null === $taxesData) {
             return [];
         }
 
@@ -44,7 +46,7 @@ final class TaxesApi extends AbstractApi
 
         /** @var list<TaxRate> $taxes */
         $taxes = array_map(
-            static fn(array $row): TaxRate => TaxRate::fromArray($row),
+            TaxRate::fromArray(...),
             $taxesData
         );
 
@@ -61,14 +63,14 @@ final class TaxesApi extends AbstractApi
     {
         $data = $this->getJsonOrNull("/taxes/{$id}");
 
-        if ($data === null) {
+        if (null === $data) {
             return null;
         }
 
         $taxData = $data['tax'] ?? null;
 
         if (!\is_array($taxData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when fetching tax rate.');
+            throw new RuntimeException('Unexpected response from Billomat when fetching tax rate.');
         }
 
         return TaxRate::fromArray($taxData);
@@ -88,7 +90,7 @@ final class TaxesApi extends AbstractApi
         $taxData = $data['tax'] ?? null;
 
         if (!\is_array($taxData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when creating tax rate.');
+            throw new RuntimeException('Unexpected response from Billomat when creating tax rate.');
         }
 
         return TaxRate::fromArray($taxData);
@@ -110,7 +112,7 @@ final class TaxesApi extends AbstractApi
         $taxData = $data['tax'] ?? null;
 
         if (!\is_array($taxData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when updating tax rate.');
+            throw new RuntimeException('Unexpected response from Billomat when updating tax rate.');
         }
 
         return TaxRate::fromArray($taxData);

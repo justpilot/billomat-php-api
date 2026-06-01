@@ -12,6 +12,9 @@ use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Throwable;
+
+use const JSON_THROW_ON_ERROR;
 
 /**
  * Basis-Klasse für alle Billomat API-Wrapper.
@@ -25,23 +28,21 @@ abstract class AbstractApi
 {
     public function __construct(
         protected BillomatHttpClientInterface $http,
-    )
-    {
+    ) {
     }
 
     /**
      * Führt einen GET-Request aus und gibt den JSON-Body als Array zurück.
      *
      * @param array<string, scalar|array|null> $query
+     *
      * @return array<string,mixed>
      */
     protected function getJson(string $path, array $query = []): array
     {
         $response = $this->http->request('GET', $path, $query);
 
-        $decoded = $this->decodeJsonResponse($response);
-
-        return $decoded;
+        return $this->decodeJsonResponse($response);
     }
 
     /**
@@ -53,9 +54,8 @@ abstract class AbstractApi
     {
         try {
             $response = $this->http->request('GET', $path);
-            $decoded = $this->decodeJsonResponse($response);
 
-            return $decoded;
+            return $this->decodeJsonResponse($response);
         } catch (NotFoundException) {
             // gewolltes Verhalten: Ressource existiert nicht
             return null;
@@ -66,15 +66,14 @@ abstract class AbstractApi
      * Führt einen POST-Request mit JSON-Body aus und gibt den JSON-Body als Array zurück.
      *
      * @param array<string,mixed> $body
+     *
      * @return array<string,mixed>
      */
     protected function postJson(string $path, array $body): array
     {
         $response = $this->http->request('POST', $path, [], $body);
 
-        $decoded = $this->decodeJsonResponse($response);
-
-        return $decoded;
+        return $this->decodeJsonResponse($response);
     }
 
     /**
@@ -88,9 +87,7 @@ abstract class AbstractApi
     {
         $response = $this->http->request('PUT', $path, [], $body);
 
-        $decoded = $this->decodeJsonResponse($response);
-
-        return $decoded;
+        return $this->decodeJsonResponse($response);
     }
 
     protected function putEmptyResponse(string $path, array $body = []): ResponseInterface
@@ -135,27 +132,23 @@ abstract class AbstractApi
         $rawBody = null;
         try {
             $rawBody = $symfonyResponse->getContent(false);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // ignorieren
         }
 
-        $message = $e->getMessage() !== ''
+        $message = '' !== $e->getMessage()
             ? $e->getMessage()
-            : sprintf('HTTP error from Billomat (status %d)', $statusCode);
+            : \sprintf('HTTP error from Billomat (status %d)', $statusCode);
 
         // Grobes Mapping nach Status-Code
         return match (true) {
-            $statusCode === Response::HTTP_UNAUTHORIZED || $statusCode === Response::HTTP_FORBIDDEN =>
-            new AuthenticationException($message, $statusCode, $rawBody, $e),
+            Response::HTTP_UNAUTHORIZED === $statusCode || Response::HTTP_FORBIDDEN === $statusCode => new AuthenticationException($message, $statusCode, $rawBody, $e),
 
-            $statusCode === Response::HTTP_NOT_FOUND =>
-            new NotFoundException($message, $statusCode, $rawBody, $e),
+            Response::HTTP_NOT_FOUND === $statusCode => new NotFoundException($message, $statusCode, $rawBody, $e),
 
-            $statusCode === Response::HTTP_BAD_REQUEST || $statusCode === Response::HTTP_UNPROCESSABLE_ENTITY =>
-            new ValidationException($message, $statusCode, $rawBody, $e),
+            Response::HTTP_BAD_REQUEST === $statusCode || Response::HTTP_UNPROCESSABLE_ENTITY === $statusCode => new ValidationException($message, $statusCode, $rawBody, $e),
 
-            default =>
-            new BillomatHttpException($message, $statusCode, $rawBody, $e),
+            default => new BillomatHttpException($message, $statusCode, $rawBody, $e),
         };
     }
 

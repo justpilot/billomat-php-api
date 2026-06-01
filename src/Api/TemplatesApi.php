@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
+use RuntimeException;
 
 /**
  * API-Wrapper für Vorlagen (Templates).
@@ -21,6 +22,7 @@ final class TemplatesApi extends AbstractApi
      * Entspricht GET /templates
      *
      * @param array<string, scalar|array|null> $query
+     *
      * @return list<Template>
      */
     public function list(array $query = []): array
@@ -30,17 +32,17 @@ final class TemplatesApi extends AbstractApi
         $raw = $data['templates']['template'] ?? [];
 
         // Billomat kann bei 1 Element ein einzelnes Objekt liefern
-        if (is_array($raw) && isset($raw['id'])) {
+        if (\is_array($raw) && isset($raw['id'])) {
             $raw = [$raw];
         }
 
-        if (!is_array($raw)) {
+        if (!\is_array($raw)) {
             return [];
         }
 
         $templates = [];
         foreach ($raw as $row) {
-            if (is_array($row)) {
+            if (\is_array($row)) {
                 /** @var array<string,mixed> $row */
                 $templates[] = Template::fromArray($row);
             }
@@ -60,14 +62,14 @@ final class TemplatesApi extends AbstractApi
     {
         $data = $this->getJsonOrNull("/templates/{$id}");
 
-        if ($data === null) {
+        if (null === $data) {
             return null;
         }
 
         $tpl = $data['template'] ?? null;
 
-        if (!is_array($tpl)) {
-            throw new \RuntimeException('Unexpected response from Billomat when fetching template.');
+        if (!\is_array($tpl)) {
+            throw new RuntimeException('Unexpected response from Billomat when fetching template.');
         }
 
         /** @var array<string,mixed> $tpl */
@@ -89,8 +91,8 @@ final class TemplatesApi extends AbstractApi
 
         $tpl = $data['template'] ?? null;
 
-        if (!is_array($tpl)) {
-            throw new \RuntimeException('Unexpected response from Billomat when creating template.');
+        if (!\is_array($tpl)) {
+            throw new RuntimeException('Unexpected response from Billomat when creating template.');
         }
 
         /** @var array<string,mixed> $tpl */
@@ -112,8 +114,8 @@ final class TemplatesApi extends AbstractApi
 
         $tpl = $data['template'] ?? null;
 
-        if (!is_array($tpl)) {
-            throw new \RuntimeException('Unexpected response from Billomat when updating template.');
+        if (!\is_array($tpl)) {
+            throw new RuntimeException('Unexpected response from Billomat when updating template.');
         }
 
         /** @var array<string,mixed> $tpl */
@@ -128,6 +130,7 @@ final class TemplatesApi extends AbstractApi
     public function delete(int $id): bool
     {
         $this->deleteVoid("/templates/{$id}");
+
         return true;
     }
 

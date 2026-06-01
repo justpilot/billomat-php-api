@@ -26,7 +26,7 @@ enum InvoicePaymentType: string
 
     public static function fromApi(?string $type): ?self
     {
-        if ($type === null || $type === '') {
+        if (null === $type || '' === $type) {
             return null;
         }
 

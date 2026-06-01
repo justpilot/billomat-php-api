@@ -17,6 +17,6 @@ enum NumberRangeMode: string
 
     public static function fromApi(?string $value): ?self
     {
-        return $value !== null ? self::tryFrom($value) : null;
+        return null !== $value ? self::tryFrom($value) : null;
     }
 }

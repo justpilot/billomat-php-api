@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Settings;
+use RuntimeException;
 
 /**
  * API-Wrapper für Account-Einstellungen.
@@ -12,21 +13,21 @@ use Justpilot\Billomat\Model\Settings;
 final class SettingsApi extends AbstractApi
 {
     /**
-     * GET /settings
+     * GET /settings.
      */
     public function get(): Settings
     {
         $data = $this->getJson('/settings');
 
-        if (!isset($data['settings']) || !is_array($data['settings'])) {
-            throw new \RuntimeException('Unexpected response from Billomat when fetching settings.');
+        if (!isset($data['settings']) || !\is_array($data['settings'])) {
+            throw new RuntimeException('Unexpected response from Billomat when fetching settings.');
         }
 
         return Settings::fromArray($data['settings']);
     }
 
     /**
-     * PUT /settings
+     * PUT /settings.
      *
      * Aktualisiert Account-Einstellungen.
      */
@@ -38,8 +39,8 @@ final class SettingsApi extends AbstractApi
 
         $data = $this->putJson('/settings', $payload);
 
-        if (!isset($data['settings']) || !is_array($data['settings'])) {
-            throw new \RuntimeException('Unexpected response from Billomat when updating settings.');
+        if (!isset($data['settings']) || !\is_array($data['settings'])) {
+            throw new RuntimeException('Unexpected response from Billomat when updating settings.');
         }
 
         return Settings::fromArray($data['settings']);

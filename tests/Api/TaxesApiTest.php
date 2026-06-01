@@ -5,21 +5,29 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\TaxesApi;
+use Justpilot\Billomat\Api\TaxRateCreateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Model\Tax;
 use Justpilot\Billomat\Model\TaxRate;
-use Justpilot\Billomat\Api\TaxRateCreateOptions;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(TaxesApi::class)]
+#[CoversClass(Tax::class)]
 final class TaxesApiTest extends TestCase
 {
-    public function test_it_lists_tax_rates(): void
+    #[Test]
+    public function itListsTaxRates(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -72,7 +80,8 @@ final class TaxesApiTest extends TestCase
         );
     }
 
-    public function test_it_gets_single_tax_rate(): void
+    #[Test]
+    public function itGetsSingleTaxRate(): void
     {
         $mock = new MockHttpClient([
             new MockResponse(json_encode([
@@ -103,7 +112,8 @@ final class TaxesApiTest extends TestCase
         self::assertTrue($tax->isDefault);
     }
 
-    public function test_it_returns_null_when_tax_not_found(): void
+    #[Test]
+    public function itReturnsNullWhenTaxNotFound(): void
     {
         // 404 wird in getJsonOrNull() zu null gemappt
         $mock = new MockHttpClient([
@@ -123,11 +133,12 @@ final class TaxesApiTest extends TestCase
         self::assertNull($tax);
     }
 
-    public function test_it_creates_tax_rate(): void
+    #[Test]
+    public function itCreatesTaxRate(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -177,7 +188,7 @@ final class TaxesApiTest extends TestCase
         $optionsArray = $captured['options'] ?? [];
         $payload = $optionsArray['json'] ?? null;
 
-        if ($payload === null && isset($optionsArray['body']) && is_string($optionsArray['body'])) {
+        if (null === $payload && isset($optionsArray['body']) && \is_string($optionsArray['body'])) {
             $payload = json_decode($optionsArray['body'], true, flags: JSON_THROW_ON_ERROR);
         }
 
@@ -188,11 +199,12 @@ final class TaxesApiTest extends TestCase
         self::assertSame(0, $payload['tax']['is_default']);
     }
 
-    public function test_it_updates_tax_rate(): void
+    #[Test]
+    public function itUpdatesTaxRate(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -239,11 +251,12 @@ final class TaxesApiTest extends TestCase
         );
     }
 
-    public function test_it_deletes_tax_rate(): void
+    #[Test]
+    public function itDeletesTaxRate(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;

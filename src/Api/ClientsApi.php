@@ -8,6 +8,7 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
+use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -30,8 +31,8 @@ final class ClientsApi extends AbstractApi
 
         $clientData = $data['client'] ?? null;
 
-        if (!is_array($clientData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when fetching own account via /clients/myself.');
+        if (!\is_array($clientData)) {
+            throw new RuntimeException('Unexpected response from Billomat when fetching own account via /clients/myself.');
         }
 
         return Client::fromArray($clientData);
@@ -43,6 +44,7 @@ final class ClientsApi extends AbstractApi
      * Entspricht GET /clients
      *
      * @param array<string, scalar|array|null> $filters
+     *
      * @return list<Client>
      */
     public function list(array $filters = []): array
@@ -51,13 +53,13 @@ final class ClientsApi extends AbstractApi
 
         $clientsNode = $data['clients']['client'] ?? [];
 
-        if ($clientsNode === null || $clientsNode === []) {
+        if (null === $clientsNode || [] === $clientsNode) {
             return [];
         }
 
-        if (is_array($clientsNode) && array_is_list($clientsNode)) {
+        if (\is_array($clientsNode) && array_is_list($clientsNode)) {
             $rows = $clientsNode;
-        } elseif (is_array($clientsNode)) {
+        } elseif (\is_array($clientsNode)) {
             $rows = [$clientsNode];
         } else {
             $rows = [];
@@ -65,7 +67,7 @@ final class ClientsApi extends AbstractApi
 
         /** @var list<Client> $models */
         $models = array_map(
-            static fn(array $row): Client => Client::fromArray($row),
+            Client::fromArray(...),
             $rows
         );
 
@@ -81,13 +83,13 @@ final class ClientsApi extends AbstractApi
     {
         $data = $this->getJsonOrNull("/clients/{$id}");
 
-        if ($data === null) {
+        if (null === $data) {
             return null;
         }
 
         $clientData = $data['client'] ?? null;
 
-        if (!is_array($clientData)) {
+        if (!\is_array($clientData)) {
             return null;
         }
 
@@ -99,7 +101,7 @@ final class ClientsApi extends AbstractApi
      *
      * Entspricht POST /clients
      *
-     * @throws \RuntimeException Wenn die Response-Struktur unerwartet ist
+     * @throws RuntimeException Wenn die Response-Struktur unerwartet ist
      */
     public function create(ClientCreateOptions $options): Client
     {
@@ -111,8 +113,8 @@ final class ClientsApi extends AbstractApi
 
         $created = $data['client'] ?? null;
 
-        if (!is_array($created)) {
-            throw new \RuntimeException('Unexpected response from Billomat when creating client.');
+        if (!\is_array($created)) {
+            throw new RuntimeException('Unexpected response from Billomat when creating client.');
         }
 
         return Client::fromArray($created);
@@ -137,26 +139,22 @@ final class ClientsApi extends AbstractApi
      *   "client": { ... }
      * }
      *
-     * @param int $id
-     *   Die interne Billomat-ID des Kunden.
-     *
+     * @param int                 $id
+     *                                     Die interne Billomat-ID des Kunden
      * @param ClientUpdateOptions $options
-     *   Die zu ändernden Kundendaten. Nur gesetzte Felder werden übertragen.
+     *                                     Die zu ändernden Kundendaten. Nur gesetzte Felder werden übertragen.
      *
      * @return Client
-     *   Das aktualisierte Client-Objekt, wie von der Billomat-API zurückgegeben.
+     *                Das aktualisierte Client-Objekt, wie von der Billomat-API zurückgegeben
      *
      * @throws ValidationException
-     *   Bei ungültigen oder nicht erlaubten Änderungen (HTTP 400/422).
-     *
+     *                                 Bei ungültigen oder nicht erlaubten Änderungen (HTTP 400/422)
      * @throws AuthenticationException
-     *   Bei ungültigen API-Zugangsdaten (HTTP 401/403).
-     *
+     *                                 Bei ungültigen API-Zugangsdaten (HTTP 401/403)
      * @throws HttpException
-     *   Bei allen sonstigen HTTP-Fehlern.
-     *
-     * @throws \RuntimeException
-     *   Wenn die API ein unerwartetes oder unvollständiges Response-Format liefert.
+     *                                 Bei allen sonstigen HTTP-Fehlern
+     * @throws RuntimeException
+     *                                 Wenn die API ein unerwartetes oder unvollständiges Response-Format liefert
      */
     public function update(int $id, ClientUpdateOptions $options): Client
     {
@@ -169,8 +167,8 @@ final class ClientsApi extends AbstractApi
         /** @var array<string,mixed>|null $clientData */
         $clientData = $data['client'] ?? null;
 
-        if (!is_array($clientData)) {
-            throw new \RuntimeException('Unexpected response from Billomat when updating client.');
+        if (!\is_array($clientData)) {
+            throw new RuntimeException('Unexpected response from Billomat when updating client.');
         }
 
         return Client::fromArray($clientData);
@@ -186,11 +184,12 @@ final class ClientsApi extends AbstractApi
      * nur archiviert werden. In diesem Fall wirft Billomat 400/422 und die
      * SDK propagiert eine {@see ValidationException}.
      *
-     * @return bool true bei Erfolg.
+     * @return bool true bei Erfolg
      */
     public function delete(int $id): bool
     {
         $this->deleteVoid("/clients/{$id}");
+
         return true;
     }
 
@@ -202,11 +201,11 @@ final class ClientsApi extends AbstractApi
      * Billomat liefert hier kein JSON, sondern direkt das Bild
      * (i. d. R. PNG). Rückgabe ist der rohe Body-String.
      *
-     * @param int|null $size Optionale Kantenlänge in Pixel.
+     * @param int|null $size optionale Kantenlänge in Pixel
      */
     public function avatar(int $id, ?int $size = null): string
     {
-        $query = $size !== null ? ['size' => $size] : [];
+        $query = null !== $size ? ['size' => $size] : [];
 
         $response = $this->http->request('GET', "/clients/{$id}/avatar", $query);
 

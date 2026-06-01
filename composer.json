@@ -11,10 +11,18 @@
     "symfony/http-foundation": "^7.3 || ^8.0"
   },
   "require-dev": {
+    "fakerphp/faker": "^1.24",
+    "friendsofphp/php-cs-fixer": "^3.65",
+    "infection/infection": "^0.29",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^2.1",
+    "phpstan/phpstan-phpunit": "^2.0",
+    "phpstan/phpstan-strict-rules": "^2.0",
+    "phpstan/phpstan-symfony": "^2.0",
     "phpunit/phpunit": "^12.4",
+    "rector/rector": "^2.0",
     "symfony/dotenv": "^7.3 || ^8.0",
-    "symfony/var-dumper": "^7.3 || ^8.0",
-    "fakerphp/faker": "^1.24"
+    "symfony/var-dumper": "^7.3 || ^8.0"
   },
   "autoload": {
     "psr-4": {
@@ -31,5 +39,57 @@
       "name": "Dimitri Dovgan",
       "email": "dimitri@justpilot.io"
     }
-  ]
+  ],
+  "config": {
+    "allow-plugins": {
+      "infection/extension-installer": true,
+      "phpstan/extension-installer": true
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "test": "@test:unit",
+    "test:unit": "phpunit --testsuite=unit",
+    "test:integration": "phpunit --testsuite=integration",
+    "test:all": "phpunit",
+    "test:coverage": [
+      "Composer\\Config::disableProcessTimeout",
+      "@putenv XDEBUG_MODE=coverage",
+      "phpunit --coverage-html=build/coverage --coverage-clover=build/coverage.xml"
+    ],
+    "lint": "php-cs-fixer fix --dry-run --diff",
+    "lint:fix": "php-cs-fixer fix",
+    "analyse": "phpstan analyse --memory-limit=512M",
+    "analyse:baseline": "phpstan analyse --memory-limit=512M --generate-baseline",
+    "refactor": "rector process",
+    "refactor:dry": "rector process --dry-run",
+    "mutate": [
+      "Composer\\Config::disableProcessTimeout",
+      "@putenv XDEBUG_MODE=coverage",
+      "infection --threads=max"
+    ],
+    "ci": [
+      "@lint",
+      "@analyse",
+      "@refactor:dry",
+      "@test:all"
+    ],
+    "audit": "composer audit"
+  },
+  "scripts-descriptions": {
+    "test": "PHPUnit-Tests (Unit only, schnell)",
+    "test:unit": "Nur Unit-Tests (kein Netz-Zugriff)",
+    "test:integration": "Integrations-Tests gegen Billomat-Sandbox (benoetigt .env.test.local)",
+    "test:all": "Alle Tests inkl. Integration",
+    "test:coverage": "Tests + HTML/Clover-Coverage in build/",
+    "lint": "Code-Style pruefen (Dry-Run)",
+    "lint:fix": "Code-Style automatisch korrigieren",
+    "analyse": "PHPStan auf Level max",
+    "analyse:baseline": "PHPStan-Baseline regenerieren",
+    "refactor": "Rector-Regeln anwenden",
+    "refactor:dry": "Rector-Vorschlaege anzeigen ohne zu schreiben",
+    "mutate": "Infection Mutation-Tests ausfuehren",
+    "ci": "Vollstaendiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)",
+    "audit": "Sicherheits-Audit der Abhaengigkeiten"
+  }
 }

@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+        include:
+          - php: '8.5'
+            experimental: true
+    continue-on-error: ${{ matrix.experimental == true }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+          tools: composer:v2
+          ini-values: memory_limit=512M
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: Run unit tests
+        run: composer test:unit
+
+  quality:
+    name: Static Analysis & Style
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          ini-values: memory_limit=512M
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: PHP-CS-Fixer (lint)
+        run: composer lint
+
+      - name: PHPStan (analyse)
+        run: composer analyse
+
+      - name: Rector (dry-run)
+        run: composer refactor:dry
+
+      - name: Composer audit
+        run: composer audit
+
+  mutation:
+    name: Mutation Testing
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: xdebug
+          tools: composer:v2
+          ini-values: memory_limit=512M
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: Run Infection
+        run: composer mutate -- --logger-github
+        env:
+          INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}

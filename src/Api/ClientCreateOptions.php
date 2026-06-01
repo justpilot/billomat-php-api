@@ -510,6 +510,6 @@ final class ClientCreateOptions
         ];
 
         // Null-Felder entfernen
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn (string|bool|int|float|null $v): bool => null !== $v);
     }
 }

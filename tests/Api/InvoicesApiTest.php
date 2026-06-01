@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceEmailOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
@@ -17,17 +18,26 @@ use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoicePdf;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(InvoicesApi::class)]
+#[CoversClass(InvoiceCreateOptions::class)]
+#[CoversClass(InvoiceUpdateOptions::class)]
+#[CoversClass(Invoice::class)]
 final class InvoicesApiTest extends TestCase
 {
-    public function test_it_lists_invoices_and_passes_filters(): void
+    #[Test]
+    public function itListsInvoicesAndPassesFilters(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -104,14 +114,15 @@ final class InvoicesApiTest extends TestCase
             parse_str($parts['query'], $query);
         }
 
-        self::assertSame(50, (int)($query['per_page'] ?? 0));
+        self::assertSame(50, (int) ($query['per_page'] ?? 0));
     }
 
-    public function test_it_gets_single_invoice_by_id(): void
+    #[Test]
+    public function itGetsSingleInvoiceById(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -161,11 +172,12 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_it_creates_a_new_invoice_draft_via_post(): void
+    #[Test]
+    public function itCreatesANewInvoiceDraftViaPost(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -201,7 +213,7 @@ final class InvoicesApiTest extends TestCase
             clientId: 123,
         );
 
-        $opts->date = new \DateTimeImmutable('2025-03-01');
+        $opts->date = new DateTimeImmutable('2025-03-01');
         $opts->currencyCode = 'EUR';
         $opts->title = 'Rechnung März';
         $opts->label = 'Leistungen März 2025';
@@ -242,7 +254,7 @@ final class InvoicesApiTest extends TestCase
         $options = $captured['options'] ?? [];
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+        if (null === $payload && isset($options['body']) && \is_string($options['body'])) {
             $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
         }
 
@@ -280,11 +292,12 @@ final class InvoicesApiTest extends TestCase
         self::assertArrayNotHasKey('id', $invoicePayload);
     }
 
-    public function test_it_completes_invoice_via_put_and_optional_template_id(): void
+    #[Test]
+    public function itCompletesInvoiceViaPutAndOptionalTemplateId(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -321,7 +334,7 @@ final class InvoicesApiTest extends TestCase
         $payload = $options['json'] ?? null;
 
         // Fallback: falls aus irgendeinem Grund ein roher Body gesetzt wurde
-        if ($payload === null && isset($options['body']) && is_string($options['body'])) {
+        if (null === $payload && isset($options['body']) && \is_string($options['body'])) {
             $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
         }
 
@@ -333,11 +346,12 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_it_deletes_draft_invoice_via_delete(): void
+    #[Test]
+    public function itDeletesDraftInvoiceViaDelete(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -365,9 +379,10 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_delete_propagates_validation_exception_for_non_draft_invoice(): void
+    #[Test]
+    public function deletePropagatesValidationExceptionForNonDraftInvoice(): void
     {
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options): MockResponse {
             // Billomat meldet z.B. 400, wenn Rechnung nicht DRAFT ist
             $body = json_encode([
                 'errors' => [
@@ -391,12 +406,13 @@ final class InvoicesApiTest extends TestCase
         $api->delete(777);
     }
 
-    public function test_it_cancels_invoice(): void
+    #[Test]
+    public function itCancelsInvoice(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -417,12 +433,13 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_it_uncancels_invoice(): void
+    #[Test]
+    public function itUncancelsInvoice(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -443,11 +460,12 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_it_fetches_invoice_pdf_in_json_mode(): void
+    #[Test]
+    public function itFetchesInvoicePdfInJsonMode(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -484,7 +502,7 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('application/pdf', $pdf->mimeType);
         self::assertSame(70137, $pdf->fileSize);
 
-        self::assertInstanceOf(\DateTimeImmutable::class, $pdf->created);
+        self::assertInstanceOf(DateTimeImmutable::class, $pdf->created);
         self::assertSame(
             '2009-09-02T12:04:15+02:00',
             $pdf->created?->format('c')
@@ -502,11 +520,12 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_it_passes_type_query_parameter_for_pdf(): void
+    #[Test]
+    public function itPassesTypeQueryParameterForPdf(): void
     {
         $capturedUrl = null;
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$capturedUrl) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$capturedUrl): MockResponse {
             $capturedUrl = $url;
 
             $body = json_encode([
@@ -546,11 +565,12 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_it_can_fetch_raw_pdf_binary(): void
+    #[Test]
+    public function itCanFetchRawPdfBinary(): void
     {
         $capturedUrl = null;
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$capturedUrl) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$capturedUrl): MockResponse {
             $capturedUrl = $url;
 
             $binaryPdf = '%PDF-1.4 FAKE BINARY%';
@@ -595,11 +615,12 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_it_updates_invoice_draft_via_put(): void
+    #[Test]
+    public function itUpdatesInvoiceDraftViaPut(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -625,7 +646,7 @@ final class InvoicesApiTest extends TestCase
         $api = new InvoicesApi($http);
 
         $opts = new InvoiceUpdateOptions();
-        $opts->date = new \DateTimeImmutable('2025-03-10');
+        $opts->date = new DateTimeImmutable('2025-03-10');
 
         $updated = $api->update(777, $opts);
 
@@ -645,12 +666,12 @@ final class InvoicesApiTest extends TestCase
         // Payload robust extrahieren: Symfony kann json -> body normalisieren
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body'])) {
+        if (null === $payload && isset($options['body'])) {
             $body = $options['body'];
 
-            if (is_string($body) && $body !== '') {
+            if (\is_string($body) && '' !== $body) {
                 $payload = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
-            } elseif (is_array($body)) {
+            } elseif (\is_array($body)) {
                 // selten, aber möglich
                 $payload = $body;
             }
@@ -664,11 +685,11 @@ final class InvoicesApiTest extends TestCase
         $flat = [];
 
         foreach ($headers as $k => $v) {
-            if (is_int($k) && is_string($v) && str_contains($v, ':')) {
+            if (\is_int($k) && \is_string($v) && str_contains($v, ':')) {
                 [$hn, $hv] = explode(':', $v, 2);
                 $flat[strtolower(trim($hn))] = trim($hv);
-            } elseif (is_string($k)) {
-                $flat[strtolower($k)] = is_array($v) ? implode(', ', $v) : (string)$v;
+            } elseif (\is_string($k)) {
+                $flat[strtolower($k)] = \is_array($v) ? implode(', ', $v) : (string) $v;
             }
         }
 
@@ -678,12 +699,13 @@ final class InvoicesApiTest extends TestCase
         }
     }
 
-    public function test_it_emails_invoice_with_recipients_and_subject(): void
+    #[Test]
+    public function itEmailsInvoiceWithRecipientsAndSubject(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             // Billomat antwortet i. d. R. mit leerem Body oder Bestätigungsobjekt
             return new MockResponse('{"@status":"OK"}', ['http_code' => 200]);
@@ -715,7 +737,7 @@ final class InvoicesApiTest extends TestCase
             $captured['url']
         );
 
-        $payload = self::extractJsonPayload($captured['options']);
+        $payload = $this->extractJsonPayload($captured['options']);
         self::assertIsArray($payload);
         self::assertArrayHasKey('email', $payload);
 
@@ -735,12 +757,13 @@ final class InvoicesApiTest extends TestCase
         ], $email['attachments']['attachment']);
     }
 
-    public function test_email_without_options_sends_empty_envelope_to_use_defaults(): void
+    #[Test]
+    public function emailWithoutOptionsSendsEmptyEnvelopeToUseDefaults(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
@@ -756,17 +779,18 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoices/123/email', $captured['url']);
 
-        $payload = self::extractJsonPayload($captured['options']);
+        $payload = $this->extractJsonPayload($captured['options']);
         self::assertIsArray($payload);
         self::assertSame(['email' => []], $payload);
     }
 
-    public function test_it_sends_invoice_via_pixelletter_mail(): void
+    #[Test]
+    public function itSendsInvoiceViaPixelletterMail(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
@@ -788,7 +812,7 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoices/888/mail', $captured['url']);
 
-        $payload = self::extractJsonPayload($captured['options']);
+        $payload = $this->extractJsonPayload($captured['options']);
         self::assertIsArray($payload);
         self::assertArrayHasKey('mail', $payload);
         self::assertSame(1, $payload['mail']['color']);
@@ -797,12 +821,13 @@ final class InvoicesApiTest extends TestCase
         self::assertSame("Beispiel GmbH\nMusterstr. 1\n12345 Berlin", $payload['mail']['recipient_address']);
     }
 
-    public function test_it_uploads_signature_pdf(): void
+    #[Test]
+    public function itUploadsSignaturePdf(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -822,17 +847,18 @@ final class InvoicesApiTest extends TestCase
             $captured['url']
         );
 
-        $payload = self::extractJsonPayload($captured['options']);
+        $payload = $this->extractJsonPayload($captured['options']);
         self::assertIsArray($payload);
         self::assertSame(['upload' => ['base64file' => $base64]], $payload);
     }
 
-    public function test_it_sends_invoice_to_encashment(): void
+    #[Test]
+    public function itSendsInvoiceToEncashment(): void
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
-            $captured = compact('method', 'url', 'options');
+        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
+            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -852,7 +878,8 @@ final class InvoicesApiTest extends TestCase
         );
     }
 
-    public function test_update_options_serializes_all_new_fields(): void
+    #[Test]
+    public function updateOptionsSerializesAllNewFields(): void
     {
         $opts = new InvoiceUpdateOptions();
 
@@ -864,7 +891,7 @@ final class InvoicesApiTest extends TestCase
         $opts->numberLength = 5;
         $opts->discountRate = 2.0;
         $opts->discountDays = 7;
-        $opts->discountDate = new \DateTimeImmutable('2026-01-22');
+        $opts->discountDate = new DateTimeImmutable('2026-01-22');
         $opts->offerId = 1001;
         $opts->confirmationId = 2002;
         $opts->recurringId = 3003;
@@ -899,20 +926,21 @@ final class InvoicesApiTest extends TestCase
      * in dieser Test-Datei (z. B. test_it_completes_invoice_...).
      *
      * @param array<string,mixed> $options
+     *
      * @return array<string,mixed>|null
      */
-    private static function extractJsonPayload(array $options): ?array
+    private function extractJsonPayload(array $options): ?array
     {
         $payload = $options['json'] ?? null;
 
-        if ($payload === null && isset($options['body']) && is_string($options['body']) && $options['body'] !== '') {
+        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
             $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
 
-            if (is_array($decoded)) {
+            if (\is_array($decoded)) {
                 return $decoded;
             }
         }
 
-        return is_array($payload) ? $payload : null;
+        return \is_array($payload) ? $payload : null;
     }
 }

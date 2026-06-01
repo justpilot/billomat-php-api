@@ -7,12 +7,16 @@ namespace Justpilot\Billomat\Tests\Integration\Clients;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 
+#[CoversNothing]
 final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegrationTestCase
 {
-    #[Group("integration")]
-    public function test_can_create_client_in_sandbox(): void
+    #[Group('integration')]
+    #[Test]
+    public function canCreateClientInSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
@@ -38,7 +42,7 @@ final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegration
         self::assertGreaterThan(0, $created->id);
         self::assertSame($options->name, $created->name);
 
-        if ($created->email !== null) {
+        if (null !== $created->email) {
             self::assertSame($options->email, $created->email);
         }
     }

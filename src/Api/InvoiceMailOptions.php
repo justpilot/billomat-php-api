@@ -52,12 +52,12 @@ final class InvoiceMailOptions
     public function toArray(): array
     {
         $data = [
-            'color' => $this->color === null ? null : ($this->color ? 1 : 0),
-            'duplex' => $this->duplex === null ? null : ($this->duplex ? 1 : 0),
+            'color' => null === $this->color ? null : ($this->color ? 1 : 0),
+            'duplex' => null === $this->duplex ? null : ($this->duplex ? 1 : 0),
             'paper_weight' => $this->paperWeight,
             'recipient_address' => $this->recipientAddress,
         ];
 
-        return array_filter($data, static fn($v) => $v !== null);
+        return array_filter($data, static fn (string|int|null $v): bool => null !== $v);
     }
 }

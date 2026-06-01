@@ -2,7 +2,7 @@
   "name": "justpilot/billomat-php-api",
   "description": "Unofficial PHP 8.4+ SDK for the Billomat API, powered by Symfony components.",
   "type": "library",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "require": {
     "php": "^8.4",
     "symfony/http-client": "^7.3 || ^8.0",

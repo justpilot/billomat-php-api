@@ -9,7 +9,7 @@
 > Es wird unabhängig entwickelt und gepflegt.
 
 [![PHP Version](https://img.shields.io/badge/PHP-8.4%2B-8892BF.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)]()
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-PHPUnit-blue.svg)]()
 
 Dieses Paket bietet ein modernes, typisiertes und erweiterbares PHP-SDK zur Arbeit mit der  

@@ -8,7 +8,7 @@ Danke, dass du zu `justpilot/billomat-php-api` beitragen möchtest. Dieses Dokum
 2. Forke das Repository und erzeuge einen Feature-Branch mit sprechendem Namen, z. B. `feature/add-articles-resource` oder `fix/payment-list-pagination`.
 3. Halte Commits klein und thematisch fokussiert. Englische Commit-Messages im Imperativ („Add articles list endpoint“).
 4. Reiche einen Pull Request gegen `main` ein und beschreibe das Warum (nicht nur das Was). Verweise im PR-Text auf das Issue.
-5. Lokale Test-Suite muss grün sein, bevor Review angefordert wird.
+5. Lokale Qualitätspipeline (`composer ci`) muss grün sein, bevor Review angefordert wird.
 
 ## Coding-Standards
 
@@ -42,17 +42,41 @@ Jede Billomat-Ressource folgt demselben Muster — orientiere dich für eine neu
 
 - Unit-Tests verwenden `Symfony\Component\HttpClient\MockHttpClient` mit `MockResponse`. Sie konstruieren `BillomatConfig`, dann `BillomatHttpClient`, dann die `*Api`-Klasse direkt — `BillomatHttpClient` selbst wird nicht gemockt.
 - Asserts sollten sowohl das hydratisierte Modell als auch den abgesetzten Request (Methode, URL, Header, Payload) prüfen.
-- Integrationstests gehören unter `tests/Integration/` und verwenden `AbstractBillomatIntegrationTestCase::createBillomatClientOrSkip()`. Sie müssen `markTestSkipped()` aufrufen, wenn `BILLOMAT_ID`/`BILLOMAT_API_KEY` fehlen, damit die Suite ohne Credentials weiterhin grün läuft.
-- Annotiere Integrationstests mit `@group integration`.
+- **PHPUnit-12-Attribut-Stil:** `#[Test]` auf jeder Test-Methode (kein `test_`-Präfix), `#[CoversClass(Foo::class)]` auf der Klasse (mehrfach, falls mehrere SUTs), statische Assertions (`self::assertX()`).
+- Integrationstests gehören unter `tests/Integration/`, erben von `AbstractBillomatIntegrationTestCase` und verwenden `createBillomatClientOrSkip()`. Sie müssen `markTestSkipped()` aufrufen, wenn `BILLOMAT_ID`/`BILLOMAT_API_KEY` fehlen.
+- Integrationstests tragen `#[CoversNothing]` auf Klassenebene und `#[Group('integration')]` auf der Methode.
 
-Tests ausführen:
+Tests und Qualitäts-Pipeline ausführen:
 
 ```bash
-vendor/bin/phpunit                                    # alle Tests
+composer test                                         # Unit-Tests (schnell)
+composer test:integration                             # nur Integrationstests
+composer test:all                                     # alle Tests
+composer ci                                           # Lint + Analyse + Rector-Dry + Tests
 vendor/bin/phpunit tests/Api/ClientsApiTest.php       # einzelne Datei
-vendor/bin/phpunit --filter test_it_lists_clients     # einzelne Methode
-vendor/bin/phpunit tests/Integration                  # nur Integration
+vendor/bin/phpunit --filter it_lists_clients          # einzelne Methode
 ```
+
+Detaillierte Test-Doku unter [docs/testing.md](docs/testing.md).
+
+## Qualität: PHPStan, CS-Fixer, Rector, Infection
+
+Alle Werkzeuge laufen über Composer-Skripte:
+
+```bash
+composer lint           # PHP-CS-Fixer (Dry-Run, zeigt Diff)
+composer lint:fix       # PHP-CS-Fixer anwenden
+composer analyse        # PHPStan Level max (mit phpstan-baseline.neon)
+composer analyse:baseline   # Baseline regenerieren
+composer refactor:dry   # Rector Vorschläge
+composer refactor       # Rector anwenden
+composer mutate         # Infection Mutation Testing
+composer audit          # Sicherheits-Audit der Abhängigkeiten
+```
+
+**PHPStan-Baseline:** `phpstan-baseline.neon` friert bestehende Findings ein. Neue Findings führen zu CI-Fail. Wer bestehende Findings behebt, regeneriert die Baseline mit `composer analyse:baseline` und committet das Ergebnis.
+
+**Rector + CS-Fixer Konflikte:** Sollte CS-Fixer eine Rector-Änderung wieder zurückdrehen oder umgekehrt, ist das ein Konfigurationsfehler. Bitte als Issue melden statt Workarounds einzuchecken.
 
 ## Was nicht ohne Absprache
 
@@ -66,9 +90,10 @@ Trage relevante Änderungen unter einem `[Unreleased]`-Abschnitt in `CHANGELOG.m
 
 ## PR-Checkliste
 
-- [ ] `vendor/bin/phpunit` läuft lokal grün
-- [ ] Unit-Tests für neuen Code vorhanden
+- [ ] `composer ci` läuft lokal grün (Lint + PHPStan + Rector-Dry + Tests)
+- [ ] Unit-Tests für neuen Code vorhanden (mit `#[Test]` und `#[CoversClass]`)
 - [ ] Bei neuen Ressourcen: Dokumentation unter `docs/resources/` plus README-Eintrag
 - [ ] `CHANGELOG.md` aktualisiert
 - [ ] Kommentare auf Deutsch, Identifier auf Englisch
 - [ ] Keine Breaking Changes ohne Absprache
+- [ ] Keine neuen `phpstan-baseline.neon`-Einträge ohne Rückfrage (lieber Findings beheben)

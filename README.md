@@ -3,7 +3,8 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.4%2B-8892BF.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Packagist](https://img.shields.io/badge/packagist-justpilot%2Fbillomat--php--api-orange.svg)](https://packagist.org/packages/justpilot/billomat-php-api)
-[![Tests](https://img.shields.io/badge/tests-PHPUnit-blue.svg)](https://phpunit.de/)
+[![Tests](https://img.shields.io/badge/tests-PHPUnit_12-blue.svg)](https://phpunit.de/)
+[![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
 
 Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.com/api/) — basiert auf Symfony-Komponenten, mit Read-Modellen, getrennten Write-Optionen und einer sauberen Exception-Hierarchie.
 
@@ -153,10 +154,12 @@ Beispiele und Patterns: [docs/error-handling.md](docs/error-handling.md).
 
 ```bash
 composer install
-vendor/bin/phpunit
+composer test            # Unit-Tests (schnell, ohne Netz)
+composer test:all        # inkl. Integration gegen Sandbox (mit .env.test.local)
+composer ci              # vollständige Qualitätspipeline: Lint + PHPStan + Rector + Tests
 ```
 
-Die Suite läuft mit `MockHttpClient` und benötigt keine Credentials. Integrationstests unter `tests/Integration/` werden übersprungen, solange `BILLOMAT_ID` und `BILLOMAT_API_KEY` nicht gesetzt sind. Mehr dazu in [docs/testing.md](docs/testing.md).
+Die Unit-Suite läuft mit `MockHttpClient` und benötigt keine Credentials. Integrationstests unter `tests/Integration/` werden übersprungen, solange `BILLOMAT_ID` und `BILLOMAT_API_KEY` nicht gesetzt sind. Mehr dazu in [docs/testing.md](docs/testing.md).
 
 ## Beispiele
 

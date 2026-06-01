@@ -27,14 +27,7 @@ Die PHPUnit-Konfiguration steht in `phpunit.xml.dist`. Strikte Flags sind aktiv:
 
 `tests/bootstrap.php` lädt zwei Dateien per `symfony/dotenv`:
 
-1. `.env.test` — eingechecktes Template mit leeren Werten als Dokumentation der erwarteten Umgebungsvariablen:
-
-   ```text
-   BILLOMAT_ID=
-   BILLOMAT_API_KEY=
-   BILLOMAT_APP_ID=
-   BILLOMAT_APP_SECRET=
-   ```
+1. `.env.test` — eingechecktes Template mit leeren Werten und Inline-Kommentaren, die jede erwartete Umgebungsvariable dokumentieren (Pflicht vs. optional, Verwendung im HTTP-Header).
 
 2. `.env.test.local` — überschreibt `.env.test` mit echten Sandbox-Credentials. Diese Datei ist in `.gitignore` aufgeführt und darf niemals committet werden.
 

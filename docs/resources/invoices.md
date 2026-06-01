@@ -34,6 +34,7 @@ Konsequenzen für die API:
 | Methode | HTTP | Pfad |
 |---|---|---|
 | `list()` | GET | `/invoices` |
+| `listGrouped($groupBy, $filters?)` | GET | `/invoices?group_by=…` |
 | `get($id)` | GET | `/invoices/{id}` |
 | `create($options)` | POST | `/invoices` |
 | `update($id, $options)` | PUT | `/invoices/{id}` |
@@ -42,6 +43,8 @@ Konsequenzen für die API:
 | `cancel($id)` | PUT | `/invoices/{id}/cancel` |
 | `uncancel($id)` | PUT | `/invoices/{id}/uncancel` |
 | `pdf($id, $type?, $rawPdf=false)` | GET | `/invoices/{id}/pdf` |
+
+Verwandte Ressourcen mit eigener Doku: [Positionen](invoice-items.md), [Zahlungen](invoice-payments.md), [Kommentare](invoice-comments.md), [Schlagworte](invoice-tags.md), [Abo-Rechnungen](recurrings.md).
 
 ## Methoden
 
@@ -56,6 +59,42 @@ $invoices = $billomat->invoices->list([
 ```
 
 Filter siehe Billomat-Doku (`client_id`, `status`, `from`, `to`, `label`, `intro`, `note`, `order_by`, `per_page` …). Array-Werte werden korrekt als `key[]=…` codiert.
+
+### `listGrouped(InvoiceGroupBy|array $groupBy, array $filters = []): list<InvoiceGroup>`
+
+Aggregiertes Listing über `?group_by=…`. Statt einzelner Rechnungen liefert Billomat Summen-Zeilen — eine pro Gruppe.
+
+```php
+use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
+
+// Umsatz pro Kunde
+$byClient = $billomat->invoices->listGrouped(InvoiceGroupBy::CLIENT);
+foreach ($byClient as $group) {
+    printf("Kunde %d: %.2f EUR brutto\n", $group->clientId, $group->totalGross);
+}
+
+// Mehrere Achsen kombinieren — Reihenfolge bestimmt die Aggregation:
+//   "client,year" → zuerst nach Kunde, dann nach Jahr.
+$byClientYear = $billomat->invoices->listGrouped([
+    InvoiceGroupBy::CLIENT,
+    InvoiceGroupBy::YEAR,
+]);
+
+// Drill-down auf eine konkrete Gruppe — Billomat liefert das passende
+// Filterset in $group->invoiceParams gleich mit.
+$first = $byClient[0];
+$detail = $billomat->invoices->list($first->invoiceParams);
+```
+
+Welche Felder im `InvoiceGroup` gefüllt sind, hängt vom `group_by`-Parameter ab:
+
+| `group_by` | Gefülltes Identifier-Feld |
+|---|---|
+| `client` | `clientId` |
+| `status` | `status` |
+| `day` / `week` / `month` / `year` | `day` / `week` / `month` / `year` (jeweils `?string`) |
+
+`totalGross` und `totalNet` enthalten die Aggregat-Summen.
 
 ### `get(int $id): ?Invoice`
 
@@ -260,6 +299,7 @@ Schmaler Subset für Partial-Updates. Felder, die nicht gesetzt werden, bleiben 
 
 - [`InvoiceStatus`](../../src/Model/Enum/InvoiceStatus.php): `DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`. Hat `label(): string` für UI-Labels (z. B. „Bezahlt“).
 - [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`).
+- [`InvoiceGroupBy`](../../src/Model/Enum/InvoiceGroupBy.php): `CLIENT`, `STATUS`, `DAY`, `WEEK`, `MONTH`, `YEAR` — Aggregationsachsen für `listGrouped()`.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 - [`SupplyDateType`](../../src/Model/Enum/SupplyDateType.php): `SUPPLY_DATE`, `DELIVERY_DATE`, `SUPPLY_TEXT`, `DELIVERY_TEXT`.
 

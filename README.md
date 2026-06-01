@@ -99,6 +99,9 @@ Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zu
 | Rechnungen | `$billomat->invoices` | `/invoices`, `/invoices/{id}/complete`, `/invoices/{id}/cancel`, `/invoices/{id}/pdf` | [docs/resources/invoices.md](docs/resources/invoices.md) |
 | Rechnungspositionen | `$billomat->invoiceItems` | `/invoice-items` | [docs/resources/invoice-items.md](docs/resources/invoice-items.md) |
 | Zahlungen | `$billomat->invoicePayments` | `/invoice-payments` | [docs/resources/invoice-payments.md](docs/resources/invoice-payments.md) |
+| Kommentare | `$billomat->invoiceComments` | `/invoice-comments` | [docs/resources/invoice-comments.md](docs/resources/invoice-comments.md) |
+| Schlagworte | `$billomat->invoiceTags` | `/invoice-tags` | [docs/resources/invoice-tags.md](docs/resources/invoice-tags.md) |
+| Abo-Rechnungen | `$billomat->recurrings` | `/recurrings`, `/recurring-items`, `/recurring-tags`, `/recurring-email-receivers` | [docs/resources/recurrings.md](docs/resources/recurrings.md) |
 | Steuersätze | `$billomat->taxes` | `/taxes` | [docs/resources/taxes.md](docs/resources/taxes.md) |
 | Vorlagen | `$billomat->templates` | `/templates`, `/templates/{id}/thumb` | [docs/resources/templates.md](docs/resources/templates.md) |
 | Einstellungen | `$billomat->settings` | `/settings` | [docs/resources/settings.md](docs/resources/settings.md) |

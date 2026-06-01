@@ -73,8 +73,7 @@
       "@analyse",
       "@refactor:dry",
       "@test:all"
-    ],
-    "audit": "composer audit"
+    ]
   },
   "scripts-descriptions": {
     "test": "PHPUnit-Tests (Unit only, schnell)",
@@ -89,7 +88,6 @@
     "refactor": "Rector-Regeln anwenden",
     "refactor:dry": "Rector-Vorschlaege anzeigen ohne zu schreiben",
     "mutate": "Infection Mutation-Tests ausfuehren",
-    "ci": "Vollstaendiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)",
-    "audit": "Sicherheits-Audit der Abhaengigkeiten"
+    "ci": "Vollstaendiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)"
   }
 }

@@ -14,6 +14,8 @@ use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Integrationstests für die in den Konformitäts-Fixes ergänzten Invoice-Aktionen:
@@ -34,6 +36,7 @@ use PHPUnit\Framework\Attributes\Group;
  *   BILLOMAT_TEST_MAIL=1                   ⚠ Pixelletter-Versand wird ausgelöst
  *   BILLOMAT_TEST_ENCASH=1                 ⚠ Forderung wird ans Inkasso übergeben
  */
+#[CoversNothing]
 final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
     /**
@@ -80,7 +83,8 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     }
 
     #[Group('integration')]
-    public function test_can_email_invoice_in_sandbox_when_explicitly_enabled(): void
+    #[Test]
+    public function can_email_invoice_in_sandbox_when_explicitly_enabled(): void
     {
         // Doppelte Sicherheitsbremse: nur wenn EXPLIZIT aktiviert UND ein
         // Empfänger gesetzt ist (der i. d. R. der/die User:in selbst ist).
@@ -114,7 +118,8 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     }
 
     #[Group('integration')]
-    public function test_can_upload_signature_in_sandbox_when_explicitly_enabled(): void
+    #[Test]
+    public function can_upload_signature_in_sandbox_when_explicitly_enabled(): void
     {
         if (getenv('BILLOMAT_TEST_UPLOAD_SIGNATURE') !== '1') {
             $this->markTestSkipped(
@@ -149,7 +154,8 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     }
 
     #[Group('integration')]
-    public function test_can_send_invoice_via_pixelletter_when_explicitly_enabled(): void
+    #[Test]
+    public function can_send_invoice_via_pixelletter_when_explicitly_enabled(): void
     {
         if (getenv('BILLOMAT_TEST_MAIL') !== '1') {
             $this->markTestSkipped(
@@ -173,7 +179,8 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     }
 
     #[Group('integration')]
-    public function test_can_send_invoice_to_encash_when_explicitly_enabled(): void
+    #[Test]
+    public function can_send_invoice_to_encash_when_explicitly_enabled(): void
     {
         if (getenv('BILLOMAT_TEST_ENCASH') !== '1') {
             $this->markTestSkipped(

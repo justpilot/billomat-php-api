@@ -13,6 +13,8 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Integrationstests für Aktionen, die in den Konformitäts-Fixes ergänzt wurden:
@@ -22,10 +24,12 @@ use PHPUnit\Framework\Attributes\Group;
  * Beide Aktionen verursachen keine Kosten und keine externen Nebenwirkungen,
  * deshalb laufen sie ohne zusätzliches Opt-in (sofern Sandbox-Credentials gesetzt sind).
  */
+#[CoversNothing]
 final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTestCase
 {
     #[Group('integration')]
-    public function test_can_delete_freshly_created_client_in_sandbox(): void
+    #[Test]
+    public function can_delete_freshly_created_client_in_sandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
@@ -63,7 +67,8 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
     }
 
     #[Group('integration')]
-    public function test_can_fetch_client_avatar_from_sandbox(): void
+    #[Test]
+    public function can_fetch_client_avatar_from_sandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 
@@ -99,7 +104,8 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
     }
 
     #[Group('integration')]
-    public function test_can_fetch_client_avatar_with_size_query(): void
+    #[Test]
+    public function can_fetch_client_avatar_with_size_query(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
 

@@ -39,3 +39,7 @@ Thumbs.db
 
 # graphify knowledge graph (local-only, auto-generated)
 /graphify-out/
+
+# Claude Code local config (user-specific hooks/permissions/credentials)
+.claude/settings.local.json
+.claude/.credentials.json

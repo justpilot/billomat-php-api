@@ -417,4 +417,49 @@ final class InvoiceItemsApiTest extends TestCase
             $captured['url']
         );
     }
+
+    #[Test]
+    public function listByInvoiceNormalisesSingleObjectIntoList(): void
+    {
+        // Billomat liefert bei genau einer Position oft direkt ein Objekt statt einer Liste
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode([
+                'invoice-items' => [
+                    'invoice-item' => [
+                        'id' => 1,
+                        'invoice_id' => 99,
+                        'quantity' => 1,
+                        'unit_price' => 10,
+                    ],
+                ],
+            ], JSON_THROW_ON_ERROR),
+            ['http_code' => 200],
+        ));
+
+        $api = new InvoiceItemsApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig(billomatId: 'x', apiKey: 'k'),
+        ));
+
+        $items = $api->listByInvoice(99);
+
+        self::assertCount(1, $items);
+        self::assertSame(1, $items[0]->id);
+    }
+
+    #[Test]
+    public function listByInvoiceReturnsEmptyListWhenNodeMissing(): void
+    {
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['invoice-items' => []], JSON_THROW_ON_ERROR),
+            ['http_code' => 200],
+        ));
+
+        $api = new InvoiceItemsApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig(billomatId: 'x', apiKey: 'k'),
+        ));
+
+        self::assertSame([], $api->listByInvoice(99));
+    }
 }

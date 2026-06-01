@@ -1249,6 +1249,90 @@ parameters:
 			path: tests/Api/InvoicesApiTest.php
 
 		-
+			message: '#^Cannot access offset ''quantity'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceCreateOptionsTest.php
+
+		-
+			message: '#^Cannot access offset ''title'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceCreateOptionsTest.php
+
+		-
+			message: '#^Cannot access offset ''type'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceCreateOptionsTest.php
+
+		-
+			message: '#^Cannot access offset ''unit_price'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceCreateOptionsTest.php
+
+		-
+			message: '#^Cannot access offset 0 on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceCreateOptionsTest.php
+
+		-
+			message: '#^Parameter \#2 \$array of static method PHPUnit\\Framework\\Assert\:\:assertArrayHasKey\(\) expects array\<mixed\>\|ArrayAccess\<\(int\|string\), mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/Options/InvoiceCreateOptionsTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of static method PHPUnit\\Framework\\Assert\:\:assertCount\(\) expects Countable\|iterable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/Options/InvoiceCreateOptionsTest.php
+
+		-
+			message: '#^Cannot access offset ''attachment'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: tests/Api/Options/InvoiceEmailOptionsTest.php
+
+		-
+			message: '#^Cannot access offset ''base64file'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceEmailOptionsTest.php
+
+		-
+			message: '#^Cannot access offset ''filename'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceEmailOptionsTest.php
+
+		-
+			message: '#^Cannot access offset ''mimetype'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/Options/InvoiceEmailOptionsTest.php
+
+		-
+			message: '#^Cannot access offset 0 on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: tests/Api/Options/InvoiceEmailOptionsTest.php
+
+		-
+			message: '#^Parameter \#2 \$array of static method PHPUnit\\Framework\\Assert\:\:assertArrayHasKey\(\) expects array\<mixed\>\|ArrayAccess\<\(int\|string\), mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/Options/InvoiceEmailOptionsTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of static method PHPUnit\\Framework\\Assert\:\:assertCount\(\) expects Countable\|iterable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/Options/InvoiceEmailOptionsTest.php
+
+		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Settings'' and Justpilot\\Billomat\\Model\\Settings will always evaluate to true\.$#'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 2
@@ -1307,6 +1391,48 @@ parameters:
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1
 			path: tests/BillomatClientTest.php
+
+		-
+			message: '#^Cannot access offset ''body'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Http/BillomatHttpClientQueryTest.php
+
+		-
+			message: '#^Cannot access offset ''headers'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: tests/Http/BillomatHttpClientQueryTest.php
+
+		-
+			message: '#^Cannot access offset ''timeout'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Http/BillomatHttpClientQueryTest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: tests/Http/BillomatHttpClientQueryTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Http\\BillomatHttpClientQueryTest\:\:queryStringProvider\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Http/BillomatHttpClientQueryTest.php
+
+		-
+			message: '#^Parameter \#1 \$rawHeaders of method Justpilot\\Billomat\\Tests\\Http\\BillomatHttpClientQueryTest\:\:normaliseHeaders\(\) expects array\<int\|string, mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: tests/Http/BillomatHttpClientQueryTest.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Http/BillomatHttpClientQueryTest.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
@@ -1547,6 +1673,18 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: tests/Integration/Templates/TemplatesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertSame\(\) with array\{Justpilot\\Billomat\\Model\\Enum\\InvoiceItemType\:\:PRODUCT, Justpilot\\Billomat\\Model\\Enum\\InvoiceItemType\:\:SERVICE\} and array\{Justpilot\\Billomat\\Model\\Enum\\InvoiceItemType\:\:PRODUCT, Justpilot\\Billomat\\Model\\Enum\\InvoiceItemType\:\:SERVICE\} will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Model/Enum/InvoiceItemTypeTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertSame\(\) with array\{Justpilot\\Billomat\\Model\\Enum\\TemplateEngine\:\:DEFAULT\} and array\{Justpilot\\Billomat\\Model\\Enum\\TemplateEngine\:\:DEFAULT\} will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Model/Enum/TemplateEngineTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\InvoicePayment'' and Justpilot\\Billomat\\Model\\InvoicePayment will always evaluate to true\.$#'

@@ -240,4 +240,44 @@ final class TemplatesApiTest extends TestCase
         self::assertSame('GET', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/templates/7/thumb?format=png', $captured['url']);
     }
+
+    #[Test]
+    public function listNormalisesSingleObjectIntoList(): void
+    {
+        // Billomat liefert bei genau einer Vorlage oft direkt ein Objekt statt einer Liste
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode([
+                'templates' => [
+                    'template' => [
+                        'id' => 42,
+                        'type' => 'INVOICE',
+                        'template_type' => 'DEFINED',
+                        'name' => 'Standard',
+                    ],
+                ],
+            ], JSON_THROW_ON_ERROR),
+            ['http_code' => 200],
+        ));
+
+        $api = new TemplatesApi(new BillomatHttpClient($mock, new BillomatConfig('x', 'k')));
+
+        $templates = $api->list();
+
+        self::assertCount(1, $templates);
+        self::assertSame(42, $templates[0]->id);
+        self::assertSame('Standard', $templates[0]->name);
+    }
+
+    #[Test]
+    public function listReturnsEmptyListWhenNodeMissing(): void
+    {
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['templates' => []], JSON_THROW_ON_ERROR),
+            ['http_code' => 200],
+        ));
+
+        $api = new TemplatesApi(new BillomatHttpClient($mock, new BillomatConfig('x', 'k')));
+
+        self::assertSame([], $api->list());
+    }
 }

@@ -281,4 +281,50 @@ final class TaxesApiTest extends TestCase
             $captured['url']
         );
     }
+
+    #[Test]
+    public function listNormalisesSingleObjectIntoList(): void
+    {
+        // Billomat liefert bei genau einem Steuersatz oft direkt ein Objekt statt einer Liste
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode([
+                'taxes' => [
+                    'tax' => [
+                        'id' => 1,
+                        'name' => 'MwSt',
+                        'rate' => 19,
+                        'is_default' => 1,
+                    ],
+                ],
+            ], JSON_THROW_ON_ERROR),
+            ['http_code' => 200],
+        ));
+
+        $api = new TaxesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig(billomatId: 'x', apiKey: 'k'),
+        ));
+
+        $taxes = $api->list();
+
+        self::assertCount(1, $taxes);
+        self::assertSame(1, $taxes[0]->id);
+        self::assertSame('MwSt', $taxes[0]->name);
+    }
+
+    #[Test]
+    public function listReturnsEmptyListWhenNodeMissing(): void
+    {
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['taxes' => []], JSON_THROW_ON_ERROR),
+            ['http_code' => 200],
+        ));
+
+        $api = new TaxesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig(billomatId: 'x', apiKey: 'k'),
+        ));
+
+        self::assertSame([], $api->list());
+    }
 }

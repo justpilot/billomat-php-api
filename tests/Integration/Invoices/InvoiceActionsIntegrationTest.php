@@ -172,7 +172,6 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $opts->color = false;
         $opts->duplex = true;
         $opts->paperWeight = '80';
-        $opts->recipientAddress = "SDK-Integrationstest\nPostfach 4711\n12345 Testdorf";
 
         $result = $billomat->invoices->mail($invoiceId, $opts);
         self::assertTrue($result);

@@ -13,8 +13,6 @@ namespace Justpilot\Billomat\Api;
  *
  * Hinweise:
  * - Diese Aktion ist kostenpflichtig (Pixelletter-Versand).
- * - `recipientAddress` ist die mehrzeilige Postanschrift. Bleibt sie leer,
- *   verwendet Billomat die auf der Rechnung gespeicherte Adresse.
  */
 final class InvoiceMailOptions
 {
@@ -33,18 +31,19 @@ final class InvoiceMailOptions
     public ?bool $duplex = null;
 
     /**
-     * Papiergewicht in g/m² (z. B. "80", "100").
+     * Papiergewicht in g/m² (z. B. "80", "90").
      *
      * Billomat-Feld: paper_weight
      */
     public ?string $paperWeight = null;
 
     /**
-     * Abweichende Empfängeradresse (mehrzeilig).
+     * Zusätzliche PDF-Anhänge, die mit ausgedruckt werden. Jeder Eintrag muss
+     * die Schlüssel `filename`, `mimetype` und `base64file` enthalten.
      *
-     * Billomat-Feld: recipient_address
+     * @var list<array{filename: string, mimetype: string, base64file: string}>
      */
-    public ?string $recipientAddress = null;
+    public array $attachments = [];
 
     /**
      * @return array<string,mixed>
@@ -55,9 +54,23 @@ final class InvoiceMailOptions
             'color' => null === $this->color ? null : ($this->color ? 1 : 0),
             'duplex' => null === $this->duplex ? null : ($this->duplex ? 1 : 0),
             'paper_weight' => $this->paperWeight,
-            'recipient_address' => $this->recipientAddress,
         ];
 
-        return array_filter($data, static fn (string|int|null $v): bool => null !== $v);
+        $data = array_filter($data, static fn (string|int|null $v): bool => null !== $v);
+
+        if ([] !== $this->attachments) {
+            $data['attachments'] = [
+                'attachment' => array_map(
+                    static fn (array $a): array => [
+                        'filename' => $a['filename'],
+                        'mimetype' => $a['mimetype'],
+                        'base64file' => $a['base64file'],
+                    ],
+                    $this->attachments,
+                ),
+            ];
+        }
+
+        return $data;
     }
 }

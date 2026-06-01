@@ -20,6 +20,13 @@ namespace Justpilot\Billomat\Api;
 final class InvoiceEmailOptions
 {
     /**
+     * ID der E-Mail-Vorlage aus den Billomat-Einstellungen.
+     *
+     * Billomat-Feld: email_template_id
+     */
+    public ?int $emailTemplateId = null;
+
+    /**
      * Absender-Adresse (muss in den Settings hinterlegt/erlaubt sein).
      *
      * Billomat-Feld: from
@@ -90,6 +97,7 @@ final class InvoiceEmailOptions
         ], static fn ($v): bool => null !== $v);
 
         $data = [
+            'email_template_id' => $this->emailTemplateId,
             'from' => $this->from,
             'recipients' => [] !== $recipients ? $recipients : null,
             'subject' => $this->subject,

@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests;
 
+use Justpilot\Billomat\Api\InvoiceCommentsApi;
+use Justpilot\Billomat\Api\InvoiceTagsApi;
+use Justpilot\Billomat\Api\RecurringEmailReceiversApi;
+use Justpilot\Billomat\Api\RecurringItemsApi;
+use Justpilot\Billomat\Api\RecurringsApi;
+use Justpilot\Billomat\Api\RecurringTagsApi;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Model\Client;
@@ -75,7 +81,11 @@ final class BillomatClientTest extends TestCase
         self::assertContainsOnlyInstancesOf(Client::class, $clients);
 
         // zusätzliche Sicherstellung: weitere APIs sind verdrahtet
-        self::assertNotNull($client->invoices);
-        self::assertNotNull($client->taxes);
+        self::assertInstanceOf(InvoiceCommentsApi::class, $client->invoiceComments);
+        self::assertInstanceOf(InvoiceTagsApi::class, $client->invoiceTags);
+        self::assertInstanceOf(RecurringsApi::class, $client->recurrings);
+        self::assertInstanceOf(RecurringItemsApi::class, $client->recurringItems);
+        self::assertInstanceOf(RecurringTagsApi::class, $client->recurringTags);
+        self::assertInstanceOf(RecurringEmailReceiversApi::class, $client->recurringEmailReceivers);
     }
 }

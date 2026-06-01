@@ -7,8 +7,10 @@ namespace Justpilot\Billomat\Api;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
 use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
@@ -53,6 +55,53 @@ final class InvoicesApi extends AbstractApi
         $models = array_map(
             Invoice::fromArray(...),
             $rows
+        );
+
+        return $models;
+    }
+
+    /**
+     * Listet Rechnungen aggregiert nach einem oder mehreren Kriterien.
+     *
+     * Entspricht GET /invoices?group_by=...
+     *
+     * Mehrere Werte werden in der Reihenfolge der Aggregation als CSV gesendet
+     * ("client,year" gruppiert zuerst nach Kunde, dann nach Jahr).
+     *
+     * @param InvoiceGroupBy|non-empty-list<InvoiceGroupBy> $groupBy
+     * @param array<string, scalar|array|null>              $filters optionale zusätzliche Filter (analog zu list())
+     *
+     * @return list<InvoiceGroup>
+     */
+    public function listGrouped(InvoiceGroupBy|array $groupBy, array $filters = []): array
+    {
+        $values = \is_array($groupBy) ? $groupBy : [$groupBy];
+
+        $csv = implode(',', array_map(static fn (InvoiceGroupBy $g): string => $g->value, $values));
+
+        $query = $filters;
+        $query['group_by'] = $csv;
+
+        $data = $this->getJson('/invoices', $query);
+
+        $node = $data['invoice-groups']['invoice-group'] ?? [];
+
+        if (null === $node || [] === $node) {
+            return [];
+        }
+
+        if (\is_array($node) && array_is_list($node)) {
+            $rows = $node;
+        } elseif (\is_array($node)) {
+            $rows = [$node];
+        } else {
+            $rows = [];
+        }
+
+        /** @var list<InvoiceGroup> $models */
+        $models = array_map(
+            InvoiceGroup::fromArray(...),
+            $rows,
         );
 
         return $models;

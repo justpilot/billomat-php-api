@@ -109,4 +109,24 @@ final class InvoiceEmailOptionsTest extends TestCase
         self::assertSame('Anbei die Rechnung.', $payload['body']);
         self::assertSame('rechnung-001', $payload['filename']);
     }
+
+    #[Test]
+    public function itPassesEmailTemplateIdThrough(): void
+    {
+        $options = new InvoiceEmailOptions();
+        $options->emailTemplateId = 42;
+
+        $payload = $options->toArray();
+
+        self::assertSame(42, $payload['email_template_id']);
+    }
+
+    #[Test]
+    public function itOmitsEmailTemplateIdWhenNull(): void
+    {
+        $options = new InvoiceEmailOptions();
+        $options->subject = 'Test';
+
+        self::assertArrayNotHasKey('email_template_id', $options->toArray());
+    }
 }

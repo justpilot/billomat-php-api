@@ -14,9 +14,11 @@ use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -30,6 +32,8 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(InvoiceCreateOptions::class)]
 #[CoversClass(InvoiceUpdateOptions::class)]
 #[CoversClass(Invoice::class)]
+#[CoversClass(InvoiceGroup::class)]
+#[CoversClass(InvoiceGroupBy::class)]
 final class InvoicesApiTest extends TestCase
 {
     #[Test]
@@ -804,7 +808,9 @@ final class InvoicesApiTest extends TestCase
         $opts->color = true;
         $opts->duplex = false;
         $opts->paperWeight = '90';
-        $opts->recipientAddress = "Beispiel GmbH\nMusterstr. 1\n12345 Berlin";
+        $opts->attachments = [
+            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+        ];
 
         $result = $api->mail(888, $opts);
 
@@ -818,7 +824,9 @@ final class InvoicesApiTest extends TestCase
         self::assertSame(1, $payload['mail']['color']);
         self::assertSame(0, $payload['mail']['duplex']);
         self::assertSame('90', $payload['mail']['paper_weight']);
-        self::assertSame("Beispiel GmbH\nMusterstr. 1\n12345 Berlin", $payload['mail']['recipient_address']);
+        self::assertArrayNotHasKey('recipient_address', $payload['mail']);
+        self::assertCount(1, $payload['mail']['attachments']['attachment']);
+        self::assertSame('agb.pdf', $payload['mail']['attachments']['attachment'][0]['filename']);
     }
 
     #[Test]
@@ -942,5 +950,96 @@ final class InvoicesApiTest extends TestCase
         }
 
         return \is_array($payload) ? $payload : null;
+    }
+
+    #[Test]
+    public function itListsInvoicesGroupedByMultipleCriteria(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            $body = json_encode([
+                'invoice-groups' => [
+                    'invoice-group' => [
+                        [
+                            'total_gross' => 347.28,
+                            'total_net' => 291.83,
+                            'client_id' => 476,
+                            'invoice-params' => ['client_id' => 476],
+                        ],
+                        [
+                            'total_gross' => 1127.53,
+                            'total_net' => 947.50,
+                            'client_id' => 477,
+                            'invoice-params' => ['client_id' => 477],
+                        ],
+                    ],
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $config = new BillomatConfig(
+            billomatId: 'mycompany',
+            apiKey: 'secret-key',
+        );
+
+        $http = new BillomatHttpClient($mock, $config);
+        $api = new InvoicesApi($http);
+
+        $groups = $api->listGrouped([InvoiceGroupBy::CLIENT, InvoiceGroupBy::YEAR]);
+
+        self::assertCount(2, $groups);
+        self::assertContainsOnlyInstancesOf(InvoiceGroup::class, $groups);
+        self::assertSame(347.28, $groups[0]->totalGross);
+        self::assertSame(476, $groups[0]->clientId);
+        self::assertSame(['client_id' => 476], $groups[0]->invoiceParams);
+
+        $parts = parse_url($captured['url']);
+        self::assertSame('/api/invoices', $parts['path'] ?? null);
+        $query = [];
+        parse_str($parts['query'] ?? '', $query);
+        self::assertSame('client,year', $query['group_by'] ?? null);
+    }
+
+    #[Test]
+    public function itAcceptsSingleGroupByEnumValue(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured['url'] = $url;
+
+            $body = json_encode([
+                'invoice-groups' => [
+                    'invoice-group' => [
+                        'total_gross' => 100.0,
+                        'total_net' => 84.03,
+                        'status' => 'OPEN',
+                        'invoice-params' => ['status' => 'OPEN'],
+                    ],
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $api = new InvoicesApi($http);
+
+        $groups = $api->listGrouped(InvoiceGroupBy::STATUS);
+
+        self::assertCount(1, $groups);
+        self::assertSame('OPEN', $groups[0]->status);
+
+        $parts = parse_url($captured['url']);
+        $query = [];
+        parse_str($parts['query'] ?? '', $query);
+        self::assertSame('status', $query['group_by'] ?? null);
     }
 }

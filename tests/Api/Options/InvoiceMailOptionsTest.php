@@ -32,16 +32,14 @@ final class InvoiceMailOptionsTest extends TestCase
     }
 
     #[Test]
-    public function itPassesStringFieldsThroughUntouched(): void
+    public function itPassesPaperWeightThroughUntouched(): void
     {
         $options = new InvoiceMailOptions();
-        $options->paperWeight = '100';
-        $options->recipientAddress = "Max Mustermann\nMusterstr. 1\n12345 Berlin";
+        $options->paperWeight = '90';
 
         $payload = $options->toArray();
 
-        self::assertSame('100', $payload['paper_weight']);
-        self::assertSame("Max Mustermann\nMusterstr. 1\n12345 Berlin", $payload['recipient_address']);
+        self::assertSame('90', $payload['paper_weight']);
     }
 
     #[Test]
@@ -53,5 +51,31 @@ final class InvoiceMailOptionsTest extends TestCase
         $payload = $options->toArray();
 
         self::assertSame(['color' => 1], $payload);
+    }
+
+    #[Test]
+    public function itWrapsAttachmentsInAttachmentEnvelope(): void
+    {
+        $options = new InvoiceMailOptions();
+        $options->attachments = [
+            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+            ['filename' => 'flyer.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'WFla'],
+        ];
+
+        $payload = $options->toArray();
+
+        self::assertArrayHasKey('attachments', $payload);
+        self::assertCount(2, $payload['attachments']['attachment']);
+        self::assertSame('agb.pdf', $payload['attachments']['attachment'][0]['filename']);
+        self::assertSame('application/pdf', $payload['attachments']['attachment'][0]['mimetype']);
+        self::assertSame('QUJD', $payload['attachments']['attachment'][0]['base64file']);
+    }
+
+    #[Test]
+    public function itOmitsAttachmentsKeyWhenEmpty(): void
+    {
+        $options = new InvoiceMailOptions();
+
+        self::assertArrayNotHasKey('attachments', $options->toArray());
     }
 }

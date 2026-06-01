@@ -164,6 +164,84 @@ final class SettingsApiTest extends TestCase
         self::assertArrayNotHasKey('locale', $payload['settings']);
     }
 
+    public function test_update_options_serialize_all_new_writable_fields(): void
+    {
+        $opts = new SettingsUpdateOptions();
+
+        $opts->bgcolor = 'ffffff';
+        $opts->color1 = 'aabbcc';
+        $opts->articleNumberPre = 'A-';
+        $opts->articleNumberLength = 5;
+
+        $opts->invoiceLabel = 'Rechnung';
+        $opts->invoiceIntro = 'Anbei …';
+        $opts->invoiceNote = 'Bitte überweisen …';
+
+        $opts->offerLabel = 'Angebot';
+        $opts->offerIntro = 'Hier unser Angebot';
+        $opts->offerNote = 'Gültig 30 Tage';
+        $opts->offerFilename = 'angebot-{nr}';
+
+        $opts->confirmationNumberPre = 'AB-';
+        $opts->confirmationNumberLength = 4;
+        $opts->confirmationLabel = 'Auftragsbestätigung';
+        $opts->confirmationIntro = 'Wir bestätigen Ihren Auftrag';
+
+        $opts->creditNoteNumberPre = 'GU-';
+        $opts->creditNoteLabel = 'Gutschrift';
+
+        $opts->deliveryNoteNumberPre = 'LS-';
+        $opts->deliveryNoteLabel = 'Lieferschein';
+
+        $opts->reminderFilename = 'mahnung-{nr}';
+        $opts->reminderDueDays = 7;
+
+        $opts->letterLabel = 'Brief';
+        $opts->letterIntro = '…';
+
+        $opts->bccAddresses = ['archiv@example.com', 'cc@example.com'];
+        $opts->taxation = 'STANDARD';
+
+        $opts->priceGroups = [2 => 'Sonderpreis', 3 => 'B2B'];
+
+        $payload = $opts->toArray();
+
+        self::assertSame('ffffff', $payload['bgcolor']);
+        self::assertSame('A-', $payload['article_number_pre']);
+        self::assertSame(5, $payload['article_number_length']);
+
+        self::assertSame('Rechnung', $payload['invoice_label']);
+        self::assertSame('Anbei …', $payload['invoice_intro']);
+        self::assertSame('Bitte überweisen …', $payload['invoice_note']);
+
+        self::assertSame('Angebot', $payload['offer_label']);
+        self::assertSame('angebot-{nr}', $payload['offer_filename']);
+
+        self::assertSame('AB-', $payload['confirmation_number_pre']);
+        self::assertSame(4, $payload['confirmation_number_length']);
+        self::assertSame('Auftragsbestätigung', $payload['confirmation_label']);
+
+        self::assertSame('GU-', $payload['credit_note_number_pre']);
+        self::assertSame('Gutschrift', $payload['credit_note_label']);
+
+        self::assertSame('LS-', $payload['delivery_note_number_pre']);
+        self::assertSame('Lieferschein', $payload['delivery_note_label']);
+
+        self::assertSame('mahnung-{nr}', $payload['reminder_filename']);
+        self::assertSame(7, $payload['reminder_due_days']);
+
+        self::assertSame('Brief', $payload['letter_label']);
+
+        self::assertSame('archiv@example.com,cc@example.com', $payload['bcc_addresses']);
+        self::assertSame('STANDARD', $payload['taxation']);
+
+        self::assertSame('Sonderpreis', $payload['price_group2']);
+        self::assertSame('B2B', $payload['price_group3']);
+
+        // nicht gesetzte Felder fallen heraus
+        self::assertArrayNotHasKey('currency_code', $payload);
+    }
+
     public function test_it_parses_bcc_addresses_from_csv_string(): void
     {
         $body = json_encode([

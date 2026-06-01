@@ -229,4 +229,32 @@ final class InvoicePaymentsApiTest extends TestCase
             $captured['url']
         );
     }
+
+    public function test_payment_model_hydrates_created_userId_and_transaction_purpose(): void
+    {
+        $payment = InvoicePayment::fromArray([
+            'id' => 77,
+            'invoice_id' => 555,
+            'user_id' => '9',
+            'created' => '2026-02-03T10:15:30+01:00',
+            'date' => '2026-02-03',
+            'amount' => '119.00',
+            'type' => 'BANK_TRANSFER',
+            'comment' => 'Eingang vom 03.02.',
+            'transaction_purpose' => 'Verwendungszweck: RE-2026-0001',
+        ]);
+
+        self::assertSame(77, $payment->id);
+        self::assertSame(555, $payment->invoiceId);
+        self::assertSame(9, $payment->userId);
+        self::assertNotNull($payment->created);
+        self::assertSame('2026-02-03', $payment->created->format('Y-m-d'));
+        self::assertSame('Verwendungszweck: RE-2026-0001', $payment->transactionPurpose);
+        self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payment->type);
+
+        $arr = $payment->toArray();
+        self::assertSame(9, $arr['user_id']);
+        self::assertSame('Verwendungszweck: RE-2026-0001', $arr['transaction_purpose']);
+        self::assertArrayHasKey('created', $arr);
+    }
 }

@@ -12,18 +12,48 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
  *
  * Laut Billomat:
  * - Nur im Status DRAFT bearbeitbar.
- * - Positionen und Kommentare nicht hier, sondern über die jeweilige Ressource.
+ * - `clientId` / `contactId` können nur im DRAFT-Status geändert werden.
+ * - Positionen und Kommentare nicht hier, sondern über die jeweiligen
+ *   Sub-Ressourcen (/invoice-items, /invoice-comments).
  *
- * Dokumentation:
- * https://www.billomat.com/api/rechnungen/
+ * Dokumentation: https://www.billomat.com/en/api/invoices/
  */
 final class InvoiceUpdateOptions
 {
     /**
+     * ID des Kunden (nur im DRAFT änderbar).
+     *
+     * Billomat-Feld: client_id
+     */
+    public ?int $clientId = null;
+
+    /**
+     * ID des Kontakts.
+     *
+     * Billomat-Feld: contact_id
+     */
+    public ?int $contactId = null;
+
+    /**
+     * Vollständige (überschriebene) Rechnungsadresse.
+     *
+     * Billomat-Feld: address
+     */
+    public ?string $address = null;
+
+    /** Präfix der Rechnungsnummer. */
+    public ?string $numberPre = null;
+
+    /** Laufende Nummer (ohne Präfix). */
+    public ?int $number = null;
+
+    /** Mindestlänge der Rechnungsnummer. */
+    public ?int $numberLength = null;
+
+    /**
      * Rechnungsdatum.
      *
      * Billomat-Feld: date
-     * Typ: DATE
      */
     public ?\DateTimeImmutable $date = null;
 
@@ -31,7 +61,6 @@ final class InvoiceUpdateOptions
      * Liefer-/Leistungsdatum.
      *
      * Billomat-Feld: supply_date
-     * Typ: MIXED (DATE/ALNUM)
      */
     public ?\DateTimeImmutable $supplyDate = null;
 
@@ -39,7 +68,6 @@ final class InvoiceUpdateOptions
      * Typ des Liefer-/Leistungsdatums.
      *
      * Billomat-Feld: supply_date_type
-     * Typ: ENUM (SUPPLY_DATE, DELIVERY_DATE, SUPPLY_TEXT, DELIVERY_TEXT)
      */
     public ?SupplyDateType $supplyDateType = null;
 
@@ -47,7 +75,6 @@ final class InvoiceUpdateOptions
      * Tage bis Fälligkeit.
      *
      * Billomat-Feld: due_days
-     * Typ: INT
      */
     public ?int $dueDays = null;
 
@@ -55,95 +82,95 @@ final class InvoiceUpdateOptions
      * Fälligkeitsdatum.
      *
      * Billomat-Feld: due_date
-     * Typ: DATE
      */
     public ?\DateTimeImmutable $dueDate = null;
 
     /**
-     * Dokumentenüberschrift.
+     * Skonto in Prozent.
      *
-     * Billomat-Feld: title
-     * Typ: ALNUM
+     * Billomat-Feld: discount_rate
      */
+    public ?float $discountRate = null;
+
+    /**
+     * Skontofrist in Tagen.
+     *
+     * Billomat-Feld: discount_days
+     */
+    public ?int $discountDays = null;
+
+    /**
+     * Skontodatum.
+     *
+     * Billomat-Feld: discount_date
+     */
+    public ?\DateTimeImmutable $discountDate = null;
+
+    /** Dokumentenüberschrift. */
     public ?string $title = null;
 
-    /**
-     * Bezeichnung.
-     *
-     * Billomat-Feld: label
-     * Typ: ALNUM
-     */
+    /** Bezeichnung / Label. */
     public ?string $label = null;
 
-    /**
-     * Einleitungstext.
-     *
-     * Billomat-Feld: intro
-     * Typ: ALNUM
-     */
+    /** Einleitungstext. */
     public ?string $intro = null;
 
-    /**
-     * Anmerkungstext.
-     *
-     * Billomat-Feld: note
-     * Typ: ALNUM
-     */
+    /** Anmerkungstext. */
     public ?string $note = null;
 
-    /**
-     * Rabatt (z.B. "10" oder "10%").
-     *
-     * Billomat-Feld: reduction
-     * Typ: ALNUM
-     */
+    /** Rabatt (z. B. "10" oder "10%"). */
     public ?string $reduction = null;
 
-    /**
-     * Preisbasis (NET/GROSS/SETTINGS).
-     *
-     * Billomat-Feld: net_gross
-     * Typ: ENUM
-     */
+    /** Preisbasis (NET/GROSS/SETTINGS). */
     public ?NetGross $netGross = null;
 
-    /**
-     * Währungscode (z.B. EUR).
-     *
-     * Billomat-Feld: currency_code
-     * Typ: ISO-Währungscode
-     */
+    /** Währungscode (z. B. EUR). */
     public ?string $currencyCode = null;
 
-    /**
-     * Währungskurs.
-     *
-     * Billomat-Feld: quote
-     * Typ: FLOAT
-     */
+    /** Währungskurs. */
     public ?float $quote = null;
 
-    /**
-     * Zahlungsarten (kommasepariert).
-     *
-     * Billomat-Feld: payment_types
-     * Typ: ALNUM
-     */
+    /** Zahlungsarten (CSV). */
     public ?string $paymentTypes = null;
 
+    /** ID einer korrigierten Rechnung. */
+    public ?int $invoiceId = null;
+
+    /** ID des Quell-Angebots. */
+    public ?int $offerId = null;
+
+    /** ID der Quell-Auftragsbestätigung. */
+    public ?int $confirmationId = null;
+
+    /** ID der Quell-Abo-Rechnung. */
+    public ?int $recurringId = null;
+
+    /** ID eines Freitext-Bausteins. */
+    public ?int $freeTextId = null;
+
+    /** Vorlagen-ID für die PDF-Erzeugung. */
+    public ?int $templateId = null;
+
     /**
-     * Serialisiert zu Billomat-Feldnamen.
-     *
      * @return array<string,mixed>
      */
     public function toArray(): array
     {
         $data = [
+            'client_id' => $this->clientId,
+            'contact_id' => $this->contactId,
+            'address' => $this->address,
+            'number_pre' => $this->numberPre,
+            'number' => $this->number,
+            'number_length' => $this->numberLength,
             'date' => $this->date?->format('Y-m-d'),
             'supply_date' => $this->supplyDate?->format('Y-m-d'),
             'supply_date_type' => $this->supplyDateType?->value,
             'due_days' => $this->dueDays,
             'due_date' => $this->dueDate?->format('Y-m-d'),
+            'discount_rate' => $this->discountRate,
+            'discount_days' => $this->discountDays,
+            'discount_date' => $this->discountDate?->format('Y-m-d'),
             'title' => $this->title,
             'label' => $this->label,
             'intro' => $this->intro,
@@ -153,6 +180,12 @@ final class InvoiceUpdateOptions
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'payment_types' => $this->paymentTypes,
+            'invoice_id' => $this->invoiceId,
+            'offer_id' => $this->offerId,
+            'confirmation_id' => $this->confirmationId,
+            'recurring_id' => $this->recurringId,
+            'free_text_id' => $this->freeTextId,
+            'template_id' => $this->templateId,
         ];
 
         return array_filter($data, static fn($v) => $v !== null);

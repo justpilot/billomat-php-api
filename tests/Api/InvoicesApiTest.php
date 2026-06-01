@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
+use Justpilot\Billomat\Api\InvoiceEmailOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -674,5 +676,243 @@ final class InvoicesApiTest extends TestCase
         if (isset($flat['content-type'])) {
             self::assertStringContainsString('application/json', strtolower($flat['content-type']));
         }
+    }
+
+    public function test_it_emails_invoice_with_recipients_and_subject(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured = compact('method', 'url', 'options');
+
+            // Billomat antwortet i. d. R. mit leerem Body oder Bestätigungsobjekt
+            return new MockResponse('{"@status":"OK"}', ['http_code' => 200]);
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $opts = new InvoiceEmailOptions();
+        $opts->from = 'me@example.com';
+        $opts->to = ['kunde@example.com'];
+        $opts->cc = ['buchhaltung@example.com'];
+        $opts->bcc = ['archiv@example.com'];
+        $opts->subject = 'Ihre Rechnung';
+        $opts->body = 'Anbei …';
+        $opts->filename = 'rechnung-2026-001';
+        $opts->attachments = [
+            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+        ];
+
+        $result = $api->email(777, $opts);
+
+        self::assertTrue($result);
+        self::assertSame('POST', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/777/email',
+            $captured['url']
+        );
+
+        $payload = self::extractJsonPayload($captured['options']);
+        self::assertIsArray($payload);
+        self::assertArrayHasKey('email', $payload);
+
+        $email = $payload['email'];
+        self::assertSame('me@example.com', $email['from'] ?? null);
+        self::assertSame(['kunde@example.com'], $email['recipients']['to'] ?? null);
+        self::assertSame(['buchhaltung@example.com'], $email['recipients']['cc'] ?? null);
+        self::assertSame(['archiv@example.com'], $email['recipients']['bcc'] ?? null);
+        self::assertSame('Ihre Rechnung', $email['subject'] ?? null);
+        self::assertSame('Anbei …', $email['body'] ?? null);
+        self::assertSame('rechnung-2026-001', $email['filename'] ?? null);
+
+        // Attachments-Envelope
+        self::assertArrayHasKey('attachments', $email);
+        self::assertSame([
+            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+        ], $email['attachments']['attachment']);
+    }
+
+    public function test_email_without_options_sends_empty_envelope_to_use_defaults(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
+            $captured = compact('method', 'url', 'options');
+
+            return new MockResponse('{}', ['http_code' => 200]);
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $result = $api->email(123);
+
+        self::assertTrue($result);
+        self::assertSame('POST', $captured['method']);
+        self::assertSame('https://mycompany.billomat.net/api/invoices/123/email', $captured['url']);
+
+        $payload = self::extractJsonPayload($captured['options']);
+        self::assertIsArray($payload);
+        self::assertSame(['email' => []], $payload);
+    }
+
+    public function test_it_sends_invoice_via_pixelletter_mail(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
+            $captured = compact('method', 'url', 'options');
+
+            return new MockResponse('{}', ['http_code' => 200]);
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $opts = new InvoiceMailOptions();
+        $opts->color = true;
+        $opts->duplex = false;
+        $opts->paperWeight = '90';
+        $opts->recipientAddress = "Beispiel GmbH\nMusterstr. 1\n12345 Berlin";
+
+        $result = $api->mail(888, $opts);
+
+        self::assertTrue($result);
+        self::assertSame('POST', $captured['method']);
+        self::assertSame('https://mycompany.billomat.net/api/invoices/888/mail', $captured['url']);
+
+        $payload = self::extractJsonPayload($captured['options']);
+        self::assertIsArray($payload);
+        self::assertArrayHasKey('mail', $payload);
+        self::assertSame(1, $payload['mail']['color']);
+        self::assertSame(0, $payload['mail']['duplex']);
+        self::assertSame('90', $payload['mail']['paper_weight']);
+        self::assertSame("Beispiel GmbH\nMusterstr. 1\n12345 Berlin", $payload['mail']['recipient_address']);
+    }
+
+    public function test_it_uploads_signature_pdf(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
+            $captured = compact('method', 'url', 'options');
+
+            return new MockResponse('', ['http_code' => 200]);
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $base64 = base64_encode('PDF-FAKE-CONTENT');
+        $result = $api->uploadSignature(555, $base64);
+
+        self::assertTrue($result);
+        self::assertSame('PUT', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/555/upload-signature',
+            $captured['url']
+        );
+
+        $payload = self::extractJsonPayload($captured['options']);
+        self::assertIsArray($payload);
+        self::assertSame(['upload' => ['base64file' => $base64]], $payload);
+    }
+
+    public function test_it_sends_invoice_to_encashment(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function ($method, $url, $options) use (&$captured) {
+            $captured = compact('method', 'url', 'options');
+
+            return new MockResponse('', ['http_code' => 200]);
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $result = $api->encash(101);
+
+        self::assertTrue($result);
+        self::assertSame('PUT', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/invoices/101/encash',
+            $captured['url']
+        );
+    }
+
+    public function test_update_options_serializes_all_new_fields(): void
+    {
+        $opts = new InvoiceUpdateOptions();
+
+        $opts->clientId = 42;
+        $opts->contactId = 17;
+        $opts->address = "Beispiel GmbH\nMusterstr. 1\n12345 Berlin";
+        $opts->numberPre = 'RE-';
+        $opts->number = 9001;
+        $opts->numberLength = 5;
+        $opts->discountRate = 2.0;
+        $opts->discountDays = 7;
+        $opts->discountDate = new \DateTimeImmutable('2026-01-22');
+        $opts->offerId = 1001;
+        $opts->confirmationId = 2002;
+        $opts->recurringId = 3003;
+        $opts->invoiceId = 4004;
+        $opts->freeTextId = 5005;
+        $opts->templateId = 6006;
+
+        $payload = $opts->toArray();
+
+        self::assertSame(42, $payload['client_id']);
+        self::assertSame(17, $payload['contact_id']);
+        self::assertSame("Beispiel GmbH\nMusterstr. 1\n12345 Berlin", $payload['address']);
+        self::assertSame('RE-', $payload['number_pre']);
+        self::assertSame(9001, $payload['number']);
+        self::assertSame(5, $payload['number_length']);
+        self::assertSame(2.0, $payload['discount_rate']);
+        self::assertSame(7, $payload['discount_days']);
+        self::assertSame('2026-01-22', $payload['discount_date']);
+        self::assertSame(1001, $payload['offer_id']);
+        self::assertSame(2002, $payload['confirmation_id']);
+        self::assertSame(3003, $payload['recurring_id']);
+        self::assertSame(4004, $payload['invoice_id']);
+        self::assertSame(5005, $payload['free_text_id']);
+        self::assertSame(6006, $payload['template_id']);
+    }
+
+    /**
+     * Liest den JSON-Payload aus den `options` von MockHttpClient.
+     *
+     * MockHttpClient verschiebt `options[json]` häufig in `options[body]` als
+     * vorab serialisierten String. Symmetrisch zur Pattern an anderen Stellen
+     * in dieser Test-Datei (z. B. test_it_completes_invoice_...).
+     *
+     * @param array<string,mixed> $options
+     * @return array<string,mixed>|null
+     */
+    private static function extractJsonPayload(array $options): ?array
+    {
+        $payload = $options['json'] ?? null;
+
+        if ($payload === null && isset($options['body']) && is_string($options['body']) && $options['body'] !== '') {
+            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
+
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return is_array($payload) ? $payload : null;
     }
 }

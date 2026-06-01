@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Client;
 use PHPUnit\Framework\TestCase;
@@ -341,5 +342,243 @@ final class ClientsApiTest extends TestCase
         self::assertIsArray($payload['client']);
 
         self::assertSame('Die super Musterfirma', $payload['client']['name'] ?? null);
+    }
+
+    public function test_update_options_serializes_all_new_writable_fields(): void
+    {
+        $opts = new ClientUpdateOptions();
+
+        $opts->name = 'Beispiel GmbH';
+        $opts->locale = 'de_DE';
+        $opts->taxRule = 'COUNTRY';
+        $opts->netGross = 'NET';
+        $opts->currencyCode = 'EUR';
+        $opts->priceGroup = 2;
+        $opts->dunningRun = true;
+        $opts->clientNumber = 'C-9001';
+        $opts->numberPre = 'KU-';
+        $opts->number = 9001;
+        $opts->numberLength = 5;
+
+        $opts->bankIban = 'DE89370400440532013000';
+        $opts->bankSwift = 'COBADEFFXXX';
+        $opts->bankAccountOwner = 'Max Mustermann';
+
+        $opts->sepaMandate = 'MD-001';
+        $opts->sepaMandateDate = '2026-01-15';
+
+        $opts->defaultPaymentTypes = 'CASH,BANK_TRANSFER';
+        $opts->reduction = 5.0;
+        $opts->discountRateType = 'ABSOLUTE';
+        $opts->discountRate = 2.5;
+        $opts->discountDaysType = 'ABSOLUTE';
+        $opts->discountDays = 7.0;
+        $opts->dueDaysType = 'ABSOLUTE';
+        $opts->dueDays = 14;
+        $opts->reminderDueDaysType = 'SETTINGS';
+        $opts->reminderDueDays = 10;
+        $opts->offerValidityDaysType = 'SETTINGS';
+        $opts->offerValidityDays = 30;
+
+        $payload = $opts->toArray();
+
+        self::assertSame('Beispiel GmbH', $payload['name']);
+        self::assertSame('de_DE', $payload['locale']);
+        self::assertSame('COUNTRY', $payload['tax_rule']);
+        self::assertSame('NET', $payload['net_gross']);
+        self::assertSame('EUR', $payload['currency_code']);
+        self::assertSame(2, $payload['price_group']);
+        self::assertSame(1, $payload['dunning_run']);
+        self::assertSame('C-9001', $payload['client_number']);
+        self::assertSame('KU-', $payload['number_pre']);
+        self::assertSame(9001, $payload['number']);
+        self::assertSame(5, $payload['number_length']);
+        self::assertSame('DE89370400440532013000', $payload['bank_iban']);
+        self::assertSame('COBADEFFXXX', $payload['bank_swift']);
+        self::assertSame('Max Mustermann', $payload['bank_account_owner']);
+        self::assertSame('MD-001', $payload['sepa_mandate']);
+        self::assertSame('2026-01-15', $payload['sepa_mandate_date']);
+        self::assertSame('CASH,BANK_TRANSFER', $payload['default_payment_types']);
+        self::assertSame(5.0, $payload['reduction']);
+        self::assertSame('ABSOLUTE', $payload['discount_rate_type']);
+        self::assertSame(2.5, $payload['discount_rate']);
+        self::assertSame('ABSOLUTE', $payload['discount_days_type']);
+        self::assertSame(7.0, $payload['discount_days']);
+        self::assertSame('ABSOLUTE', $payload['due_days_type']);
+        self::assertSame(14, $payload['due_days']);
+        self::assertSame('SETTINGS', $payload['reminder_due_days_type']);
+        self::assertSame(10, $payload['reminder_due_days']);
+        self::assertSame('SETTINGS', $payload['offer_validity_days_type']);
+        self::assertSame(30, $payload['offer_validity_days']);
+
+        // archived nicht gesetzt → darf nicht im Payload landen
+        self::assertArrayNotHasKey('archived', $payload);
+    }
+
+    public function test_client_model_hydrates_bank_sepa_and_revenue_fields(): void
+    {
+        $data = [
+            'id' => 1,
+            'name' => 'Fixture GmbH',
+            'created' => '2026-01-15T08:30:00+01:00',
+            'address' => "Fixture GmbH\nMusterstr. 1\n12345 Berlin",
+            'client_number' => 'C-100',
+            'number_pre' => 'C-',
+            'number' => '100',
+            'number_length' => '5',
+            'bank_iban' => 'DE89370400440532013000',
+            'bank_swift' => 'COBADEFFXXX',
+            'bank_name' => 'Commerzbank',
+            'bank_account_owner' => 'Fixture GmbH',
+            'sepa_mandate' => 'MD-001',
+            'sepa_mandate_date' => '2026-01-10',
+            'default_payment_types' => 'CASH,BANK_TRANSFER',
+            'enable_customerportal' => '1',
+            'customerportal_url' => 'https://portal.example.com/abc',
+            'revenue_gross' => '11900.50',
+            'revenue_net' => '10000.42',
+            'discount_rate_type' => 'ABSOLUTE',
+            'discount_days_type' => 'ABSOLUTE',
+            'due_days_type' => 'ABSOLUTE',
+            'reminder_due_days_type' => 'SETTINGS',
+            'offer_validity_days_type' => 'SETTINGS',
+        ];
+
+        $c = Client::fromArray($data);
+
+        self::assertSame(1, $c->id);
+        self::assertSame('Fixture GmbH', $c->name);
+        self::assertNotNull($c->created);
+        self::assertSame('2026-01-15', $c->created->format('Y-m-d'));
+        self::assertSame("Fixture GmbH\nMusterstr. 1\n12345 Berlin", $c->address);
+        self::assertSame(100, $c->number);
+        self::assertSame('C-', $c->numberPre);
+        self::assertSame(5, $c->numberLength);
+        self::assertSame('DE89370400440532013000', $c->bankIban);
+        self::assertSame('COBADEFFXXX', $c->bankSwift);
+        self::assertSame('Commerzbank', $c->bankName);
+        self::assertSame('Fixture GmbH', $c->bankAccountOwner);
+        self::assertSame('MD-001', $c->sepaMandate);
+        self::assertNotNull($c->sepaMandateDate);
+        self::assertSame('2026-01-10', $c->sepaMandateDate->format('Y-m-d'));
+        self::assertSame('CASH,BANK_TRANSFER', $c->defaultPaymentTypes);
+        self::assertTrue($c->enableCustomerportal);
+        self::assertSame('https://portal.example.com/abc', $c->customerportalUrl);
+        self::assertSame(11900.50, $c->revenueGross);
+        self::assertSame(10000.42, $c->revenueNet);
+        self::assertSame('ABSOLUTE', $c->discountRateType);
+        self::assertSame('ABSOLUTE', $c->discountDaysType);
+        self::assertSame('ABSOLUTE', $c->dueDaysType);
+        self::assertSame('SETTINGS', $c->reminderDueDaysType);
+        self::assertSame('SETTINGS', $c->offerValidityDaysType);
+    }
+
+    public function test_it_deletes_client_via_delete(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            return new MockResponse('', ['http_code' => 200]);
+        });
+
+        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $api = new ClientsApi($http);
+
+        $result = $api->delete(42);
+
+        self::assertTrue($result);
+        self::assertSame('DELETE', $captured['method']);
+        self::assertSame(
+            'https://mycompany.billomat.net/api/clients/42',
+            $captured['url']
+        );
+    }
+
+    public function test_delete_propagates_validation_exception_when_client_has_documents(): void
+    {
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) {
+            $body = json_encode([
+                'errors' => [
+                    'error' => 'Client cannot be deleted because there are documents assigned.',
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 400]);
+        });
+
+        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $api = new ClientsApi($http);
+
+        $this->expectException(ValidationException::class);
+
+        $api->delete(42);
+    }
+
+    public function test_it_fetches_avatar_binary(): void
+    {
+        $captured = [];
+        $pngBytes = "\x89PNG\r\n\x1a\nFAKE";
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured, $pngBytes) {
+            $captured['method'] = $method;
+            $captured['url'] = $url;
+            $captured['options'] = $options;
+
+            return new MockResponse($pngBytes, [
+                'http_code' => 200,
+                'response_headers' => [
+                    'content-type' => 'image/png',
+                ],
+            ]);
+        });
+
+        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $api = new ClientsApi($http);
+
+        $binary = $api->avatar(42, 256);
+
+        self::assertSame($pngBytes, $binary);
+
+        self::assertSame('GET', $captured['method']);
+
+        $url = $captured['url'];
+        $parts = parse_url($url);
+
+        self::assertSame('/api/clients/42/avatar', $parts['path'] ?? null);
+
+        $query = [];
+        if (isset($parts['query'])) {
+            parse_str($parts['query'], $query);
+        }
+
+        self::assertSame(256, (int)($query['size'] ?? 0));
+    }
+
+    public function test_avatar_omits_size_query_when_not_provided(): void
+    {
+        $captured = [];
+
+        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured) {
+            $captured['url'] = $url;
+
+            return new MockResponse('PNG', [
+                'http_code' => 200,
+                'response_headers' => ['content-type' => 'image/png'],
+            ]);
+        });
+
+        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $api = new ClientsApi($http);
+
+        $api->avatar(7);
+
+        self::assertSame(
+            'https://mycompany.billomat.net/api/clients/7/avatar',
+            $captured['url']
+        );
     }
 }

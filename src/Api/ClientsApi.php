@@ -8,14 +8,19 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
+use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Clients-Ressource.
  *
  * Kapselt Zugriffe auf:
- *  - GET  /clients
- *  - GET  /clients/{id}
- *  - POST /clients
+ *  - GET    /clients
+ *  - GET    /clients/myself
+ *  - GET    /clients/{id}
+ *  - POST   /clients
+ *  - PUT    /clients/{id}
+ *  - DELETE /clients/{id}
+ *  - GET    /clients/{id}/avatar
  */
 final class ClientsApi extends AbstractApi
 {
@@ -169,5 +174,46 @@ final class ClientsApi extends AbstractApi
         }
 
         return Client::fromArray($clientData);
+    }
+
+    /**
+     * Löscht einen Kunden.
+     *
+     * Entspricht DELETE /clients/{id}.
+     *
+     * ⚠️ Hinweis aus der Billomat-Doku: Kunden, an denen bereits Dokumente
+     * (Rechnungen, Angebote, …) hängen, können nicht hart gelöscht, sondern
+     * nur archiviert werden. In diesem Fall wirft Billomat 400/422 und die
+     * SDK propagiert eine {@see ValidationException}.
+     *
+     * @return bool true bei Erfolg.
+     */
+    public function delete(int $id): bool
+    {
+        $this->deleteVoid("/clients/{$id}");
+        return true;
+    }
+
+    /**
+     * Lädt das Avatar (binäres Bild) eines Kunden.
+     *
+     * Entspricht GET /clients/{id}/avatar?size={size}.
+     *
+     * Billomat liefert hier kein JSON, sondern direkt das Bild
+     * (i. d. R. PNG). Rückgabe ist der rohe Body-String.
+     *
+     * @param int|null $size Optionale Kantenlänge in Pixel.
+     */
+    public function avatar(int $id, ?int $size = null): string
+    {
+        $query = $size !== null ? ['size' => $size] : [];
+
+        $response = $this->http->request('GET', "/clients/{$id}/avatar", $query);
+
+        try {
+            return $response->getContent();
+        } catch (HttpExceptionInterface $e) {
+            throw $this->mapHttpException($e);
+        }
     }
 }

@@ -199,6 +199,68 @@ final class InvoicesApi extends AbstractApi
     }
 
     /**
+     * Versendet eine Rechnung per E-Mail.
+     *
+     * Entspricht POST /invoices/{id}/email.
+     *
+     * Wenn keine Optionen angegeben werden, verwendet Billomat alle Defaults
+     * (Absender aus den Settings, Empfänger aus den Kunden-Stammdaten,
+     * Default-Subject/Body, PDF als Anhang).
+     */
+    public function email(int $id, ?InvoiceEmailOptions $options = null): bool
+    {
+        $payload = ['email' => $options?->toArray() ?? []];
+
+        $this->postJson("/invoices/{$id}/email", $payload);
+
+        return true;
+    }
+
+    /**
+     * Versendet eine Rechnung postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /invoices/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?InvoiceMailOptions $options = null): bool
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postJson("/invoices/{$id}/mail", $payload);
+
+        return true;
+    }
+
+    /**
+     * Lädt eine unterschriebene PDF-Version der Rechnung hoch.
+     *
+     * Entspricht PUT /invoices/{id}/upload-signature.
+     *
+     * @param string $base64Pdf Base64-codierter PDF-Inhalt der unterschriebenen Rechnung.
+     */
+    public function uploadSignature(int $id, string $base64Pdf): bool
+    {
+        $payload = ['upload' => ['base64file' => $base64Pdf]];
+
+        $response = $this->putEmptyResponse("/invoices/{$id}/upload-signature", $payload);
+        return $response->getStatusCode() === 200;
+    }
+
+    /**
+     * Übergibt eine Rechnung an das Inkasso-Verfahren.
+     *
+     * Entspricht PUT /invoices/{id}/encash.
+     *
+     * Voraussetzungen laut Billomat: Rechnung muss OPEN oder OVERDUE sein.
+     */
+    public function encash(int $id): bool
+    {
+        $response = $this->putEmptyResponse("/invoices/{$id}/encash");
+        return $response->getStatusCode() === 200;
+    }
+
+    /**
      * Ruft das PDF einer Rechnung ab.
      *
      * Entspricht GET /invoices/{id}/pdf

@@ -180,6 +180,23 @@ Alle vom SDK geworfenen Exceptions erben von `BillomatException`. HTTP-Fehler we
 
 Beispiele und Patterns: [docs/error-handling.md](docs/error-handling.md).
 
+## Pagination
+
+Für List-Endpunkte stehen zusätzlich zu `list()` zwei Helfer bereit:
+
+```php
+// Auto-Pagination — lazy Generator, läuft über alle Seiten
+foreach ($billomat->clients->iterateAll(['country_code' => 'DE']) as $client) {
+    // …
+}
+
+// Eine Seite mit Metadaten
+$result = $billomat->clients->listPage(['per_page' => 50, 'page' => 3]);
+echo "Seite {$result->info->page} / " . ($result->info->totalPages() ?? '?');
+```
+
+Details und Beispiele: [docs/advanced/pagination.md](docs/advanced/pagination.md).
+
 ## Tests
 
 ```bash

@@ -11,6 +11,8 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Pagination\Page;
+use Justpilot\Billomat\Pagination\PageInfo;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -18,11 +20,14 @@ use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
+use const PHP_URL_QUERY;
 
 #[CoversClass(ClientsApi::class)]
 #[CoversClass(ClientCreateOptions::class)]
 #[CoversClass(ClientUpdateOptions::class)]
 #[CoversClass(Client::class)]
+#[CoversClass(Page::class)]
+#[CoversClass(PageInfo::class)]
 final class ClientsApiTest extends TestCase
 {
     #[Test]
@@ -596,5 +601,120 @@ final class ClientsApiTest extends TestCase
             'https://mycompany.billomat.net/api/clients/7/avatar',
             $captured['url']
         );
+    }
+
+    #[Test]
+    public function listPageReturnsPaginationMetadata(): void
+    {
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode([
+                'clients' => [
+                    'client' => [
+                        ['id' => 1, 'name' => 'Acme'],
+                        ['id' => 2, 'name' => 'Beta'],
+                    ],
+                    '@page' => '2',
+                    '@per_page' => '2',
+                    '@total' => '5',
+                ],
+            ], JSON_THROW_ON_ERROR),
+            ['http_code' => 200],
+        ));
+
+        $api = new ClientsApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $page = $api->listPage(['page' => 2, 'per_page' => 2]);
+
+        self::assertCount(2, $page->items);
+        self::assertSame('Acme', $page->items[0]->name);
+        self::assertSame(2, $page->info->page);
+        self::assertSame(2, $page->info->perPage);
+        self::assertSame(5, $page->info->total);
+        self::assertSame(3, $page->info->totalPages());
+        self::assertTrue($page->info->hasNextPage());
+    }
+
+    #[Test]
+    public function iterateAllAutoPaginatesUntilLastPage(): void
+    {
+        $requests = 0;
+
+        $mock = new MockHttpClient(static function (string $method, string $url) use (&$requests): MockResponse {
+            ++$requests;
+
+            // URL parsen statt str_contains (per_page=2 enthält 'page=2' als Substring!)
+            $query = [];
+            parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+            $page = (int) ($query['page'] ?? 1);
+
+            $rows = match ($page) {
+                1 => [['id' => 1, 'name' => 'A'], ['id' => 2, 'name' => 'B']],
+                2 => [['id' => 3, 'name' => 'C'], ['id' => 4, 'name' => 'D']],
+                3 => [['id' => 5, 'name' => 'E']],
+                default => [],
+            };
+
+            $body = json_encode([
+                'clients' => [
+                    'client' => $rows,
+                    '@page' => (string) $page,
+                    '@per_page' => '2',
+                    '@total' => '5',
+                ],
+            ], JSON_THROW_ON_ERROR);
+
+            return new MockResponse($body, ['http_code' => 200]);
+        });
+
+        $api = new ClientsApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $collected = [];
+        foreach ($api->iterateAll(pageSize: 2) as $client) {
+            $collected[] = $client->name;
+        }
+
+        self::assertSame(['A', 'B', 'C', 'D', 'E'], $collected);
+        self::assertSame(3, $requests);
+    }
+
+    #[Test]
+    public function iterateAllStopsEarlyWhenPageShorterThanPageSize(): void
+    {
+        // Fallback-Pfad: Endpunkt liefert keine `@total`-Metadaten. Die
+        // Iteration muss trotzdem terminieren, wenn die Page weniger Items
+        // als `per_page` liefert.
+        $requests = 0;
+
+        $mock = new MockHttpClient(static function () use (&$requests): MockResponse {
+            ++$requests;
+
+            $rows = match ($requests) {
+                1 => [['id' => 1, 'name' => 'A'], ['id' => 2, 'name' => 'B']],
+                2 => [['id' => 3, 'name' => 'C']], // < perPage -> Abbruch
+                default => [],
+            };
+
+            // Bewusst keine @page/@per_page/@total -> Fallback greift
+            return new MockResponse(
+                json_encode(['clients' => ['client' => $rows]], JSON_THROW_ON_ERROR),
+                ['http_code' => 200],
+            );
+        });
+
+        $api = new ClientsApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $collected = iterator_to_array($api->iterateAll(pageSize: 2), preserve_keys: false);
+
+        self::assertCount(3, $collected);
+        self::assertSame(2, $requests);
     }
 }

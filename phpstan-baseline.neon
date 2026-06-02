@@ -19,7 +19,19 @@ parameters:
 			path: src/Api/AbstractApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:iterateResource\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/AbstractApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:listResource\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/AbstractApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:listResourcePage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/AbstractApi.php
@@ -31,7 +43,19 @@ parameters:
 			path: src/Api/AbstractApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlePropertiesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlePropertiesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ArticlePropertiesApi.php
@@ -49,7 +73,19 @@ parameters:
 			path: src/Api/ArticlePropertiesApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlePropertyValuesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlePropertyValuesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ArticlePropertyValuesApi.php
@@ -67,7 +103,19 @@ parameters:
 			path: src/Api/ArticleTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ArticlesApi.php
@@ -85,7 +133,19 @@ parameters:
 			path: src/Api/ArticlesApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ClientPropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ClientPropertiesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ClientPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ClientPropertiesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ClientPropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ClientPropertiesApi.php
@@ -109,7 +169,19 @@ parameters:
 			path: src/Api/ClientTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ClientsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ClientsApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ClientsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ClientsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ClientsApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ClientsApi.php
@@ -151,7 +223,19 @@ parameters:
 			path: src/Api/ConfirmationTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ConfirmationsApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ConfirmationsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationsApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ConfirmationsApi.php
@@ -185,6 +269,18 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/ContactsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CountriesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CountriesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CountriesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CountriesApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
@@ -223,7 +319,19 @@ parameters:
 			path: src/Api/CreditNoteTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CreditNotesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CreditNotesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\CreditNotesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CreditNotesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CreditNotesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/CreditNotesApi.php
@@ -239,6 +347,18 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/CreditNotesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CurrenciesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CurrenciesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CurrenciesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CurrenciesApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
@@ -265,7 +385,19 @@ parameters:
 			path: src/Api/DeliveryNoteTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNotesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/DeliveryNotesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNotesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/DeliveryNotesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNotesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/DeliveryNotesApi.php
@@ -295,7 +427,19 @@ parameters:
 			path: src/Api/DunningLevelsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\EmailTemplatesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/EmailTemplatesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\EmailTemplatesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/EmailTemplatesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\EmailTemplatesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/EmailTemplatesApi.php
@@ -307,7 +451,19 @@ parameters:
 			path: src/Api/EmailTemplatesApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\FreeTextsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/FreeTextsApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\FreeTextsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/FreeTextsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\FreeTextsApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/FreeTextsApi.php
@@ -319,7 +475,19 @@ parameters:
 			path: src/Api/FreeTextsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\InboxDocumentsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/InboxDocumentsApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InboxDocumentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/InboxDocumentsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\InboxDocumentsApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/InboxDocumentsApi.php
@@ -349,7 +517,19 @@ parameters:
 			path: src/Api/IncomingPaymentsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingPropertiesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingPropertiesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/IncomingPropertiesApi.php
@@ -367,7 +547,19 @@ parameters:
 			path: src/Api/IncomingPropertiesApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertyValuesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingPropertyValuesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingPropertyValuesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertyValuesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/IncomingPropertyValuesApi.php
@@ -385,7 +577,19 @@ parameters:
 			path: src/Api/IncomingTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingsApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingsApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/IncomingsApi.php
@@ -439,6 +643,12 @@ parameters:
 			path: src/Api/InvoiceTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\InvoicesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/InvoicesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InvoicesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -446,6 +656,12 @@ parameters:
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InvoicesApi\:\:listGrouped\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/InvoicesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\InvoicesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/InvoicesApi.php
@@ -475,7 +691,19 @@ parameters:
 			path: src/Api/LetterTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\LettersApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/LettersApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\LettersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/LettersApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\LettersApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/LettersApi.php
@@ -517,7 +745,19 @@ parameters:
 			path: src/Api/OfferTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\OffersApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/OffersApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\OffersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/OffersApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\OffersApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/OffersApi.php
@@ -559,7 +799,19 @@ parameters:
 			path: src/Api/RecurringTagsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\RecurringsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/RecurringsApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\RecurringsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/RecurringsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\RecurringsApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/RecurringsApi.php
@@ -601,7 +853,19 @@ parameters:
 			path: src/Api/ReminderTextsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\RemindersApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/RemindersApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\RemindersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/RemindersApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\RemindersApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/RemindersApi.php
@@ -631,7 +895,19 @@ parameters:
 			path: src/Api/SupplierPropertiesApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/SupplierPropertiesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/SupplierPropertiesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/SupplierPropertiesApi.php
@@ -661,7 +937,19 @@ parameters:
 			path: src/Api/SupplierPropertyValuesApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertyValuesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/SupplierPropertyValuesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/SupplierPropertyValuesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertyValuesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/SupplierPropertyValuesApi.php
@@ -727,7 +1015,19 @@ parameters:
 			path: src/Api/SuppliersApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\SuppliersApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/SuppliersApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\SuppliersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/SuppliersApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\SuppliersApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/SuppliersApi.php
@@ -799,7 +1099,19 @@ parameters:
 			path: src/Api/UnitsApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\UnitsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/UnitsApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\UnitsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/UnitsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\UnitsApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/UnitsApi.php
@@ -829,7 +1141,19 @@ parameters:
 			path: src/Api/UsersApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\UsersApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/UsersApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\UsersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/UsersApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\UsersApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/UsersApi.php

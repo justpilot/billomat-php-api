@@ -6,6 +6,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Added
+- **Pagination-Iterator für alle List-Endpunkte.** Zwei neue, rein additive Methoden pro `*Api`-Klasse mit `list()`:
+  - `iterateAll(array $filters = [], int $pageSize = 100): \Generator<int, Model>` — lazy Generator nach Stripes `auto_paging_iter()`-Pattern. Holt seitenweise und yieldet einzelne Modelle; stoppt automatisch sobald die letzte Seite erreicht ist (entweder per `@total`-Envelope oder per `count(items) < pageSize`-Heuristik). Filter werden bei jeder Page-Anfrage mitgesendet; `page`/`per_page` darin werden überschrieben.
+  - `listPage(array $filters = []): Page<Model>` — gibt eine einzelne Seite samt Pagination-Metadaten zurück. Neue Wert-Objekte `Justpilot\Billomat\Pagination\Page<T>` (`items` + `info`) und `Justpilot\Billomat\Pagination\PageInfo` (`page`/`perPage`/`total`/`totalPages()`/`hasNextPage()`). `total` ist `null`, wenn der Endpunkt keine `@total`-Metadaten liefert.
+
+  Verfügbar auf den 26 List-APIs: `clients`, `invoices`, `offers`, `confirmations`, `creditNotes`, `deliveryNotes`, `reminders`, `letters`, `articles`, `suppliers`, `incomings`, `inboxDocuments`, `recurrings`, `contacts`, `articleProperties`, `articlePropertyValues`, `clientProperties`, `incomingProperties`, `incomingPropertyValues`, `supplierProperties`, `supplierPropertyValues`, `countries`, `currencies`, `units`, `users`, `emailTemplates`, `freeTexts`. Bestehende `list()`-Methoden bleiben unverändert.
+
+  Zwei neue `protected`-Helper in `AbstractApi`: `listResourcePage()` und `iterateResource()`. Beispiel: siehe `docs/advanced/pagination.md`.
+
 ### Changed
 - **Empty-String → null in Read-Modellen normalisiert.** Billomat liefert in JSON-Responses an vielen Stellen leere Strings statt echter `null`-Werte (z. B. `"title": ""`). Die `fromArray()`-Hydration aller Read-Modelle setzt diese Werte jetzt konsistent auf `null`, was bisher nur für int/float/bool-Felder so war. **Auswirkung:** Konsumenten, die in nullable string-Properties bisher gegen `''` geprüft haben, sollten auf `null` (oder `?? ''`) umstellen. Property-Typen, Konstruktor-Signaturen und `toArray()`-Ausgabe bleiben unverändert.
 

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Pagination\Page;
 
 /**
  * API-Wrapper für die Billomat-Incomings-Ressource (Eingangsrechnungen).
@@ -34,6 +36,39 @@ final class IncomingsApi extends AbstractApi
     public function list(array $filters = []): array
     {
         return $this->listResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters);
+    }
+
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * Identisch zu {@see list()}, gibt aber zusätzlich `@page`/`@per_page`/
+     * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
+     * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
+     *
+     * @param array<string, scalar|array|null> $filters
+     *
+     * @return Page<Incoming>
+     */
+    public function listPage(array $filters = []): Page
+    {
+        return $this->listResourcePage('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters);
+    }
+
+    /**
+     * Iteriert lazy durch alle Eingangsrechnungen und yieldet sie einzeln.
+     *
+     * Holt seitenweise pro {@code $pageSize}-Items und stoppt automatisch,
+     * sobald die letzte Seite erreicht ist (analog `auto_paging_iter()` im
+     * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
+     * und `per_page` darin werden überschrieben.
+     *
+     * @param array<string, scalar|array|null> $filters
+     *
+     * @return Generator<int, Incoming>
+     */
+    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters, $pageSize);
     }
 
     public function get(int $id): ?Incoming

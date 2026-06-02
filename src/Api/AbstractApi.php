@@ -6,11 +6,15 @@ namespace Justpilot\Billomat\Api;
 
 use Closure;
 use Deprecated;
+use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Pagination\Page;
+use Justpilot\Billomat\Pagination\PageInfo;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
@@ -172,6 +176,98 @@ abstract class AbstractApi
         $rows = array_is_list($node) ? $node : [$node];
 
         return array_map($hydrate, $rows);
+    }
+
+    /**
+     * Wie {@see listResource()}, gibt aber die einzelne Seite samt Pagination-
+     * Metadaten zurück. Die Werte `@page`/`@per_page`/`@total` aus dem
+     * äußeren Envelope werden in {@see PageInfo} normalisiert (von String zu
+     * Int). Liefert der Endpunkt keine dieser Felder, werden sie aus
+     * `$filters['page']`/`$filters['per_page']` bzw. der tatsächlichen
+     * Item-Anzahl abgeleitet (-> einzelne Seite, `hasNextPage() === false`).
+     *
+     * @template T of object
+     *
+     * @param string                           $path     Endpunkt, z. B. "/clients"
+     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param array<string, scalar|array|null> $filters  optionale Query-Filter
+     *
+     * @return Page<T>
+     */
+    protected function listResourcePage(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = []): Page
+    {
+        $data = $this->getJson($path, $filters);
+
+        $envelope = $data[$outerKey] ?? null;
+        if (!\is_array($envelope)) {
+            $envelope = [];
+        }
+
+        $node = $envelope[$innerKey] ?? null;
+        if (null === $node || [] === $node || '' === $node || !\is_array($node)) {
+            $items = [];
+        } else {
+            /** @var list<array<string,mixed>> $rows */
+            $rows = array_is_list($node) ? $node : [$node];
+            $items = array_map($hydrate, $rows);
+        }
+
+        $info = new PageInfo(
+            page: ScalarCaster::toIntOrNull($envelope['@page'] ?? $filters['page'] ?? null) ?? 1,
+            perPage: ScalarCaster::toIntOrNull($envelope['@per_page'] ?? $filters['per_page'] ?? null) ?? \count($items),
+            total: ScalarCaster::toIntOrNull($envelope['@total'] ?? null),
+        );
+
+        return new Page($items, $info);
+    }
+
+    /**
+     * Erzeugt einen Lazy-Generator, der seitenweise durch eine Billomat-Liste
+     * iteriert. Jede Iteration des äußeren Loops materialisiert eine Seite und
+     * yieldet ihre Items; sobald {@see PageInfo::hasNextPage()} `false` ist,
+     * stoppt der Generator.
+     *
+     * Sicherheitsnetz gegen Endlos-Loops: liefert eine Seite weniger Items als
+     * `per_page` erwartet (typischer Indikator für die letzte Seite, auch wenn
+     * `@total` fehlt), wird ebenfalls abgebrochen.
+     *
+     * @template T of object
+     *
+     * @param string                           $path     Endpunkt, z. B. "/clients"
+     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param array<string, scalar|array|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
+     * @param int                              $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit)
+     *
+     * @return Generator<int, T>
+     */
+    protected function iterateResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = [], int $pageSize = 100): Generator
+    {
+        $pageSize = max(1, $pageSize);
+        $page = 1;
+
+        while (true) {
+            $pageData = $this->listResourcePage(
+                $path,
+                $outerKey,
+                $innerKey,
+                $hydrate,
+                [...$filters, 'page' => $page, 'per_page' => $pageSize],
+            );
+
+            foreach ($pageData->items as $item) {
+                yield $item;
+            }
+
+            if (!$pageData->info->hasNextPage() || \count($pageData->items) < $pageSize) {
+                return;
+            }
+
+            ++$page;
+        }
     }
 
     /**

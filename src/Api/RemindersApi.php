@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderPdf;
+use Justpilot\Billomat\Pagination\Page;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -39,6 +41,39 @@ final class RemindersApi extends AbstractApi
     public function list(array $filters = []): array
     {
         return $this->listResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
+    }
+
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * Identisch zu {@see list()}, gibt aber zusätzlich `@page`/`@per_page`/
+     * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
+     * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
+     *
+     * @param array<string, scalar|array|null> $filters
+     *
+     * @return Page<Reminder>
+     */
+    public function listPage(array $filters = []): Page
+    {
+        return $this->listResourcePage('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
+    }
+
+    /**
+     * Iteriert lazy durch alle Mahnungen und yieldet sie einzeln.
+     *
+     * Holt seitenweise pro {@code $pageSize}-Items und stoppt automatisch,
+     * sobald die letzte Seite erreicht ist (analog `auto_paging_iter()` im
+     * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
+     * und `per_page` darin werden überschrieben.
+     *
+     * @param array<string, scalar|array|null> $filters
+     *
+     * @return Generator<int, Reminder>
+     */
+    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters, $pageSize);
     }
 
     public function get(int $id): ?Reminder

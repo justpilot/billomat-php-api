@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
-use Throwable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
 
@@ -183,86 +183,62 @@ final readonly class Client
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             name: (string) ($data['name'] ?? ''),
-            created: self::parseDateTime($data['created'] ?? null),
-            clientNumber: $data['client_number'] ?? null,
-            number: isset($data['number']) && '' !== $data['number'] ? (int) $data['number'] : null,
-            numberPre: $data['number_pre'] ?? null,
-            numberLength: isset($data['number_length']) && '' !== $data['number_length']
-                ? (int) $data['number_length']
-                : null,
-            street: $data['street'] ?? null,
-            zip: $data['zip'] ?? null,
-            city: $data['city'] ?? null,
-            state: $data['state'] ?? null,
-            countryCode: $data['country_code'] ?? null,
-            address: $data['address'] ?? null,
-            firstName: $data['first_name'] ?? null,
-            lastName: $data['last_name'] ?? null,
-            salutation: $data['salutation'] ?? null,
-            email: $data['email'] ?? null,
-            phone: $data['phone'] ?? null,
-            fax: $data['fax'] ?? null,
-            mobile: $data['mobile'] ?? null,
-            www: $data['www'] ?? null,
-            note: $data['note'] ?? null,
-            locale: $data['locale'] ?? null,
-            taxNumber: $data['tax_number'] ?? null,
-            vatNumber: $data['vat_number'] ?? null,
-            taxRule: $data['tax_rule'] ?? null,
-            netGross: $data['net_gross'] ?? null,
-            currencyCode: $data['currency_code'] ?? null,
-            debitorAccountNumber: isset($data['debitor_account_number']) && '' !== $data['debitor_account_number']
-                ? (int) $data['debitor_account_number']
-                : null,
-            priceGroup: isset($data['price_group']) && '' !== $data['price_group']
-                ? (int) $data['price_group']
-                : null,
-            archived: isset($data['archived']) ? (bool) $data['archived'] : null,
-            dunningRun: isset($data['dunning_run']) ? (bool) $data['dunning_run'] : null,
-            reduction: isset($data['reduction']) && '' !== $data['reduction']
-                ? (float) $data['reduction']
-                : null,
-            discountRateType: $data['discount_rate_type'] ?? null,
-            discountRate: isset($data['discount_rate']) && '' !== $data['discount_rate']
-                ? (float) $data['discount_rate']
-                : null,
-            discountDaysType: $data['discount_days_type'] ?? null,
-            discountDays: isset($data['discount_days']) && '' !== $data['discount_days']
-                ? (float) $data['discount_days']
-                : null,
-            dueDaysType: $data['due_days_type'] ?? null,
-            dueDays: isset($data['due_days']) && '' !== $data['due_days']
-                ? (int) $data['due_days']
-                : null,
-            reminderDueDaysType: $data['reminder_due_days_type'] ?? null,
-            reminderDueDays: isset($data['reminder_due_days']) && '' !== $data['reminder_due_days']
-                ? (int) $data['reminder_due_days']
-                : null,
-            offerValidityDaysType: $data['offer_validity_days_type'] ?? null,
-            offerValidityDays: isset($data['offer_validity_days']) && '' !== $data['offer_validity_days']
-                ? (int) $data['offer_validity_days']
-                : null,
-            bankAccountOwner: $data['bank_account_owner'] ?? null,
-            bankNumber: $data['bank_number'] ?? null,
-            bankName: $data['bank_name'] ?? null,
-            bankAccountNumber: $data['bank_account_number'] ?? null,
-            bankSwift: $data['bank_swift'] ?? null,
-            bankIban: $data['bank_iban'] ?? null,
-            sepaMandate: $data['sepa_mandate'] ?? null,
-            sepaMandateDate: self::parseDateTime($data['sepa_mandate_date'] ?? null),
-            defaultPaymentTypes: $data['default_payment_types'] ?? null,
-            enableCustomerportal: isset($data['enable_customerportal'])
-                ? (bool) $data['enable_customerportal']
-                : null,
-            customerportalUrl: $data['customerportal_url'] ?? null,
-            revenueGross: isset($data['revenue_gross']) && '' !== $data['revenue_gross']
-                ? (float) $data['revenue_gross']
-                : null,
-            revenueNet: isset($data['revenue_net']) && '' !== $data['revenue_net']
-                ? (float) $data['revenue_net']
-                : null,
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            clientNumber: ScalarCaster::toStringOrNull($data['client_number'] ?? null),
+            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
+            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
+            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
+            street: ScalarCaster::toStringOrNull($data['street'] ?? null),
+            zip: ScalarCaster::toStringOrNull($data['zip'] ?? null),
+            city: ScalarCaster::toStringOrNull($data['city'] ?? null),
+            state: ScalarCaster::toStringOrNull($data['state'] ?? null),
+            countryCode: ScalarCaster::toStringOrNull($data['country_code'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
+            lastName: ScalarCaster::toStringOrNull($data['last_name'] ?? null),
+            salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
+            email: ScalarCaster::toStringOrNull($data['email'] ?? null),
+            phone: ScalarCaster::toStringOrNull($data['phone'] ?? null),
+            fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
+            mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
+            www: ScalarCaster::toStringOrNull($data['www'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
+            taxNumber: ScalarCaster::toStringOrNull($data['tax_number'] ?? null),
+            vatNumber: ScalarCaster::toStringOrNull($data['vat_number'] ?? null),
+            taxRule: ScalarCaster::toStringOrNull($data['tax_rule'] ?? null),
+            netGross: ScalarCaster::toStringOrNull($data['net_gross'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            debitorAccountNumber: ScalarCaster::toIntOrNull($data['debitor_account_number'] ?? null),
+            priceGroup: ScalarCaster::toIntOrNull($data['price_group'] ?? null),
+            archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
+            dunningRun: ScalarCaster::toBoolOrNull($data['dunning_run'] ?? null),
+            reduction: ScalarCaster::toFloatOrNull($data['reduction'] ?? null),
+            discountRateType: ScalarCaster::toStringOrNull($data['discount_rate_type'] ?? null),
+            discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
+            discountDaysType: ScalarCaster::toStringOrNull($data['discount_days_type'] ?? null),
+            discountDays: ScalarCaster::toFloatOrNull($data['discount_days'] ?? null),
+            dueDaysType: ScalarCaster::toStringOrNull($data['due_days_type'] ?? null),
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            reminderDueDaysType: ScalarCaster::toStringOrNull($data['reminder_due_days_type'] ?? null),
+            reminderDueDays: ScalarCaster::toIntOrNull($data['reminder_due_days'] ?? null),
+            offerValidityDaysType: ScalarCaster::toStringOrNull($data['offer_validity_days_type'] ?? null),
+            offerValidityDays: ScalarCaster::toIntOrNull($data['offer_validity_days'] ?? null),
+            bankAccountOwner: ScalarCaster::toStringOrNull($data['bank_account_owner'] ?? null),
+            bankNumber: ScalarCaster::toStringOrNull($data['bank_number'] ?? null),
+            bankName: ScalarCaster::toStringOrNull($data['bank_name'] ?? null),
+            bankAccountNumber: ScalarCaster::toStringOrNull($data['bank_account_number'] ?? null),
+            bankSwift: ScalarCaster::toStringOrNull($data['bank_swift'] ?? null),
+            bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
+            sepaMandate: ScalarCaster::toStringOrNull($data['sepa_mandate'] ?? null),
+            sepaMandateDate: ScalarCaster::toDateTimeOrNull($data['sepa_mandate_date'] ?? null),
+            defaultPaymentTypes: ScalarCaster::toStringOrNull($data['default_payment_types'] ?? null),
+            enableCustomerportal: ScalarCaster::toBoolOrNull($data['enable_customerportal'] ?? null),
+            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
+            revenueGross: ScalarCaster::toFloatOrNull($data['revenue_gross'] ?? null),
+            revenueNet: ScalarCaster::toFloatOrNull($data['revenue_net'] ?? null),
         );
     }
 
@@ -333,18 +309,5 @@ final readonly class Client
             'revenue_gross' => $this->revenueGross,
             'revenue_net' => $this->revenueNet,
         ];
-    }
-
-    private static function parseDateTime(mixed $value): ?DateTimeImmutable
-    {
-        if (!\is_string($value) || '' === trim($value)) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

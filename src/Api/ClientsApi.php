@@ -29,13 +29,7 @@ final class ClientsApi extends AbstractApi
     {
         $data = $this->getJson('/clients/myself');
 
-        $clientData = $data['client'] ?? null;
-
-        if (!\is_array($clientData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching own account via /clients/myself.');
-        }
-
-        return Client::fromArray($clientData);
+        return Client::fromArray($this->unwrapEnvelope($data, 'client', 'fetching own account via /clients/myself'));
     }
 
     /**
@@ -49,29 +43,7 @@ final class ClientsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/clients', $filters);
-
-        $clientsNode = $data['clients']['client'] ?? [];
-
-        if (null === $clientsNode || [] === $clientsNode) {
-            return [];
-        }
-
-        if (\is_array($clientsNode) && array_is_list($clientsNode)) {
-            $rows = $clientsNode;
-        } elseif (\is_array($clientsNode)) {
-            $rows = [$clientsNode];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Client> $models */
-        $models = array_map(
-            Client::fromArray(...),
-            $rows
-        );
-
-        return $models;
+        return $this->listResource('/clients', 'clients', 'client', Client::fromArray(...), $filters);
     }
 
     /**
@@ -105,19 +77,9 @@ final class ClientsApi extends AbstractApi
      */
     public function create(ClientCreateOptions $options): Client
     {
-        $payload = [
-            'client' => $options->toArray(),
-        ];
+        $data = $this->postJson('/clients', ['client' => $options->toArray()]);
 
-        $data = $this->postJson('/clients', $payload);
-
-        $created = $data['client'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating client.');
-        }
-
-        return Client::fromArray($created);
+        return Client::fromArray($this->unwrapEnvelope($data, 'client', 'creating client'));
     }
 
     /**
@@ -158,20 +120,9 @@ final class ClientsApi extends AbstractApi
      */
     public function update(int $id, ClientUpdateOptions $options): Client
     {
-        $payload = [
-            'client' => $options->toArray(),
-        ];
+        $data = $this->putJson("/clients/{$id}", ['client' => $options->toArray()]);
 
-        $data = $this->putJson("/clients/{$id}", $payload);
-
-        /** @var array<string,mixed>|null $clientData */
-        $clientData = $data['client'] ?? null;
-
-        if (!\is_array($clientData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating client.');
-        }
-
-        return Client::fromArray($clientData);
+        return Client::fromArray($this->unwrapEnvelope($data, 'client', 'updating client'));
     }
 
     /**

@@ -239,7 +239,6 @@ final class InvoicesApiTest extends TestCase
         $created = $api->create($opts);
 
         // --- Assertions on response mapping ---
-        self::assertInstanceOf(Invoice::class, $created);
         self::assertSame(777, $created->id);
         self::assertSame(123, $created->clientId);
         self::assertSame(InvoiceStatus::DRAFT, $created->status);
@@ -654,7 +653,6 @@ final class InvoicesApiTest extends TestCase
 
         $updated = $api->update(777, $opts);
 
-        self::assertInstanceOf(Invoice::class, $updated);
         self::assertSame(777, $updated->id);
         self::assertSame('2025-03-10', $updated->date?->format('Y-m-d'));
 

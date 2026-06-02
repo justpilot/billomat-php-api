@@ -12,7 +12,6 @@ use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
-use Justpilot\Billomat\Model\InvoicePayment;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -65,7 +64,6 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertInstanceOf(Invoice::class, $draft);
         self::assertNotNull($draft->id);
 
         $invoiceId = $draft->id;
@@ -93,7 +91,6 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
 
         $payment = $billomat->invoicePayments->create($paymentOpts);
 
-        self::assertInstanceOf(InvoicePayment::class, $payment);
         self::assertNotNull($payment->id);
         self::assertSame($invoiceId, $payment->invoiceId);
         self::assertSame($amount, $payment->amount);

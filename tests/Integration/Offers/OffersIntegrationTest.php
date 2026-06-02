@@ -90,7 +90,6 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $offer = $billomat->offers->create($opts);
 
-        self::assertInstanceOf(Offer::class, $offer);
         self::assertNotNull($offer->id);
         self::assertSame($clientId, $offer->clientId);
         self::assertSame(OfferStatus::DRAFT, $offer->status);

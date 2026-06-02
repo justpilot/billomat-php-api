@@ -67,7 +67,6 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $contact = $billomat->contacts->create($opts);
 
-        self::assertInstanceOf(Contact::class, $contact);
         self::assertNotNull($contact->id);
 
         // Update

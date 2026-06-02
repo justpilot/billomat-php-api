@@ -17,7 +17,6 @@ final class InvoiceItemTypeTest extends TestCase
     {
         self::assertSame('PRODUCT', InvoiceItemType::PRODUCT->value);
         self::assertSame('SERVICE', InvoiceItemType::SERVICE->value);
-        self::assertSame([InvoiceItemType::PRODUCT, InvoiceItemType::SERVICE], InvoiceItemType::cases());
     }
 
     #[Test]

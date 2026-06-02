@@ -136,7 +136,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
             $createdClient = $billomat->clients->create($clientOptions);
 
-            self::assertInstanceOf(Client::class, $createdClient);
             self::assertNotNull($createdClient->id);
 
             $clientId = $createdClient->id;
@@ -174,14 +173,12 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // 4) Rechnung in der Sandbox erstellen (Draft)
         $invoice = $billomat->invoices->create($invoiceOpts);
 
-        self::assertInstanceOf(Invoice::class, $invoice);
         self::assertNotNull($invoice->id);
         self::assertGreaterThan(0, $invoice->id);
         self::assertSame($clientId, $invoice->clientId);
 
         // Status sollte gesetzt sein (bei Erstellung typischerweise "DRAFT")
         self::assertNotNull($invoice->status);
-        self::assertInstanceOf(InvoiceStatus::class, $invoice->status);
 
         // Rechnungsdatum prüfen, wenn vom Server zurückgegeben
         if ($invoice->date instanceof DateTimeImmutable) {
@@ -249,7 +246,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertInstanceOf(Invoice::class, $draft);
         self::assertNotNull($draft->id);
         self::assertGreaterThan(0, $draft->id);
 
@@ -268,7 +264,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($clientId, $completed->clientId);
 
         self::assertNotNull($completed->status);
-        self::assertInstanceOf(InvoiceStatus::class, $completed->status);
         self::assertNotSame(InvoiceStatus::DRAFT, $completed->status, 'Invoice status should not remain DRAFT after complete().');
 
         if (null !== $completed->invoiceNumber) {
@@ -319,7 +314,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertInstanceOf(Invoice::class, $draft);
         self::assertNotNull($draft->id);
         self::assertSame(InvoiceStatus::DRAFT, $draft->status);
 
@@ -380,7 +374,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertInstanceOf(Invoice::class, $draft);
         self::assertNotNull($draft->id);
 
         $draftId = $draft->id;
@@ -451,7 +444,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertInstanceOf(Invoice::class, $draft);
         self::assertNotNull($draft->id);
 
         $draftId = $draft->id;

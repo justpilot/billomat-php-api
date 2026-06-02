@@ -58,7 +58,6 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $created = $billomat->taxes->create($options);
 
-        self::assertInstanceOf(TaxRate::class, $created);
         self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
         self::assertSame($name, $created->name);

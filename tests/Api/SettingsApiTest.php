@@ -66,8 +66,6 @@ final class SettingsApiTest extends TestCase
 
         $settings = $api->get();
 
-        self::assertInstanceOf(Settings::class, $settings);
-
         self::assertInstanceOf(DateTimeImmutable::class, $settings->created);
         self::assertInstanceOf(DateTimeImmutable::class, $settings->updated);
 
@@ -139,7 +137,6 @@ final class SettingsApiTest extends TestCase
         $updated = $api->update($opts);
 
         // Response Mapping prüfen
-        self::assertInstanceOf(Settings::class, $updated);
         self::assertSame(NetGross::GROSS, $updated->netGross);
         self::assertSame(NumberRangeMode::IGNORE_PREFIX, $updated->numberRangeMode);
         self::assertSame(30, $updated->dueDays);

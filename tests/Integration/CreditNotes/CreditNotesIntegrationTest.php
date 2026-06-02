@@ -72,7 +72,6 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
 
         $note = $billomat->creditNotes->create($opts);
 
-        self::assertInstanceOf(CreditNote::class, $note);
         self::assertNotNull($note->id);
         self::assertSame(CreditNoteStatus::DRAFT, $note->status);
 

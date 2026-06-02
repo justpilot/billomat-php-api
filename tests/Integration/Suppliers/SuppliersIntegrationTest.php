@@ -45,9 +45,7 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $supplier = $billomat->suppliers->create($opts);
 
-        self::assertInstanceOf(Supplier::class, $supplier);
         self::assertNotNull($supplier->id);
-        self::assertNotNull($supplier->name);
 
         // Update
         $update = new SupplierUpdateOptions();
@@ -79,7 +77,6 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
             $tagOpts = new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'IT-SupTag-'.date('His'));
             $tag = $billomat->supplierTags->create($tagOpts);
 
-            self::assertInstanceOf(SupplierTag::class, $tag);
             self::assertNotNull($tag->id);
 
             $tags = $billomat->supplierTags->listBySupplier($supplier->id);

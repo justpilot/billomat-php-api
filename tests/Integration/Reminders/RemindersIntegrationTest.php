@@ -66,7 +66,6 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $reminder = $billomat->reminders->create($opts);
 
-        self::assertInstanceOf(Reminder::class, $reminder);
         self::assertNotNull($reminder->id);
         self::assertSame(ReminderStatus::DRAFT, $reminder->status);
 

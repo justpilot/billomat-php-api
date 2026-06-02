@@ -22,18 +22,29 @@ use Symfony\Component\HttpFoundation\Response as HttpStatus;
  */
 final class TestApi extends AbstractApi
 {
-    /** @param array<string, scalar|array|null> $query */
+    /**
+     * @param array<string, scalar|array|null> $query
+     *
+     * @return array<string,mixed>
+     */
     public function publicGetJson(string $path, array $query = []): array
     {
         return $this->getJson($path, $query);
     }
 
+    /**
+     * @return array<string,mixed>|null
+     */
     public function publicGetJsonOrNull(string $path): ?array
     {
         return $this->getJsonOrNull($path);
     }
 
-    /** @param array<string,mixed> $body */
+    /**
+     * @param array<string,mixed> $body
+     *
+     * @return array<string,mixed>
+     */
     public function publicPostJson(string $path, array $body): array
     {
         return $this->postJson($path, $body);

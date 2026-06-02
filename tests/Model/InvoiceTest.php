@@ -61,7 +61,6 @@ final class InvoiceTest extends TestCase
 
         $invoice = Invoice::fromArray($data);
 
-        self::assertInstanceOf(Invoice::class, $invoice);
         self::assertSame(123, $invoice->id);
         self::assertSame(456, $invoice->clientId);
         self::assertSame(789, $invoice->contactId);
@@ -130,7 +129,6 @@ final class InvoiceTest extends TestCase
 
         $invoice = Invoice::fromArray($data);
 
-        self::assertInstanceOf(Invoice::class, $invoice);
         self::assertSame(123, $invoice->id);
         self::assertSame(456, $invoice->clientId);
         self::assertSame('EUR', $invoice->currencyCode);
@@ -165,7 +163,6 @@ final class InvoiceTest extends TestCase
 
         self::assertIsArray($invoice->items);
         self::assertCount(1, $invoice->items);
-        self::assertInstanceOf(InvoiceItem::class, $invoice->items[0]);
 
         $item = $invoice->items[0];
         self::assertSame(1, $item->id);

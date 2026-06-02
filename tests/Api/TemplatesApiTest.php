@@ -141,7 +141,6 @@ final class TemplatesApiTest extends TestCase
 
         $created = $api->create($opts);
 
-        self::assertInstanceOf(Template::class, $created);
         self::assertSame(99, $created->id);
 
         self::assertSame('POST', $captured['method']);

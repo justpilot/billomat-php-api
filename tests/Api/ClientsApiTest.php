@@ -59,7 +59,6 @@ final class ClientsApiTest extends TestCase
 
         $me = $api->getMyself();
 
-        self::assertInstanceOf(Client::class, $me);
         self::assertSame(12345, $me->id);
         self::assertSame('Mein Account', $me->name);
         self::assertSame('ACC1', $me->clientNumber);
@@ -255,7 +254,6 @@ final class ClientsApiTest extends TestCase
 
         $created = $api->create($opts);
 
-        self::assertInstanceOf(Client::class, $created);
         self::assertSame(999, $created->id);
         self::assertSame('New Client GmbH', $created->name);
         self::assertSame('C-100', $created->clientNumber);
@@ -331,7 +329,6 @@ final class ClientsApiTest extends TestCase
 
         $updated = $api->update(123, $opts);
 
-        self::assertInstanceOf(Client::class, $updated);
         self::assertSame(123, $updated->id);
         self::assertSame('Die super Musterfirma', $updated->name);
 

@@ -10,7 +10,6 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -42,7 +41,6 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
         $created = $billomat->clients->create($options);
 
-        self::assertInstanceOf(Client::class, $created);
         self::assertNotNull($created->id);
 
         $clientId = $created->id;

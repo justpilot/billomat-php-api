@@ -171,7 +171,6 @@ final class TaxesApiTest extends TestCase
 
         $created = $api->create($options);
 
-        self::assertInstanceOf(TaxRate::class, $created);
         self::assertSame(10, $created->id);
         self::assertSame('USt 7%', $created->name);
         self::assertSame(7.0, $created->rate);
@@ -237,7 +236,6 @@ final class TaxesApiTest extends TestCase
 
         $updated = $api->update(10, $options);
 
-        self::assertInstanceOf(TaxRate::class, $updated);
         self::assertSame(10, $updated->id);
         self::assertSame('USt 7% (neu)', $updated->name);
         self::assertSame(7.0, $updated->rate);

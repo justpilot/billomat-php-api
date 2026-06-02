@@ -77,7 +77,6 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
 
         $prop = $billomat->articleProperties->create($opts);
 
-        self::assertInstanceOf(ArticleProperty::class, $prop);
         self::assertNotNull($prop->id);
         self::assertSame(PropertyType::TEXTFIELD, $prop->type);
 
@@ -95,7 +94,6 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
 
         $prop = $billomat->clientProperties->create($opts);
 
-        self::assertInstanceOf(ClientProperty::class, $prop);
         self::assertNotNull($prop->id);
 
         self::assertTrue($billomat->clientProperties->delete($prop->id));

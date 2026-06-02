@@ -44,7 +44,7 @@ final class BillomatHttpClientQueryTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{0: array<string, scalar|array|null>, 1: string}>
+     * @return iterable<string, array{0: array<string, scalar|array<int|string, scalar|null>|null>, 1: string}>
      */
     public static function queryStringProvider(): iterable
     {

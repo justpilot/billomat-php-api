@@ -75,7 +75,6 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
 
         $confirmation = $billomat->confirmations->create($opts);
 
-        self::assertInstanceOf(Confirmation::class, $confirmation);
         self::assertNotNull($confirmation->id);
         self::assertSame(ConfirmationStatus::DRAFT, $confirmation->status);
 

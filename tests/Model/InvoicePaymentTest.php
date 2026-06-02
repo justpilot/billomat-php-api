@@ -28,7 +28,6 @@ final class InvoicePaymentTest extends TestCase
 
         $payment = InvoicePayment::fromArray($data);
 
-        self::assertInstanceOf(InvoicePayment::class, $payment);
         self::assertSame(55, $payment->id);
         self::assertSame(789, $payment->invoiceId);
 

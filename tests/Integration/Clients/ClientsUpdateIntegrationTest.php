@@ -49,7 +49,6 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
 
         $updated = $billomat->clients->update($id, $opts);
 
-        self::assertInstanceOf(Client::class, $updated);
         self::assertSame($id, $updated->id);
         self::assertSame($originalName, $updated->name, 'Name should not change when only note is updated.');
         self::assertSame($newNote, $updated->note);
@@ -72,7 +71,6 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
         }
 
         $afterReset = $billomat->clients->update($id, $reset);
-        self::assertInstanceOf(Client::class, $afterReset);
         self::assertSame($id, $afterReset->id);
 
         $fetchedAfterReset = $billomat->clients->get($id);

@@ -70,7 +70,6 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
         if ('UPLOADED' === $tpl->templateType?->value) {
             // format/base64file sind laut Doku erst beim single GET vorhanden
             // aber wir prüfen nur "nicht kaputt"
-            self::assertTrue(true);
         }
     }
 

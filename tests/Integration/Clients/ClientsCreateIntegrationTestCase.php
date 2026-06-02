@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\Clients;
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
-use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -37,7 +36,6 @@ final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegration
 
         $created = $billomat->clients->create($options);
 
-        self::assertInstanceOf(Client::class, $created);
         self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
         self::assertSame($options->name, $created->name);

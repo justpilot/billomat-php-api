@@ -45,7 +45,6 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $article = $billomat->articles->create($opts);
 
-        self::assertInstanceOf(Article::class, $article);
         self::assertNotNull($article->id);
         self::assertNotNull($article->title);
 
@@ -85,7 +84,6 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
             $tagOpts = new ArticleTagCreateOptions(articleId: $article->id, name: 'IT-Tag-'.date('His'));
             $tag = $billomat->articleTags->create($tagOpts);
 
-            self::assertInstanceOf(ArticleTag::class, $tag);
             self::assertNotNull($tag->id);
 
             // List by article

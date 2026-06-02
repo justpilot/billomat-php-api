@@ -64,7 +64,6 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $incoming = $billomat->incomings->create($opts);
 
-        self::assertInstanceOf(Incoming::class, $incoming);
         self::assertNotNull($incoming->id);
         self::assertSame($supplierId, $incoming->supplierId);
 

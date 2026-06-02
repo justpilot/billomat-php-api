@@ -16,7 +16,6 @@ final class TemplateEngineTest extends TestCase
     public function itExposesDefaultCase(): void
     {
         self::assertSame('DEFAULT', TemplateEngine::DEFAULT->value);
-        self::assertSame([TemplateEngine::DEFAULT], TemplateEngine::cases());
     }
 
     #[Test]

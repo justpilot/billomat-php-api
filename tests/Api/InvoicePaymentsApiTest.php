@@ -176,7 +176,6 @@ final class InvoicePaymentsApiTest extends TestCase
 
         $payment = $api->create($opts);
 
-        self::assertInstanceOf(InvoicePayment::class, $payment);
         self::assertSame(10, $payment->id);
         self::assertSame(300, $payment->invoiceId);
         self::assertSame(119.0, $payment->amount);

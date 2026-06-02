@@ -11,3 +11,26 @@ parameters:
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: true
     tmpDir: build/phpstan
+    ignoreErrors:
+        # Mocked-Request-Introspection: PHPUnit-Tests fangen den ausgehenden
+        # MockHttpClient-Aufruf via `array $captured` ein und greifen dann
+        # tief in `$captured['options']['body']`/`['json']`/`['headers']` rein.
+        # Das `array $options`-Argument der Closure ist nicht typisiert; jeder
+        # Folge-Zugriff liefert daher `mixed`. Den ganzen Capture-Pfad zu
+        # typisieren (eigenes `CapturedRequest`-DTO + Trait + Migration aller
+        # ~60 Tests) hätte einen niedrigen Nutzen-pro-Aufwand. Stattdessen
+        # blenden wir die rein kosmetischen `offsetAccess`/`argument.type`-
+        # Warnungen gezielt in tests/Api/ aus. Produktivcode bleibt strikt
+        # auf Level max.
+        -
+            identifier: offsetAccess.nonOffsetAccessible
+            paths:
+                - tests/Api/*
+                - tests/Integration/*
+            reportUnmatched: false
+        -
+            identifier: argument.type
+            paths:
+                - tests/Api/*
+                - tests/Integration/*
+            reportUnmatched: false

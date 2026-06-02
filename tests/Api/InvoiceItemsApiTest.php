@@ -288,7 +288,6 @@ final class InvoiceItemsApiTest extends TestCase
 
         $created = $api->create(123, $options);
 
-        self::assertInstanceOf(InvoiceItem::class, $created);
         self::assertSame(77, $created->id);
         self::assertSame(123, $created->invoiceId);
         self::assertSame('Neue Position', $created->title);
@@ -372,7 +371,6 @@ final class InvoiceItemsApiTest extends TestCase
 
         $updated = $api->update(77, $options);
 
-        self::assertInstanceOf(InvoiceItem::class, $updated);
         self::assertSame(77, $updated->id);
         self::assertSame(InvoiceItemType::PRODUCT, $updated->type);
         self::assertTrue($updated->taxChangedManually);

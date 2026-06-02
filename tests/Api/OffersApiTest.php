@@ -186,7 +186,6 @@ final class OffersApiTest extends TestCase
 
         $created = $api->create($opts);
 
-        self::assertInstanceOf(Offer::class, $created);
         self::assertSame(777, $created->id);
         self::assertSame(OfferStatus::DRAFT, $created->status);
 
@@ -236,7 +235,6 @@ final class OffersApiTest extends TestCase
 
         $updated = $api->update(777, $opts);
 
-        self::assertInstanceOf(Offer::class, $updated);
         self::assertSame('2026-03-10', $updated->date?->format('Y-m-d'));
 
         self::assertSame('PUT', $captured['method']);

@@ -68,7 +68,6 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $letter = $billomat->letters->create($opts);
 
-        self::assertInstanceOf(Letter::class, $letter);
         self::assertNotNull($letter->id);
         self::assertSame($clientId, $letter->clientId);
         self::assertSame(LetterStatus::DRAFT, $letter->status);

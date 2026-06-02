@@ -73,7 +73,6 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
 
         $note = $billomat->deliveryNotes->create($opts);
 
-        self::assertInstanceOf(DeliveryNote::class, $note);
         self::assertNotNull($note->id);
         self::assertSame(DeliveryNoteStatus::DRAFT, $note->status);
 

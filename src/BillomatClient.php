@@ -22,6 +22,12 @@ use Justpilot\Billomat\Api\DeliveryNoteCommentsApi;
 use Justpilot\Billomat\Api\DeliveryNoteItemsApi;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\DeliveryNoteTagsApi;
+use Justpilot\Billomat\Api\InboxDocumentsApi;
+use Justpilot\Billomat\Api\IncomingCommentsApi;
+use Justpilot\Billomat\Api\IncomingPaymentsApi;
+use Justpilot\Billomat\Api\IncomingPropertyValuesApi;
+use Justpilot\Billomat\Api\IncomingsApi;
+use Justpilot\Billomat\Api\IncomingTagsApi;
 use Justpilot\Billomat\Api\InvoiceCommentsApi;
 use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
@@ -108,6 +114,13 @@ final readonly class BillomatClient
 
     public ContactsApi $contacts;
 
+    public IncomingsApi $incomings;
+    public IncomingCommentsApi $incomingComments;
+    public IncomingPaymentsApi $incomingPayments;
+    public IncomingTagsApi $incomingTags;
+    public IncomingPropertyValuesApi $incomingPropertyValues;
+    public InboxDocumentsApi $inboxDocuments;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -161,6 +174,12 @@ final readonly class BillomatClient
         $this->supplierTags = new SupplierTagsApi($this->http);
         $this->supplierPropertyValues = new SupplierPropertyValuesApi($this->http);
         $this->contacts = new ContactsApi($this->http);
+        $this->incomings = new IncomingsApi($this->http);
+        $this->incomingComments = new IncomingCommentsApi($this->http);
+        $this->incomingPayments = new IncomingPaymentsApi($this->http);
+        $this->incomingTags = new IncomingTagsApi($this->http);
+        $this->incomingPropertyValues = new IncomingPropertyValuesApi($this->http);
+        $this->inboxDocuments = new InboxDocumentsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

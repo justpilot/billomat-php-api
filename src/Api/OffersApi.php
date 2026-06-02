@@ -144,9 +144,9 @@ final class OffersApi extends AbstractApi
 
         $payload = ['offer' => $body];
 
-        $response = $this->putEmptyResponse("/offers/{$id}/complete", $payload);
+        $this->putVoid("/offers/{$id}/complete", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**
@@ -164,33 +164,33 @@ final class OffersApi extends AbstractApi
     /** Storniert ein Angebot. */
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/offers/{$id}/cancel");
+        $this->putVoid("/offers/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /** Markiert ein Angebot als gewonnen (Status → ACCEPTED). */
     public function win(int $id): bool
     {
-        $response = $this->putEmptyResponse("/offers/{$id}/win");
+        $this->putVoid("/offers/{$id}/win");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /** Markiert ein Angebot als verloren (Status → REJECTED). */
     public function lose(int $id): bool
     {
-        $response = $this->putEmptyResponse("/offers/{$id}/lose");
+        $this->putVoid("/offers/{$id}/lose");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /** Markiert ein Angebot als erledigt (Status → CLEARED). */
     public function clear(int $id): bool
     {
-        $response = $this->putEmptyResponse("/offers/{$id}/clear");
+        $this->putVoid("/offers/{$id}/clear");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**
@@ -198,9 +198,9 @@ final class OffersApi extends AbstractApi
      */
     public function undo(int $id): bool
     {
-        $response = $this->putEmptyResponse("/offers/{$id}/undo");
+        $this->putVoid("/offers/{$id}/undo");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /** Versendet ein Angebot per E-Mail. */
@@ -220,9 +220,9 @@ final class OffersApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/offers/{$id}/upload-signature", $payload);
+        $this->putVoid("/offers/{$id}/upload-signature", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**

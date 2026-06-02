@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\DeliveryNoteUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNotePdf;
@@ -348,5 +349,24 @@ final class DeliveryNotesApiTest extends TestCase
         }
 
         return \is_array($payload) ? $payload : null;
+    }
+
+    #[Test]
+    public function undoMapsHttpErrorToValidationException(): void
+    {
+        // Regression: vor Bug-Fix verschluckte `undo()` 4xx/5xx und gab still `false` zurück.
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['errors' => ['error' => 'Delivery note status cannot be reverted.']], JSON_THROW_ON_ERROR),
+            ['http_code' => 422],
+        ));
+
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        $api->undo(21);
     }
 }

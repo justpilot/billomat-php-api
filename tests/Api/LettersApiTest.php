@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\LetterEmailOptions;
 use Justpilot\Billomat\Api\LettersApi;
 use Justpilot\Billomat\Api\LetterUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
@@ -290,5 +291,24 @@ final class LettersApiTest extends TestCase
 
         self::assertSame('https://mycompany.billomat.net/api/letters/100/upload', $captured[0]['url']);
         self::assertSame('https://mycompany.billomat.net/api/letters/200/upload-signature', $captured[1]['url']);
+    }
+
+    #[Test]
+    public function completeMapsHttpErrorToValidationException(): void
+    {
+        // Regression: vor Bug-Fix verschluckte `complete()` 4xx/5xx und gab still `false` zurück.
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['errors' => ['error' => 'Letter cannot be completed.']], JSON_THROW_ON_ERROR),
+            ['http_code' => 422],
+        ));
+
+        $api = new LettersApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        $api->complete(7);
     }
 }

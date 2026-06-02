@@ -125,9 +125,9 @@ final class RemindersApi extends AbstractApi
 
         $payload = ['reminder' => $body];
 
-        $response = $this->putEmptyResponse("/reminders/{$id}/complete", $payload);
+        $this->putVoid("/reminders/{$id}/complete", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function delete(int $id): bool
@@ -139,9 +139,9 @@ final class RemindersApi extends AbstractApi
 
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/reminders/{$id}/cancel");
+        $this->putVoid("/reminders/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function email(int $id, ?ReminderEmailOptions $options = null): bool
@@ -157,9 +157,9 @@ final class RemindersApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/reminders/{$id}/upload-signature", $payload);
+        $this->putVoid("/reminders/{$id}/upload-signature", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**

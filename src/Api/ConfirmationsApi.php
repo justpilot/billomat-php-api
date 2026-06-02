@@ -127,9 +127,9 @@ final class ConfirmationsApi extends AbstractApi
 
         $payload = ['confirmation' => $body];
 
-        $response = $this->putEmptyResponse("/confirmations/{$id}/complete", $payload);
+        $this->putVoid("/confirmations/{$id}/complete", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function delete(int $id): bool
@@ -141,25 +141,25 @@ final class ConfirmationsApi extends AbstractApi
 
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/confirmations/{$id}/cancel");
+        $this->putVoid("/confirmations/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /** Markiert eine Auftragsbestätigung als erledigt (Status → CLEARED). */
     public function clear(int $id): bool
     {
-        $response = $this->putEmptyResponse("/confirmations/{$id}/clear");
+        $this->putVoid("/confirmations/{$id}/clear");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /** Setzt einen Status zurück auf OPEN (Rückgängigmachen von clear/cancel). */
     public function undo(int $id): bool
     {
-        $response = $this->putEmptyResponse("/confirmations/{$id}/undo");
+        $this->putVoid("/confirmations/{$id}/undo");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function email(int $id, ?ConfirmationEmailOptions $options = null): bool
@@ -175,9 +175,9 @@ final class ConfirmationsApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/confirmations/{$id}/upload-signature", $payload);
+        $this->putVoid("/confirmations/{$id}/upload-signature", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**

@@ -119,16 +119,16 @@ final class IncomingsApi extends AbstractApi
 
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/incomings/{$id}/cancel");
+        $this->putVoid("/incomings/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function uncancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/incomings/{$id}/uncancel");
+        $this->putVoid("/incomings/{$id}/uncancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**
@@ -138,8 +138,8 @@ final class IncomingsApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/incomings/{$id}/upload", $payload);
+        $this->putVoid("/incomings/{$id}/upload", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 }

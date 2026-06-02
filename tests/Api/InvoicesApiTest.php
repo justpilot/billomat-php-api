@@ -1042,4 +1042,24 @@ final class InvoicesApiTest extends TestCase
         parse_str($parts['query'] ?? '', $query);
         self::assertSame('status', $query['group_by'] ?? null);
     }
+
+    #[Test]
+    public function completeMapsHttpErrorToValidationException(): void
+    {
+        // Regression: vor Bug-Fix verschluckte `complete()` 4xx/5xx und gab still `false` zurück,
+        // weil $response->getStatusCode() in Symfony's HttpClient bei 4xx/5xx NICHT wirft.
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['errors' => ['error' => 'Invoice cannot be completed.']], JSON_THROW_ON_ERROR),
+            ['http_code' => 422],
+        ));
+
+        $api = new InvoicesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        $api->complete(777);
+    }
 }

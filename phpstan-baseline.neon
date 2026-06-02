@@ -13,20 +13,8 @@ parameters:
 			path: src/Api/AbstractApi.php
 
 		-
-			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:putEmptyResponse\(\) has parameter \$body with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/AbstractApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:putJson\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/AbstractApi.php
-
-		-
-			message: '#^Parameter \#4 \$json of method Justpilot\\Billomat\\Http\\BillomatHttpClientInterface\:\:request\(\) expects array\<string, mixed\>\|null, array given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Api/AbstractApi.php
 

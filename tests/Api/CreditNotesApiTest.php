@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Api\CreditNoteUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNotePdf;
@@ -334,5 +335,24 @@ final class CreditNotesApiTest extends TestCase
         }
 
         return \is_array($payload) ? $payload : null;
+    }
+
+    #[Test]
+    public function cancelMapsHttpErrorToValidationException(): void
+    {
+        // Regression: vor Bug-Fix verschluckte `cancel()` 4xx/5xx und gab still `false` zurück.
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['errors' => ['error' => 'Credit note cannot be cancelled.']], JSON_THROW_ON_ERROR),
+            ['http_code' => 422],
+        ));
+
+        $api = new CreditNotesApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        $api->cancel(9);
     }
 }

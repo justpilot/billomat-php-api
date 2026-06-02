@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
@@ -494,5 +495,24 @@ final class OffersApiTest extends TestCase
         }
 
         return \is_array($payload) ? $payload : null;
+    }
+
+    #[Test]
+    public function winMapsHttpErrorToValidationException(): void
+    {
+        // Regression: vor Bug-Fix verschluckte `win()` 4xx/5xx und gab still `false` zurück.
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['errors' => ['error' => 'Offer cannot be marked as won.']], JSON_THROW_ON_ERROR),
+            ['http_code' => 422],
+        ));
+
+        $api = new OffersApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        $api->win(42);
     }
 }

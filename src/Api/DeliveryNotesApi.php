@@ -127,9 +127,9 @@ final class DeliveryNotesApi extends AbstractApi
 
         $payload = ['delivery-note' => $body];
 
-        $response = $this->putEmptyResponse("/delivery-notes/{$id}/complete", $payload);
+        $this->putVoid("/delivery-notes/{$id}/complete", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function delete(int $id): bool
@@ -141,23 +141,23 @@ final class DeliveryNotesApi extends AbstractApi
 
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/delivery-notes/{$id}/cancel");
+        $this->putVoid("/delivery-notes/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function clear(int $id): bool
     {
-        $response = $this->putEmptyResponse("/delivery-notes/{$id}/clear");
+        $this->putVoid("/delivery-notes/{$id}/clear");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function undo(int $id): bool
     {
-        $response = $this->putEmptyResponse("/delivery-notes/{$id}/undo");
+        $this->putVoid("/delivery-notes/{$id}/undo");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function email(int $id, ?DeliveryNoteEmailOptions $options = null): bool
@@ -173,9 +173,9 @@ final class DeliveryNotesApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/delivery-notes/{$id}/upload-signature", $payload);
+        $this->putVoid("/delivery-notes/{$id}/upload-signature", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**

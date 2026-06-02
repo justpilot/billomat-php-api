@@ -9,6 +9,7 @@ use Justpilot\Billomat\Api\IncomingCreateOptions;
 use Justpilot\Billomat\Api\IncomingsApi;
 use Justpilot\Billomat\Api\IncomingUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Incoming;
@@ -172,5 +173,24 @@ final class IncomingsApiTest extends TestCase
         self::assertSame('https://mycompany.billomat.net/api/incomings/2/uncancel', $captured[1]['url']);
         self::assertSame('https://mycompany.billomat.net/api/incomings/3/upload', $captured[2]['url']);
         self::assertSame('DELETE', $captured[3]['method']);
+    }
+
+    #[Test]
+    public function cancelMapsHttpErrorToValidationException(): void
+    {
+        // Regression: vor Bug-Fix verschluckte `cancel()` 4xx/5xx und gab still `false` zurück.
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['errors' => ['error' => 'Incoming cannot be cancelled.']], JSON_THROW_ON_ERROR),
+            ['http_code' => 422],
+        ));
+
+        $api = new IncomingsApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        $api->cancel(12);
     }
 }

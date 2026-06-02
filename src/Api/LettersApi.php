@@ -128,9 +128,9 @@ final class LettersApi extends AbstractApi
 
         $payload = ['letter' => $body];
 
-        $response = $this->putEmptyResponse("/letters/{$id}/complete", $payload);
+        $this->putVoid("/letters/{$id}/complete", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function delete(int $id): bool
@@ -142,23 +142,23 @@ final class LettersApi extends AbstractApi
 
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/letters/{$id}/cancel");
+        $this->putVoid("/letters/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function clear(int $id): bool
     {
-        $response = $this->putEmptyResponse("/letters/{$id}/clear");
+        $this->putVoid("/letters/{$id}/clear");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function undo(int $id): bool
     {
-        $response = $this->putEmptyResponse("/letters/{$id}/undo");
+        $this->putVoid("/letters/{$id}/undo");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function email(int $id, ?LetterEmailOptions $options = null): bool
@@ -179,9 +179,9 @@ final class LettersApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/letters/{$id}/upload", $payload);
+        $this->putVoid("/letters/{$id}/upload", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /** Lädt eine unterschriebene PDF-Version des Briefs hoch. */
@@ -189,9 +189,9 @@ final class LettersApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/letters/{$id}/upload-signature", $payload);
+        $this->putVoid("/letters/{$id}/upload-signature", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**

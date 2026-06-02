@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\ReminderEmailOptions;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\ReminderStatus;
@@ -292,5 +293,24 @@ final class RemindersApiTest extends TestCase
         self::assertTrue($api->uploadSignature(555, base64_encode('PDF')));
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/reminders/555/upload-signature', $captured['url']);
+    }
+
+    #[Test]
+    public function completeMapsHttpErrorToValidationException(): void
+    {
+        // Regression: vor Bug-Fix verschluckte `complete()` 4xx/5xx und gab still `false` zurück.
+        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
+            json_encode(['errors' => ['error' => 'Reminder cannot be completed.']], JSON_THROW_ON_ERROR),
+            ['http_code' => 422],
+        ));
+
+        $api = new RemindersApi(new BillomatHttpClient(
+            $mock,
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(ValidationException::class);
+
+        $api->complete(88);
     }
 }

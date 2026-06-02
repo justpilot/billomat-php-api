@@ -126,9 +126,9 @@ final class CreditNotesApi extends AbstractApi
 
         $payload = ['credit-note' => $body];
 
-        $response = $this->putEmptyResponse("/credit-notes/{$id}/complete", $payload);
+        $this->putVoid("/credit-notes/{$id}/complete", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function delete(int $id): bool
@@ -140,16 +140,16 @@ final class CreditNotesApi extends AbstractApi
 
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/credit-notes/{$id}/cancel");
+        $this->putVoid("/credit-notes/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function uncancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/credit-notes/{$id}/uncancel");
+        $this->putVoid("/credit-notes/{$id}/uncancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     public function email(int $id, ?CreditNoteEmailOptions $options = null): bool
@@ -165,9 +165,9 @@ final class CreditNotesApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/credit-notes/{$id}/upload-signature", $payload);
+        $this->putVoid("/credit-notes/{$id}/upload-signature", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**

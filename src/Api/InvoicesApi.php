@@ -206,9 +206,9 @@ final class InvoicesApi extends AbstractApi
 
         $payload = ['invoice' => $body];
 
-        $response = $this->putEmptyResponse("/invoices/{$id}/complete", $payload);
+        $this->putVoid("/invoices/{$id}/complete", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**
@@ -234,9 +234,9 @@ final class InvoicesApi extends AbstractApi
      */
     public function cancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/invoices/{$id}/cancel");
+        $this->putVoid("/invoices/{$id}/cancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**
@@ -248,9 +248,9 @@ final class InvoicesApi extends AbstractApi
      */
     public function uncancel(int $id): bool
     {
-        $response = $this->putEmptyResponse("/invoices/{$id}/uncancel");
+        $this->putVoid("/invoices/{$id}/uncancel");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**
@@ -298,9 +298,9 @@ final class InvoicesApi extends AbstractApi
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
-        $response = $this->putEmptyResponse("/invoices/{$id}/upload-signature", $payload);
+        $this->putVoid("/invoices/{$id}/upload-signature", $payload);
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**
@@ -312,9 +312,9 @@ final class InvoicesApi extends AbstractApi
      */
     public function encash(int $id): bool
     {
-        $response = $this->putEmptyResponse("/invoices/{$id}/encash");
+        $this->putVoid("/invoices/{$id}/encash");
 
-        return 200 === $response->getStatusCode();
+        return true;
     }
 
     /**

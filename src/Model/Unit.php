@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Einheit (z.B. Stück, Stunde) aus den Billomat-Einstellungen.
  */
@@ -21,7 +23,7 @@ final readonly class Unit
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             name: (string) ($data['name'] ?? ''),
         );
     }

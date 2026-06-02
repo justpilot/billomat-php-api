@@ -10,7 +10,6 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -41,29 +40,7 @@ final class DeliveryNotesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/delivery-notes', $filters);
-
-        $node = $data['delivery-notes']['delivery-note'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<DeliveryNote> $models */
-        $models = array_map(
-            DeliveryNote::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters);
     }
 
     public function get(int $id): ?DeliveryNote
@@ -94,13 +71,7 @@ final class DeliveryNotesApi extends AbstractApi
 
         $data = $this->postJson('/delivery-notes', $payload);
 
-        $created = $data['delivery-note'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating delivery note.');
-        }
-
-        return DeliveryNote::fromArray($created);
+        return DeliveryNote::fromArray($this->unwrapEnvelope($data, 'delivery-note', 'creating delivery note'));
     }
 
     public function update(int $id, DeliveryNoteUpdateOptions $options): DeliveryNote
@@ -109,12 +80,7 @@ final class DeliveryNotesApi extends AbstractApi
 
         $data = $this->putJson("/delivery-notes/{$id}", $payload);
 
-        $row = $data['delivery-note'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating delivery note.');
-        }
-
-        return DeliveryNote::fromArray($row);
+        return DeliveryNote::fromArray($this->unwrapEnvelope($data, 'delivery-note', 'updating delivery note'));
     }
 
     public function complete(int $id, ?int $templateId = null): bool
@@ -203,12 +169,6 @@ final class DeliveryNotesApi extends AbstractApi
 
         $data = $this->getJson("/delivery-notes/{$id}/pdf", $query);
 
-        $pdfData = $data['pdf'] ?? null;
-
-        if (!\is_array($pdfData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching delivery note PDF.');
-        }
-
-        return DeliveryNotePdf::fromArray($pdfData);
+        return DeliveryNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching delivery note PDF'));
     }
 }

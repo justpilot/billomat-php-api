@@ -12,7 +12,6 @@ use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -35,29 +34,7 @@ final class InvoicesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/invoices', $filters);
-
-        $node = $data['invoices']['invoice'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Invoice> $models */
-        $models = array_map(
-            Invoice::fromArray(...),
-            $rows
-        );
-
-        return $models;
+        return $this->listResource('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters);
     }
 
     /**
@@ -82,29 +59,7 @@ final class InvoicesApi extends AbstractApi
         $query = $filters;
         $query['group_by'] = $csv;
 
-        $data = $this->getJson('/invoices', $query);
-
-        $node = $data['invoice-groups']['invoice-group'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<InvoiceGroup> $models */
-        $models = array_map(
-            InvoiceGroup::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/invoices', 'invoice-groups', 'invoice-group', InvoiceGroup::fromArray(...), $query);
     }
 
     /**
@@ -148,13 +103,7 @@ final class InvoicesApi extends AbstractApi
 
         $data = $this->postJson('/invoices', $payload);
 
-        $created = $data['invoice'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating invoice.');
-        }
-
-        return Invoice::fromArray($created);
+        return Invoice::fromArray($this->unwrapEnvelope($data, 'invoice', 'creating invoice'));
     }
 
     /**
@@ -174,12 +123,7 @@ final class InvoicesApi extends AbstractApi
 
         $data = $this->putJson("/invoices/{$id}", $payload);
 
-        $invoiceData = $data['invoice'] ?? null;
-        if (!\is_array($invoiceData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating invoice.');
-        }
-
-        return Invoice::fromArray($invoiceData);
+        return Invoice::fromArray($this->unwrapEnvelope($data, 'invoice', 'updating invoice'));
     }
 
     /**
@@ -358,12 +302,6 @@ final class InvoicesApi extends AbstractApi
         // Standard-Modus: JSON → { "pdf": { ... } }
         $data = $this->getJson("/invoices/{$id}/pdf", $query);
 
-        $pdfData = $data['pdf'] ?? null;
-
-        if (!\is_array($pdfData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching invoice PDF.');
-        }
-
-        return InvoicePdf::fromArray($pdfData);
+        return InvoicePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching invoice PDF'));
     }
 }

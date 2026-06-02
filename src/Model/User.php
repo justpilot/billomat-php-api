@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Benutzer/Mitarbeiter aus der Billomat-API.
  *
@@ -30,17 +32,15 @@ final readonly class User
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            email: $data['email'] ?? null,
-            firstName: $data['first_name'] ?? null,
-            lastName: $data['last_name'] ?? null,
-            salutation: $data['salutation'] ?? null,
-            phone: $data['phone'] ?? null,
-            mobile: $data['mobile'] ?? null,
-            fax: $data['fax'] ?? null,
-            roleId: isset($data['role_id']) && '' !== $data['role_id']
-                ? (int) $data['role_id']
-                : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            email: ScalarCaster::toStringOrNull($data['email'] ?? null),
+            firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
+            lastName: ScalarCaster::toStringOrNull($data['last_name'] ?? null),
+            salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
+            phone: ScalarCaster::toStringOrNull($data['phone'] ?? null),
+            mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
+            fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
+            roleId: ScalarCaster::toIntOrNull($data['role_id'] ?? null),
         );
     }
 

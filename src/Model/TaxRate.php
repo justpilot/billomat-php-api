@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Repräsentiert einen Steuersatz aus der Billomat-API.
  *
@@ -34,8 +36,8 @@ final readonly class TaxRate
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            accountId: isset($data['account_id']) ? (int) $data['account_id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            accountId: ScalarCaster::toIntOrNull($data['account_id'] ?? null),
             name: (string) ($data['name'] ?? ''),
             rate: isset($data['rate']) ? (float) $data['rate'] : 0.0,
             isDefault: isset($data['is_default']) && 1 === (int) $data['is_default'],

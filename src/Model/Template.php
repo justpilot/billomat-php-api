@@ -6,10 +6,10 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use DateTimeInterface;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateType;
-use Throwable;
 
 /**
  * Repräsentiert eine Vorlage (Template) aus der Billomat API.
@@ -39,26 +39,17 @@ final readonly class Template
      */
     public static function fromArray(array $data): self
     {
-        $created = null;
-        if (!empty($data['created'])) {
-            try {
-                $created = new DateTimeImmutable((string) $data['created']);
-            } catch (Throwable) {
-                $created = null;
-            }
-        }
-
         $isDefaultRaw = $data['is_default'] ?? 0;
         $isDefault = '1' === (string) $isDefaultRaw || 1 === $isDefaultRaw || true === $isDefaultRaw;
 
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            created: $created,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             type: TemplateDocumentType::fromApi($data['type'] ?? null),
             templateType: TemplateType::fromApi($data['template_type'] ?? null),
-            name: $data['name'] ?? null,
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             format: TemplateFormat::fromApi($data['format'] ?? null),
-            base64file: $data['base64file'] ?? null,
+            base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
             isDefault: $isDefault,
         );
     }

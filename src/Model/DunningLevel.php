@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Mahnstufe (Dunning Level).
  *
@@ -27,12 +29,12 @@ final readonly class DunningLevel
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            name: $data['name'] ?? null,
-            position: isset($data['position']) ? (int) $data['position'] : null,
-            dueDays: isset($data['due_days']) ? (int) $data['due_days'] : null,
-            charge: isset($data['charge']) ? (float) $data['charge'] : null,
-            interest: isset($data['interest']) ? (float) $data['interest'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            position: ScalarCaster::toIntOrNull($data['position'] ?? null),
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            charge: ScalarCaster::toFloatOrNull($data['charge'] ?? null),
+            interest: ScalarCaster::toFloatOrNull($data['interest'] ?? null),
         );
     }
 

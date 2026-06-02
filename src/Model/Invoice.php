@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
-use Throwable;
 
 use const DATE_ATOM;
 
@@ -132,12 +132,6 @@ final readonly class Invoice
      */
     public static function fromArray(array $data): self
     {
-        $created = self::parseDateTime($data['created'] ?? null);
-        $date = self::parseDateTime($data['date'] ?? null);
-        $supplyDate = self::parseDateTime($data['supply_date'] ?? null);
-        $dueDate = self::parseDateTime($data['due_date'] ?? null);
-        $discountDate = self::parseDateTime($data['discount_date'] ?? null);
-
         // Taxes
         $taxes = [];
         if (isset($data['taxes']['tax'])) {
@@ -181,69 +175,51 @@ final readonly class Invoice
         }
 
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: (int) ($data['client_id'] ?? 0),
-            contactId: isset($data['contact_id']) && '' !== $data['contact_id']
-                ? (int) $data['contact_id']
-                : null,
-            created: $created,
-            invoiceNumber: $data['invoice_number'] ?? null,
-            number: isset($data['number']) && '' !== $data['number']
-                ? (int) $data['number']
-                : null,
-            numberPre: $data['number_pre'] ?? null,
-            numberLength: isset($data['number_length']) ? (int) $data['number_length'] : null,
+            contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            invoiceNumber: ScalarCaster::toStringOrNull($data['invoice_number'] ?? null),
+            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
+            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
+            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             status: InvoiceStatus::fromApi($data['status'] ?? null),
-            date: $date,
-            supplyDate: $supplyDate,
+            date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
+            supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
             supplyDateType: isset($data['supply_date_type'])
                 ? SupplyDateType::tryFrom((string) $data['supply_date_type'])
                 : null,
-            dueDate: $dueDate,
-            dueDays: isset($data['due_days']) ? (int) $data['due_days'] : null,
-            address: $data['address'] ?? null,
-            discountRate: isset($data['discount_rate']) ? (float) $data['discount_rate'] : null,
-            discountDate: $discountDate,
-            discountDays: isset($data['discount_days']) ? (int) $data['discount_days'] : null,
-            discountAmount: isset($data['discount_amount']) ? (float) $data['discount_amount'] : null,
-            title: $data['title'] ?? null,
-            label: $data['label'] ?? null,
-            intro: $data['intro'] ?? null,
-            note: $data['note'] ?? null,
-            totalGross: isset($data['total_gross']) ? (float) $data['total_gross'] : null,
-            totalNet: isset($data['total_net']) ? (float) $data['total_net'] : null,
+            dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
+            discountDate: ScalarCaster::toDateTimeOrNull($data['discount_date'] ?? null),
+            discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
+            discountAmount: ScalarCaster::toFloatOrNull($data['discount_amount'] ?? null),
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             netGross: isset($data['net_gross'])
                 ? NetGross::tryFrom((string) $data['net_gross'])
                 : null,
-            reduction: $data['reduction'] ?? null,
-            totalGrossUnreduced: isset($data['total_gross_unreduced'])
-                ? (float) $data['total_gross_unreduced']
-                : null,
-            totalNetUnreduced: isset($data['total_net_unreduced'])
-                ? (float) $data['total_net_unreduced']
-                : null,
-            paidAmount: isset($data['paid_amount']) ? (float) $data['paid_amount'] : null,
-            openAmount: isset($data['open_amount']) ? (float) $data['open_amount'] : null,
-            currencyCode: $data['currency_code'] ?? null,
-            quote: isset($data['quote']) ? (float) $data['quote'] : null,
-            invoiceId: isset($data['invoice_id']) && '' !== $data['invoice_id']
-                ? (int) $data['invoice_id']
-                : null,
-            offerId: isset($data['offer_id']) && '' !== $data['offer_id']
-                ? (int) $data['offer_id']
-                : null,
-            confirmationId: isset($data['confirmation_id']) && '' !== $data['confirmation_id']
-                ? (int) $data['confirmation_id']
-                : null,
-            recurringId: isset($data['recurring_id']) && '' !== $data['recurring_id']
-                ? (int) $data['recurring_id']
-                : null,
+            reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
+            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
+            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
+            invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),
+            offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
+            confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
+            recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
             taxes: $taxes,
-            paymentTypes: $data['payment_types'] ?? null,
-            customerportalUrl: $data['customerportal_url'] ?? null,
-            templateId: isset($data['template_id']) && '' !== $data['template_id']
-                ? (int) $data['template_id']
-                : null,
+            paymentTypes: ScalarCaster::toStringOrNull($data['payment_types'] ?? null),
+            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
+            templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: $items,
         );
     }
@@ -324,18 +300,5 @@ final readonly class Invoice
         }
 
         return $data;
-    }
-
-    private static function parseDateTime(?string $value): ?DateTimeImmutable
-    {
-        if (null === $value || '' === $value) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

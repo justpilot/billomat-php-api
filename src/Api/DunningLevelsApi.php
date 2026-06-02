@@ -20,26 +20,7 @@ final class DunningLevelsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/dunning-levels', $filters);
-
-        $node = $data['dunning-levels']['dunning-level'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<DunningLevel> $models */
-        $models = array_map(DunningLevel::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/dunning-levels', 'dunning-levels', 'dunning-level', DunningLevel::fromArray(...), $filters);
     }
 
     public function get(int $id): ?DunningLevel

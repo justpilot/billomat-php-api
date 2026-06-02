@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * E-Mail-Vorlage aus den Billomat-Einstellungen.
  *
@@ -27,12 +29,12 @@ final readonly class EmailTemplate
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            name: $data['name'] ?? null,
-            subject: $data['subject'] ?? null,
-            body: $data['body'] ?? null,
-            fromAddress: $data['from'] ?? null,
-            isDefault: isset($data['is_default']) ? (bool) (int) $data['is_default'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
+            body: ScalarCaster::toStringOrNull($data['body'] ?? null),
+            fromAddress: ScalarCaster::toStringOrNull($data['from'] ?? null),
+            isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
         );
     }
 

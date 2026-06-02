@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\DeliveryNoteItem;
-use RuntimeException;
 
 /**
  * API-Wrapper für Delivery-Note-Items.
@@ -23,25 +22,7 @@ final class DeliveryNoteItemsApi extends AbstractApi
     {
         $params = array_merge(['delivery_note_id' => $deliveryNoteId], $query);
 
-        $data = $this->getJson('/delivery-note-items', $params);
-
-        $itemsData = $data['delivery-note-items']['delivery-note-item'] ?? [];
-
-        if (isset($itemsData['id'])) {
-            $itemsData = [$itemsData];
-        }
-
-        if (!\is_array($itemsData) || [] === $itemsData) {
-            return [];
-        }
-
-        /** @var list<DeliveryNoteItem> $items */
-        $items = array_map(
-            DeliveryNoteItem::fromArray(...),
-            $itemsData,
-        );
-
-        return $items;
+        return $this->listResource('/delivery-note-items', 'delivery-note-items', 'delivery-note-item', DeliveryNoteItem::fromArray(...), $params);
     }
 
     public function get(int $id): ?DeliveryNoteItem
@@ -52,13 +33,7 @@ final class DeliveryNoteItemsApi extends AbstractApi
             return null;
         }
 
-        $itemData = $data['delivery-note-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching delivery note item.');
-        }
-
-        return DeliveryNoteItem::fromArray($itemData);
+        return DeliveryNoteItem::fromArray($this->unwrapEnvelope($data, 'delivery-note-item', 'fetching delivery note item'));
     }
 
     public function create(int $deliveryNoteId, DeliveryNoteItemCreateOptions $options): DeliveryNoteItem
@@ -70,13 +45,7 @@ final class DeliveryNoteItemsApi extends AbstractApi
 
         $data = $this->postJson('/delivery-note-items', $payload);
 
-        $itemData = $data['delivery-note-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating delivery note item.');
-        }
-
-        return DeliveryNoteItem::fromArray($itemData);
+        return DeliveryNoteItem::fromArray($this->unwrapEnvelope($data, 'delivery-note-item', 'creating delivery note item'));
     }
 
     public function update(int $id, DeliveryNoteItemCreateOptions $options): DeliveryNoteItem
@@ -85,13 +54,7 @@ final class DeliveryNoteItemsApi extends AbstractApi
 
         $data = $this->putJson("/delivery-note-items/{$id}", $payload);
 
-        $itemData = $data['delivery-note-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating delivery note item.');
-        }
-
-        return DeliveryNoteItem::fromArray($itemData);
+        return DeliveryNoteItem::fromArray($this->unwrapEnvelope($data, 'delivery-note-item', 'updating delivery note item'));
     }
 
     public function delete(int $id): bool

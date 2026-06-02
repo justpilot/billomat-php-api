@@ -8,7 +8,6 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Contact;
-use RuntimeException;
 
 /**
  * API-Wrapper für Kunden-Ansprechpartner (Contacts).
@@ -35,29 +34,7 @@ final class ContactsApi extends AbstractApi
     {
         $params = array_merge(['client_id' => $clientId], $query);
 
-        $data = $this->getJson('/contacts', $params);
-
-        $node = $data['contacts']['contact'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Contact> $models */
-        $models = array_map(
-            Contact::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $params);
     }
 
     public function get(int $id): ?Contact
@@ -88,13 +65,7 @@ final class ContactsApi extends AbstractApi
 
         $data = $this->postJson('/contacts', $payload);
 
-        $created = $data['contact'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating contact.');
-        }
-
-        return Contact::fromArray($created);
+        return Contact::fromArray($this->unwrapEnvelope($data, 'contact', 'creating contact'));
     }
 
     public function update(int $id, ContactUpdateOptions $options): Contact
@@ -103,12 +74,7 @@ final class ContactsApi extends AbstractApi
 
         $data = $this->putJson("/contacts/{$id}", $payload);
 
-        $row = $data['contact'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating contact.');
-        }
-
-        return Contact::fromArray($row);
+        return Contact::fromArray($this->unwrapEnvelope($data, 'contact', 'updating contact'));
     }
 
     public function delete(int $id): bool

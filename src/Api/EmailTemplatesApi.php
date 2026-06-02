@@ -20,26 +20,7 @@ final class EmailTemplatesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/email-templates', $filters);
-
-        $node = $data['email-templates']['email-template'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<EmailTemplate> $models */
-        $models = array_map(EmailTemplate::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/email-templates', 'email-templates', 'email-template', EmailTemplate::fromArray(...), $filters);
     }
 
     public function get(int $id): ?EmailTemplate

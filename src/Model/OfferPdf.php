@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
-use Throwable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 
 /**
  * PDF-Metadaten eines Angebots aus GET /offers/{id}/pdf (JSON-Modus).
@@ -28,21 +28,10 @@ final class OfferPdf
      */
     public static function fromArray(array $data): self
     {
-        $created = null;
-        $createdRaw = $data['created'] ?? null;
-
-        if (\is_string($createdRaw) && '' !== $createdRaw) {
-            try {
-                $created = new DateTimeImmutable($createdRaw);
-            } catch (Throwable) {
-                $created = null;
-            }
-        }
-
         return new self(
             id: (int) ($data['id'] ?? 0),
             offerId: (int) ($data['offer_id'] ?? 0),
-            created: $created,
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             filename: (string) ($data['filename'] ?? ''),
             mimeType: (string) ($data['mimetype'] ?? 'application/pdf'),
             fileSize: (int) ($data['filesize'] ?? 0),

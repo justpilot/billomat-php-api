@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
-use Throwable;
 
 use const DATE_ATOM;
 
@@ -31,18 +31,14 @@ final readonly class CreditNoteComment
      */
     public static function fromArray(array $data): self
     {
-        $actionkeyRaw = isset($data['actionkey']) && '' !== $data['actionkey']
-            ? (string) $data['actionkey']
-            : null;
+        $actionkeyRaw = ScalarCaster::toStringOrNull($data['actionkey'] ?? null);
 
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             creditNoteId: (int) ($data['credit_note_id'] ?? 0),
-            comment: isset($data['comment']) ? (string) $data['comment'] : null,
-            created: self::parseDateTime($data['created'] ?? null),
-            userId: isset($data['user_id']) && '' !== $data['user_id']
-                ? (int) $data['user_id']
-                : null,
+            comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
             actionkey: null !== $actionkeyRaw
                 ? CreditNoteCommentActionKey::tryFrom($actionkeyRaw)
                 : null,
@@ -63,18 +59,5 @@ final readonly class CreditNoteComment
             'comment' => $this->comment,
             'actionkey' => $this->actionkeyRaw,
         ];
-    }
-
-    private static function parseDateTime(mixed $value): ?DateTimeImmutable
-    {
-        if (!\is_string($value) || '' === trim($value)) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

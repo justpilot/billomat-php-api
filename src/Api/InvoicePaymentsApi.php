@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InvoicePayment;
-use RuntimeException;
 
 /**
  * API-Wrapper für Rechnungszahlungen (Invoice Payments).
@@ -36,35 +35,7 @@ final class InvoicePaymentsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/invoice-payments', $filters);
-
-        $paymentsRoot = $data['invoice-payments'] ?? null;
-        if (!\is_array($paymentsRoot)) {
-            return [];
-        }
-
-        $rows = $paymentsRoot['invoice-payment'] ?? [];
-
-        // Billomat liefert bei 1 Element ggf. direkt ein Assoc-Array
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<InvoicePayment> $payments */
-        $payments = array_map(
-            InvoicePayment::fromArray(...),
-            $rows,
-        );
-
-        return $payments;
+        return $this->listResource('/invoice-payments', 'invoice-payments', 'invoice-payment', InvoicePayment::fromArray(...), $filters);
     }
 
     /**
@@ -98,13 +69,7 @@ final class InvoicePaymentsApi extends AbstractApi
 
         $data = $this->postJson('/invoice-payments', $payload);
 
-        $paymentData = $data['invoice-payment'] ?? null;
-
-        if (!\is_array($paymentData)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating invoice payment.');
-        }
-
-        return InvoicePayment::fromArray($paymentData);
+        return InvoicePayment::fromArray($this->unwrapEnvelope($data, 'invoice-payment', 'creating invoice payment'));
     }
 
     /**

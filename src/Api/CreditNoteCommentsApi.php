@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
-use RuntimeException;
 
 /**
  * API-Wrapper für Credit-Note-Comments.
@@ -29,34 +28,7 @@ final class CreditNoteCommentsApi extends AbstractApi
             ));
         }
 
-        $data = $this->getJson('/credit-note-comments', $query);
-
-        $root = $data['credit-note-comments'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['credit-note-comment'] ?? [];
-
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<CreditNoteComment> $comments */
-        $comments = array_map(
-            CreditNoteComment::fromArray(...),
-            $rows,
-        );
-
-        return $comments;
+        return $this->listResource('/credit-note-comments', 'credit-note-comments', 'credit-note-comment', CreditNoteComment::fromArray(...), $query);
     }
 
     public function get(int $id): ?CreditNoteComment
@@ -81,12 +53,7 @@ final class CreditNoteCommentsApi extends AbstractApi
 
         $data = $this->postJson('/credit-note-comments', $payload);
 
-        $row = $data['credit-note-comment'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating credit note comment.');
-        }
-
-        return CreditNoteComment::fromArray($row);
+        return CreditNoteComment::fromArray($this->unwrapEnvelope($data, 'credit-note-comment', 'creating credit note comment'));
     }
 
     public function delete(int $id): bool

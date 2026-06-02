@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\NumberRangeMode;
 use Justpilot\Billomat\Model\Enum\TemplateEngine;
-use Throwable;
 
 /**
  * Account-Einstellungen (GET/PUT /api/settings).
@@ -217,128 +217,73 @@ final readonly class Settings
             : null;
 
         return new self(
-            created: self::dt($data, 'created'),
-            updated: self::dt($data, 'updated'),
-            bgcolor: self::str($data, 'bgcolor'),
-            color1: self::str($data, 'color1'),
-            color2: self::str($data, 'color2'),
-            color3: self::str($data, 'color3'),
-            currencyCode: self::str($data, 'currency_code'),
-            locale: self::str($data, 'locale'),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            bgcolor: ScalarCaster::toStringOrNull($data['bgcolor'] ?? null),
+            color1: ScalarCaster::toStringOrNull($data['color1'] ?? null),
+            color2: ScalarCaster::toStringOrNull($data['color2'] ?? null),
+            color3: ScalarCaster::toStringOrNull($data['color3'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             netGross: $netGross,
-            sepaCreditorId: self::str($data, 'sepa_creditor_id'),
+            sepaCreditorId: ScalarCaster::toStringOrNull($data['sepa_creditor_id'] ?? null),
             numberRangeMode: $mode,
-            articleNumberPre: self::str($data, 'article_number_pre'),
-            articleNumberLength: self::int($data, 'article_number_length'),
-            articleNumberNext: self::int($data, 'article_number_next'),
+            articleNumberPre: ScalarCaster::toStringOrNull($data['article_number_pre'] ?? null),
+            articleNumberLength: ScalarCaster::toIntOrNull($data['article_number_length'] ?? null),
+            articleNumberNext: ScalarCaster::toIntOrNull($data['article_number_next'] ?? null),
             priceGroups: $priceGroups,
-            clientNumberPre: self::str($data, 'client_number_pre'),
-            clientNumberLength: self::int($data, 'client_number_length'),
-            clientNumberNext: self::int($data, 'client_number_next'),
-            invoiceNumberPre: self::str($data, 'invoice_number_pre'),
-            invoiceNumberLength: self::int($data, 'invoice_number_length'),
-            invoiceNumberNext: self::int($data, 'invoice_number_next'),
-            invoiceLabel: self::str($data, 'invoice_label'),
-            invoiceIntro: self::str($data, 'invoice_intro'),
-            invoiceNote: self::str($data, 'invoice_note'),
-            invoiceFilename: self::str($data, 'invoice_filename'),
-            dueDays: self::int($data, 'due_days'),
-            discountRate: self::float($data, 'discount_rate'),
-            discountDays: self::int($data, 'discount_days'),
-            offerNumberPre: self::str($data, 'offer_number_pre'),
-            offerNumberLength: self::int($data, 'offer_number_length'),
-            offerNumberNext: self::int($data, 'offer_number_next'),
-            offerLabel: self::str($data, 'offer_label'),
-            offerIntro: self::str($data, 'offer_intro'),
-            offerNote: self::str($data, 'offer_note'),
-            offerFilename: self::str($data, 'offer_filename'),
-            offerValidityDays: self::int($data, 'offer_validity_days'),
-            confirmationNumberPre: self::str($data, 'confirmation_number_pre'),
-            confirmationNumberLength: self::int($data, 'confirmation_number_length'),
-            confirmationNumberNext: self::int($data, 'confirmation_number_next'),
-            confirmationLabel: self::str($data, 'confirmation_label'),
-            confirmationIntro: self::str($data, 'confirmation_intro'),
-            confirmationNote: self::str($data, 'confirmation_note'),
-            confirmationFilename: self::str($data, 'confirmation_filename'),
-            creditNoteNumberPre: self::str($data, 'credit_note_number_pre'),
-            creditNoteNumberLength: self::int($data, 'credit_note_number_length'),
-            creditNoteNumberNext: self::int($data, 'credit_note_number_next'),
-            creditNoteLabel: self::str($data, 'credit_note_label'),
-            creditNoteIntro: self::str($data, 'credit_note_intro'),
-            creditNoteNote: self::str($data, 'credit_note_note'),
-            creditNoteFilename: self::str($data, 'credit_note_filename'),
-            deliveryNoteNumberPre: self::str($data, 'delivery_note_number_pre'),
-            deliveryNoteNumberLength: self::int($data, 'delivery_note_number_length'),
-            deliveryNoteNumberNext: self::int($data, 'delivery_note_number_next'),
-            deliveryNoteLabel: self::str($data, 'delivery_note_label'),
-            deliveryNoteIntro: self::str($data, 'delivery_note_intro'),
-            deliveryNoteNote: self::str($data, 'delivery_note_note'),
-            deliveryNoteFilename: self::str($data, 'delivery_note_filename'),
-            reminderFilename: self::str($data, 'reminder_filename'),
-            reminderDueDays: self::int($data, 'reminder_due_days'),
-            letterLabel: self::str($data, 'letter_label'),
-            letterIntro: self::str($data, 'letter_intro'),
-            letterFilename: self::str($data, 'letter_filename'),
+            clientNumberPre: ScalarCaster::toStringOrNull($data['client_number_pre'] ?? null),
+            clientNumberLength: ScalarCaster::toIntOrNull($data['client_number_length'] ?? null),
+            clientNumberNext: ScalarCaster::toIntOrNull($data['client_number_next'] ?? null),
+            invoiceNumberPre: ScalarCaster::toStringOrNull($data['invoice_number_pre'] ?? null),
+            invoiceNumberLength: ScalarCaster::toIntOrNull($data['invoice_number_length'] ?? null),
+            invoiceNumberNext: ScalarCaster::toIntOrNull($data['invoice_number_next'] ?? null),
+            invoiceLabel: ScalarCaster::toStringOrNull($data['invoice_label'] ?? null),
+            invoiceIntro: ScalarCaster::toStringOrNull($data['invoice_intro'] ?? null),
+            invoiceNote: ScalarCaster::toStringOrNull($data['invoice_note'] ?? null),
+            invoiceFilename: ScalarCaster::toStringOrNull($data['invoice_filename'] ?? null),
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
+            discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
+            offerNumberPre: ScalarCaster::toStringOrNull($data['offer_number_pre'] ?? null),
+            offerNumberLength: ScalarCaster::toIntOrNull($data['offer_number_length'] ?? null),
+            offerNumberNext: ScalarCaster::toIntOrNull($data['offer_number_next'] ?? null),
+            offerLabel: ScalarCaster::toStringOrNull($data['offer_label'] ?? null),
+            offerIntro: ScalarCaster::toStringOrNull($data['offer_intro'] ?? null),
+            offerNote: ScalarCaster::toStringOrNull($data['offer_note'] ?? null),
+            offerFilename: ScalarCaster::toStringOrNull($data['offer_filename'] ?? null),
+            offerValidityDays: ScalarCaster::toIntOrNull($data['offer_validity_days'] ?? null),
+            confirmationNumberPre: ScalarCaster::toStringOrNull($data['confirmation_number_pre'] ?? null),
+            confirmationNumberLength: ScalarCaster::toIntOrNull($data['confirmation_number_length'] ?? null),
+            confirmationNumberNext: ScalarCaster::toIntOrNull($data['confirmation_number_next'] ?? null),
+            confirmationLabel: ScalarCaster::toStringOrNull($data['confirmation_label'] ?? null),
+            confirmationIntro: ScalarCaster::toStringOrNull($data['confirmation_intro'] ?? null),
+            confirmationNote: ScalarCaster::toStringOrNull($data['confirmation_note'] ?? null),
+            confirmationFilename: ScalarCaster::toStringOrNull($data['confirmation_filename'] ?? null),
+            creditNoteNumberPre: ScalarCaster::toStringOrNull($data['credit_note_number_pre'] ?? null),
+            creditNoteNumberLength: ScalarCaster::toIntOrNull($data['credit_note_number_length'] ?? null),
+            creditNoteNumberNext: ScalarCaster::toIntOrNull($data['credit_note_number_next'] ?? null),
+            creditNoteLabel: ScalarCaster::toStringOrNull($data['credit_note_label'] ?? null),
+            creditNoteIntro: ScalarCaster::toStringOrNull($data['credit_note_intro'] ?? null),
+            creditNoteNote: ScalarCaster::toStringOrNull($data['credit_note_note'] ?? null),
+            creditNoteFilename: ScalarCaster::toStringOrNull($data['credit_note_filename'] ?? null),
+            deliveryNoteNumberPre: ScalarCaster::toStringOrNull($data['delivery_note_number_pre'] ?? null),
+            deliveryNoteNumberLength: ScalarCaster::toIntOrNull($data['delivery_note_number_length'] ?? null),
+            deliveryNoteNumberNext: ScalarCaster::toIntOrNull($data['delivery_note_number_next'] ?? null),
+            deliveryNoteLabel: ScalarCaster::toStringOrNull($data['delivery_note_label'] ?? null),
+            deliveryNoteIntro: ScalarCaster::toStringOrNull($data['delivery_note_intro'] ?? null),
+            deliveryNoteNote: ScalarCaster::toStringOrNull($data['delivery_note_note'] ?? null),
+            deliveryNoteFilename: ScalarCaster::toStringOrNull($data['delivery_note_filename'] ?? null),
+            reminderFilename: ScalarCaster::toStringOrNull($data['reminder_filename'] ?? null),
+            reminderDueDays: ScalarCaster::toIntOrNull($data['reminder_due_days'] ?? null),
+            letterLabel: ScalarCaster::toStringOrNull($data['letter_label'] ?? null),
+            letterIntro: ScalarCaster::toStringOrNull($data['letter_intro'] ?? null),
+            letterFilename: ScalarCaster::toStringOrNull($data['letter_filename'] ?? null),
             templateEngine: $engine,
-            printVersion: self::bool($data, 'print_version'),
-            defaultEmailSender: self::str($data, 'default_email_sender'),
+            printVersion: ScalarCaster::toBoolOrNull($data['print_version'] ?? null),
+            defaultEmailSender: ScalarCaster::toStringOrNull($data['default_email_sender'] ?? null),
             bccAddresses: $bcc,
-            taxation: self::str($data, 'taxation'),
+            taxation: ScalarCaster::toStringOrNull($data['taxation'] ?? null),
         );
-    }
-
-    private static function str(array $data, string $key): ?string
-    {
-        $v = $data[$key] ?? null;
-
-        return \is_string($v) ? $v : null;
-    }
-
-    private static function int(array $data, string $key): ?int
-    {
-        $v = $data[$key] ?? null;
-        if (null === $v || '' === $v) {
-            return null;
-        }
-
-        return is_numeric($v) ? (int) $v : null;
-    }
-
-    private static function float(array $data, string $key): ?float
-    {
-        $v = $data[$key] ?? null;
-        if (null === $v || '' === $v) {
-            return null;
-        }
-
-        return is_numeric($v) ? (float) $v : null;
-    }
-
-    private static function bool(array $data, string $key): ?bool
-    {
-        $v = $data[$key] ?? null;
-        if (null === $v || '' === $v) {
-            return null;
-        }
-        if (\is_bool($v)) {
-            return $v;
-        }
-        $s = strtolower(trim((string) $v));
-
-        return \in_array($s, ['1', 'true', 'yes'], true);
-    }
-
-    private static function dt(array $data, string $key): ?DateTimeImmutable
-    {
-        $v = $data[$key] ?? null;
-        if (!\is_string($v) || '' === trim($v)) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($v);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

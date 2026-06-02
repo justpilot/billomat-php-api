@@ -10,7 +10,6 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferPdf;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -45,29 +44,7 @@ final class OffersApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/offers', $filters);
-
-        $node = $data['offers']['offer'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Offer> $models */
-        $models = array_map(
-            Offer::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/offers', 'offers', 'offer', Offer::fromArray(...), $filters);
     }
 
     /**
@@ -103,13 +80,7 @@ final class OffersApi extends AbstractApi
 
         $data = $this->postJson('/offers', $payload);
 
-        $created = $data['offer'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating offer.');
-        }
-
-        return Offer::fromArray($created);
+        return Offer::fromArray($this->unwrapEnvelope($data, 'offer', 'creating offer'));
     }
 
     /**
@@ -123,12 +94,7 @@ final class OffersApi extends AbstractApi
 
         $data = $this->putJson("/offers/{$id}", $payload);
 
-        $offerData = $data['offer'] ?? null;
-        if (!\is_array($offerData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating offer.');
-        }
-
-        return Offer::fromArray($offerData);
+        return Offer::fromArray($this->unwrapEnvelope($data, 'offer', 'updating offer'));
     }
 
     /**
@@ -252,12 +218,6 @@ final class OffersApi extends AbstractApi
 
         $data = $this->getJson("/offers/{$id}/pdf", $query);
 
-        $pdfData = $data['pdf'] ?? null;
-
-        if (!\is_array($pdfData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching offer PDF.');
-        }
-
-        return OfferPdf::fromArray($pdfData);
+        return OfferPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching offer PDF'));
     }
 }

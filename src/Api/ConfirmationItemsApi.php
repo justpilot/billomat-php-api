@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ConfirmationItem;
-use RuntimeException;
 
 /**
  * API-Wrapper für Confirmation-Items.
@@ -30,25 +29,7 @@ final class ConfirmationItemsApi extends AbstractApi
     {
         $params = array_merge(['confirmation_id' => $confirmationId], $query);
 
-        $data = $this->getJson('/confirmation-items', $params);
-
-        $itemsData = $data['confirmation-items']['confirmation-item'] ?? [];
-
-        if (isset($itemsData['id'])) {
-            $itemsData = [$itemsData];
-        }
-
-        if (!\is_array($itemsData) || [] === $itemsData) {
-            return [];
-        }
-
-        /** @var list<ConfirmationItem> $items */
-        $items = array_map(
-            ConfirmationItem::fromArray(...),
-            $itemsData,
-        );
-
-        return $items;
+        return $this->listResource('/confirmation-items', 'confirmation-items', 'confirmation-item', ConfirmationItem::fromArray(...), $params);
     }
 
     public function get(int $id): ?ConfirmationItem
@@ -59,13 +40,7 @@ final class ConfirmationItemsApi extends AbstractApi
             return null;
         }
 
-        $itemData = $data['confirmation-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching confirmation item.');
-        }
-
-        return ConfirmationItem::fromArray($itemData);
+        return ConfirmationItem::fromArray($this->unwrapEnvelope($data, 'confirmation-item', 'fetching confirmation item'));
     }
 
     public function create(int $confirmationId, ConfirmationItemCreateOptions $options): ConfirmationItem
@@ -77,13 +52,7 @@ final class ConfirmationItemsApi extends AbstractApi
 
         $data = $this->postJson('/confirmation-items', $payload);
 
-        $itemData = $data['confirmation-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating confirmation item.');
-        }
-
-        return ConfirmationItem::fromArray($itemData);
+        return ConfirmationItem::fromArray($this->unwrapEnvelope($data, 'confirmation-item', 'creating confirmation item'));
     }
 
     public function update(int $id, ConfirmationItemCreateOptions $options): ConfirmationItem
@@ -92,13 +61,7 @@ final class ConfirmationItemsApi extends AbstractApi
 
         $data = $this->putJson("/confirmation-items/{$id}", $payload);
 
-        $itemData = $data['confirmation-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating confirmation item.');
-        }
-
-        return ConfirmationItem::fromArray($itemData);
+        return ConfirmationItem::fromArray($this->unwrapEnvelope($data, 'confirmation-item', 'updating confirmation item'));
     }
 
     public function delete(int $id): bool

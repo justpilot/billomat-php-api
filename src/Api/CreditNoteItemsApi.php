@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\CreditNoteItem;
-use RuntimeException;
 
 /**
  * API-Wrapper für Credit-Note-Items.
@@ -21,25 +20,7 @@ final class CreditNoteItemsApi extends AbstractApi
     {
         $params = array_merge(['credit_note_id' => $creditNoteId], $query);
 
-        $data = $this->getJson('/credit-note-items', $params);
-
-        $itemsData = $data['credit-note-items']['credit-note-item'] ?? [];
-
-        if (isset($itemsData['id'])) {
-            $itemsData = [$itemsData];
-        }
-
-        if (!\is_array($itemsData) || [] === $itemsData) {
-            return [];
-        }
-
-        /** @var list<CreditNoteItem> $items */
-        $items = array_map(
-            CreditNoteItem::fromArray(...),
-            $itemsData,
-        );
-
-        return $items;
+        return $this->listResource('/credit-note-items', 'credit-note-items', 'credit-note-item', CreditNoteItem::fromArray(...), $params);
     }
 
     public function get(int $id): ?CreditNoteItem
@@ -50,13 +31,7 @@ final class CreditNoteItemsApi extends AbstractApi
             return null;
         }
 
-        $itemData = $data['credit-note-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching credit note item.');
-        }
-
-        return CreditNoteItem::fromArray($itemData);
+        return CreditNoteItem::fromArray($this->unwrapEnvelope($data, 'credit-note-item', 'fetching credit note item'));
     }
 
     public function create(int $creditNoteId, CreditNoteItemCreateOptions $options): CreditNoteItem
@@ -68,13 +43,7 @@ final class CreditNoteItemsApi extends AbstractApi
 
         $data = $this->postJson('/credit-note-items', $payload);
 
-        $itemData = $data['credit-note-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating credit note item.');
-        }
-
-        return CreditNoteItem::fromArray($itemData);
+        return CreditNoteItem::fromArray($this->unwrapEnvelope($data, 'credit-note-item', 'creating credit note item'));
     }
 
     public function update(int $id, CreditNoteItemCreateOptions $options): CreditNoteItem
@@ -83,13 +52,7 @@ final class CreditNoteItemsApi extends AbstractApi
 
         $data = $this->putJson("/credit-note-items/{$id}", $payload);
 
-        $itemData = $data['credit-note-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating credit note item.');
-        }
-
-        return CreditNoteItem::fromArray($itemData);
+        return CreditNoteItem::fromArray($this->unwrapEnvelope($data, 'credit-note-item', 'updating credit note item'));
     }
 
     public function delete(int $id): bool

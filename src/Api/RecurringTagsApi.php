@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\RecurringTag;
 use Justpilot\Billomat\Model\RecurringTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Schlagworte von Abo-Rechnungen.
@@ -27,30 +26,7 @@ final class RecurringTagsApi extends AbstractApi
      */
     public function listByRecurring(int $recurringId): array
     {
-        $data = $this->getJson('/recurring-tags', ['recurring_id' => $recurringId]);
-
-        $root = $data['recurring-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['recurring-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<RecurringTag> $tags */
-        $tags = array_map(RecurringTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/recurring-tags', 'recurring-tags', 'recurring-tag', RecurringTag::fromArray(...), ['recurring_id' => $recurringId]);
     }
 
     /**
@@ -60,30 +36,7 @@ final class RecurringTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/recurring-tags');
-
-        $root = $data['recurring-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<RecurringTagCloudEntry> $tags */
-        $tags = array_map(RecurringTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/recurring-tags', 'recurring-tags', 'tag', RecurringTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?RecurringTag
@@ -108,12 +61,7 @@ final class RecurringTagsApi extends AbstractApi
 
         $data = $this->postJson('/recurring-tags', $payload);
 
-        $row = $data['recurring-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating recurring tag.');
-        }
-
-        return RecurringTag::fromArray($row);
+        return RecurringTag::fromArray($this->unwrapEnvelope($data, 'recurring-tag', 'creating recurring tag'));
     }
 
     public function delete(int $id): bool

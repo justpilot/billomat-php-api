@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\RecurringItem;
-use RuntimeException;
 
 /**
  * API-Wrapper für die Positionen einer Abo-Rechnung.
@@ -30,22 +29,7 @@ final class RecurringItemsApi extends AbstractApi
     {
         $params = array_merge(['recurring_id' => $recurringId], $query);
 
-        $data = $this->getJson('/recurring-items', $params);
-
-        $rows = $data['recurring-items']['recurring-item'] ?? [];
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows) || [] === $rows) {
-            return [];
-        }
-
-        /** @var list<RecurringItem> $items */
-        $items = array_map(RecurringItem::fromArray(...), $rows);
-
-        return $items;
+        return $this->listResource('/recurring-items', 'recurring-items', 'recurring-item', RecurringItem::fromArray(...), $params);
     }
 
     public function get(int $id): ?RecurringItem
@@ -56,12 +40,7 @@ final class RecurringItemsApi extends AbstractApi
             return null;
         }
 
-        $row = $data['recurring-item'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching recurring item.');
-        }
-
-        return RecurringItem::fromArray($row);
+        return RecurringItem::fromArray($this->unwrapEnvelope($data, 'recurring-item', 'fetching recurring item'));
     }
 
     public function create(int $recurringId, RecurringItemCreateOptions $options): RecurringItem
@@ -73,12 +52,7 @@ final class RecurringItemsApi extends AbstractApi
 
         $data = $this->postJson('/recurring-items', $payload);
 
-        $row = $data['recurring-item'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating recurring item.');
-        }
-
-        return RecurringItem::fromArray($row);
+        return RecurringItem::fromArray($this->unwrapEnvelope($data, 'recurring-item', 'creating recurring item'));
     }
 
     public function update(int $id, RecurringItemCreateOptions $options): RecurringItem
@@ -87,12 +61,7 @@ final class RecurringItemsApi extends AbstractApi
 
         $data = $this->putJson("/recurring-items/{$id}", $payload);
 
-        $row = $data['recurring-item'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating recurring item.');
-        }
-
-        return RecurringItem::fromArray($row);
+        return RecurringItem::fromArray($this->unwrapEnvelope($data, 'recurring-item', 'updating recurring item'));
     }
 
     public function delete(int $id): bool

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
 
 /**
@@ -27,7 +28,7 @@ final readonly class RecurringEmailReceiver
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             recurringId: (int) ($data['recurring_id'] ?? 0),
             type: RecurringEmailReceiverType::from((string) ($data['type'] ?? 'to')),
             address: (string) ($data['address'] ?? ''),

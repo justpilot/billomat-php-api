@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InvoiceItem;
-use RuntimeException;
 
 /**
  * API-Wrapper für Rechnungspositionen (Invoice Items).
@@ -31,27 +30,7 @@ final class InvoiceItemsApi extends AbstractApi
     {
         $params = array_merge(['invoice_id' => $invoiceId], $query);
 
-        /** @var array<string,mixed> $data */
-        $data = $this->getJson('/invoice-items', $params);
-
-        $itemsData = $data['invoice-items']['invoice-item'] ?? [];
-
-        // Billomat liefert bei genau einem Eintrag oft ein einzelnes Array
-        if (isset($itemsData['id'])) {
-            $itemsData = [$itemsData];
-        }
-
-        if (!\is_array($itemsData) || [] === $itemsData) {
-            return [];
-        }
-
-        /** @var list<InvoiceItem> $items */
-        $items = array_map(
-            InvoiceItem::fromArray(...),
-            $itemsData,
-        );
-
-        return $items;
+        return $this->listResource('/invoice-items', 'invoice-items', 'invoice-item', InvoiceItem::fromArray(...), $params);
     }
 
     /**
@@ -67,13 +46,7 @@ final class InvoiceItemsApi extends AbstractApi
             return null;
         }
 
-        $itemData = $data['invoice-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching invoice item.');
-        }
-
-        return InvoiceItem::fromArray($itemData);
+        return InvoiceItem::fromArray($this->unwrapEnvelope($data, 'invoice-item', 'fetching invoice item'));
     }
 
     /**
@@ -97,16 +70,9 @@ final class InvoiceItemsApi extends AbstractApi
 
         $payload = ['invoice-item' => $body];
 
-        /** @var array<string,mixed> $data */
         $data = $this->postJson('/invoice-items', $payload);
 
-        $itemData = $data['invoice-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating invoice item.');
-        }
-
-        return InvoiceItem::fromArray($itemData);
+        return InvoiceItem::fromArray($this->unwrapEnvelope($data, 'invoice-item', 'creating invoice item'));
     }
 
     /**
@@ -119,16 +85,9 @@ final class InvoiceItemsApi extends AbstractApi
     {
         $payload = ['invoice-item' => $options->toArray()];
 
-        /** @var array<string,mixed> $data */
         $data = $this->putJson("/invoice-items/{$id}", $payload);
 
-        $itemData = $data['invoice-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating invoice item.');
-        }
-
-        return InvoiceItem::fromArray($itemData);
+        return InvoiceItem::fromArray($this->unwrapEnvelope($data, 'invoice-item', 'updating invoice item'));
     }
 
     /**

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Währung aus der Billomat-Währungsliste.
  *
@@ -25,8 +27,8 @@ final readonly class Currency
     {
         return new self(
             code: (string) ($data['code'] ?? $data['currency_code'] ?? ''),
-            name: $data['name'] ?? null,
-            symbol: $data['symbol'] ?? null,
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            symbol: ScalarCaster::toStringOrNull($data['symbol'] ?? null),
         );
     }
 

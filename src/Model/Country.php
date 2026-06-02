@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Land aus der Billomat-Länderliste.
  *
@@ -26,9 +28,9 @@ final readonly class Country
     {
         return new self(
             code: (string) ($data['code'] ?? $data['country_code'] ?? ''),
-            name: $data['name'] ?? null,
-            nameDe: $data['name_de'] ?? null,
-            eu: isset($data['eu']) ? (bool) (int) $data['eu'] : null,
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            nameDe: ScalarCaster::toStringOrNull($data['name_de'] ?? null),
+            eu: ScalarCaster::toBoolOrNull($data['eu'] ?? null),
         );
     }
 

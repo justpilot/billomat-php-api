@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
-use Throwable;
 
 use const DATE_ATOM;
 
@@ -64,10 +64,6 @@ final readonly class Confirmation
      */
     public static function fromArray(array $data): self
     {
-        $created = self::parseDateTime($data['created'] ?? null);
-        $date = self::parseDateTime($data['date'] ?? null);
-        $discountDate = self::parseDateTime($data['discount_date'] ?? null);
-
         $taxes = [];
         if (isset($data['taxes']['tax'])) {
             $rawTaxes = $data['taxes']['tax'];
@@ -108,54 +104,40 @@ final readonly class Confirmation
         }
 
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: (int) ($data['client_id'] ?? 0),
-            contactId: isset($data['contact_id']) && '' !== $data['contact_id']
-                ? (int) $data['contact_id']
-                : null,
-            created: $created,
-            confirmationNumber: $data['confirmation_number'] ?? null,
-            number: isset($data['number']) && '' !== $data['number']
-                ? (int) $data['number']
-                : null,
-            numberPre: $data['number_pre'] ?? null,
-            numberLength: isset($data['number_length']) ? (int) $data['number_length'] : null,
+            contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            confirmationNumber: ScalarCaster::toStringOrNull($data['confirmation_number'] ?? null),
+            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
+            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
+            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             status: ConfirmationStatus::fromApi(isset($data['status']) ? (string) $data['status'] : null),
-            date: $date,
-            address: $data['address'] ?? null,
-            discountRate: isset($data['discount_rate']) ? (float) $data['discount_rate'] : null,
-            discountDate: $discountDate,
-            discountDays: isset($data['discount_days']) ? (int) $data['discount_days'] : null,
-            discountAmount: isset($data['discount_amount']) ? (float) $data['discount_amount'] : null,
-            title: $data['title'] ?? null,
-            label: $data['label'] ?? null,
-            intro: $data['intro'] ?? null,
-            note: $data['note'] ?? null,
-            totalGross: isset($data['total_gross']) ? (float) $data['total_gross'] : null,
-            totalNet: isset($data['total_net']) ? (float) $data['total_net'] : null,
+            date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
+            discountDate: ScalarCaster::toDateTimeOrNull($data['discount_date'] ?? null),
+            discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
+            discountAmount: ScalarCaster::toFloatOrNull($data['discount_amount'] ?? null),
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             netGross: isset($data['net_gross'])
                 ? NetGross::tryFrom((string) $data['net_gross'])
                 : null,
-            reduction: $data['reduction'] ?? null,
-            totalGrossUnreduced: isset($data['total_gross_unreduced'])
-                ? (float) $data['total_gross_unreduced']
-                : null,
-            totalNetUnreduced: isset($data['total_net_unreduced'])
-                ? (float) $data['total_net_unreduced']
-                : null,
-            currencyCode: $data['currency_code'] ?? null,
-            quote: isset($data['quote']) ? (float) $data['quote'] : null,
-            offerId: isset($data['offer_id']) && '' !== $data['offer_id']
-                ? (int) $data['offer_id']
-                : null,
-            freeTextId: isset($data['free_text_id']) && '' !== $data['free_text_id']
-                ? (int) $data['free_text_id']
-                : null,
-            templateId: isset($data['template_id']) && '' !== $data['template_id']
-                ? (int) $data['template_id']
-                : null,
+            reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
+            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
+            offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
+            freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
+            templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             taxes: $taxes,
-            customerportalUrl: $data['customerportal_url'] ?? null,
+            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             items: $items,
         );
     }
@@ -222,18 +204,5 @@ final readonly class Confirmation
         }
 
         return $data;
-    }
-
-    private static function parseDateTime(?string $value): ?DateTimeImmutable
-    {
-        if (null === $value || '' === $value) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\OfferTag;
 use Justpilot\Billomat\Model\OfferTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Angebots-Schlagworte (Offer Tags).
@@ -27,30 +26,7 @@ final class OfferTagsApi extends AbstractApi
      */
     public function listByOffer(int $offerId): array
     {
-        $data = $this->getJson('/offer-tags', ['offer_id' => $offerId]);
-
-        $root = $data['offer-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['offer-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<OfferTag> $tags */
-        $tags = array_map(OfferTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/offer-tags', 'offer-tags', 'offer-tag', OfferTag::fromArray(...), ['offer_id' => $offerId]);
     }
 
     /**
@@ -60,30 +36,7 @@ final class OfferTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/offer-tags');
-
-        $root = $data['offer-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<OfferTagCloudEntry> $tags */
-        $tags = array_map(OfferTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/offer-tags', 'offer-tags', 'tag', OfferTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?OfferTag
@@ -108,12 +61,7 @@ final class OfferTagsApi extends AbstractApi
 
         $data = $this->postJson('/offer-tags', $payload);
 
-        $row = $data['offer-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating offer tag.');
-        }
-
-        return OfferTag::fromArray($row);
+        return OfferTag::fromArray($this->unwrapEnvelope($data, 'offer-tag', 'creating offer tag'));
     }
 
     public function delete(int $id): bool

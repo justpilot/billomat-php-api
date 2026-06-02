@@ -10,7 +10,6 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderPdf;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -39,29 +38,7 @@ final class RemindersApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/reminders', $filters);
-
-        $node = $data['reminders']['reminder'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Reminder> $models */
-        $models = array_map(
-            Reminder::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
     }
 
     public function get(int $id): ?Reminder
@@ -92,13 +69,7 @@ final class RemindersApi extends AbstractApi
 
         $data = $this->postJson('/reminders', $payload);
 
-        $created = $data['reminder'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating reminder.');
-        }
-
-        return Reminder::fromArray($created);
+        return Reminder::fromArray($this->unwrapEnvelope($data, 'reminder', 'creating reminder'));
     }
 
     public function update(int $id, ReminderUpdateOptions $options): Reminder
@@ -107,12 +78,7 @@ final class RemindersApi extends AbstractApi
 
         $data = $this->putJson("/reminders/{$id}", $payload);
 
-        $row = $data['reminder'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating reminder.');
-        }
-
-        return Reminder::fromArray($row);
+        return Reminder::fromArray($this->unwrapEnvelope($data, 'reminder', 'updating reminder'));
     }
 
     public function complete(int $id, ?int $templateId = null): bool
@@ -187,12 +153,6 @@ final class RemindersApi extends AbstractApi
 
         $data = $this->getJson("/reminders/{$id}/pdf", $query);
 
-        $pdfData = $data['pdf'] ?? null;
-
-        if (!\is_array($pdfData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching reminder PDF.');
-        }
-
-        return ReminderPdf::fromArray($pdfData);
+        return ReminderPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching reminder PDF'));
     }
 }

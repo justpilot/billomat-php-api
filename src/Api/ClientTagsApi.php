@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ClientTag;
 use Justpilot\Billomat\Model\ClientTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Client-Tags.
@@ -18,30 +17,7 @@ final class ClientTagsApi extends AbstractApi
      */
     public function listByClient(int $clientId): array
     {
-        $data = $this->getJson('/client-tags', ['client_id' => $clientId]);
-
-        $root = $data['client-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['client-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ClientTag> $tags */
-        $tags = array_map(ClientTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/client-tags', 'client-tags', 'client-tag', ClientTag::fromArray(...), ['client_id' => $clientId]);
     }
 
     /**
@@ -49,30 +25,7 @@ final class ClientTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/client-tags');
-
-        $root = $data['client-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ClientTagCloudEntry> $tags */
-        $tags = array_map(ClientTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/client-tags', 'client-tags', 'tag', ClientTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?ClientTag
@@ -97,12 +50,7 @@ final class ClientTagsApi extends AbstractApi
 
         $data = $this->postJson('/client-tags', $payload);
 
-        $row = $data['client-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating client tag.');
-        }
-
-        return ClientTag::fromArray($row);
+        return ClientTag::fromArray($this->unwrapEnvelope($data, 'client-tag', 'creating client tag'));
     }
 
     public function delete(int $id): bool

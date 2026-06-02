@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
-use Throwable;
 
 use const DATE_ATOM;
 
@@ -47,28 +47,26 @@ final readonly class Incoming
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            supplierId: isset($data['supplier_id']) && '' !== $data['supplier_id']
-                ? (int) $data['supplier_id']
-                : null,
-            created: self::parseDateTime($data['created'] ?? null),
-            date: self::parseDateTime($data['date'] ?? null),
-            supplyDate: self::parseDateTime($data['supply_date'] ?? null),
-            dueDate: self::parseDateTime($data['due_date'] ?? null),
-            dueDays: isset($data['due_days']) ? (int) $data['due_days'] : null,
-            paidAt: self::parseDateTime($data['paid_at'] ?? null),
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
+            supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
+            dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            paidAt: ScalarCaster::toDateTimeOrNull($data['paid_at'] ?? null),
             status: IncomingStatus::fromApi(isset($data['status']) ? (string) $data['status'] : null),
-            incomingNumber: $data['incoming_number'] ?? null,
-            address: $data['address'] ?? null,
-            label: $data['label'] ?? null,
-            intro: $data['intro'] ?? null,
-            note: $data['note'] ?? null,
-            totalGross: isset($data['total_gross']) ? (float) $data['total_gross'] : null,
-            totalNet: isset($data['total_net']) ? (float) $data['total_net'] : null,
-            paidAmount: isset($data['paid_amount']) ? (float) $data['paid_amount'] : null,
-            openAmount: isset($data['open_amount']) ? (float) $data['open_amount'] : null,
-            currencyCode: $data['currency_code'] ?? null,
-            quote: isset($data['quote']) ? (float) $data['quote'] : null,
+            incomingNumber: ScalarCaster::toStringOrNull($data['incoming_number'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
         );
     }
 
@@ -99,18 +97,5 @@ final readonly class Incoming
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
         ];
-    }
-
-    private static function parseDateTime(mixed $value): ?DateTimeImmutable
-    {
-        if (!\is_string($value) || '' === $value) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Freitext-Baustein (verwendbar als title/label/intro/note auf Dokumenten).
  *
@@ -26,11 +28,11 @@ final readonly class FreeText
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            title: $data['title'] ?? null,
-            label: $data['label'] ?? null,
-            intro: $data['intro'] ?? null,
-            note: $data['note'] ?? null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
         );
     }
 

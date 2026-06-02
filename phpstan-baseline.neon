@@ -31,40 +31,22 @@ parameters:
 			path: src/Api/AbstractApi.php
 
 		-
-			message: '#^Cannot access offset ''article\-property'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ArticlePropertiesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ArticleProperty given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticleProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/ArticlePropertiesApi.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
+			identifier: argument.type
 			count: 1
-			path: src/Api/ArticlePropertyValuesApi.php
+			path: src/Api/ArticlePropertiesApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -73,64 +55,16 @@ parameters:
 			path: src/Api/ArticlePropertyValuesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ArticlePropertyValue given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticlePropertyValuesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticlePropertyValue\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/ArticlePropertyValuesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/ArticlePropertyValuesApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ArticleTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ArticleTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ArticleTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticleTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ArticleTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticleTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticleTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/ArticleTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/ArticleTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''article'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/ArticlesApi.php
+			path: src/Api/ArticleTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -139,28 +73,16 @@ parameters:
 			path: src/Api/ArticlesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Article given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticlesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Article\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/ArticlesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/ArticlesApi.php
 
 		-
-			message: '#^Cannot access offset ''client\-property'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
+			identifier: argument.type
 			count: 1
-			path: src/Api/ClientPropertiesApi.php
+			path: src/Api/ArticlesApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ClientPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -169,57 +91,21 @@ parameters:
 			path: src/Api/ClientPropertiesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ClientProperty given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ClientPropertiesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ClientProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/ClientPropertiesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/ClientPropertiesApi.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ClientTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ClientTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ClientTag given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Api/ClientTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ClientTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ClientTagsApi.php
+			path: src/Api/ClientPropertiesApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ClientTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/ClientTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
+			count: 1
 			path: src/Api/ClientTagsApi.php
 
 		-
@@ -241,40 +127,10 @@ parameters:
 			path: src/Api/ClientsApi.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ConfirmationCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationComment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationCommentsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/ConfirmationCommentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/ConfirmationCommentsApi.php
-
-		-
-			message: '#^Cannot access offset ''confirmation\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ConfirmationItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ConfirmationItemsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationItemsApi\:\:listByConfirmation\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -283,58 +139,16 @@ parameters:
 			path: src/Api/ConfirmationItemsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationItem given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/ConfirmationItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Api/ConfirmationItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ConfirmationTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ConfirmationTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/ConfirmationTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/ConfirmationTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''confirmation'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/ConfirmationsApi.php
+			path: src/Api/ConfirmationTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -343,34 +157,16 @@ parameters:
 			path: src/Api/ConfirmationsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Confirmation given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Confirmation\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Api/ConfirmationsApi.php
 
 		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationPdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/ConfirmationsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/ConfirmationsApi.php
-
-		-
-			message: '#^Cannot access offset ''contact'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ContactsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ContactsApi\:\:listByClient\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -379,76 +175,22 @@ parameters:
 			path: src/Api/ContactsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Contact given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ContactsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Contact\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/ContactsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/ContactsApi.php
 
 		-
-			message: '#^Cannot access offset ''country'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CountriesApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Country given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Api/CountriesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/CountriesApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CreditNoteCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\CreditNoteComment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNoteCommentsApi.php
+			path: src/Api/ContactsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/CreditNoteCommentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/CreditNoteCommentsApi.php
-
-		-
-			message: '#^Cannot access offset ''credit\-note\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CreditNoteItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CreditNoteItemsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\CreditNoteItemsApi\:\:listByCreditNote\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -457,22 +199,10 @@ parameters:
 			path: src/Api/CreditNoteItemsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\CreditNoteItem given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/CreditNoteItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNoteItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Api/CreditNoteItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CreditNotePaymentsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\CreditNotePaymentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -481,64 +211,16 @@ parameters:
 			path: src/Api/CreditNotePaymentsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\CreditNotePayment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNotePaymentsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNotePayment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/CreditNotePaymentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/CreditNotePaymentsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CreditNoteTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CreditNoteTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\CreditNoteTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNoteTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\CreditNoteTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNoteTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNoteTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/CreditNoteTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/CreditNoteTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''credit\-note'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/CreditNotesApi.php
+			path: src/Api/CreditNoteTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\CreditNotesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -547,82 +229,22 @@ parameters:
 			path: src/Api/CreditNotesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\CreditNote given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNotesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNote\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/CreditNotesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNotePdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Api/CreditNotesApi.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Api/CreditNotesApi.php
-
-		-
-			message: '#^Cannot access offset ''currency'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/CurrenciesApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Currency given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CurrenciesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/CurrenciesApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/DeliveryNoteCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteComment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNoteCommentsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/DeliveryNoteCommentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/DeliveryNoteCommentsApi.php
-
-		-
-			message: '#^Cannot access offset ''delivery\-note\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/DeliveryNoteItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/DeliveryNoteItemsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNoteItemsApi\:\:listByDeliveryNote\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -631,58 +253,16 @@ parameters:
 			path: src/Api/DeliveryNoteItemsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteItem given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/DeliveryNoteItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Api/DeliveryNoteItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/DeliveryNoteTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/DeliveryNoteTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNoteTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNoteTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/DeliveryNoteTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/DeliveryNoteTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''delivery\-note'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/DeliveryNotesApi.php
+			path: src/Api/DeliveryNoteTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNotesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -691,44 +271,20 @@ parameters:
 			path: src/Api/DeliveryNotesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNote given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNotesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNote\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Api/DeliveryNotesApi.php
 
 		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNotePdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/DeliveryNotesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/DeliveryNotesApi.php
-
-		-
-			message: '#^Cannot access offset ''dunning\-level'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/DunningLevelsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\DunningLevelsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/DunningLevelsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DunningLevel given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Api/DunningLevelsApi.php
 
@@ -739,26 +295,8 @@ parameters:
 			path: src/Api/DunningLevelsApi.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/DunningLevelsApi.php
-
-		-
-			message: '#^Cannot access offset ''email\-template'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/EmailTemplatesApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\EmailTemplatesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/EmailTemplatesApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\EmailTemplate given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Api/EmailTemplatesApi.php
 
@@ -769,26 +307,8 @@ parameters:
 			path: src/Api/EmailTemplatesApi.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/EmailTemplatesApi.php
-
-		-
-			message: '#^Cannot access offset ''free\-text'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/FreeTextsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\FreeTextsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/FreeTextsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\FreeText given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Api/FreeTextsApi.php
 
@@ -799,70 +319,22 @@ parameters:
 			path: src/Api/FreeTextsApi.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/FreeTextsApi.php
-
-		-
-			message: '#^Cannot access offset ''inbox\-document'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InboxDocumentsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InboxDocumentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/InboxDocumentsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InboxDocument given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InboxDocumentsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InboxDocument\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/InboxDocumentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/InboxDocumentsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/IncomingCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\IncomingComment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingCommentsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/IncomingCommentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/IncomingCommentsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/IncomingPaymentsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPaymentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -871,28 +343,10 @@ parameters:
 			path: src/Api/IncomingPaymentsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\IncomingPayment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingPaymentsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingPayment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/IncomingPaymentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/IncomingPaymentsApi.php
-
-		-
-			message: '#^Cannot access offset ''incoming\-property'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/IncomingPropertiesApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -901,28 +355,16 @@ parameters:
 			path: src/Api/IncomingPropertiesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\IncomingProperty given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingPropertiesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/IncomingPropertiesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/IncomingPropertiesApi.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
+			identifier: argument.type
 			count: 1
-			path: src/Api/IncomingPropertyValuesApi.php
+			path: src/Api/IncomingPropertiesApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -931,64 +373,16 @@ parameters:
 			path: src/Api/IncomingPropertyValuesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\IncomingPropertyValue given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingPropertyValuesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingPropertyValue\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/IncomingPropertyValuesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/IncomingPropertyValuesApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/IncomingTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/IncomingTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\IncomingTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\IncomingTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/IncomingTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/IncomingTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''incoming'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/IncomingsApi.php
+			path: src/Api/IncomingTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -997,58 +391,22 @@ parameters:
 			path: src/Api/IncomingsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Incoming given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Incoming\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/IncomingsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/IncomingsApi.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InvoiceCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceComment given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Api/InvoiceCommentsApi.php
+			path: src/Api/IncomingsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoiceComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/InvoiceCommentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/InvoiceCommentsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InvoiceItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''invoice\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InvoiceItemsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InvoiceItemsApi\:\:listByInvoice\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -1057,22 +415,10 @@ parameters:
 			path: src/Api/InvoiceItemsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceItem given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/InvoiceItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoiceItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Api/InvoiceItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InvoicePaymentsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InvoicePaymentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -1081,70 +427,16 @@ parameters:
 			path: src/Api/InvoicePaymentsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoicePayment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoicePaymentsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoicePayment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/InvoicePaymentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/InvoicePaymentsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InvoiceTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InvoiceTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoiceTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoiceTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoiceTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/InvoiceTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/InvoiceTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''invoice'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/InvoicesApi.php
-
-		-
-			message: '#^Cannot access offset ''invoice\-group'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/InvoicesApi.php
+			path: src/Api/InvoiceTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InvoicesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -1159,100 +451,28 @@ parameters:
 			path: src/Api/InvoicesApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Invoice given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoicesApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceGroup given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoicesApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Invoice\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Api/InvoicesApi.php
 
 		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoicePdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/InvoicesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/InvoicesApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/LetterCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\LetterComment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/LetterCommentsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\LetterComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/LetterCommentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/LetterCommentsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/LetterTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/LetterTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\LetterTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/LetterTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\LetterTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/LetterTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\LetterTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/LetterTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/LetterTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''letter'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/LettersApi.php
+			path: src/Api/LetterTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\LettersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -1261,64 +481,22 @@ parameters:
 			path: src/Api/LettersApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Letter given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/LettersApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Letter\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Api/LettersApi.php
 
 		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\LetterPdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/LettersApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/LettersApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/OfferCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\OfferComment given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OfferCommentsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\OfferComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/OfferCommentsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/OfferCommentsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/OfferItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''offer\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/OfferItemsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\OfferItemsApi\:\:listByOffer\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -1327,58 +505,16 @@ parameters:
 			path: src/Api/OfferItemsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\OfferItem given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/OfferItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\OfferItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Api/OfferItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/OfferTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/OfferTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\OfferTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OfferTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\OfferTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OfferTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\OfferTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/OfferTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/OfferTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''offer'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/OffersApi.php
+			path: src/Api/OfferTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\OffersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -1387,64 +523,22 @@ parameters:
 			path: src/Api/OffersApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Offer given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OffersApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Offer\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Api/OffersApi.php
 
 		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\OfferPdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/OffersApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/OffersApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/RecurringEmailReceiversApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\RecurringEmailReceiver given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringEmailReceiversApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\RecurringEmailReceiver\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/RecurringEmailReceiversApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/RecurringEmailReceiversApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/RecurringItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''recurring\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/RecurringItemsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\RecurringItemsApi\:\:listByRecurring\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -1453,58 +547,16 @@ parameters:
 			path: src/Api/RecurringItemsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\RecurringItem given\.$#'
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/RecurringItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\RecurringItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Api/RecurringItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/RecurringTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/RecurringTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\RecurringTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\RecurringTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringTagsApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\RecurringTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/RecurringTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/RecurringTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''recurring'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/RecurringsApi.php
+			path: src/Api/RecurringTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\RecurringsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -1513,34 +565,16 @@ parameters:
 			path: src/Api/RecurringsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Recurring given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Recurring\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/RecurringsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/RecurringsApi.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
+			identifier: argument.type
 			count: 1
-			path: src/Api/ReminderItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''reminder\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ReminderItemsApi.php
+			path: src/Api/RecurringsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ReminderItemsApi\:\:listByReminder\(\) has parameter \$query with no value type specified in iterable type array\.$#'
@@ -1549,68 +583,14 @@ parameters:
 			path: src/Api/ReminderItemsApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ReminderItem given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ReminderItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ReminderItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ReminderItemsApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ReminderTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/ReminderTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ReminderTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ReminderTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ReminderTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ReminderTagsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ReminderTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 2
-			path: src/Api/ReminderTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/ReminderTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''reminder\-text'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Api/ReminderTextsApi.php
+			path: src/Api/ReminderTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ReminderTextsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ReminderTextsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ReminderText given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Api/ReminderTextsApi.php
 
@@ -1621,44 +601,20 @@ parameters:
 			path: src/Api/ReminderTextsApi.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/ReminderTextsApi.php
-
-		-
-			message: '#^Cannot access offset ''reminder'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/RemindersApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\RemindersApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/RemindersApi.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Reminder given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RemindersApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Reminder\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
-			count: 3
-			path: src/Api/RemindersApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ReminderPdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Api/RemindersApi.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
+			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Api/RemindersApi.php
 
@@ -1921,78 +877,6 @@ parameters:
 			path: src/Http/BillomatHttpClientInterface.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 6
-			path: src/Model/Article.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 7
-			path: src/Model/Article.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Parameter \$articleNumber of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Parameter \$purchasePriceCurrencyCode of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Article.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/ArticleProperty.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1
@@ -2005,33 +889,15 @@ parameters:
 			path: src/Model/ArticleProperty.php
 
 		-
-			message: '#^Parameter \$defaultValue of class Justpilot\\Billomat\\Model\\ArticleProperty constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ArticleProperty.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 3
-			path: src/Model/ArticlePropertyValue.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\ArticlePropertyValue constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ArticlePropertyValue.php
-
-		-
-			message: '#^Parameter \$type of class Justpilot\\Billomat\\Model\\ArticlePropertyValue constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ArticlePropertyValue.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 2
+			path: src/Model/ArticlePropertyValue.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
 			path: src/Model/ArticleTag.php
 
 		-
@@ -2043,7 +909,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/ArticleTagCloudEntry.php
 
 		-
@@ -2059,12 +925,6 @@ parameters:
 			path: src/Model/Client.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/ClientProperty.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1
@@ -2077,15 +937,9 @@ parameters:
 			path: src/Model/ClientProperty.php
 
 		-
-			message: '#^Parameter \$defaultValue of class Justpilot\\Billomat\\Model\\ClientProperty constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ClientProperty.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/ClientTag.php
 
 		-
@@ -2097,7 +951,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/ClientTagCloudEntry.php
 
 		-
@@ -2133,13 +987,13 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 9
+			count: 2
 			path: src/Model/Confirmation.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 9
+			count: 1
 			path: src/Model/Confirmation.php
 
 		-
@@ -2155,140 +1009,26 @@ parameters:
 			path: src/Model/Confirmation.php
 
 		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Confirmation\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$confirmationNumber of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
 			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Confirmation constructor expects list\<Justpilot\\Billomat\\Model\\ConfirmationItem\>, array\<Justpilot\\Billomat\\Model\\ConfirmationItem\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Model/Confirmation.php
 
 		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Confirmation.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
-			path: src/Model/ConfirmationComment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
+			count: 1
 			path: src/Model/ConfirmationComment.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 7
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
+			count: 2
 			path: src/Model/ConfirmationItem.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 2
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/ConfirmationItem.php
 
@@ -2307,7 +1047,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/ConfirmationTag.php
 
 		-
@@ -2319,7 +1059,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/ConfirmationTagCloudEntry.php
 
 		-
@@ -2331,126 +1071,12 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/Contact.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$city of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$countryCode of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$email of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$fax of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$firstName of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$lastName of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$mobile of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$phone of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$salutation of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$state of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$street of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Parameter \$zip of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Contact.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/Country.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Country.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\Country constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Country.php
-
-		-
-			message: '#^Parameter \$nameDe of class Justpilot\\Billomat\\Model\\Country constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/Country.php
 
@@ -2481,13 +1107,13 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 9
+			count: 2
 			path: src/Model/CreditNote.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 8
+			count: 1
 			path: src/Model/CreditNote.php
 
 		-
@@ -2503,140 +1129,26 @@ parameters:
 			path: src/Model/CreditNote.php
 
 		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\CreditNote\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$creditNoteNumber of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
 			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\CreditNote constructor expects list\<Justpilot\\Billomat\\Model\\CreditNoteItem\>, array\<Justpilot\\Billomat\\Model\\CreditNoteItem\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Model/CreditNote.php
 
 		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\CreditNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
-			path: src/Model/CreditNoteComment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
+			count: 1
 			path: src/Model/CreditNoteComment.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 7
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
+			count: 2
 			path: src/Model/CreditNoteItem.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 2
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\CreditNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\CreditNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\CreditNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\CreditNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\CreditNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/CreditNoteItem.php
 
@@ -2649,7 +1161,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
+			count: 1
 			path: src/Model/CreditNotePayment.php
 
 		-
@@ -2659,18 +1171,6 @@ parameters:
 			path: src/Model/CreditNotePayment.php
 
 		-
-			message: '#^Parameter \$comment of class Justpilot\\Billomat\\Model\\CreditNotePayment constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNotePayment.php
-
-		-
-			message: '#^Parameter \$transactionPurpose of class Justpilot\\Billomat\\Model\\CreditNotePayment constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNotePayment.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -2685,7 +1185,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/CreditNoteTag.php
 
 		-
@@ -2697,12 +1197,6 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
-			path: src/Model/CreditNoteTagCloudEntry.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
 			count: 1
 			path: src/Model/CreditNoteTagCloudEntry.php
 
@@ -2710,17 +1204,11 @@ parameters:
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1
-			path: src/Model/Currency.php
+			path: src/Model/CreditNoteTagCloudEntry.php
 
 		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\Currency constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Currency.php
-
-		-
-			message: '#^Parameter \$symbol of class Justpilot\\Billomat\\Model\\Currency constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
 			count: 1
 			path: src/Model/Currency.php
 
@@ -2751,13 +1239,13 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 7
+			count: 2
 			path: src/Model/DeliveryNote.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 9
+			count: 1
 			path: src/Model/DeliveryNote.php
 
 		-
@@ -2773,140 +1261,26 @@ parameters:
 			path: src/Model/DeliveryNote.php
 
 		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\DeliveryNote\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$deliveryNoteNumber of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
 			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects list\<Justpilot\\Billomat\\Model\\DeliveryNoteItem\>, array\<Justpilot\\Billomat\\Model\\DeliveryNoteItem\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Model/DeliveryNote.php
 
 		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNote.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
-			path: src/Model/DeliveryNoteComment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
+			count: 1
 			path: src/Model/DeliveryNoteComment.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 7
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
+			count: 2
 			path: src/Model/DeliveryNoteItem.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 2
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/DeliveryNoteItem.php
 
@@ -2925,7 +1299,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/DeliveryNoteTag.php
 
 		-
@@ -2937,7 +1311,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/DeliveryNoteTagCloudEntry.php
 
 		-
@@ -2945,54 +1319,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/DeliveryNoteTagCloudEntry.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/DunningLevel.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 3
-			path: src/Model/DunningLevel.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\DunningLevel constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/DunningLevel.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/EmailTemplate.php
-
-		-
-			message: '#^Parameter \$body of class Justpilot\\Billomat\\Model\\EmailTemplate constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/EmailTemplate.php
-
-		-
-			message: '#^Parameter \$fromAddress of class Justpilot\\Billomat\\Model\\EmailTemplate constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/EmailTemplate.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\EmailTemplate constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/EmailTemplate.php
-
-		-
-			message: '#^Parameter \$subject of class Justpilot\\Billomat\\Model\\EmailTemplate constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/EmailTemplate.php
 
 		-
 			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
@@ -3010,120 +1336,24 @@ parameters:
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 1
-			path: src/Model/FreeText.php
+			path: src/Model/InboxDocument.php
 
 		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\FreeText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/FreeText.php
-
-		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\FreeText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/FreeText.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\FreeText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/FreeText.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\FreeText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/FreeText.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
 			count: 2
 			path: src/Model/InboxDocument.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 3
-			path: src/Model/InboxDocument.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/InboxDocument.php
-
-		-
-			message: '#^Parameter \$base64file of class Justpilot\\Billomat\\Model\\InboxDocument constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InboxDocument.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 5
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 3
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Incoming constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Incoming constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Parameter \$incomingNumber of class Justpilot\\Billomat\\Model\\Incoming constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Incoming constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Incoming constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Incoming.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Incoming constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/Incoming.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
-			path: src/Model/IncomingComment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
+			count: 1
 			path: src/Model/IncomingComment.php
 
 		-
@@ -3135,7 +1365,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
+			count: 1
 			path: src/Model/IncomingPayment.php
 
 		-
@@ -3143,24 +1373,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Model/IncomingPayment.php
-
-		-
-			message: '#^Parameter \$comment of class Justpilot\\Billomat\\Model\\IncomingPayment constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/IncomingPayment.php
-
-		-
-			message: '#^Parameter \$transactionPurpose of class Justpilot\\Billomat\\Model\\IncomingPayment constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/IncomingPayment.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/IncomingProperty.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
@@ -3175,33 +1387,15 @@ parameters:
 			path: src/Model/IncomingProperty.php
 
 		-
-			message: '#^Parameter \$defaultValue of class Justpilot\\Billomat\\Model\\IncomingProperty constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/IncomingProperty.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 3
-			path: src/Model/IncomingPropertyValue.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\IncomingPropertyValue constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/IncomingPropertyValue.php
-
-		-
-			message: '#^Parameter \$type of class Justpilot\\Billomat\\Model\\IncomingPropertyValue constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/IncomingPropertyValue.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 2
+			path: src/Model/IncomingPropertyValue.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
 			path: src/Model/IncomingTag.php
 
 		-
@@ -3213,7 +1407,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/IncomingTagCloudEntry.php
 
 		-
@@ -3249,13 +1443,13 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 11
+			count: 2
 			path: src/Model/Invoice.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 12
+			count: 1
 			path: src/Model/Invoice.php
 
 		-
@@ -3277,164 +1471,26 @@ parameters:
 			path: src/Model/Invoice.php
 
 		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Invoice\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 5
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$invoiceNumber of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
 			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Invoice constructor expects list\<Justpilot\\Billomat\\Model\\InvoiceItem\>, array\<Justpilot\\Billomat\\Model\\InvoiceItem\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Model/Invoice.php
 
 		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$paymentTypes of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Invoice constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
-			path: src/Model/InvoiceComment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
+			count: 1
 			path: src/Model/InvoiceComment.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
 			count: 2
-			path: src/Model/InvoiceGroup.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/InvoiceGroup.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 5
-			path: src/Model/InvoiceGroup.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 7
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
 			path: src/Model/InvoiceItem.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 2
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\InvoiceItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/InvoiceItem.php
 
@@ -3447,7 +1503,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
+			count: 1
 			path: src/Model/InvoicePayment.php
 
 		-
@@ -3457,18 +1513,6 @@ parameters:
 			path: src/Model/InvoicePayment.php
 
 		-
-			message: '#^Parameter \$comment of class Justpilot\\Billomat\\Model\\InvoicePayment constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InvoicePayment.php
-
-		-
-			message: '#^Parameter \$transactionPurpose of class Justpilot\\Billomat\\Model\\InvoicePayment constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InvoicePayment.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -3483,7 +1527,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/InvoiceTag.php
 
 		-
@@ -3495,7 +1539,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/InvoiceTagCloudEntry.php
 
 		-
@@ -3507,79 +1551,19 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 6
+			count: 1
 			path: src/Model/Letter.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Letter\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$letterNumber of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Letter.php
-
-		-
-			message: '#^Parameter \$subject of class Justpilot\\Billomat\\Model\\Letter constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/Letter.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
-			path: src/Model/LetterComment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
+			count: 1
 			path: src/Model/LetterComment.php
 
 		-
@@ -3597,7 +1581,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/LetterTag.php
 
 		-
@@ -3609,7 +1593,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/LetterTagCloudEntry.php
 
 		-
@@ -3645,13 +1629,13 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 9
+			count: 2
 			path: src/Model/Offer.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 9
+			count: 1
 			path: src/Model/Offer.php
 
 		-
@@ -3667,140 +1651,26 @@ parameters:
 			path: src/Model/Offer.php
 
 		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Offer\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
 			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Offer constructor expects list\<Justpilot\\Billomat\\Model\\OfferItem\>, array\<Justpilot\\Billomat\\Model\\OfferItem\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Model/Offer.php
 
 		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$offerNumber of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Offer constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
-			path: src/Model/OfferComment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
+			count: 1
 			path: src/Model/OfferComment.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 7
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
+			count: 2
 			path: src/Model/OfferItem.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 2
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\OfferItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\OfferItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\OfferItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\OfferItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\OfferItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/OfferItem.php
 
@@ -3819,7 +1689,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/OfferTag.php
 
 		-
@@ -3831,7 +1701,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/OfferTagCloudEntry.php
 
 		-
@@ -3867,13 +1737,13 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 6
+			count: 2
 			path: src/Model/Recurring.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 12
+			count: 1
 			path: src/Model/Recurring.php
 
 		-
@@ -3889,85 +1759,7 @@ parameters:
 			path: src/Model/Recurring.php
 
 		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$emailMessage of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$emailSender of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$emailSubject of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
 			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Recurring constructor expects list\<Justpilot\\Billomat\\Model\\RecurringItem\>, array\<Justpilot\\Billomat\\Model\\RecurringItem\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$paymentTypes of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Recurring constructor expects string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Model/Recurring.php
@@ -3975,7 +1767,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/RecurringEmailReceiver.php
 
 		-
@@ -3987,13 +1779,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 7
-			path: src/Model/RecurringItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
+			count: 2
 			path: src/Model/RecurringItem.php
 
 		-
@@ -4003,39 +1789,9 @@ parameters:
 			path: src/Model/RecurringItem.php
 
 		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\RecurringItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/RecurringItem.php
-
-		-
-			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\RecurringItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/RecurringItem.php
-
-		-
-			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\RecurringItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/RecurringItem.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\RecurringItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/RecurringItem.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\RecurringItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/RecurringItem.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/RecurringTag.php
 
 		-
@@ -4047,7 +1803,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/RecurringTagCloudEntry.php
 
 		-
@@ -4069,15 +1825,9 @@ parameters:
 			path: src/Model/Reminder.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 3
-			path: src/Model/Reminder.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 9
+			count: 1
 			path: src/Model/Reminder.php
 
 		-
@@ -4093,61 +1843,7 @@ parameters:
 			path: src/Model/Reminder.php
 
 		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Reminder\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
 			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Reminder constructor expects list\<Justpilot\\Billomat\\Model\\ReminderItem\>, array\<Justpilot\\Billomat\\Model\\ReminderItem\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$reminderNumber of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Reminder.php
-
-		-
-			message: '#^Parameter \$subject of class Justpilot\\Billomat\\Model\\Reminder constructor expects string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Model/Reminder.php
@@ -4155,43 +1851,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
-			count: 4
-			path: src/Model/ReminderItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
-			path: src/Model/ReminderItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/ReminderItem.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: src/Model/ReminderItem.php
-
-		-
-			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\ReminderItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ReminderItem.php
-
-		-
-			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\ReminderItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ReminderItem.php
-
-		-
-			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\ReminderItem constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
+			count: 2
 			path: src/Model/ReminderItem.php
 
 		-
@@ -4209,7 +1869,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/ReminderTag.php
 
 		-
@@ -4221,7 +1881,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/ReminderTagCloudEntry.php
 
 		-
@@ -4229,76 +1889,10 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/ReminderTagCloudEntry.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 3
-			path: src/Model/ReminderText.php
-
-		-
-			message: '#^Parameter \$footer of class Justpilot\\Billomat\\Model\\ReminderText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ReminderText.php
-
-		-
-			message: '#^Parameter \$header of class Justpilot\\Billomat\\Model\\ReminderText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ReminderText.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\ReminderText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ReminderText.php
-
-		-
-			message: '#^Parameter \$subject of class Justpilot\\Billomat\\Model\\ReminderText constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ReminderText.php
 
 		-
 			message: '#^Call to function array_filter\(\) requires parameter \#2 to be passed to avoid loose comparison semantics\.$#'
 			identifier: arrayFilter.strict
-			count: 1
-			path: src/Model/Settings.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Settings.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:bool\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Model/Settings.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:dt\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Model/Settings.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:float\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Model/Settings.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:int\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Model/Settings.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Model\\Settings\:\:str\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: src/Model/Settings.php
 
@@ -4309,172 +1903,10 @@ parameters:
 			path: src/Model/Settings.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/Supplier.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 2
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
 			count: 1
 			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$bankAccountNumber of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$bankAccountOwner of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$bankBic of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$bankIban of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$bankName of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$bankNumber of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$city of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$countryCode of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$email of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$fax of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$firstName of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$lastName of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$mobile of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$phone of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$salutation of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$state of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$street of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$taxNumber of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$vatNumber of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$www of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Parameter \$zip of class Justpilot\\Billomat\\Model\\Supplier constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Supplier.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/SupplierProperty.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'
@@ -4489,33 +1921,15 @@ parameters:
 			path: src/Model/SupplierProperty.php
 
 		-
-			message: '#^Parameter \$defaultValue of class Justpilot\\Billomat\\Model\\SupplierProperty constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/SupplierProperty.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 3
-			path: src/Model/SupplierPropertyValue.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\SupplierPropertyValue constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/SupplierPropertyValue.php
-
-		-
-			message: '#^Parameter \$type of class Justpilot\\Billomat\\Model\\SupplierPropertyValue constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/SupplierPropertyValue.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 2
+			path: src/Model/SupplierPropertyValue.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
 			path: src/Model/SupplierTag.php
 
 		-
@@ -4527,7 +1941,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: src/Model/SupplierTagCloudEntry.php
 
 		-
@@ -4545,7 +1959,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
+			count: 1
 			path: src/Model/TaxRate.php
 
 		-
@@ -4555,20 +1969,8 @@ parameters:
 			path: src/Model/TaxRate.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/Template.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
-			count: 2
-			path: src/Model/Template.php
-
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
 			count: 1
 			path: src/Model/Template.php
 
@@ -4591,76 +1993,10 @@ parameters:
 			path: src/Model/Template.php
 
 		-
-			message: '#^Parameter \$base64file of class Justpilot\\Billomat\\Model\\Template constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Template.php
-
-		-
-			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\Template constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Template.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/Unit.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1
 			path: src/Model/Unit.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/User.php
-
-		-
-			message: '#^Parameter \$email of class Justpilot\\Billomat\\Model\\User constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/User.php
-
-		-
-			message: '#^Parameter \$fax of class Justpilot\\Billomat\\Model\\User constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/User.php
-
-		-
-			message: '#^Parameter \$firstName of class Justpilot\\Billomat\\Model\\User constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/User.php
-
-		-
-			message: '#^Parameter \$lastName of class Justpilot\\Billomat\\Model\\User constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/User.php
-
-		-
-			message: '#^Parameter \$mobile of class Justpilot\\Billomat\\Model\\User constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/User.php
-
-		-
-			message: '#^Parameter \$phone of class Justpilot\\Billomat\\Model\\User constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/User.php
-
-		-
-			message: '#^Parameter \$salutation of class Justpilot\\Billomat\\Model\\User constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/User.php
 
 		-
 			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertNull\(\)\.$#'

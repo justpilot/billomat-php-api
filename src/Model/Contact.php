@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
-use Throwable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
 
@@ -42,33 +42,24 @@ final readonly class Contact
      */
     public static function fromArray(array $data): self
     {
-        $created = null;
-        if (!empty($data['created'])) {
-            try {
-                $created = new DateTimeImmutable((string) $data['created']);
-            } catch (Throwable) {
-                $created = null;
-            }
-        }
-
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: (int) ($data['client_id'] ?? 0),
-            created: $created,
-            label: $data['label'] ?? null,
-            salutation: $data['salutation'] ?? null,
-            firstName: $data['first_name'] ?? null,
-            lastName: $data['last_name'] ?? null,
-            street: $data['street'] ?? null,
-            zip: $data['zip'] ?? null,
-            city: $data['city'] ?? null,
-            state: $data['state'] ?? null,
-            countryCode: $data['country_code'] ?? null,
-            email: $data['email'] ?? null,
-            phone: $data['phone'] ?? null,
-            fax: $data['fax'] ?? null,
-            mobile: $data['mobile'] ?? null,
-            note: $data['note'] ?? null,
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
+            firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
+            lastName: ScalarCaster::toStringOrNull($data['last_name'] ?? null),
+            street: ScalarCaster::toStringOrNull($data['street'] ?? null),
+            zip: ScalarCaster::toStringOrNull($data['zip'] ?? null),
+            city: ScalarCaster::toStringOrNull($data['city'] ?? null),
+            state: ScalarCaster::toStringOrNull($data['state'] ?? null),
+            countryCode: ScalarCaster::toStringOrNull($data['country_code'] ?? null),
+            email: ScalarCaster::toStringOrNull($data['email'] ?? null),
+            phone: ScalarCaster::toStringOrNull($data['phone'] ?? null),
+            fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
+            mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
         );
     }
 

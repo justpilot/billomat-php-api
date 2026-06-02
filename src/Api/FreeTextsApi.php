@@ -20,26 +20,7 @@ final class FreeTextsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/free-texts', $filters);
-
-        $node = $data['free-texts']['free-text'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<FreeText> $models */
-        $models = array_map(FreeText::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/free-texts', 'free-texts', 'free-text', FreeText::fromArray(...), $filters);
     }
 
     public function get(int $id): ?FreeText

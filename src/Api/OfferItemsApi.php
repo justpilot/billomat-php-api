@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\OfferItem;
-use RuntimeException;
 
 /**
  * API-Wrapper für Angebotspositionen (Offer Items).
@@ -30,25 +29,7 @@ final class OfferItemsApi extends AbstractApi
     {
         $params = array_merge(['offer_id' => $offerId], $query);
 
-        $data = $this->getJson('/offer-items', $params);
-
-        $itemsData = $data['offer-items']['offer-item'] ?? [];
-
-        if (isset($itemsData['id'])) {
-            $itemsData = [$itemsData];
-        }
-
-        if (!\is_array($itemsData) || [] === $itemsData) {
-            return [];
-        }
-
-        /** @var list<OfferItem> $items */
-        $items = array_map(
-            OfferItem::fromArray(...),
-            $itemsData,
-        );
-
-        return $items;
+        return $this->listResource('/offer-items', 'offer-items', 'offer-item', OfferItem::fromArray(...), $params);
     }
 
     public function get(int $id): ?OfferItem
@@ -59,13 +40,7 @@ final class OfferItemsApi extends AbstractApi
             return null;
         }
 
-        $itemData = $data['offer-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching offer item.');
-        }
-
-        return OfferItem::fromArray($itemData);
+        return OfferItem::fromArray($this->unwrapEnvelope($data, 'offer-item', 'fetching offer item'));
     }
 
     public function create(int $offerId, OfferItemCreateOptions $options): OfferItem
@@ -77,13 +52,7 @@ final class OfferItemsApi extends AbstractApi
 
         $data = $this->postJson('/offer-items', $payload);
 
-        $itemData = $data['offer-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating offer item.');
-        }
-
-        return OfferItem::fromArray($itemData);
+        return OfferItem::fromArray($this->unwrapEnvelope($data, 'offer-item', 'creating offer item'));
     }
 
     public function update(int $id, OfferItemCreateOptions $options): OfferItem
@@ -92,13 +61,7 @@ final class OfferItemsApi extends AbstractApi
 
         $data = $this->putJson("/offer-items/{$id}", $payload);
 
-        $itemData = $data['offer-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating offer item.');
-        }
-
-        return OfferItem::fromArray($itemData);
+        return OfferItem::fromArray($this->unwrapEnvelope($data, 'offer-item', 'updating offer item'));
     }
 
     public function delete(int $id): bool

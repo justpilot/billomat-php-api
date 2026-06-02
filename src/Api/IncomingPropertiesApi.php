@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\IncomingProperty;
-use RuntimeException;
 
 /**
  * API-Wrapper für Definitionen von Eigenschaften für Eingangsrechnungen.
@@ -19,26 +18,7 @@ final class IncomingPropertiesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/incoming-properties', $filters);
-
-        $node = $data['incoming-properties']['incoming-property'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<IncomingProperty> $models */
-        $models = array_map(IncomingProperty::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/incoming-properties', 'incoming-properties', 'incoming-property', IncomingProperty::fromArray(...), $filters);
     }
 
     public function get(int $id): ?IncomingProperty
@@ -63,12 +43,7 @@ final class IncomingPropertiesApi extends AbstractApi
 
         $data = $this->postJson('/incoming-properties', $payload);
 
-        $row = $data['incoming-property'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating incoming property.');
-        }
-
-        return IncomingProperty::fromArray($row);
+        return IncomingProperty::fromArray($this->unwrapEnvelope($data, 'incoming-property', 'creating incoming property'));
     }
 
     public function update(int $id, PropertyCreateOptions $options): IncomingProperty
@@ -77,12 +52,7 @@ final class IncomingPropertiesApi extends AbstractApi
 
         $data = $this->putJson("/incoming-properties/{$id}", $payload);
 
-        $row = $data['incoming-property'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating incoming property.');
-        }
-
-        return IncomingProperty::fromArray($row);
+        return IncomingProperty::fromArray($this->unwrapEnvelope($data, 'incoming-property', 'updating incoming property'));
     }
 
     public function delete(int $id): bool

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
-use Throwable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
 
@@ -40,30 +40,19 @@ final readonly class ReminderItem
      */
     public static function fromArray(array $data): self
     {
-        $created = null;
-        if (!empty($data['created'])) {
-            try {
-                $created = new DateTimeImmutable((string) $data['created']);
-            } catch (Throwable) {
-                $created = null;
-            }
-        }
-
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            reminderId: isset($data['reminder_id']) ? (int) $data['reminder_id'] : null,
-            articleId: isset($data['article_id']) && '' !== $data['article_id']
-                ? (int) $data['article_id']
-                : null,
-            position: isset($data['position']) ? (int) $data['position'] : null,
-            unit: $data['unit'] ?? null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            reminderId: ScalarCaster::toIntOrNull($data['reminder_id'] ?? null),
+            articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
+            position: ScalarCaster::toIntOrNull($data['position'] ?? null),
+            unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
             quantity: isset($data['quantity']) ? (float) $data['quantity'] : 0.0,
             unitPrice: isset($data['unit_price']) ? (float) $data['unit_price'] : 0.0,
-            title: $data['title'] ?? null,
-            description: $data['description'] ?? null,
-            totalGross: isset($data['total_gross']) ? (float) $data['total_gross'] : null,
-            totalNet: isset($data['total_net']) ? (float) $data['total_net'] : null,
-            created: $created,
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            description: ScalarCaster::toStringOrNull($data['description'] ?? null),
+            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
         );
     }
 

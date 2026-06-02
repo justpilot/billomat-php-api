@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ReminderItem;
-use RuntimeException;
 
 /**
  * API-Wrapper für Reminder-Items (read-only — Mahnungspositionen werden vom System generiert).
@@ -27,25 +26,7 @@ final class ReminderItemsApi extends AbstractApi
     {
         $params = array_merge(['reminder_id' => $reminderId], $query);
 
-        $data = $this->getJson('/reminder-items', $params);
-
-        $itemsData = $data['reminder-items']['reminder-item'] ?? [];
-
-        if (isset($itemsData['id'])) {
-            $itemsData = [$itemsData];
-        }
-
-        if (!\is_array($itemsData) || [] === $itemsData) {
-            return [];
-        }
-
-        /** @var list<ReminderItem> $items */
-        $items = array_map(
-            ReminderItem::fromArray(...),
-            $itemsData,
-        );
-
-        return $items;
+        return $this->listResource('/reminder-items', 'reminder-items', 'reminder-item', ReminderItem::fromArray(...), $params);
     }
 
     public function get(int $id): ?ReminderItem
@@ -56,12 +37,6 @@ final class ReminderItemsApi extends AbstractApi
             return null;
         }
 
-        $itemData = $data['reminder-item'] ?? null;
-
-        if (!\is_array($itemData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching reminder item.');
-        }
-
-        return ReminderItem::fromArray($itemData);
+        return ReminderItem::fromArray($this->unwrapEnvelope($data, 'reminder-item', 'fetching reminder item'));
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Wert einer Eigenschaft einer Eingangsrechnung.
  */
@@ -25,11 +27,11 @@ final readonly class IncomingPropertyValue
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             incomingId: (int) ($data['incoming_id'] ?? 0),
             incomingPropertyId: (int) ($data['incoming_property_id'] ?? 0),
-            type: $data['type'] ?? null,
-            name: $data['name'] ?? null,
+            type: ScalarCaster::toStringOrNull($data['type'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
         );
     }

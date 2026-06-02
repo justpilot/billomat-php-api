@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Eintrag aus der aggregierten Tag-Cloud GET /letter-tags.
  */
@@ -22,7 +24,7 @@ final readonly class LetterTagCloudEntry
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             name: (string) ($data['name'] ?? ''),
             count: isset($data['count']) ? (int) $data['count'] : 0,
         );

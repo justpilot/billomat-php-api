@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ArticlePropertyValue;
-use RuntimeException;
 
 /**
  * API-Wrapper für Werte von Artikel-Eigenschaften (Article Property Values).
@@ -26,34 +25,7 @@ final class ArticlePropertyValuesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/article-property-values', $filters);
-
-        $root = $data['article-property-values'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['article-property-value'] ?? [];
-
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ArticlePropertyValue> $values */
-        $values = array_map(
-            ArticlePropertyValue::fromArray(...),
-            $rows,
-        );
-
-        return $values;
+        return $this->listResource('/article-property-values', 'article-property-values', 'article-property-value', ArticlePropertyValue::fromArray(...), $filters);
     }
 
     public function get(int $id): ?ArticlePropertyValue
@@ -78,11 +50,6 @@ final class ArticlePropertyValuesApi extends AbstractApi
 
         $data = $this->postJson('/article-property-values', $payload);
 
-        $row = $data['article-property-value'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating article property value.');
-        }
-
-        return ArticlePropertyValue::fromArray($row);
+        return ArticlePropertyValue::fromArray($this->unwrapEnvelope($data, 'article-property-value', 'creating article property value'));
     }
 }

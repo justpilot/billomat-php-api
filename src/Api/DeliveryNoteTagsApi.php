@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\DeliveryNoteTag;
 use Justpilot\Billomat\Model\DeliveryNoteTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Delivery-Note-Tags.
@@ -18,30 +17,7 @@ final class DeliveryNoteTagsApi extends AbstractApi
      */
     public function listByDeliveryNote(int $deliveryNoteId): array
     {
-        $data = $this->getJson('/delivery-note-tags', ['delivery_note_id' => $deliveryNoteId]);
-
-        $root = $data['delivery-note-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['delivery-note-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<DeliveryNoteTag> $tags */
-        $tags = array_map(DeliveryNoteTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/delivery-note-tags', 'delivery-note-tags', 'delivery-note-tag', DeliveryNoteTag::fromArray(...), ['delivery_note_id' => $deliveryNoteId]);
     }
 
     /**
@@ -49,30 +25,7 @@ final class DeliveryNoteTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/delivery-note-tags');
-
-        $root = $data['delivery-note-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<DeliveryNoteTagCloudEntry> $tags */
-        $tags = array_map(DeliveryNoteTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/delivery-note-tags', 'delivery-note-tags', 'tag', DeliveryNoteTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?DeliveryNoteTag
@@ -97,12 +50,7 @@ final class DeliveryNoteTagsApi extends AbstractApi
 
         $data = $this->postJson('/delivery-note-tags', $payload);
 
-        $row = $data['delivery-note-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating delivery note tag.');
-        }
-
-        return DeliveryNoteTag::fromArray($row);
+        return DeliveryNoteTag::fromArray($this->unwrapEnvelope($data, 'delivery-note-tag', 'creating delivery note tag'));
     }
 
     public function delete(int $id): bool

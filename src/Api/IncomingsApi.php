@@ -8,7 +8,6 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Incoming;
-use RuntimeException;
 
 /**
  * API-Wrapper für die Billomat-Incomings-Ressource (Eingangsrechnungen).
@@ -34,29 +33,7 @@ final class IncomingsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/incomings', $filters);
-
-        $node = $data['incomings']['incoming'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Incoming> $models */
-        $models = array_map(
-            Incoming::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters);
     }
 
     public function get(int $id): ?Incoming
@@ -87,13 +64,7 @@ final class IncomingsApi extends AbstractApi
 
         $data = $this->postJson('/incomings', $payload);
 
-        $created = $data['incoming'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating incoming.');
-        }
-
-        return Incoming::fromArray($created);
+        return Incoming::fromArray($this->unwrapEnvelope($data, 'incoming', 'creating incoming'));
     }
 
     public function update(int $id, IncomingUpdateOptions $options): Incoming
@@ -102,12 +73,7 @@ final class IncomingsApi extends AbstractApi
 
         $data = $this->putJson("/incomings/{$id}", $payload);
 
-        $row = $data['incoming'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating incoming.');
-        }
-
-        return Incoming::fromArray($row);
+        return Incoming::fromArray($this->unwrapEnvelope($data, 'incoming', 'updating incoming'));
     }
 
     public function delete(int $id): bool

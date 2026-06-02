@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
-use Throwable;
 
 use const DATE_ATOM;
 
@@ -43,33 +43,24 @@ final readonly class Letter
      */
     public static function fromArray(array $data): self
     {
-        $created = self::parseDateTime($data['created'] ?? null);
-        $date = self::parseDateTime($data['date'] ?? null);
-
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: (int) ($data['client_id'] ?? 0),
-            contactId: isset($data['contact_id']) && '' !== $data['contact_id']
-                ? (int) $data['contact_id']
-                : null,
-            created: $created,
-            letterNumber: $data['letter_number'] ?? null,
-            number: isset($data['number']) && '' !== $data['number']
-                ? (int) $data['number']
-                : null,
-            numberPre: $data['number_pre'] ?? null,
-            numberLength: isset($data['number_length']) ? (int) $data['number_length'] : null,
+            contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            letterNumber: ScalarCaster::toStringOrNull($data['letter_number'] ?? null),
+            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
+            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
+            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             status: LetterStatus::fromApi(isset($data['status']) ? (string) $data['status'] : null),
-            date: $date,
-            address: $data['address'] ?? null,
-            subject: $data['subject'] ?? null,
-            label: $data['label'] ?? null,
-            intro: $data['intro'] ?? null,
-            note: $data['note'] ?? null,
-            templateId: isset($data['template_id']) && '' !== $data['template_id']
-                ? (int) $data['template_id']
-                : null,
-            customerportalUrl: $data['customerportal_url'] ?? null,
+            date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
+            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
         );
     }
 
@@ -97,18 +88,5 @@ final readonly class Letter
             'template_id' => $this->templateId,
             'customerportal_url' => $this->customerportalUrl,
         ];
-    }
-
-    private static function parseDateTime(?string $value): ?DateTimeImmutable
-    {
-        if (null === $value || '' === $value) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

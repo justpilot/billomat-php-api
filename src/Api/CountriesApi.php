@@ -18,25 +18,6 @@ final class CountriesApi extends AbstractApi
      */
     public function list(): array
     {
-        $data = $this->getJson('/countries');
-
-        $node = $data['countries']['country'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Country> $models */
-        $models = array_map(Country::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/countries', 'countries', 'country', Country::fromArray(...));
     }
 }

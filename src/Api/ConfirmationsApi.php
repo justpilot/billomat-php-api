@@ -10,7 +10,6 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -41,29 +40,7 @@ final class ConfirmationsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/confirmations', $filters);
-
-        $node = $data['confirmations']['confirmation'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Confirmation> $models */
-        $models = array_map(
-            Confirmation::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters);
     }
 
     public function get(int $id): ?Confirmation
@@ -94,13 +71,7 @@ final class ConfirmationsApi extends AbstractApi
 
         $data = $this->postJson('/confirmations', $payload);
 
-        $created = $data['confirmation'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating confirmation.');
-        }
-
-        return Confirmation::fromArray($created);
+        return Confirmation::fromArray($this->unwrapEnvelope($data, 'confirmation', 'creating confirmation'));
     }
 
     public function update(int $id, ConfirmationUpdateOptions $options): Confirmation
@@ -109,12 +80,7 @@ final class ConfirmationsApi extends AbstractApi
 
         $data = $this->putJson("/confirmations/{$id}", $payload);
 
-        $row = $data['confirmation'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating confirmation.');
-        }
-
-        return Confirmation::fromArray($row);
+        return Confirmation::fromArray($this->unwrapEnvelope($data, 'confirmation', 'updating confirmation'));
     }
 
     public function complete(int $id, ?int $templateId = null): bool
@@ -207,12 +173,6 @@ final class ConfirmationsApi extends AbstractApi
 
         $data = $this->getJson("/confirmations/{$id}/pdf", $query);
 
-        $pdfData = $data['pdf'] ?? null;
-
-        if (!\is_array($pdfData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching confirmation PDF.');
-        }
-
-        return ConfirmationPdf::fromArray($pdfData);
+        return ConfirmationPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching confirmation PDF'));
     }
 }

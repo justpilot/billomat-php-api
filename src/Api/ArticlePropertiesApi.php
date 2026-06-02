@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ArticleProperty;
-use RuntimeException;
 
 /**
  * API-Wrapper für Definitionen von Artikel-Eigenschaften.
@@ -28,26 +27,7 @@ final class ArticlePropertiesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/article-properties', $filters);
-
-        $node = $data['article-properties']['article-property'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<ArticleProperty> $models */
-        $models = array_map(ArticleProperty::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/article-properties', 'article-properties', 'article-property', ArticleProperty::fromArray(...), $filters);
     }
 
     public function get(int $id): ?ArticleProperty
@@ -72,12 +52,7 @@ final class ArticlePropertiesApi extends AbstractApi
 
         $data = $this->postJson('/article-properties', $payload);
 
-        $row = $data['article-property'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating article property.');
-        }
-
-        return ArticleProperty::fromArray($row);
+        return ArticleProperty::fromArray($this->unwrapEnvelope($data, 'article-property', 'creating article property'));
     }
 
     public function update(int $id, PropertyCreateOptions $options): ArticleProperty
@@ -86,12 +61,7 @@ final class ArticlePropertiesApi extends AbstractApi
 
         $data = $this->putJson("/article-properties/{$id}", $payload);
 
-        $row = $data['article-property'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating article property.');
-        }
-
-        return ArticleProperty::fromArray($row);
+        return ArticleProperty::fromArray($this->unwrapEnvelope($data, 'article-property', 'updating article property'));
     }
 
     public function delete(int $id): bool

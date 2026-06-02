@@ -8,7 +8,6 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Article;
-use RuntimeException;
 
 /**
  * API-Wrapper für die Billomat-Articles-Ressource (Artikel).
@@ -31,29 +30,7 @@ final class ArticlesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/articles', $filters);
-
-        $node = $data['articles']['article'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Article> $models */
-        $models = array_map(
-            Article::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/articles', 'articles', 'article', Article::fromArray(...), $filters);
     }
 
     public function get(int $id): ?Article
@@ -84,13 +61,7 @@ final class ArticlesApi extends AbstractApi
 
         $data = $this->postJson('/articles', $payload);
 
-        $created = $data['article'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating article.');
-        }
-
-        return Article::fromArray($created);
+        return Article::fromArray($this->unwrapEnvelope($data, 'article', 'creating article'));
     }
 
     public function update(int $id, ArticleUpdateOptions $options): Article
@@ -99,12 +70,7 @@ final class ArticlesApi extends AbstractApi
 
         $data = $this->putJson("/articles/{$id}", $payload);
 
-        $row = $data['article'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating article.');
-        }
-
-        return Article::fromArray($row);
+        return Article::fromArray($this->unwrapEnvelope($data, 'article', 'updating article'));
     }
 
     public function delete(int $id): bool

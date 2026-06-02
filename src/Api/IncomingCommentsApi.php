@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\IncomingComment;
-use RuntimeException;
 
 /**
  * API-Wrapper für Incoming-Comments.
@@ -29,34 +28,7 @@ final class IncomingCommentsApi extends AbstractApi
             ));
         }
 
-        $data = $this->getJson('/incoming-comments', $query);
-
-        $root = $data['incoming-comments'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['incoming-comment'] ?? [];
-
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<IncomingComment> $comments */
-        $comments = array_map(
-            IncomingComment::fromArray(...),
-            $rows,
-        );
-
-        return $comments;
+        return $this->listResource('/incoming-comments', 'incoming-comments', 'incoming-comment', IncomingComment::fromArray(...), $query);
     }
 
     public function get(int $id): ?IncomingComment
@@ -81,12 +53,7 @@ final class IncomingCommentsApi extends AbstractApi
 
         $data = $this->postJson('/incoming-comments', $payload);
 
-        $row = $data['incoming-comment'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating incoming comment.');
-        }
-
-        return IncomingComment::fromArray($row);
+        return IncomingComment::fromArray($this->unwrapEnvelope($data, 'incoming-comment', 'creating incoming comment'));
     }
 
     public function delete(int $id): bool

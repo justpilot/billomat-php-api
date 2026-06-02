@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Mahn-Textbaustein.
  *
@@ -28,13 +30,13 @@ final readonly class ReminderText
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            name: $data['name'] ?? null,
-            subject: $data['subject'] ?? null,
-            header: $data['header'] ?? null,
-            footer: $data['footer'] ?? null,
-            dueDays: isset($data['due_days']) ? (int) $data['due_days'] : null,
-            sort: isset($data['sort']) ? (int) $data['sort'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
+            header: ScalarCaster::toStringOrNull($data['header'] ?? null),
+            footer: ScalarCaster::toStringOrNull($data['footer'] ?? null),
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            sort: ScalarCaster::toIntOrNull($data['sort'] ?? null),
         );
     }
 

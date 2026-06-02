@@ -253,7 +253,7 @@ final class InvoiceTest extends TestCase
         self::assertSame(7, $invoice->discountDays);
         self::assertSame(2.0, $invoice->discountAmount);
 
-        self::assertSame('', $invoice->title);
+        self::assertNull($invoice->title);
         self::assertSame('Projekt 123', $invoice->label);
         self::assertSame($data['intro'], $invoice->intro);
         self::assertSame($data['note'], $invoice->note);

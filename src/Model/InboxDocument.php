@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
-use Throwable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
 
@@ -31,22 +31,13 @@ final readonly class InboxDocument
      */
     public static function fromArray(array $data): self
     {
-        $created = null;
-        if (!empty($data['created'])) {
-            try {
-                $created = new DateTimeImmutable((string) $data['created']);
-            } catch (Throwable) {
-                $created = null;
-            }
-        }
-
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            created: $created,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             filename: (string) ($data['filename'] ?? ''),
             mimeType: (string) ($data['mimetype'] ?? 'application/octet-stream'),
             fileSize: (int) ($data['filesize'] ?? 0),
-            base64file: $data['base64file'] ?? null,
+            base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
         );
     }
 

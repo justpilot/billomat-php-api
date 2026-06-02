@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Rechnungs-Schlagworte (Invoice Tags).
@@ -31,30 +30,7 @@ final class InvoiceTagsApi extends AbstractApi
      */
     public function listByInvoice(int $invoiceId): array
     {
-        $data = $this->getJson('/invoice-tags', ['invoice_id' => $invoiceId]);
-
-        $root = $data['invoice-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['invoice-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<InvoiceTag> $tags */
-        $tags = array_map(InvoiceTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/invoice-tags', 'invoice-tags', 'invoice-tag', InvoiceTag::fromArray(...), ['invoice_id' => $invoiceId]);
     }
 
     /**
@@ -66,30 +42,7 @@ final class InvoiceTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/invoice-tags');
-
-        $root = $data['invoice-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<InvoiceTagCloudEntry> $tags */
-        $tags = array_map(InvoiceTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/invoice-tags', 'invoice-tags', 'tag', InvoiceTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?InvoiceTag
@@ -114,12 +67,7 @@ final class InvoiceTagsApi extends AbstractApi
 
         $data = $this->postJson('/invoice-tags', $payload);
 
-        $row = $data['invoice-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating invoice tag.');
-        }
-
-        return InvoiceTag::fromArray($row);
+        return InvoiceTag::fromArray($this->unwrapEnvelope($data, 'invoice-tag', 'creating invoice tag'));
     }
 
     public function delete(int $id): bool

@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\DeliveryNoteComment;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
-use RuntimeException;
 
 /**
  * API-Wrapper für Delivery-Note-Comments.
@@ -29,34 +28,7 @@ final class DeliveryNoteCommentsApi extends AbstractApi
             ));
         }
 
-        $data = $this->getJson('/delivery-note-comments', $query);
-
-        $root = $data['delivery-note-comments'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['delivery-note-comment'] ?? [];
-
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<DeliveryNoteComment> $comments */
-        $comments = array_map(
-            DeliveryNoteComment::fromArray(...),
-            $rows,
-        );
-
-        return $comments;
+        return $this->listResource('/delivery-note-comments', 'delivery-note-comments', 'delivery-note-comment', DeliveryNoteComment::fromArray(...), $query);
     }
 
     public function get(int $id): ?DeliveryNoteComment
@@ -81,12 +53,7 @@ final class DeliveryNoteCommentsApi extends AbstractApi
 
         $data = $this->postJson('/delivery-note-comments', $payload);
 
-        $row = $data['delivery-note-comment'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating delivery note comment.');
-        }
-
-        return DeliveryNoteComment::fromArray($row);
+        return DeliveryNoteComment::fromArray($this->unwrapEnvelope($data, 'delivery-note-comment', 'creating delivery note comment'));
     }
 
     public function delete(int $id): bool

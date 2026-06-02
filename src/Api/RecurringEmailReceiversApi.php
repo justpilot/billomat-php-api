@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\RecurringEmailReceiver;
-use RuntimeException;
 
 /**
  * API-Wrapper für E-Mail-Empfänger einer Abo-Rechnung.
@@ -25,30 +24,7 @@ final class RecurringEmailReceiversApi extends AbstractApi
      */
     public function listByRecurring(int $recurringId): array
     {
-        $data = $this->getJson('/recurring-email-receivers', ['recurring_id' => $recurringId]);
-
-        $root = $data['recurring-email-receivers'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['recurring-email-receiver'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<RecurringEmailReceiver> $receivers */
-        $receivers = array_map(RecurringEmailReceiver::fromArray(...), $rows);
-
-        return $receivers;
+        return $this->listResource('/recurring-email-receivers', 'recurring-email-receivers', 'recurring-email-receiver', RecurringEmailReceiver::fromArray(...), ['recurring_id' => $recurringId]);
     }
 
     public function get(int $id): ?RecurringEmailReceiver
@@ -73,12 +49,7 @@ final class RecurringEmailReceiversApi extends AbstractApi
 
         $data = $this->postJson('/recurring-email-receivers', $payload);
 
-        $row = $data['recurring-email-receiver'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating recurring e-mail receiver.');
-        }
-
-        return RecurringEmailReceiver::fromArray($row);
+        return RecurringEmailReceiver::fromArray($this->unwrapEnvelope($data, 'recurring-email-receiver', 'creating recurring e-mail receiver'));
     }
 
     public function delete(int $id): bool

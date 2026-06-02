@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\IncomingTag;
 use Justpilot\Billomat\Model\IncomingTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Incoming-Tags.
@@ -18,30 +17,7 @@ final class IncomingTagsApi extends AbstractApi
      */
     public function listByIncoming(int $incomingId): array
     {
-        $data = $this->getJson('/incoming-tags', ['incoming_id' => $incomingId]);
-
-        $root = $data['incoming-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['incoming-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<IncomingTag> $tags */
-        $tags = array_map(IncomingTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/incoming-tags', 'incoming-tags', 'incoming-tag', IncomingTag::fromArray(...), ['incoming_id' => $incomingId]);
     }
 
     /**
@@ -49,30 +25,7 @@ final class IncomingTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/incoming-tags');
-
-        $root = $data['incoming-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<IncomingTagCloudEntry> $tags */
-        $tags = array_map(IncomingTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/incoming-tags', 'incoming-tags', 'tag', IncomingTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?IncomingTag
@@ -97,12 +50,7 @@ final class IncomingTagsApi extends AbstractApi
 
         $data = $this->postJson('/incoming-tags', $payload);
 
-        $row = $data['incoming-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating incoming tag.');
-        }
-
-        return IncomingTag::fromArray($row);
+        return IncomingTag::fromArray($this->unwrapEnvelope($data, 'incoming-tag', 'creating incoming tag'));
     }
 
     public function delete(int $id): bool

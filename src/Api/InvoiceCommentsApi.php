@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\InvoiceComment;
-use RuntimeException;
 
 /**
  * API-Wrapper für Rechnungskommentare (Invoice Comments).
@@ -42,34 +41,7 @@ final class InvoiceCommentsApi extends AbstractApi
             ));
         }
 
-        $data = $this->getJson('/invoice-comments', $query);
-
-        $root = $data['invoice-comments'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['invoice-comment'] ?? [];
-
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<InvoiceComment> $comments */
-        $comments = array_map(
-            InvoiceComment::fromArray(...),
-            $rows,
-        );
-
-        return $comments;
+        return $this->listResource('/invoice-comments', 'invoice-comments', 'invoice-comment', InvoiceComment::fromArray(...), $query);
     }
 
     public function get(int $id): ?InvoiceComment
@@ -94,12 +66,7 @@ final class InvoiceCommentsApi extends AbstractApi
 
         $data = $this->postJson('/invoice-comments', $payload);
 
-        $row = $data['invoice-comment'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating invoice comment.');
-        }
-
-        return InvoiceComment::fromArray($row);
+        return InvoiceComment::fromArray($this->unwrapEnvelope($data, 'invoice-comment', 'creating invoice comment'));
     }
 
     public function delete(int $id): bool

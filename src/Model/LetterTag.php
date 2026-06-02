@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Schlagwort/Tag an einem Brief.
  */
@@ -22,7 +24,7 @@ final readonly class LetterTag
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             letterId: (int) ($data['letter_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
         );

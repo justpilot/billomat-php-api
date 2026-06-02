@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
-use Throwable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
 
@@ -53,46 +53,35 @@ final readonly class Supplier
      */
     public static function fromArray(array $data): self
     {
-        $created = null;
-        if (!empty($data['created'])) {
-            try {
-                $created = new DateTimeImmutable((string) $data['created']);
-            } catch (Throwable) {
-                $created = null;
-            }
-        }
-
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            created: $created,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             name: (string) ($data['name'] ?? ''),
-            clientNumber: isset($data['client_number']) && '' !== $data['client_number']
-                ? (int) $data['client_number']
-                : null,
-            salutation: $data['salutation'] ?? null,
-            firstName: $data['first_name'] ?? null,
-            lastName: $data['last_name'] ?? null,
-            street: $data['street'] ?? null,
-            zip: $data['zip'] ?? null,
-            city: $data['city'] ?? null,
-            state: $data['state'] ?? null,
-            countryCode: $data['country_code'] ?? null,
-            address: $data['address'] ?? null,
-            note: $data['note'] ?? null,
-            email: $data['email'] ?? null,
-            phone: $data['phone'] ?? null,
-            fax: $data['fax'] ?? null,
-            mobile: $data['mobile'] ?? null,
-            www: $data['www'] ?? null,
-            taxNumber: $data['tax_number'] ?? null,
-            vatNumber: $data['vat_number'] ?? null,
-            bankAccountNumber: $data['bank_account_number'] ?? null,
-            bankAccountOwner: $data['bank_account_owner'] ?? null,
-            bankNumber: $data['bank_number'] ?? null,
-            bankName: $data['bank_name'] ?? null,
-            bankIban: $data['bank_iban'] ?? null,
-            bankBic: $data['bank_bic'] ?? null,
-            currencyCode: $data['currency_code'] ?? null,
+            clientNumber: ScalarCaster::toIntOrNull($data['client_number'] ?? null),
+            salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
+            firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
+            lastName: ScalarCaster::toStringOrNull($data['last_name'] ?? null),
+            street: ScalarCaster::toStringOrNull($data['street'] ?? null),
+            zip: ScalarCaster::toStringOrNull($data['zip'] ?? null),
+            city: ScalarCaster::toStringOrNull($data['city'] ?? null),
+            state: ScalarCaster::toStringOrNull($data['state'] ?? null),
+            countryCode: ScalarCaster::toStringOrNull($data['country_code'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            email: ScalarCaster::toStringOrNull($data['email'] ?? null),
+            phone: ScalarCaster::toStringOrNull($data['phone'] ?? null),
+            fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
+            mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
+            www: ScalarCaster::toStringOrNull($data['www'] ?? null),
+            taxNumber: ScalarCaster::toStringOrNull($data['tax_number'] ?? null),
+            vatNumber: ScalarCaster::toStringOrNull($data['vat_number'] ?? null),
+            bankAccountNumber: ScalarCaster::toStringOrNull($data['bank_account_number'] ?? null),
+            bankAccountOwner: ScalarCaster::toStringOrNull($data['bank_account_owner'] ?? null),
+            bankNumber: ScalarCaster::toStringOrNull($data['bank_number'] ?? null),
+            bankName: ScalarCaster::toStringOrNull($data['bank_name'] ?? null),
+            bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
+            bankBic: ScalarCaster::toStringOrNull($data['bank_bic'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
         );
     }
 

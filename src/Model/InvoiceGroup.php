@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Aggregat-Eintrag aus GET /invoices?group_by=...
  *
@@ -50,18 +52,14 @@ final readonly class InvoiceGroup
         }
 
         return new self(
-            totalGross: isset($data['total_gross']) ? (float) $data['total_gross'] : null,
-            totalNet: isset($data['total_net']) ? (float) $data['total_net'] : null,
-            clientId: isset($data['client_id']) && '' !== $data['client_id']
-                ? (int) $data['client_id']
-                : null,
-            status: isset($data['status']) && '' !== $data['status']
-                ? (string) $data['status']
-                : null,
-            day: isset($data['day']) && '' !== $data['day'] ? (string) $data['day'] : null,
-            week: isset($data['week']) && '' !== $data['week'] ? (string) $data['week'] : null,
-            month: isset($data['month']) && '' !== $data['month'] ? (string) $data['month'] : null,
-            year: isset($data['year']) && '' !== $data['year'] ? (string) $data['year'] : null,
+            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null),
+            status: ScalarCaster::toStringOrNull($data['status'] ?? null),
+            day: ScalarCaster::toStringOrNull($data['day'] ?? null),
+            week: ScalarCaster::toStringOrNull($data['week'] ?? null),
+            month: ScalarCaster::toStringOrNull($data['month'] ?? null),
+            year: ScalarCaster::toStringOrNull($data['year'] ?? null),
             invoiceParams: $params,
         );
     }

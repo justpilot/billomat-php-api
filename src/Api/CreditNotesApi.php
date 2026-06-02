@@ -10,7 +10,6 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNotePdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -40,29 +39,7 @@ final class CreditNotesApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/credit-notes', $filters);
-
-        $node = $data['credit-notes']['credit-note'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<CreditNote> $models */
-        $models = array_map(
-            CreditNote::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters);
     }
 
     public function get(int $id): ?CreditNote
@@ -93,13 +70,7 @@ final class CreditNotesApi extends AbstractApi
 
         $data = $this->postJson('/credit-notes', $payload);
 
-        $created = $data['credit-note'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating credit note.');
-        }
-
-        return CreditNote::fromArray($created);
+        return CreditNote::fromArray($this->unwrapEnvelope($data, 'credit-note', 'creating credit note'));
     }
 
     public function update(int $id, CreditNoteUpdateOptions $options): CreditNote
@@ -108,12 +79,7 @@ final class CreditNotesApi extends AbstractApi
 
         $data = $this->putJson("/credit-notes/{$id}", $payload);
 
-        $row = $data['credit-note'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating credit note.');
-        }
-
-        return CreditNote::fromArray($row);
+        return CreditNote::fromArray($this->unwrapEnvelope($data, 'credit-note', 'updating credit note'));
     }
 
     public function complete(int $id, ?int $templateId = null): bool
@@ -195,12 +161,6 @@ final class CreditNotesApi extends AbstractApi
 
         $data = $this->getJson("/credit-notes/{$id}/pdf", $query);
 
-        $pdfData = $data['pdf'] ?? null;
-
-        if (!\is_array($pdfData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching credit note PDF.');
-        }
-
-        return CreditNotePdf::fromArray($pdfData);
+        return CreditNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching credit note PDF'));
     }
 }

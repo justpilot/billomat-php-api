@@ -10,7 +10,6 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterPdf;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -42,29 +41,7 @@ final class LettersApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/letters', $filters);
-
-        $node = $data['letters']['letter'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Letter> $models */
-        $models = array_map(
-            Letter::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/letters', 'letters', 'letter', Letter::fromArray(...), $filters);
     }
 
     public function get(int $id): ?Letter
@@ -95,13 +72,7 @@ final class LettersApi extends AbstractApi
 
         $data = $this->postJson('/letters', $payload);
 
-        $created = $data['letter'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating letter.');
-        }
-
-        return Letter::fromArray($created);
+        return Letter::fromArray($this->unwrapEnvelope($data, 'letter', 'creating letter'));
     }
 
     public function update(int $id, LetterUpdateOptions $options): Letter
@@ -110,12 +81,7 @@ final class LettersApi extends AbstractApi
 
         $data = $this->putJson("/letters/{$id}", $payload);
 
-        $row = $data['letter'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating letter.');
-        }
-
-        return Letter::fromArray($row);
+        return Letter::fromArray($this->unwrapEnvelope($data, 'letter', 'updating letter'));
     }
 
     public function complete(int $id, ?int $templateId = null): bool
@@ -219,12 +185,6 @@ final class LettersApi extends AbstractApi
 
         $data = $this->getJson("/letters/{$id}/pdf", $query);
 
-        $pdfData = $data['pdf'] ?? null;
-
-        if (!\is_array($pdfData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching letter PDF.');
-        }
-
-        return LetterPdf::fromArray($pdfData);
+        return LetterPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching letter PDF'));
     }
 }

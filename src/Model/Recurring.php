@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
-use Throwable;
 
 use const DATE_ATOM;
 
@@ -114,63 +114,53 @@ final readonly class Recurring
         }
 
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: (int) ($data['client_id'] ?? 0),
-            contactId: isset($data['contact_id']) && '' !== $data['contact_id']
-                ? (int) $data['contact_id']
-                : null,
-            created: self::parseDateTime($data['created'] ?? null),
-            address: $data['address'] ?? null,
-            supplyDate: self::parseDateTime($data['supply_date'] ?? null),
+            contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
             supplyDateType: isset($data['supply_date_type'])
                 ? SupplyDateType::tryFrom((string) $data['supply_date_type'])
                 : null,
-            dueDays: isset($data['due_days']) ? (int) $data['due_days'] : null,
-            discountRate: isset($data['discount_rate']) ? (float) $data['discount_rate'] : null,
-            discountDays: isset($data['discount_days']) ? (int) $data['discount_days'] : null,
-            name: $data['name'] ?? null,
-            numberPre: $data['number_pre'] ?? null,
-            title: $data['title'] ?? null,
-            label: $data['label'] ?? null,
-            intro: $data['intro'] ?? null,
-            note: $data['note'] ?? null,
-            currencyCode: $data['currency_code'] ?? null,
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
+            discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             netGross: isset($data['net_gross'])
                 ? NetGross::tryFrom((string) $data['net_gross'])
                 : null,
-            quote: isset($data['quote']) ? (float) $data['quote'] : null,
-            paymentTypes: $data['payment_types'] ?? null,
+            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
+            paymentTypes: ScalarCaster::toStringOrNull($data['payment_types'] ?? null),
             action: isset($data['action'])
                 ? RecurringAction::tryFrom((string) $data['action'])
                 : null,
-            cycleNumber: isset($data['cycle_number']) ? (int) $data['cycle_number'] : null,
+            cycleNumber: ScalarCaster::toIntOrNull($data['cycle_number'] ?? null),
             cycle: isset($data['cycle'])
                 ? RecurringCycle::tryFrom((string) $data['cycle'])
                 : null,
-            hour: isset($data['hour']) && '' !== $data['hour'] ? (int) $data['hour'] : null,
-            startDate: self::parseDateTime($data['start_date'] ?? null),
-            endDate: self::parseDateTime($data['end_date'] ?? null),
-            lastCreationDate: self::parseDateTime($data['last_creation_date'] ?? null),
-            nextCreationDate: self::parseDateTime($data['next_creation_date'] ?? null),
-            iterations: isset($data['iterations']) && '' !== $data['iterations']
-                ? (int) $data['iterations']
-                : null,
-            counter: isset($data['counter']) ? (int) $data['counter'] : null,
-            totalGross: isset($data['total_gross']) ? (float) $data['total_gross'] : null,
-            totalNet: isset($data['total_net']) ? (float) $data['total_net'] : null,
-            reduction: $data['reduction'] ?? null,
-            emailSender: $data['email_sender'] ?? null,
-            emailSubject: $data['email_subject'] ?? null,
-            emailMessage: $data['email_message'] ?? null,
-            emailTemplateId: isset($data['email_template_id']) && '' !== $data['email_template_id']
-                ? (int) $data['email_template_id']
-                : null,
-            freeTextId: isset($data['free_text_id']) && '' !== $data['free_text_id']
-                ? (int) $data['free_text_id']
-                : null,
-            templateId: isset($data['template_id']) && '' !== $data['template_id']
-                ? (int) $data['template_id']
-                : null,
+            hour: ScalarCaster::toIntOrNull($data['hour'] ?? null),
+            startDate: ScalarCaster::toDateTimeOrNull($data['start_date'] ?? null),
+            endDate: ScalarCaster::toDateTimeOrNull($data['end_date'] ?? null),
+            lastCreationDate: ScalarCaster::toDateTimeOrNull($data['last_creation_date'] ?? null),
+            nextCreationDate: ScalarCaster::toDateTimeOrNull($data['next_creation_date'] ?? null),
+            iterations: ScalarCaster::toIntOrNull($data['iterations'] ?? null),
+            counter: ScalarCaster::toIntOrNull($data['counter'] ?? null),
+            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
+            emailSender: ScalarCaster::toStringOrNull($data['email_sender'] ?? null),
+            emailSubject: ScalarCaster::toStringOrNull($data['email_subject'] ?? null),
+            emailMessage: ScalarCaster::toStringOrNull($data['email_message'] ?? null),
+            emailTemplateId: ScalarCaster::toIntOrNull($data['email_template_id'] ?? null),
+            freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
+            templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             taxes: $taxes,
             items: $items,
         );
@@ -246,18 +236,5 @@ final readonly class Recurring
         }
 
         return $data;
-    }
-
-    private static function parseDateTime(mixed $value): ?DateTimeImmutable
-    {
-        if (!\is_string($value) || '' === trim($value)) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

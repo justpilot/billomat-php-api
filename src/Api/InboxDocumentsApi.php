@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InboxDocument;
-use RuntimeException;
 
 /**
  * API-Wrapper für Posteingangs-Dokumente (Inbox Documents).
@@ -27,29 +26,7 @@ final class InboxDocumentsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/inbox-documents', $filters);
-
-        $node = $data['inbox-documents']['inbox-document'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<InboxDocument> $models */
-        $models = array_map(
-            InboxDocument::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/inbox-documents', 'inbox-documents', 'inbox-document', InboxDocument::fromArray(...), $filters);
     }
 
     public function get(int $id): ?InboxDocument
@@ -75,13 +52,7 @@ final class InboxDocumentsApi extends AbstractApi
 
         $data = $this->postJson('/inbox-documents', $payload);
 
-        $created = $data['inbox-document'] ?? null;
-
-        if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating inbox document.');
-        }
-
-        return InboxDocument::fromArray($created);
+        return InboxDocument::fromArray($this->unwrapEnvelope($data, 'inbox-document', 'creating inbox document'));
     }
 
     public function delete(int $id): bool

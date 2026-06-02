@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\OfferComment;
-use RuntimeException;
 
 /**
  * API-Wrapper für Angebotskommentare (Offer Comments).
@@ -37,34 +36,7 @@ final class OfferCommentsApi extends AbstractApi
             ));
         }
 
-        $data = $this->getJson('/offer-comments', $query);
-
-        $root = $data['offer-comments'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['offer-comment'] ?? [];
-
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<OfferComment> $comments */
-        $comments = array_map(
-            OfferComment::fromArray(...),
-            $rows,
-        );
-
-        return $comments;
+        return $this->listResource('/offer-comments', 'offer-comments', 'offer-comment', OfferComment::fromArray(...), $query);
     }
 
     public function get(int $id): ?OfferComment
@@ -89,12 +61,7 @@ final class OfferCommentsApi extends AbstractApi
 
         $data = $this->postJson('/offer-comments', $payload);
 
-        $row = $data['offer-comment'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating offer comment.');
-        }
-
-        return OfferComment::fromArray($row);
+        return OfferComment::fromArray($this->unwrapEnvelope($data, 'offer-comment', 'creating offer comment'));
     }
 
     public function delete(int $id): bool

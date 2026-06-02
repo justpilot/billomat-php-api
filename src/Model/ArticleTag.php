@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Schlagwort/Tag an einem Artikel.
  */
@@ -22,7 +24,7 @@ final readonly class ArticleTag
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             articleId: (int) ($data['article_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
         );

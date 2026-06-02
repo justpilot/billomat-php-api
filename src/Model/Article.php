@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
-use Throwable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
 
@@ -46,47 +46,28 @@ final readonly class Article
      */
     public static function fromArray(array $data): self
     {
-        $created = null;
-        if (!empty($data['created'])) {
-            try {
-                $created = new DateTimeImmutable((string) $data['created']);
-            } catch (Throwable) {
-                $created = null;
-            }
-        }
-
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            created: $created,
-            articleNumber: $data['article_number'] ?? null,
-            number: isset($data['number']) && '' !== $data['number']
-                ? (int) $data['number']
-                : null,
-            numberPre: $data['number_pre'] ?? null,
-            numberLength: isset($data['number_length']) ? (int) $data['number_length'] : null,
-            title: $data['title'] ?? null,
-            description: $data['description'] ?? null,
-            salesPrice: isset($data['sales_price']) ? (float) $data['sales_price'] : null,
-            currencyCode: $data['currency_code'] ?? null,
-            salesPrice2: isset($data['sales_price2']) ? (float) $data['sales_price2'] : null,
-            salesPrice3: isset($data['sales_price3']) ? (float) $data['sales_price3'] : null,
-            salesPrice4: isset($data['sales_price4']) ? (float) $data['sales_price4'] : null,
-            salesPrice5: isset($data['sales_price5']) ? (float) $data['sales_price5'] : null,
-            unit: $data['unit'] ?? null,
-            unitId: isset($data['unit_id']) && '' !== $data['unit_id']
-                ? (int) $data['unit_id']
-                : null,
-            purchasePrice: isset($data['purchase_price']) ? (float) $data['purchase_price'] : null,
-            purchasePriceCurrencyCode: $data['purchase_price_currency_code'] ?? null,
-            supplierId: isset($data['supplier_id']) && '' !== $data['supplier_id']
-                ? (int) $data['supplier_id']
-                : null,
-            taxId: isset($data['tax_id']) && '' !== $data['tax_id']
-                ? (int) $data['tax_id']
-                : null,
-            categoryId: isset($data['category_id']) && '' !== $data['category_id']
-                ? (int) $data['category_id']
-                : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            articleNumber: ScalarCaster::toStringOrNull($data['article_number'] ?? null),
+            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
+            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
+            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            description: ScalarCaster::toStringOrNull($data['description'] ?? null),
+            salesPrice: ScalarCaster::toFloatOrNull($data['sales_price'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            salesPrice2: ScalarCaster::toFloatOrNull($data['sales_price2'] ?? null),
+            salesPrice3: ScalarCaster::toFloatOrNull($data['sales_price3'] ?? null),
+            salesPrice4: ScalarCaster::toFloatOrNull($data['sales_price4'] ?? null),
+            salesPrice5: ScalarCaster::toFloatOrNull($data['sales_price5'] ?? null),
+            unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
+            unitId: ScalarCaster::toIntOrNull($data['unit_id'] ?? null),
+            purchasePrice: ScalarCaster::toFloatOrNull($data['purchase_price'] ?? null),
+            purchasePriceCurrencyCode: ScalarCaster::toStringOrNull($data['purchase_price_currency_code'] ?? null),
+            supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
+            taxId: ScalarCaster::toIntOrNull($data['tax_id'] ?? null),
+            categoryId: ScalarCaster::toIntOrNull($data['category_id'] ?? null),
         );
     }
 

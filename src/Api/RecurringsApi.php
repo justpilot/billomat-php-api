@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Recurring;
-use RuntimeException;
 
 /**
  * API-Wrapper für Abo-Rechnungen (Recurrings).
@@ -33,26 +32,7 @@ final class RecurringsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/recurrings', $filters);
-
-        $node = $data['recurrings']['recurring'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Recurring> $models */
-        $models = array_map(Recurring::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters);
     }
 
     public function get(int $id): ?Recurring
@@ -77,12 +57,7 @@ final class RecurringsApi extends AbstractApi
 
         $data = $this->postJson('/recurrings', $payload);
 
-        $row = $data['recurring'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating recurring.');
-        }
-
-        return Recurring::fromArray($row);
+        return Recurring::fromArray($this->unwrapEnvelope($data, 'recurring', 'creating recurring'));
     }
 
     public function update(int $id, RecurringUpdateOptions $options): Recurring
@@ -91,12 +66,7 @@ final class RecurringsApi extends AbstractApi
 
         $data = $this->putJson("/recurrings/{$id}", $payload);
 
-        $row = $data['recurring'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating recurring.');
-        }
-
-        return Recurring::fromArray($row);
+        return Recurring::fromArray($this->unwrapEnvelope($data, 'recurring', 'updating recurring'));
     }
 
     public function delete(int $id): bool

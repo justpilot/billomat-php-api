@@ -20,26 +20,7 @@ final class ReminderTextsApi extends AbstractApi
      */
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/reminder-texts', $filters);
-
-        $node = $data['reminder-texts']['reminder-text'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<ReminderText> $models */
-        $models = array_map(ReminderText::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/reminder-texts', 'reminder-texts', 'reminder-text', ReminderText::fromArray(...), $filters);
     }
 
     public function get(int $id): ?ReminderText

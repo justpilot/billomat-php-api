@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
+
 /**
  * Schlagwort/Tag an einer Mahnung.
  */
@@ -22,7 +24,7 @@ final readonly class ReminderTag
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             reminderId: (int) ($data['reminder_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
         );

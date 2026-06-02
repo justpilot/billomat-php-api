@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\LetterTag;
 use Justpilot\Billomat\Model\LetterTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Letter-Tags.
@@ -18,30 +17,7 @@ final class LetterTagsApi extends AbstractApi
      */
     public function listByLetter(int $letterId): array
     {
-        $data = $this->getJson('/letter-tags', ['letter_id' => $letterId]);
-
-        $root = $data['letter-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['letter-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<LetterTag> $tags */
-        $tags = array_map(LetterTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/letter-tags', 'letter-tags', 'letter-tag', LetterTag::fromArray(...), ['letter_id' => $letterId]);
     }
 
     /**
@@ -49,30 +25,7 @@ final class LetterTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/letter-tags');
-
-        $root = $data['letter-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<LetterTagCloudEntry> $tags */
-        $tags = array_map(LetterTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/letter-tags', 'letter-tags', 'tag', LetterTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?LetterTag
@@ -97,12 +50,7 @@ final class LetterTagsApi extends AbstractApi
 
         $data = $this->postJson('/letter-tags', $payload);
 
-        $row = $data['letter-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating letter tag.');
-        }
-
-        return LetterTag::fromArray($row);
+        return LetterTag::fromArray($this->unwrapEnvelope($data, 'letter-tag', 'creating letter tag'));
     }
 
     public function delete(int $id): bool

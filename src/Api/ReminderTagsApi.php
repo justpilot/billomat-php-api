@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ReminderTag;
 use Justpilot\Billomat\Model\ReminderTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Reminder-Tags.
@@ -18,30 +17,7 @@ final class ReminderTagsApi extends AbstractApi
      */
     public function listByReminder(int $reminderId): array
     {
-        $data = $this->getJson('/reminder-tags', ['reminder_id' => $reminderId]);
-
-        $root = $data['reminder-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['reminder-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ReminderTag> $tags */
-        $tags = array_map(ReminderTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/reminder-tags', 'reminder-tags', 'reminder-tag', ReminderTag::fromArray(...), ['reminder_id' => $reminderId]);
     }
 
     /**
@@ -49,30 +25,7 @@ final class ReminderTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/reminder-tags');
-
-        $root = $data['reminder-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ReminderTagCloudEntry> $tags */
-        $tags = array_map(ReminderTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/reminder-tags', 'reminder-tags', 'tag', ReminderTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?ReminderTag
@@ -97,12 +50,7 @@ final class ReminderTagsApi extends AbstractApi
 
         $data = $this->postJson('/reminder-tags', $payload);
 
-        $row = $data['reminder-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating reminder tag.');
-        }
-
-        return ReminderTag::fromArray($row);
+        return ReminderTag::fromArray($this->unwrapEnvelope($data, 'reminder-tag', 'creating reminder tag'));
     }
 
     public function delete(int $id): bool

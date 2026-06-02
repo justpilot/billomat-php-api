@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 
 /**
@@ -28,11 +29,11 @@ final readonly class ClientProperty
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             name: (string) ($data['name'] ?? ''),
             type: PropertyType::fromApi($data['type'] ?? null),
-            defaultValue: $data['default_value'] ?? null,
-            position: isset($data['position']) ? (int) $data['position'] : null,
+            defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
+            position: ScalarCaster::toIntOrNull($data['position'] ?? null),
         );
     }
 

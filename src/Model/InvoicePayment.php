@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
-use Throwable;
 
 use const DATE_ATOM;
 
@@ -48,17 +48,15 @@ final readonly class InvoicePayment
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             invoiceId: (int) ($data['invoice_id'] ?? 0),
-            date: self::parseDateTime($data['date'] ?? null),
+            date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             amount: isset($data['amount']) ? (float) $data['amount'] : 0.0,
             type: InvoicePaymentType::fromApi($data['type'] ?? null),
-            comment: $data['comment'] ?? null,
-            created: self::parseDateTime($data['created'] ?? null),
-            userId: isset($data['user_id']) && '' !== $data['user_id']
-                ? (int) $data['user_id']
-                : null,
-            transactionPurpose: $data['transaction_purpose'] ?? null,
+            comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
+            transactionPurpose: ScalarCaster::toStringOrNull($data['transaction_purpose'] ?? null),
         );
     }
 
@@ -80,18 +78,5 @@ final readonly class InvoicePayment
             'comment' => $this->comment,
             'transaction_purpose' => $this->transactionPurpose,
         ];
-    }
-
-    private static function parseDateTime(mixed $value): ?DateTimeImmutable
-    {
-        if (!\is_string($value) || '' === trim($value)) {
-            return null;
-        }
-
-        try {
-            return new DateTimeImmutable($value);
-        } catch (Throwable) {
-            return null;
-        }
     }
 }

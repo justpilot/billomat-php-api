@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ArticleTag;
 use Justpilot\Billomat\Model\ArticleTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Article-Tags.
@@ -18,30 +17,7 @@ final class ArticleTagsApi extends AbstractApi
      */
     public function listByArticle(int $articleId): array
     {
-        $data = $this->getJson('/article-tags', ['article_id' => $articleId]);
-
-        $root = $data['article-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['article-tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ArticleTag> $tags */
-        $tags = array_map(ArticleTag::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/article-tags', 'article-tags', 'article-tag', ArticleTag::fromArray(...), ['article_id' => $articleId]);
     }
 
     /**
@@ -49,30 +25,7 @@ final class ArticleTagsApi extends AbstractApi
      */
     public function cloud(): array
     {
-        $data = $this->getJson('/article-tags');
-
-        $root = $data['article-tags'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['tag'] ?? [];
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['name'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ArticleTagCloudEntry> $tags */
-        $tags = array_map(ArticleTagCloudEntry::fromArray(...), $rows);
-
-        return $tags;
+        return $this->listResource('/article-tags', 'article-tags', 'tag', ArticleTagCloudEntry::fromArray(...));
     }
 
     public function get(int $id): ?ArticleTag
@@ -97,12 +50,7 @@ final class ArticleTagsApi extends AbstractApi
 
         $data = $this->postJson('/article-tags', $payload);
 
-        $row = $data['article-tag'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating article tag.');
-        }
-
-        return ArticleTag::fromArray($row);
+        return ArticleTag::fromArray($this->unwrapEnvelope($data, 'article-tag', 'creating article tag'));
     }
 
     public function delete(int $id): bool

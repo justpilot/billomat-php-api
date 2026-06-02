@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-
-use const FILTER_VALIDATE_BOOLEAN;
 
 /**
  * Position einer Abo-Rechnung.
@@ -46,34 +45,24 @@ final readonly class RecurringItem
     public static function fromArray(array $data): self
     {
         return new self(
-            id: isset($data['id']) ? (int) $data['id'] : null,
-            recurringId: isset($data['recurring_id']) && '' !== $data['recurring_id']
-                ? (int) $data['recurring_id']
-                : null,
-            articleId: isset($data['article_id']) && '' !== $data['article_id']
-                ? (int) $data['article_id']
-                : null,
-            position: isset($data['position']) ? (int) $data['position'] : null,
-            unit: $data['unit'] ?? null,
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
+            articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
+            position: ScalarCaster::toIntOrNull($data['position'] ?? null),
+            unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
             quantity: isset($data['quantity']) ? (float) $data['quantity'] : 0.0,
             unitPrice: isset($data['unit_price']) ? (float) $data['unit_price'] : 0.0,
-            taxName: $data['tax_name'] ?? null,
-            taxRate: isset($data['tax_rate']) ? (float) $data['tax_rate'] : null,
-            taxChangedManually: isset($data['tax_changed_manually'])
-                ? filter_var($data['tax_changed_manually'], FILTER_VALIDATE_BOOLEAN)
-                : null,
-            title: $data['title'] ?? null,
-            description: $data['description'] ?? null,
-            reduction: $data['reduction'] ?? null,
+            taxName: ScalarCaster::toStringOrNull($data['tax_name'] ?? null),
+            taxRate: ScalarCaster::toFloatOrNull($data['tax_rate'] ?? null),
+            taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            description: ScalarCaster::toStringOrNull($data['description'] ?? null),
+            reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
             type: isset($data['type']) ? InvoiceItemType::tryFrom((string) $data['type']) : null,
-            totalGross: isset($data['total_gross']) ? (float) $data['total_gross'] : null,
-            totalNet: isset($data['total_net']) ? (float) $data['total_net'] : null,
-            totalGrossUnreduced: isset($data['total_gross_unreduced'])
-                ? (float) $data['total_gross_unreduced']
-                : null,
-            totalNetUnreduced: isset($data['total_net_unreduced'])
-                ? (float) $data['total_net_unreduced']
-                : null,
+            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
+            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
         );
     }
 

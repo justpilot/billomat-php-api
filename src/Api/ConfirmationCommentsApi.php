@@ -6,7 +6,6 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ConfirmationComment;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
-use RuntimeException;
 
 /**
  * API-Wrapper für Confirmation-Comments.
@@ -31,34 +30,7 @@ final class ConfirmationCommentsApi extends AbstractApi
             ));
         }
 
-        $data = $this->getJson('/confirmation-comments', $query);
-
-        $root = $data['confirmation-comments'] ?? null;
-        if (!\is_array($root)) {
-            return [];
-        }
-
-        $rows = $root['confirmation-comment'] ?? [];
-
-        if ([] === $rows || null === $rows) {
-            return [];
-        }
-
-        if (isset($rows['id'])) {
-            $rows = [$rows];
-        }
-
-        if (!\is_array($rows)) {
-            return [];
-        }
-
-        /** @var list<ConfirmationComment> $comments */
-        $comments = array_map(
-            ConfirmationComment::fromArray(...),
-            $rows,
-        );
-
-        return $comments;
+        return $this->listResource('/confirmation-comments', 'confirmation-comments', 'confirmation-comment', ConfirmationComment::fromArray(...), $query);
     }
 
     public function get(int $id): ?ConfirmationComment
@@ -83,12 +55,7 @@ final class ConfirmationCommentsApi extends AbstractApi
 
         $data = $this->postJson('/confirmation-comments', $payload);
 
-        $row = $data['confirmation-comment'] ?? null;
-        if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating confirmation comment.');
-        }
-
-        return ConfirmationComment::fromArray($row);
+        return ConfirmationComment::fromArray($this->unwrapEnvelope($data, 'confirmation-comment', 'creating confirmation comment'));
     }
 
     public function delete(int $id): bool

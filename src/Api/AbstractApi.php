@@ -27,7 +27,7 @@ use const JSON_THROW_ON_ERROR;
 abstract class AbstractApi
 {
     public function __construct(
-        protected BillomatHttpClientInterface $http,
+        protected readonly BillomatHttpClientInterface $http,
     ) {
     }
 

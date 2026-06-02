@@ -31,6 +31,12 @@ php examples/03-complete-and-pdf.php
 php examples/04-payments.php
 php examples/05-list-with-filters.php
 php examples/06-error-handling.php
+php examples/07-create-offer.php
+php examples/08-credit-note.php
+php examples/09-recurring.php
+php examples/10-incoming.php
+php examples/11-supplier.php
+php examples/12-email-invoice.php
 ```
 
 ## Übersicht
@@ -43,6 +49,12 @@ php examples/06-error-handling.php
 | [`04-payments.php`](04-payments.php) | Zahlung verbuchen, listen, wieder entfernen. |
 | [`05-list-with-filters.php`](05-list-with-filters.php) | Filter, Pagination, Sortierung mit `order_by=…+DESC`. |
 | [`06-error-handling.php`](06-error-handling.php) | Demonstriert `ValidationException` und `NotFoundException`. |
+| [`07-create-offer.php`](07-create-offer.php) | Angebot anlegen, abschliessen, als gewonnen markieren. |
+| [`08-credit-note.php`](08-credit-note.php) | Gutschrift anlegen, abschliessen, Auszahlung verbuchen. |
+| [`09-recurring.php`](09-recurring.php) | Abo-Rechnung mit E-Mail-Empfänger, Tag und Preis-Update. |
+| [`10-incoming.php`](10-incoming.php) | Eingangsrechnung erfassen, taggen, Zahlung verbuchen. |
+| [`11-supplier.php`](11-supplier.php) | Lieferant mit Tag und Property-Wert anlegen. |
+| [`12-email-invoice.php`](12-email-invoice.php) | Rechnung per `InvoiceEmailOptions` an Kunden versenden. |
 
 ## Daten aufräumen
 

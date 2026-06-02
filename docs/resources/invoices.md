@@ -42,6 +42,10 @@ Konsequenzen für die API:
 | `delete($id)` | DELETE | `/invoices/{id}` |
 | `cancel($id)` | PUT | `/invoices/{id}/cancel` |
 | `uncancel($id)` | PUT | `/invoices/{id}/uncancel` |
+| `email($id, $options?)` | POST | `/invoices/{id}/email` |
+| `mail($id, $options?)` | POST | `/invoices/{id}/mail` |
+| `uploadSignature($id, $base64Pdf)` | PUT | `/invoices/{id}/upload-signature` |
+| `encash($id)` | PUT | `/invoices/{id}/encash` |
 | `pdf($id, $type?, $rawPdf=false)` | GET | `/invoices/{id}/pdf` |
 
 Verwandte Ressourcen mit eigener Doku: [Positionen](invoice-items.md), [Zahlungen](invoice-payments.md), [Kommentare](invoice-comments.md), [Schlagworte](invoice-tags.md), [Abo-Rechnungen](recurrings.md).
@@ -148,6 +152,67 @@ Nur für `DRAFT`. Anderenfalls antwortet Billomat mit 422 → `ValidationExcepti
 ### `cancel(int $id): bool` / `uncancel(int $id): bool`
 
 Storniert eine bereits abgeschlossene Rechnung oder macht die Stornierung rückgängig.
+
+### `email(int $id, ?InvoiceEmailOptions $options = null): bool`
+
+Versendet die Rechnung als PDF-Anhang per E-Mail. Ohne `$options` zieht Billomat alle Defaults aus dem Account (Absender, Empfänger aus den Kunden-Stammdaten, Betreff/Body aus der Default-Vorlage).
+
+```php
+use Justpilot\Billomat\Api\InvoiceEmailOptions;
+
+// 1) Minimal: Defaults verwenden
+$billomat->invoices->email($invoice->id);
+
+// 2) Mit eigenen Empfängern und individuellem Text
+$opts = new InvoiceEmailOptions();
+$opts->from = 'rechnungen@meinefirma.de';
+$opts->to = ['kunde@example.com'];
+$opts->bcc = ['buchhaltung@meinefirma.de'];
+$opts->subject = 'Ihre Rechnung vom Juni';
+$opts->body = "Sehr geehrte Damen und Herren,\n\nim Anhang Ihre Rechnung.\n";
+$opts->filename = 'rechnung-2026-0042';
+
+$billomat->invoices->email($invoice->id, $opts);
+```
+
+Voraussetzungen:
+
+- Die Rechnung muss `complete()`-d sein (sonst existiert kein PDF).
+- `from` muss im Billomat-Account als Absender hinterlegt sein, sonst antwortet die API mit `ValidationException`.
+
+### `mail(int $id, ?InvoiceMailOptions $options = null): bool`
+
+Verschickt die Rechnung postalisch über den Pixelletter-Service. **Kostenpflichtig** — Billomat verrechnet Porto + Druck.
+
+```php
+use Justpilot\Billomat\Api\InvoiceMailOptions;
+
+$opts = new InvoiceMailOptions();
+$opts->color = true;
+$opts->duplex = true;
+$opts->paperWeight = '90';
+
+$billomat->invoices->mail($invoice->id, $opts);
+```
+
+Die Empfängeradresse wird automatisch aus der auf der Rechnung hinterlegten Adresse übernommen — eine separate Adress-Property gibt es bewusst nicht.
+
+### `uploadSignature(int $id, string $base64Pdf): bool`
+
+Lädt eine unterschriebene PDF-Version der Rechnung hoch und ersetzt damit das von Billomat erzeugte PDF.
+
+```php
+$signed = base64_encode(file_get_contents('/path/to/signed-invoice.pdf'));
+$billomat->invoices->uploadSignature($invoice->id, $signed);
+```
+
+### `encash(int $id): bool`
+
+Übergibt eine Rechnung an das Inkasso-Verfahren von Billomat. Laut Billomat-Doku muss die Rechnung dafür im Status `OPEN` oder `OVERDUE` sein.
+
+```php
+$billomat->invoices->encash($invoice->id);
+```
 
 ### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string`
 
@@ -262,6 +327,35 @@ Schmaler Subset für Partial-Updates. Felder, die nicht gesetzt werden, bleiben 
 | `quote` | `quote` | `?float` |
 | `paymentTypes` | `payment_types` | `?string` |
 
+## Write-Modell: `InvoiceEmailOptions`
+
+Payload für `email()`. Alle Felder sind optional — Billomat füllt fehlende Werte aus der gewählten Vorlage oder den Account-Defaults.
+
+| Property | Billomat-Feld | Typ | Notes |
+|---|---|---|---|
+| `emailTemplateId` | `email_template_id` | `?int` | ID einer im Account hinterlegten E-Mail-Vorlage |
+| `from` | `from` | `?string` | Muss im Account als Absender freigegeben sein |
+| `to` | `recipients.to` | `list<string>` | TO-Empfänger |
+| `cc` | `recipients.cc` | `list<string>` | CC-Empfänger |
+| `bcc` | `recipients.bcc` | `list<string>` | BCC-Empfänger |
+| `subject` | `subject` | `?string` | |
+| `body` | `body` | `?string` | Plain-Text-Body |
+| `filename` | `filename` | `?string` | Dateiname des PDF-Anhangs, ohne `.pdf` |
+| `attachments` | `attachments.attachment[]` | `list<array{filename:string,mimetype:string,base64file:string}>` | Zusätzliche Anhänge |
+
+`toArray()` filtert leere Empfängerlisten und `null`-Felder heraus.
+
+## Write-Modell: `InvoiceMailOptions`
+
+Payload für `mail()` (Pixelletter). Empfängeradresse kommt fix aus der Rechnungsadresse — daher kein `to`-Feld.
+
+| Property | Billomat-Feld | Typ | Notes |
+|---|---|---|---|
+| `color` | `color` | `?bool` | Wird als `1`/`0` serialisiert |
+| `duplex` | `duplex` | `?bool` | Doppelseitiger Druck |
+| `paperWeight` | `paper_weight` | `?string` | g/m² als String, z. B. `"80"` |
+| `attachments` | `attachments.attachment[]` | `list<array{filename:string,mimetype:string,base64file:string}>` | |
+
 ## Read-Modell: `Invoice`
 
 `final readonly class Invoice`. Die wichtigsten Felder:
@@ -310,6 +404,9 @@ Schmaler Subset für Partial-Updates. Felder, die nicht gesetzt werden, bleiben 
 - **`pdf()` setzt `complete()` voraus.** Bei `DRAFT`-Rechnungen existiert noch kein PDF — der Endpoint liefert je nach Account 404 oder einen Fehler.
 - **Single-Item-List-Quirk.** Wie bei allen Ressourcen normalisiert `list()` automatisch.
 - **`pdf(rawPdf: true)` umgeht das `getJson()`-Dispatching.** Wenn du den Aufruf in einem Mock-Test einbaust, achte darauf, dass der Mock auch `application/pdf` zurückgibt — der HTTP-Status wird trotzdem auf Fehler geprüft.
+- **`email()` setzt `complete()` voraus.** Bei `DRAFT`-Rechnungen existiert noch kein PDF; Billomat antwortet je nach Konto mit `ValidationException` oder schickt eine leere Mail.
+- **`mail()` ist kostenpflichtig.** Pixelletter rechnet pro Brief ab — Tests besser nur in der Sandbox laufen lassen.
+- **`InvoiceEmailOptions::$from`** muss eine im Billomat-Account verifizierte Absenderadresse sein. Sonst kommt 422 zurück.
 
 ## End-to-End-Beispiel
 

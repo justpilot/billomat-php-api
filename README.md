@@ -91,20 +91,47 @@ Vollständige, ausführbare Beispiele liegen unter [examples/](examples/).
 
 ## Ressourcen
 
-Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zugreifbar.
+Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zugreifbar. Die Tabelle gruppiert die Ressourcen nach Themengebiet — eine Zeile pro Doku-Datei.
 
-| Ressource | Zugriff | Endpunkte | Doku |
-|---|---|---|---|
-| Kunden | `$billomat->clients` | `/clients`, `/clients/myself` | [docs/resources/clients.md](docs/resources/clients.md) |
-| Rechnungen | `$billomat->invoices` | `/invoices`, `/invoices/{id}/complete`, `/invoices/{id}/cancel`, `/invoices/{id}/pdf` | [docs/resources/invoices.md](docs/resources/invoices.md) |
-| Rechnungspositionen | `$billomat->invoiceItems` | `/invoice-items` | [docs/resources/invoice-items.md](docs/resources/invoice-items.md) |
-| Zahlungen | `$billomat->invoicePayments` | `/invoice-payments` | [docs/resources/invoice-payments.md](docs/resources/invoice-payments.md) |
-| Kommentare | `$billomat->invoiceComments` | `/invoice-comments` | [docs/resources/invoice-comments.md](docs/resources/invoice-comments.md) |
-| Schlagworte | `$billomat->invoiceTags` | `/invoice-tags` | [docs/resources/invoice-tags.md](docs/resources/invoice-tags.md) |
-| Abo-Rechnungen | `$billomat->recurrings` | `/recurrings`, `/recurring-items`, `/recurring-tags`, `/recurring-email-receivers` | [docs/resources/recurrings.md](docs/resources/recurrings.md) |
-| Steuersätze | `$billomat->taxes` | `/taxes` | [docs/resources/taxes.md](docs/resources/taxes.md) |
-| Vorlagen | `$billomat->templates` | `/templates`, `/templates/{id}/thumb` | [docs/resources/templates.md](docs/resources/templates.md) |
-| Einstellungen | `$billomat->settings` | `/settings` | [docs/resources/settings.md](docs/resources/settings.md) |
+### Stammdaten
+
+| Ressource | Zugriff | Doku |
+|---|---|---|
+| Kunden | `$billomat->clients` | [docs/resources/clients.md](docs/resources/clients.md) |
+| Kundenschlagworte | `$billomat->clientTags` | [docs/resources/client-tags.md](docs/resources/client-tags.md) |
+| Ansprechpartner | `$billomat->contacts` | [docs/resources/contacts.md](docs/resources/contacts.md) |
+| Lieferanten | `$billomat->suppliers`, `supplierTags`, `supplierPropertyValues` | [docs/resources/suppliers.md](docs/resources/suppliers.md) |
+| Artikel | `$billomat->articles`, `articleTags`, `articlePropertyValues` | [docs/resources/articles.md](docs/resources/articles.md) |
+| Property-Definitionen | `$billomat->articleProperties`, `clientProperties`, `supplierProperties`, `incomingProperties` | [docs/resources/properties.md](docs/resources/properties.md) |
+
+### Ausgangsbelege
+
+| Ressource | Zugriff | Doku |
+|---|---|---|
+| Rechnungen | `$billomat->invoices`, `invoiceItems`, `invoicePayments`, `invoiceComments`, `invoiceTags` | [docs/resources/invoices.md](docs/resources/invoices.md), [items](docs/resources/invoice-items.md), [payments](docs/resources/invoice-payments.md), [comments](docs/resources/invoice-comments.md), [tags](docs/resources/invoice-tags.md) |
+| Abo-Rechnungen | `$billomat->recurrings`, `recurringItems`, `recurringTags`, `recurringEmailReceivers` | [docs/resources/recurrings.md](docs/resources/recurrings.md) |
+| Angebote | `$billomat->offers`, `offerItems`, `offerComments`, `offerTags` | [docs/resources/offers.md](docs/resources/offers.md) |
+| Auftragsbestätigungen | `$billomat->confirmations`, `confirmationItems`, `confirmationComments`, `confirmationTags` | [docs/resources/confirmations.md](docs/resources/confirmations.md) |
+| Lieferscheine | `$billomat->deliveryNotes`, `deliveryNoteItems`, `deliveryNoteComments`, `deliveryNoteTags` | [docs/resources/delivery-notes.md](docs/resources/delivery-notes.md) |
+| Gutschriften | `$billomat->creditNotes`, `creditNoteItems`, `creditNoteComments`, `creditNoteTags`, `creditNotePayments` | [docs/resources/credit-notes.md](docs/resources/credit-notes.md) |
+| Mahnungen | `$billomat->reminders`, `reminderItems`, `reminderTags` | [docs/resources/reminders.md](docs/resources/reminders.md) |
+| Briefe | `$billomat->letters`, `letterComments`, `letterTags` | [docs/resources/letters.md](docs/resources/letters.md) |
+
+### Eingangsbelege
+
+| Ressource | Zugriff | Doku |
+|---|---|---|
+| Eingangsrechnungen | `$billomat->incomings`, `incomingComments`, `incomingPayments`, `incomingTags`, `incomingPropertyValues` | [docs/resources/incomings.md](docs/resources/incomings.md) |
+| Posteingang (Inbox) | `$billomat->inboxDocuments` | [docs/resources/inbox-documents.md](docs/resources/inbox-documents.md) |
+
+### Account & Hilfs-Ressourcen
+
+| Ressource | Zugriff | Doku |
+|---|---|---|
+| Einstellungen | `$billomat->settings` | [docs/resources/settings.md](docs/resources/settings.md) |
+| Steuersätze | `$billomat->taxes` | [docs/resources/taxes.md](docs/resources/taxes.md) |
+| Vorlagen | `$billomat->templates` | [docs/resources/templates.md](docs/resources/templates.md) |
+| Lookups (Countries, Currencies, Units, DunningLevels, Users, EmailTemplates, FreeTexts, ReminderTexts) | `$billomat->countries`, `currencies`, `units`, `dunningLevels`, `users`, `emailTemplates`, `freeTexts`, `reminderTexts` | [docs/resources/lookups.md](docs/resources/lookups.md) |
 
 ## Konfiguration
 

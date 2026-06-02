@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat;
 
+use Justpilot\Billomat\Api\ArticlePropertyValuesApi;
+use Justpilot\Billomat\Api\ArticlesApi;
+use Justpilot\Billomat\Api\ArticleTagsApi;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ConfirmationCommentsApi;
 use Justpilot\Billomat\Api\ConfirmationItemsApi;
@@ -91,6 +94,10 @@ final readonly class BillomatClient
     public LetterCommentsApi $letterComments;
     public LetterTagsApi $letterTags;
 
+    public ArticlesApi $articles;
+    public ArticleTagsApi $articleTags;
+    public ArticlePropertyValuesApi $articlePropertyValues;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -137,6 +144,9 @@ final readonly class BillomatClient
         $this->letters = new LettersApi($this->http);
         $this->letterComments = new LetterCommentsApi($this->http);
         $this->letterTags = new LetterTagsApi($this->http);
+        $this->articles = new ArticlesApi($this->http);
+        $this->articleTags = new ArticleTagsApi($this->http);
+        $this->articlePropertyValues = new ArticlePropertyValuesApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

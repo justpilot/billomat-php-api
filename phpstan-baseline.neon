@@ -31,6 +31,102 @@ parameters:
 			path: src/Api/AbstractApi.php
 
 		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ArticlePropertyValuesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlePropertyValuesApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ArticlePropertyValue given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ArticlePropertyValuesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticlePropertyValue\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/ArticlePropertyValuesApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/ArticlePropertyValuesApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ArticleTagsApi.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ArticleTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ArticleTag given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ArticleTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ArticleTagCloudEntry given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ArticleTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticleTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/ArticleTagsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: src/Api/ArticleTagsApi.php
+
+		-
+			message: '#^Cannot access offset ''article'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ArticlesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ArticlesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ArticlesApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Article given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ArticlesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Article\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/ArticlesApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/ArticlesApi.php
+
+		-
 			message: '#^Cannot access offset ''client'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -1157,6 +1253,114 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Http/BillomatHttpClientInterface.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 6
+			path: src/Model/Article.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 7
+			path: src/Model/Article.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
+			identifier: empty.notAllowed
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Parameter \$articleNumber of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Parameter \$purchasePriceCurrencyCode of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\Article constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Article.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/ArticlePropertyValue.php
+
+		-
+			message: '#^Parameter \$name of class Justpilot\\Billomat\\Model\\ArticlePropertyValue constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/ArticlePropertyValue.php
+
+		-
+			message: '#^Parameter \$type of class Justpilot\\Billomat\\Model\\ArticlePropertyValue constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/ArticlePropertyValue.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Model/ArticleTag.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/ArticleTag.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Model/ArticleTagCloudEntry.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/ArticleTagCloudEntry.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
@@ -3269,6 +3473,30 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Api/AbstractApiExceptionTest.php
+
+		-
+			message: '#^Cannot access offset ''article'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: tests/Api/ArticlesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''sales_price'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ArticlesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''title'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ArticlesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''unit'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ArticlesApiTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'

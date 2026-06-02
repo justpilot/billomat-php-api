@@ -10,6 +10,10 @@ use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\InvoiceTagsApi;
+use Justpilot\Billomat\Api\OfferCommentsApi;
+use Justpilot\Billomat\Api\OfferItemsApi;
+use Justpilot\Billomat\Api\OffersApi;
+use Justpilot\Billomat\Api\OfferTagsApi;
 use Justpilot\Billomat\Api\RecurringEmailReceiversApi;
 use Justpilot\Billomat\Api\RecurringItemsApi;
 use Justpilot\Billomat\Api\RecurringsApi;
@@ -39,6 +43,11 @@ final readonly class BillomatClient
     public RecurringTagsApi $recurringTags;
     public RecurringEmailReceiversApi $recurringEmailReceivers;
 
+    public OffersApi $offers;
+    public OfferItemsApi $offerItems;
+    public OfferCommentsApi $offerComments;
+    public OfferTagsApi $offerTags;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -62,6 +71,10 @@ final readonly class BillomatClient
         $this->recurringItems = new RecurringItemsApi($this->http);
         $this->recurringTags = new RecurringTagsApi($this->http);
         $this->recurringEmailReceivers = new RecurringEmailReceiversApi($this->http);
+        $this->offers = new OffersApi($this->http);
+        $this->offerItems = new OfferItemsApi($this->http);
+        $this->offerComments = new OfferCommentsApi($this->http);
+        $this->offerTags = new OfferTagsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Justpilot\Billomat\Api;
+
+use DateTimeImmutable;
+
+/**
+ * Typisierter Payload für PUT /reminders/{id}.
+ *
+ * Nur Mahnungen im Status DRAFT sind voll editierbar.
+ */
+final class ReminderUpdateOptions
+{
+    public ?int $contactId = null;
+
+    public ?string $address = null;
+
+    public ?string $numberPre = null;
+
+    public ?int $number = null;
+
+    public ?int $numberLength = null;
+
+    public ?DateTimeImmutable $date = null;
+
+    public ?int $dueDays = null;
+
+    public ?DateTimeImmutable $dueDate = null;
+
+    public ?string $subject = null;
+
+    public ?string $label = null;
+
+    public ?string $intro = null;
+
+    public ?string $note = null;
+
+    public ?int $reminderTextId = null;
+
+    public ?int $templateId = null;
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function toArray(): array
+    {
+        $data = [
+            'contact_id' => $this->contactId,
+            'address' => $this->address,
+            'number_pre' => $this->numberPre,
+            'number' => $this->number,
+            'number_length' => $this->numberLength,
+            'date' => $this->date?->format('Y-m-d'),
+            'due_days' => $this->dueDays,
+            'due_date' => $this->dueDate?->format('Y-m-d'),
+            'subject' => $this->subject,
+            'label' => $this->label,
+            'intro' => $this->intro,
+            'note' => $this->note,
+            'reminder_text_id' => $this->reminderTextId,
+            'template_id' => $this->templateId,
+        ];
+
+        return array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);
+    }
+}

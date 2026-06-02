@@ -31,6 +31,9 @@ use Justpilot\Billomat\Api\RecurringEmailReceiversApi;
 use Justpilot\Billomat\Api\RecurringItemsApi;
 use Justpilot\Billomat\Api\RecurringsApi;
 use Justpilot\Billomat\Api\RecurringTagsApi;
+use Justpilot\Billomat\Api\ReminderItemsApi;
+use Justpilot\Billomat\Api\RemindersApi;
+use Justpilot\Billomat\Api\ReminderTagsApi;
 use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\TaxesApi;
 use Justpilot\Billomat\Api\TemplatesApi;
@@ -77,6 +80,10 @@ final readonly class BillomatClient
     public CreditNoteTagsApi $creditNoteTags;
     public CreditNotePaymentsApi $creditNotePayments;
 
+    public RemindersApi $reminders;
+    public ReminderItemsApi $reminderItems;
+    public ReminderTagsApi $reminderTags;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -117,6 +124,9 @@ final readonly class BillomatClient
         $this->creditNoteComments = new CreditNoteCommentsApi($this->http);
         $this->creditNoteTags = new CreditNoteTagsApi($this->http);
         $this->creditNotePayments = new CreditNotePaymentsApi($this->http);
+        $this->reminders = new RemindersApi($this->http);
+        $this->reminderItems = new ReminderItemsApi($this->http);
+        $this->reminderTags = new ReminderTagsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

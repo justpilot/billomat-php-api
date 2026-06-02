@@ -41,6 +41,9 @@ use Justpilot\Billomat\Api\ReminderItemsApi;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderTagsApi;
 use Justpilot\Billomat\Api\SettingsApi;
+use Justpilot\Billomat\Api\SupplierPropertyValuesApi;
+use Justpilot\Billomat\Api\SuppliersApi;
+use Justpilot\Billomat\Api\SupplierTagsApi;
 use Justpilot\Billomat\Api\TaxesApi;
 use Justpilot\Billomat\Api\TemplatesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -98,6 +101,10 @@ final readonly class BillomatClient
     public ArticleTagsApi $articleTags;
     public ArticlePropertyValuesApi $articlePropertyValues;
 
+    public SuppliersApi $suppliers;
+    public SupplierTagsApi $supplierTags;
+    public SupplierPropertyValuesApi $supplierPropertyValues;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -147,6 +154,9 @@ final readonly class BillomatClient
         $this->articles = new ArticlesApi($this->http);
         $this->articleTags = new ArticleTagsApi($this->http);
         $this->articlePropertyValues = new ArticlePropertyValuesApi($this->http);
+        $this->suppliers = new SuppliersApi($this->http);
+        $this->supplierTags = new SupplierTagsApi($this->http);
+        $this->supplierPropertyValues = new SupplierPropertyValuesApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

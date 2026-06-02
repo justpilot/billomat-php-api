@@ -283,6 +283,36 @@ parameters:
 			path: src/Api/ConfirmationsApi.php
 
 		-
+			message: '#^Cannot access offset ''contact'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ContactsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ContactsApi\:\:listByClient\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ContactsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Contact given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ContactsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Contact\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/ContactsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/ContactsApi.php
+
+		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -1919,6 +1949,108 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/ConfirmationTagCloudEntry.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
+			identifier: empty.notAllowed
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$city of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$countryCode of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$email of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$fax of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$firstName of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$lastName of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$mobile of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$phone of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$salutation of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$state of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$street of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
+
+		-
+			message: '#^Parameter \$zip of class Justpilot\\Billomat\\Model\\Contact constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Contact.php
 
 		-
 			message: '#^Cannot access offset ''credit\-note\-item'' on mixed\.$#'
@@ -3941,6 +4073,30 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''client_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ContactsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''contact'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: tests/Api/ContactsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ContactsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''first_name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ContactsApiTest.php
 
 		-
 			message: '#^Cannot access offset ''amount'' on mixed\.$#'

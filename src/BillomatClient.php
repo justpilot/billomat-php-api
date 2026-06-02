@@ -12,6 +12,7 @@ use Justpilot\Billomat\Api\ConfirmationCommentsApi;
 use Justpilot\Billomat\Api\ConfirmationItemsApi;
 use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ConfirmationTagsApi;
+use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\CreditNoteCommentsApi;
 use Justpilot\Billomat\Api\CreditNoteItemsApi;
 use Justpilot\Billomat\Api\CreditNotePaymentsApi;
@@ -105,6 +106,8 @@ final readonly class BillomatClient
     public SupplierTagsApi $supplierTags;
     public SupplierPropertyValuesApi $supplierPropertyValues;
 
+    public ContactsApi $contacts;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -157,6 +160,7 @@ final readonly class BillomatClient
         $this->suppliers = new SuppliersApi($this->http);
         $this->supplierTags = new SupplierTagsApi($this->http);
         $this->supplierPropertyValues = new SupplierPropertyValuesApi($this->http);
+        $this->contacts = new ContactsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

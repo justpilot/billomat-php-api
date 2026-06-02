@@ -190,6 +190,132 @@ parameters:
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
+			path: src/Api/DeliveryNoteCommentsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteComment given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/DeliveryNoteCommentsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/DeliveryNoteCommentsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/DeliveryNoteCommentsApi.php
+
+		-
+			message: '#^Cannot access offset ''delivery\-note\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/DeliveryNoteItemsApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/DeliveryNoteItemsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNoteItemsApi\:\:listByDeliveryNote\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/DeliveryNoteItemsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteItem given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/DeliveryNoteItemsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/DeliveryNoteItemsApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/DeliveryNoteTagsApi.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/DeliveryNoteTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteTag given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/DeliveryNoteTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteTagCloudEntry given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/DeliveryNoteTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/DeliveryNoteTagsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: src/Api/DeliveryNoteTagsApi.php
+
+		-
+			message: '#^Cannot access offset ''delivery\-note'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/DeliveryNotesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNotesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/DeliveryNotesApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNote given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/DeliveryNotesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNote\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/DeliveryNotesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNotePdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/DeliveryNotesApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/DeliveryNotesApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
 			path: src/Api/InvoiceCommentsApi.php
 
 		-
@@ -1139,6 +1265,228 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/ConfirmationTagCloudEntry.php
+
+		-
+			message: '#^Cannot access offset ''delivery\-note\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Cannot access offset ''tax'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 7
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 9
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\DeliveryNoteItem given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\DeliveryNote\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$deliveryNoteNumber of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects list\<Justpilot\\Billomat\\Model\\DeliveryNoteItem\>, array\<Justpilot\\Billomat\\Model\\DeliveryNoteItem\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\DeliveryNote constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNote.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/DeliveryNoteComment.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Model/DeliveryNoteComment.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 7
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 4
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
+			identifier: empty.notAllowed
+			count: 1
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\DeliveryNoteItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/DeliveryNoteItem.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/DeliveryNotePdf.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: src/Model/DeliveryNotePdf.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Model/DeliveryNoteTag.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/DeliveryNoteTag.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Model/DeliveryNoteTagCloudEntry.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/DeliveryNoteTagCloudEntry.php
 
 		-
 			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
@@ -2173,6 +2521,72 @@ parameters:
 			path: tests/Api/ConfirmationsApiTest.php
 
 		-
+			message: '#^Cannot access offset ''client_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''delivery\-note\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''delivery\-note\-items'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''from'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Cannot access offset ''invoice_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\DeliveryNotesApiTest\:\:extractJsonPayload\(\) should return array\<string, mixed\>\|null but returns array\<mixed, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\DeliveryNotesApiTest\:\:extractJsonPayload\(\) should return array\<string, mixed\>\|null but returns array\<mixed, mixed\>\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Offset ''delivery\-note'' might not exist on array\<string, mixed\>\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 3
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Justpilot\\Billomat\\Tests\\Api\\DeliveryNotesApiTest\:\:extractJsonPayload\(\) expects array\<string, mixed\>, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Justpilot\\Billomat\\Tests\\Api\\DeliveryNotesApiTest\:\:extractJsonPayload\(\) expects array\<string, mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of static method PHPUnit\\Framework\\Assert\:\:assertCount\(\) expects Countable\|iterable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/DeliveryNotesApiTest.php
+
+		-
 			message: '#^Cannot access offset ''comment'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -3203,6 +3617,18 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: tests/Integration/Confirmations/ConfirmationsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\DeliveryNote'' and Justpilot\\Billomat\\Model\\DeliveryNote will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/DeliveryNotes/DeliveryNotesIntegrationTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\DeliveryNotes\\DeliveryNotesIntegrationTest\:\:ensureClientId\(\) should return int but returns int\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Integration/DeliveryNotes/DeliveryNotesIntegrationTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Invoice'' and Justpilot\\Billomat\\Model\\Invoice will always evaluate to true\.$#'

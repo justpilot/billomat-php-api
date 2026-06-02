@@ -23,6 +23,9 @@ use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\InvoiceTagsApi;
+use Justpilot\Billomat\Api\LetterCommentsApi;
+use Justpilot\Billomat\Api\LettersApi;
+use Justpilot\Billomat\Api\LetterTagsApi;
 use Justpilot\Billomat\Api\OfferCommentsApi;
 use Justpilot\Billomat\Api\OfferItemsApi;
 use Justpilot\Billomat\Api\OffersApi;
@@ -84,6 +87,10 @@ final readonly class BillomatClient
     public ReminderItemsApi $reminderItems;
     public ReminderTagsApi $reminderTags;
 
+    public LettersApi $letters;
+    public LetterCommentsApi $letterComments;
+    public LetterTagsApi $letterTags;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -127,6 +134,9 @@ final readonly class BillomatClient
         $this->reminders = new RemindersApi($this->http);
         $this->reminderItems = new ReminderItemsApi($this->http);
         $this->reminderTags = new ReminderTagsApi($this->http);
+        $this->letters = new LettersApi($this->http);
+        $this->letterComments = new LetterCommentsApi($this->http);
+        $this->letterTags = new LetterTagsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

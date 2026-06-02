@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Justpilot\Billomat;
 
 use Justpilot\Billomat\Api\ClientsApi;
+use Justpilot\Billomat\Api\ConfirmationCommentsApi;
+use Justpilot\Billomat\Api\ConfirmationItemsApi;
+use Justpilot\Billomat\Api\ConfirmationsApi;
+use Justpilot\Billomat\Api\ConfirmationTagsApi;
 use Justpilot\Billomat\Api\InvoiceCommentsApi;
 use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
@@ -48,6 +52,11 @@ final readonly class BillomatClient
     public OfferCommentsApi $offerComments;
     public OfferTagsApi $offerTags;
 
+    public ConfirmationsApi $confirmations;
+    public ConfirmationItemsApi $confirmationItems;
+    public ConfirmationCommentsApi $confirmationComments;
+    public ConfirmationTagsApi $confirmationTags;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -75,6 +84,10 @@ final readonly class BillomatClient
         $this->offerItems = new OfferItemsApi($this->http);
         $this->offerComments = new OfferCommentsApi($this->http);
         $this->offerTags = new OfferTagsApi($this->http);
+        $this->confirmations = new ConfirmationsApi($this->http);
+        $this->confirmationItems = new ConfirmationItemsApi($this->http);
+        $this->confirmationComments = new ConfirmationCommentsApi($this->http);
+        $this->confirmationTags = new ConfirmationTagsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

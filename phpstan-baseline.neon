@@ -64,6 +64,132 @@ parameters:
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
+			path: src/Api/ConfirmationCommentsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationComment given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ConfirmationCommentsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/ConfirmationCommentsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/ConfirmationCommentsApi.php
+
+		-
+			message: '#^Cannot access offset ''confirmation\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ConfirmationItemsApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ConfirmationItemsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationItemsApi\:\:listByConfirmation\(\) has parameter \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ConfirmationItemsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationItem given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ConfirmationItemsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationItem\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/ConfirmationItemsApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ConfirmationTagsApi.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ConfirmationTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationTag given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ConfirmationTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationTagCloudEntry given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ConfirmationTagsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Api/ConfirmationTagsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: src/Api/ConfirmationTagsApi.php
+
+		-
+			message: '#^Cannot access offset ''confirmation'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Api/ConfirmationsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ConfirmationsApi.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\Confirmation given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ConfirmationsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Confirmation\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Api/ConfirmationsApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationPdf\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/ConfirmationsApi.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Api/ConfirmationsApi.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
 			path: src/Api/InvoiceCommentsApi.php
 
 		-
@@ -791,6 +917,228 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Model/Client.php
+
+		-
+			message: '#^Cannot access offset ''confirmation\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Cannot access offset ''tax'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 9
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 9
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\ConfirmationItem given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Confirmation\:\:parseDateTime\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$address of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$confirmationNumber of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$currencyCode of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$customerportalUrl of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$intro of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Confirmation constructor expects list\<Justpilot\\Billomat\\Model\\ConfirmationItem\>, array\<Justpilot\\Billomat\\Model\\ConfirmationItem\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$label of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$note of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$numberPre of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\Confirmation constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Confirmation.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/ConfirmationComment.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Model/ConfirmationComment.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 7
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 4
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
+			identifier: empty.notAllowed
+			count: 1
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Parameter \$description of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Parameter \$reduction of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Parameter \$taxName of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Parameter \$title of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Parameter \$unit of class Justpilot\\Billomat\\Model\\ConfirmationItem constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/ConfirmationItem.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: src/Model/ConfirmationPdf.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: src/Model/ConfirmationPdf.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Model/ConfirmationTag.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/ConfirmationTag.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Model/ConfirmationTagCloudEntry.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/ConfirmationTagCloudEntry.php
 
 		-
 			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
@@ -1745,6 +2093,84 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: tests/Api/ClientsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''client_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''confirmation\-item'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''confirmation\-items'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''from'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''offer_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''recipients'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Cannot access offset ''to'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\ConfirmationsApiTest\:\:extractJsonPayload\(\) should return array\<string, mixed\>\|null but returns array\<mixed, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\ConfirmationsApiTest\:\:extractJsonPayload\(\) should return array\<string, mixed\>\|null but returns array\<mixed, mixed\>\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Offset ''confirmation'' might not exist on array\<string, mixed\>\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 3
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Justpilot\\Billomat\\Tests\\Api\\ConfirmationsApiTest\:\:extractJsonPayload\(\) expects array\<string, mixed\>, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Justpilot\\Billomat\\Tests\\Api\\ConfirmationsApiTest\:\:extractJsonPayload\(\) expects array\<string, mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: tests/Api/ConfirmationsApiTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of static method PHPUnit\\Framework\\Assert\:\:assertCount\(\) expects Countable\|iterable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Api/ConfirmationsApiTest.php
 
 		-
 			message: '#^Cannot access offset ''comment'' on mixed\.$#'
@@ -2765,6 +3191,18 @@ parameters:
 			identifier: staticMethod.dynamicCall
 			count: 2
 			path: tests/Integration/Clients/ClientsUpdateIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Confirmation'' and Justpilot\\Billomat\\Model\\Confirmation will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Confirmations/ConfirmationsIntegrationTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\Confirmations\\ConfirmationsIntegrationTest\:\:ensureClientId\(\) should return int but returns int\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Integration/Confirmations/ConfirmationsIntegrationTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Invoice'' and Justpilot\\Billomat\\Model\\Invoice will always evaluate to true\.$#'

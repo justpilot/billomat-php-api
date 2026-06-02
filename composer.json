@@ -3,6 +3,21 @@
   "description": "Unofficial PHP 8.4+ SDK for the Billomat API, powered by Symfony components.",
   "type": "library",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/justpilot/billomat-php-api",
+  "keywords": [
+    "billomat",
+    "api",
+    "sdk",
+    "client",
+    "invoice",
+    "rechnung",
+    "accounting",
+    "buchhaltung"
+  ],
+  "support": {
+    "issues": "https://github.com/justpilot/billomat-php-api/issues",
+    "source": "https://github.com/justpilot/billomat-php-api"
+  },
   "require": {
     "php": "^8.4",
     "symfony/http-client": "^7.3 || ^8.0",
@@ -78,16 +93,16 @@
   "scripts-descriptions": {
     "test": "PHPUnit-Tests (Unit only, schnell)",
     "test:unit": "Nur Unit-Tests (kein Netz-Zugriff)",
-    "test:integration": "Integrations-Tests gegen Billomat-Sandbox (benoetigt .env.test.local)",
+    "test:integration": "Integrations-Tests gegen Billomat-Sandbox (benötigt .env.test.local)",
     "test:all": "Alle Tests inkl. Integration",
     "test:coverage": "Tests + HTML/Clover-Coverage in build/",
-    "lint": "Code-Style pruefen (Dry-Run)",
+    "lint": "Code-Style prüfen (Dry-Run)",
     "lint:fix": "Code-Style automatisch korrigieren",
     "analyse": "PHPStan auf Level max",
     "analyse:baseline": "PHPStan-Baseline regenerieren",
     "refactor": "Rector-Regeln anwenden",
-    "refactor:dry": "Rector-Vorschlaege anzeigen ohne zu schreiben",
-    "mutate": "Infection Mutation-Tests ausfuehren",
-    "ci": "Vollstaendiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)"
+    "refactor:dry": "Rector-Vorschläge anzeigen ohne zu schreiben",
+    "mutate": "Infection Mutation-Tests ausführen",
+    "ci": "Vollständiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)"
   }
 }

@@ -9,6 +9,11 @@ use Justpilot\Billomat\Api\ConfirmationCommentsApi;
 use Justpilot\Billomat\Api\ConfirmationItemsApi;
 use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ConfirmationTagsApi;
+use Justpilot\Billomat\Api\CreditNoteCommentsApi;
+use Justpilot\Billomat\Api\CreditNoteItemsApi;
+use Justpilot\Billomat\Api\CreditNotePaymentsApi;
+use Justpilot\Billomat\Api\CreditNotesApi;
+use Justpilot\Billomat\Api\CreditNoteTagsApi;
 use Justpilot\Billomat\Api\DeliveryNoteCommentsApi;
 use Justpilot\Billomat\Api\DeliveryNoteItemsApi;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
@@ -66,6 +71,12 @@ final readonly class BillomatClient
     public DeliveryNoteCommentsApi $deliveryNoteComments;
     public DeliveryNoteTagsApi $deliveryNoteTags;
 
+    public CreditNotesApi $creditNotes;
+    public CreditNoteItemsApi $creditNoteItems;
+    public CreditNoteCommentsApi $creditNoteComments;
+    public CreditNoteTagsApi $creditNoteTags;
+    public CreditNotePaymentsApi $creditNotePayments;
+
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
@@ -101,6 +112,11 @@ final readonly class BillomatClient
         $this->deliveryNoteItems = new DeliveryNoteItemsApi($this->http);
         $this->deliveryNoteComments = new DeliveryNoteCommentsApi($this->http);
         $this->deliveryNoteTags = new DeliveryNoteTagsApi($this->http);
+        $this->creditNotes = new CreditNotesApi($this->http);
+        $this->creditNoteItems = new CreditNoteItemsApi($this->http);
+        $this->creditNoteComments = new CreditNoteCommentsApi($this->http);
+        $this->creditNoteTags = new CreditNoteTagsApi($this->http);
+        $this->creditNotePayments = new CreditNotePaymentsApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
     }

@@ -6445,6 +6445,48 @@ parameters:
 			path: tests/Integration/AbstractBillomatIntegrationTestCase.php
 
 		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Article'' and Justpilot\\Billomat\\Model\\Article will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Articles/ArticlesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\ArticleTag'' and Justpilot\\Billomat\\Model\\ArticleTag will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Articles/ArticlesIntegrationTest.php
+
+		-
+			message: '#^Parameter \#1 \$articleId of method Justpilot\\Billomat\\Api\\ArticleTagsApi\:\:listByArticle\(\) expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Integration/Articles/ArticlesIntegrationTest.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Justpilot\\Billomat\\Api\\ArticlesApi\:\:delete\(\) expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Integration/Articles/ArticlesIntegrationTest.php
+
+		-
+			message: '#^Parameter \$articleId of class Justpilot\\Billomat\\Api\\ArticleTagCreateOptions constructor expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Integration/Articles/ArticlesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\ClientTag'' and Justpilot\\Billomat\\Model\\ClientTag will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/ClientTags/ClientTagsIntegrationTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\ClientTags\\ClientTagsIntegrationTest\:\:ensureClientId\(\) should return int but returns int\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Integration/ClientTags/ClientTagsIntegrationTest.php
+
+		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Client'' and Justpilot\\Billomat\\Model\\Client will always evaluate to true\.$#'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1
@@ -6511,6 +6553,18 @@ parameters:
 			path: tests/Integration/Confirmations/ConfirmationsIntegrationTest.php
 
 		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Contact'' and Justpilot\\Billomat\\Model\\Contact will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Contacts/ContactsIntegrationTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\Contacts\\ContactsIntegrationTest\:\:ensureClientId\(\) should return int but returns int\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Integration/Contacts/ContactsIntegrationTest.php
+
+		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\CreditNote'' and Justpilot\\Billomat\\Model\\CreditNote will always evaluate to true\.$#'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1
@@ -6533,6 +6587,24 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: tests/Integration/DeliveryNotes/DeliveryNotesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\InboxDocument'' and Justpilot\\Billomat\\Model\\InboxDocument will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/InboxDocuments/InboxDocumentsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Incoming'' and Justpilot\\Billomat\\Model\\Incoming will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Incomings/IncomingsIntegrationTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\Incomings\\IncomingsIntegrationTest\:\:ensureSupplierId\(\) should return int but returns int\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Integration/Incomings/IncomingsIntegrationTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Invoice'' and Justpilot\\Billomat\\Model\\Invoice will always evaluate to true\.$#'
@@ -6631,6 +6703,18 @@ parameters:
 			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
 
 		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Letter'' and Justpilot\\Billomat\\Model\\Letter will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Letters/LettersIntegrationTest.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\Letters\\LettersIntegrationTest\:\:ensureClientId\(\) should return int but returns int\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Integration/Letters/LettersIntegrationTest.php
+
+		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Offer'' and Justpilot\\Billomat\\Model\\Offer will always evaluate to true\.$#'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1
@@ -6641,6 +6725,24 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: tests/Integration/Offers/OffersIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\ArticleProperty'' and Justpilot\\Billomat\\Model\\ArticleProperty will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Properties/PropertiesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\ClientProperty'' and Justpilot\\Billomat\\Model\\ClientProperty will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Properties/PropertiesIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Reminder'' and Justpilot\\Billomat\\Model\\Reminder will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Reminders/RemindersIntegrationTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''DateTimeImmutable'' and DateTimeImmutable will always evaluate to true\.$#'
@@ -6665,6 +6767,42 @@ parameters:
 			identifier: staticMethod.dynamicCall
 			count: 1
 			path: tests/Integration/Settings/SettingsIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\Supplier'' and Justpilot\\Billomat\\Model\\Supplier will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Suppliers/SuppliersIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\SupplierTag'' and Justpilot\\Billomat\\Model\\SupplierTag will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Suppliers/SuppliersIntegrationTest.php
+
+		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotNull\(\) with string will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Integration/Suppliers/SuppliersIntegrationTest.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Justpilot\\Billomat\\Api\\SuppliersApi\:\:delete\(\) expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Integration/Suppliers/SuppliersIntegrationTest.php
+
+		-
+			message: '#^Parameter \#1 \$supplierId of method Justpilot\\Billomat\\Api\\SupplierTagsApi\:\:listBySupplier\(\) expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Integration/Suppliers/SuppliersIntegrationTest.php
+
+		-
+			message: '#^Parameter \$supplierId of class Justpilot\\Billomat\\Api\\SupplierTagCreateOptions constructor expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Integration/Suppliers/SuppliersIntegrationTest.php
 
 		-
 			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertInstanceOf\(\) with ''Justpilot\\\\Billomat\\\\Model\\\\TaxRate'' and Justpilot\\Billomat\\Model\\TaxRate will always evaluate to true\.$#'

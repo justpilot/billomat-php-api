@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration\Account;
 
-use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
-use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -23,8 +21,6 @@ final class AccountIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $account = $billomat->account->get();
 
-        self::assertInstanceOf(Account::class, $account);
-        self::assertInstanceOf(Client::class, $account->client);
         self::assertNotNull($account->client->id);
         self::assertNotSame('', $account->client->name);
 

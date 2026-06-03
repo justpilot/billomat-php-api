@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/abo-rechnungen/ -->
+
 # Recurrings (Abo-Rechnungen)
 
 API-Wrapper für Abo-Rechnungen unter `/recurrings` und ihre drei Sub-Ressourcen (`/recurring-items`, `/recurring-tags`, `/recurring-email-receivers`).

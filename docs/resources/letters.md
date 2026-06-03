@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/briefe/ -->
+
 # Letters (Briefe)
 
 API-Wrapper für freie Korrespondenz unter `/letters` und ihre zwei Sub-Ressourcen (`/letter-comments`, `/letter-tags`).

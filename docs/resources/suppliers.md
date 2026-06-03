@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/lieferanten/ -->
+
 # Suppliers (Lieferanten)
 
 API-Wrapper für Lieferanten unter `/suppliers` und ihre zwei Sub-Ressourcen (`/supplier-tags`, `/supplier-property-values`).

@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/einstellungen/steuersaetze/ -->
+
 # Taxes (Steuersätze)
 
 API-Wrapper für die Verwaltung von Steuersätzen unter `/taxes`. Steuersätze sind die globalen Account-Steuersätze (z. B. „MwSt 19 %“). Die pro Rechnungsposition tatsächlich angewendete Steuer liegt in der Position selbst (`InvoiceItemCreateOptions::$taxRate`).

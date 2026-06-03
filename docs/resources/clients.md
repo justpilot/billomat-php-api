@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/kunden/ -->
+
 # Clients (Kunden)
 
 API-Wrapper für die Billomat-Ressource „Kunden“ — entspricht den Endpunkten unter `/clients`.

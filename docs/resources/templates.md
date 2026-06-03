@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/einstellungen/vorlagen/ -->
+
 # Templates (Vorlagen)
 
 API-Wrapper für Dokument-Vorlagen unter `/templates`. Vorlagen werden für die PDF-Erzeugung von Rechnungen, Angeboten, Lieferscheinen usw. genutzt — sowohl Billomat-interne („DEFINED“, im Editor gebaut) als auch eigene Word/RTF-Uploads („UPLOADED“).

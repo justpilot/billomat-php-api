@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/einstellungen/ -->
+
 # Settings (Account-Einstellungen)
 
 API-Wrapper für die Account-weiten Einstellungen unter `/settings`. Liefert Konfigurations-Defaults für Nummernkreise, Pflichtangaben in Dokumenten, Farben des Kundenportals und mehr.

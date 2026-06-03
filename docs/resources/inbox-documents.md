@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/eingangsrechnungen/inbox/ -->
+
 # Inbox Documents (Posteingangs-Dokumente)
 
 API-Wrapper für den Billomat-Posteingang unter `/inbox-documents` — also alle PDFs/Bilder, die Billomat per E-Mail, Drag-and-Drop oder API entgegengenommen, aber noch keinem Beleg zugeordnet hat.

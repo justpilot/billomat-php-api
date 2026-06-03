@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/kunden/kontakte/ -->
+
 # Contacts (Ansprechpartner)
 
 API-Wrapper für Kunden-Ansprechpartner unter `/contacts`. Ein Contact gehört immer zu genau einem Kunden (`client_id` als Fremdschlüssel). Typischer Anwendungsfall: pro Firma mehrere Kontaktpersonen (Buchhaltung, Einkauf, Geschäftsführung) hinterlegen.

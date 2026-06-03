@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/rechnungen/ -->
+
 # Invoices (Rechnungen)
 
 API-Wrapper für die Billomat-Ressource „Rechnungen“ unter `/invoices`.

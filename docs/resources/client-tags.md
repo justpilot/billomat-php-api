@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/kunden/schlagworte/ -->
+
 # Client Tags (Kunden-Schlagworte)
 
 API-Wrapper für Schlagworte an Kunden unter `/client-tags`. Konzeptionell identisch zu [Invoice Tags](invoice-tags.md) — wer das Modell dort verstanden hat, kann diese Datei als Spickzettel lesen.

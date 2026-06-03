@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/angebote/ -->
+
 # Offers (Angebote)
 
 API-Wrapper für Angebote unter `/offers` und ihre drei Sub-Ressourcen (`/offer-items`, `/offer-comments`, `/offer-tags`).

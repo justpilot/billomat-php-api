@@ -1,3 +1,5 @@
+<!-- Quelle: SDK-Aggregation — keine 1:1 Billomat-URL; siehe die Sub-Ressourcen-Docs (countries.md, currencies.md, settings-units.md, settings-email-templates.md, settings-free-texts.md, settings-reminder-levels.md, users.md). -->
+
 # Lookups (Stammdaten & Settings)
 
 API-Wrapper für die acht read-only Lookup-Endpoints — Stammdaten und Account-Einstellungen, die andere Ressourcen referenzieren.

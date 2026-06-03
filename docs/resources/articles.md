@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/artikel/ -->
+
 # Articles (Artikel)
 
 API-Wrapper für Artikel unter `/articles` und ihre zwei Sub-Ressourcen (`/article-tags`, `/article-property-values`).

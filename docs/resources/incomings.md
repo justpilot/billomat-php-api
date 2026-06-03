@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/eingangsrechnungen/ -->
+
 # Incomings (Eingangsbelege)
 
 API-Wrapper für Eingangsrechnungen unter `/incomings` und ihre vier Sub-Ressourcen (`/incoming-comments`, `/incoming-payments`, `/incoming-tags`, `/incoming-property-values`). Definitionen der Custom-Properties liegen unter `/incoming-properties` (siehe `IncomingPropertiesApi`, hier nur am Rand dokumentiert).

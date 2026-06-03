@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/einstellungen/artikel-attribute/ + https://www.billomat.com/api/einstellungen/kunden-attribute/ + https://www.billomat.com/api/einstellungen/lieferanten-attribute/ + https://www.billomat.com/api/einstellungen/eingangsrechnung-attribute/ -->
+
 # Properties (Custom-Field-Definitionen)
 
 API-Wrapper für die vier Property-Definition-Endpoints unter `/article-properties`, `/client-properties`, `/supplier-properties` und `/incoming-properties`.

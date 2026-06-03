@@ -1,3 +1,5 @@
+<!-- Quelle: https://www.billomat.com/api/gutschriften/ -->
+
 # Credit Notes (Gutschriften)
 
 API-Wrapper für Gutschriften unter `/credit-notes` und ihre vier Sub-Ressourcen (`/credit-note-items`, `/credit-note-comments`, `/credit-note-tags`, `/credit-note-payments`).

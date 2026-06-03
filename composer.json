@@ -91,7 +91,8 @@
       "@refactor:dry",
       "@test:all"
     ],
-    "extract:spec": "php tools/extract-billomat-spec.php"
+    "extract:spec": "php tools/extract-billomat-spec.php",
+    "audit:spec": "php tools/audit-spec-vs-code.php"
   },
   "scripts-descriptions": {
     "test": "PHPUnit-Tests (Unit only, schnell)",
@@ -107,6 +108,7 @@
     "refactor:dry": "Rector-Vorschläge anzeigen ohne zu schreiben",
     "mutate": "Infection Mutation-Tests ausführen",
     "ci": "Vollständiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)",
-    "extract:spec": "Billomat-API-Doku (HTML-Spiegel) in docs/spec/billomat.json überführen"
+    "extract:spec": "Billomat-API-Doku (HTML-Spiegel) in docs/spec/billomat.json überführen",
+    "audit:spec": "Vergleicht docs/spec/billomat.json gegen src/ und schreibt docs/audit.md"
   }
 }

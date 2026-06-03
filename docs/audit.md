@@ -38,12 +38,12 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `einstellungen/artikel-attribute` | Artikel-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/benutzer-attribute` | Benutzer-Attribute | — | — | — | — | — | Benutzer-Attribute – noch kein Api. |
 | `einstellungen/eingangsrechnung-attribute` | Eingansgrechnung-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/einheiten` | Einheiten | ✓ | — | — | — | — |  |
-| `einstellungen/email-vorlagen` | E-Mail-Vorlagen | ✓ | — | — | — | — |  |
-| `einstellungen/freitexte` | Freitexte | ✓ | — | — | — | — |  |
+| `einstellungen/einheiten` | Einheiten | ✓ | ✓ | — | — | ✓ |  |
+| `einstellungen/email-vorlagen` | E-Mail-Vorlagen | ✓ | ✓ | — | — | ✓ |  |
+| `einstellungen/freitexte` | Freitexte | ✓ | ✓ | — | — | ✓ |  |
 | `einstellungen/kunden-attribute` | Kunden-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/lieferanten-attribute` | Lieferanten-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/mahnstufen` | Mahnstufen | ✓ | — | — | — | — |  |
+| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts; SDK ergänzt ein zweites DunningLevelsApi für /dunning-levels. |
 | `einstellungen/rollen` | Rollen | — | — | — | — | — | Rollen-Verwaltung – noch kein Api. |
 | `einstellungen/steuerfreie-laender` | Steuerfreie Länder | — | — | — | — | — | Steuerfreie Länder – noch kein Api. |
 | `einstellungen/steuersaetze` | Steuersätze | ✓ | — | — | — | ✓ |  |

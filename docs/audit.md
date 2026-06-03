@@ -13,8 +13,8 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `abo-rechnungen/empfaenger` | E-Mail-Empfänger | ✓ | — | — | — | ✓ |  |
 | `abo-rechnungen/positionen` | Positionen | ✓ | — | — | — | ✓ |  |
 | `abo-rechnungen/schlagworte` | Schlagworte | ✓ | — | — | — | ✓ |  |
-| `account` | Account | — | — | — | — | — | Account-Endpunkte – noch nicht im SDK. |
-| `aktivitaeten` | Aktivitäten | — | — | — | — | — | Activities-Feed – noch nicht im SDK. |
+| `account` | Account | ✓ | ✓ | — | — | ✓ |  |
+| `aktivitaeten` | Aktivitäten | ✓ | ✓ | — | — | ✓ |  |
 | `angebote` | Angebote | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `angebote/kommentare` | Kommentare | ✓ | ✓ | ✓ | — | ✓ |  |
 | `angebote/positionen` | Positionen | ✓ | ✓ | ✓ | — | ✓ |  |
@@ -24,7 +24,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `artikel/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `auftragsbestaetigungen` | Auftragsbestätigungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `benutzer` | Benutzer | ✓ | ✓ | — | — | ✓ |  |
-| `benutzerdefinierte-attribute-filtern` | Benutzerdefinierte Attribute filtern | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
+| `benutzerdefinierte-attribute-filtern` | Benutzerdefinierte Attribute filtern | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `briefe` | Briefe | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `eingangsrechnungen` | Eingangsrechnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `eingangsrechnungen/attribute` | Attribute | ✓ | — | — | — | ✓ |  |
@@ -48,15 +48,15 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `einstellungen/steuerfreie-laender` | Steuerfreie Länder | — | — | — | — | — | Steuerfreie Länder – noch kein Api. |
 | `einstellungen/steuersaetze` | Steuersätze | ✓ | — | — | — | ✓ |  |
 | `einstellungen/vorlagen` | Vorlagen | ✓ | — | ✓ | ✓ | ✓ |  |
-| `grundlagen` | Grundlagen | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/api-sicherheit` | Sicherheit | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/authentifizierung` | Authentifizierung | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/daten-lesen` | Daten lesen | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/daten-schreiben` | Daten schreiben | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/eigene-meta-daten` | Eigene Meta-Daten | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/fehler` | Fehler | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/tools` | Tools | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
-| `grundlagen/zugriffsbegrenzung` | Zugriffsbegrenzung | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
+| `grundlagen` | Grundlagen | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/api-sicherheit` | Sicherheit | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/authentifizierung` | Authentifizierung | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/daten-lesen` | Daten lesen | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/daten-schreiben` | Daten schreiben | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/eigene-meta-daten` | Eigene Meta-Daten | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/fehler` | Fehler | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/tools` | Tools | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/zugriffsbegrenzung` | Zugriffsbegrenzung | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `gutschriften` | Gutschriften | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `gutschriften/kommentare` | Kommentare | ✓ | ✓ | ✓ | — | ✓ |  |
 | `gutschriften/positionen` | Positionen | ✓ | ✓ | ✓ | — | ✓ |  |
@@ -79,9 +79,9 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `rechnungen/positionen` | Positionen | ✓ | ✓ | ✓ | — | ✓ |  |
 | `rechnungen/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `rechnungen/zahlungen` | Zahlungen | ✓ | ✓ | ✓ | — | ✓ |  |
-| `suche` | Suche | — | — | — | — | — | Globale Suche – noch nicht im SDK. |
+| `suche` | Suche | ✓ | ✓ | — | — | ✓ |  |
 | `waehrungen` | Währungen | ✓ | ✓ | — | — | ✓ |  |
-| `webhooks` | Webhooks | ✗ | ✗ | ✗ | ✗ | ✗ |  |
+| `webhooks` | Webhooks | — | — | — | — | ✓ | Empfänger-seitiges Konzept – kein REST-Endpunkt; siehe docs/concepts/webhooks.md. |
 
 ## Feld-Lücken in `*Options`-Klassen
 

@@ -39,6 +39,7 @@ const API_NAMESPACE = 'Justpilot\\Billomat\\Api\\';
  *   createOptions?: string,
  *   updateOptions?: string,
  *   docFile?: string,
+ *   conceptFile?: string,
  *   note?: string
  * }|null>
  */
@@ -147,12 +148,11 @@ $mapping = [
     'benutzer' => ['api' => 'UsersApi', 'model' => 'User', 'docFile' => 'users.md'],
     'laender' => ['api' => 'CountriesApi', 'model' => 'Country', 'docFile' => 'countries.md'],
     'waehrungen' => ['api' => 'CurrenciesApi', 'model' => 'Currency', 'docFile' => 'currencies.md'],
-    'webhooks' => ['api' => 'WebhooksApi', 'model' => 'Webhook',
-        'createOptions' => 'WebhookCreateOptions', 'updateOptions' => 'WebhookUpdateOptions',
-        'docFile' => 'webhooks.md'],
-    'account' => ['note' => 'Account-Endpunkte – noch nicht im SDK.'],
-    'aktivitaeten' => ['note' => 'Activities-Feed – noch nicht im SDK.'],
-    'suche' => ['note' => 'Globale Suche – noch nicht im SDK.'],
+    'webhooks' => ['conceptFile' => 'webhooks.md',
+        'note' => 'Empfänger-seitiges Konzept – kein REST-Endpunkt; siehe docs/concepts/webhooks.md.'],
+    'account' => ['api' => 'AccountApi', 'model' => 'Account', 'docFile' => 'account.md'],
+    'aktivitaeten' => ['api' => 'ActivitiesApi', 'model' => 'Activity', 'docFile' => 'activities.md'],
+    'suche' => ['api' => 'SearchApi', 'model' => 'SearchResult', 'docFile' => 'search.md'],
 
     'einstellungen' => ['api' => 'SettingsApi', 'docFile' => 'settings.md'],
     'einstellungen/steuersaetze' => ['api' => 'TaxesApi', 'docFile' => 'taxes.md'],
@@ -220,9 +220,23 @@ function buildResourceMatrix(array $resources, array $mapping): array
 {
     $rows = [];
     foreach ($resources as $slug => $resource) {
-        $map = $mapping[$slug] ?? false;
+        if (!array_key_exists($slug, $mapping)) {
+            $rows[] = [
+                'slug' => $slug,
+                'title' => (string) ($resource['title'] ?? $slug),
+                'api' => '✗',
+                'model' => '✗',
+                'create' => '✗',
+                'update' => '✗',
+                'docFile' => '✗',
+                'note' => 'Kein Mapping definiert – Audit-Skript erweitern.',
+            ];
+            continue;
+        }
+
+        $map = $mapping[$slug];
         if ($map === null) {
-            // Bewusst übersprungen (Konzept-Doku)
+            // Bewusst übersprungen (Konzept-Doku unter grundlagen/)
             $rows[] = [
                 'slug' => $slug,
                 'title' => (string) ($resource['title'] ?? $slug),
@@ -236,16 +250,17 @@ function buildResourceMatrix(array $resources, array $mapping): array
             continue;
         }
 
-        if ($map === false) {
+        if (isset($map['conceptFile'])) {
+            $conceptPath = (string) $map['conceptFile'];
             $rows[] = [
                 'slug' => $slug,
                 'title' => (string) ($resource['title'] ?? $slug),
-                'api' => '✗',
-                'model' => '✗',
-                'create' => '✗',
-                'update' => '✗',
-                'docFile' => '✗',
-                'note' => 'Kein Mapping definiert – Audit-Skript erweitern.',
+                'api' => '—',
+                'model' => '—',
+                'create' => '—',
+                'update' => '—',
+                'docFile' => conceptMark($conceptPath),
+                'note' => (string) ($map['note'] ?? 'Konzept-Doku, kein Api erwartet.'),
             ];
             continue;
         }
@@ -278,6 +293,11 @@ function docMark(?string $relativePath): string
         return '—';
     }
     return is_file(DOCS_RESOURCES_DIR . '/' . $relativePath) ? '✓' : '✗';
+}
+
+function conceptMark(string $relativePath): string
+{
+    return is_file(PROJECT_ROOT . '/docs/concepts/' . $relativePath) ? '✓' : '✗';
 }
 
 /**

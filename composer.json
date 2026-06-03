@@ -36,6 +36,8 @@
     "phpstan/phpstan-symfony": "^2.0",
     "phpunit/phpunit": "^12.4",
     "rector/rector": "^2.0",
+    "symfony/css-selector": "^7.3 || ^8.0",
+    "symfony/dom-crawler": "^7.3 || ^8.0",
     "symfony/dotenv": "^7.3 || ^8.0",
     "symfony/var-dumper": "^7.3 || ^8.0"
   },
@@ -88,7 +90,8 @@
       "@analyse",
       "@refactor:dry",
       "@test:all"
-    ]
+    ],
+    "extract:spec": "php tools/extract-billomat-spec.php"
   },
   "scripts-descriptions": {
     "test": "PHPUnit-Tests (Unit only, schnell)",
@@ -103,6 +106,7 @@
     "refactor": "Rector-Regeln anwenden",
     "refactor:dry": "Rector-Vorschläge anzeigen ohne zu schreiben",
     "mutate": "Infection Mutation-Tests ausführen",
-    "ci": "Vollständiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)"
+    "ci": "Vollständiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)",
+    "extract:spec": "Billomat-API-Doku (HTML-Spiegel) in docs/spec/billomat.json überführen"
   }
 }

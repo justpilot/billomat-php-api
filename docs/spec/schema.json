@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/justpilot/billomat-php-api/docs/spec/schema.json",
+  "title": "Billomat-API-Spezifikation (intern)",
+  "description": "Beschreibt die Form von docs/spec/billomat.json. Datei wird von tools/extract-billomat-spec.php aus dem lokalen HTML-Spiegel der offiziellen Billomat-Doku abgeleitet (https://www.billomat.com/api/). Inhalte sind Fakten (Endpunkt-Pfade, Feldnamen, Typen, Default-Werte, Enum-Werte) und werden im SDK als Single Source of Truth für Doku-Generierung, Audit und Code-Erweiterung verwendet.",
+  "type": "object",
+  "required": ["schema_version", "source_base_url", "resources"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "description": "Version des hier definierten Schemas. Wird bei rückwärts-inkompatiblen Änderungen hochgezählt.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "source_base_url": {
+      "description": "Basis-URL der öffentlichen Billomat-API-Doku, an die jeder Ressourcen-Slug angehängt wird.",
+      "type": "string",
+      "format": "uri"
+    },
+    "resources": {
+      "description": "Pro Ressourcen-Slug (entspricht Pfad-Segment in der Billomat-Doku, z.B. 'kunden', 'rechnungen/zahlungen') ein Eintrag.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/resource" }
+    }
+  },
+  "$defs": {
+    "resource": {
+      "type": "object",
+      "required": ["title", "source_url", "endpoints"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "description": "Lesbarer deutscher Titel der Ressource (aus <h1>).",
+          "type": "string"
+        },
+        "source_url": {
+          "description": "Direkter Link zur öffentlichen Doku-Seite.",
+          "type": "string",
+          "format": "uri"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/endpoint" }
+        },
+        "filters": {
+          "description": "Optionale Filter, die ressourcen-weit (nicht endpunktspezifisch) dokumentiert sind. Selten genutzt.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/filter" }
+        }
+      }
+    },
+    "endpoint": {
+      "type": "object",
+      "required": ["name", "method", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Deutscher Abschnittstitel aus der Doku (z.B. „Kunden erstellen“).",
+          "type": "string"
+        },
+        "method": {
+          "description": "HTTP-Methode.",
+          "type": ["string", "null"],
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", null]
+        },
+        "path": {
+          "description": "API-Pfad inklusive Pfad-Parametern (z.B. /api/clients/{id}/avatar).",
+          "type": ["string", "null"]
+        },
+        "description_de": {
+          "description": "Freitext-Beschreibung des Endpunkts in deutscher Sprache (paraphrasiert/destilliert).",
+          "type": "string"
+        },
+        "fields": {
+          "description": "Feld-Schema des Endpunkts (für POST/PUT): jedes Feld mit Typ, Default und Pflicht-Marker.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/field" }
+        },
+        "filters": {
+          "description": "Filter-Parameter für GET-Listen-Endpunkte.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/filter" }
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": ["name", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "snake_case-Name aus Billomats XML (z.B. 'country_code').",
+          "type": "string"
+        },
+        "type": {
+          "description": "Billomat-Typ-Bezeichner: INT, FLOAT, BOOL, ALNUM, DATE, DATETIME, ISO-Währungscode, gültige E-Mail-Adresse, ENUM-Listen wie 'TAX, NO_TAX, COUNTRY' usw.",
+          "type": ["string", "null"]
+        },
+        "description_de": {
+          "description": "Beschreibung des Feldes laut Billomat-Doku (paraphrasiert).",
+          "type": ["string", "null"]
+        },
+        "default": {
+          "description": "Default-Wert oder Verweis auf abhängige Quelle (z.B. 'Wert aus Einstellungen'). null wenn nicht dokumentiert.",
+          "type": ["string", "null"]
+        },
+        "required": {
+          "description": "true, wenn die Pflichtfeld-Spalte in der Doku einen Marker zeigt.",
+          "type": "boolean"
+        },
+        "enum": {
+          "description": "Wenn 'type' eine kommagetrennte Liste von Großbuchstaben-Token ist, hier als Liste zugänglich gemacht. Eingang für Enum-Generierung im SDK.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "filter": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Filter-Parameter-Name (snake_case).",
+          "type": "string"
+        },
+        "description_de": {
+          "description": "Beschreibung des Filters.",
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

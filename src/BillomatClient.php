@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat;
 
+use Justpilot\Billomat\Api\AccountApi;
+use Justpilot\Billomat\Api\ActivitiesApi;
 use Justpilot\Billomat\Api\ArticlePropertiesApi;
 use Justpilot\Billomat\Api\ArticlePropertyValuesApi;
 use Justpilot\Billomat\Api\ArticlesApi;
@@ -57,6 +59,7 @@ use Justpilot\Billomat\Api\ReminderItemsApi;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderTagsApi;
 use Justpilot\Billomat\Api\ReminderTextsApi;
+use Justpilot\Billomat\Api\SearchApi;
 use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\SupplierPropertiesApi;
 use Justpilot\Billomat\Api\SupplierPropertyValuesApi;
@@ -151,6 +154,10 @@ final readonly class BillomatClient
     public TemplatesApi $templates;
     public TaxesApi $taxes;
 
+    public AccountApi $account;
+    public ActivitiesApi $activities;
+    public SearchApi $search;
+
     public function __construct(
         BillomatConfig $config,
         ?HttpClientInterface $httpClient = null,
@@ -222,6 +229,10 @@ final readonly class BillomatClient
         $this->currencies = new CurrenciesApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
+
+        $this->account = new AccountApi($this->http);
+        $this->activities = new ActivitiesApi($this->http);
+        $this->search = new SearchApi($this->http);
     }
 
     public static function create(

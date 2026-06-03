@@ -43,6 +43,24 @@ parameters:
 			path: src/Api/AbstractApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ActivitiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ActivitiesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ActivitiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ActivitiesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\ActivitiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/ActivitiesApi.php
+
+		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -881,6 +899,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/RemindersApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\SearchApi\:\:query\(\) has parameter \$extraFilters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/SearchApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Settings\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'

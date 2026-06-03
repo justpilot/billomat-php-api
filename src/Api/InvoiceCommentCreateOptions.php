@@ -19,6 +19,11 @@ final class InvoiceCommentCreateOptions
      */
     public ?InvoiceCommentActionKey $actionkey = null;
 
+    /**
+     * Sichtbarkeit für die Aktivitäten-Liste des Kunden. Default laut Billomat: false.
+     */
+    public ?bool $public = null;
+
     public function __construct(
         /** ID der Rechnung (Pflichtfeld). */
         public int $invoiceId,
@@ -36,6 +41,7 @@ final class InvoiceCommentCreateOptions
             'invoice_id' => $this->invoiceId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
+            'public' => $this->public,
         ];
 
         return array_filter($data, static fn (mixed $v): bool => null !== $v);

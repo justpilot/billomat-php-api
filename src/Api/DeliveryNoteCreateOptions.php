@@ -50,6 +50,9 @@ final class DeliveryNoteCreateOptions
     /** Quell-Rechnung, aus der der Lieferschein entsteht. */
     public ?int $invoiceId = null;
 
+    /** Quell-Angebot, aus dem der Lieferschein entsteht. */
+    public ?int $offerId = null;
+
     /** Quell-Auftragsbestätigung. */
     public ?int $confirmationId = null;
 
@@ -102,6 +105,7 @@ final class DeliveryNoteCreateOptions
             'net_gross' => $this->netGross?->value,
             'quote' => $this->quote,
             'invoice_id' => $this->invoiceId,
+            'offer_id' => $this->offerId,
             'confirmation_id' => $this->confirmationId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,

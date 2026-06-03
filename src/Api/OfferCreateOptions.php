@@ -38,6 +38,12 @@ final class OfferCreateOptions
     /** Gültigkeit in Tagen (Angebotsgültigkeit). */
     public ?int $validityDays = null;
 
+    /**
+     * Konkretes Ablaufdatum des Angebots. Wird übersteuert durch `validityDays`,
+     * wenn beide gesetzt sind.
+     */
+    public ?DateTimeImmutable $validityDate = null;
+
     public ?int $discountRate = null;
 
     public ?int $discountDays = null;
@@ -101,6 +107,7 @@ final class OfferCreateOptions
             'number_length' => $this->numberLength,
             'date' => $this->date?->format('Y-m-d'),
             'validity_days' => $this->validityDays,
+            'validity_date' => $this->validityDate?->format('Y-m-d'),
             'discount_rate' => $this->discountRate,
             'discount_days' => $this->discountDays,
             'discount_date' => $this->discountDate?->format('Y-m-d'),

@@ -35,6 +35,11 @@ final class OfferItemCreateOptions
 
     public ?int $position = null;
 
+    /**
+     * Markiert die Position als optional. 0 = Pflicht, 1 = optional.
+     */
+    public ?int $optional = null;
+
     public function __construct(
         public float $quantity,
         public float $unitPrice,
@@ -59,6 +64,7 @@ final class OfferItemCreateOptions
             'tax_changed_manually' => $this->taxChangedManually,
             'reduction' => $this->reduction,
             'position' => $this->position,
+            'optional' => $this->optional,
         ];
 
         // quantity/unit_price bleiben auch bei null-Default erhalten

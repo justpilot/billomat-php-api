@@ -19,14 +19,32 @@ final class InboxDocumentCreateOptions
     }
 
     /**
+     * Dokumenttyp laut Billomat-Klassifikation (z.B. "other", "invoice",
+     * "credit_note"). Default laut Billomat: "other".
+     */
+    public ?string $documentType = null;
+
+    /**
+     * Frei strukturierte Zusatzdaten (Schlüssel-Wert-Paare), die Billomat
+     * unverändert speichert.
+     *
+     * @var array<string, mixed>|null
+     */
+    public ?array $metadata = null;
+
+    /**
      * @return array<string,mixed>
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             'filename' => $this->filename,
             'mimetype' => $this->mimeType,
             'base64file' => $this->base64file,
+            'document_type' => $this->documentType,
+            'metadata' => $this->metadata,
         ];
+
+        return array_filter($data, static fn (mixed $v): bool => null !== $v);
     }
 }

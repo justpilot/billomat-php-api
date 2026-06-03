@@ -46,6 +46,8 @@ final class DeliveryNoteUpdateOptions
 
     public ?int $invoiceId = null;
 
+    public ?int $offerId = null;
+
     public ?int $confirmationId = null;
 
     public ?int $freeTextId = null;
@@ -74,6 +76,7 @@ final class DeliveryNoteUpdateOptions
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'invoice_id' => $this->invoiceId,
+            'offer_id' => $this->offerId,
             'confirmation_id' => $this->confirmationId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,

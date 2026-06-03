@@ -34,6 +34,8 @@ final class OfferUpdateOptions
 
     public ?int $validityDays = null;
 
+    public ?DateTimeImmutable $validityDate = null;
+
     public ?float $discountRate = null;
 
     public ?int $discountDays = null;
@@ -74,6 +76,7 @@ final class OfferUpdateOptions
             'number_length' => $this->numberLength,
             'date' => $this->date?->format('Y-m-d'),
             'validity_days' => $this->validityDays,
+            'validity_date' => $this->validityDate?->format('Y-m-d'),
             'discount_rate' => $this->discountRate,
             'discount_days' => $this->discountDays,
             'discount_date' => $this->discountDate?->format('Y-m-d'),

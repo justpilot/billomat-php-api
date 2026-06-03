@@ -61,6 +61,18 @@ final class SupplierCreateOptions
 
     public ?string $bankBic = null;
 
+    /**
+     * BIC/SWIFT-Code laut Billomat-Doku (Feld `bank_swift`). Alias zu
+     * `bankBic` — beide werden serialisiert, der zuletzt gesetzte hat in
+     * der Praxis Vorrang am Backend.
+     */
+    public ?string $bankSwift = null;
+
+    public ?string $clientNumber = null;
+
+    /** Gläubiger-Identifikationsnummer (SEPA). */
+    public ?string $creditorIdentifier = null;
+
     public ?string $currencyCode = null;
 
     /**
@@ -92,6 +104,9 @@ final class SupplierCreateOptions
             'bank_name' => $this->bankName,
             'bank_iban' => $this->bankIban,
             'bank_bic' => $this->bankBic,
+            'bank_swift' => $this->bankSwift,
+            'client_number' => $this->clientNumber,
+            'creditor_identifier' => $this->creditorIdentifier,
             'currency_code' => $this->currencyCode,
         ];
 

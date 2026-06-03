@@ -20,6 +20,12 @@ final class LetterCreateOptions
 
     public ?int $contactId = null;
 
+    /**
+     * Empfänger-Lieferant für Lieferanten-Briefe. Wird statt `clientId`
+     * verwendet, wenn der Brief an einen Lieferanten geht.
+     */
+    public ?int $supplierId = null;
+
     public ?string $address = null;
 
     public ?string $numberPre = null;
@@ -50,6 +56,7 @@ final class LetterCreateOptions
         $data = [
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
+            'supplier_id' => $this->supplierId,
             'address' => $this->address,
             'number_pre' => $this->numberPre,
             'number' => $this->number,

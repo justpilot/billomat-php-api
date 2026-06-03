@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\NetGross;
+
 /**
  * Typisierter Payload für PUT /articles/{id}.
  */
@@ -39,11 +42,15 @@ final class ArticleUpdateOptions
 
     public ?string $purchasePriceCurrencyCode = null;
 
+    public ?NetGross $purchasePriceNetGross = null;
+
     public ?int $supplierId = null;
 
     public ?int $taxId = null;
 
     public ?int $categoryId = null;
+
+    public ?ArticleType $type = null;
 
     /**
      * @return array<string,mixed>
@@ -66,9 +73,11 @@ final class ArticleUpdateOptions
             'unit_id' => $this->unitId,
             'purchase_price' => $this->purchasePrice,
             'purchase_price_currency_code' => $this->purchasePriceCurrencyCode,
+            'purchase_price_net_gross' => $this->purchasePriceNetGross?->value,
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,
             'category_id' => $this->categoryId,
+            'type' => $this->type?->value,
         ];
 
         return array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);

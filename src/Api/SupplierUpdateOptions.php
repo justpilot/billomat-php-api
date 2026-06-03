@@ -55,6 +55,12 @@ final class SupplierUpdateOptions
 
     public ?string $bankBic = null;
 
+    public ?string $bankSwift = null;
+
+    public ?string $clientNumber = null;
+
+    public ?string $creditorIdentifier = null;
+
     public ?string $currencyCode = null;
 
     /**
@@ -86,6 +92,9 @@ final class SupplierUpdateOptions
             'bank_name' => $this->bankName,
             'bank_iban' => $this->bankIban,
             'bank_bic' => $this->bankBic,
+            'bank_swift' => $this->bankSwift,
+            'client_number' => $this->clientNumber,
+            'creditor_identifier' => $this->creditorIdentifier,
             'currency_code' => $this->currencyCode,
         ];
 

@@ -51,6 +51,14 @@ final class RecurringCreateOptions
     public ?int $emailTemplateId = null;
     public ?int $freeTextId = null;
     public ?int $templateId = null;
+    public ?DateTimeImmutable $nextCreationDate = null;
+    public ?string $emailFilename = null;
+    public ?bool $emailBcc = null;
+    public ?bool $letterColor = null;
+    public ?bool $letterDuplex = null;
+    public ?int $letterPaperWeight = null;
+    public ?int $offerId = null;
+    public ?int $confirmationId = null;
 
     /** @var list<RecurringItemCreateOptions> */
     private array $items = [];
@@ -113,9 +121,17 @@ final class RecurringCreateOptions
             'email_template_id' => $this->emailTemplateId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
+            'next_creation_date' => $this->nextCreationDate?->format('Y-m-d'),
+            'email_filename' => $this->emailFilename,
+            'email_bcc' => $this->emailBcc,
+            'letter_color' => $this->letterColor,
+            'letter_duplex' => $this->letterDuplex,
+            'letter_paper_weight' => $this->letterPaperWeight,
+            'offer_id' => $this->offerId,
+            'confirmation_id' => $this->confirmationId,
         ];
 
-        $data = array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);
+        $data = array_filter($data, static fn (int|string|float|bool|null $v): bool => null !== $v);
 
         if ([] !== $this->items) {
             $data['recurring-items'] = [

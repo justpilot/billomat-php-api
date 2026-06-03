@@ -11,6 +11,8 @@ final class ContactUpdateOptions
 {
     public ?string $label = null;
 
+    public ?string $name = null;
+
     public ?string $salutation = null;
 
     public ?string $firstName = null;
@@ -35,6 +37,8 @@ final class ContactUpdateOptions
 
     public ?string $mobile = null;
 
+    public ?string $www = null;
+
     public ?string $note = null;
 
     /**
@@ -44,6 +48,7 @@ final class ContactUpdateOptions
     {
         $data = [
             'label' => $this->label,
+            'name' => $this->name,
             'salutation' => $this->salutation,
             'first_name' => $this->firstName,
             'last_name' => $this->lastName,
@@ -56,6 +61,7 @@ final class ContactUpdateOptions
             'phone' => $this->phone,
             'fax' => $this->fax,
             'mobile' => $this->mobile,
+            'www' => $this->www,
             'note' => $this->note,
         ];
 

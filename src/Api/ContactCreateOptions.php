@@ -19,6 +19,8 @@ final class ContactCreateOptions
 
     public ?string $label = null;
 
+    public ?string $name = null;
+
     public ?string $salutation = null;
 
     public ?string $firstName = null;
@@ -43,6 +45,8 @@ final class ContactCreateOptions
 
     public ?string $mobile = null;
 
+    public ?string $www = null;
+
     public ?string $note = null;
 
     /**
@@ -53,6 +57,7 @@ final class ContactCreateOptions
         $data = [
             'client_id' => $this->clientId,
             'label' => $this->label,
+            'name' => $this->name,
             'salutation' => $this->salutation,
             'first_name' => $this->firstName,
             'last_name' => $this->lastName,
@@ -65,6 +70,7 @@ final class ContactCreateOptions
             'phone' => $this->phone,
             'fax' => $this->fax,
             'mobile' => $this->mobile,
+            'www' => $this->www,
             'note' => $this->note,
         ];
 

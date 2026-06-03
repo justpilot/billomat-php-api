@@ -42,4 +42,21 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
 
         self::assertArrayNotHasKey('actionkey', $options->toArray());
     }
+
+    #[Test]
+    public function itSerializesPublicFlag(): void
+    {
+        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x');
+        $options->public = true;
+
+        self::assertTrue($options->toArray()['public']);
+    }
+
+    #[Test]
+    public function itOmitsPublicWhenNull(): void
+    {
+        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x');
+
+        self::assertArrayNotHasKey('public', $options->toArray());
+    }
 }

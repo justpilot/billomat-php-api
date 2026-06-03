@@ -15,6 +15,8 @@ final class LetterUpdateOptions
 
     public ?int $contactId = null;
 
+    public ?int $supplierId = null;
+
     public ?string $address = null;
 
     public ?string $numberPre = null;
@@ -45,6 +47,7 @@ final class LetterUpdateOptions
         $data = [
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
+            'supplier_id' => $this->supplierId,
             'address' => $this->address,
             'number_pre' => $this->numberPre,
             'number' => $this->number,

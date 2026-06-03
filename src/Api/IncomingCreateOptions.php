@@ -20,6 +20,12 @@ final class IncomingCreateOptions
 
     public ?string $incomingNumber = null;
 
+    /**
+     * Belegnummer laut Billomat-Doku (Feld `number`). Pflichtfeld; das ältere
+     * `incomingNumber` bleibt als Alias für Rückwärtskompatibilität bestehen.
+     */
+    public ?string $number = null;
+
     public ?DateTimeImmutable $date = null;
 
     public ?DateTimeImmutable $supplyDate = null;
@@ -44,6 +50,18 @@ final class IncomingCreateOptions
 
     public ?float $quote = null;
 
+    /** Base64-codiertes Belegdokument (PDF, Bild). */
+    public ?string $base64file = null;
+
+    /** Kategorie/Schlagwort der Eingangsrechnung. */
+    public ?string $category = null;
+
+    /** Kundennummer beim Lieferanten (z.B. eigene Vertragsnummer). */
+    public ?string $clientNumber = null;
+
+    /** Aufwandskonto laut SKR/Konten-Mapping. */
+    public ?int $expenseAccountNumber = null;
+
     /**
      * @return array<string,mixed>
      */
@@ -51,6 +69,7 @@ final class IncomingCreateOptions
     {
         $data = [
             'supplier_id' => $this->supplierId,
+            'number' => $this->number,
             'incoming_number' => $this->incomingNumber,
             'date' => $this->date?->format('Y-m-d'),
             'supply_date' => $this->supplyDate?->format('Y-m-d'),
@@ -64,6 +83,10 @@ final class IncomingCreateOptions
             'total_net' => $this->totalNet,
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
+            'base64file' => $this->base64file,
+            'category' => $this->category,
+            'client_number' => $this->clientNumber,
+            'expense_account_number' => $this->expenseAccountNumber,
         ];
 
         return array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);

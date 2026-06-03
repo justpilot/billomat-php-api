@@ -31,6 +31,7 @@ Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.
 - HTTP-Layer auf Basis von `symfony/http-client`. Eigene Client-Implementierung injizierbar (Logging, Retry, Mock).
 - Eine `*Api`-Klasse pro Billomat-Ressource mit einheitlichen Verben (`list`, `get`, `create`, `update`, `delete`) plus ressourcenspezifischen Aktionen (`complete`, `cancel`, `pdf`, `thumb` …).
 - Typisierte Write-Modelle (`*CreateOptions` / `*UpdateOptions`) statt loser Arrays.
+- Auto-Pagination für Listen-Endpunkte: `listPage()` mit Metadaten und `iterateAll()` als lazy Generator über alle Seiten.
 - Zentrale Exception-Hierarchie mit Mapping auf HTTP-Status-Codes (401/403, 404, 400/422).
 - Vollständige Test-Suite (Unit-Tests mit `MockHttpClient`, optionale Integrationstests gegen den Billomat-Sandbox).
 - Reine Library — kein Framework-Bootstrap, keine globale Konfiguration.

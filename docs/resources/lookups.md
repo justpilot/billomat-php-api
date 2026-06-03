@@ -1,25 +1,28 @@
-<!-- Quelle: SDK-Aggregation — keine 1:1 Billomat-URL; siehe die Sub-Ressourcen-Docs (countries.md, currencies.md, settings-units.md, settings-email-templates.md, settings-free-texts.md, settings-reminder-levels.md, users.md). -->
+<!-- Quelle: SDK-Aggregation — keine 1:1 Billomat-URL; siehe die Sub-Ressourcen-Docs (countries.md, currencies.md, settings-units.md, settings-email-templates.md, settings-free-texts.md, settings-reminder-levels.md, settings-roles.md, settings-tax-free-countries.md, incoming-categories.md, users.md). -->
 
 # Lookups (Stammdaten & Settings)
 
-API-Wrapper für die acht read-only Lookup-Endpoints — Stammdaten und Account-Einstellungen, die andere Ressourcen referenzieren.
+API-Wrapper für die elf read-only Lookup-Endpoints — Stammdaten und Account-Einstellungen, die andere Ressourcen referenzieren.
 
 ## Zugriff
 
 ```php
-$billomat->countries       // ISO-Länderliste
-$billomat->currencies      // Währungsliste
-$billomat->units           // Einheiten (Stück, Stunde, …)
-$billomat->dunningLevels   // Mahnstufen
-$billomat->users           // Mitarbeiter/Benutzer des Accounts
-$billomat->emailTemplates  // E-Mail-Vorlagen
-$billomat->freeTexts       // Freitext-Bausteine
-$billomat->reminderTexts   // Mahn-Textbausteine
+$billomat->countries           // ISO-Länderliste
+$billomat->currencies          // Währungsliste
+$billomat->units               // Einheiten (Stück, Stunde, …)
+$billomat->dunningLevels       // Mahnstufen (numerisch)
+$billomat->users               // Mitarbeiter/Benutzer des Accounts
+$billomat->roles               // Rollen samt Permission-Map
+$billomat->emailTemplates      // E-Mail-Vorlagen
+$billomat->freeTexts           // Freitext-Bausteine
+$billomat->reminderTexts       // Mahn-Textbausteine
+$billomat->countryTaxes        // Steuerfreie Länder (ISO 3166)
+$billomat->incomingCategories  // Eingangsrechnungs-Kategorien (String-ID)
 ```
 
 ## Modell
 
-Alle acht APIs sind read-only — sie kennen keine `create`/`update`/`delete`-Verben. `countries` und `currencies` bieten nur `list()`; die übrigen sechs zusätzlich ein `get(int $id)`. `UsersApi` hat einen Bonus-Endpoint `getMyself()` für den aktuell authentifizierten Account.
+Alle elf APIs sind read-only — sie kennen keine `create`/`update`/`delete`-Verben. `countries` und `currencies` bieten nur `list()`; die übrigen zusätzlich ein `get($id)`. `UsersApi` hat einen Bonus-Endpoint `getMyself()` für den aktuell authentifizierten Account. Für `incomingCategories` ist `$id` ein **String**-Slug (z.B. `goods`), nicht numerisch.
 
 Jede dieser Ressourcen liefert Stammdaten, die andere Modelle nur per ID/Code referenzieren — z. B. `Recurring::$emailTemplateId`, `Invoice::$currencyCode`, `InvoiceItem::$unit`.
 
@@ -35,6 +38,9 @@ Jede dieser Ressourcen liefert Stammdaten, die andere Modelle nur per ID/Code re
 | `emailTemplates` | GET | `/email-templates`, `/email-templates/{id}` | `list($filters?)`, `get($id)` |
 | `freeTexts` | GET | `/free-texts`, `/free-texts/{id}` | `list($filters?)`, `get($id)` |
 | `reminderTexts` | GET | `/reminder-texts`, `/reminder-texts/{id}` | `list($filters?)`, `get($id)` |
+| `roles` | GET | `/roles`, `/roles/{id}` | `list($filters?)`, `get($id)` |
+| `countryTaxes` | GET | `/country-taxes`, `/country-taxes/{id}` | `list($filters?)`, `get($id)` |
+| `incomingCategories` | GET | `/incoming-categories`, `/incoming-categories/{id}` | `list($filters?)`, `get($id)` |
 
 ## Methoden
 
@@ -212,6 +218,60 @@ $texts = $billomat->reminderTexts->list(['order_by' => 'sort+ASC']);
 | `dueDays` | `?int` |
 | `sort` | `?int` |
 
+### `roles`
+
+Endpoint: `/roles`. Mitarbeiter-Rollen samt zugehöriger Zugriffsrechte. Details: [settings-roles.md](settings-roles.md).
+
+```php
+$master = $billomat->roles->get(1);
+$canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === 'DELETE';
+```
+
+#### Read-Modell: `Role`
+
+`final readonly class Role`.
+
+| Property | Typ |
+|---|---|
+| `id` | `?int` |
+| `name` | `?string` |
+| `permissions` | `array<string,?string>` |
+
+### `countryTaxes`
+
+Endpoint: `/country-taxes`. Liste der Ländercodes, für die Billomat keine MwSt. berechnet. Details: [settings-tax-free-countries.md](settings-tax-free-countries.md).
+
+```php
+$taxFree = array_map(static fn ($c) => $c->countryCode, $billomat->countryTaxes->list());
+```
+
+#### Read-Modell: `CountryTax`
+
+`final readonly class CountryTax`.
+
+| Property | Typ |
+|---|---|
+| `id` | `?int` |
+| `countryCode` | `?string` |
+
+### `incomingCategories`
+
+Endpoint: `/incoming-categories`. Vordefinierte Kategorie-Buckets für Eingangsrechnungen — die ID ist ein **String**-Slug. Details: [incoming-categories.md](incoming-categories.md).
+
+```php
+$goods = $billomat->incomingCategories->get('goods');
+```
+
+#### Read-Modell: `IncomingCategory`
+
+`final readonly class IncomingCategory`.
+
+| Property | Typ |
+|---|---|
+| `id` | `string` |
+| `title` | `?string` |
+| `description` | `?string` |
+
 ## Verwendete Enums
 
 Keine.
@@ -223,7 +283,7 @@ Keine.
 - **`code` ist der Schlüssel, nicht `id`.** Für `Country` und `Currency` gibt es keine numerische ID — alle Querverweise (`Client::$countryCode`, `Invoice::$currencyCode`) zielen auf den ISO-Code.
 - **Billomat antwortet uneinheitlich.** Manche Endpoints liefern `code`, andere `country_code`/`currency_code` — das Read-Modell akzeptiert beides. Keine Logik daran hängen, welches Feld zurückkommt.
 - **`from` heisst im PHP-Modell `fromAddress`.** `from` ist in PHP reserviert, deshalb das Rename. `toArray()` rendert wieder als `from`.
-- **`User::roleId`** ist ein Verweis auf eine im Billomat-Account hinterlegte Rolle. Es gibt keine separate `RolesApi` — die Rollen-Stammdaten sind nicht via API verfügbar.
+- **`User::roleId`** ist ein Verweis auf eine im Billomat-Account hinterlegte Rolle — auflösbar via [`$billomat->roles->get($roleId)`](settings-roles.md).
 - **`getMyself()`** ist der einzige Weg, programmatisch den aktuellen Account-Inhaber/Mitarbeiter zu identifizieren. Sehr nützlich für „Erstellt von"-Felder in Audit-Logs.
 - **Filter-Strings nicht selbst URL-encoden.** `order_by=sort+ASC` wird vom HTTP-Layer korrekt durchgereicht; ein `%2B` statt `+` lehnt Billomat ab (siehe `BillomatHttpClient::buildBillomatQuery`).
 

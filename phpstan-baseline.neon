@@ -301,6 +301,30 @@ parameters:
 			path: src/Api/CountriesApi.php
 
 		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CountryTaxesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CountryTaxesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CountryTaxesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CountryTaxesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\CountryTaxesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/CountryTaxesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CountryTax\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/CountryTaxesApi.php
+
+		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -515,6 +539,30 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/InboxDocumentsApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingCategoriesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingCategoriesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingCategoriesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingCategoriesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\IncomingCategoriesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/IncomingCategoriesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingCategory\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/IncomingCategoriesApi.php
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
@@ -899,6 +947,30 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/RemindersApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\RolesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/RolesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\RolesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/RolesApi.php
+
+		-
+			message: '#^Method Justpilot\\Billomat\\Api\\RolesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Api/RolesApi.php
+
+		-
+			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Role\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Api/RolesApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\SearchApi\:\:query\(\) has parameter \$extraFilters with no value type specified in iterable type array\.$#'
@@ -1697,6 +1769,12 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/Incoming.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/Model/IncomingCategory.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'

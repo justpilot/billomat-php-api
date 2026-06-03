@@ -29,7 +29,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `eingangsrechnungen` | Eingangsrechnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `eingangsrechnungen/attribute` | Attribute | ✓ | — | — | — | ✓ |  |
 | `eingangsrechnungen/inbox` | Inbox | ✓ | ✓ | ✓ | — | ✓ |  |
-| `eingangsrechnungen/kategorien` | Kategorien | — | — | — | — | — | Kategorien (read-only Endpoint); noch kein dediziertes Api. |
+| `eingangsrechnungen/kategorien` | Kategorien | ✓ | ✓ | — | — | ✓ | Read-only; Mutations-Endpunkte sind in der Spec nicht dokumentiert. |
 | `eingangsrechnungen/kommentare` | Kommentare | ✓ | ✓ | ✓ | — | ✓ |  |
 | `eingangsrechnungen/posten` | Posten | — | — | — | — | ✓ | Posten/Items werden inline über Incoming verwaltet. |
 | `eingangsrechnungen/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
@@ -44,8 +44,8 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `einstellungen/kunden-attribute` | Kunden-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/lieferanten-attribute` | Lieferanten-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts; SDK ergänzt ein zweites DunningLevelsApi für /dunning-levels. |
-| `einstellungen/rollen` | Rollen | — | — | — | — | — | Rollen-Verwaltung – noch kein Api. |
-| `einstellungen/steuerfreie-laender` | Steuerfreie Länder | — | — | — | — | — | Steuerfreie Länder – noch kein Api. |
+| `einstellungen/rollen` | Rollen | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /roles. |
+| `einstellungen/steuerfreie-laender` | Steuerfreie Länder | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /country-taxes. |
 | `einstellungen/steuersaetze` | Steuersätze | ✓ | — | — | — | ✓ |  |
 | `einstellungen/vorlagen` | Vorlagen | ✓ | — | ✓ | ✓ | ✓ |  |
 | `grundlagen` | Grundlagen | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |

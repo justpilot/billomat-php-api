@@ -19,6 +19,7 @@ use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ConfirmationTagsApi;
 use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\CountriesApi;
+use Justpilot\Billomat\Api\CountryTaxesApi;
 use Justpilot\Billomat\Api\CreditNoteCommentsApi;
 use Justpilot\Billomat\Api\CreditNoteItemsApi;
 use Justpilot\Billomat\Api\CreditNotePaymentsApi;
@@ -33,6 +34,7 @@ use Justpilot\Billomat\Api\DunningLevelsApi;
 use Justpilot\Billomat\Api\EmailTemplatesApi;
 use Justpilot\Billomat\Api\FreeTextsApi;
 use Justpilot\Billomat\Api\InboxDocumentsApi;
+use Justpilot\Billomat\Api\IncomingCategoriesApi;
 use Justpilot\Billomat\Api\IncomingCommentsApi;
 use Justpilot\Billomat\Api\IncomingPaymentsApi;
 use Justpilot\Billomat\Api\IncomingPropertiesApi;
@@ -59,6 +61,7 @@ use Justpilot\Billomat\Api\ReminderItemsApi;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderTagsApi;
 use Justpilot\Billomat\Api\ReminderTextsApi;
+use Justpilot\Billomat\Api\RolesApi;
 use Justpilot\Billomat\Api\SearchApi;
 use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\SupplierPropertiesApi;
@@ -150,6 +153,9 @@ final readonly class BillomatClient
     public UsersApi $users;
     public CountriesApi $countries;
     public CurrenciesApi $currencies;
+    public CountryTaxesApi $countryTaxes;
+    public IncomingCategoriesApi $incomingCategories;
+    public RolesApi $roles;
 
     public TemplatesApi $templates;
     public TaxesApi $taxes;
@@ -227,6 +233,9 @@ final readonly class BillomatClient
         $this->users = new UsersApi($this->http);
         $this->countries = new CountriesApi($this->http);
         $this->currencies = new CurrenciesApi($this->http);
+        $this->countryTaxes = new CountryTaxesApi($this->http);
+        $this->incomingCategories = new IncomingCategoriesApi($this->http);
+        $this->roles = new RolesApi($this->http);
         $this->taxes = new TaxesApi($this->http);
         $this->templates = new TemplatesApi($this->http);
 

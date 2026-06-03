@@ -310,6 +310,8 @@ function buildFieldGaps(array $resources, array $mapping): array
                 continue;
             }
 
+            $expectedFieldNames = filterParentIds($expectedFieldNames, $slug);
+
             $reflected = collectOptionPropertyNames($fqcn);
             $reflectedSet = array_flip(array_map(snakeCase(...), $reflected));
 
@@ -386,6 +388,37 @@ function snakeCase(string $camel): string
 {
     $snake = preg_replace('/([a-z0-9])([A-Z])/', '$1_$2', $camel) ?? $camel;
     return strtolower($snake);
+}
+
+/**
+ * Entfernt Parent-ID-Felder aus der Erwartungsliste für Items, Kommentare, Schlagworte,
+ * Zahlungen und Empfänger — diese werden vom parent-API-Code (z.B.
+ * CreditNoteItemsApi::create($creditNoteId, …)) gesetzt und sind absichtlich nicht
+ * als Property in der *Options-Klasse abgebildet.
+ *
+ * @param list<string> $fieldNames
+ *
+ * @return list<string>
+ */
+function filterParentIds(array $fieldNames, string $slug): array
+{
+    static $parentIdsBySegment = [
+        'positionen' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'recurring_id'],
+        'kommentare' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'letter_id', 'incoming_id'],
+        'schlagworte' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'article_id', 'client_id', 'supplier_id', 'recurring_id', 'incoming_id', 'letter_id'],
+        'zahlungen' => ['invoice_id', 'credit_note_id', 'incoming_id'],
+        'empfaenger' => ['recurring_id'],
+        'attribute' => ['client_id', 'article_id', 'supplier_id', 'incoming_id'],
+    ];
+
+    $parts = explode('/', $slug);
+    $segment = end($parts) ?: $slug;
+    $suppress = $parentIdsBySegment[$segment] ?? [];
+    if ($suppress === []) {
+        return $fieldNames;
+    }
+
+    return array_values(array_diff($fieldNames, $suppress));
 }
 
 /**

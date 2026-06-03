@@ -93,16 +93,14 @@ Felder, die laut Spec dokumentiert sind, aber in der zugeordneten
 | `ArticleCreateOptions` | `artikel` | `purchase_price_net_gross`, `type` |
 | `ContactCreateOptions` | `kunden/kontakte` | `name`, `www` |
 | `CreditNoteCommentCreateOptions` | `gutschriften/kommentare` | `public` |
-| `CreditNoteItemCreateOptions` | `gutschriften/positionen` | `credit_note_id` |
 | `DeliveryNoteCreateOptions` | `lieferscheine` | `offer_id` |
 | `InboxDocumentCreateOptions` | `eingangsrechnungen/inbox` | `document_type`, `metadata` |
 | `IncomingCreateOptions` | `eingangsrechnungen` | `base64file`, `category`, `client_number`, `expense_account_number`, `number` |
 | `InvoiceCommentCreateOptions` | `rechnungen/kommentare` | `public` |
-| `InvoiceItemCreateOptions` | `rechnungen/positionen` | `invoice_id` |
 | `LetterCreateOptions` | `briefe` | `supplier_id` |
 | `OfferCommentCreateOptions` | `angebote/kommentare` | `public` |
 | `OfferCreateOptions` | `angebote` | `validity_date` |
-| `OfferItemCreateOptions` | `angebote/positionen` | `offer_id`, `optional` |
+| `OfferItemCreateOptions` | `angebote/positionen` | `optional` |
 | `RecurringCreateOptions` | `abo-rechnungen` | `confirmation_id`, `email_bcc`, `email_filename`, `letter_color`, `letter_duplex`, `letter_paper_weight`, `next_creation_date`, `offer_id` |
 | `SupplierCreateOptions` | `lieferanten` | `bank_swift`, `client_number`, `creditor_identifier` |
 

@@ -90,6 +90,7 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 ## Conventions
 
 - PHP 8.4+ only. Use `final readonly` for read models, `readonly` properties on `BillomatClient`, named arguments, enums (`src/Model/Enum/`), and constructor property promotion.
+- Symfony version support: **LTS + latest stable** — currently `^7.4 || ^8.0` on every `symfony/*` package. When a new minor ships, bump the upper bound; when a new LTS ships and the previous LTS leaves security support, raise the lower bound. CI exercises the floor (Symfony 7.4 LTS pinned via `extra.symfony.require` + Flex) and the ceiling (Symfony 8.x).
 - `declare(strict_types=1);` at the top of every file.
 - All API classes are `final`; models are `final readonly`.
 - PSR-4: `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.

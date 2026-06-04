@@ -1,0 +1,78 @@
+name: Bug-Report
+description: Einen Fehler im SDK melden
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du dir Zeit nimmst, einen Fehler zu melden. Bitte fülle die Felder so vollständig wie möglich aus — das beschleunigt die Diagnose deutlich.
+
+        **Vor dem Melden bitte prüfen:**
+        - Es handelt sich um einen Bug in `justpilot/billomat-php-api`, nicht in der Billomat-API selbst (Billomat-Probleme bitte direkt an https://www.billomat.com/ melden).
+        - Es ist kein Sicherheitsthema — sonst bitte nach `SECURITY.md` per E-Mail melden, nicht hier.
+
+  - type: input
+    id: sdk-version
+    attributes:
+      label: SDK-Version
+      description: Welche Version von `justpilot/billomat-php-api` ist installiert?
+      placeholder: "z. B. 2.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP-Version
+      placeholder: "z. B. 8.4.3"
+    validations:
+      required: true
+
+  - type: input
+    id: symfony-version
+    attributes:
+      label: Symfony-Version (HttpClient)
+      description: "Ausgabe von `composer show symfony/http-client | grep versions`"
+      placeholder: "z. B. 7.4.1"
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduktion
+      description: Minimaler Code-Snippet, der den Fehler auslöst. Bitte API-Keys/Personenbezogenes redigieren.
+      render: php
+      placeholder: |
+        $billomat = BillomatClient::create(billomatId: '...', apiKey: '...');
+        $billomat->invoices->complete(123);
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Tatsächliches Verhalten
+      description: Wenn eine Exception fliegt, bitte Klasse + Message angeben.
+    validations:
+      required: true
+
+  - type: textarea
+    id: stack-trace
+    attributes:
+      label: Stack-Trace / Logs (optional)
+      render: text
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Zusätzlicher Kontext (optional)
+      description: Alles, was bei der Diagnose helfen könnte — Workarounds, Hypothesen, Querverweise.

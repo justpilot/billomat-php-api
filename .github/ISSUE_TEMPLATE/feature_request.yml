@@ -1,0 +1,47 @@
+name: Feature-Request
+description: Eine neue Funktion oder Erweiterung vorschlagen
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke für deinen Vorschlag. Bitte beschreibe nicht nur **was**, sondern auch **warum** — der konkrete Use-Case hilft, die richtige API-Form zu finden.
+
+        **Vor dem Vorschlag bitte prüfen:**
+        - Der gewünschte Endpunkt existiert in der Billomat-API (siehe https://www.billomat.com/api/). Endpunkte, die Billomat nicht anbietet, kann das SDK nicht abdecken (z. B. Webhooks-CRUD ist UI-only — siehe `docs/concepts/webhooks.md`).
+        - Es ist keine Breaking-Change-Anfrage gegen die bestehende öffentliche API ohne Major-Bump.
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use-Case
+      description: Welches Problem möchtest du lösen? Beispiel-Code, wie der finale Aufruf aussehen könnte, ist willkommen.
+    validations:
+      required: true
+
+  - type: input
+    id: billomat-endpoint
+    attributes:
+      label: Billomat-API-Endpunkt
+      description: Welcher Billomat-Endpunkt deckt das ab? Bitte URL aus https://www.billomat.com/api/ angeben.
+      placeholder: "https://www.billomat.com/api/rechnungen/"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Vorschlag / Skizze (optional)
+      description: Vorgeschlagene SDK-Signatur, Klassennamen, Verhalten. Orientiere dich am Drei-Schichten-Muster (`*Api`, `*CreateOptions`, `Model\*`) aus `AGENTS.md`.
+      render: php
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen, die du in Betracht gezogen hast (optional)
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Zusätzlicher Kontext (optional)

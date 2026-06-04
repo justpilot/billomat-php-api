@@ -40,6 +40,17 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ### Deprecated
 - `AbstractApi::putEmptyResponse()` ist als `#[\Deprecated]` markiert und wird in 3.0 entfernt. Interner Ersatz: `AbstractApi::putVoid()`, das HTTP-Fehler korrekt materialisiert.
 
+### Documentation
+- **README überarbeitet.** Alle exposed APIs (`account`, `activities`, `search`, `roles`, `countryTaxes`, `incomingCategories`, `userProperties`) sind jetzt in den Resource-Tabellen gelistet. Neuer Abschnitt „Weitergehende Konzepte" verlinkt die sechs `docs/concepts/`-Guides (Auth, API-Security, Pagination/Filtering, Custom Meta Attributes, Errors & Rate Limits, Webhooks-as-UI-only). Neue Sektionen „Logging & HTTP-Client" (Snippet mit `TraceableHttpClient` / `RetryableHttpClient`) und „Changelog" mit Link auf Keep a Changelog + SemVer.
+- **Englische README.** Neues `README.en.md` spiegelt die deutsche README für Nicht-DACH-Besucher; beide Dateien cross-linken via Sprach-Switcher-Header.
+- **Migrations-Guide phobetor → justpilot.** Neuer Guide `docs/migration-from-phobetor.md` mit Side-by-Side-Übersetzungen (Instanziierung, CRUD, Pagination, PDF, Exceptions). Jede justpilot-seitige Signatur ist gegen den tatsächlichen SDK-Stand verifiziert.
+- **Packagist-Keywords erweitert.** `composer.json` enthält jetzt zusätzlich `symfony`, `http-client`, `typed`, `readonly`, `php84`, `dach`, `gobd`, `api-client` — Discoverability für Search-Queries jenseits von „billomat".
+- **Code of Conduct.** `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1) im Root. Kontakt: `dimitri@justpilot.io`.
+
+### Build
+- **GitHub-Community-Set vollständig.** `.github/ISSUE_TEMPLATE/{bug_report,feature_request,config}.yml`, `.github/pull_request_template.md` und `.github/dependabot.yml` (Composer + GitHub-Actions weekly, gruppiert in `symfony` und `dev-tools`) hinzugefügt.
+- **Codecov-Integration.** CI lädt das Coverage-XML aus dem PHP 8.4 + Symfony-LTS-Job nach Codecov hoch; Badge in `README.md` und `README.en.md` neben dem PHPStan-Badge.
+
 ## [2.0.0] - 2026-06-02
 ### Breaking Changes
 - `InvoiceMailOptions::recipientAddress` entfernt. Das Feld ist in der Billomat-Doku zum Pixelletter-Versand nicht dokumentiert und wurde serverseitig stillschweigend ignoriert. **Migration:** Property aus bestehenden Aufrufen entfernen — Empfängerdaten werden aus dem auf der Rechnung hinterlegten Adressdatensatz übernommen.

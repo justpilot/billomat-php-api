@@ -18,11 +18,12 @@ Der Billomat-API-Schlüssel hat denselben Lese- und Schreibzugriff wie der angem
 
 ## Unterstützte Versionen
 
-Aktuell wird ausschließlich die `1.x`-Linie aktiv gepflegt. Sicherheitsrelevante Fixes erscheinen als Patch-Releases gegen die jüngste Minor-Version.
+Aktuell wird ausschließlich die `2.x`-Linie aktiv gepflegt. Sicherheitsrelevante Fixes erscheinen als Patch-Releases gegen die jüngste Minor-Version.
 
 | Version | Unterstützt |
 |---|---|
-| 1.x | Ja |
+| 2.x | Ja |
+| 1.x | Nein |
 | < 1.0 | Nein |
 
 ## Sicherheitslücken melden

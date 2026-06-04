@@ -93,6 +93,11 @@ $me = $billomat->users->getMyself();
 echo $me?->email;
 ```
 
+## Stolpersteine
+
+- **Kein Schreibzugriff per API.** Billomat dokumentiert für `/users` ausschliesslich Lese-Endpunkte (list, single, avatar, myself). Es existiert kein offizielles `POST/PUT/DELETE /users`. Benutzerverwaltung — Anlegen, Rolle ändern, Passwort, Löschen — geschieht ausschliesslich über die Billomat-Web-UI. Das SDK exponiert daher absichtlich keine `create`/`update`/`delete`-Verben für diese Ressource.
+- **`role_id` ist nur Read-Lookup.** Die Rolle eines Benutzers liest sich aus `User::$roleId`; die Roll-Definitionen selbst kommen aus [`settings-roles.md`](settings-roles.md). Die Zuordnung „User → Rolle" verändert man in der UI, nicht hier.
+
 ## Read-Modell: `User`
 
 `final readonly class Justpilot\Billomat\Model\User`

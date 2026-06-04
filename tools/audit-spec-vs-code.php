@@ -147,7 +147,8 @@ $mapping = [
     'abo-rechnungen/empfaenger' => ['api' => 'RecurringEmailReceiversApi', 'docFile' => 'recurrings.md'],
     'abo-rechnungen/schlagworte' => ['api' => 'RecurringTagsApi', 'docFile' => 'recurrings.md'],
 
-    'benutzer' => ['api' => 'UsersApi', 'model' => 'User', 'docFile' => 'users.md'],
+    'benutzer' => ['api' => 'UsersApi', 'model' => 'User', 'docFile' => 'users.md',
+        'note' => 'Read-only; Billomat exponiert kein POST/PUT/DELETE für /users — Benutzerverwaltung ist UI-only.'],
     'laender' => ['api' => 'CountriesApi', 'model' => 'Country', 'docFile' => 'countries.md'],
     'waehrungen' => ['api' => 'CurrenciesApi', 'model' => 'Currency', 'docFile' => 'currencies.md'],
     'webhooks' => ['conceptFile' => 'webhooks.md',

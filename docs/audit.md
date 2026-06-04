@@ -23,7 +23,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `artikel/attribute` | Attribute | ✓ | — | — | — | ✓ |  |
 | `artikel/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `auftragsbestaetigungen` | Auftragsbestätigungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| `benutzer` | Benutzer | ✓ | ✓ | — | — | ✓ |  |
+| `benutzer` | Benutzer | ✓ | ✓ | — | — | ✓ | Read-only; Billomat exponiert kein POST/PUT/DELETE für /users — Benutzerverwaltung ist UI-only. |
 | `benutzerdefinierte-attribute-filtern` | Benutzerdefinierte Attribute filtern | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `briefe` | Briefe | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `eingangsrechnungen` | Eingangsrechnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |

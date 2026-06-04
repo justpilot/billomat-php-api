@@ -46,7 +46,7 @@ jobs:
           composer config extra.symfony.require "${{ matrix.symfony }}"
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@v4
 
       - name: Run unit tests
         run: composer test:unit
@@ -66,7 +66,7 @@ jobs:
           ini-values: memory_limit=512M
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@v4
 
       - name: PHP-CS-Fixer (lint)
         run: composer lint
@@ -98,7 +98,7 @@ jobs:
           ini-values: memory_limit=512M
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@v4
 
       - name: Run Infection
         run: composer mutate -- --logger-github

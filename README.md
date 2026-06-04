@@ -3,7 +3,6 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.4%2B-8892BF.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Packagist](https://img.shields.io/badge/packagist-justpilot%2Fbillomat--php--api-orange.svg)](https://packagist.org/packages/justpilot/billomat-php-api)
-[![Tests](https://img.shields.io/badge/tests-PHPUnit_12-blue.svg)](https://phpunit.de/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
 
 Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.com/api/) — basiert auf Symfony-Komponenten, mit Read-Modellen, getrennten Write-Optionen und einer sauberen Exception-Hierarchie.
@@ -12,29 +11,21 @@ Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.
 
 ## Inhalt
 
-- [Features](#features)
 - [Voraussetzungen](#voraussetzungen)
 - [Installation](#installation)
 - [Quickstart](#quickstart)
+- [Features](#features)
 - [Ressourcen](#ressourcen)
 - [Konfiguration](#konfiguration)
+- [Pagination](#pagination)
 - [Fehlerbehandlung](#fehlerbehandlung)
+- [Logging & HTTP-Client](#logging--http-client)
 - [Tests](#tests)
 - [Beispiele](#beispiele)
 - [Beitragen](#beitragen)
 - [Sicherheit](#sicherheit)
+- [Changelog](#changelog)
 - [Lizenz](#lizenz)
-
-## Features
-
-- PHP 8.4+ mit `final readonly` Models, Enums, Constructor Property Promotion und Named Arguments.
-- HTTP-Layer auf Basis von `symfony/http-client`. Eigene Client-Implementierung injizierbar (Logging, Retry, Mock).
-- Eine `*Api`-Klasse pro Billomat-Ressource mit einheitlichen Verben (`list`, `get`, `create`, `update`, `delete`) plus ressourcenspezifischen Aktionen (`complete`, `cancel`, `pdf`, `thumb` …).
-- Typisierte Write-Modelle (`*CreateOptions` / `*UpdateOptions`) statt loser Arrays.
-- Auto-Pagination für Listen-Endpunkte: `listPage()` mit Metadaten und `iterateAll()` als lazy Generator über alle Seiten.
-- Zentrale Exception-Hierarchie mit Mapping auf HTTP-Status-Codes (401/403, 404, 400/422).
-- Vollständige Test-Suite (Unit-Tests mit `MockHttpClient`, optionale Integrationstests gegen den Billomat-Sandbox).
-- Reine Library — kein Framework-Bootstrap, keine globale Konfiguration.
 
 ## Voraussetzungen
 
@@ -91,6 +82,14 @@ file_put_contents(sprintf('invoice-%d.pdf', $invoice->id), $pdf);
 
 Vollständige, ausführbare Beispiele liegen unter [examples/](examples/).
 
+## Features
+
+- PHP 8.4+, durchgängig typisiert (`final readonly` Models, Enums, Named Arguments).
+- HTTP-Layer auf `symfony/http-client`; eigenes `HttpClientInterface` injizierbar.
+- Eine `*Api`-Klasse je Billomat-Ressource mit einheitlichen Verben (`list`, `get`, `create`, `update`, `delete`) plus ressourcenspezifischen Aktionen (`complete`, `cancel`, `pdf`, `thumb` …).
+- Auto-Pagination via `iterateAll()`-Generator und `listPage()` mit Metadaten.
+- Strukturierte Exception-Hierarchie mit Mapping auf HTTP-Statuscodes (401/403, 404, 400/422).
+
 ## Ressourcen
 
 Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zugreifbar. Die Tabelle gruppiert die Ressourcen nach Themengebiet — eine Zeile pro Doku-Datei.
@@ -104,7 +103,7 @@ Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zu
 | Ansprechpartner | `$billomat->contacts` | [docs/resources/contacts.md](docs/resources/contacts.md) |
 | Lieferanten | `$billomat->suppliers`, `supplierTags`, `supplierPropertyValues` | [docs/resources/suppliers.md](docs/resources/suppliers.md) |
 | Artikel | `$billomat->articles`, `articleTags`, `articlePropertyValues` | [docs/resources/articles.md](docs/resources/articles.md) |
-| Property-Definitionen | `$billomat->articleProperties`, `clientProperties`, `supplierProperties`, `incomingProperties` | [docs/resources/properties.md](docs/resources/properties.md) |
+| Property-Definitionen | `$billomat->articleProperties`, `clientProperties`, `supplierProperties`, `incomingProperties`, `userProperties` | [docs/resources/properties.md](docs/resources/properties.md) |
 
 ### Ausgangsbelege
 
@@ -124,16 +123,26 @@ Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zu
 | Ressource | Zugriff | Doku |
 |---|---|---|
 | Eingangsrechnungen | `$billomat->incomings`, `incomingComments`, `incomingPayments`, `incomingTags`, `incomingPropertyValues` | [docs/resources/incomings.md](docs/resources/incomings.md) |
+| Eingangsrechnungs-Kategorien | `$billomat->incomingCategories` | [docs/resources/incoming-categories.md](docs/resources/incoming-categories.md) |
 | Posteingang (Inbox) | `$billomat->inboxDocuments` | [docs/resources/inbox-documents.md](docs/resources/inbox-documents.md) |
 
 ### Account & Hilfs-Ressourcen
 
 | Ressource | Zugriff | Doku |
 |---|---|---|
+| Konto-Info | `$billomat->account` | [docs/resources/account.md](docs/resources/account.md) |
+| Aktivitätsverlauf | `$billomat->activities` | [docs/resources/activities.md](docs/resources/activities.md) |
+| Suche | `$billomat->search` | [docs/resources/search.md](docs/resources/search.md) |
 | Einstellungen | `$billomat->settings` | [docs/resources/settings.md](docs/resources/settings.md) |
 | Steuersätze | `$billomat->taxes` | [docs/resources/taxes.md](docs/resources/taxes.md) |
+| Steuerfreie Länder | `$billomat->countryTaxes` | [docs/resources/settings-tax-free-countries.md](docs/resources/settings-tax-free-countries.md) |
+| Rollen | `$billomat->roles` | [docs/resources/settings-roles.md](docs/resources/settings-roles.md) |
 | Vorlagen | `$billomat->templates` | [docs/resources/templates.md](docs/resources/templates.md) |
 | Lookups (Countries, Currencies, Units, DunningLevels, Users, EmailTemplates, FreeTexts, ReminderTexts) | `$billomat->countries`, `currencies`, `units`, `dunningLevels`, `users`, `emailTemplates`, `freeTexts`, `reminderTexts` | [docs/resources/lookups.md](docs/resources/lookups.md) |
+
+### Weitergehende Konzepte
+
+Vertiefende Themen sind unter [docs/concepts/](docs/concepts/) gesammelt: [Authentifizierung](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API-Security](docs/concepts/api-security.md), [Pagination & Filtering](docs/concepts/pagination-and-filtering.md), [Custom Meta Attributes](docs/concepts/custom-meta-attributes.md), [Fehler & Rate-Limits](docs/concepts/errors-and-rate-limits.md) sowie [Webhooks](docs/concepts/webhooks.md) (nur UI-konfigurierbar, kein REST-Endpunkt — daher auch im SDK nicht abgebildet).
 
 ## Konfiguration
 
@@ -167,21 +176,6 @@ $billomat = new BillomatClient($config);
 
 Details zu allen Optionen und zur HTTP-Client-Injection: [docs/configuration.md](docs/configuration.md).
 
-## Fehlerbehandlung
-
-Alle vom SDK geworfenen Exceptions erben von `BillomatException`. HTTP-Fehler werden auf spezialisierte Subklassen abgebildet:
-
-| Statuscode | Exception |
-|---|---|
-| 401, 403 | `AuthenticationException` |
-| 404 | `NotFoundException` |
-| 400, 422 | `ValidationException` |
-| sonstige 4xx/5xx | `HttpException` |
-
-`get($id)`-Methoden geben bei einer 404-Antwort `null` zurück, statt eine Exception zu werfen. Auf jeder `HttpException` sind `getStatusCode()` und `getResponseBody()` verfügbar — letzteres enthält den Roh-Body von Billomat und ist beim Debuggen oft hilfreich.
-
-Beispiele und Patterns: [docs/error-handling.md](docs/error-handling.md).
-
 ## Pagination
 
 Für List-Endpunkte stehen zusätzlich zu `list()` zwei Helfer bereit:
@@ -198,6 +192,43 @@ echo "Seite {$result->info->page} / " . ($result->info->totalPages() ?? '?');
 ```
 
 Details und Beispiele: [docs/advanced/pagination.md](docs/advanced/pagination.md).
+
+## Fehlerbehandlung
+
+Alle vom SDK geworfenen Exceptions erben von `BillomatException`. HTTP-Fehler werden auf spezialisierte Subklassen abgebildet:
+
+| Statuscode | Exception |
+|---|---|
+| 401, 403 | `AuthenticationException` |
+| 404 | `NotFoundException` |
+| 400, 422 | `ValidationException` |
+| sonstige 4xx/5xx | `HttpException` |
+
+`get($id)`-Methoden geben bei einer 404-Antwort `null` zurück, statt eine Exception zu werfen. Auf jeder `HttpException` sind `getStatusCode()` und `getResponseBody()` verfügbar — letzteres enthält den Roh-Body von Billomat und ist beim Debuggen oft hilfreich.
+
+Beispiele und Patterns: [docs/error-handling.md](docs/error-handling.md), Hintergrund zu Rate-Limits in [docs/concepts/errors-and-rate-limits.md](docs/concepts/errors-and-rate-limits.md).
+
+## Logging & HTTP-Client
+
+Der Symfony-HTTP-Client lässt sich vor der Übergabe an `BillomatClient` dekorieren — für Logging, Tracing, Retry oder Tests reicht die Standard-Symfony-Toolbox:
+
+```php
+use Justpilot\Billomat\BillomatClient;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpClient\RetryableHttpClient;
+use Symfony\Component\HttpClient\TraceableHttpClient;
+
+$inner = HttpClient::create(['max_duration' => 30.0]);
+$decorated = new TraceableHttpClient(new RetryableHttpClient($inner));
+
+$billomat = BillomatClient::create(
+    billomatId: 'mycompany',
+    apiKey: getenv('BILLOMAT_API_KEY'),
+    httpClient: $decorated,
+);
+```
+
+Für Unit-Tests eignet sich `Symfony\Component\HttpClient\MockHttpClient` als Drop-in. Patterns und Eigenheiten des HTTP-Layers (Query-Encoding, `+` vs. `%2B`, Array-Filter) sind in [docs/advanced/http-layer.md](docs/advanced/http-layer.md) beschrieben.
 
 ## Tests
 
@@ -216,13 +247,15 @@ Lauffähige, kommentierte Skripte liegen unter [examples/](examples/) — vom An
 
 ## Beitragen
 
-Pull Requests sind willkommen. Der Beitragsleitfaden inklusive Coding-Standards, Test-Anforderungen und dem Drei-Schichten-Muster pro Ressource liegt in [CONTRIBUTING.md](CONTRIBUTING.md).
-
-AI-Coding-Agents (Claude Code, Cursor, GitHub Copilot, Codex, …) finden den projektspezifischen Kontext in [AGENTS.md](AGENTS.md) nach der [agents.md](https://agents.md/)-Konvention.
+Pull Requests sind willkommen. Der Beitragsleitfaden inklusive Coding-Standards, Test-Anforderungen und dem Drei-Schichten-Muster pro Ressource liegt in [CONTRIBUTING.md](CONTRIBUTING.md). AI-Coding-Agents finden den projektspezifischen Kontext in [AGENTS.md](AGENTS.md) nach der [agents.md](https://agents.md/)-Konvention.
 
 ## Sicherheit
 
 Hinweise zum Umgang mit API-Keys und zur verantwortlichen Meldung von Sicherheitslücken stehen in [SECURITY.md](SECURITY.md).
+
+## Changelog
+
+Versionshistorie und Release-Notes nach [Keep a Changelog](https://keepachangelog.com/) in [CHANGELOG.md](CHANGELOG.md). Das Projekt folgt [Semantic Versioning](https://semver.org/).
 
 ## Lizenz
 

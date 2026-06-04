@@ -36,7 +36,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `eingangsrechnungen/zahlungen` | Zahlungen | ✓ | ✓ | ✓ | — | ✓ |  |
 | `einstellungen` | Einstellungen | ✓ | — | — | — | ✓ |  |
 | `einstellungen/artikel-attribute` | Artikel-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/benutzer-attribute` | Benutzer-Attribute | — | — | — | — | — | Benutzer-Attribute – noch kein Api. |
+| `einstellungen/benutzer-attribute` | Benutzer-Attribute | ✓ | ✓ | — | — | ✓ | Fünfter Parent neben article-/client-/supplier-/incoming-properties; nutzt geteilte PropertyCreateOptions. |
 | `einstellungen/eingangsrechnung-attribute` | Eingansgrechnung-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/einheiten` | Einheiten | ✓ | ✓ | — | — | ✓ |  |
 | `einstellungen/email-vorlagen` | E-Mail-Vorlagen | ✓ | ✓ | — | — | ✓ |  |

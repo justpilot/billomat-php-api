@@ -8,7 +8,8 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
 
 /**
  * Geteilte Options-Klasse für POST der Property-Definitionen
- * (article-properties, client-properties, supplier-properties, incoming-properties).
+ * (article-properties, client-properties, supplier-properties,
+ * incoming-properties, user-properties).
  *
  * Doku: https://www.billomat.com/en/api/settings/client-properties/
  */

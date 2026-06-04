@@ -180,7 +180,9 @@ $mapping = [
     'einstellungen/artikel-attribute' => ['api' => 'ArticlePropertiesApi', 'docFile' => 'properties.md'],
     'einstellungen/lieferanten-attribute' => ['api' => 'SupplierPropertiesApi', 'docFile' => 'properties.md'],
     'einstellungen/eingangsrechnung-attribute' => ['api' => 'IncomingPropertiesApi', 'docFile' => 'properties.md'],
-    'einstellungen/benutzer-attribute' => ['note' => 'Benutzer-Attribute – noch kein Api.'],
+    'einstellungen/benutzer-attribute' => ['api' => 'UserPropertiesApi', 'model' => 'UserProperty',
+        'docFile' => 'properties.md',
+        'note' => 'Fünfter Parent neben article-/client-/supplier-/incoming-properties; nutzt geteilte PropertyCreateOptions.'],
 
     'grundlagen' => null,
     'grundlagen/authentifizierung' => null,

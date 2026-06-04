@@ -1,8 +1,8 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/artikel-attribute/ + https://www.billomat.com/api/einstellungen/kunden-attribute/ + https://www.billomat.com/api/einstellungen/lieferanten-attribute/ + https://www.billomat.com/api/einstellungen/eingangsrechnung-attribute/ -->
+<!-- Quelle: https://www.billomat.com/api/einstellungen/artikel-attribute/ + https://www.billomat.com/api/einstellungen/kunden-attribute/ + https://www.billomat.com/api/einstellungen/lieferanten-attribute/ + https://www.billomat.com/api/einstellungen/eingangsrechnung-attribute/ + https://www.billomat.com/api/einstellungen/benutzer-attribute/ -->
 
 # Properties (Custom-Field-Definitionen)
 
-API-Wrapper für die vier Property-Definition-Endpoints unter `/article-properties`, `/client-properties`, `/supplier-properties` und `/incoming-properties`.
+API-Wrapper für die fünf Property-Definition-Endpoints unter `/article-properties`, `/client-properties`, `/supplier-properties`, `/incoming-properties` und `/user-properties`.
 
 ## Zugriff
 
@@ -11,24 +11,26 @@ $billomat->articleProperties   // Definitionen für Artikel-Custom-Fields
 $billomat->clientProperties    // Definitionen für Kunden-Custom-Fields
 $billomat->supplierProperties  // Definitionen für Lieferanten-Custom-Fields
 $billomat->incomingProperties  // Definitionen für Eingangsbeleg-Custom-Fields
+$billomat->userProperties      // Definitionen für Benutzer-Custom-Fields
 ```
 
 ## Modell
 
-Eine *Property* ist ein benutzerdefiniertes Feld (Custom Field) auf einer der vier Hauptressourcen. Diese APIs verwalten ausschliesslich die **Definitionen** — also Name, Typ und optionalen Default-Wert eines solchen Feldes.
+Eine *Property* ist ein benutzerdefiniertes Feld (Custom Field) auf einer der fünf Hauptressourcen. Diese APIs verwalten ausschliesslich die **Definitionen** — also Name, Typ und optionalen Default-Wert eines solchen Feldes.
 
-Die konkreten **Werte** an einer Instanz werden über separate Sub-Ressourcen gepflegt:
+Die konkreten **Werte** an einer Instanz werden über separate Sub-Ressourcen gepflegt — mit einer Ausnahme für User:
 
 - Werte an einem Artikel: `articlePropertyValues` (siehe [Articles](articles.md))
 - Werte an einem Kunden: `clientPropertyValues` (siehe [Clients](clients.md))
 - Werte an einem Lieferanten: `supplierPropertyValues` (siehe [Suppliers](suppliers.md))
 - Werte an einer Eingangsrechnung: `incomingPropertyValues` (siehe [Incomings](incomings.md))
+- Werte an einem Benutzer: **kein dedizierter Values-Endpoint**; Billomat pflegt User-Property-Werte direkt am Benutzer-Datensatz.
 
-Die vier Property-Definition-APIs sind strukturell identisch (gleiche Verben, gleiche Payload-Struktur). Sie unterscheiden sich nur im Endpoint-Pfad und im Read-Modell. Die Write-Klasse `PropertyCreateOptions` wird von allen vier APIs geteilt.
+Die fünf Property-Definition-APIs sind strukturell identisch (gleiche Verben, gleiche Payload-Struktur). Sie unterscheiden sich nur im Endpoint-Pfad und im Read-Modell. Die Write-Klasse `PropertyCreateOptions` wird von allen fünf APIs geteilt.
 
 ## Endpunkt-Übersicht
 
-Alle vier APIs bieten dieselben Verben mit derselben Signatur. Pfad und Read-Modell variieren:
+Alle fünf APIs bieten dieselben Verben mit derselben Signatur. Pfad und Read-Modell variieren:
 
 | Property-Klient | Endpoint-Basis | Read-Modell |
 |---|---|---|
@@ -36,8 +38,9 @@ Alle vier APIs bieten dieselben Verben mit derselben Signatur. Pfad und Read-Mod
 | `clientProperties` | `/client-properties` | `ClientProperty` |
 | `supplierProperties` | `/supplier-properties` | `SupplierProperty` |
 | `incomingProperties` | `/incoming-properties` | `IncomingProperty` |
+| `userProperties` | `/user-properties` | `UserProperty` |
 
-### Verben (für jede der vier APIs)
+### Verben (für jede der fünf APIs)
 
 | Methode | HTTP | Pfad |
 |---|---|---|
@@ -49,7 +52,7 @@ Alle vier APIs bieten dieselben Verben mit derselben Signatur. Pfad und Read-Mod
 
 ## Methoden
 
-Beispiele anhand von `articleProperties` — `clientProperties`, `supplierProperties` und `incomingProperties` verhalten sich exakt analog.
+Beispiele anhand von `articleProperties` — `clientProperties`, `supplierProperties`, `incomingProperties` und `userProperties` verhalten sich exakt analog.
 
 ### `list(array $filters = []): list<TProperty>`
 
@@ -112,7 +115,7 @@ $billomat->incomingProperties->delete(42);
 
 ## Write-Modell: `PropertyCreateOptions`
 
-Gemeinsame Options-Klasse für alle vier APIs, sowohl für `create()` als auch für `update()`. Konstruktor: `new PropertyCreateOptions(string $name)` — `name` ist Pflicht.
+Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch für `update()`. Konstruktor: `new PropertyCreateOptions(string $name)` — `name` ist Pflicht.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -178,7 +181,8 @@ Gemeinsame Options-Klasse für alle vier APIs, sowohl für `create()` als auch f
 ## Stolpersteine
 
 - **Definitionen vs. Werte nicht verwechseln.** `articleProperties` definiert nur das Schema („Es gibt ein Feld namens *Lieferzeit*"). Um einem konkreten Artikel den Wert `5 Werktage` zuzuweisen, ist `articlePropertyValues` zuständig.
-- **Eine Options-Klasse für alle vier APIs.** `PropertyCreateOptions` lebt im Namespace `Justpilot\Billomat\Api` und wird mehrfach verwendet. Beim Refactoring nicht versehentlich pro Ressource duplizieren.
+- **Eine Options-Klasse für alle fünf APIs.** `PropertyCreateOptions` lebt im Namespace `Justpilot\Billomat\Api` und wird mehrfach verwendet. Beim Refactoring nicht versehentlich pro Ressource duplizieren.
+- **`userProperties` hat keinen Values-Endpoint.** Anders als die vier anderen Parents pflegt Billomat User-Property-Werte direkt am Benutzer-Datensatz, nicht über eine separate Sub-Ressource.
 - **`type` ist optional.** Wird `type` weggelassen, behandelt Billomat das Feld als Freitext. Für `CHECKBOX`-Felder ist `defaultValue` ein String — typische Wire-Werte sind `"0"` und `"1"`.
 - **`position` steuert nur die UI-Sortierung.** Es ist kein Eindeutigkeits-Constraint; Duplikate sind zulässig.
 - **Löschen ist destruktiv.** Wer eine Definition löscht, verliert auch die bisher daran gespeicherten Werte an den Instanzen. Für „nur ausblenden" gibt es keinen API-Weg — die Anwendungsebene muss das selbst modellieren.

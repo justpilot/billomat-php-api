@@ -71,6 +71,7 @@ use Justpilot\Billomat\Api\SupplierTagsApi;
 use Justpilot\Billomat\Api\TaxesApi;
 use Justpilot\Billomat\Api\TemplatesApi;
 use Justpilot\Billomat\Api\UnitsApi;
+use Justpilot\Billomat\Api\UserPropertiesApi;
 use Justpilot\Billomat\Api\UsersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -144,6 +145,7 @@ final readonly class BillomatClient
     public ClientPropertiesApi $clientProperties;
     public SupplierPropertiesApi $supplierProperties;
     public IncomingPropertiesApi $incomingProperties;
+    public UserPropertiesApi $userProperties;
     public ClientTagsApi $clientTags;
     public EmailTemplatesApi $emailTemplates;
     public FreeTextsApi $freeTexts;
@@ -224,6 +226,7 @@ final readonly class BillomatClient
         $this->clientProperties = new ClientPropertiesApi($this->http);
         $this->supplierProperties = new SupplierPropertiesApi($this->http);
         $this->incomingProperties = new IncomingPropertiesApi($this->http);
+        $this->userProperties = new UserPropertiesApi($this->http);
         $this->clientTags = new ClientTagsApi($this->http);
         $this->emailTemplates = new EmailTemplatesApi($this->http);
         $this->freeTexts = new FreeTextsApi($this->http);

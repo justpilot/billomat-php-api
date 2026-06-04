@@ -11,7 +11,19 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum RecurringEmailReceiverType: string
 {
-    case TO = 'to';
-    case CC = 'cc';
-    case BCC = 'bcc';
+    case TO = 'To';
+    case CC = 'Cc';
+    case BCC = 'Bcc';
+
+    /**
+     * Toleriert Klein- und Großschreibung beim Hydrieren aus API-Responses.
+     * Billomat liefert "To"/"Cc"/"Bcc"; alte Daten/Doku verwendeten teilweise
+     * Kleinbuchstaben.
+     */
+    public static function fromApi(string $value): self
+    {
+        return self::tryFrom($value)
+            ?? self::tryFrom(ucfirst(strtolower($value)))
+            ?? self::TO;
+    }
 }

@@ -30,7 +30,7 @@ final readonly class RecurringEmailReceiver
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             recurringId: (int) ($data['recurring_id'] ?? 0),
-            type: RecurringEmailReceiverType::from((string) ($data['type'] ?? 'to')),
+            type: RecurringEmailReceiverType::fromApi((string) ($data['type'] ?? 'To')),
             address: (string) ($data['address'] ?? ''),
         );
     }

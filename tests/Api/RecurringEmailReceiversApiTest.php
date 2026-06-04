@@ -35,8 +35,8 @@ final class RecurringEmailReceiversApiTest extends TestCase
             $body = json_encode([
                 'recurring-email-receivers' => [
                     'recurring-email-receiver' => [
-                        ['id' => 1, 'recurring_id' => 42, 'type' => 'to', 'address' => 'a@example.com'],
-                        ['id' => 2, 'recurring_id' => 42, 'type' => 'cc', 'address' => 'b@example.com'],
+                        ['id' => 1, 'recurring_id' => 42, 'type' => 'To', 'address' => 'a@example.com'],
+                        ['id' => 2, 'recurring_id' => 42, 'type' => 'Cc', 'address' => 'b@example.com'],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -69,7 +69,7 @@ final class RecurringEmailReceiversApiTest extends TestCase
             $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             $body = json_encode([
-                'recurring-email-receiver' => ['id' => 10, 'recurring_id' => 42, 'type' => 'bcc', 'address' => 'log@example.com'],
+                'recurring-email-receiver' => ['id' => 10, 'recurring_id' => 42, 'type' => 'Bcc', 'address' => 'log@example.com'],
             ], JSON_THROW_ON_ERROR);
 
             return new MockResponse($body, ['http_code' => 201]);
@@ -90,7 +90,7 @@ final class RecurringEmailReceiversApiTest extends TestCase
 
         $payload = $this->extractJsonPayload($captured['options']);
         self::assertIsArray($payload);
-        self::assertSame('bcc', $payload['recurring-email-receiver']['type']);
+        self::assertSame('Bcc', $payload['recurring-email-receiver']['type']);
     }
 
     #[Test]

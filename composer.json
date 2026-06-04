@@ -7,12 +7,20 @@
   "keywords": [
     "billomat",
     "api",
+    "api-client",
     "sdk",
     "client",
     "invoice",
     "rechnung",
     "accounting",
-    "buchhaltung"
+    "buchhaltung",
+    "symfony",
+    "http-client",
+    "typed",
+    "readonly",
+    "php84",
+    "dach",
+    "gobd"
   ],
   "support": {
     "issues": "https://github.com/justpilot/billomat-php-api/issues",

@@ -5,6 +5,8 @@
 [![Packagist](https://img.shields.io/badge/packagist-justpilot%2Fbillomat--php--api-orange.svg)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
 
+**Sprache / Language:** Deutsch (diese Datei) · [English](README.en.md)
+
 Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.com/api/) — basiert auf Symfony-Komponenten, mit Read-Modellen, getrennten Write-Optionen und einer sauberen Exception-Hierarchie.
 
 > Unoffizielles SDK. Dieses Projekt steht in keiner offiziellen Verbindung zur Billomat GmbH und wird unabhängig entwickelt und gepflegt.
@@ -244,6 +246,8 @@ Die Unit-Suite läuft mit `MockHttpClient` und benötigt keine Credentials. Inte
 ## Beispiele
 
 Lauffähige, kommentierte Skripte liegen unter [examples/](examples/) — vom Anlegen eines Kunden bis zum Abrufen eines PDFs. Jede Datei nimmt die Credentials aus Umgebungsvariablen, damit sie ohne Code-Änderungen direkt ausführbar ist.
+
+Wechsel von `phobetor/billomat` oder `vrok/billomat-client`? Siehe [docs/migration-from-phobetor.md](docs/migration-from-phobetor.md).
 
 ## Beitragen
 

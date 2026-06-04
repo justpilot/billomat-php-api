@@ -6,6 +6,11 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-06-04
+
+### Fixed
+- **CI auf dem Tag-Commit grün.** Der in v2.1.0 eingeführte Codecov-Step rief `composer test:coverage` auf, wodurch Xdebug-Coverage aktiv wurde und PHPUnit unter `beStrictAboutCoverageMetadata="true"` + `failOnRisky="true"` 442 Tests als „Risky" geflaggt hat (Tests, die in API-Tests inzidentell Model-Code beim Hydrate-Aufruf ausführen). CI lief deshalb rot. Workflow rollt jetzt auf `composer test:unit` über alle Matrix-Einträge zurück; Codecov-Upload und striktes Coverage-Setup folgen in einem späteren Release, nachdem die Tests mit `#[UsesClass]`-Annotationen ergänzt wurden. Codecov-Badge bleibt vorerst als Platzhalter im README.
+
 ## [2.1.0] - 2026-06-04
 
 ### Added

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\ClientPropertyValuesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientPropertyValue;
@@ -24,6 +25,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ClientPropertyValue::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(HttpException::class)]
 #[UsesClass(ScalarCaster::class)]
 final class ClientPropertyValuesApiTest extends TestCase
 {

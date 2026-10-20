@@ -95,6 +95,7 @@ Konstruktor: `new InvoiceTagCreateOptions(int $invoiceId, string $name)`. Beide 
 | `id` | `?int` |
 | `invoiceId` | `int` |
 | `name` | `string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `InvoiceTagCloudEntry`
 

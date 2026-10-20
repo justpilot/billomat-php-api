@@ -120,6 +120,9 @@ Konstruktor: `new TemplateCreateOptions(TemplateDocumentType $type)`.
 | `format` | `?TemplateFormat` | Nur bei UPLOADED + Single-GET |
 | `base64file` | `?string` | Nur bei UPLOADED + Single-GET |
 | `isDefault` | `bool` | |
+| `updated` | `?\DateTimeImmutable` |  |
+| `isBackgroundAvailable` | `?bool` |  |
+| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 ## Verwendete Enums
 

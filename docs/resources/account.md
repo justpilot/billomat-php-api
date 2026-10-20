@@ -68,6 +68,8 @@ if ($storage !== null && !$storage->isUnlimited()) {
 | `client` | `Client` | Vollständiger Kunden-Datensatz (Stammdaten, Adresse, Bankverbindung etc.) |
 | `plan` | `?string` | Tarifname, z.B. `"XL"`, `"S"`, `"Free"` |
 | `quotas` | `list<AccountQuota>` | Kontingent-Liste, pro Entität ein Eintrag |
+| `taxAuthorityNumber` | `?string` | E-Rechnung, nur lesend – siehe Stolpersteine |
+| `facturxFieldsEnabled` | `?bool` | E-Rechnung, nur lesend – siehe Stolpersteine |
 
 ## Modell `AccountQuota`
 

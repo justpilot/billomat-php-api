@@ -60,6 +60,8 @@ Liefert `null` bei 404.
 |---|---|---|
 | `id` | `id` | `?int` |
 | `name` | `name` | `string` |
+| `updated` | `?\DateTimeImmutable` |  |
+| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 > Die Billomat-Antwort enthält zusätzlich ein `created` (Zeitstempel der Anlage). Das SDK exponiert es aktuell nicht — bei Bedarf in `Unit` ergänzen.
 

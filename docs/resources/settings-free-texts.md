@@ -62,6 +62,8 @@ Liefert `null` bei 404.
 | `label` | `label` | `?string` | Untertitel/Bezeichnung |
 | `intro` | `intro` | `?string` | Einleitungstext / Brieftext |
 | `note` | `note` | `?string` | Anmerkungen am Dokumentende |
+| `created`, `updated` | `?\DateTimeImmutable` |  | |
+| `isDefault` | `?bool` |  | |
 
 > Die Billomat-Spec listet zusätzlich `name` (interner Bezeichner der Vorlage), `type` (Dokumenttyp) und `is_default`. Das SDK exponiert diese Felder im Read-Modell aktuell nicht — die Erweiterung in `FreeText::fromArray()` ist trivial.
 

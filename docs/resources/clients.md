@@ -240,6 +240,9 @@ Schmaler Subset für Partial-Updates. Nur Felder, die hier vorhanden und gesetzt
 | `archived`, `dunningRun` | `?bool` | |
 | `reduction`, `discountRate`, `discountDays` | `?float` | |
 | `dueDays`, `reminderDueDays`, `offerValidityDays` | `?int` | |
+| `updated` | `?\DateTimeImmutable` |  |
+| `digExclude` | `?bool` |  |
+| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 `Client::fromArray(array $data): self` hydriert ein Modell aus dem `client`-Knoten der API-Response. `toArray()` rendert das Modell zurück in Billomat-Feldnamen (snake_case) — gedacht für Debugging und Logging, **nicht** für Update-Calls.
 
@@ -293,6 +296,8 @@ Ein erneuter `create()`-Call mit derselben `clientPropertyId` überschreibt den 
 | `type` | `?string` (rohes API-Feld, z. B. `TEXTFIELD`) |
 | `name` | `?string` (Name aus der Property-Definition) |
 | `value` | `mixed` |
+| `created`, `updated` | `?\DateTimeImmutable` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Verwendete Enums
 

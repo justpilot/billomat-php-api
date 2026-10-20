@@ -244,6 +244,15 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `quote` | `?float` |
 | `reminderTextId`, `templateId` | `?int` |
 | `items` | `list<ReminderItem>` |
+| `updated` | `?\DateTimeImmutable` |
+| `paidAmount` | `?float` (Bereits bezahlter Betrag) |
+| `openAmount` | `?float` (Offener Betrag) |
+| `reminderLevel` | `?int` (Mahnstufe, siehe `ReminderTextsApi`) |
+| `reminderLevelName` | `?string` (Name der Mahnstufe) |
+| `isOld` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `reminderNumber`, `number`, `numberPre`, `numberLength`, `totalNet`, `quote`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `ReminderItem`
 
@@ -260,6 +269,11 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `title`, `description` | `?string` |
 | `totalGross`, `totalNet` | `?float` |
 | `created` | `?\DateTimeImmutable` |
+| `total` | `?float` |
+| `isCharge` | `?bool` (Position ist eine Mahngebühr) |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `totalGross`, `totalNet`, `created`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `ReminderTag`
 
@@ -268,6 +282,7 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `id` | `?int` |
 | `reminderId` | `int` |
 | `name` | `string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `ReminderTagCloudEntry`
 

@@ -106,6 +106,9 @@ Konstruktor: `new InvoiceItemCreateOptions(float $quantity, float $unitPrice)`.
 | `totalGross`, `totalNet` | `?float` | Inkl. Rabatt |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?float` | Ohne Rabatt |
 | `created` | `?\DateTimeImmutable` | |
+| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+
+> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Verwendete Enums
 

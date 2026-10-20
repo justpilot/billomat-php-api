@@ -62,5 +62,6 @@ Lazy-Iteration über alle Seiten.
 | `code` | `string` | `code` (Fallback: `currency_code`) |
 | `name` | `?string` | `name` |
 | `symbol` | `?string` | `symbol` |
+| `id` | `?int` |  |
 
 `Currency::fromArray($data)` hydratisiert aus dem Wire-Format; `Currency::toArray()` schreibt snake_case zurück.

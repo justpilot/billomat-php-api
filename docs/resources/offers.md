@@ -368,6 +368,12 @@ Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hin
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
 | `customerportalUrl` | `?string` — Direktlink ins Kundenportal |
 | `items` | `list<OfferItem>` — eingebettet aus `offer-items.offer-item` |
+| `updated` | `?\DateTimeImmutable` |
+| `validityDate` | `?\DateTimeImmutable` (Gültig bis, nur Datum) |
+| `totalReduction` | `?float` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `discountRate`, `discountDate`, `discountDays`, `discountAmount`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `OfferItem`
 
@@ -385,6 +391,10 @@ Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hin
 | `type` | `?InvoiceItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
 | `created` | `?\DateTimeImmutable` |
+| `optional` | `?bool` (Optionale Position) |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `OfferComment`
 
@@ -399,10 +409,15 @@ Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hin
 | `userId` | `?int` |
 | `actionkey` | `?OfferCommentActionKey` |
 | `actionkeyRaw` | `?string` — Roh-Wert, falls Billomat einen unbekannten `actionkey` liefert |
+| `public` | `?bool` |
+| `byClient` | `?bool` |
+| `emailId` | `?int` |
+| `clientId` | `?int` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `OfferTag`
 
-`final readonly`. Felder: `id` (`?int`), `offerId` (`int`), `name` (`string`).
+`final readonly`. Felder: `id` (`?int`), `offerId` (`int`), `name` (`string`), `customfield` (`?string`).
 
 ## Read-Modell: `OfferTagCloudEntry`
 

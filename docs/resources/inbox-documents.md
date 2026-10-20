@@ -96,6 +96,14 @@ Alle drei Felder werden über den Konstruktor gesetzt und sind Pflicht.
 | `mimeType` | `string` |
 | `fileSize` | `int` |
 | `base64file` | `?string` |
+| `updated` | `?\DateTimeImmutable` |
+| `xrechnungExtractionsId` | `?int` (E-Rechnung, nur lesend – von Billomat nicht dokumentiert) |
+| `userId` | `?int` |
+| `documentType` | `?string` |
+| `pageCount` | `?int` |
+| `fileUrl` | `?string` |
+| `metadata` | `?string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 Plus Helper `getBinary(): string` — dekodiert `base64file` und gibt die Roh-Bytes zurück; leerer String, wenn das Feld leer oder ungültig codiert ist. Auf `InboxDocument` instanzen aus `list()` ist `base64file` üblicherweise `null` — `getBinary()` liefert dann ebenfalls einen leeren String.
 

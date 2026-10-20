@@ -95,6 +95,13 @@ Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, float $amount)`. B
 | `amount` | `float` |
 | `type` | `?InvoicePaymentType` |
 | `comment` | `?string` |
+| `currencyCode` | `?string` |
+| `quote` | `?float` |
+| `paymentGroup` | `?string` |
+| `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
+| `finapiTransactionAmount` | `?float` (finAPI-Bankabgleich) |
+| `documentTitle` | `?string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Verwendete Enums
 

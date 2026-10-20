@@ -206,6 +206,24 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `emailTemplateId`, `freeTextId`, `templateId` | `?int` |
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
 | `items` | `list<RecurringItem>` |
+| `updated` | `?\DateTimeImmutable` |
+| `totalReduction` | `?float` |
+| `totalNetUnreduced` | `?float` |
+| `totalGrossUnreduced` | `?float` |
+| `discountAmount` | `?float` |
+| `status` | `?string` |
+| `inProgress` | `?bool` |
+| `ultimo` | `?bool` |
+| `emailFilename` | `?string` |
+| `emailBcc` | `?bool` |
+| `letterColor` | `?bool` |
+| `letterDuplex` | `?bool` |
+| `letterPaperWeight` | `?int` |
+| `offerId` | `?int` |
+| `confirmationId` | `?int` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `numberPre`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 `counter` zählt die bereits ausgeführten Läufe; `nextCreationDate` ist der nächste geplante Erzeugungs-Tag.
 

@@ -139,6 +139,9 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `defaultValue` | `?string` |
 | `position` | `?int` |
 | `isNvl` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `ClientProperty`
 
@@ -152,6 +155,9 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `defaultValue` | `?string` |
 | `position` | `?int` |
 | `isNvl` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `SupplierProperty`
 
@@ -165,6 +171,9 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `defaultValue` | `?string` |
 | `position` | `?int` |
 | `isNvl` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `IncomingProperty`
 
@@ -178,6 +187,9 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `defaultValue` | `?string` |
 | `position` | `?int` |
 | `isNvl` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Verwendete Enums
 

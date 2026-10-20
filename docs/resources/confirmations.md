@@ -318,6 +318,11 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
 | `customerportalUrl` | `?string` |
 | `items` | `list<ConfirmationItem>` |
+| `updated` | `?\DateTimeImmutable` |
+| `totalReduction` | `?float` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `discountRate`, `discountDate`, `discountDays`, `discountAmount`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `ConfirmationItem`
 
@@ -335,6 +340,9 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 | `type` | `?InvoiceItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
 | `created` | `?\DateTimeImmutable` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `ConfirmationComment`
 
@@ -349,10 +357,15 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 | `userId` | `?int` |
 | `actionkey` | `?ConfirmationCommentActionKey` |
 | `actionkeyRaw` | `?string` — Roh-Wert bei unbekanntem `actionkey` |
+| `public` | `?bool` |
+| `byClient` | `?bool` |
+| `emailId` | `?int` |
+| `clientId` | `?int` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `ConfirmationTag`
 
-`final readonly`. Felder: `id` (`?int`), `confirmationId` (`int`), `name` (`string`).
+`final readonly`. Felder: `id` (`?int`), `confirmationId` (`int`), `name` (`string`), `customfield` (`?string`).
 
 ## Read-Modell: `ConfirmationTagCloudEntry`
 

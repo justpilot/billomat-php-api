@@ -149,6 +149,14 @@ Funktional identisch zu `ContactCreateOptions`, **ohne** `clientId`. Beim Update
 | `fax` | `?string` |
 | `mobile` | `?string` |
 | `note` | `?string` |
+| `updated` | `?\DateTimeImmutable` |
+| `name` | `?string` |
+| `address` | `?string` |
+| `www` | `?string` |
+| `locale` | `?string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `note`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 `created` wird aus dem Billomat-String mittels `new DateTimeImmutable(...)` geparst; bei ungültigem Wert bleibt das Feld `null`.
 

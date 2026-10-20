@@ -298,6 +298,15 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `totalGross`, `totalNet`, `paidAmount`, `openAmount` | `?float` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
+| `updated` | `?\DateTimeImmutable` |
+| `clientNumber` | `?string` |
+| `expenseAccountNumber` | `?string` |
+| `category` | `?string` |
+| `pageCount` | `?int` |
+| `hasAttachment` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `supplyDate`, `dueDays`, `paidAt`, `intro`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 `paidAmount` und `openAmount` werden serverseitig aus den Zahlungen berechnet.
 
@@ -312,6 +321,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `userId` | `?int` |
 | `actionkey` | `?IncomingCommentActionKey` |
 | `actionkeyRaw` | `?string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 `actionkeyRaw` hält den rohen API-Wert; `actionkey` ist `null`, falls Billomat einen unbekannten Wert liefert (`tryFrom`). Beim Debuggen hilft `actionkeyRaw`.
 
@@ -328,6 +338,13 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
 | `transactionPurpose` | `?string` |
+| `currencyCode` | `?string` |
+| `quote` | `?float` |
+| `paymentGroup` | `?string` |
+| `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
+| `finapiTransactionAmount` | `?float` (finAPI-Bankabgleich) |
+| `documentTitle` | `?string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `IncomingTag`
 
@@ -336,6 +353,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `id` | `?int` |
 | `incomingId` | `int` |
 | `name` | `string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `IncomingTagCloudEntry`
 
@@ -355,6 +373,8 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `type` | `?string` |
 | `name` | `?string` |
 | `value` | `mixed` |
+| `created`, `updated` | `?\DateTimeImmutable` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `IncomingProperty`
 
@@ -367,6 +387,10 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
 | `position` | `?int` |
+| `isNvl` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Verwendete Enums
 

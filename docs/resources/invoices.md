@@ -388,6 +388,13 @@ Payload für `mail()` (Pixelletter). Empfängeradresse kommt fix aus der Rechnun
 | `customerportalUrl` | `?string` |
 | `templateId` | `?int` |
 | `items` | `list<InvoiceItem>` — falls die API die Positionen mitliefert |
+| `updated` | `?\DateTimeImmutable` |
+| `facturxReference` | `?string` (E-Rechnung, nur lesend – von Billomat nicht dokumentiert) |
+| `totalReduction` | `?float` |
+| `digProceeded` | `?bool` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `customerportalUrl`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 `Invoice::fromArray()` normalisiert die `taxes`-Struktur (Billomat liefert einzelne Einträge mal als Objekt, mal als Liste) und die mitgelieferten `invoice-items`.
 

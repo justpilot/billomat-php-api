@@ -12,6 +12,7 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
+use Justpilot\Billomat\Model\Enum\ArticleType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -28,6 +29,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ArticleType::class)]
 #[UsesClass(ScalarCaster::class)]
 final class ArticlesApiTest extends TestCase
 {

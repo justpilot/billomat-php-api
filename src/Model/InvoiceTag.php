@@ -17,6 +17,7 @@ final readonly class InvoiceTag
         public ?int $id,
         public int $invoiceId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -29,6 +30,7 @@ final readonly class InvoiceTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             invoiceId: (int) ($data['invoice_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -41,6 +43,7 @@ final readonly class InvoiceTag
             'id' => $this->id,
             'invoice_id' => $this->invoiceId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

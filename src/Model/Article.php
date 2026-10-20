@@ -38,6 +38,8 @@ final readonly class Article
         public ?int $supplierId = null,
         public ?int $taxId = null,
         public ?int $categoryId = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -68,6 +70,8 @@ final readonly class Article
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             taxId: ScalarCaster::toIntOrNull($data['tax_id'] ?? null),
             categoryId: ScalarCaster::toIntOrNull($data['category_id'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -98,6 +102,8 @@ final readonly class Article
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,
             'category_id' => $this->categoryId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

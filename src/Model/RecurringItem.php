@@ -36,6 +36,7 @@ final readonly class RecurringItem
         public ?float $totalNet,
         public ?float $totalGrossUnreduced,
         public ?float $totalNetUnreduced,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -63,6 +64,7 @@ final readonly class RecurringItem
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -90,6 +92,7 @@ final readonly class RecurringItem
             'total_net' => $this->totalNet,
             'total_gross_unreduced' => $this->totalGrossUnreduced,
             'total_net_unreduced' => $this->totalNetUnreduced,
+            'customfield' => $this->customfield,
         ];
     }
 }

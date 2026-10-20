@@ -121,7 +121,9 @@ final readonly class Invoice
         /**
          * Rechnungspositionen, falls im API-Response enthalten.
          */
-        public array $items = []
+        public array $items = [],
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -221,6 +223,8 @@ final readonly class Invoice
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: $items,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -275,6 +279,8 @@ final readonly class Invoice
             'payment_types' => $this->paymentTypes,
             'customerportal_url' => $this->customerportalUrl,
             'template_id' => $this->templateId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
 
         if ([] !== $this->taxes) {

@@ -56,7 +56,8 @@ final readonly class InvoiceItem
         /** Unreduzierter Gesamtbetrag netto. */
         public ?float $totalNetUnreduced,
         /** Erstellungszeitpunkt der Position. */
-        public ?DateTimeImmutable $created
+        public ?DateTimeImmutable $created,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -87,6 +88,7 @@ final readonly class InvoiceItem
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -117,6 +119,7 @@ final readonly class InvoiceItem
             'total_gross_unreduced' => $this->totalGrossUnreduced,
             'total_net_unreduced' => $this->totalNetUnreduced,
             'created' => $this->created?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

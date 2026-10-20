@@ -30,7 +30,9 @@ final readonly class Template
         public ?TemplateFormat $format = null,
         /** Nur bei UPLOADED + single GET verfügbar */
         public ?string $base64file = null,
-        public bool $isDefault = false
+        public bool $isDefault = false,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -51,6 +53,8 @@ final readonly class Template
             format: TemplateFormat::fromApi($data['format'] ?? null),
             base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
             isDefault: $isDefault,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -68,6 +72,8 @@ final readonly class Template
             'format' => $this->format?->value,
             'base64file' => $this->base64file,
             'is_default' => $this->isDefault ? 1 : 0,
+            'updated' => $this->updated?->format(DateTimeInterface::ATOM),
+            'customfield' => $this->customfield,
         ], static fn (int|string|null $v): bool => null !== $v);
     }
 }

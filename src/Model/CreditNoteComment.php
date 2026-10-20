@@ -23,6 +23,7 @@ final readonly class CreditNoteComment
         public ?int $userId = null,
         public ?CreditNoteCommentActionKey $actionkey = null,
         public ?string $actionkeyRaw = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -43,6 +44,7 @@ final readonly class CreditNoteComment
                 ? CreditNoteCommentActionKey::tryFrom($actionkeyRaw)
                 : null,
             actionkeyRaw: $actionkeyRaw,
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -58,6 +60,7 @@ final readonly class CreditNoteComment
             'user_id' => $this->userId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkeyRaw,
+            'customfield' => $this->customfield,
         ];
     }
 }

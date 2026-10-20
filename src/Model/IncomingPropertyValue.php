@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+
+use const DATE_ATOM;
 
 /**
  * Wert einer Eigenschaft einer Eingangsrechnung.
@@ -18,6 +21,9 @@ final readonly class IncomingPropertyValue
         public ?string $type,
         public ?string $name,
         public mixed $value,
+        public ?DateTimeImmutable $created = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -33,6 +39,9 @@ final readonly class IncomingPropertyValue
             type: ScalarCaster::toStringOrNull($data['type'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -48,6 +57,9 @@ final readonly class IncomingPropertyValue
             'type' => $this->type,
             'name' => $this->name,
             'value' => $this->value,
+            'created' => $this->created?->format(DATE_ATOM),
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

@@ -25,6 +25,7 @@ final readonly class ConfirmationComment
         public ?int $userId = null,
         public ?ConfirmationCommentActionKey $actionkey = null,
         public ?string $actionkeyRaw = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -45,6 +46,7 @@ final readonly class ConfirmationComment
                 ? ConfirmationCommentActionKey::tryFrom($actionkeyRaw)
                 : null,
             actionkeyRaw: $actionkeyRaw,
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -60,6 +62,7 @@ final readonly class ConfirmationComment
             'user_id' => $this->userId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkeyRaw,
+            'customfield' => $this->customfield,
         ];
     }
 }

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+
+use const DATE_ATOM;
 
 /**
  * Benutzer/Mitarbeiter aus der Billomat-API.
@@ -23,6 +26,9 @@ final readonly class User
         public ?string $mobile = null,
         public ?string $fax = null,
         public ?int $roleId = null,
+        public ?DateTimeImmutable $created = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -41,6 +47,9 @@ final readonly class User
             mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
             fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
             roleId: ScalarCaster::toIntOrNull($data['role_id'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -59,6 +68,9 @@ final readonly class User
             'mobile' => $this->mobile,
             'fax' => $this->fax,
             'role_id' => $this->roleId,
+            'created' => $this->created?->format(DATE_ATOM),
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

@@ -27,6 +27,7 @@ final readonly class CreditNotePayment
         public ?DateTimeImmutable $created = null,
         public ?int $userId = null,
         public ?string $transactionPurpose = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -45,6 +46,7 @@ final readonly class CreditNotePayment
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
             transactionPurpose: ScalarCaster::toStringOrNull($data['transaction_purpose'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -63,6 +65,7 @@ final readonly class CreditNotePayment
             'type' => $this->type?->value,
             'comment' => $this->comment,
             'transaction_purpose' => $this->transactionPurpose,
+            'customfield' => $this->customfield,
         ];
     }
 }

@@ -171,7 +171,9 @@ final readonly class Client
         /** Brutto-Umsatz (read-only Auswertungsfeld). */
         public ?float $revenueGross = null,
         /** Netto-Umsatz (read-only Auswertungsfeld). */
-        public ?float $revenueNet = null
+        public ?float $revenueNet = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -239,6 +241,8 @@ final readonly class Client
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             revenueGross: ScalarCaster::toFloatOrNull($data['revenue_gross'] ?? null),
             revenueNet: ScalarCaster::toFloatOrNull($data['revenue_net'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -308,6 +312,8 @@ final readonly class Client
             'customerportal_url' => $this->customerportalUrl,
             'revenue_gross' => $this->revenueGross,
             'revenue_net' => $this->revenueNet,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

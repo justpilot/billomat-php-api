@@ -34,6 +34,8 @@ final readonly class Contact
         public ?string $fax = null,
         public ?string $mobile = null,
         public ?string $note = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -60,6 +62,8 @@ final readonly class Contact
             fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
             mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -86,6 +90,8 @@ final readonly class Contact
             'fax' => $this->fax,
             'mobile' => $this->mobile,
             'note' => $this->note,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

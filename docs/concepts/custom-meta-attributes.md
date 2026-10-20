@@ -36,7 +36,16 @@ Listen-Endpunkte akzeptieren den Such-Parameter `customfield`:
 GET /api/clients?customfield={suche}
 ```
 
-> Das SDK exponiert `customfield` aktuell **nicht** als dedizierte Methode. Wer es nutzen will, kann den Wert über den Filter-Parameter in `list(['customfield' => '…'])` mitgeben und beim Schreiben den generischen `BillomatHttpClient` ansprechen.
+### Im SDK
+
+Beim **Lesen** steht der Wert auf allen Read-Modellen, für die Billomat ihn mitliefert, als `?string $customfield` bereit (leerer String → `null`):
+
+```php
+$client = $billomat->clients->get(42);
+$crmId = $client?->customfield;
+```
+
+Zum **Filtern** den Parameter in `list(['customfield' => '…'])` mitgeben. Eine dedizierte Methode zum **Schreiben** (`PUT /{resource}/{id}/customfield`) gibt es noch nicht; dafür den generischen `BillomatHttpClient` ansprechen.
 
 ## Properties + PropertyValues — definierte Custom-Attribute
 
@@ -49,7 +58,7 @@ Pro Ressource gibt es zwei API-Schichten:
 
 SDK-Klassen:
 
-- `ClientPropertiesApi`
+- `ClientPropertiesApi` + `ClientPropertyValuesApi`
 - `ArticlePropertiesApi` + `ArticlePropertyValuesApi`
 - `SupplierPropertiesApi` + `SupplierPropertyValuesApi`
 - `IncomingPropertiesApi` + `IncomingPropertyValuesApi`

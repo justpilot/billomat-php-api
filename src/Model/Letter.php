@@ -35,6 +35,8 @@ final readonly class Letter
         public ?string $note = null,
         public ?int $templateId = null,
         public ?string $customerportalUrl = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -61,6 +63,8 @@ final readonly class Letter
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -87,6 +91,8 @@ final readonly class Letter
             'note' => $this->note,
             'template_id' => $this->templateId,
             'customerportal_url' => $this->customerportalUrl,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

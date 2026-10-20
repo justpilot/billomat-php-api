@@ -36,7 +36,8 @@ final readonly class InvoicePayment
         /** ID des Users, der die Zahlung erfasst hat. */
         public ?int $userId = null,
         /** Verwendungszweck (z. B. Buchungstext aus dem Bankexport). */
-        public ?string $transactionPurpose = null
+        public ?string $transactionPurpose = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -57,6 +58,7 @@ final readonly class InvoicePayment
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
             transactionPurpose: ScalarCaster::toStringOrNull($data['transaction_purpose'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -77,6 +79,7 @@ final readonly class InvoicePayment
             'type' => $this->type?->value,
             'comment' => $this->comment,
             'transaction_purpose' => $this->transactionPurpose,
+            'customfield' => $this->customfield,
         ];
     }
 }

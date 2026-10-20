@@ -38,6 +38,8 @@ final readonly class Incoming
         public ?float $openAmount = null,
         public ?string $currencyCode = null,
         public ?float $quote = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -68,6 +70,8 @@ final readonly class Incoming
             openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -97,6 +101,8 @@ final readonly class Incoming
             'open_amount' => $this->openAmount,
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

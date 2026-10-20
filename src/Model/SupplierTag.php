@@ -15,6 +15,7 @@ final readonly class SupplierTag
         public ?int $id,
         public int $supplierId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class SupplierTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             supplierId: (int) ($data['supplier_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class SupplierTag
             'id' => $this->id,
             'supplier_id' => $this->supplierId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

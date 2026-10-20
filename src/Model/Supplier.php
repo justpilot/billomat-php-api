@@ -45,6 +45,8 @@ final readonly class Supplier
         public ?string $bankIban = null,
         public ?string $bankBic = null,
         public ?string $currencyCode = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -83,6 +85,8 @@ final readonly class Supplier
             // Billomat liefert den BIC als `bank_swift`; `bank_bic` nur als Fallback.
             bankBic: ScalarCaster::toStringOrNull($data['bank_swift'] ?? $data['bank_bic'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -120,6 +124,8 @@ final readonly class Supplier
             'bank_iban' => $this->bankIban,
             'bank_bic' => $this->bankBic,
             'currency_code' => $this->currencyCode,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

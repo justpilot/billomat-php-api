@@ -28,6 +28,7 @@ final readonly class ReminderText
         public ?string $chargeName = null,
         public ?string $chargeDescription = null,
         public ?float $chargeAmount = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -47,6 +48,7 @@ final readonly class ReminderText
             chargeName: ScalarCaster::toStringOrNull($data['charge_name'] ?? null),
             chargeDescription: ScalarCaster::toStringOrNull($data['charge_description'] ?? null),
             chargeAmount: ScalarCaster::toFloatOrNull($data['charge_amount'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -66,6 +68,7 @@ final readonly class ReminderText
             'charge_name' => $this->chargeName,
             'charge_description' => $this->chargeDescription,
             'charge_amount' => $this->chargeAmount,
+            'customfield' => $this->customfield,
         ];
     }
 }

@@ -15,6 +15,7 @@ final readonly class ReminderTag
         public ?int $id,
         public int $reminderId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class ReminderTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             reminderId: (int) ($data['reminder_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class ReminderTag
             'id' => $this->id,
             'reminder_id' => $this->reminderId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

@@ -48,6 +48,8 @@ final readonly class Reminder
         public ?int $reminderTextId = null,
         public ?int $templateId = null,
         public array $items = [],
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -98,6 +100,8 @@ final readonly class Reminder
             reminderTextId: ScalarCaster::toIntOrNull($data['reminder_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: $items,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -131,6 +135,8 @@ final readonly class Reminder
             'quote' => $this->quote,
             'reminder_text_id' => $this->reminderTextId,
             'template_id' => $this->templateId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
 
         if ([] !== $this->items) {

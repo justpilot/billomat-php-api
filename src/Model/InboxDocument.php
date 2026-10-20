@@ -23,6 +23,8 @@ final readonly class InboxDocument
         public string $mimeType,
         public int $fileSize,
         public ?string $base64file = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -38,6 +40,8 @@ final readonly class InboxDocument
             mimeType: (string) ($data['mimetype'] ?? 'application/octet-stream'),
             fileSize: (int) ($data['filesize'] ?? 0),
             base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -53,6 +57,8 @@ final readonly class InboxDocument
             'mimetype' => $this->mimeType,
             'filesize' => $this->fileSize,
             'base64file' => $this->base64file,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 

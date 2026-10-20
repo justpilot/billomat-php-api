@@ -69,6 +69,8 @@ final readonly class Recurring
         public ?int $templateId = null,
         public array $taxes = [],
         public array $items = [],
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -163,6 +165,8 @@ final readonly class Recurring
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             taxes: $taxes,
             items: $items,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -211,6 +215,8 @@ final readonly class Recurring
             'email_template_id' => $this->emailTemplateId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
 
         if ([] !== $this->taxes) {

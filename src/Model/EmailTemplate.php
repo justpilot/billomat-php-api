@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+
+use const DATE_ATOM;
 
 /**
  * E-Mail-Vorlage aus den Billomat-Einstellungen.
@@ -27,6 +30,8 @@ final readonly class EmailTemplate
         public ?bool $isDefault = null,
         public ?string $type = null,
         public ?bool $bcc = null,
+        public ?DateTimeImmutable $created = null,
+        public ?DateTimeImmutable $updated = null,
     ) {
     }
 
@@ -44,6 +49,8 @@ final readonly class EmailTemplate
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
             type: ScalarCaster::toStringOrNull($data['type'] ?? null),
             bcc: ScalarCaster::toBoolOrNull($data['bcc'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
         );
     }
 
@@ -61,6 +68,8 @@ final readonly class EmailTemplate
             'is_default' => $this->isDefault,
             'type' => $this->type,
             'bcc' => $this->bcc,
+            'created' => $this->created?->format(DATE_ATOM),
+            'updated' => $this->updated?->format(DATE_ATOM),
         ];
     }
 }

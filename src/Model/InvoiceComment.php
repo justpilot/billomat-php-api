@@ -38,6 +38,7 @@ final readonly class InvoiceComment
         public ?InvoiceCommentActionKey $actionkey = null,
         /** Roher ActionKey-String aus der API (auch wenn das Enum den Wert nicht kennt). */
         public ?string $actionkeyRaw = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -58,6 +59,7 @@ final readonly class InvoiceComment
                 ? InvoiceCommentActionKey::tryFrom($actionkeyRaw)
                 : null,
             actionkeyRaw: $actionkeyRaw,
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -73,6 +75,7 @@ final readonly class InvoiceComment
             'user_id' => $this->userId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkeyRaw,
+            'customfield' => $this->customfield,
         ];
     }
 }

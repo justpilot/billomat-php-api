@@ -23,6 +23,7 @@ final readonly class LetterComment
         public ?int $userId = null,
         public ?LetterCommentActionKey $actionkey = null,
         public ?string $actionkeyRaw = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -43,6 +44,7 @@ final readonly class LetterComment
                 ? LetterCommentActionKey::tryFrom($actionkeyRaw)
                 : null,
             actionkeyRaw: $actionkeyRaw,
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -58,6 +60,7 @@ final readonly class LetterComment
             'user_id' => $this->userId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkeyRaw,
+            'customfield' => $this->customfield,
         ];
     }
 }

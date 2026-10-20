@@ -19,6 +19,7 @@ final readonly class IncomingProperty
         public ?string $defaultValue = null,
         public ?int $position = null,
         public ?bool $isNvl = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -34,6 +35,7 @@ final readonly class IncomingProperty
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             isNvl: ScalarCaster::toBoolOrNull($data['is_nvl'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -49,6 +51,7 @@ final readonly class IncomingProperty
             'default_value' => $this->defaultValue,
             'position' => $this->position,
             'is_nvl' => $this->isNvl,
+            'customfield' => $this->customfield,
         ];
     }
 }

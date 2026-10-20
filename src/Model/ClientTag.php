@@ -15,6 +15,7 @@ final readonly class ClientTag
         public ?int $id,
         public int $clientId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class ClientTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: (int) ($data['client_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class ClientTag
             'id' => $this->id,
             'client_id' => $this->clientId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

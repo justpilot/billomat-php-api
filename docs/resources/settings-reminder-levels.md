@@ -71,10 +71,11 @@ Liefert `null` bei 404.
 | `subject` | `subject` | `?string` | Betreff der Mahn-E-Mail/des Briefs |
 | `header` | `header` | `?string` | Einleitung |
 | `footer` | `footer` | `?string` | Anmerkung |
-| `dueDays` | `due_days` | `?int` | Fälligkeitstage (SDK-spezifisch — nicht in der Spec dokumentiert) |
-| `sort` | `sort` | `?int` | Reihenfolge der Stufe |
-
-> Die Billomat-Spec listet zusätzlich `sorting` (statt `sort`) und `charge_name`/`charge_description`/`charge_amount` für Mahngebühren. Das SDK exponiert diese nicht im Read-Modell — Erweiterung in `ReminderText::fromArray()` ist trivial, wenn benötigt.
+| `dueDays` | `due_days` | `?int` | Liefert Billomat nicht mehr; nur aus Kompatibilitätsgründen vorhanden |
+| `sort` | `sorting` (Fallback `sort`) | `?int` | Reihenfolge der Stufe |
+| `chargeName` | `charge_name` | `?string` | Name der Mahngebühr |
+| `chargeDescription` | `charge_description` | `?string` | Beschreibung der Mahngebühr |
+| `chargeAmount` | `charge_amount` | `?float` | Höhe der Mahngebühr |
 
 ### `DunningLevel`
 

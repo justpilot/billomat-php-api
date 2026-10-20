@@ -80,7 +80,8 @@ final readonly class Supplier
             bankNumber: ScalarCaster::toStringOrNull($data['bank_number'] ?? null),
             bankName: ScalarCaster::toStringOrNull($data['bank_name'] ?? null),
             bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
-            bankBic: ScalarCaster::toStringOrNull($data['bank_bic'] ?? null),
+            // Billomat liefert den BIC als `bank_swift`; `bank_bic` nur als Fallback.
+            bankBic: ScalarCaster::toStringOrNull($data['bank_swift'] ?? $data['bank_bic'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
         );
     }

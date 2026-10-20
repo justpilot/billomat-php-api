@@ -21,6 +21,11 @@ final class PropertyCreateOptions
 
     public ?int $position = null;
 
+    /**
+     * Standardwert verwenden, wenn kein anderer Wert gesetzt ist.
+     */
+    public ?bool $isNvl = null;
+
     public function __construct(
         public string $name,
     ) {
@@ -36,6 +41,7 @@ final class PropertyCreateOptions
             'type' => $this->type?->value,
             'default_value' => $this->defaultValue,
             'position' => $this->position,
+            'is_nvl' => null === $this->isNvl ? null : ($this->isNvl ? 1 : 0),
         ];
 
         return array_filter($data, static fn (int|string|null $v): bool => null !== $v);

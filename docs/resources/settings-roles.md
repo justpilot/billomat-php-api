@@ -67,7 +67,7 @@ Jedes Permission-Feld enthält einen von vier Werten:
 
 ### Bekannte Permission-Keys
 
-`articles`, `clients`, `offers`, `confirmations`, `invoices`, `credit_notes`, `delivery_notes`, `reminders`, `settings_my_account`, `settings_documents`, `settings_configuration`, `settings_administration`, `settings_addons`, `settings_my_addons`.
+`articles`, `clients`, `suppliers`, `offers`, `confirmations`, `invoices`, `credit_notes`, `delivery_notes`, `reminders`, `incomings`, `letters`, `banking`, `net_income_statement`, `accounting_export`, `settings_my_account`, `settings_documents`, `settings_configuration`, `settings_administration`, `settings_addons`, `settings_my_addons`.
 
 `fromArray()` nimmt zusätzlich jeden Key entgegen, der mit `settings_` beginnt — falls Billomat das Set erweitert, landen neue Settings-Rechte automatisch in `permissions`.
 

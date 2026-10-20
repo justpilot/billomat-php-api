@@ -17,7 +17,7 @@ final class ConfirmationStatusTest extends TestCase
     {
         // Billomat-API-Werte — Drift = Regression.
         self::assertSame(
-            ['DRAFT', 'OPEN', 'CLEARED', 'CANCELED'],
+            ['DRAFT', 'OPEN', 'COMPLETED', 'CLEARED', 'CANCELED'],
             array_map(static fn (ConfirmationStatus $c): string => $c->value, ConfirmationStatus::cases())
         );
     }
@@ -28,6 +28,7 @@ final class ConfirmationStatusTest extends TestCase
         self::assertNull(ConfirmationStatus::fromApi(null));
         self::assertNull(ConfirmationStatus::fromApi('BOGUS'));
         self::assertSame(ConfirmationStatus::OPEN, ConfirmationStatus::fromApi('OPEN'));
+        self::assertSame(ConfirmationStatus::COMPLETED, ConfirmationStatus::fromApi('COMPLETED'));
     }
 
     #[Test]

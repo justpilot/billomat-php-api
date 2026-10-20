@@ -16,7 +16,7 @@ final class LetterStatusTest extends TestCase
     public function itExposesAllExpectedCases(): void
     {
         self::assertSame(
-            ['DRAFT', 'OPEN', 'CLEARED', 'CANCELED'],
+            ['DRAFT', 'OPEN', 'COMPLETED', 'CLEARED', 'CANCELED'],
             array_map(static fn (LetterStatus $c): string => $c->value, LetterStatus::cases())
         );
     }
@@ -27,6 +27,7 @@ final class LetterStatusTest extends TestCase
         self::assertNull(LetterStatus::fromApi(null));
         self::assertNull(LetterStatus::fromApi('BOGUS'));
         self::assertSame(LetterStatus::CLEARED, LetterStatus::fromApi('CLEARED'));
+        self::assertSame(LetterStatus::COMPLETED, LetterStatus::fromApi('COMPLETED'));
     }
 
     #[Test]

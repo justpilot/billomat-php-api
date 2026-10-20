@@ -16,7 +16,7 @@ final class DeliveryNoteStatusTest extends TestCase
     public function itExposesAllExpectedCases(): void
     {
         self::assertSame(
-            ['DRAFT', 'OPEN', 'CLEARED', 'CANCELED'],
+            ['DRAFT', 'OPEN', 'CREATED', 'CLEARED', 'CANCELED'],
             array_map(static fn (DeliveryNoteStatus $c): string => $c->value, DeliveryNoteStatus::cases())
         );
     }
@@ -27,6 +27,7 @@ final class DeliveryNoteStatusTest extends TestCase
         self::assertNull(DeliveryNoteStatus::fromApi(null));
         self::assertNull(DeliveryNoteStatus::fromApi('BOGUS'));
         self::assertSame(DeliveryNoteStatus::CLEARED, DeliveryNoteStatus::fromApi('CLEARED'));
+        self::assertSame(DeliveryNoteStatus::CREATED, DeliveryNoteStatus::fromApi('CREATED'));
     }
 
     #[Test]

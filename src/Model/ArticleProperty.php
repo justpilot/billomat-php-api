@@ -20,6 +20,7 @@ final readonly class ArticleProperty
         public ?PropertyType $type,
         public ?string $defaultValue = null,
         public ?int $position = null,
+        public ?bool $isNvl = null,
     ) {
     }
 
@@ -34,6 +35,7 @@ final readonly class ArticleProperty
             type: PropertyType::fromApi($data['type'] ?? null),
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
+            isNvl: ScalarCaster::toBoolOrNull($data['is_nvl'] ?? null),
         );
     }
 
@@ -48,6 +50,7 @@ final readonly class ArticleProperty
             'type' => $this->type?->value,
             'default_value' => $this->defaultValue,
             'position' => $this->position,
+            'is_nvl' => $this->isNvl,
         ];
     }
 }

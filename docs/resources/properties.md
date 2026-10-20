@@ -123,6 +123,7 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `type` | `type` | `?PropertyType` | `TEXTFIELD`, `TEXTAREA`, `CHECKBOX` |
 | `defaultValue` | `default_value` | `?string` | Default-Wert für neue Instanzen |
 | `position` | `position` | `?int` | Sortierung in der Billomat-UI |
+| `isNvl` | `is_nvl` | `?bool` | Standardwert verwenden, wenn kein anderer Wert gesetzt ist (als `0`/`1` gesendet) |
 
 `toArray()` entfernt `null`-Felder per `array_filter`. `name` wird stets mitgeschickt.
 
@@ -137,6 +138,7 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
 | `position` | `?int` |
+| `isNvl` | `?bool` |
 
 ## Read-Modell: `ClientProperty`
 
@@ -149,6 +151,7 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
 | `position` | `?int` |
+| `isNvl` | `?bool` |
 
 ## Read-Modell: `SupplierProperty`
 
@@ -161,6 +164,7 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
 | `position` | `?int` |
+| `isNvl` | `?bool` |
 
 ## Read-Modell: `IncomingProperty`
 
@@ -173,6 +177,7 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
 | `position` | `?int` |
+| `isNvl` | `?bool` |
 
 ## Verwendete Enums
 
@@ -184,7 +189,7 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 - **Eine Options-Klasse für alle fünf APIs.** `PropertyCreateOptions` lebt im Namespace `Justpilot\Billomat\Api` und wird mehrfach verwendet. Beim Refactoring nicht versehentlich pro Ressource duplizieren.
 - **`userProperties` hat keinen Values-Endpoint.** Anders als die vier anderen Parents pflegt Billomat User-Property-Werte direkt am Benutzer-Datensatz, nicht über eine separate Sub-Ressource.
 - **`type` ist optional.** Wird `type` weggelassen, behandelt Billomat das Feld als Freitext. Für `CHECKBOX`-Felder ist `defaultValue` ein String — typische Wire-Werte sind `"0"` und `"1"`.
-- **`position` steuert nur die UI-Sortierung.** Es ist kein Eindeutigkeits-Constraint; Duplikate sind zulässig.
+- **`position` liefert Billomat beim Lesen nicht mit.** Das Feld ist im Read-Modell daher in der Regel `null`; es ist kein Eindeutigkeits-Constraint.
 - **Löschen ist destruktiv.** Wer eine Definition löscht, verliert auch die bisher daran gespeicherten Werte an den Instanzen. Für „nur ausblenden" gibt es keinen API-Weg — die Anwendungsebene muss das selbst modellieren.
 - **`update()` nimmt dieselbe Klasse wie `create()`.** Es gibt keinen separaten `PropertyUpdateOptions`-Typ. Bei einem PUT ohne `type` lässt Billomat den bisherigen Typ stehen.
 

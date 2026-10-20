@@ -294,7 +294,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `date`, `supplyDate`, `dueDate`, `paidAt` | `?\DateTimeImmutable` |
 | `dueDays` | `?int` |
 | `status` | `?IncomingStatus` |
-| `incomingNumber`, `address`, `label`, `intro`, `note` | `?string` |
+| `incomingNumber` (Wire-Feld `number`, Fallback `incoming_number`), `address`, `label`, `intro`, `note` | `?string` |
 | `totalGross`, `totalNet`, `paidAmount`, `openAmount` | `?float` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |

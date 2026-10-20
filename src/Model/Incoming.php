@@ -56,7 +56,8 @@ final readonly class Incoming
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             paidAt: ScalarCaster::toDateTimeOrNull($data['paid_at'] ?? null),
             status: IncomingStatus::fromApi(isset($data['status']) ? (string) $data['status'] : null),
-            incomingNumber: ScalarCaster::toStringOrNull($data['incoming_number'] ?? null),
+            // Billomat liefert die Belegnummer als `number`; `incoming_number` nur als Fallback.
+            incomingNumber: ScalarCaster::toStringOrNull($data['number'] ?? $data['incoming_number'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),

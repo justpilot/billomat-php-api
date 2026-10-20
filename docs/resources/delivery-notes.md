@@ -366,7 +366,7 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 
 ## Verwendete Enums
 
-- [`DeliveryNoteStatus`](../../src/Model/Enum/DeliveryNoteStatus.php): `DRAFT`, `OPEN`, `CLEARED`, `CANCELED`. Hat `label()` für deutsche Bezeichnung.
+- [`DeliveryNoteStatus`](../../src/Model/Enum/DeliveryNoteStatus.php): `DRAFT`, `OPEN`, `CREATED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `CREATED`. Hat `label()` für deutsche Bezeichnung.
 - [`DeliveryNoteCommentActionKey`](../../src/Model/Enum/DeliveryNoteCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`.
 - [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
 - [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.

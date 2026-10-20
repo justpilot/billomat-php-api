@@ -83,6 +83,7 @@ Hilfsmethode `isUnlimited(): bool` für die `available === -1`-Konvention.
 
 ## Stolpersteine
 
+- **E-Rechnung (undokumentiert).** `tax_authority_number` (`$taxAuthorityNumber`), `facturx_fields_enabled` (`$facturxFieldsEnabled`) und `seller_identifier` (über `$account->client->sellerIdentifier`) liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
 - **Kein `/account`-Endpunkt.** Wer den Account-Datensatz allein aus dem Pfad herleiten will, irrt — der Pfad ist `/clients/myself`.
 - **Quota-Liste kann fehlen.** Bei manchen Tarifen liefert Billomat `quotas` gar nicht — dann ist die Liste leer und `quota($entity)` gibt `null` zurück.
 - **`storage` in Bytes, alles andere als Stück.** `available`/`used` haben keine Einheit im Response — bei `storage` sind die Werte in Bytes (Beispiel aus der Doku: `8_740_060` Bytes), bei `documents`/`clients`/`articles` Stück.

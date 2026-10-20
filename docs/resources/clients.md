@@ -233,6 +233,7 @@ Schmaler Subset für Partial-Updates. Nur Felder, die hier vorhanden und gesetzt
 | `firstName`, `lastName`, `salutation` | `?string` | |
 | `email`, `phone`, `fax`, `mobile`, `www` | `?string` | |
 | `note`, `locale` | `?string` | |
+| `facturxIdentifier`, `sellerIdentifier` | `?string` | E-Rechnung (ZUGFeRD/Factur-X), siehe Stolpersteine |
 | `taxNumber`, `vatNumber` | `?string` | |
 | `taxRule`, `netGross`, `currencyCode` | `?string` | Werte spiegeln die Enum-Cases als String. |
 | `debitorAccountNumber`, `priceGroup` | `?int` | |
@@ -303,6 +304,7 @@ Diese Enums tauchen als String-Werte in den Properties auf (Billomat liefert sie
 
 ## Stolpersteine
 
+- **E-Rechnung (undokumentiert).** `facturx_identifier` und `seller_identifier` liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
 - **Single-Item-List-Quirk:** Wenn Billomat in der Liste nur einen Kunden zurückliefert, schickt es ihn manchmal als Objekt statt in einer Liste. Das normalisiert `ClientsApi::list()` automatisch — du bekommst immer eine `list<Client>`.
 - **Archivierte Kunden lassen sich nicht updaten.** Setze in `ClientUpdateOptions` zuerst `archived = false`, dann den Rest in einem zweiten Update-Request.
 - **`number_length` < tatsächliche Länge.** Wenn `number` schon vorhandene Stellen hat, schlägt das Validierungs-Check auf Billomat-Seite fehl — `ValidationException` ist die Folge.

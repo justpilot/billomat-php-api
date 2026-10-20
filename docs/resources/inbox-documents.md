@@ -105,6 +105,7 @@ Keine. Die Ressource hat keinen Status-Enum.
 
 ## Stolpersteine
 
+- **E-Rechnung (undokumentiert).** `xrechnung_extractions_id` (`InboxDocument::$xrechnungExtractionsId`) liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
 - **`base64file` nur über `get()`.** `list()` liefert die Metadaten ohne Binärinhalt, um Antwort-Größen klein zu halten. Wer den PDF-Inhalt verarbeiten will, muss jedes Dokument einzeln per `get($id)` nachladen.
 - **Wire-Feld heißt `mimetype`, nicht `mime_type`.** Anders als bei den meisten anderen Ressourcen wird hier kein Snake-Case mit Unterstrich verwendet — Billomat erwartet `mimetype` in einem Wort. Die PHP-Property nennt sich trotzdem `mimeType` (camelCase).
 - **Keine API-Konvertierung in ein Incoming.** Die Billomat-API bietet kein `/inbox-documents/{id}/convert` oder ähnlich. Wer das Web-UI-Verhalten nachbauen will, muss selbst `IncomingsApi::create()` plus `IncomingsApi::upload()` aufrufen und das Inbox-Dokument anschließend manuell löschen.

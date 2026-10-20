@@ -25,6 +25,7 @@ final readonly class InboxDocument
         public ?string $base64file = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?int $xrechnungExtractionsId = null,
     ) {
     }
 
@@ -42,6 +43,7 @@ final readonly class InboxDocument
             base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            xrechnungExtractionsId: ScalarCaster::toIntOrNull($data['xrechnung_extractions_id'] ?? null),
         );
     }
 
@@ -59,6 +61,7 @@ final readonly class InboxDocument
             'base64file' => $this->base64file,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'xrechnung_extractions_id' => $this->xrechnungExtractionsId,
         ];
     }
 

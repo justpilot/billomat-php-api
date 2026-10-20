@@ -174,6 +174,8 @@ final readonly class Client
         public ?float $revenueNet = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?string $facturxIdentifier = null,
+        public ?string $sellerIdentifier = null,
     ) {
     }
 
@@ -243,6 +245,8 @@ final readonly class Client
             revenueNet: ScalarCaster::toFloatOrNull($data['revenue_net'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            facturxIdentifier: ScalarCaster::toStringOrNull($data['facturx_identifier'] ?? null),
+            sellerIdentifier: ScalarCaster::toStringOrNull($data['seller_identifier'] ?? null),
         );
     }
 
@@ -314,6 +318,8 @@ final readonly class Client
             'revenue_net' => $this->revenueNet,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'facturx_identifier' => $this->facturxIdentifier,
+            'seller_identifier' => $this->sellerIdentifier,
         ];
     }
 }

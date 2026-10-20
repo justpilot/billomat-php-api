@@ -124,6 +124,7 @@ final readonly class Invoice
         public array $items = [],
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?string $facturxReference = null,
     ) {
     }
 
@@ -225,6 +226,7 @@ final readonly class Invoice
             items: $items,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
         );
     }
 
@@ -281,6 +283,7 @@ final readonly class Invoice
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'facturx_reference' => $this->facturxReference,
         ];
 
         if ([] !== $this->taxes) {

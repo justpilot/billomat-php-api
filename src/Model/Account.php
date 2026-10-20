@@ -25,6 +25,8 @@ final readonly class Account
         public Client $client,
         public ?string $plan,
         public array $quotas,
+        public ?string $taxAuthorityNumber = null,
+        public ?bool $facturxFieldsEnabled = null,
     ) {
     }
 
@@ -37,6 +39,8 @@ final readonly class Account
             client: Client::fromArray($data),
             plan: ScalarCaster::toStringOrNull($data['plan'] ?? null),
             quotas: self::extractQuotas($data['quotas'] ?? null),
+            taxAuthorityNumber: ScalarCaster::toStringOrNull($data['tax_authority_number'] ?? null),
+            facturxFieldsEnabled: ScalarCaster::toBoolOrNull($data['facturx_fields_enabled'] ?? null),
         );
     }
 
@@ -60,6 +64,8 @@ final readonly class Account
             'plan' => $this->plan,
             'quotas' => array_map(static fn (AccountQuota $q): array => $q->toArray(), $this->quotas),
             'client' => $this->client->toArray(),
+            'tax_authority_number' => $this->taxAuthorityNumber,
+            'facturx_fields_enabled' => $this->facturxFieldsEnabled,
         ];
     }
 

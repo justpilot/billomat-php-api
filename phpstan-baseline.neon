@@ -2887,12 +2887,6 @@ parameters:
 			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type DateTimeImmutable\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Tests\\Integration\\Letters\\LettersIntegrationTest\:\:ensureClientId\(\) should return int but returns int\|null\.$#'
 			identifier: return.type
 			count: 1

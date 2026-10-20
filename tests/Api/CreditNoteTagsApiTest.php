@@ -8,10 +8,12 @@ use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteTagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNoteTag;
 use Justpilot\Billomat\Model\CreditNoteTagCloudEntry;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -22,6 +24,9 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(CreditNoteTagCreateOptions::class)]
 #[CoversClass(CreditNoteTag::class)]
 #[CoversClass(CreditNoteTagCloudEntry::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class CreditNoteTagsApiTest extends TestCase
 {
     #[Test]

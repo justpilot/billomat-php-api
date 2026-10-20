@@ -9,7 +9,6 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
-use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -182,7 +181,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         // Rechnungsdatum prüfen, wenn vom Server zurückgegeben
         if ($invoice->date instanceof DateTimeImmutable) {
-            self::assertSame($invoiceOpts->date?->format('Y-m-d'), $invoice->date?->format('Y-m-d'));
+            self::assertSame($invoiceOpts->date->format('Y-m-d'), $invoice->date->format('Y-m-d'));
         }
 
         // Währung prüfen, wenn zurückgegeben
@@ -488,7 +487,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $binary = $billomat->invoices->pdf(
             id: $invoiceId,
-            type: null,
             rawPdf: true,
         );
 

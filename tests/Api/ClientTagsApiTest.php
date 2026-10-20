@@ -8,10 +8,12 @@ use Justpilot\Billomat\Api\ClientTagCreateOptions;
 use Justpilot\Billomat\Api\ClientTagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientTag;
 use Justpilot\Billomat\Model\ClientTagCloudEntry;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -22,6 +24,9 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ClientTagCreateOptions::class)]
 #[CoversClass(ClientTag::class)]
 #[CoversClass(ClientTagCloudEntry::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class ClientTagsApiTest extends TestCase
 {
     #[Test]

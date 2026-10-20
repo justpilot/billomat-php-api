@@ -6,6 +6,24 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-20
+
+### Breaking Changes
+- **Symfony 7.4 wird nicht mehr unterstützt.** Alle `symfony/*`-Abhängigkeiten verlangen jetzt `^8.1`; `symfony/http-foundation` mindestens `^8.1.7`. Die öffentliche SDK-API ist unverändert. **Migration:** Projekte auf Symfony 8.1+ können ohne Codeänderung auf `^3.0` wechseln; Projekte auf Symfony 7.x bleiben auf `^2.1`.
+
+### Removed
+- Ungenutzte Laufzeit-Abhängigkeiten `symfony/serializer` und `symfony/options-resolver` entfernt. Weder `src/` noch die Tests haben sie verwendet; Konsumenten installieren dadurch weniger transitive Pakete.
+
+### Security
+- **CVE-2026-108082** (ReDoS in `HeaderUtils::split()` über den `Cache-Control`-Header) in `symfony/http-foundation` ist durch die neue Untergrenze `^8.1.7` ausgeschlossen. Das SDK nutzt aus `http-foundation` nur die `Response::HTTP_*`-Konstanten und war deshalb nicht direkt angreifbar; `composer audit` hat bei Konsumenten trotzdem angeschlagen.
+
+### Build
+- Dev-Tooling aktualisiert: PHPUnit 12.5 → 13.4, Infection 0.29 → 0.35, PHPStan 2.2 → 2.3 (Extensions 2.1), Rector 2.4 → 2.7, PHP-CS-Fixer 3.95.27.
+- `rector.php`: Das in Rector 2.7 entfernte `PHPUnitSetList::PHPUNIT_100` wurde durch `withComposerBased(phpunit: true)` ersetzt (wählt die Regeln passend zur installierten PHPUnit-Version). Neue Rector-Regeln haben redundante `@return $this`-Docblocks und überflüssige `null`-Named-Args entfernt.
+- CI-Matrix: Symfony-7.4-Job entfernt, Floor ist jetzt Symfony 8.1.
+- **Mutation-Testing im CI wieder lauffähig.** Unter Coverage hat PHPUnit 442 Unit-Tests als „Risky“ geflaggt (inzidentell ausgeführte Klassen wie `BillomatConfig`, `BillomatHttpClient`, `ScalarCaster` ohne Coverage-Metadaten), wodurch Infection schon beim initialen Testlauf abbrach. 86 Testklassen haben die fehlenden `#[UsesClass]`-Attribute erhalten; die Suite läuft unter Coverage jetzt ohne Risky-Tests.
+- `infection.json5`: `minMsi`/`minCoveredMsi` von 70/75 auf 60 gesenkt. Die alten Schwellen wurden wegen des Abbruchs nie geprüft; der tatsächliche Score liegt bei 62 %. Die Schwellen dienen jetzt als Untergrenze gegen Regressionen und sollen mit besseren Tests schrittweise angehoben werden.
+
 ## [2.1.1] - 2026-06-04
 
 ### Fixed

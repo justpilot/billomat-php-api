@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Offer::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(OfferStatus::class)]
+#[UsesClass(OfferItem::class)]
 final class OfferTest extends TestCase
 {
     #[Test]

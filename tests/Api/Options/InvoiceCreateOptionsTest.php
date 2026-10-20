@@ -12,9 +12,11 @@ use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoiceCreateOptions::class)]
+#[UsesClass(InvoiceItemCreateOptions::class)]
 final class InvoiceCreateOptionsTest extends TestCase
 {
     #[Test]

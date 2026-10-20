@@ -7,11 +7,13 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\ActivitiesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Activity;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -23,6 +25,9 @@ use const PHP_URL_QUERY;
 #[CoversClass(Activity::class)]
 #[CoversClass(Page::class)]
 #[CoversClass(PageInfo::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class ActivitiesApiTest extends TestCase
 {
     #[Test]

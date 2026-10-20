@@ -1,6 +1,6 @@
 # Testing
 
-Das SDK wird vollständig mit **PHPUnit 12** getestet. Es gibt zwei Test-Arten:
+Das SDK wird vollständig mit **PHPUnit 13** getestet. Es gibt zwei Test-Arten:
 
 - **Unit-Tests** unter `tests/` (außer `tests/Integration/`) — mocken die HTTP-Ebene mit Symfonys `MockHttpClient`. Benötigen keine Credentials, laufen in jedem Setup.
 - **Integrationstests** unter `tests/Integration/` — sprechen den realen Billomat-Sandbox an. Werden ohne Credentials automatisch übersprungen.

@@ -10,14 +10,17 @@ use Justpilot\Billomat\Api\LetterEmailOptions;
 use Justpilot\Billomat\Api\LettersApi;
 use Justpilot\Billomat\Api\LetterUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterPdf;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -31,6 +34,10 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Letter::class)]
 #[CoversClass(LetterPdf::class)]
 #[CoversClass(LetterStatus::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class LettersApiTest extends TestCase
 {
     #[Test]

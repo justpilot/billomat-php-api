@@ -66,9 +66,6 @@ final class ConfirmationCreateOptions
      */
     private array $items = [];
 
-    /**
-     * @return $this
-     */
     public function addItem(ConfirmationItemCreateOptions $item): self
     {
         $this->items[] = $item;

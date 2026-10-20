@@ -75,9 +75,6 @@ final class OfferCreateOptions
      */
     private array $items = [];
 
-    /**
-     * @return $this
-     */
     public function addItem(OfferItemCreateOptions $item): self
     {
         $this->items[] = $item;

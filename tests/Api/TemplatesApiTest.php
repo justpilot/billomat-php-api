@@ -9,6 +9,7 @@ use Justpilot\Billomat\Api\TemplatesApi;
 use Justpilot\Billomat\Api\TemplateUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
@@ -16,6 +17,7 @@ use Justpilot\Billomat\Model\Enum\TemplateType;
 use Justpilot\Billomat\Model\Template;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -24,6 +26,14 @@ use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(TemplatesApi::class)]
 #[CoversClass(Template::class)]
+#[UsesClass(TemplateCreateOptions::class)]
+#[UsesClass(TemplateUpdateOptions::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(TemplateDocumentType::class)]
+#[UsesClass(TemplateFormat::class)]
+#[UsesClass(TemplateType::class)]
 final class TemplatesApiTest extends TestCase
 {
     /**

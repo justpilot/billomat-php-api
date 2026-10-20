@@ -10,14 +10,17 @@ use Justpilot\Billomat\Api\ReminderEmailOptions;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\ReminderStatus;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderPdf;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -31,6 +34,10 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Reminder::class)]
 #[CoversClass(ReminderPdf::class)]
 #[CoversClass(ReminderStatus::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class RemindersApiTest extends TestCase
 {
     #[Test]

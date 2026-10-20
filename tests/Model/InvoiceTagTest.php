@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoiceTag::class)]
 #[CoversClass(InvoiceTagCloudEntry::class)]
+#[UsesClass(ScalarCaster::class)]
 final class InvoiceTagTest extends TestCase
 {
     #[Test]

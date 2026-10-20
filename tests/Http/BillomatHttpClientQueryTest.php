@@ -9,6 +9,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
  *  - keine leeren Werte
  */
 #[CoversClass(BillomatHttpClient::class)]
+#[UsesClass(BillomatConfig::class)]
 final class BillomatHttpClientQueryTest extends TestCase
 {
     /**

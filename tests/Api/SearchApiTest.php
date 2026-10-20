@@ -7,9 +7,11 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\SearchApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\SearchResult;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -19,6 +21,9 @@ use const PHP_URL_QUERY;
 
 #[CoversClass(SearchApi::class)]
 #[CoversClass(SearchResult::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class SearchApiTest extends TestCase
 {
     #[Test]

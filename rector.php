@@ -26,9 +26,10 @@ return RectorConfig::configure()
         SetList::CODE_QUALITY,
         SetList::DEAD_CODE,
         SetList::TYPE_DECLARATION,
-        PHPUnitSetList::PHPUNIT_100,
         PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
     ])
+    // Versionsspezifische PHPUnit-Regeln anhand der installierten PHPUnit-Version (ersetzt PHPUNIT_100 & Co.).
+    ->withComposerBased(phpunit: true)
     ->withImportNames(importDocBlockNames: true, importShortClasses: false)
     ->withCache(cacheDirectory: __DIR__ . '/build/rector');

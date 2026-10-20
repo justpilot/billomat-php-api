@@ -90,10 +90,10 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 ## Conventions
 
 - PHP 8.4+ only. Use `final readonly` for read models, `readonly` properties on `BillomatClient`, named arguments, enums (`src/Model/Enum/`), and constructor property promotion.
-- Symfony version support: **LTS + latest stable** — currently `^7.4 || ^8.0` on every `symfony/*` package. When a new minor ships, bump the upper bound; when a new LTS ships and the previous LTS leaves security support, raise the lower bound. CI exercises the floor (Symfony 7.4 LTS pinned via `extra.symfony.require` + Flex) and the ceiling (Symfony 8.x).
+- Symfony version support: **Symfony 8 only** — currently `^8.1` on every `symfony/*` package (`symfony/http-foundation` `^8.1.7` because of CVE-2026-108082). Raise the lower bound when a security fix requires it or an older minor leaves maintenance. CI exercises the floor (Symfony 8.1 pinned via `extra.symfony.require` + Flex) and the ceiling (latest Symfony 8.x).
 - `declare(strict_types=1);` at the top of every file.
 - All API classes are `final`; models are `final readonly`.
 - PSR-4: `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.
 - Unit tests use `Symfony\Component\HttpClient\MockHttpClient` + `MockResponse` to capture the outgoing request and assert URL/method/headers/body. Don't mock `BillomatHttpClient` itself.
-- Test methods use PHPUnit 12 attributes: `#[Test]` on each method (no `test_` prefix), `#[CoversClass]` on unit-test classes, `#[CoversNothing]` on integration tests, `#[DataProvider]` for providers. Assertions are called statically (`self::assertX()`).
+- Test methods use PHPUnit 13 attributes: `#[Test]` on each method (no `test_` prefix), `#[CoversClass]` on unit-test classes, `#[CoversNothing]` on integration tests, `#[DataProvider]` for providers. Assertions are called statically (`self::assertX()`).
 - Comments are in German throughout. Match the existing language when editing existing files; new files can follow the same style.

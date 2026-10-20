@@ -9,11 +9,13 @@ use Justpilot\Billomat\Api\FreeTextsApi;
 use Justpilot\Billomat\Api\ReminderTextsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\EmailTemplate;
 use Justpilot\Billomat\Model\FreeText;
 use Justpilot\Billomat\Model\ReminderText;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -26,6 +28,9 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(EmailTemplate::class)]
 #[CoversClass(FreeText::class)]
 #[CoversClass(ReminderText::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class TextResourcesApiTest extends TestCase
 {
     #[Test]

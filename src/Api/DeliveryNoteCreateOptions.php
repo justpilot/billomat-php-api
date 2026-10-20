@@ -65,9 +65,6 @@ final class DeliveryNoteCreateOptions
      */
     private array $items = [];
 
-    /**
-     * @return $this
-     */
     public function addItem(DeliveryNoteItemCreateOptions $item): self
     {
         $this->items[] = $item;

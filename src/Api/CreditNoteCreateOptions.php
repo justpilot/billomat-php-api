@@ -59,9 +59,6 @@ final class CreditNoteCreateOptions
      */
     private array $items = [];
 
-    /**
-     * @return $this
-     */
     public function addItem(CreditNoteItemCreateOptions $item): self
     {
         $this->items[] = $item;

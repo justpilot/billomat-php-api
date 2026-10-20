@@ -599,7 +599,6 @@ final class InvoicesApiTest extends TestCase
 
         $result = $api->pdf(
             id: 777,
-            type: null,
             rawPdf: true
         );
 

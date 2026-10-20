@@ -28,26 +28,24 @@
   },
   "require": {
     "php": "^8.4",
-    "symfony/http-client": "^7.4 || ^8.0",
-    "symfony/serializer": "^7.4 || ^8.0",
-    "symfony/options-resolver": "^7.4 || ^8.0",
-    "symfony/http-foundation": "^7.4 || ^8.0"
+    "symfony/http-client": "^8.1",
+    "symfony/http-foundation": "^8.1.7"
   },
   "require-dev": {
     "fakerphp/faker": "^1.24",
-    "friendsofphp/php-cs-fixer": "^3.65",
-    "infection/infection": "^0.29",
+    "friendsofphp/php-cs-fixer": "^3.95",
+    "infection/infection": "^0.35",
     "phpstan/extension-installer": "^1.4",
-    "phpstan/phpstan": "^2.1",
-    "phpstan/phpstan-phpunit": "^2.0",
-    "phpstan/phpstan-strict-rules": "^2.0",
-    "phpstan/phpstan-symfony": "^2.0",
-    "phpunit/phpunit": "^12.4",
-    "rector/rector": "^2.0",
-    "symfony/css-selector": "^7.4 || ^8.0",
-    "symfony/dom-crawler": "^7.4 || ^8.0",
-    "symfony/dotenv": "^7.4 || ^8.0",
-    "symfony/var-dumper": "^7.4 || ^8.0"
+    "phpstan/phpstan": "^2.3",
+    "phpstan/phpstan-phpunit": "^2.1",
+    "phpstan/phpstan-strict-rules": "^2.1",
+    "phpstan/phpstan-symfony": "^2.1",
+    "phpunit/phpunit": "^13.4",
+    "rector/rector": "^2.7",
+    "symfony/css-selector": "^8.1",
+    "symfony/dom-crawler": "^8.1",
+    "symfony/dotenv": "^8.1",
+    "symfony/var-dumper": "^8.1"
   },
   "autoload": {
     "psr-4": {

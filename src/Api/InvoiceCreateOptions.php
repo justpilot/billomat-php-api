@@ -280,8 +280,6 @@ final class InvoiceCreateOptions
 
     /**
      * Fügt eine Rechnungsposition hinzu.
-     *
-     * @return $this
      */
     public function addItem(InvoiceItemCreateOptions $item): self
     {

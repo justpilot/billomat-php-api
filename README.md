@@ -34,7 +34,7 @@ Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.
 
 - PHP 8.4 oder neuer
 - Composer
-- Symfony-Komponenten: aktuelles LTS (`^7.4`) oder Latest Stable (`^8.0`). Ältere Symfony-Versionen werden nicht unterstützt.
+- Symfony-Komponenten ab Version 8.1 (`^8.1`). Symfony 7.x wird nicht mehr unterstützt.
 - Ein Billomat-Account mit aktiviertem API-Zugriff
 - Ein API-Schlüssel aus den Account-Einstellungen unter `https://<billomatId>.billomat.net/app/settings/api`
 

@@ -6,6 +6,20 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Changed
+- **Breaking: Symfony 7.4 wird nicht mehr unterstützt.** Alle `symfony/*`-Abhängigkeiten verlangen jetzt `^8.1`; `symfony/http-foundation` mindestens `^8.1.7`. Projekte auf Symfony 7.x bleiben auf v2.x.
+
+### Removed
+- Ungenutzte Laufzeit-Abhängigkeiten `symfony/serializer` und `symfony/options-resolver` entfernt. Weder `src/` noch die Tests haben sie verwendet; Konsumenten installieren dadurch weniger transitive Pakete.
+
+### Security
+- **CVE-2026-108082** (ReDoS in `HeaderUtils::split()` über den `Cache-Control`-Header) in `symfony/http-foundation` ist durch die neue Untergrenze `^8.1.7` ausgeschlossen. Das SDK nutzt aus `http-foundation` nur die `Response::HTTP_*`-Konstanten und war deshalb nicht direkt angreifbar; `composer audit` hat bei Konsumenten trotzdem angeschlagen.
+
+### Build
+- Dev-Tooling aktualisiert: PHPUnit 12.5 → 13.4, Infection 0.29 → 0.35, PHPStan 2.2 → 2.3 (Extensions 2.1), Rector 2.4 → 2.7, PHP-CS-Fixer 3.95.27.
+- `rector.php`: Das in Rector 2.7 entfernte `PHPUnitSetList::PHPUNIT_100` wurde durch `withComposerBased(phpunit: true)` ersetzt (wählt die Regeln passend zur installierten PHPUnit-Version). Neue Rector-Regeln haben redundante `@return $this`-Docblocks und überflüssige `null`-Named-Args entfernt.
+- CI-Matrix: Symfony-7.4-Job entfernt, Floor ist jetzt Symfony 8.1.
+
 ## [2.1.1] - 2026-06-04
 
 ### Fixed

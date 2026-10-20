@@ -23,6 +23,9 @@ final readonly class ReminderText
         public ?string $subject = null,
         public ?string $header = null,
         public ?string $footer = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $dueDays = null,
         public ?int $sort = null,
         public ?string $chargeName = null,

@@ -17,6 +17,9 @@ final readonly class IncomingProperty
         public string $name,
         public ?PropertyType $type,
         public ?string $defaultValue = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `position` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $position = null,
         public ?bool $isNvl = null,
         public ?string $customfield = null,

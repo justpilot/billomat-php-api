@@ -22,8 +22,17 @@ final readonly class User
         public ?string $firstName = null,
         public ?string $lastName = null,
         public ?string $salutation = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `phone` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $phone = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `mobile` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $mobile = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `fax` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $fax = null,
         public ?int $roleId = null,
         public ?DateTimeImmutable $created = null,

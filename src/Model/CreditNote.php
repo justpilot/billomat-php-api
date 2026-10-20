@@ -53,6 +53,9 @@ final readonly class CreditNote
         public ?int $freeTextId = null,
         public ?int $templateId = null,
         public array $taxes = [],
+        /**
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         public array $items = [],
         public ?DateTimeImmutable $updated = null,

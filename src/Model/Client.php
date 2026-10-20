@@ -166,7 +166,11 @@ final readonly class Client
         public ?string $defaultPaymentTypes = null,
         /** Kundenportal aktiviert? */
         public ?bool $enableCustomerportal = null,
-        /** Persönliche URL zum Kundenportal. */
+        /**
+         * Persönliche URL zum Kundenportal.
+         *
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         /** Brutto-Umsatz (read-only Auswertungsfeld). */
         public ?float $revenueGross = null,

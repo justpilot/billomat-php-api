@@ -55,7 +55,11 @@ final readonly class InvoiceItem
         public ?float $totalGrossUnreduced,
         /** Unreduzierter Gesamtbetrag netto. */
         public ?float $totalNetUnreduced,
-        /** Erstellungszeitpunkt der Position. */
+        /**
+         * Erstellungszeitpunkt der Position.
+         *
+         * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $created,
         public ?string $customfield = null,
     ) {

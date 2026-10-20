@@ -28,9 +28,21 @@ final readonly class Reminder
         public ?int $contactId = null,
         public ?int $invoiceId = null,
         public ?DateTimeImmutable $created = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `reminder_number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $reminderNumber = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $number = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $numberPre = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_length` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $numberLength = null,
         public ?ReminderStatus $status = null,
         public ?DateTimeImmutable $date = null,
@@ -42,8 +54,14 @@ final readonly class Reminder
         public ?string $intro = null,
         public ?string $note = null,
         public ?float $totalGross = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNet = null,
         public ?string $currencyCode = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `quote` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $quote = null,
         public ?int $reminderTextId = null,
         public ?int $templateId = null,

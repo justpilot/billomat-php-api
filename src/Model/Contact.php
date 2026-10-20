@@ -33,6 +33,9 @@ final readonly class Contact
         public ?string $phone = null,
         public ?string $fax = null,
         public ?string $mobile = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $note = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,

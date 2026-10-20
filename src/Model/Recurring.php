@@ -39,6 +39,9 @@ final readonly class Recurring
         public ?float $discountRate = null,
         public ?int $discountDays = null,
         public ?string $name = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $numberPre = null,
         public ?string $title = null,
         public ?string $label = null,

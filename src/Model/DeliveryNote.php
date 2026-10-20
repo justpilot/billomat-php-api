@@ -38,13 +38,37 @@ final readonly class DeliveryNote
         public ?string $label = null,
         public ?string $intro = null,
         public ?string $note = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalGross = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNet = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `net_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?NetGross $netGross = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `reduction` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $reduction = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_gross_unreduced` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalGrossUnreduced = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net_unreduced` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNetUnreduced = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $currencyCode = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `quote` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $quote = null,
         /** Quell-Rechnung. */
         public ?int $invoiceId = null,
@@ -53,6 +77,9 @@ final readonly class DeliveryNote
         public ?int $freeTextId = null,
         public ?int $templateId = null,
         public array $taxes = [],
+        /**
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         public array $items = [],
         public ?DateTimeImmutable $updated = null,

@@ -33,12 +33,21 @@ final readonly class Article
         public ?float $salesPrice3 = null,
         public ?float $salesPrice4 = null,
         public ?float $salesPrice5 = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `unit` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $unit = null,
         public ?int $unitId = null,
         public ?float $purchasePrice = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `purchase_price_currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $purchasePriceCurrencyCode = null,
         public ?int $supplierId = null,
         public ?int $taxId = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `category_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $categoryId = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,

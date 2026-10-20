@@ -40,9 +40,21 @@ final readonly class Offer
         public ?int $validityDays = null,
         /** Vollständige Angebotsadresse (formatiert). */
         public ?string $address = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_rate` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $discountRate = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $discountDate = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $discountDays = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_amount` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $discountAmount = null,
         public ?string $title = null,
         public ?string $label = null,
@@ -59,6 +71,9 @@ final readonly class Offer
         public ?int $freeTextId = null,
         public ?int $templateId = null,
         public array $taxes = [],
+        /**
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         public array $items = [],
         public ?DateTimeImmutable $updated = null,

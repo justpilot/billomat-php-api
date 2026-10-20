@@ -114,7 +114,11 @@ final readonly class Invoice
         public array $taxes = [],
         /** Akzeptierte Zahlungsarten (kommasepariert, z. B. "CASH,BANK_TRANSFER"). */
         public ?string $paymentTypes = null,
-        /** URL zum Customer-Portal für diese Rechnung. */
+        /**
+         * URL zum Customer-Portal für diese Rechnung.
+         *
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         /** ID der Vorlage, mit der die Rechnung erzeugt/abgeschlossen wurde. */
         public ?int $templateId = null,

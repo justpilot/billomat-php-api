@@ -21,6 +21,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Spec-Audit ordnete `kunden/attribute` fälschlich `ClientPropertiesApi` (Definitionen) zu und meldete die fehlenden Attribut-Werte deshalb nicht.
 
 ### Deprecated
+- **71 Read-Model-Properties, die Billomat nicht (mehr) liefert und nicht dokumentiert** – sie waren immer `null` (bzw. `0.0`). Am Docblock jeweils mit `@deprecated` markiert, Entfernung in 4.0. Betroffen u. a.: `customerportalUrl` (Kunde, Rechnung, Angebot, Auftragsbestätigung, Gutschrift, Lieferschein, Brief), die Nummernfelder an `Letter` und `Reminder`, alle Beträge/Steuern an `DeliveryNote` und `DeliveryNoteItem`, `created` an Belegpositionen, `discount*` an `Offer`/`Confirmation`, `Incoming::$supplyDate`/`$dueDays`/`$paidAt`/`$intro`, `Article::$unit`/`$purchasePriceCurrencyCode`/`$categoryId`, `position` an den Attribut-Definitionen, `User::$phone`/`$mobile`/`$fax`, `TaxRate::$accountId`, `Country::$nameDe`/`$eu`, `ReminderText::$dueDays`, `Contact::$note`. Felder, die die Billomat-Doku noch beschreibt (z. B. `freeTextId`), bleiben unverändert.
 - **`DunningLevelsApi` / `$billomat->dunningLevels`.** `/dunning-levels` antwortet mit `404 resource not found` und ist in der Billomat-Doku nicht beschrieben. Mahnstufen über `ReminderTextsApi` lesen. Wird in 4.0 entfernt.
 
 ### Documentation

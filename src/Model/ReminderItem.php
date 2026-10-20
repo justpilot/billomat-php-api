@@ -29,8 +29,17 @@ final readonly class ReminderItem
         public float $unitPrice,
         public ?string $title,
         public ?string $description,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalGross,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNet,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $created,
         public ?string $customfield = null,
         public ?float $total = null,

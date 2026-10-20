@@ -20,7 +20,11 @@ final readonly class TaxRate
     public function __construct(
         /** Interne Billomat-ID des Steuersatzes. */
         public ?int $id,
-        /** ID des Accounts, zu dem der Steuersatz gehört. */
+        /**
+         * ID des Accounts, zu dem der Steuersatz gehört.
+         *
+         * @deprecated since 3.1 – Billomat liefert `account_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $accountId,
         /** Name des Steuersatzes, z. B. "MwSt". */
         public string $name,

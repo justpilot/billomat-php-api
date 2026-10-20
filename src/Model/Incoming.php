@@ -22,14 +22,26 @@ final readonly class Incoming
         public ?int $supplierId,
         public ?DateTimeImmutable $created = null,
         public ?DateTimeImmutable $date = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `supply_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $supplyDate = null,
         public ?DateTimeImmutable $dueDate = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $dueDays = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `paid_at` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $paidAt = null,
         public ?IncomingStatus $status = null,
         public ?string $incomingNumber = null,
         public ?string $address = null,
         public ?string $label = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `intro` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $intro = null,
         public ?string $note = null,
         public ?float $totalGross = null,

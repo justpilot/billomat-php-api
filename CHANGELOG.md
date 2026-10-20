@@ -6,8 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
-### Changed
-- **Breaking: Symfony 7.4 wird nicht mehr unterstützt.** Alle `symfony/*`-Abhängigkeiten verlangen jetzt `^8.1`; `symfony/http-foundation` mindestens `^8.1.7`. Projekte auf Symfony 7.x bleiben auf v2.x.
+## [3.0.0] - 2026-10-20
+
+### Breaking Changes
+- **Symfony 7.4 wird nicht mehr unterstützt.** Alle `symfony/*`-Abhängigkeiten verlangen jetzt `^8.1`; `symfony/http-foundation` mindestens `^8.1.7`. Die öffentliche SDK-API ist unverändert. **Migration:** Projekte auf Symfony 8.1+ können ohne Codeänderung auf `^3.0` wechseln; Projekte auf Symfony 7.x bleiben auf `^2.1`.
 
 ### Removed
 - Ungenutzte Laufzeit-Abhängigkeiten `symfony/serializer` und `symfony/options-resolver` entfernt. Weder `src/` noch die Tests haben sie verwendet; Konsumenten installieren dadurch weniger transitive Pakete.

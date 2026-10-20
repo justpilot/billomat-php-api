@@ -97,6 +97,7 @@ Konstruktor: `new ClientTagCreateOptions(int $clientId, string $name)`. Beide We
 | `id` | `?int` |
 | `clientId` | `int` |
 | `name` | `string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `ClientTagCloudEntry`
 

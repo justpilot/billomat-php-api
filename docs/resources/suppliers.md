@@ -163,6 +163,14 @@ Spiegelt `SupplierCreateOptions` exakt, jedoch ist `name` nicht mehr Pflicht und
 | `taxNumber`, `vatNumber` | `?string` |
 | `bankAccountNumber`, `bankAccountOwner`, `bankNumber`, `bankName`, `bankIban`, `bankBic` | `?string` |
 | `currencyCode` | `?string` |
+| `updated` | `?\DateTimeImmutable` |
+| `isEuCountry` | `?bool` |
+| `locale` | `?string` |
+| `creditorAccountNumber` | `?string` |
+| `creditorIdentifier` | `?string` |
+| `costsGross` | `?float` |
+| `costsNet` | `?float` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Supplier Tags
 
@@ -198,6 +206,7 @@ Ein `update()` gibt es nicht — Tags werden gelöscht und neu angelegt.
 | `id` | `?int` |
 | `supplierId` | `int` |
 | `name` | `string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ### Read-Modell: `SupplierTagCloudEntry`
 
@@ -251,6 +260,8 @@ Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt:
 | `type` | `?string` (rohes API-Feld, z. B. `TEXTFIELD`) |
 | `name` | `?string` (Name aus der Property-Definition) |
 | `value` | `mixed` |
+| `created`, `updated` | `?\DateTimeImmutable` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Verwendete Enums
 

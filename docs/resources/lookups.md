@@ -67,6 +67,9 @@ $eu = array_values(array_filter(
 | `name` | `?string` |
 | `nameDe` | `?string` |
 | `eu` | `?bool` |
+| `id` | `?int` |
+
+> **Veraltet seit 3.1:** `nameDe`, `eu`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ### `currencies`
 
@@ -85,6 +88,7 @@ $currencies = $billomat->currencies->list();
 | `code` | `string` |
 | `name` | `?string` |
 | `symbol` | `?string` |
+| `id` | `?int` |
 
 ### `units`
 
@@ -103,6 +107,8 @@ $piece = $billomat->units->get(42);
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
+| `created`, `updated` | `?\DateTimeImmutable` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ### `dunningLevels`
 
@@ -152,6 +158,13 @@ $all = $billomat->users->list();
 | `mobile` | `?string` |
 | `fax` | `?string` |
 | `roleId` | `?int` |
+| `created`, `updated` | `?\DateTimeImmutable` |
+| `locale` | `?string` |
+| `timezone` | `?string` |
+| `isAccountOwner` | `?bool` (Inhaber des Accounts) |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `phone`, `mobile`, `fax`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ### `emailTemplates`
 
@@ -179,6 +192,7 @@ $default = array_values(array_filter(
 | `isDefault` | `?bool` |
 | `type` | `?string` |
 | `bcc` | `?bool` |
+| `created`, `updated` | `?\DateTimeImmutable` |
 
 ### `freeTexts`
 
@@ -199,6 +213,10 @@ $blocks = $billomat->freeTexts->list();
 | `label` | `?string` |
 | `intro` | `?string` |
 | `note` | `?string` |
+| `created`, `updated` | `?\DateTimeImmutable` |
+| `type` | `?string` |
+| `name` | `?string` |
+| `isDefault` | `?bool` |
 
 ### `reminderTexts`
 
@@ -224,6 +242,9 @@ $texts = $billomat->reminderTexts->list(['order_by' => 'sorting+ASC']);
 | `chargeName` | `?string` |
 | `chargeDescription` | `?string` |
 | `chargeAmount` | `?float` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `dueDays`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ### `roles`
 

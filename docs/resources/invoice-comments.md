@@ -95,6 +95,11 @@ Konstruktor: `new InvoiceCommentCreateOptions(int $invoiceId, string $comment)`.
 | `userId` | `?int` | `null` bei System-Kommentaren |
 | `actionkey` | `?InvoiceCommentActionKey` | `null` bei unbekanntem oder fehlendem Wert |
 | `actionkeyRaw` | `?string` | Originaler API-String, auch wenn das Enum den Wert nicht kennt |
+| `public` | `?bool` |  |
+| `byClient` | `?bool` |  |
+| `emailId` | `?int` |  |
+| `clientId` | `?int` |  |
+| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 ## Verwendetes Enum: `InvoiceCommentActionKey`
 

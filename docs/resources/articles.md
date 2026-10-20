@@ -156,6 +156,15 @@ Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und
 | `supplierId` | `?int` |
 | `taxId` | `?int` |
 | `categoryId` | `?int` |
+| `updated` | `?\DateTimeImmutable` |
+| `archived` | `?bool` |
+| `type` | `?ArticleType` |
+| `revenueAccountNumber` | `?string` |
+| `costCenter` | `?string` |
+| `purchasePriceNetGross` | `?NetGross` (Ob `purchasePrice` netto oder brutto ist) |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `unit`, `purchasePriceCurrencyCode`, `categoryId`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Article Tags
 
@@ -193,6 +202,7 @@ Beide Werte sind Pflicht und werden über den Konstruktor gesetzt:
 | `id` | `?int` |
 | `articleId` | `int` |
 | `name` | `string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ### Read-Modell: `ArticleTagCloudEntry`
 
@@ -246,6 +256,8 @@ Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt:
 | `type` | `?string` (rohes API-Feld, z. B. `TEXTFIELD`) |
 | `name` | `?string` (Name aus der Property-Definition) |
 | `value` | `mixed` |
+| `created`, `updated` | `?\DateTimeImmutable` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Verwendete Enums
 

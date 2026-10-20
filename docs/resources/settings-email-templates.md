@@ -65,6 +65,7 @@ Liefert `null` bei 404.
 | `isDefault` | `is_default` | `?bool` |
 | `type` | `type` | `?string` |
 | `bcc` | `bcc` | `?bool` |
+| `created`, `updated` | `?\DateTimeImmutable` |  |
 
 > Billomat liefert den Nachrichtentext im Feld `text`; das SDK stellt ihn weiterhin als `$body` bereit. Ein Feld `from` liefert die API nicht mehr — `fromAddress` ist daher in der Regel `null` und bleibt nur aus Kompatibilitätsgründen erhalten.
 

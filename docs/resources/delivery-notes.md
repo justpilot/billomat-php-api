@@ -308,6 +308,11 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
 | `customerportalUrl` | `?string` |
 | `items` | `list<DeliveryNoteItem>` |
+| `updated` | `?\DateTimeImmutable` |
+| `offerId` | `?int` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `totalGross`, `totalNet`, `netGross`, `reduction`, `totalGrossUnreduced`, `totalNetUnreduced`, `currencyCode`, `quote`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `DeliveryNoteItem`
 
@@ -325,6 +330,9 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 | `type` | `?InvoiceItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
 | `created` | `?\DateTimeImmutable` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `unitPrice`, `taxName`, `taxRate`, `reduction`, `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced`, `created`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null` (`unitPrice`: immer `0.0`). Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `DeliveryNoteComment`
 
@@ -339,10 +347,15 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 | `userId` | `?int` |
 | `actionkey` | `?DeliveryNoteCommentActionKey` |
 | `actionkeyRaw` | `?string` — Roh-Wert bei unbekanntem `actionkey` |
+| `public` | `?bool` |
+| `byClient` | `?bool` |
+| `emailId` | `?int` |
+| `clientId` | `?int` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `DeliveryNoteTag`
 
-`final readonly`. Felder: `id` (`?int`), `deliveryNoteId` (`int`), `name` (`string`).
+`final readonly`. Felder: `id` (`?int`), `deliveryNoteId` (`int`), `name` (`string`), `customfield` (`?string`).
 
 ## Read-Modell: `DeliveryNoteTagCloudEntry`
 

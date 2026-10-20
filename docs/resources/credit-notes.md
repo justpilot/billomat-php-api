@@ -364,6 +364,11 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
 | `customerportalUrl` | `?string` |
 | `items` | `list<CreditNoteItem>` |
+| `updated` | `?\DateTimeImmutable` |
+| `totalReduction` | `?float` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `customerportalUrl`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `CreditNoteItem`
 
@@ -381,6 +386,10 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `totalGross`, `totalNet` | `?float` |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
 | `created` | `?\DateTimeImmutable` |
+| `taxRateReverseCharge` | `?float` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+
+> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `CreditNoteComment`
 
@@ -393,6 +402,11 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `userId` | `?int` |
 | `actionkey` | `?CreditNoteCommentActionKey` |
 | `actionkeyRaw` | `?string` (Roh-Wert, falls Billomat einen unbekannten Key liefert) |
+| `public` | `?bool` |
+| `byClient` | `?bool` |
+| `emailId` | `?int` |
+| `clientId` | `?int` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `CreditNoteTag`
 
@@ -401,6 +415,7 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `id` | `?int` |
 | `creditNoteId` | `int` |
 | `name` | `string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `CreditNoteTagCloudEntry`
 
@@ -422,6 +437,13 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `comment`, `transactionPurpose` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
+| `currencyCode` | `?string` |
+| `quote` | `?float` |
+| `paymentGroup` | `?string` |
+| `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
+| `finapiTransactionAmount` | `?float` (finAPI-Bankabgleich) |
+| `documentTitle` | `?string` |
+| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `CreditNotePdf`
 

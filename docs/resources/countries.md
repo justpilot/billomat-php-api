@@ -58,5 +58,8 @@ Lazy-Iteration über alle Seiten.
 | `name` | `?string` | `name` |
 | `nameDe` | `?string` | `name_de` |
 | `eu` | `?bool` | `eu` |
+| `id` | `?int` |  |
+
+> **Veraltet seit 3.1:** `nameDe`, `eu`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 `Country::fromArray($data)` hydratisiert aus dem Wire-Format; `Country::toArray()` schreibt snake_case zurück.

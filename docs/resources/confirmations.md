@@ -376,7 +376,7 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 
 ## Verwendete Enums
 
-- [`ConfirmationStatus`](../../src/Model/Enum/ConfirmationStatus.php): `DRAFT`, `OPEN`, `CLEARED`, `CANCELED`. Hat `label()` für deutsche Bezeichnung. Beachten: **kein** `ACCEPTED`/`REJECTED` wie beim Angebot.
+- [`ConfirmationStatus`](../../src/Model/Enum/ConfirmationStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Hat `label()` für deutsche Bezeichnung. Beachten: **kein** `ACCEPTED`/`REJECTED` wie beim Angebot.
 - [`ConfirmationCommentActionKey`](../../src/Model/Enum/ConfirmationCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT` — schlanker als bei Offers (`WIN`/`LOSE` fehlen).
 - [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
 - [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.

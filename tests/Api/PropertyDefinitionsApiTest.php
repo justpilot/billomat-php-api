@@ -57,7 +57,7 @@ final class PropertyDefinitionsApiTest extends TestCase
                 'client-properties' => [
                     'client-property' => [
                         ['id' => 1, 'name' => 'VAT-ID', 'type' => 'TEXTFIELD', 'position' => 1],
-                        ['id' => 2, 'name' => 'Kundengruppe', 'type' => 'TEXTAREA', 'position' => 2],
+                        ['id' => 2, 'name' => 'Kundengruppe', 'type' => 'TEXTAREA', 'position' => 2, 'is_nvl' => '1'],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
@@ -70,6 +70,8 @@ final class PropertyDefinitionsApiTest extends TestCase
         self::assertSame('VAT-ID', $props[0]->name);
         self::assertSame(PropertyType::TEXTFIELD, $props[0]->type);
         self::assertSame(2, $props[1]->position);
+        self::assertNull($props[0]->isNvl);
+        self::assertTrue($props[1]->isNvl);
     }
 
     #[Test]
@@ -147,6 +149,7 @@ final class PropertyDefinitionsApiTest extends TestCase
         $opts = new PropertyCreateOptions(name: 'Neues Feld');
         $opts->type = PropertyType::TEXTAREA;
         $opts->position = 5;
+        $opts->isNvl = true;
 
         $created = $api->create($opts);
 
@@ -158,6 +161,7 @@ final class PropertyDefinitionsApiTest extends TestCase
         self::assertSame('Neues Feld', $payload['client-property']['name']);
         self::assertSame('TEXTAREA', $payload['client-property']['type']);
         self::assertSame(5, $payload['client-property']['position']);
+        self::assertSame(1, $payload['client-property']['is_nvl']);
     }
 
     #[Test]

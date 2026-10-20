@@ -45,6 +45,14 @@ final readonly class Supplier
         public ?string $bankIban = null,
         public ?string $bankBic = null,
         public ?string $currencyCode = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?bool $isEuCountry = null,
+        public ?string $locale = null,
+        public ?string $creditorAccountNumber = null,
+        public ?string $creditorIdentifier = null,
+        public ?float $costsGross = null,
+        public ?float $costsNet = null,
     ) {
     }
 
@@ -80,8 +88,17 @@ final readonly class Supplier
             bankNumber: ScalarCaster::toStringOrNull($data['bank_number'] ?? null),
             bankName: ScalarCaster::toStringOrNull($data['bank_name'] ?? null),
             bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
-            bankBic: ScalarCaster::toStringOrNull($data['bank_bic'] ?? null),
+            // Billomat liefert den BIC als `bank_swift`; `bank_bic` nur als Fallback.
+            bankBic: ScalarCaster::toStringOrNull($data['bank_swift'] ?? $data['bank_bic'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            isEuCountry: ScalarCaster::toBoolOrNull($data['is_eu_country'] ?? null),
+            locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
+            creditorAccountNumber: ScalarCaster::toStringOrNull($data['creditor_account_number'] ?? null),
+            creditorIdentifier: ScalarCaster::toStringOrNull($data['creditor_identifier'] ?? null),
+            costsGross: ScalarCaster::toFloatOrNull($data['costs_gross'] ?? null),
+            costsNet: ScalarCaster::toFloatOrNull($data['costs_net'] ?? null),
         );
     }
 
@@ -119,6 +136,14 @@ final readonly class Supplier
             'bank_iban' => $this->bankIban,
             'bank_bic' => $this->bankBic,
             'currency_code' => $this->currencyCode,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'is_eu_country' => $this->isEuCountry,
+            'locale' => $this->locale,
+            'creditor_account_number' => $this->creditorAccountNumber,
+            'creditor_identifier' => $this->creditorIdentifier,
+            'costs_gross' => $this->costsGross,
+            'costs_net' => $this->costsNet,
         ];
     }
 }

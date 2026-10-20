@@ -33,7 +33,16 @@ final readonly class Contact
         public ?string $phone = null,
         public ?string $fax = null,
         public ?string $mobile = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $note = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?string $name = null,
+        public ?string $address = null,
+        public ?string $www = null,
+        public ?string $locale = null,
     ) {
     }
 
@@ -60,6 +69,12 @@ final readonly class Contact
             fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
             mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            www: ScalarCaster::toStringOrNull($data['www'] ?? null),
+            locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
         );
     }
 
@@ -86,6 +101,12 @@ final readonly class Contact
             'fax' => $this->fax,
             'mobile' => $this->mobile,
             'note' => $this->note,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'name' => $this->name,
+            'address' => $this->address,
+            'www' => $this->www,
+            'locale' => $this->locale,
         ];
     }
 }

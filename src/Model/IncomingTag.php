@@ -15,6 +15,7 @@ final readonly class IncomingTag
         public ?int $id,
         public int $incomingId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class IncomingTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             incomingId: (int) ($data['incoming_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class IncomingTag
             'id' => $this->id,
             'incoming_id' => $this->incomingId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

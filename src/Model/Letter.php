@@ -22,9 +22,21 @@ final readonly class Letter
         public int $clientId,
         public ?int $contactId = null,
         public ?DateTimeImmutable $created = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `letter_number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $letterNumber = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $number = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $numberPre = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_length` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $numberLength = null,
         public ?LetterStatus $status = null,
         public ?DateTimeImmutable $date = null,
@@ -32,9 +44,18 @@ final readonly class Letter
         public ?string $subject = null,
         public ?string $label = null,
         public ?string $intro = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $note = null,
         public ?int $templateId = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?int $supplierId = null,
     ) {
     }
 
@@ -61,6 +82,9 @@ final readonly class Letter
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
         );
     }
 
@@ -87,6 +111,9 @@ final readonly class Letter
             'note' => $this->note,
             'template_id' => $this->templateId,
             'customerportal_url' => $this->customerportalUrl,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'supplier_id' => $this->supplierId,
         ];
     }
 }

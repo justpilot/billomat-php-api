@@ -36,7 +36,12 @@ final readonly class CreditNoteItem
         public ?float $totalNet,
         public ?float $totalGrossUnreduced,
         public ?float $totalNetUnreduced,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $created,
+        public ?string $customfield = null,
+        public ?float $taxRateReverseCharge = null,
     ) {
     }
 
@@ -65,6 +70,8 @@ final readonly class CreditNoteItem
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            taxRateReverseCharge: ScalarCaster::toFloatOrNull($data['tax_rate_reverse_charge'] ?? null),
         );
     }
 
@@ -93,6 +100,8 @@ final readonly class CreditNoteItem
             'total_gross_unreduced' => $this->totalGrossUnreduced,
             'total_net_unreduced' => $this->totalNetUnreduced,
             'created' => $this->created?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'tax_rate_reverse_charge' => $this->taxRateReverseCharge,
         ];
     }
 }

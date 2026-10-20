@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\NetGross;
 
 use const DATE_ATOM;
 
@@ -31,13 +33,29 @@ final readonly class Article
         public ?float $salesPrice3 = null,
         public ?float $salesPrice4 = null,
         public ?float $salesPrice5 = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `unit` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $unit = null,
         public ?int $unitId = null,
         public ?float $purchasePrice = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `purchase_price_currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $purchasePriceCurrencyCode = null,
         public ?int $supplierId = null,
         public ?int $taxId = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `category_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $categoryId = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?bool $archived = null,
+        public ?ArticleType $type = null,
+        public ?string $revenueAccountNumber = null,
+        public ?string $costCenter = null,
+        public ?NetGross $purchasePriceNetGross = null,
     ) {
     }
 
@@ -68,6 +86,13 @@ final readonly class Article
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             taxId: ScalarCaster::toIntOrNull($data['tax_id'] ?? null),
             categoryId: ScalarCaster::toIntOrNull($data['category_id'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
+            type: ArticleType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
+            revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
+            costCenter: ScalarCaster::toStringOrNull($data['cost_center'] ?? null),
+            purchasePriceNetGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null) ?? ''),
         );
     }
 
@@ -98,6 +123,13 @@ final readonly class Article
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,
             'category_id' => $this->categoryId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'archived' => $this->archived,
+            'type' => $this->type?->value,
+            'revenue_account_number' => $this->revenueAccountNumber,
+            'cost_center' => $this->costCenter,
+            'purchase_price_net_gross' => $this->purchasePriceNetGross?->value,
         ];
     }
 }

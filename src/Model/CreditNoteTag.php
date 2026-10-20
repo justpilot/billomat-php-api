@@ -15,6 +15,7 @@ final readonly class CreditNoteTag
         public ?int $id,
         public int $creditNoteId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class CreditNoteTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             creditNoteId: (int) ($data['credit_note_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class CreditNoteTag
             'id' => $this->id,
             'credit_note_id' => $this->creditNoteId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

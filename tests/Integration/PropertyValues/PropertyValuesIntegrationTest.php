@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Tests\Integration\PropertyValues;
 
 use Justpilot\Billomat\Api\ArticleCreateOptions;
 use Justpilot\Billomat\Api\ArticlePropertyValueCreateOptions;
+use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
 use Justpilot\Billomat\Api\IncomingPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
@@ -13,6 +15,7 @@ use Justpilot\Billomat\Api\SupplierCreateOptions;
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\ArticlePropertyValue;
+use Justpilot\Billomat\Model\ClientPropertyValue;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 use Justpilot\Billomat\Model\IncomingPropertyValue;
 use Justpilot\Billomat\Model\SupplierPropertyValue;
@@ -22,8 +25,8 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 
 /**
- * Sammel-Test: Werte für die drei PropertyValue-Ressourcen
- * (Article, Supplier, Incoming) lebenszyklus-getestet:
+ * Sammel-Test: Werte für die vier PropertyValue-Ressourcen
+ * (Article, Client, Supplier, Incoming) lebenszyklus-getestet:
  *  Property-Definition → Parent-Resource → PropertyValue → cleanup beidseitig.
  */
 #[CoversNothing]
@@ -79,6 +82,40 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         } finally {
             $billomat->articles->delete($article->id);
             $billomat->articleProperties->delete($prop->id);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function canManageClientPropertyValuesInSandbox(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $propOpts = new PropertyCreateOptions(name: 'IT-CliProp-'.date('His'));
+        $propOpts->type = PropertyType::TEXTFIELD;
+        $prop = $billomat->clientProperties->create($propOpts);
+        self::assertNotNull($prop->id);
+
+        $clientOpts = new ClientCreateOptions();
+        $clientOpts->name = 'IT-PV-Kunde '.date('His');
+        $client = $billomat->clients->create($clientOpts);
+        self::assertNotNull($client->id);
+
+        try {
+            $value = $billomat->clientPropertyValues->create(new ClientPropertyValueCreateOptions(
+                clientId: $client->id,
+                clientPropertyId: $prop->id,
+                value: 'Testwert',
+            ));
+            self::assertNotNull($value->id);
+            self::assertSame($client->id, $value->clientId);
+
+            $values = $billomat->clientPropertyValues->list(['client_id' => $client->id]);
+            self::assertContainsOnlyInstancesOf(ClientPropertyValue::class, $values);
+            self::assertGreaterThanOrEqual(1, \count($values));
+        } finally {
+            $billomat->clients->delete($client->id);
+            $billomat->clientProperties->delete($prop->id);
         }
     }
 

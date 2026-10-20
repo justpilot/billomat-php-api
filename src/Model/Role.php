@@ -35,8 +35,9 @@ final readonly class Role
     public static function fromArray(array $data): self
     {
         $permissionKeys = [
-            'articles', 'clients', 'offers', 'confirmations', 'invoices',
-            'credit_notes', 'delivery_notes', 'reminders',
+            'articles', 'clients', 'suppliers', 'offers', 'confirmations', 'invoices',
+            'credit_notes', 'delivery_notes', 'reminders', 'incomings', 'letters',
+            'banking', 'net_income_statement', 'accounting_export',
             'settings_my_account', 'settings_documents', 'settings_configuration',
             'settings_administration', 'settings_addons', 'settings_my_addons',
         ];

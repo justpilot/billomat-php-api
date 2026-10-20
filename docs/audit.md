@@ -43,7 +43,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `einstellungen/freitexte` | Freitexte | ✓ | ✓ | — | — | ✓ |  |
 | `einstellungen/kunden-attribute` | Kunden-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/lieferanten-attribute` | Lieferanten-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts; SDK ergänzt ein zweites DunningLevelsApi für /dunning-levels. |
+| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts. DunningLevelsApi (/dunning-levels) ist deprecated – Endpoint antwortet mit 404. |
 | `einstellungen/rollen` | Rollen | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /roles. |
 | `einstellungen/steuerfreie-laender` | Steuerfreie Länder | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /country-taxes. |
 | `einstellungen/steuersaetze` | Steuersätze | ✓ | — | — | — | ✓ |  |
@@ -63,7 +63,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `gutschriften/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `gutschriften/zahlungen` | Zahlungen | ✓ | ✓ | ✓ | — | ✓ |  |
 | `kunden` | Kunden | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| `kunden/attribute` | Attribute | ✓ | ✓ | — | — | ✓ | Geteilte Doku unter properties.md. |
+| `kunden/attribute` | Attribute | ✓ | ✓ | ✓ | — | ✓ | Attribut-Werte (/client-property-values); Definitionen siehe einstellungen/kunden-attribute. |
 | `kunden/kontakte` | Kontakte | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `kunden/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `laender` | Länder | ✓ | ✓ | — | — | ✓ |  |

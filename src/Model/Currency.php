@@ -17,6 +17,7 @@ final readonly class Currency
         public string $code,
         public ?string $name = null,
         public ?string $symbol = null,
+        public ?int $id = null,
     ) {
     }
 
@@ -29,6 +30,7 @@ final readonly class Currency
             code: (string) ($data['code'] ?? $data['currency_code'] ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             symbol: ScalarCaster::toStringOrNull($data['symbol'] ?? null),
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
         );
     }
 
@@ -41,6 +43,7 @@ final readonly class Currency
             'code' => $this->code,
             'name' => $this->name,
             'symbol' => $this->symbol,
+            'id' => $this->id,
         ];
     }
 }

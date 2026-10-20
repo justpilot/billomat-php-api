@@ -17,6 +17,7 @@ final readonly class OfferTag
         public ?int $id,
         public int $offerId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -29,6 +30,7 @@ final readonly class OfferTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             offerId: (int) ($data['offer_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -41,6 +43,7 @@ final readonly class OfferTag
             'id' => $this->id,
             'offer_id' => $this->offerId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

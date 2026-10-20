@@ -29,9 +29,21 @@ final readonly class ReminderItem
         public float $unitPrice,
         public ?string $title,
         public ?string $description,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalGross,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNet,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $created,
+        public ?string $customfield = null,
+        public ?float $total = null,
+        public ?bool $isCharge = null,
     ) {
     }
 
@@ -53,6 +65,9 @@ final readonly class ReminderItem
             totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            total: ScalarCaster::toFloatOrNull($data['total'] ?? null),
+            isCharge: ScalarCaster::toBoolOrNull($data['is_charge'] ?? null),
         );
     }
 
@@ -74,6 +89,9 @@ final readonly class ReminderItem
             'total_gross' => $this->totalGross,
             'total_net' => $this->totalNet,
             'created' => $this->created?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'total' => $this->total,
+            'is_charge' => $this->isCharge,
         ];
     }
 }

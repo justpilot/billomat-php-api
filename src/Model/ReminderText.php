@@ -9,7 +9,11 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 /**
  * Mahn-Textbaustein.
  *
- * Doku: https://www.billomat.com/en/api/settings/reminder-texts/
+ * Doku: https://www.billomat.com/api/einstellungen/mahnstufen/
+ *
+ * Billomat liefert die Reihenfolge als `sorting` (früher `sort`) und optional
+ * eine Mahngebühr (`charge_*`). `due_days` liefert die API nicht mehr;
+ * `$dueDays` bleibt nur aus Kompatibilitätsgründen erhalten.
  */
 final readonly class ReminderText
 {
@@ -19,8 +23,15 @@ final readonly class ReminderText
         public ?string $subject = null,
         public ?string $header = null,
         public ?string $footer = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $dueDays = null,
         public ?int $sort = null,
+        public ?string $chargeName = null,
+        public ?string $chargeDescription = null,
+        public ?float $chargeAmount = null,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -36,7 +47,11 @@ final readonly class ReminderText
             header: ScalarCaster::toStringOrNull($data['header'] ?? null),
             footer: ScalarCaster::toStringOrNull($data['footer'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
-            sort: ScalarCaster::toIntOrNull($data['sort'] ?? null),
+            sort: ScalarCaster::toIntOrNull($data['sorting'] ?? $data['sort'] ?? null),
+            chargeName: ScalarCaster::toStringOrNull($data['charge_name'] ?? null),
+            chargeDescription: ScalarCaster::toStringOrNull($data['charge_description'] ?? null),
+            chargeAmount: ScalarCaster::toFloatOrNull($data['charge_amount'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -53,6 +68,10 @@ final readonly class ReminderText
             'footer' => $this->footer,
             'due_days' => $this->dueDays,
             'sort' => $this->sort,
+            'charge_name' => $this->chargeName,
+            'charge_description' => $this->chargeDescription,
+            'charge_amount' => $this->chargeAmount,
+            'customfield' => $this->customfield,
         ];
     }
 }

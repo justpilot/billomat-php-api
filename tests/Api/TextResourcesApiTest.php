@@ -40,7 +40,15 @@ final class TextResourcesApiTest extends TestCase
             $body = json_encode([
                 'email-templates' => [
                     'email-template' => [
-                        ['id' => 1, 'name' => 'Standard Rechnung', 'subject' => 'Ihre Rechnung'],
+                        [
+                            'id' => '1',
+                            'name' => 'Standard Rechnung',
+                            'type' => 'INVOICES',
+                            'subject' => 'Ihre Rechnung',
+                            'text' => 'Im Anhang Ihre Rechnung.',
+                            'bcc' => '1',
+                            'is_default' => '1',
+                        ],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -56,6 +64,10 @@ final class TextResourcesApiTest extends TestCase
         $templates = $api->list();
         self::assertCount(1, $templates);
         self::assertSame('Standard Rechnung', $templates[0]->name);
+        self::assertSame('INVOICES', $templates[0]->type);
+        self::assertSame('Im Anhang Ihre Rechnung.', $templates[0]->body);
+        self::assertTrue($templates[0]->bcc);
+        self::assertTrue($templates[0]->isDefault);
     }
 
     #[Test]
@@ -90,7 +102,15 @@ final class TextResourcesApiTest extends TestCase
             $body = json_encode([
                 'reminder-texts' => [
                     'reminder-text' => [
-                        ['id' => 1, 'name' => '1. Mahnung', 'due_days' => 14],
+                        [
+                            'id' => '1',
+                            'name' => '1. Mahnung',
+                            'sorting' => '2',
+                            'charge_name' => 'Mahngebühr',
+                            'charge_description' => 'Pauschale',
+                            'charge_amount' => '5.5',
+                            'due_days' => 14,
+                        ],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -106,5 +126,9 @@ final class TextResourcesApiTest extends TestCase
         $texts = $api->list();
         self::assertCount(1, $texts);
         self::assertSame(14, $texts[0]->dueDays);
+        self::assertSame(2, $texts[0]->sort);
+        self::assertSame('Mahngebühr', $texts[0]->chargeName);
+        self::assertSame('Pauschale', $texts[0]->chargeDescription);
+        self::assertSame(5.5, $texts[0]->chargeAmount);
     }
 }

@@ -166,12 +166,21 @@ final readonly class Client
         public ?string $defaultPaymentTypes = null,
         /** Kundenportal aktiviert? */
         public ?bool $enableCustomerportal = null,
-        /** Persönliche URL zum Kundenportal. */
+        /**
+         * Persönliche URL zum Kundenportal.
+         *
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         /** Brutto-Umsatz (read-only Auswertungsfeld). */
         public ?float $revenueGross = null,
         /** Netto-Umsatz (read-only Auswertungsfeld). */
-        public ?float $revenueNet = null
+        public ?float $revenueNet = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?string $facturxIdentifier = null,
+        public ?string $sellerIdentifier = null,
+        public ?bool $digExclude = null,
     ) {
     }
 
@@ -239,6 +248,11 @@ final readonly class Client
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             revenueGross: ScalarCaster::toFloatOrNull($data['revenue_gross'] ?? null),
             revenueNet: ScalarCaster::toFloatOrNull($data['revenue_net'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            facturxIdentifier: ScalarCaster::toStringOrNull($data['facturx_identifier'] ?? null),
+            sellerIdentifier: ScalarCaster::toStringOrNull($data['seller_identifier'] ?? null),
+            digExclude: ScalarCaster::toBoolOrNull($data['dig_exclude'] ?? null),
         );
     }
 
@@ -308,6 +322,11 @@ final readonly class Client
             'customerportal_url' => $this->customerportalUrl,
             'revenue_gross' => $this->revenueGross,
             'revenue_net' => $this->revenueNet,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'facturx_identifier' => $this->facturxIdentifier,
+            'seller_identifier' => $this->sellerIdentifier,
+            'dig_exclude' => $this->digExclude,
         ];
     }
 }

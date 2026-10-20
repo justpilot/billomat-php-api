@@ -40,9 +40,21 @@ final readonly class Offer
         public ?int $validityDays = null,
         /** Vollständige Angebotsadresse (formatiert). */
         public ?string $address = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_rate` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $discountRate = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $discountDate = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $discountDays = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `discount_amount` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $discountAmount = null,
         public ?string $title = null,
         public ?string $label = null,
@@ -59,8 +71,15 @@ final readonly class Offer
         public ?int $freeTextId = null,
         public ?int $templateId = null,
         public array $taxes = [],
+        /**
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         public array $items = [],
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?DateTimeImmutable $validityDate = null,
+        public ?float $totalReduction = null,
     ) {
     }
 
@@ -144,6 +163,10 @@ final readonly class Offer
             taxes: $taxes,
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             items: $items,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            validityDate: ScalarCaster::toDateTimeOrNull($data['validity_date'] ?? null),
+            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
         );
     }
 
@@ -184,6 +207,10 @@ final readonly class Offer
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
             'customerportal_url' => $this->customerportalUrl,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'validity_date' => $this->validityDate?->format('Y-m-d'),
+            'total_reduction' => $this->totalReduction,
         ];
 
         if ([] !== $this->taxes) {

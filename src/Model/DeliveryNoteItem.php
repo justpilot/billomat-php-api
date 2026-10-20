@@ -24,19 +24,47 @@ final readonly class DeliveryNoteItem
         public ?int $position,
         public ?string $unit,
         public float $quantity,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `unit_price` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `0.0`. Wird in 4.0 entfernt.
+         */
         public float $unitPrice,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `tax_name` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $taxName,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `tax_rate` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $taxRate,
         public ?bool $taxChangedManually,
         public ?string $title,
         public ?string $description,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `reduction` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $reduction,
         public ?InvoiceItemType $type,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalGross,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNet,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_gross_unreduced` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalGrossUnreduced,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net_unreduced` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNetUnreduced,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $created,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -65,6 +93,7 @@ final readonly class DeliveryNoteItem
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -93,6 +122,7 @@ final readonly class DeliveryNoteItem
             'total_gross_unreduced' => $this->totalGrossUnreduced,
             'total_net_unreduced' => $this->totalNetUnreduced,
             'created' => $this->created?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
         ];
     }
 }

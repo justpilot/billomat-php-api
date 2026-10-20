@@ -17,6 +17,7 @@ final readonly class ConfirmationTag
         public ?int $id,
         public int $confirmationId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -29,6 +30,7 @@ final readonly class ConfirmationTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             confirmationId: (int) ($data['confirmation_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -41,6 +43,7 @@ final readonly class ConfirmationTag
             'id' => $this->id,
             'confirmation_id' => $this->confirmationId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

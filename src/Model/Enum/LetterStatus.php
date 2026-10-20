@@ -8,11 +8,14 @@ namespace Justpilot\Billomat\Model\Enum;
  * Status eines Briefs (Letter).
  *
  * Doku: https://www.billomat.com/en/api/letters/
+ *
+ * Nach `complete()` liefert Billomat COMPLETED (Stand 2026-10).
  */
 enum LetterStatus: string
 {
     case DRAFT = 'DRAFT';
     case OPEN = 'OPEN';
+    case COMPLETED = 'COMPLETED';
     case CLEARED = 'CLEARED';
     case CANCELED = 'CANCELED';
 
@@ -26,6 +29,7 @@ enum LetterStatus: string
         return match ($this) {
             self::DRAFT => 'Entwurf',
             self::OPEN => 'Offen',
+            self::COMPLETED => 'Abgeschlossen',
             self::CLEARED => 'Erledigt',
             self::CANCELED => 'Storniert',
         };

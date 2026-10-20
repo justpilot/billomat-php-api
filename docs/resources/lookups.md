@@ -10,7 +10,7 @@ API-Wrapper für die elf read-only Lookup-Endpoints — Stammdaten und Account-E
 $billomat->countries           // ISO-Länderliste
 $billomat->currencies          // Währungsliste
 $billomat->units               // Einheiten (Stück, Stunde, …)
-$billomat->dunningLevels       // Mahnstufen (numerisch)
+$billomat->dunningLevels       // deprecated: /dunning-levels antwortet mit 404
 $billomat->users               // Mitarbeiter/Benutzer des Accounts
 $billomat->roles               // Rollen samt Permission-Map
 $billomat->emailTemplates      // E-Mail-Vorlagen
@@ -106,6 +106,8 @@ $piece = $billomat->units->get(42);
 
 ### `dunningLevels`
 
+> **Deprecated seit 3.1.** Billomat liefert `/dunning-levels` nicht (mehr) aus (`404 resource not found`) und dokumentiert den Endpoint nicht. Mahnstufen über `reminderTexts` lesen. Wird in 4.0 entfernt.
+
 Endpoint: `/dunning-levels`. `list($filters?)` und `get($id)`.
 
 ```php
@@ -165,7 +167,7 @@ $default = array_values(array_filter(
 
 #### Read-Modell: `EmailTemplate`
 
-`final readonly class EmailTemplate`. Das Wire-Feld `from` wird auf `fromAddress` gemappt (`from` ist in PHP ein Keyword).
+`final readonly class EmailTemplate`. Der Nachrichtentext kommt im Wire-Feld `text` und landet in `body`. `fromAddress` (Wire-Feld `from`) liefert Billomat nicht mehr und ist in der Regel `null`.
 
 | Property | Typ |
 |---|---|
@@ -175,6 +177,8 @@ $default = array_values(array_filter(
 | `body` | `?string` |
 | `fromAddress` | `?string` |
 | `isDefault` | `?bool` |
+| `type` | `?string` |
+| `bcc` | `?bool` |
 
 ### `freeTexts`
 
@@ -201,7 +205,7 @@ $blocks = $billomat->freeTexts->list();
 Endpoint: `/reminder-texts`. Textbausteine für Mahnungen — werden über `Reminder::$reminderTextId` referenziert (siehe [Reminders](reminders.md)).
 
 ```php
-$texts = $billomat->reminderTexts->list(['order_by' => 'sort+ASC']);
+$texts = $billomat->reminderTexts->list(['order_by' => 'sorting+ASC']);
 ```
 
 #### Read-Modell: `ReminderText`
@@ -217,6 +221,9 @@ $texts = $billomat->reminderTexts->list(['order_by' => 'sort+ASC']);
 | `footer` | `?string` |
 | `dueDays` | `?int` |
 | `sort` | `?int` |
+| `chargeName` | `?string` |
+| `chargeDescription` | `?string` |
+| `chargeAmount` | `?float` |
 
 ### `roles`
 

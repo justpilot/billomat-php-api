@@ -101,7 +101,7 @@ Every resource is reachable as a `public readonly` property on `BillomatClient`.
 
 | Resource | Access | Docs |
 |---|---|---|
-| Clients | `$billomat->clients` | [docs/resources/clients.md](docs/resources/clients.md) |
+| Clients | `$billomat->clients`, `clientPropertyValues` | [docs/resources/clients.md](docs/resources/clients.md) |
 | Client tags | `$billomat->clientTags` | [docs/resources/client-tags.md](docs/resources/client-tags.md) |
 | Contacts | `$billomat->contacts` | [docs/resources/contacts.md](docs/resources/contacts.md) |
 | Suppliers | `$billomat->suppliers`, `supplierTags`, `supplierPropertyValues` | [docs/resources/suppliers.md](docs/resources/suppliers.md) |

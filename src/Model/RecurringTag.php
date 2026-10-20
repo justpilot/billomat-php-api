@@ -17,6 +17,7 @@ final readonly class RecurringTag
         public ?int $id,
         public int $recurringId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -29,6 +30,7 @@ final readonly class RecurringTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             recurringId: (int) ($data['recurring_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -41,6 +43,7 @@ final readonly class RecurringTag
             'id' => $this->id,
             'recurring_id' => $this->recurringId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

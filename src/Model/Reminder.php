@@ -28,9 +28,21 @@ final readonly class Reminder
         public ?int $contactId = null,
         public ?int $invoiceId = null,
         public ?DateTimeImmutable $created = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `reminder_number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $reminderNumber = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $number = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $numberPre = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_length` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $numberLength = null,
         public ?ReminderStatus $status = null,
         public ?DateTimeImmutable $date = null,
@@ -42,12 +54,25 @@ final readonly class Reminder
         public ?string $intro = null,
         public ?string $note = null,
         public ?float $totalGross = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $totalNet = null,
         public ?string $currencyCode = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `quote` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?float $quote = null,
         public ?int $reminderTextId = null,
         public ?int $templateId = null,
         public array $items = [],
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?float $paidAmount = null,
+        public ?float $openAmount = null,
+        public ?int $reminderLevel = null,
+        public ?string $reminderLevelName = null,
+        public ?bool $isOld = null,
     ) {
     }
 
@@ -98,6 +123,13 @@ final readonly class Reminder
             reminderTextId: ScalarCaster::toIntOrNull($data['reminder_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: $items,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            reminderLevel: ScalarCaster::toIntOrNull($data['reminder_level'] ?? null),
+            reminderLevelName: ScalarCaster::toStringOrNull($data['reminder_level_name'] ?? null),
+            isOld: ScalarCaster::toBoolOrNull($data['is_old'] ?? null),
         );
     }
 
@@ -131,6 +163,13 @@ final readonly class Reminder
             'quote' => $this->quote,
             'reminder_text_id' => $this->reminderTextId,
             'template_id' => $this->templateId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'paid_amount' => $this->paidAmount,
+            'open_amount' => $this->openAmount,
+            'reminder_level' => $this->reminderLevel,
+            'reminder_level_name' => $this->reminderLevelName,
+            'is_old' => $this->isOld,
         ];
 
         if ([] !== $this->items) {

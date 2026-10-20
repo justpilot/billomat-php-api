@@ -90,6 +90,15 @@ final class IncomingTest extends TestCase
     }
 
     #[Test]
+    public function itReadsIncomingNumberFromNumberField(): void
+    {
+        // Billomat liefert die Belegnummer als `number`, nicht als `incoming_number`.
+        $incoming = Incoming::fromArray(['id' => '1', 'number' => 'RE-4711']);
+
+        self::assertSame('RE-4711', $incoming->incomingNumber);
+    }
+
+    #[Test]
     public function toArrayRoundTrips(): void
     {
         $array = Incoming::fromArray([

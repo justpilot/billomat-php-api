@@ -15,6 +15,7 @@ final readonly class DeliveryNoteTag
         public ?int $id,
         public int $deliveryNoteId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class DeliveryNoteTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             deliveryNoteId: (int) ($data['delivery_note_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class DeliveryNoteTag
             'id' => $this->id,
             'delivery_note_id' => $this->deliveryNoteId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

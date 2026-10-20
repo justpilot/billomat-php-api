@@ -15,6 +15,7 @@ final readonly class ArticleTag
         public ?int $id,
         public int $articleId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class ArticleTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             articleId: (int) ($data['article_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class ArticleTag
             'id' => $this->id,
             'article_id' => $this->articleId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

@@ -114,14 +114,23 @@ final readonly class Invoice
         public array $taxes = [],
         /** Akzeptierte Zahlungsarten (kommasepariert, z. B. "CASH,BANK_TRANSFER"). */
         public ?string $paymentTypes = null,
-        /** URL zum Customer-Portal für diese Rechnung. */
+        /**
+         * URL zum Customer-Portal für diese Rechnung.
+         *
+         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $customerportalUrl = null,
         /** ID der Vorlage, mit der die Rechnung erzeugt/abgeschlossen wurde. */
         public ?int $templateId = null,
         /**
          * Rechnungspositionen, falls im API-Response enthalten.
          */
-        public array $items = []
+        public array $items = [],
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?string $facturxReference = null,
+        public ?float $totalReduction = null,
+        public ?bool $digProceeded = null,
     ) {
     }
 
@@ -221,6 +230,11 @@ final readonly class Invoice
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: $items,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
+            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
+            digProceeded: ScalarCaster::toBoolOrNull($data['dig_proceeded'] ?? null),
         );
     }
 
@@ -275,6 +289,11 @@ final readonly class Invoice
             'payment_types' => $this->paymentTypes,
             'customerportal_url' => $this->customerportalUrl,
             'template_id' => $this->templateId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'facturx_reference' => $this->facturxReference,
+            'total_reduction' => $this->totalReduction,
+            'dig_proceeded' => $this->digProceeded,
         ];
 
         if ([] !== $this->taxes) {

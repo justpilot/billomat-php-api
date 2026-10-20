@@ -15,6 +15,7 @@ final readonly class LetterTag
         public ?int $id,
         public int $letterId,
         public string $name,
+        public ?string $customfield = null,
     ) {
     }
 
@@ -27,6 +28,7 @@ final readonly class LetterTag
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             letterId: (int) ($data['letter_id'] ?? 0),
             name: (string) ($data['name'] ?? ''),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
@@ -39,6 +41,7 @@ final readonly class LetterTag
             'id' => $this->id,
             'letter_id' => $this->letterId,
             'name' => $this->name,
+            'customfield' => $this->customfield,
         ];
     }
 }

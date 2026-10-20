@@ -263,6 +263,7 @@ Lieferanten haben sonst keine ressourcen-spezifischen Enums; alle Felder am `Sup
 - **Kein `update()` für Tags und Property-Values.** Tags löschen und neu anlegen; bei Property-Values überschreibt ein erneuter POST mit derselben `supplier_property_id` den bestehenden Eintrag.
 - **`address` und `clientNumber` sind read-only.** Beide Felder erscheinen im `Supplier`-Read-Modell, fehlen aber in `SupplierCreateOptions`/`SupplierUpdateOptions` — Billomat baut sie selbst aus `street`/`zip`/`city`/`countryCode` bzw. einer laufenden Nummer.
 - **`Supplier::$name` ist nicht-null.** Im Gegensatz zu fast allen anderen Feldern ist `name` im Read-Modell ein `string` (kein `?string`) — ein leerer Name liefert `''`, nicht `null`.
+- **`bankBic` kommt als `bank_swift`.** Billomat liefert den BIC im Feld `bank_swift`; das Read-Modell mappt ihn auf `bankBic` (Fallback `bank_bic`).
 - **Alte vs. moderne Bankdaten.** `bankAccountNumber`/`bankNumber` sind die deutschen Pre-SEPA-Felder. Für SEPA-Überweisungen sind `bankIban`/`bankBic` relevant; beide Paare lassen sich parallel setzen, aber Billomat nutzt für Überweisungen primär IBAN/BIC.
 - **`currencyCode` als Default.** Der Wert wird auf neu angelegte Eingangsbelege ([Incomings](incomings.md)) übernommen, kann dort aber pro Beleg überschrieben werden.
 - **Verknüpfung zu Artikeln läuft über `Article::$supplierId`.** Beim Löschen eines Suppliers verlieren betroffene Artikel nur den Verweis — sie werden nicht mitgelöscht.

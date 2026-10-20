@@ -2,12 +2,12 @@
 
 # Reminder Levels / Dunning Levels (Mahnstufen)
 
-Mahnstufen werden in Billomat über **zwei** verwandte, aber technisch getrennte Endpunkte abgebildet. Das SDK exponiert beide:
+Mahnstufen werden in Billomat über `/reminder-texts` abgebildet. Das SDK exponiert zusätzlich das ältere `DunningLevelsApi`, das inzwischen **deprecated** ist:
 
 | API | Endpunkt | Inhalt |
 |---|---|---|
 | `ReminderTextsApi` | `/reminder-texts` | Text-Bausteine pro Mahnstufe (Betreff, Header, Footer, Gebühren) — entspricht der offiziell dokumentierten *Mahnstufen*-Seite. |
-| `DunningLevelsApi` | `/dunning-levels` | Numerische Metadaten der Mahnstufe (Position, Fälligkeitstage, Gebühr, Zinsen). Nicht von allen Tenants ausgeliefert. |
+| `DunningLevelsApi` | `/dunning-levels` | **Deprecated seit 3.1.** Billomat antwortet mit `404 resource not found`; der Endpoint ist nicht dokumentiert. Wird in 4.0 entfernt. |
 
 Beide Endpunkte sind read-only im SDK.
 
@@ -71,10 +71,11 @@ Liefert `null` bei 404.
 | `subject` | `subject` | `?string` | Betreff der Mahn-E-Mail/des Briefs |
 | `header` | `header` | `?string` | Einleitung |
 | `footer` | `footer` | `?string` | Anmerkung |
-| `dueDays` | `due_days` | `?int` | Fälligkeitstage (SDK-spezifisch — nicht in der Spec dokumentiert) |
-| `sort` | `sort` | `?int` | Reihenfolge der Stufe |
-
-> Die Billomat-Spec listet zusätzlich `sorting` (statt `sort`) und `charge_name`/`charge_description`/`charge_amount` für Mahngebühren. Das SDK exponiert diese nicht im Read-Modell — Erweiterung in `ReminderText::fromArray()` ist trivial, wenn benötigt.
+| `dueDays` | `due_days` | `?int` | Liefert Billomat nicht mehr; nur aus Kompatibilitätsgründen vorhanden |
+| `sort` | `sorting` (Fallback `sort`) | `?int` | Reihenfolge der Stufe |
+| `chargeName` | `charge_name` | `?string` | Name der Mahngebühr |
+| `chargeDescription` | `charge_description` | `?string` | Beschreibung der Mahngebühr |
+| `chargeAmount` | `charge_amount` | `?float` | Höhe der Mahngebühr |
 
 ### `DunningLevel`
 
@@ -91,13 +92,12 @@ Liefert `null` bei 404.
 
 ## Welche der beiden API nutzen?
 
-- **`ReminderTextsApi`** wenn der Text der Mahnung interessiert (Betreff, Einleitung, Footer) — z.B. um Vorlagen zu prüfen oder UI-Anzeigen zu bauen.
-- **`DunningLevelsApi`** wenn die numerische Konfiguration interessiert (nach wievielen Tagen die Stufe greift, mit welcher Gebühr/Zinsen).
-- Beide gemeinsam, wenn ein vollständiges Bild einer Mahnstufe benötigt wird — die ID ist allerdings **nicht** über beide Endpunkte verknüpft; der Mapping müsste über `name`/`position` erfolgen.
+- **`ReminderTextsApi`** für alles rund um Mahnstufen: Texte (Betreff, Einleitung, Footer), Reihenfolge (`sort`) und Mahngebühr (`charge*`).
+- **`DunningLevelsApi`** nicht mehr verwenden — der Endpoint antwortet mit 404.
 
 ## Stolpersteine
 
-- **`/dunning-levels` nicht auf allen Tenants verfügbar.** Der Integration-Test (`tests/Integration/Lookups/LookupsIntegrationTest.php`) markiert sich als `skipped`, wenn Billomat 404 zurückgibt.
+- **`/dunning-levels` antwortet mit 404** (Stand 2026-10). Der Integration-Test (`tests/Integration/Lookups/LookupsIntegrationTest.php`) markiert sich als `skipped`, wenn Billomat 404 zurückgibt.
 - **Spec-Drift im Read-Modell.** Wie oben erwähnt — `ReminderText` exponiert `sort` (das Billomat-Feld heisst `sorting`) und kennt die `charge_*`-Felder nicht. Wer Mahngebühren aus der API lesen muss, ergänzt `ReminderText`.
 - **Single-Item-List-Quirk.** Beide APIs normalisieren über `listResource()`.
 

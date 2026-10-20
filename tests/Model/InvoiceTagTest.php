@@ -25,7 +25,7 @@ final class InvoiceTagTest extends TestCase
         self::assertSame(7, $tag->id);
         self::assertSame(42, $tag->invoiceId);
         self::assertSame('wichtig', $tag->name);
-        self::assertSame(['id' => 7, 'invoice_id' => 42, 'name' => 'wichtig'], $tag->toArray());
+        self::assertSame(['id' => 7, 'invoice_id' => 42, 'name' => 'wichtig', 'customfield' => null], $tag->toArray());
     }
 
     #[Test]

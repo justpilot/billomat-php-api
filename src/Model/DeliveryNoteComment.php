@@ -25,6 +25,11 @@ final readonly class DeliveryNoteComment
         public ?int $userId = null,
         public ?DeliveryNoteCommentActionKey $actionkey = null,
         public ?string $actionkeyRaw = null,
+        public ?string $customfield = null,
+        public ?bool $public = null,
+        public ?bool $byClient = null,
+        public ?int $emailId = null,
+        public ?int $clientId = null,
     ) {
     }
 
@@ -45,6 +50,11 @@ final readonly class DeliveryNoteComment
                 ? DeliveryNoteCommentActionKey::tryFrom($actionkeyRaw)
                 : null,
             actionkeyRaw: $actionkeyRaw,
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            public: ScalarCaster::toBoolOrNull($data['public'] ?? null),
+            byClient: ScalarCaster::toBoolOrNull($data['by_client'] ?? null),
+            emailId: ScalarCaster::toIntOrNull($data['email_id'] ?? null),
+            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null),
         );
     }
 
@@ -60,6 +70,11 @@ final readonly class DeliveryNoteComment
             'user_id' => $this->userId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkeyRaw,
+            'customfield' => $this->customfield,
+            'public' => $this->public,
+            'by_client' => $this->byClient,
+            'email_id' => $this->emailId,
+            'client_id' => $this->clientId,
         ];
     }
 }

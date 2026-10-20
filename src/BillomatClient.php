@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\ArticlePropertyValuesApi;
 use Justpilot\Billomat\Api\ArticlesApi;
 use Justpilot\Billomat\Api\ArticleTagsApi;
 use Justpilot\Billomat\Api\ClientPropertiesApi;
+use Justpilot\Billomat\Api\ClientPropertyValuesApi;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ClientTagsApi;
 use Justpilot\Billomat\Api\ConfirmationCommentsApi;
@@ -147,10 +148,14 @@ final readonly class BillomatClient
     public IncomingPropertiesApi $incomingProperties;
     public UserPropertiesApi $userProperties;
     public ClientTagsApi $clientTags;
+    public ClientPropertyValuesApi $clientPropertyValues;
     public EmailTemplatesApi $emailTemplates;
     public FreeTextsApi $freeTexts;
     public ReminderTextsApi $reminderTexts;
     public UnitsApi $units;
+    /**
+     * @deprecated since 3.1 – `/dunning-levels` antwortet mit 404; {@see $reminderTexts} verwenden
+     */
     public DunningLevelsApi $dunningLevels;
     public UsersApi $users;
     public CountriesApi $countries;
@@ -228,6 +233,7 @@ final readonly class BillomatClient
         $this->incomingProperties = new IncomingPropertiesApi($this->http);
         $this->userProperties = new UserPropertiesApi($this->http);
         $this->clientTags = new ClientTagsApi($this->http);
+        $this->clientPropertyValues = new ClientPropertyValuesApi($this->http);
         $this->emailTemplates = new EmailTemplatesApi($this->http);
         $this->freeTexts = new FreeTextsApi($this->http);
         $this->reminderTexts = new ReminderTextsApi($this->http);

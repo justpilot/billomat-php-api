@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+
+use const DATE_ATOM;
 
 /**
  * Freitext-Baustein (verwendbar als title/label/intro/note auf Dokumenten).
@@ -19,6 +22,11 @@ final readonly class FreeText
         public ?string $label = null,
         public ?string $intro = null,
         public ?string $note = null,
+        public ?DateTimeImmutable $created = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $type = null,
+        public ?string $name = null,
+        public ?bool $isDefault = null,
     ) {
     }
 
@@ -33,6 +41,11 @@ final readonly class FreeText
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            type: ScalarCaster::toStringOrNull($data['type'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
         );
     }
 
@@ -47,6 +60,11 @@ final readonly class FreeText
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
+            'created' => $this->created?->format(DATE_ATOM),
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'type' => $this->type,
+            'name' => $this->name,
+            'is_default' => $this->isDefault,
         ];
     }
 }

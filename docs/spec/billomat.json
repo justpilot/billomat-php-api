@@ -100,7 +100,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Abo-Rechnungsadresse",
+                            "description_de": "komplette Abo-Rechnungsadresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse des Kunden (wird ein leerer Wert übergeben, wird die aktuelle Kunden-Adresse verwendet)",
                             "required": false
                         },
@@ -720,7 +720,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Angebotsadresse",
+                            "description_de": "komplette Angebotsadresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse des Kunden",
                             "required": false
                         },
@@ -1571,7 +1571,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Adresse",
+                            "description_de": "komplette Adresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse des Kunden",
                             "required": false
                         },
@@ -1976,7 +1976,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Briefadresse",
+                            "description_de": "komplette Briefadresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse des Kunden",
                             "required": false
                         },
@@ -4299,7 +4299,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Gutschriftenadresse",
+                            "description_de": "komplette Gutschriftenadresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse des Kunden",
                             "required": false
                         },
@@ -6039,7 +6039,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Lieferscheinadresse",
+                            "description_de": "komplette Lieferscheinadresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse des Kunden",
                             "required": false
                         },
@@ -6344,7 +6344,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Mahnungsadresse",
+                            "description_de": "komplette Mahnungsadresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse aus der Rechnung",
                             "required": false
                         },
@@ -6777,7 +6777,7 @@
                         {
                             "name": "address",
                             "type": "ALNUM",
-                            "description_de": "komplette Rechnungsadresse",
+                            "description_de": "komplette Rechnungsadresse (veraltet, wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden)",
                             "default": "Adresse des Kunden",
                             "required": false
                         },

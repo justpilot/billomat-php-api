@@ -401,6 +401,7 @@ Payload für `mail()` (Pixelletter). Empfängeradresse kommt fix aus der Rechnun
 
 ## Stolpersteine
 
+- **E-Rechnung (undokumentiert).** `facturx_reference` (`Invoice::$facturxReference`) liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
 - **`update()` nur auf `DRAFT`.** Sobald `complete()` lief, ändert ein PUT die Rechnung nicht mehr. Stattdessen `cancel()` + neue Rechnung, oder Korrekturrechnung mit `invoiceId`-Verknüpfung.
 - **`delete()` nur auf `DRAFT`.** Eine abgeschlossene Rechnung wird `cancel()`-d, nicht gelöscht (Buchhaltungsgründe).
 - **`pdf()` setzt `complete()` voraus.** Bei `DRAFT`-Rechnungen existiert noch kein PDF — der Endpoint liefert je nach Account 404 oder einen Fehler.

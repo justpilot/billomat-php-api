@@ -109,7 +109,7 @@ Nur im Status `DRAFT` ratsam. Felder, die `null` bleiben, werden serverseitig ni
 
 #### `complete(int $id, ?int $templateId = null): bool`
 
-Status `DRAFT → OPEN`. Optional kann ein konkretes Layout-Template forciert werden.
+Status `DRAFT → COMPLETED`. Optional kann ein konkretes Layout-Template forciert werden.
 
 #### `cancel(int $id): bool` / `clear(int $id): bool` / `undo(int $id): bool`
 
@@ -309,7 +309,7 @@ Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurü
 
 ## Verwendete Enums
 
-- [`LetterStatus`](../../src/Model/Enum/LetterStatus.php): `DRAFT`, `OPEN`, `CLEARED`, `CANCELED`. Beachte: kein `PAID`, kein `OVERDUE` — Briefe haben keinen Zahlungs-Lifecycle.
+- [`LetterStatus`](../../src/Model/Enum/LetterStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Beachte: kein `PAID`, kein `OVERDUE` — Briefe haben keinen Zahlungs-Lifecycle.
 - [`LetterCommentActionKey`](../../src/Model/Enum/LetterCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`, `UPLOAD`. Der zusätzliche `UPLOAD`-Key markiert ein über `upload()` hochgeladenes Brief-PDF.
 - [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): wiederverwendet für die PDF-Varianten in `pdf()`.
 

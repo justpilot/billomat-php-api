@@ -39,6 +39,9 @@ final readonly class Recurring
         public ?float $discountRate = null,
         public ?int $discountDays = null,
         public ?string $name = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $numberPre = null,
         public ?string $title = null,
         public ?string $label = null,
@@ -69,6 +72,22 @@ final readonly class Recurring
         public ?int $templateId = null,
         public array $taxes = [],
         public array $items = [],
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?float $totalReduction = null,
+        public ?float $totalNetUnreduced = null,
+        public ?float $totalGrossUnreduced = null,
+        public ?float $discountAmount = null,
+        public ?string $status = null,
+        public ?bool $inProgress = null,
+        public ?bool $ultimo = null,
+        public ?string $emailFilename = null,
+        public ?bool $emailBcc = null,
+        public ?bool $letterColor = null,
+        public ?bool $letterDuplex = null,
+        public ?int $letterPaperWeight = null,
+        public ?int $offerId = null,
+        public ?int $confirmationId = null,
     ) {
     }
 
@@ -163,6 +182,22 @@ final readonly class Recurring
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             taxes: $taxes,
             items: $items,
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
+            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
+            discountAmount: ScalarCaster::toFloatOrNull($data['discount_amount'] ?? null),
+            status: ScalarCaster::toStringOrNull($data['status'] ?? null),
+            inProgress: ScalarCaster::toBoolOrNull($data['in_progress'] ?? null),
+            ultimo: ScalarCaster::toBoolOrNull($data['ultimo'] ?? null),
+            emailFilename: ScalarCaster::toStringOrNull($data['email_filename'] ?? null),
+            emailBcc: ScalarCaster::toBoolOrNull($data['email_bcc'] ?? null),
+            letterColor: ScalarCaster::toBoolOrNull($data['letter_color'] ?? null),
+            letterDuplex: ScalarCaster::toBoolOrNull($data['letter_duplex'] ?? null),
+            letterPaperWeight: ScalarCaster::toIntOrNull($data['letter_paper_weight'] ?? null),
+            offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
+            confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
         );
     }
 
@@ -211,6 +246,22 @@ final readonly class Recurring
             'email_template_id' => $this->emailTemplateId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'total_reduction' => $this->totalReduction,
+            'total_net_unreduced' => $this->totalNetUnreduced,
+            'total_gross_unreduced' => $this->totalGrossUnreduced,
+            'discount_amount' => $this->discountAmount,
+            'status' => $this->status,
+            'in_progress' => $this->inProgress,
+            'ultimo' => $this->ultimo,
+            'email_filename' => $this->emailFilename,
+            'email_bcc' => $this->emailBcc,
+            'letter_color' => $this->letterColor,
+            'letter_duplex' => $this->letterDuplex,
+            'letter_paper_weight' => $this->letterPaperWeight,
+            'offer_id' => $this->offerId,
+            'confirmation_id' => $this->confirmationId,
         ];
 
         if ([] !== $this->taxes) {

@@ -6,6 +6,27 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Added
+- **`ClientPropertyValuesApi`** (`$billomat->clientPropertyValues`) für `/client-property-values` samt `ClientPropertyValue`-Modell und `ClientPropertyValueCreateOptions`. Werte von Kunden-Attributen ließen sich bisher nicht über das SDK lesen oder setzen; für Artikel, Lieferanten und Eingangsrechnungen gab es das Gegenstück schon.
+- **`customfield` und Zeitstempel auf allen Read-Modellen**, für die Billomat sie liefert: `?string $customfield` (59 Modelle), `?DateTimeImmutable $updated` (22) und `?DateTimeImmutable $created`, wo es bisher fehlte (9). Welche Ressource welches Feld liefert, ist in `tests/Model/MetadataFieldsTest.php` festgehalten.
+- **E-Rechnungs-Felder** (ZUGFeRD/Factur-X, XRechnung), die Billomat liefert, aber nicht dokumentiert – nur lesend: `Client::$facturxIdentifier`/`$sellerIdentifier`, `Account::$taxAuthorityNumber`/`$facturxFieldsEnabled`, `Invoice::$facturxReference`, `InboxDocument::$xrechnungExtractionsId`.
+- **Neue Beleg-Felder:** `Reminder::$paidAmount`/`$openAmount`/`$reminderLevel`/`$reminderLevelName`/`$isOld`, `ReminderItem::$total`/`$isCharge`, `Recurring::$status`/`$inProgress`/`$ultimo`/`$discountAmount`/`$totalNetUnreduced`/`$totalGrossUnreduced`, die Versandoptionen `Recurring::$emailFilename`/`$emailBcc`/`$letterColor`/`$letterDuplex`/`$letterPaperWeight` sowie `$offerId`/`$confirmationId`, `Offer::$validityDate`, `OfferItem::$optional`, `CreditNoteItem::$taxRateReverseCharge`, `DeliveryNote::$offerId`, `Letter::$supplierId`, `Invoice::$digProceeded` und `$totalReduction` auf Rechnung, Angebot, Auftragsbestätigung, Gutschrift und Abo-Rechnung. Die beschreibbaren davon waren in den `*Options` schon vorhanden, ließen sich aber nicht zurücklesen.
+- **Neue Felder an Stammdaten und Nebenressourcen:** `Article::$archived`/`$type` (`ArticleType`)/`$revenueAccountNumber`/`$costCenter`/`$purchasePriceNetGross` (`NetGross`), `Client::$digExclude`, `Supplier::$isEuCountry`/`$locale`/`$creditorAccountNumber`/`$creditorIdentifier`/`$costsGross`/`$costsNet`, `Incoming::$clientNumber`/`$expenseAccountNumber`/`$category`/`$pageCount`/`$hasAttachment`, `Contact::$name`/`$address`/`$www`/`$locale`, an allen Zahlungen `$currencyCode`/`$quote`/`$paymentGroup`/`$finapiTransactionId`/`$finapiTransactionAmount`/`$documentTitle`, an allen Beleg-Kommentaren `$public`/`$byClient`/`$emailId`/`$clientId`, `InboxDocument::$userId`/`$documentType`/`$pageCount`/`$fileUrl`/`$metadata`, `User::$locale`/`$timezone`/`$isAccountOwner`, `FreeText::$type`/`$name`/`$isDefault`, `TaxRate::$canDelete`, `Template::$isBackgroundAvailable` sowie `Country::$id`/`Currency::$id`.
+- Neue Felder aus den aktuellen API-Antworten: `EmailTemplate::$type`/`$bcc`, `ReminderText::$chargeName`/`$chargeDescription`/`$chargeAmount`, `*Property::$isNvl` (Article/Client/Supplier/Incoming/User) und `PropertyCreateOptions::$isNvl`.
+
+### Fixed
+- **Status nach `complete()` ging verloren.** Billomat liefert inzwischen `COMPLETED` (Auftragsbestätigungen, Briefe) bzw. `CREATED` (Lieferscheine). Die Enums `ConfirmationStatus`, `LetterStatus` und `DeliveryNoteStatus` kennen diese Werte jetzt; vorher war `status` danach `null`.
+- **Felder, die immer `null` blieben, weil Billomat sie umbenannt hat:** `EmailTemplate::$body` liest jetzt `text`, `ReminderText::$sort` liest `sorting`, `Supplier::$bankBic` liest `bank_swift`, `Incoming::$incomingNumber` liest `number`. Die alten Feldnamen bleiben jeweils als Fallback.
+- `Role::$permissions` enthält jetzt auch `suppliers`, `incomings`, `letters`, `banking`, `net_income_statement` und `accounting_export`.
+- Spec-Audit ordnete `kunden/attribute` fälschlich `ClientPropertiesApi` (Definitionen) zu und meldete die fehlenden Attribut-Werte deshalb nicht.
+
+### Deprecated
+- **71 Read-Model-Properties, die Billomat nicht (mehr) liefert und nicht dokumentiert** – sie waren immer `null` (bzw. `0.0`). Am Docblock jeweils mit `@deprecated` markiert, Entfernung in 4.0. Betroffen u. a.: `customerportalUrl` (Kunde, Rechnung, Angebot, Auftragsbestätigung, Gutschrift, Lieferschein, Brief), die Nummernfelder an `Letter` und `Reminder`, alle Beträge/Steuern an `DeliveryNote` und `DeliveryNoteItem`, `created` an Belegpositionen, `discount*` an `Offer`/`Confirmation`, `Incoming::$supplyDate`/`$dueDays`/`$paidAt`/`$intro`, `Article::$unit`/`$purchasePriceCurrencyCode`/`$categoryId`, `position` an den Attribut-Definitionen, `User::$phone`/`$mobile`/`$fax`, `TaxRate::$accountId`, `Country::$nameDe`/`$eu`, `ReminderText::$dueDays`, `Contact::$note`. Felder, die die Billomat-Doku noch beschreibt (z. B. `freeTextId`), bleiben unverändert.
+- **`DunningLevelsApi` / `$billomat->dunningLevels`.** `/dunning-levels` antwortet mit `404 resource not found` und ist in der Billomat-Doku nicht beschrieben. Mahnstufen über `ReminderTextsApi` lesen. Wird in 4.0 entfernt.
+
+### Documentation
+- `docs/spec/billomat.json` aus der aktuellen Billomat-Doku neu erzeugt: Das Feld `address` beim Anlegen von Belegen ist dort jetzt als veraltet markiert („wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden“).
+
 ## [3.0.0] - 2026-10-20
 
 ### Breaking Changes

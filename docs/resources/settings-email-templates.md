@@ -60,11 +60,13 @@ Liefert `null` bei 404.
 | `id` | `id` | `?int` |
 | `name` | `name` | `?string` |
 | `subject` | `subject` | `?string` |
-| `body` | `body` | `?string` |
+| `body` | `text` (Fallback `body`) | `?string` |
 | `fromAddress` | `from` | `?string` |
 | `isDefault` | `is_default` | `?bool` |
+| `type` | `type` | `?string` |
+| `bcc` | `bcc` | `?bool` |
 
-> Die Billomat-Spec listet zusätzlich `type` (Dokumenttyp, z.B. `INVOICES`/`OFFERS`/…) und `bcc` (BCC-Kopie an Absender). Das SDK exponiert diese Felder im Read-Modell aktuell nicht — Erweiterung ist trivial in `EmailTemplate::fromArray()`.
+> Billomat liefert den Nachrichtentext im Feld `text`; das SDK stellt ihn weiterhin als `$body` bereit. Ein Feld `from` liefert die API nicht mehr — `fromAddress` ist daher in der Regel `null` und bleibt nur aus Kompatibilitätsgründen erhalten.
 
 ## Dokumenttypen (laut Spec)
 

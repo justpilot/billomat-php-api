@@ -76,6 +76,10 @@ final class TaxRateTest extends TestCase
                 'name' => 'MwSt',
                 'rate' => 19.0,
                 'is_default' => 1,
+                'created' => null,
+                'updated' => null,
+                'customfield' => null,
+                'can_delete' => null,
             ],
             $tax->toArray()
         );

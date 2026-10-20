@@ -22,14 +22,26 @@ final readonly class Incoming
         public ?int $supplierId,
         public ?DateTimeImmutable $created = null,
         public ?DateTimeImmutable $date = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `supply_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $supplyDate = null,
         public ?DateTimeImmutable $dueDate = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?int $dueDays = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `paid_at` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?DateTimeImmutable $paidAt = null,
         public ?IncomingStatus $status = null,
         public ?string $incomingNumber = null,
         public ?string $address = null,
         public ?string $label = null,
+        /**
+         * @deprecated since 3.1 – Billomat liefert `intro` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
+         */
         public ?string $intro = null,
         public ?string $note = null,
         public ?float $totalGross = null,
@@ -38,6 +50,13 @@ final readonly class Incoming
         public ?float $openAmount = null,
         public ?string $currencyCode = null,
         public ?float $quote = null,
+        public ?DateTimeImmutable $updated = null,
+        public ?string $customfield = null,
+        public ?string $clientNumber = null,
+        public ?string $expenseAccountNumber = null,
+        public ?string $category = null,
+        public ?int $pageCount = null,
+        public ?bool $hasAttachment = null,
     ) {
     }
 
@@ -56,7 +75,8 @@ final readonly class Incoming
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             paidAt: ScalarCaster::toDateTimeOrNull($data['paid_at'] ?? null),
             status: IncomingStatus::fromApi(isset($data['status']) ? (string) $data['status'] : null),
-            incomingNumber: ScalarCaster::toStringOrNull($data['incoming_number'] ?? null),
+            // Billomat liefert die Belegnummer als `number`; `incoming_number` nur als Fallback.
+            incomingNumber: ScalarCaster::toStringOrNull($data['number'] ?? $data['incoming_number'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
@@ -67,6 +87,13 @@ final readonly class Incoming
             openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            clientNumber: ScalarCaster::toStringOrNull($data['client_number'] ?? null),
+            expenseAccountNumber: ScalarCaster::toStringOrNull($data['expense_account_number'] ?? null),
+            category: ScalarCaster::toStringOrNull($data['category'] ?? null),
+            pageCount: ScalarCaster::toIntOrNull($data['page_count'] ?? null),
+            hasAttachment: ScalarCaster::toBoolOrNull($data['has_attachment'] ?? null),
         );
     }
 
@@ -96,6 +123,13 @@ final readonly class Incoming
             'open_amount' => $this->openAmount,
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
+            'updated' => $this->updated?->format(DATE_ATOM),
+            'customfield' => $this->customfield,
+            'client_number' => $this->clientNumber,
+            'expense_account_number' => $this->expenseAccountNumber,
+            'category' => $this->category,
+            'page_count' => $this->pageCount,
+            'has_attachment' => $this->hasAttachment,
         ];
     }
 }

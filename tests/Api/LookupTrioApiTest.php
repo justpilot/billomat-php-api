@@ -118,6 +118,13 @@ final class LookupTrioApiTest extends TestCase
                             'invoices' => 'DELETE',
                             'settings_my_account' => 'UPDATE',
                             'settings_addons' => 'UPDATE',
+                            'suppliers' => 'READ',
+                            'incomings' => 'UPDATE',
+                            'letters' => 'DELETE',
+                            'banking' => 'READ',
+                            'net_income_statement' => 'READ',
+                            'accounting_export' => '',
+                            'customfield' => '',
                         ],
                     ],
                 ],
@@ -136,6 +143,14 @@ final class LookupTrioApiTest extends TestCase
         self::assertSame('UPDATE', $role->permissions['settings_addons']);
         self::assertArrayNotHasKey('id', $role->permissions);
         self::assertArrayNotHasKey('name', $role->permissions);
+        self::assertSame('READ', $role->permissions['suppliers']);
+        self::assertSame('UPDATE', $role->permissions['incomings']);
+        self::assertSame('DELETE', $role->permissions['letters']);
+        self::assertSame('READ', $role->permissions['banking']);
+        self::assertSame('READ', $role->permissions['net_income_statement']);
+        self::assertArrayHasKey('accounting_export', $role->permissions);
+        self::assertNull($role->permissions['accounting_export']);
+        self::assertArrayNotHasKey('customfield', $role->permissions);
     }
 
     #[Test]

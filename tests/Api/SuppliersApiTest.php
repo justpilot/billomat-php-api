@@ -67,6 +67,7 @@ final class SuppliersApiTest extends TestCase
                     'country_code' => 'DE',
                     'vat_number' => 'DE123456789',
                     'bank_iban' => 'DE89370400440532013000',
+                    'bank_swift' => 'COBADEFFXXX',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -84,6 +85,7 @@ final class SuppliersApiTest extends TestCase
         self::assertSame('ACME GmbH', $supplier->name);
         self::assertSame('DE123456789', $supplier->vatNumber);
         self::assertSame('DE89370400440532013000', $supplier->bankIban);
+        self::assertSame('COBADEFFXXX', $supplier->bankBic);
     }
 
     #[Test]

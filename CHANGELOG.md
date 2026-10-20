@@ -7,12 +7,17 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [Unreleased]
 
 ### Added
+- **`ClientPropertyValuesApi`** (`$billomat->clientPropertyValues`) für `/client-property-values` samt `ClientPropertyValue`-Modell und `ClientPropertyValueCreateOptions`. Werte von Kunden-Attributen ließen sich bisher nicht über das SDK lesen oder setzen; für Artikel, Lieferanten und Eingangsrechnungen gab es das Gegenstück schon.
 - Neue Felder aus den aktuellen API-Antworten: `EmailTemplate::$type`/`$bcc`, `ReminderText::$chargeName`/`$chargeDescription`/`$chargeAmount`, `*Property::$isNvl` (Article/Client/Supplier/Incoming/User) und `PropertyCreateOptions::$isNvl`.
 
 ### Fixed
 - **Status nach `complete()` ging verloren.** Billomat liefert inzwischen `COMPLETED` (Auftragsbestätigungen, Briefe) bzw. `CREATED` (Lieferscheine). Die Enums `ConfirmationStatus`, `LetterStatus` und `DeliveryNoteStatus` kennen diese Werte jetzt; vorher war `status` danach `null`.
 - **Felder, die immer `null` blieben, weil Billomat sie umbenannt hat:** `EmailTemplate::$body` liest jetzt `text`, `ReminderText::$sort` liest `sorting`, `Supplier::$bankBic` liest `bank_swift`, `Incoming::$incomingNumber` liest `number`. Die alten Feldnamen bleiben jeweils als Fallback.
 - `Role::$permissions` enthält jetzt auch `suppliers`, `incomings`, `letters`, `banking`, `net_income_statement` und `accounting_export`.
+- Spec-Audit ordnete `kunden/attribute` fälschlich `ClientPropertiesApi` (Definitionen) zu und meldete die fehlenden Attribut-Werte deshalb nicht.
+
+### Deprecated
+- **`DunningLevelsApi` / `$billomat->dunningLevels`.** `/dunning-levels` antwortet mit `404 resource not found` und ist in der Billomat-Doku nicht beschrieben. Mahnstufen über `ReminderTextsApi` lesen. Wird in 4.0 entfernt.
 
 ### Documentation
 - `docs/spec/billomat.json` aus der aktuellen Billomat-Doku neu erzeugt: Das Feld `address` beim Anlegen von Belegen ist dort jetzt als veraltet markiert („wird nicht mehr verarbeitet – bitte contact_id oder client_id verwenden“).

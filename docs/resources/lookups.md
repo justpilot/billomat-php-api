@@ -10,7 +10,7 @@ API-Wrapper für die elf read-only Lookup-Endpoints — Stammdaten und Account-E
 $billomat->countries           // ISO-Länderliste
 $billomat->currencies          // Währungsliste
 $billomat->units               // Einheiten (Stück, Stunde, …)
-$billomat->dunningLevels       // Mahnstufen (numerisch)
+$billomat->dunningLevels       // deprecated: /dunning-levels antwortet mit 404
 $billomat->users               // Mitarbeiter/Benutzer des Accounts
 $billomat->roles               // Rollen samt Permission-Map
 $billomat->emailTemplates      // E-Mail-Vorlagen
@@ -105,6 +105,8 @@ $piece = $billomat->units->get(42);
 | `name` | `string` |
 
 ### `dunningLevels`
+
+> **Deprecated seit 3.1.** Billomat liefert `/dunning-levels` nicht (mehr) aus (`404 resource not found`) und dokumentiert den Endpoint nicht. Mahnstufen über `reminderTexts` lesen. Wird in 4.0 entfernt.
 
 Endpoint: `/dunning-levels`. `list($filters?)` und `get($id)`.
 

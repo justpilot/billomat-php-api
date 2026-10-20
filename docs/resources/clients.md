@@ -8,6 +8,7 @@ API-Wrapper für die Billomat-Ressource „Kunden“ — entspricht den Endpunkt
 
 ```php
 $billomat->clients
+$billomat->clientPropertyValues  // Werte benutzerdefinierter Kunden-Eigenschaften
 ```
 
 `Justpilot\Billomat\Api\ClientsApi`, intern angelegt in `BillomatClient::__construct()`.
@@ -240,6 +241,57 @@ Schmaler Subset für Partial-Updates. Nur Felder, die hier vorhanden und gesetzt
 | `dueDays`, `reminderDueDays`, `offerValidityDays` | `?int` | |
 
 `Client::fromArray(array $data): self` hydriert ein Modell aus dem `client`-Knoten der API-Response. `toArray()` rendert das Modell zurück in Billomat-Feldnamen (snake_case) — gedacht für Debugging und Logging, **nicht** für Update-Calls.
+
+## Client Property Values
+
+Speichert die Werte für die in [`properties.md`](properties.md) definierten Kunden-Eigenschaften (`clientProperties`). Eine Property-Definition (`ClientProperty`) ist das Schema (Name + `PropertyType`), ein `ClientPropertyValue` ist die konkrete Belegung an einem Kunden.
+
+| Methode | HTTP | Pfad |
+|---|---|---|
+| `list($filters?)` | GET | `/client-property-values` |
+| `listPage($filters?)` | GET | `/client-property-values` |
+| `iterateAll($filters?, $pageSize?)` | GET | `/client-property-values` (mehrseitig) |
+| `get($id)` | GET | `/client-property-values/{id}` |
+| `create($options)` | POST | `/client-property-values` |
+
+```php
+use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
+
+// Werte für einen Kunden auflisten
+$values = $billomat->clientPropertyValues->list([
+    'client_id' => $client->id,
+]);
+
+// Wert für die Property "Branche" (id = 12) setzen
+$value = $billomat->clientPropertyValues->create(
+    new ClientPropertyValueCreateOptions(
+        clientId: $client->id,
+        clientPropertyId: 12,
+        value: 'Logistik',
+    ),
+);
+```
+
+Ein erneuter `create()`-Call mit derselben `clientPropertyId` überschreibt den bestehenden Wert.
+
+### Write-Modell: `ClientPropertyValueCreateOptions`
+
+| Property | Billomat-Feld | Typ | Notes |
+|---|---|---|---|
+| `clientId` | `client_id` | `int` (Pflicht) | — |
+| `clientPropertyId` | `client_property_id` | `int` (Pflicht) | ID der Property-Definition |
+| `value` | `value` | `mixed` (Pflicht) | Bei `CHECKBOX` werden `0`/`1` erwartet |
+
+### Read-Modell: `ClientPropertyValue`
+
+| Property | Typ |
+|---|---|
+| `id` | `?int` |
+| `clientId` | `int` |
+| `clientPropertyId` | `int` |
+| `type` | `?string` (rohes API-Feld, z. B. `TEXTFIELD`) |
+| `name` | `?string` (Name aus der Property-Definition) |
+| `value` | `mixed` |
 
 ## Verwendete Enums
 

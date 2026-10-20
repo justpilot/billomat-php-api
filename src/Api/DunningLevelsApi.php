@@ -10,6 +10,11 @@ use Justpilot\Billomat\Model\DunningLevel;
  * Read-only API-Wrapper für Mahnstufen.
  *
  * Doku: https://www.billomat.com/en/api/settings/dunning-levels/
+ *
+ * @deprecated since 3.1 – Billomat liefert `/dunning-levels` nicht (mehr) aus
+ *             (`404 resource not found`, Stand 2026-10) und dokumentiert den
+ *             Endpoint nicht. Mahnstufen stattdessen über {@see ReminderTextsApi}
+ *             (`/reminder-texts`) lesen. Wird in 4.0 entfernt.
  */
 final class DunningLevelsApi extends AbstractApi
 {

@@ -6,6 +6,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-10-20
+
 ### Added
 - **`ClientPropertyValuesApi`** (`$billomat->clientPropertyValues`) für `/client-property-values` samt `ClientPropertyValue`-Modell und `ClientPropertyValueCreateOptions`. Werte von Kunden-Attributen ließen sich bisher nicht über das SDK lesen oder setzen; für Artikel, Lieferanten und Eingangsrechnungen gab es das Gegenstück schon.
 - **`customfield` und Zeitstempel auf allen Read-Modellen**, für die Billomat sie liefert: `?string $customfield` (59 Modelle), `?DateTimeImmutable $updated` (22) und `?DateTimeImmutable $created`, wo es bisher fehlte (9). Welche Ressource welches Feld liefert, ist in `tests/Model/MetadataFieldsTest.php` festgehalten.

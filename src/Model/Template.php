@@ -33,6 +33,7 @@ final readonly class Template
         public bool $isDefault = false,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?bool $isBackgroundAvailable = null,
     ) {
     }
 
@@ -55,6 +56,7 @@ final readonly class Template
             isDefault: $isDefault,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            isBackgroundAvailable: ScalarCaster::toBoolOrNull($data['is_background_available'] ?? null),
         );
     }
 
@@ -74,6 +76,7 @@ final readonly class Template
             'is_default' => $this->isDefault ? 1 : 0,
             'updated' => $this->updated?->format(DateTimeInterface::ATOM),
             'customfield' => $this->customfield,
+            'is_background_available' => null === $this->isBackgroundAvailable ? null : ($this->isBackgroundAvailable ? 1 : 0),
         ], static fn (int|string|null $v): bool => null !== $v);
     }
 }

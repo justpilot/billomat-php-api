@@ -28,6 +28,12 @@ final readonly class CreditNotePayment
         public ?int $userId = null,
         public ?string $transactionPurpose = null,
         public ?string $customfield = null,
+        public ?string $currencyCode = null,
+        public ?float $quote = null,
+        public ?string $paymentGroup = null,
+        public ?string $finapiTransactionId = null,
+        public ?float $finapiTransactionAmount = null,
+        public ?string $documentTitle = null,
     ) {
     }
 
@@ -47,6 +53,12 @@ final readonly class CreditNotePayment
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
             transactionPurpose: ScalarCaster::toStringOrNull($data['transaction_purpose'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
+            paymentGroup: ScalarCaster::toStringOrNull($data['payment_group'] ?? null),
+            finapiTransactionId: ScalarCaster::toStringOrNull($data['finapi_transaction_id'] ?? null),
+            finapiTransactionAmount: ScalarCaster::toFloatOrNull($data['finapi_transaction_amount'] ?? null),
+            documentTitle: ScalarCaster::toStringOrNull($data['document_title'] ?? null),
         );
     }
 
@@ -66,6 +78,12 @@ final readonly class CreditNotePayment
             'comment' => $this->comment,
             'transaction_purpose' => $this->transactionPurpose,
             'customfield' => $this->customfield,
+            'currency_code' => $this->currencyCode,
+            'quote' => $this->quote,
+            'payment_group' => $this->paymentGroup,
+            'finapi_transaction_id' => $this->finapiTransactionId,
+            'finapi_transaction_amount' => $this->finapiTransactionAmount,
+            'document_title' => $this->documentTitle,
         ];
     }
 }

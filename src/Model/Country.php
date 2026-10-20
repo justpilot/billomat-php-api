@@ -18,6 +18,7 @@ final readonly class Country
         public ?string $name = null,
         public ?string $nameDe = null,
         public ?bool $eu = null,
+        public ?int $id = null,
     ) {
     }
 
@@ -31,6 +32,7 @@ final readonly class Country
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             nameDe: ScalarCaster::toStringOrNull($data['name_de'] ?? null),
             eu: ScalarCaster::toBoolOrNull($data['eu'] ?? null),
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
         );
     }
 
@@ -44,6 +46,7 @@ final readonly class Country
             'name' => $this->name,
             'name_de' => $this->nameDe,
             'eu' => $this->eu,
+            'id' => $this->id,
         ];
     }
 }

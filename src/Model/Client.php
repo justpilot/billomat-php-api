@@ -176,6 +176,7 @@ final readonly class Client
         public ?string $customfield = null,
         public ?string $facturxIdentifier = null,
         public ?string $sellerIdentifier = null,
+        public ?bool $digExclude = null,
     ) {
     }
 
@@ -247,6 +248,7 @@ final readonly class Client
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             facturxIdentifier: ScalarCaster::toStringOrNull($data['facturx_identifier'] ?? null),
             sellerIdentifier: ScalarCaster::toStringOrNull($data['seller_identifier'] ?? null),
+            digExclude: ScalarCaster::toBoolOrNull($data['dig_exclude'] ?? null),
         );
     }
 
@@ -320,6 +322,7 @@ final readonly class Client
             'customfield' => $this->customfield,
             'facturx_identifier' => $this->facturxIdentifier,
             'seller_identifier' => $this->sellerIdentifier,
+            'dig_exclude' => $this->digExclude,
         ];
     }
 }

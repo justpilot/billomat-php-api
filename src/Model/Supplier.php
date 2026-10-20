@@ -47,6 +47,12 @@ final readonly class Supplier
         public ?string $currencyCode = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?bool $isEuCountry = null,
+        public ?string $locale = null,
+        public ?string $creditorAccountNumber = null,
+        public ?string $creditorIdentifier = null,
+        public ?float $costsGross = null,
+        public ?float $costsNet = null,
     ) {
     }
 
@@ -87,6 +93,12 @@ final readonly class Supplier
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            isEuCountry: ScalarCaster::toBoolOrNull($data['is_eu_country'] ?? null),
+            locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
+            creditorAccountNumber: ScalarCaster::toStringOrNull($data['creditor_account_number'] ?? null),
+            creditorIdentifier: ScalarCaster::toStringOrNull($data['creditor_identifier'] ?? null),
+            costsGross: ScalarCaster::toFloatOrNull($data['costs_gross'] ?? null),
+            costsNet: ScalarCaster::toFloatOrNull($data['costs_net'] ?? null),
         );
     }
 
@@ -126,6 +138,12 @@ final readonly class Supplier
             'currency_code' => $this->currencyCode,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'is_eu_country' => $this->isEuCountry,
+            'locale' => $this->locale,
+            'creditor_account_number' => $this->creditorAccountNumber,
+            'creditor_identifier' => $this->creditorIdentifier,
+            'costs_gross' => $this->costsGross,
+            'costs_net' => $this->costsNet,
         ];
     }
 }

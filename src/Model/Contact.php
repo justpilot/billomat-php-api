@@ -36,6 +36,10 @@ final readonly class Contact
         public ?string $note = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?string $name = null,
+        public ?string $address = null,
+        public ?string $www = null,
+        public ?string $locale = null,
     ) {
     }
 
@@ -64,6 +68,10 @@ final readonly class Contact
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            www: ScalarCaster::toStringOrNull($data['www'] ?? null),
+            locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
         );
     }
 
@@ -92,6 +100,10 @@ final readonly class Contact
             'note' => $this->note,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'name' => $this->name,
+            'address' => $this->address,
+            'www' => $this->www,
+            'locale' => $this->locale,
         ];
     }
 }

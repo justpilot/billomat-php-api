@@ -26,6 +26,11 @@ final readonly class InboxDocument
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
         public ?int $xrechnungExtractionsId = null,
+        public ?int $userId = null,
+        public ?string $documentType = null,
+        public ?int $pageCount = null,
+        public ?string $fileUrl = null,
+        public ?string $metadata = null,
     ) {
     }
 
@@ -44,6 +49,11 @@ final readonly class InboxDocument
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             xrechnungExtractionsId: ScalarCaster::toIntOrNull($data['xrechnung_extractions_id'] ?? null),
+            userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
+            documentType: ScalarCaster::toStringOrNull($data['document_type'] ?? null),
+            pageCount: ScalarCaster::toIntOrNull($data['page_count'] ?? null),
+            fileUrl: ScalarCaster::toStringOrNull($data['file_url'] ?? null),
+            metadata: ScalarCaster::toStringOrNull($data['metadata'] ?? null),
         );
     }
 
@@ -62,6 +72,11 @@ final readonly class InboxDocument
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'xrechnung_extractions_id' => $this->xrechnungExtractionsId,
+            'user_id' => $this->userId,
+            'document_type' => $this->documentType,
+            'page_count' => $this->pageCount,
+            'file_url' => $this->fileUrl,
+            'metadata' => $this->metadata,
         ];
     }
 

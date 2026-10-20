@@ -24,6 +24,9 @@ final readonly class FreeText
         public ?string $note = null,
         public ?DateTimeImmutable $created = null,
         public ?DateTimeImmutable $updated = null,
+        public ?string $type = null,
+        public ?string $name = null,
+        public ?bool $isDefault = null,
     ) {
     }
 
@@ -40,6 +43,9 @@ final readonly class FreeText
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            type: ScalarCaster::toStringOrNull($data['type'] ?? null),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
+            isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
         );
     }
 
@@ -56,6 +62,9 @@ final readonly class FreeText
             'note' => $this->note,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
+            'type' => $this->type,
+            'name' => $this->name,
+            'is_default' => $this->isDefault,
         ];
     }
 }

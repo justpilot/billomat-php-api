@@ -40,6 +40,11 @@ final readonly class Incoming
         public ?float $quote = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?string $clientNumber = null,
+        public ?string $expenseAccountNumber = null,
+        public ?string $category = null,
+        public ?int $pageCount = null,
+        public ?bool $hasAttachment = null,
     ) {
     }
 
@@ -72,6 +77,11 @@ final readonly class Incoming
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            clientNumber: ScalarCaster::toStringOrNull($data['client_number'] ?? null),
+            expenseAccountNumber: ScalarCaster::toStringOrNull($data['expense_account_number'] ?? null),
+            category: ScalarCaster::toStringOrNull($data['category'] ?? null),
+            pageCount: ScalarCaster::toIntOrNull($data['page_count'] ?? null),
+            hasAttachment: ScalarCaster::toBoolOrNull($data['has_attachment'] ?? null),
         );
     }
 
@@ -103,6 +113,11 @@ final readonly class Incoming
             'quote' => $this->quote,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'client_number' => $this->clientNumber,
+            'expense_account_number' => $this->expenseAccountNumber,
+            'category' => $this->category,
+            'page_count' => $this->pageCount,
+            'has_attachment' => $this->hasAttachment,
         ];
     }
 }

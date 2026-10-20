@@ -29,6 +29,9 @@ final readonly class User
         public ?DateTimeImmutable $created = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?string $locale = null,
+        public ?string $timezone = null,
+        public ?bool $isAccountOwner = null,
     ) {
     }
 
@@ -50,6 +53,9 @@ final readonly class User
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
+            timezone: ScalarCaster::toStringOrNull($data['timezone'] ?? null),
+            isAccountOwner: ScalarCaster::toBoolOrNull($data['is_account_owner'] ?? null),
         );
     }
 
@@ -71,6 +77,9 @@ final readonly class User
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'locale' => $this->locale,
+            'timezone' => $this->timezone,
+            'is_account_owner' => $this->isAccountOwner,
         ];
     }
 }

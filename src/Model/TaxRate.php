@@ -31,6 +31,7 @@ final readonly class TaxRate
         public ?DateTimeImmutable $created = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?bool $canDelete = null,
     ) {
     }
 
@@ -50,6 +51,7 @@ final readonly class TaxRate
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            canDelete: ScalarCaster::toBoolOrNull($data['can_delete'] ?? null),
         );
     }
 
@@ -69,6 +71,7 @@ final readonly class TaxRate
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'can_delete' => null === $this->canDelete ? null : ($this->canDelete ? 1 : 0),
         ];
     }
 }

@@ -7,11 +7,14 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 use Justpilot\Billomat\Api\RecurringTagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\RecurringTag;
 use Justpilot\Billomat\Model\RecurringTagCloudEntry;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -22,6 +25,10 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(RecurringTag::class)]
 #[CoversClass(RecurringTagCloudEntry::class)]
 #[CoversClass(RecurringTagCreateOptions::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class RecurringTagsApiTest extends TestCase
 {
     #[Test]

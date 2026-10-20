@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationItem;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Confirmation::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(ConfirmationItem::class)]
+#[UsesClass(ConfirmationStatus::class)]
 final class ConfirmationTest extends TestCase
 {
     #[Test]

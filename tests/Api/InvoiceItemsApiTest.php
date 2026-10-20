@@ -8,11 +8,14 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -21,6 +24,11 @@ use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(InvoiceItemsApi::class)]
 #[CoversClass(InvoiceItem::class)]
+#[UsesClass(InvoiceItemCreateOptions::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class InvoiceItemsApiTest extends TestCase
 {
     #[Test]

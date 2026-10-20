@@ -8,9 +8,11 @@ use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 use Justpilot\Billomat\Api\InboxDocumentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\InboxDocument;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -20,6 +22,9 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(InboxDocumentsApi::class)]
 #[CoversClass(InboxDocumentCreateOptions::class)]
 #[CoversClass(InboxDocument::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class InboxDocumentsApiTest extends TestCase
 {
     #[Test]

@@ -9,9 +9,11 @@ use Justpilot\Billomat\Api\SuppliersApi;
 use Justpilot\Billomat\Api\SupplierUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Supplier;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -22,6 +24,9 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(SupplierCreateOptions::class)]
 #[CoversClass(SupplierUpdateOptions::class)]
 #[CoversClass(Supplier::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class SuppliersApiTest extends TestCase
 {
     #[Test]

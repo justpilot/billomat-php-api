@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests;
 
+use Justpilot\Billomat\Api\AbstractApi;
+use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -16,6 +21,12 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(BillomatClient::class)]
+#[UsesClass(AbstractApi::class)]
+#[UsesClass(ClientsApi::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(Client::class)]
 final class BillomatClientTest extends TestCase
 {
     #[Test]

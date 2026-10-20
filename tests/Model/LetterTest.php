@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
 use Justpilot\Billomat\Model\Letter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Letter::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(LetterStatus::class)]
 final class LetterTest extends TestCase
 {
     #[Test]

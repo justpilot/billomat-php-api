@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
@@ -13,9 +14,13 @@ use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Invoice::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(InvoiceStatus::class)]
+#[UsesClass(InvoiceItem::class)]
 final class InvoiceTest extends TestCase
 {
     #[Test]

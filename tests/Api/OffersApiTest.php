@@ -11,14 +11,17 @@ use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferPdf;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -32,6 +35,11 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Offer::class)]
 #[CoversClass(OfferPdf::class)]
 #[CoversClass(OfferStatus::class)]
+#[UsesClass(OfferItemCreateOptions::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class OffersApiTest extends TestCase
 {
     #[Test]

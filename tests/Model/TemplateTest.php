@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateType;
 use Justpilot\Billomat\Model\Template;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Template::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(TemplateDocumentType::class)]
+#[UsesClass(TemplateFormat::class)]
+#[UsesClass(TemplateType::class)]
 final class TemplateTest extends TestCase
 {
     #[Test]

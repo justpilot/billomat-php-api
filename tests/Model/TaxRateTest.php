@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\TaxRate;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(TaxRate::class)]
+#[UsesClass(ScalarCaster::class)]
 final class TaxRateTest extends TestCase
 {
     #[Test]

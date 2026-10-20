@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\NumberRangeMode;
 use Justpilot\Billomat\Model\Enum\TemplateEngine;
@@ -12,9 +13,13 @@ use Justpilot\Billomat\Model\Settings;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Settings::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(NumberRangeMode::class)]
+#[UsesClass(TemplateEngine::class)]
 final class SettingsTest extends TestCase
 {
     #[Test]

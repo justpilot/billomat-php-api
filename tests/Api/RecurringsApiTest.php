@@ -10,12 +10,16 @@ use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\RecurringsApi;
 use Justpilot\Billomat\Api\RecurringUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Recurring;
+use Justpilot\Billomat\Model\RecurringItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -28,6 +32,12 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Recurring::class)]
 #[CoversClass(RecurringAction::class)]
 #[CoversClass(RecurringCycle::class)]
+#[UsesClass(RecurringItemCreateOptions::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(RecurringItem::class)]
 final class RecurringsApiTest extends TestCase
 {
     #[Test]

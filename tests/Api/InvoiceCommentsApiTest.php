@@ -7,11 +7,14 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCommentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\InvoiceComment;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -21,6 +24,10 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(InvoiceCommentsApi::class)]
 #[CoversClass(InvoiceComment::class)]
 #[CoversClass(InvoiceCommentCreateOptions::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class InvoiceCommentsApiTest extends TestCase
 {
     #[Test]

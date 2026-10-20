@@ -5,15 +5,20 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNoteItem;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(CreditNote::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(CreditNoteItem::class)]
+#[UsesClass(CreditNoteStatus::class)]
 final class CreditNoteTest extends TestCase
 {
     #[Test]

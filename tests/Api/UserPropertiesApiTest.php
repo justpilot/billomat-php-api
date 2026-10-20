@@ -7,11 +7,14 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Api\UserPropertiesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 use Justpilot\Billomat\Model\UserProperty;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -22,6 +25,10 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(UserProperty::class)]
 #[CoversClass(PropertyCreateOptions::class)]
 #[CoversClass(PropertyType::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class UserPropertiesApiTest extends TestCase
 {
     private function client(MockHttpClient $mock): BillomatHttpClient

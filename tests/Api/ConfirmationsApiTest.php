@@ -11,14 +11,17 @@ use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ConfirmationUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -32,6 +35,11 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Confirmation::class)]
 #[CoversClass(ConfirmationPdf::class)]
 #[CoversClass(ConfirmationStatus::class)]
+#[UsesClass(ConfirmationItemCreateOptions::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(HttpException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ScalarCaster::class)]
 final class ConfirmationsApiTest extends TestCase
 {
     #[Test]

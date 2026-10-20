@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\InvoicePayment;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoicePayment::class)]
+#[UsesClass(ScalarCaster::class)]
+#[UsesClass(InvoicePaymentType::class)]
 final class InvoicePaymentTest extends TestCase
 {
     #[Test]

@@ -125,6 +125,8 @@ final readonly class Invoice
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
         public ?string $facturxReference = null,
+        public ?float $totalReduction = null,
+        public ?bool $digProceeded = null,
     ) {
     }
 
@@ -227,6 +229,8 @@ final readonly class Invoice
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
+            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
+            digProceeded: ScalarCaster::toBoolOrNull($data['dig_proceeded'] ?? null),
         );
     }
 
@@ -284,6 +288,8 @@ final readonly class Invoice
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'facturx_reference' => $this->facturxReference,
+            'total_reduction' => $this->totalReduction,
+            'dig_proceeded' => $this->digProceeded,
         ];
 
         if ([] !== $this->taxes) {

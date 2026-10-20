@@ -57,6 +57,7 @@ final readonly class DeliveryNote
         public array $items = [],
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?int $offerId = null,
     ) {
     }
 
@@ -139,6 +140,7 @@ final readonly class DeliveryNote
             items: $items,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
         );
     }
 
@@ -178,6 +180,7 @@ final readonly class DeliveryNote
             'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'offer_id' => $this->offerId,
         ];
 
         if ([] !== $this->taxes) {

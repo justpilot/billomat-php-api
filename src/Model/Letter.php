@@ -37,6 +37,7 @@ final readonly class Letter
         public ?string $customerportalUrl = null,
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?int $supplierId = null,
     ) {
     }
 
@@ -65,6 +66,7 @@ final readonly class Letter
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
         );
     }
 
@@ -93,6 +95,7 @@ final readonly class Letter
             'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'supplier_id' => $this->supplierId,
         ];
     }
 }

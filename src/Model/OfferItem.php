@@ -40,6 +40,7 @@ final readonly class OfferItem
         public ?float $totalNetUnreduced,
         public ?DateTimeImmutable $created,
         public ?string $customfield = null,
+        public ?bool $optional = null,
     ) {
     }
 
@@ -69,6 +70,7 @@ final readonly class OfferItem
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            optional: ScalarCaster::toBoolOrNull($data['optional'] ?? null),
         );
     }
 
@@ -98,6 +100,7 @@ final readonly class OfferItem
             'total_net_unreduced' => $this->totalNetUnreduced,
             'created' => $this->created?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'optional' => $this->optional,
         ];
     }
 }

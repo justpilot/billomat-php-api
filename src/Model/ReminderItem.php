@@ -33,6 +33,8 @@ final readonly class ReminderItem
         public ?float $totalNet,
         public ?DateTimeImmutable $created,
         public ?string $customfield = null,
+        public ?float $total = null,
+        public ?bool $isCharge = null,
     ) {
     }
 
@@ -55,6 +57,8 @@ final readonly class ReminderItem
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            total: ScalarCaster::toFloatOrNull($data['total'] ?? null),
+            isCharge: ScalarCaster::toBoolOrNull($data['is_charge'] ?? null),
         );
     }
 
@@ -77,6 +81,8 @@ final readonly class ReminderItem
             'total_net' => $this->totalNet,
             'created' => $this->created?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'total' => $this->total,
+            'is_charge' => $this->isCharge,
         ];
     }
 }

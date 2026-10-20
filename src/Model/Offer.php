@@ -63,6 +63,8 @@ final readonly class Offer
         public array $items = [],
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?DateTimeImmutable $validityDate = null,
+        public ?float $totalReduction = null,
     ) {
     }
 
@@ -148,6 +150,8 @@ final readonly class Offer
             items: $items,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            validityDate: ScalarCaster::toDateTimeOrNull($data['validity_date'] ?? null),
+            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
         );
     }
 
@@ -190,6 +194,8 @@ final readonly class Offer
             'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'validity_date' => $this->validityDate?->format('Y-m-d'),
+            'total_reduction' => $this->totalReduction,
         ];
 
         if ([] !== $this->taxes) {

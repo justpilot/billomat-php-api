@@ -58,6 +58,7 @@ final readonly class Confirmation
         public array $items = [],
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?float $totalReduction = null,
     ) {
     }
 
@@ -143,6 +144,7 @@ final readonly class Confirmation
             items: $items,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
         );
     }
 
@@ -185,6 +187,7 @@ final readonly class Confirmation
             'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'total_reduction' => $this->totalReduction,
         ];
 
         if ([] !== $this->taxes) {

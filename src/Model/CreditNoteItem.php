@@ -38,6 +38,7 @@ final readonly class CreditNoteItem
         public ?float $totalNetUnreduced,
         public ?DateTimeImmutable $created,
         public ?string $customfield = null,
+        public ?float $taxRateReverseCharge = null,
     ) {
     }
 
@@ -67,6 +68,7 @@ final readonly class CreditNoteItem
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            taxRateReverseCharge: ScalarCaster::toFloatOrNull($data['tax_rate_reverse_charge'] ?? null),
         );
     }
 
@@ -96,6 +98,7 @@ final readonly class CreditNoteItem
             'total_net_unreduced' => $this->totalNetUnreduced,
             'created' => $this->created?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'tax_rate_reverse_charge' => $this->taxRateReverseCharge,
         ];
     }
 }

@@ -50,6 +50,11 @@ final readonly class Reminder
         public array $items = [],
         public ?DateTimeImmutable $updated = null,
         public ?string $customfield = null,
+        public ?float $paidAmount = null,
+        public ?float $openAmount = null,
+        public ?int $reminderLevel = null,
+        public ?string $reminderLevelName = null,
+        public ?bool $isOld = null,
     ) {
     }
 
@@ -102,6 +107,11 @@ final readonly class Reminder
             items: $items,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            reminderLevel: ScalarCaster::toIntOrNull($data['reminder_level'] ?? null),
+            reminderLevelName: ScalarCaster::toStringOrNull($data['reminder_level_name'] ?? null),
+            isOld: ScalarCaster::toBoolOrNull($data['is_old'] ?? null),
         );
     }
 
@@ -137,6 +147,11 @@ final readonly class Reminder
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
+            'paid_amount' => $this->paidAmount,
+            'open_amount' => $this->openAmount,
+            'reminder_level' => $this->reminderLevel,
+            'reminder_level_name' => $this->reminderLevelName,
+            'is_old' => $this->isOld,
         ];
 
         if ([] !== $this->items) {

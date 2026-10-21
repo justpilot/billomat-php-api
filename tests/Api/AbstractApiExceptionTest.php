@@ -222,7 +222,7 @@ final class AbstractApiExceptionTest extends TestCase
         $api = new TestApi(self::createStub(BillomatHttpClientInterface::class));
 
         $this->expectException(UnexpectedResponseException::class);
-        $this->expectExceptionMessage('Unexpected response from Billomat when fetching client.');
+        $this->expectExceptionMessageIsOrContains('Unexpected response from Billomat when fetching client.');
 
         $api->publicUnwrapEnvelope(['invoice' => ['id' => 1]], 'client');
     }

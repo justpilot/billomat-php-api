@@ -7,10 +7,13 @@ namespace Justpilot\Billomat\Api;
 /**
  * Typisierter Payload für POST /clients gemäß Billomat-API.
  *
- * Alle Felder basieren auf der offiziellen Dokumentation:
- * https://www.billomat.com/api/clients/
- *
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
+ *
+ * Doku:
+ * https://www.billomat.com/en/api/clients/
+ *
+ * Generiert aus tools/codegen/definitions/clients.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final class ClientCreateOptions
 {
@@ -23,15 +26,20 @@ final class ClientCreateOptions
     public ?string $name = null;
 
     /**
-     * Archivierungsstatus.
+     * Kundennummer (frei wählbar).
      *
-     * 1 = archiviert, 0 = aktiv.
-     *
-     * Billomat-Feld: archived
-     * Typ: BOOL
-     * Default: 0
+     * Billomat-Feld: client_number
      */
-    public ?bool $archived = null;
+    public ?string $clientNumber = null;
+
+    /**
+     * Laufende Nummer (ohne Präfix).
+     *
+     * Billomat-Feld: number
+     * Typ: INT
+     * Default: nächste freie Nummer
+     */
+    public ?int $number = null;
 
     /**
      * Präfix der Kundennummer.
@@ -43,20 +51,11 @@ final class ClientCreateOptions
     public ?string $numberPre = null;
 
     /**
-     * Laufende Kundennummer.
-     *
-     * Billomat-Feld: number
-     * Typ: INT
-     * Default: nächste freie Nummer
-     */
-    public ?int $number = null;
-
-    /**
      * Mindestlänge der Kundennummer.
      *
      * Billomat-Feld: number_length
      * Typ: INT
-     * Default: Wert aus Einstellungen
+     * Default: Wert aus den Einstellungen
      */
     public ?int $numberLength = null;
 
@@ -85,7 +84,7 @@ final class ClientCreateOptions
     public ?string $city = null;
 
     /**
-     * Bundesland / Region / Bezirk.
+     * Bundesland / Bezirk / Region.
      *
      * Billomat-Feld: state
      * Typ: ALNUM
@@ -93,23 +92,15 @@ final class ClientCreateOptions
     public ?string $state = null;
 
     /**
-     * Ländercode ISO 3166-1 Alpha-2.
-     *
-     * Billomat-Feld: country_code
-     * Typ: ALNUM
-     * Default: Land des eigenen Accounts
+     * Ländercode des Kunden (ISO 3166-1 Alpha-2).
      *
      * Beispiel: "DE", "AT", "CH"
+     *
+     * Billomat-Feld: country_code
+     * Typ: Ländercode nach ISO 3166 Alpha-2
+     * Default: Wert aus eigener Firma
      */
     public ?string $countryCode = null;
-
-    /**
-     * Kundennummer (benutzerdefiniert).
-     *
-     * Billomat-Feld: client_number
-     * Typ: ALNUM
-     */
-    public ?string $clientNumber = null;
 
     /**
      * Vorname.
@@ -139,7 +130,7 @@ final class ClientCreateOptions
      * E-Mail-Adresse.
      *
      * Billomat-Feld: email
-     * Typ: gültige E-Mail
+     * Typ: gültige E-Mail-Adresse
      */
     public ?string $email = null;
 
@@ -168,11 +159,12 @@ final class ClientCreateOptions
     public ?string $mobile = null;
 
     /**
-     * Website ohne http:// oder https://.
+     * Website (ohne Schema).
+     *
+     * Beispiel: "example.com"
      *
      * Billomat-Feld: www
-     * Typ: URL
-     * Beispiel: "example.com"
+     * Typ: URL (ohne http)
      */
     public ?string $www = null;
 
@@ -187,15 +179,12 @@ final class ClientCreateOptions
     /**
      * Gebietsschema des Kunden.
      *
+     * Beispiel: "de_DE"
+     *
      * Billomat-Feld: locale
      * Typ: ALNUM
-     * Beispiel: "de_DE"
      */
     public ?string $locale = null;
-
-    // ---------------------------------------------------------------------
-    // Steuerdaten
-    // ---------------------------------------------------------------------
 
     /**
      * Steuernummer.
@@ -206,10 +195,10 @@ final class ClientCreateOptions
     public ?string $taxNumber = null;
 
     /**
-     * Umsatzsteuer-ID.
+     * Umsatzsteuer-ID (USt-IdNr.).
      *
      * Billomat-Feld: vat_number
-     * Typ: gültige USt-ID
+     * Typ: gültige Ust-IdNr.
      */
     public ?string $vatNumber = null;
 
@@ -232,20 +221,19 @@ final class ClientCreateOptions
     public ?string $netGross = null;
 
     /**
-     * Währungscode.
+     * Währung des Kunden (ISO-Währungscode).
+     *
+     * Beispiel: "EUR"
      *
      * Billomat-Feld: currency_code
      * Typ: ISO-Währungscode
-     * Beispiel: "EUR"
      */
     public ?string $currencyCode = null;
 
-    // ---------------------------------------------------------------------
-    // Debitor & Preisgruppe
-    // ---------------------------------------------------------------------
-
     /**
      * Debitorennummer.
+     *
+     * Wird häufig als Referenz zur FIBU verwendet.
      *
      * Billomat-Feld: debitor_account_number
      * Typ: INT
@@ -255,95 +243,34 @@ final class ClientCreateOptions
     /**
      * Preisgruppe.
      *
+     * Artikel können mehrere Preise haben – die Preisgruppe legt fest,
+     * welcher Preis für den Kunden verwendet wird.
+     *
      * Billomat-Feld: price_group
      * Typ: INT
      */
     public ?int $priceGroup = null;
 
-    // ---------------------------------------------------------------------
-    // Bankdaten
-    // ---------------------------------------------------------------------
+    /**
+     * Archivierungsstatus.
+     *
+     * true = archiviert, false = aktiv.
+     *
+     * Billomat-Feld: archived
+     * Typ: BOOL
+     * Default: 0
+     */
+    public ?bool $archived = null;
 
     /**
-     * Kontonummer.
+     * Automatischer Mahnlauf.
      *
-     * Billomat-Feld: bank_account_number
-     * Typ: ALNUM
-     */
-    public ?string $bankAccountNumber = null;
-
-    /**
-     * Kontoinhaber.
+     * true = Kunde wird in automatischem Mahnlauf berücksichtigt.
      *
-     * Billomat-Feld: bank_account_owner
-     * Typ: ALNUM
+     * Billomat-Feld: dunning_run
+     * Typ: BOOL
      */
-    public ?string $bankAccountOwner = null;
-
-    /**
-     * Bankleitzahl.
-     *
-     * Billomat-Feld: bank_number
-     * Typ: ALNUM
-     */
-    public ?string $bankNumber = null;
-
-    /**
-     * Bankname.
-     *
-     * Billomat-Feld: bank_name
-     * Typ: ALNUM
-     */
-    public ?string $bankName = null;
-
-    /**
-     * SWIFT/BIC.
-     *
-     * Billomat-Feld: bank_swift
-     * Typ: ALNUM
-     */
-    public ?string $bankSwift = null;
-
-    /**
-     * IBAN.
-     *
-     * Billomat-Feld: bank_iban
-     * Typ: gültige IBAN
-     */
-    public ?string $bankIban = null;
-
-    // ---------------------------------------------------------------------
-    // SEPA
-    // ---------------------------------------------------------------------
-
-    /**
-     * Mandatsreferenz für SEPA-Lastschrift.
-     *
-     * Billomat-Feld: sepa_mandate
-     * Typ: ALNUM
-     */
-    public ?string $sepaMandate = null;
-
-    /**
-     * Ausstelldatum des SEPA-Mandats (YYYY-MM-DD).
-     *
-     * Billomat-Feld: sepa_mandate_date
-     * Typ: DATE
-     */
-    public ?string $sepaMandateDate = null;
-
-    // ---------------------------------------------------------------------
-    // Zahlungsbedingungen
-    // ---------------------------------------------------------------------
-
-    /**
-     * Standard-Zahlarten des Kunden (CSV).
-     *
-     * Billomat-Feld: default_payment_types
-     * Typ: ALNUM (CSV)
-     * Beispiel: "CASH,BANK_TRANSFER"
-     */
-    public ?string $defaultPaymentTypes = null;
+    public bool $dunningRun = false;
 
     /**
      * Rabatt in Prozent.
@@ -375,6 +302,7 @@ final class ClientCreateOptions
      *
      * Billomat-Feld: discount_days_type
      * Typ: SETTINGS | ABSOLUTE | RELATIVE
+     * Default: SETTINGS
      */
     public ?string $discountDaysType = null;
 
@@ -391,6 +319,7 @@ final class ClientCreateOptions
      *
      * Billomat-Feld: due_days_type
      * Typ: SETTINGS | ABSOLUTE | RELATIVE
+     * Default: SETTINGS
      */
     public ?string $dueDaysType = null;
 
@@ -407,6 +336,7 @@ final class ClientCreateOptions
      *
      * Billomat-Feld: reminder_due_days_type
      * Typ: SETTINGS | ABSOLUTE | RELATIVE
+     * Default: SETTINGS
      */
     public ?string $reminderDueDaysType = null;
 
@@ -423,26 +353,93 @@ final class ClientCreateOptions
      *
      * Billomat-Feld: offer_validity_days_type
      * Typ: SETTINGS | ABSOLUTE | RELATIVE
+     * Default: SETTINGS
      */
     public ?string $offerValidityDaysType = null;
 
     /**
-     * Angebotsgültigkeit (Tage).
+     * Angebotsgültigkeit in Tagen.
      *
      * Billomat-Feld: offer_validity_days
      * Typ: INT
      */
     public ?int $offerValidityDays = null;
 
-    // ---------------------------------------------------------------------
+    /**
+     * Kontoinhaber.
+     *
+     * Billomat-Feld: bank_account_owner
+     * Typ: ALNUM
+     */
+    public ?string $bankAccountOwner = null;
 
     /**
-     * Automatischer Mahnlauf.
+     * Bankleitzahl.
      *
-     * Billomat-Feld: dunning_run
-     * Typ: BOOL
+     * Billomat-Feld: bank_number
+     * Typ: ALNUM
      */
-    public bool $dunningRun = false;
+    public ?string $bankNumber = null;
+
+    /**
+     * Bankname.
+     *
+     * Billomat-Feld: bank_name
+     * Typ: ALNUM
+     */
+    public ?string $bankName = null;
+
+    /**
+     * Kontonummer.
+     *
+     * Billomat-Feld: bank_account_number
+     * Typ: ALNUM
+     */
+    public ?string $bankAccountNumber = null;
+
+    /**
+     * SWIFT / BIC.
+     *
+     * Billomat-Feld: bank_swift
+     * Typ: ALNUM
+     */
+    public ?string $bankSwift = null;
+
+    /**
+     * IBAN.
+     *
+     * Billomat-Feld: bank_iban
+     * Typ: gültige IBAN
+     */
+    public ?string $bankIban = null;
+
+    /**
+     * SEPA-Mandatsreferenz.
+     *
+     * Billomat-Feld: sepa_mandate
+     * Typ: ALNUM
+     */
+    public ?string $sepaMandate = null;
+
+    /**
+     * Ausstelldatum des SEPA-Mandats.
+     *
+     * Format: YYYY-MM-DD
+     *
+     * Billomat-Feld: sepa_mandate_date
+     * Typ: DATE
+     */
+    public ?string $sepaMandateDate = null;
+
+    /**
+     * Standard-Zahlarten (CSV).
+     *
+     * Beispiel: "CASH,BANK_TRANSFER"
+     *
+     * Billomat-Feld: default_payment_types
+     * Typ: ALNUM
+     */
+    public ?string $defaultPaymentTypes = null;
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -453,16 +450,15 @@ final class ClientCreateOptions
     {
         $data = [
             'name' => $this->name,
-            'archived' => $this->archived,
-            'number_pre' => $this->numberPre,
+            'client_number' => $this->clientNumber,
             'number' => $this->number,
+            'number_pre' => $this->numberPre,
             'number_length' => $this->numberLength,
             'street' => $this->street,
             'zip' => $this->zip,
             'city' => $this->city,
             'state' => $this->state,
             'country_code' => $this->countryCode,
-            'client_number' => $this->clientNumber,
             'first_name' => $this->firstName,
             'last_name' => $this->lastName,
             'salutation' => $this->salutation,
@@ -473,27 +469,15 @@ final class ClientCreateOptions
             'www' => $this->www,
             'note' => $this->note,
             'locale' => $this->locale,
-
             'tax_number' => $this->taxNumber,
             'vat_number' => $this->vatNumber,
             'tax_rule' => $this->taxRule,
             'net_gross' => $this->netGross,
             'currency_code' => $this->currencyCode,
-
             'debitor_account_number' => $this->debitorAccountNumber,
             'price_group' => $this->priceGroup,
-
-            'bank_account_number' => $this->bankAccountNumber,
-            'bank_account_owner' => $this->bankAccountOwner,
-            'bank_number' => $this->bankNumber,
-            'bank_name' => $this->bankName,
-            'bank_swift' => $this->bankSwift,
-            'bank_iban' => $this->bankIban,
-
-            'sepa_mandate' => $this->sepaMandate,
-            'sepa_mandate_date' => $this->sepaMandateDate,
-
-            'default_payment_types' => $this->defaultPaymentTypes,
+            'archived' => $this->archived,
+            'dunning_run' => $this->dunningRun,
             'reduction' => $this->reduction,
             'discount_rate_type' => $this->discountRateType,
             'discount_rate' => $this->discountRate,
@@ -505,11 +489,18 @@ final class ClientCreateOptions
             'reminder_due_days' => $this->reminderDueDays,
             'offer_validity_days_type' => $this->offerValidityDaysType,
             'offer_validity_days' => $this->offerValidityDays,
-
-            'dunning_run' => $this->dunningRun,
+            'bank_account_owner' => $this->bankAccountOwner,
+            'bank_number' => $this->bankNumber,
+            'bank_name' => $this->bankName,
+            'bank_account_number' => $this->bankAccountNumber,
+            'bank_swift' => $this->bankSwift,
+            'bank_iban' => $this->bankIban,
+            'sepa_mandate' => $this->sepaMandate,
+            'sepa_mandate_date' => $this->sepaMandateDate,
+            'default_payment_types' => $this->defaultPaymentTypes,
         ];
 
         // Null-Felder entfernen
-        return array_filter($data, static fn (string|bool|int|float|null $v): bool => null !== $v);
+        return array_filter($data, static fn (mixed $v): bool => null !== $v);
     }
 }

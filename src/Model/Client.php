@@ -17,6 +17,9 @@ use const DATE_ATOM;
  *
  * Dokumentation:
  * https://www.billomat.com/en/api/clients/
+ *
+ * Generiert aus tools/codegen/definitions/clients.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Client
 {
@@ -65,7 +68,11 @@ final readonly class Client
         public ?string $fax = null,
         /** Mobilnummer. */
         public ?string $mobile = null,
-        /** Website (ohne Schema). */
+        /**
+         * Website (ohne Schema).
+         *
+         * Beispiel: "example.com"
+         */
         public ?string $www = null,
         /** Notiz zum Kunden. */
         public ?string $note = null,
@@ -113,7 +120,7 @@ final readonly class Client
         /**
          * Archivierungsstatus.
          *
-         * 1 = archiviert, 0 = aktiv.
+         * true = archiviert, false = aktiv.
          */
         public ?bool $archived = null,
         /**
@@ -122,27 +129,45 @@ final readonly class Client
          * true = Kunde wird in automatischem Mahnlauf berücksichtigt.
          */
         public ?bool $dunningRun = null,
-        /**
-         * Rabatt in Prozent.
-         */
+        /** Rabatt in Prozent. */
         public ?float $reduction = null,
-        /** Typ des Skonto-Satzes (SETTINGS|ABSOLUTE|RELATIVE). */
+        /**
+         * Typ des Skonto-Satzes.
+         *
+         * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
+         */
         public ?string $discountRateType = null,
         /** Skonto-Satz. */
         public ?float $discountRate = null,
-        /** Typ des Skonto-Zeitraums (SETTINGS|ABSOLUTE|RELATIVE). */
+        /**
+         * Typ des Skonto-Zeitraums.
+         *
+         * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
+         */
         public ?string $discountDaysType = null,
         /** Skonto-Tage. */
         public ?float $discountDays = null,
-        /** Typ der Fälligkeit (SETTINGS|ABSOLUTE|RELATIVE). */
+        /**
+         * Typ der Fälligkeit.
+         *
+         * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
+         */
         public ?string $dueDaysType = null,
         /** Fälligkeit in Tagen nach Rechnungsdatum. */
         public ?int $dueDays = null,
-        /** Typ der Mahnfälligkeit (SETTINGS|ABSOLUTE|RELATIVE). */
+        /**
+         * Typ der Mahnfälligkeit.
+         *
+         * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
+         */
         public ?string $reminderDueDaysType = null,
         /** Mahnfälligkeit in Tagen. */
         public ?int $reminderDueDays = null,
-        /** Typ der Angebotsgültigkeit (SETTINGS|ABSOLUTE|RELATIVE). */
+        /**
+         * Typ der Angebotsgültigkeit.
+         *
+         * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
+         */
         public ?string $offerValidityDaysType = null,
         /** Angebotsgültigkeit in Tagen. */
         public ?int $offerValidityDays = null,
@@ -162,7 +187,11 @@ final readonly class Client
         public ?string $sepaMandate = null,
         /** Ausstelldatum des SEPA-Mandats. */
         public ?DateTimeImmutable $sepaMandateDate = null,
-        /** Standard-Zahlarten (CSV, z. B. "CASH,BANK_TRANSFER"). */
+        /**
+         * Standard-Zahlarten (CSV).
+         *
+         * Beispiel: "CASH,BANK_TRANSFER"
+         */
         public ?string $defaultPaymentTypes = null,
         /** Kundenportal aktiviert? */
         public ?bool $enableCustomerportal = null,
@@ -176,16 +205,29 @@ final readonly class Client
         public ?float $revenueGross = null,
         /** Netto-Umsatz (read-only Auswertungsfeld). */
         public ?float $revenueNet = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Kennung für E-Rechnungen (ZUGFeRD/Factur-X).
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert.
+         */
         public ?string $facturxIdentifier = null,
+        /**
+         * Verkäufer-Kennung für E-Rechnungen (ZUGFeRD/Factur-X).
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert.
+         */
         public ?string $sellerIdentifier = null,
+        /** Von Billomat geliefert, aber nicht dokumentiert. */
         public ?bool $digExclude = null,
     ) {
     }
 
     /**
-     * Hydriert einen Client aus einem Billomat-Response-Array.
+     * Hydriert das Model aus einem Billomat-Response-Array.
      *
      * @param array<string,mixed> $data
      */
@@ -193,7 +235,7 @@ final readonly class Client
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            name: (string) ($data['name'] ?? ''),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             clientNumber: ScalarCaster::toStringOrNull($data['client_number'] ?? null),
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),
@@ -257,7 +299,7 @@ final readonly class Client
     }
 
     /**
-     * Exportiert den Client als Array mit Billomat-Feldnamen.
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
      *
      * Praktisch für Debugging oder Log-Ausgaben.
      *
@@ -267,8 +309,8 @@ final readonly class Client
     {
         return [
             'id' => $this->id,
-            'created' => $this->created?->format(DATE_ATOM),
             'name' => $this->name,
+            'created' => $this->created?->format(DATE_ATOM),
             'client_number' => $this->clientNumber,
             'number' => $this->number,
             'number_pre' => $this->numberPre,

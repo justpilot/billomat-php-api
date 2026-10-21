@@ -77,6 +77,9 @@ jobs:
       - name: Rector (dry-run)
         run: composer refactor:dry
 
+      - name: Generated code up to date
+        run: composer generate:check
+
       - name: Composer audit
         run: composer audit
 

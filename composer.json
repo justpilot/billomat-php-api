@@ -94,10 +94,13 @@
       "@lint",
       "@analyse",
       "@refactor:dry",
+      "@generate:check",
       "@test:all"
     ],
     "extract:spec": "php tools/extract-billomat-spec.php",
-    "audit:spec": "php tools/audit-spec-vs-code.php"
+    "audit:spec": "php tools/audit-spec-vs-code.php",
+    "generate": "php tools/generate.php",
+    "generate:check": "php tools/generate.php --check"
   },
   "scripts-descriptions": {
     "test": "PHPUnit-Tests (Unit only, schnell)",
@@ -114,6 +117,8 @@
     "mutate": "Infection Mutation-Tests ausführen",
     "ci": "Vollständiger lokaler CI-Check (Lint + Analyse + Rector-Dry + Tests)",
     "extract:spec": "Billomat-API-Doku (HTML-Spiegel) in docs/spec/billomat.json überführen",
-    "audit:spec": "Vergleicht docs/spec/billomat.json gegen src/ und schreibt docs/audit.md"
+    "audit:spec": "Vergleicht docs/spec/billomat.json gegen src/ und schreibt docs/audit.md",
+    "generate": "Erzeugt Models und Options aus docs/spec/billomat.json + tools/codegen/definitions/",
+    "generate:check": "Prüft, ob die generierten Dateien unter src/ aktuell sind"
   }
 }

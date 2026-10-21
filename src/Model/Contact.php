@@ -12,48 +12,93 @@ use const DATE_ATOM;
 /**
  * Ansprechpartner (Contact) eines Kunden.
  *
- * Doku: https://www.billomat.com/en/api/clients/contacts/
+ * Dieses Model bildet die Struktur von GET /contacts bzw. GET /contacts/{id} ab.
+ * Es ist als Read-Model gedacht: Die Erstellung erfolgt über ContactCreateOptions.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/en/api/clients/contacts/
+ *
+ * Generiert aus tools/codegen/definitions/contacts.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Contact
 {
     public function __construct(
+        /** Interne Billomat-ID des Kontakts. */
         public ?int $id,
+        /** ID des Kunden, zu dem der Kontakt gehört. */
         public int $clientId,
+        /** Erstellungszeitpunkt des Kontakts. */
         public ?DateTimeImmutable $created = null,
+        /** Bezeichnung des Kontakts. */
         public ?string $label = null,
+        /** Anrede. */
         public ?string $salutation = null,
+        /** Vorname. */
         public ?string $firstName = null,
+        /** Nachname. */
         public ?string $lastName = null,
+        /** Straße. */
         public ?string $street = null,
+        /** Postleitzahl. */
         public ?string $zip = null,
+        /** Ort. */
         public ?string $city = null,
+        /** Bundesland / Bezirk / Region. */
         public ?string $state = null,
+        /**
+         * Ländercode (ISO 3166-1 Alpha-2).
+         *
+         * Beispiel: "DE", "AT", "CH"
+         */
         public ?string $countryCode = null,
+        /** E-Mail-Adresse. */
         public ?string $email = null,
+        /** Telefonnummer. */
         public ?string $phone = null,
+        /** Faxnummer. */
         public ?string $fax = null,
+        /** Mobilnummer. */
         public ?string $mobile = null,
         /**
+         * Notiz zum Kontakt.
+         *
          * @deprecated since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $note = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Firmenname. */
         public ?string $name = null,
+        /** Von Billomat zusammengesetzte Adresse (mehrzeilig). */
         public ?string $address = null,
+        /**
+         * Website (ohne Schema).
+         *
+         * Beispiel: "example.com"
+         */
         public ?string $www = null,
+        /**
+         * Gebietsschema des Kontakts.
+         *
+         * Beispiel: "de_DE"
+         */
         public ?string $locale = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            clientId: (int) ($data['client_id'] ?? 0),
+            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
@@ -79,6 +124,10 @@ final readonly class Contact
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

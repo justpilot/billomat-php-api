@@ -168,9 +168,11 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
             'specType' => null !== $specField ? (null !== $enum ? implode(' | ', $enum) : (string) $specField['type']) : null,
             'specDefault' => $specField['default'] ?? null,
             'writable' => empty($field['readOnly']),
+            'inModel' => empty($field['optionsOnly']),
             'deprecated' => $field['deprecated'] ?? null,
             'model' => $field['model'] ?? [],
             'create' => $field['create'] ?? [],
+            'update' => $field['update'] ?? [],
         ];
     }
 
@@ -198,7 +200,8 @@ function phpTypeFromSpec(string $specType): string
  */
 function renderModel(array $definition, array $fields, string $source): string
 {
-    $types = array_column($fields, 'type');
+    $fields = array_values(array_filter($fields, static fn (array $f): bool => $f['inModel']));
+    $types = array_map(modelType(...), $fields);
     $usesDate = [] !== array_intersect($types, ['date', 'datetime']);
     $usesAtom = \in_array('datetime', $types, true);
 
@@ -230,7 +233,7 @@ function renderModel(array $definition, array $fields, string $source): string
         $out .= docBlock($lines, '        ');
         $out .= '        public ' . modelTypeHint($field) . ' $' . $field['property'];
         if (empty($field['model']['required'])) {
-            $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : "''");
+            $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : nonNullFallback(modelType($field)));
         }
         $out .= ",\n";
     }
@@ -248,7 +251,7 @@ function renderModel(array $definition, array $fields, string $source): string
     $out .= "    public function toArray(): array\n    {\n        return [\n";
     foreach ($fields as $field) {
         $value = '$this->' . $field['property'];
-        $value = match ($field['type']) {
+        $value = match (modelType($field)) {
             'date' => $value . "?->format('Y-m-d')",
             'datetime' => $value . '?->format(DATE_ATOM)',
             default => $value,
@@ -261,13 +264,36 @@ function renderModel(array $definition, array $fields, string $source): string
 }
 
 /**
+ * Typ im Read-Model; `model.type` überschreibt den Typ aus Spec/Definition (BC).
+ *
+ * @param array<string, mixed> $field
+ */
+function modelType(array $field): string
+{
+    return $field['model']['type'] ?? $field['type'];
+}
+
+/**
+ * Ersatzwert für nicht-nullbare Felder, wenn Billomat nichts liefert.
+ */
+function nonNullFallback(string $type): string
+{
+    return match ($type) {
+        'int' => '0',
+        'float' => '0.0',
+        'bool' => 'false',
+        default => "''",
+    };
+}
+
+/**
  * @param array<string, mixed> $field
  */
 function modelTypeHint(array $field): string
 {
-    $type = match ($field['type']) {
+    $type = match (modelType($field)) {
         'date', 'datetime' => 'DateTimeImmutable',
-        default => $field['type'],
+        default => modelType($field),
     };
 
     return empty($field['model']['nonNull']) ? '?' . $type : $type;
@@ -278,7 +304,7 @@ function modelTypeHint(array $field): string
  */
 function hydrateExpression(array $field): string
 {
-    $caster = match ($field['type']) {
+    $caster = match (modelType($field)) {
         'int' => 'toIntOrNull',
         'float' => 'toFloatOrNull',
         'bool' => 'toBoolOrNull',
@@ -286,9 +312,12 @@ function hydrateExpression(array $field): string
         default => 'toStringOrNull',
     };
 
-    $expression = 'ScalarCaster::' . $caster . "(\$data['" . $field['wire'] . "'] ?? null)";
+    // `model.sources`: Billomat-Felder, die der Reihe nach probiert werden (Fallback).
+    $sources = $field['model']['sources'] ?? [$field['wire']];
+    $lookup = implode(' ?? ', array_map(static fn (string $s): string => "\$data['{$s}']", $sources));
+    $expression = 'ScalarCaster::' . $caster . '(' . $lookup . ' ?? null)';
 
-    return empty($field['model']['nonNull']) ? $expression : $expression . " ?? ''";
+    return empty($field['model']['nonNull']) ? $expression : $expression . ' ?? ' . nonNullFallback(modelType($field));
 }
 
 // -------------------------------------------------------------------------
@@ -303,37 +332,37 @@ function hydrateExpression(array $field): string
 function renderOptions(array $definition, array $options, array $fields, string $source, bool $isCreate): string
 {
     $boolAsInt = !empty($options['boolAsInt']);
-    $writable = array_values(array_filter($fields, static fn (array $f): bool => $f['writable']));
+    $writable = array_values(array_filter(
+        $fields,
+        static fn (array $f): bool => $f['writable'] && ($isCreate || empty($f['update']['skip'])),
+    ));
 
     $out = "<?php\n\ndeclare(strict_types=1);\n\nnamespace Justpilot\\Billomat\\Api;\n\n";
     $out .= classDoc($options['doc'], $definition['docUrl'], $source, 'Doku:');
     $out .= 'final class ' . $options['class'] . "\n{\n";
 
+    // Pflichtfelder beim Anlegen werden als Konstruktor-Parameter erzwungen.
+    $promoted = $isCreate
+        ? array_values(array_filter($writable, static fn (array $f): bool => !empty($f['create']['constructor'])))
+        : [];
+    if ([] !== $promoted) {
+        $out .= "    public function __construct(\n";
+        foreach ($promoted as $field) {
+            $out .= docBlock(optionsDocLines($field, $isCreate), '        ');
+            $out .= '        public ' . optionsPhpType($field) . ' $' . $field['property'] . ",\n";
+        }
+        $out .= "    ) {\n    }\n\n";
+    }
+
     foreach ($writable as $field) {
-        $lines = [$field['doc']];
-        $details = $field['details'];
-        if ('date' === $field['type']) {
-            $details[] = 'Format: YYYY-MM-DD';
-        }
-        if ([] !== $details) {
-            $lines = [...$lines, '', ...$details];
+        if (\in_array($field, $promoted, true)) {
+            continue;
         }
 
-        $lines[] = '';
-        $lines[] = 'Billomat-Feld: ' . $field['wire'];
-        if (null !== $field['specType']) {
-            $lines[] = 'Typ: ' . $field['specType'];
-        }
-        // Spec-Defaults gelten beim Anlegen; beim Update bleibt ein nicht gesendetes Feld unverändert.
-        if ($isCreate && null !== $field['specDefault']) {
-            $lines[] = 'Default: ' . $field['specDefault'];
-        }
-
-        $phpType = 'date' === $field['type'] ? 'string' : $field['type'];
         $nonNull = $isCreate && !empty($field['create']['nonNull']);
 
-        $out .= docBlock($lines, '    ');
-        $out .= '    public ' . ($nonNull ? '' : '?') . $phpType . ' $' . $field['property'] . ' = '
+        $out .= docBlock(optionsDocLines($field, $isCreate), '    ');
+        $out .= '    public ' . ($nonNull ? '' : '?') . optionsPhpType($field) . ' $' . $field['property'] . ' = '
             . ($nonNull ? var_export($field['create']['default'], true) : 'null') . ";\n\n";
     }
 
@@ -341,7 +370,7 @@ function renderOptions(array $definition, array $options, array $fields, string 
     $out .= "    public function toArray(): array\n    {\n        \$data = [\n";
     foreach ($writable as $field) {
         $value = '$this->' . $field['property'];
-        $nonNull = $isCreate && !empty($field['create']['nonNull']);
+        $nonNull = $isCreate && (!empty($field['create']['nonNull']) || !empty($field['create']['constructor']));
         if ($boolAsInt && 'bool' === $field['type']) {
             $value = $nonNull
                 ? "({$value} ? 1 : 0)"
@@ -353,6 +382,43 @@ function renderOptions(array $definition, array $options, array $fields, string 
     $out .= "        return array_filter(\$data, static fn (mixed \$v): bool => null !== \$v);\n    }\n}\n";
 
     return $out;
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function optionsPhpType(array $field): string
+{
+    return 'date' === $field['type'] ? 'string' : $field['type'];
+}
+
+/**
+ * @param array<string, mixed> $field
+ *
+ * @return list<string>
+ */
+function optionsDocLines(array $field, bool $isCreate): array
+{
+    $lines = [$field['doc']];
+    $details = $field['details'];
+    if ('date' === $field['type']) {
+        $details[] = 'Format: YYYY-MM-DD';
+    }
+    if ([] !== $details) {
+        $lines = [...$lines, '', ...$details];
+    }
+
+    $lines[] = '';
+    $lines[] = 'Billomat-Feld: ' . $field['wire'];
+    if (null !== $field['specType']) {
+        $lines[] = 'Typ: ' . $field['specType'];
+    }
+    // Spec-Defaults gelten beim Anlegen; beim Update bleibt ein nicht gesendetes Feld unverändert.
+    if ($isCreate && null !== $field['specDefault']) {
+        $lines[] = 'Default: ' . $field['specDefault'];
+    }
+
+    return $lines;
 }
 
 // -------------------------------------------------------------------------

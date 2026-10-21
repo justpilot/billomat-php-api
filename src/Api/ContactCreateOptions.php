@@ -5,51 +5,163 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 /**
- * Typisierter Payload für POST /contacts.
+ * Typisierter Payload für POST /contacts gemäß Billomat-API.
  *
- * Doku: https://www.billomat.com/en/api/clients/contacts/
+ * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
+ *
+ * Doku:
+ * https://www.billomat.com/en/api/clients/contacts/
+ *
+ * Generiert aus tools/codegen/definitions/contacts.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final class ContactCreateOptions
 {
     public function __construct(
-        /** ID des Kunden (Pflichtfeld). */
+        /**
+         * ID des Kunden, zu dem der Kontakt gehört.
+         *
+         * Billomat-Feld: client_id
+         * Typ: INT
+         */
         public int $clientId,
     ) {
     }
 
+    /**
+     * Bezeichnung des Kontakts.
+     *
+     * Billomat-Feld: label
+     * Typ: ALNUM
+     */
     public ?string $label = null;
 
-    public ?string $name = null;
-
+    /**
+     * Anrede.
+     *
+     * Billomat-Feld: salutation
+     * Typ: ALNUM
+     */
     public ?string $salutation = null;
 
+    /**
+     * Vorname.
+     *
+     * Billomat-Feld: first_name
+     * Typ: ALNUM
+     */
     public ?string $firstName = null;
 
+    /**
+     * Nachname.
+     *
+     * Billomat-Feld: last_name
+     * Typ: ALNUM
+     */
     public ?string $lastName = null;
 
+    /**
+     * Straße.
+     *
+     * Billomat-Feld: street
+     * Typ: ALNUM
+     */
     public ?string $street = null;
 
+    /**
+     * Postleitzahl.
+     *
+     * Billomat-Feld: zip
+     * Typ: ALNUM
+     */
     public ?string $zip = null;
 
+    /**
+     * Ort.
+     *
+     * Billomat-Feld: city
+     * Typ: ALNUM
+     */
     public ?string $city = null;
 
+    /**
+     * Bundesland / Bezirk / Region.
+     *
+     * Billomat-Feld: state
+     * Typ: ALNUM
+     */
     public ?string $state = null;
 
+    /**
+     * Ländercode (ISO 3166-1 Alpha-2).
+     *
+     * Beispiel: "DE", "AT", "CH"
+     *
+     * Billomat-Feld: country_code
+     * Typ: Ländercode nach ISO 3166 Alpha-2
+     */
     public ?string $countryCode = null;
 
+    /**
+     * E-Mail-Adresse.
+     *
+     * Billomat-Feld: email
+     * Typ: gültige E-Mail-Adresse
+     */
     public ?string $email = null;
 
+    /**
+     * Telefonnummer.
+     *
+     * Billomat-Feld: phone
+     * Typ: ALNUM
+     */
     public ?string $phone = null;
 
+    /**
+     * Faxnummer.
+     *
+     * Billomat-Feld: fax
+     * Typ: ALNUM
+     */
     public ?string $fax = null;
 
+    /**
+     * Mobilnummer.
+     *
+     * Billomat-Feld: mobile
+     * Typ: ALNUM
+     */
     public ?string $mobile = null;
 
-    public ?string $www = null;
-
+    /**
+     * Notiz zum Kontakt.
+     *
+     * Billomat-Feld: note
+     */
     public ?string $note = null;
 
     /**
+     * Firmenname.
+     *
+     * Billomat-Feld: name
+     * Typ: ALNUM
+     */
+    public ?string $name = null;
+
+    /**
+     * Website (ohne Schema).
+     *
+     * Beispiel: "example.com"
+     *
+     * Billomat-Feld: www
+     * Typ: URL (ohne http)
+     */
+    public ?string $www = null;
+
+    /**
+     * Serialisiert die Options in ein Billomat-Payload-Array.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array
@@ -57,7 +169,6 @@ final class ContactCreateOptions
         $data = [
             'client_id' => $this->clientId,
             'label' => $this->label,
-            'name' => $this->name,
             'salutation' => $this->salutation,
             'first_name' => $this->firstName,
             'last_name' => $this->lastName,
@@ -70,10 +181,12 @@ final class ContactCreateOptions
             'phone' => $this->phone,
             'fax' => $this->fax,
             'mobile' => $this->mobile,
-            'www' => $this->www,
             'note' => $this->note,
+            'name' => $this->name,
+            'www' => $this->www,
         ];
 
-        return array_filter($data, static fn (int|string|null $v): bool => null !== $v);
+        // Null-Felder entfernen
+        return array_filter($data, static fn (mixed $v): bool => null !== $v);
     }
 }

@@ -12,51 +12,116 @@ use const DATE_ATOM;
 /**
  * Lieferant (Supplier) aus der Billomat-API.
  *
- * Doku: https://www.billomat.com/en/api/suppliers/
+ * Dieses Model bildet die Struktur von GET /suppliers bzw. GET /suppliers/{id} ab.
+ * Es ist als Read-Model gedacht: Die Erstellung erfolgt über SupplierCreateOptions.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/en/api/suppliers/
+ *
+ * Generiert aus tools/codegen/definitions/suppliers.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Supplier
 {
     public function __construct(
+        /** Interne Billomat-ID des Lieferanten. */
         public ?int $id,
+        /** Erstellungszeitpunkt des Lieferanten. */
         public ?DateTimeImmutable $created,
+        /** Firmenname des Lieferanten. */
         public string $name,
+        /** Eigene Kundennummer beim Lieferanten. */
         public ?int $clientNumber = null,
+        /** Anrede. */
         public ?string $salutation = null,
+        /** Vorname. */
         public ?string $firstName = null,
+        /** Nachname. */
         public ?string $lastName = null,
+        /** Straße. */
         public ?string $street = null,
+        /** Postleitzahl. */
         public ?string $zip = null,
+        /** Ort. */
         public ?string $city = null,
+        /** Bundesland / Bezirk / Region. */
         public ?string $state = null,
+        /**
+         * Ländercode (ISO 3166-1 Alpha-2).
+         *
+         * Beispiel: "DE", "AT", "CH"
+         */
         public ?string $countryCode = null,
+        /** Von Billomat zusammengesetzte Adresse (mehrzeilig). */
         public ?string $address = null,
+        /** Notiz zum Lieferanten. */
         public ?string $note = null,
+        /** E-Mail-Adresse. */
         public ?string $email = null,
+        /** Telefonnummer. */
         public ?string $phone = null,
+        /** Faxnummer. */
         public ?string $fax = null,
+        /** Mobilnummer. */
         public ?string $mobile = null,
+        /**
+         * Website (ohne Schema).
+         *
+         * Beispiel: "example.com"
+         */
         public ?string $www = null,
+        /** Steuernummer. */
         public ?string $taxNumber = null,
+        /** Umsatzsteuer-ID (USt-IdNr.). */
         public ?string $vatNumber = null,
+        /** Kontonummer. */
         public ?string $bankAccountNumber = null,
+        /** Kontoinhaber. */
         public ?string $bankAccountOwner = null,
+        /** Bankleitzahl. */
         public ?string $bankNumber = null,
+        /** Bankname. */
         public ?string $bankName = null,
+        /** IBAN. */
         public ?string $bankIban = null,
+        /**
+         * SWIFT / BIC.
+         *
+         * Billomat liefert den BIC als `bank_swift`; `bank_bic` dient nur als Fallback.
+         */
         public ?string $bankBic = null,
+        /**
+         * Währung des Lieferanten (ISO-Währungscode).
+         *
+         * Leer = Account-Währung.
+         */
         public ?string $currencyCode = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Sitzt der Lieferant in einem EU-Land? */
         public ?bool $isEuCountry = null,
+        /**
+         * Gebietsschema des Lieferanten.
+         *
+         * Beispiel: "de_DE"
+         */
         public ?string $locale = null,
+        /** Kreditorennummer. */
         public ?string $creditorAccountNumber = null,
+        /** SEPA-Gläubiger-ID. */
         public ?string $creditorIdentifier = null,
+        /** Brutto-Kosten (read-only Auswertungsfeld). */
         public ?float $costsGross = null,
+        /** Netto-Kosten (read-only Auswertungsfeld). */
         public ?float $costsNet = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -64,7 +129,7 @@ final readonly class Supplier
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            name: (string) ($data['name'] ?? ''),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             clientNumber: ScalarCaster::toIntOrNull($data['client_number'] ?? null),
             salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
             firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
@@ -88,7 +153,6 @@ final readonly class Supplier
             bankNumber: ScalarCaster::toStringOrNull($data['bank_number'] ?? null),
             bankName: ScalarCaster::toStringOrNull($data['bank_name'] ?? null),
             bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
-            // Billomat liefert den BIC als `bank_swift`; `bank_bic` nur als Fallback.
             bankBic: ScalarCaster::toStringOrNull($data['bank_swift'] ?? $data['bank_bic'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -103,6 +167,10 @@ final readonly class Supplier
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

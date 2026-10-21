@@ -7,10 +7,10 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Pagination\Page;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -108,7 +108,7 @@ final class ClientsApi extends AbstractApi
      *
      * Entspricht POST /clients
      *
-     * @throws RuntimeException Wenn die Response-Struktur unerwartet ist
+     * @throws UnexpectedResponseException Wenn die Response-Struktur unerwartet ist
      */
     public function create(ClientCreateOptions $options): Client
     {
@@ -145,13 +145,13 @@ final class ClientsApi extends AbstractApi
      *                Das aktualisierte Client-Objekt, wie von der Billomat-API zurückgegeben
      *
      * @throws ValidationException
-     *                                 Bei ungültigen oder nicht erlaubten Änderungen (HTTP 400/422)
+     *                                     Bei ungültigen oder nicht erlaubten Änderungen (HTTP 400/422)
      * @throws AuthenticationException
-     *                                 Bei ungültigen API-Zugangsdaten (HTTP 401/403)
+     *                                     Bei ungültigen API-Zugangsdaten (HTTP 401/403)
      * @throws HttpException
-     *                                 Bei allen sonstigen HTTP-Fehlern
-     * @throws RuntimeException
-     *                                 Wenn die API ein unerwartetes oder unvollständiges Response-Format liefert
+     *                                     Bei allen sonstigen HTTP-Fehlern
+     * @throws UnexpectedResponseException
+     *                                     Wenn die API ein unerwartetes oder unvollständiges Response-Format liefert
      */
     public function update(int $id, ClientUpdateOptions $options): Client
     {

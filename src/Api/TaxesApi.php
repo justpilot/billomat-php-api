@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\TaxRate;
-use RuntimeException;
 
 /**
  * API-Wrapper für Steuersätze.
@@ -70,7 +70,7 @@ final class TaxesApi extends AbstractApi
         $taxData = $data['tax'] ?? null;
 
         if (!\is_array($taxData)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching tax rate.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when fetching tax rate.');
         }
 
         return TaxRate::fromArray($taxData);
@@ -90,7 +90,7 @@ final class TaxesApi extends AbstractApi
         $taxData = $data['tax'] ?? null;
 
         if (!\is_array($taxData)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating tax rate.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when creating tax rate.');
         }
 
         return TaxRate::fromArray($taxData);
@@ -112,7 +112,7 @@ final class TaxesApi extends AbstractApi
         $taxData = $data['tax'] ?? null;
 
         if (!\is_array($taxData)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating tax rate.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when updating tax rate.');
         }
 
         return TaxRate::fromArray($taxData);

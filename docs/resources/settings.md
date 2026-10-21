@@ -33,7 +33,7 @@ echo $settings->invoiceNumberPre;        // z. B. "RE-"
 echo $settings->dueDays;                 // z. B. 14
 ```
 
-Wirft eine `\RuntimeException`, wenn die API ein unerwartetes Response-Format liefert (sollte praktisch nicht vorkommen).
+Wirft eine `UnexpectedResponseException`, wenn die API ein unerwartetes Response-Format liefert (sollte praktisch nicht vorkommen).
 
 ### `update(SettingsUpdateOptions $options): Settings`
 

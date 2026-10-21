@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\SupplierProperty;
 use Justpilot\Billomat\Pagination\Page;
-use RuntimeException;
 
 /**
  * API-Wrapper für Definitionen von Lieferanten-Eigenschaften.
@@ -102,7 +102,7 @@ final class SupplierPropertiesApi extends AbstractApi
 
         $row = $data['supplier-property'] ?? null;
         if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating supplier property.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when creating supplier property.');
         }
 
         return SupplierProperty::fromArray($row);
@@ -116,7 +116,7 @@ final class SupplierPropertiesApi extends AbstractApi
 
         $row = $data['supplier-property'] ?? null;
         if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating supplier property.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when updating supplier property.');
         }
 
         return SupplierProperty::fromArray($row);

@@ -10,13 +10,12 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
-use RuntimeException;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Throwable;
@@ -275,7 +274,7 @@ abstract class AbstractApi
      *
      * Billomat antwortet bei {@code get()}/{@code create()}/{@code update()} mit
      * {@code {"client": { ... }}} — diese Methode liefert das innere Array oder
-     * wirft eine {@see RuntimeException} mit konsistenter Fehlermeldung, wenn
+     * wirft eine {@see UnexpectedResponseException} mit konsistenter Fehlermeldung, wenn
      * die Hülle nicht so aussieht, wie sie sollte.
      *
      * @param array<string,mixed> $payload bereits dekodierter JSON-Body
@@ -289,7 +288,7 @@ abstract class AbstractApi
         $node = $payload[$key] ?? null;
 
         if (!\is_array($node)) {
-            throw new RuntimeException(\sprintf('Unexpected response from Billomat when %s.', $context));
+            throw new UnexpectedResponseException(\sprintf('Unexpected response from Billomat when %s.', $context));
         }
 
         /** @var array<string,mixed> $node */
@@ -336,13 +335,10 @@ abstract class AbstractApi
             : \sprintf('HTTP error from Billomat (status %d)', $statusCode);
 
         // Grobes Mapping nach Status-Code
-        return match (true) {
-            Response::HTTP_UNAUTHORIZED === $statusCode || Response::HTTP_FORBIDDEN === $statusCode => new AuthenticationException($message, $statusCode, $rawBody, $e),
-
-            Response::HTTP_NOT_FOUND === $statusCode => new NotFoundException($message, $statusCode, $rawBody, $e),
-
-            Response::HTTP_BAD_REQUEST === $statusCode || Response::HTTP_UNPROCESSABLE_ENTITY === $statusCode => new ValidationException($message, $statusCode, $rawBody, $e),
-
+        return match ($statusCode) {
+            401, 403 => new AuthenticationException($message, $statusCode, $rawBody, $e),
+            404 => new NotFoundException($message, $statusCode, $rawBody, $e),
+            400, 422 => new ValidationException($message, $statusCode, $rawBody, $e),
             default => new BillomatHttpException($message, $statusCode, $rawBody, $e),
         };
     }

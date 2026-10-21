@@ -6,6 +6,12 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Changed
+- **`UnexpectedResponseException` statt `\RuntimeException`.** Antwortet Billomat mit 2xx, passt der Body aber nicht zur erwarteten Struktur (z. B. fehlt das Wrapper-Element `client`), werfen die API-Methoden jetzt `Justpilot\Billomat\Exception\UnexpectedResponseException`. Damit fängt `catch (BillomatException)` auch diesen Fall. Kein BC-Break: Die neue Exception erbt über `BillomatException` weiterhin von `\RuntimeException`, Meldungstexte sind unverändert.
+
+### Removed
+- **Abhängigkeit `symfony/http-foundation`.** Sie wurde nur für die `Response::HTTP_*`-Konstanten im Exception-Mapping gebraucht. Konsumenten installieren dadurch ein Paket weniger und erben keine Sicherheits-Bumps mehr daraus (zuletzt CVE-2026-108082). Wer `symfony/http-foundation` selbst nutzt, muss es im eigenen `composer.json` verlangen.
+
 ## [3.1.0] - 2026-10-20
 
 ### Added

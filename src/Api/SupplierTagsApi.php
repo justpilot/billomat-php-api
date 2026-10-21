@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\SupplierTag;
 use Justpilot\Billomat\Model\SupplierTagCloudEntry;
-use RuntimeException;
 
 /**
  * API-Wrapper für Supplier-Tags.
@@ -99,7 +99,7 @@ final class SupplierTagsApi extends AbstractApi
 
         $row = $data['supplier-tag'] ?? null;
         if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating supplier tag.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when creating supplier tag.');
         }
 
         return SupplierTag::fromArray($row);

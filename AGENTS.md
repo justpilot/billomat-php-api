@@ -81,6 +81,8 @@ When adding a new resource, register it as a public readonly property on `Billom
 | 400, 422 | `ValidationException` |
 | other | `HttpException` |
 
+A 2xx response whose body doesn't match the expected envelope throws `UnexpectedResponseException` (via `unwrapEnvelope()`), never a plain `RuntimeException`.
+
 `getJsonOrNull()` swallows `NotFoundException` so `get()` can return `null` for missing resources. The raw response body is preserved on the exception for debugging.
 
 ### Binary responses
@@ -90,7 +92,7 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 ## Conventions
 
 - PHP 8.4+ only. Use `final readonly` for read models, `readonly` properties on `BillomatClient`, named arguments, enums (`src/Model/Enum/`), and constructor property promotion.
-- Symfony version support: **Symfony 8 only** — currently `^8.1` on every `symfony/*` package (`symfony/http-foundation` `^8.1.7` because of CVE-2026-108082). Raise the lower bound when a security fix requires it or an older minor leaves maintenance. CI exercises the floor (Symfony 8.1 pinned via `extra.symfony.require` + Flex) and the ceiling (latest Symfony 8.x).
+- Symfony version support: **Symfony 8 only** — currently `^8.1` on every `symfony/*` package. The only runtime dependency is `symfony/http-client`; don't add `symfony/http-foundation` just for status-code constants. Raise the lower bound when a security fix requires it or an older minor leaves maintenance. CI exercises the floor (Symfony 8.1 pinned via `extra.symfony.require` + Flex) and the ceiling (latest Symfony 8.x).
 - `declare(strict_types=1);` at the top of every file.
 - All API classes are `final`; models are `final readonly`.
 - PSR-4: `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.

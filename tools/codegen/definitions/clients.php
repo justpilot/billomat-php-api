@@ -15,11 +15,16 @@ declare(strict_types=1);
  *   details     Weitere Doku-Zeilen (z. B. „Beispiel: …“).
  *   type        string|int|float|bool|date|datetime – Pflicht für Felder, die nicht in der Spec stehen.
  *   readOnly    true = nur im Read-Model, nicht in den Options.
+ *   optionsOnly true = nur in den Options, nicht im Read-Model.
  *   writable    true = in den Options, obwohl die Spec das Feld nicht beim Anlegen nennt.
  *   deprecated  Text für @deprecated am Read-Model.
  *   model       ['required' => true]  → Konstruktor-Parameter ohne Default
- *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''
+ *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
+ *               ['type' => 'int']     → abweichender Typ im Read-Model
+ *               ['sources' => [...]]  → Billomat-Felder, die beim Hydrieren der Reihe nach probiert werden
  *   create      ['nonNull' => true, 'default' => <wert>] → nicht-nullbare Property mit Default
+ *               ['constructor' => true] → Pflicht-Parameter im Konstruktor der Create-Options
+ *   update      ['skip' => true]      → fehlt in den Update-Options
  *
  * Nach Änderungen: composer generate
  */

@@ -1513,12 +1513,6 @@ parameters:
 			path: src/Model/ConfirmationTagCloudEntry.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/Contact.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 1
@@ -2351,12 +2345,6 @@ parameters:
 			identifier: booleanAnd.rightNotBoolean
 			count: 1
 			path: src/Model/Settings.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Supplier.php
 
 		-
 			message: '#^Cannot cast mixed to string\.$#'

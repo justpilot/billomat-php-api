@@ -6,6 +6,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-10-21
+
 ### Changed
 - **`UnexpectedResponseException` statt `\RuntimeException`.** Antwortet Billomat mit 2xx, passt der Body aber nicht zur erwarteten Struktur (z. B. fehlt das Wrapper-Element `client`), werfen die API-Methoden jetzt `Justpilot\Billomat\Exception\UnexpectedResponseException`. Damit fängt `catch (BillomatException)` auch diesen Fall. Kein BC-Break: Die neue Exception erbt über `BillomatException` weiterhin von `\RuntimeException`, Meldungstexte sind unverändert.
 

@@ -7,10 +7,10 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Supplier;
 use Justpilot\Billomat\Pagination\Page;
-use RuntimeException;
 
 /**
  * API-Wrapper für die Billomat-Suppliers-Ressource (Lieferanten).
@@ -122,7 +122,7 @@ final class SuppliersApi extends AbstractApi
         $created = $data['supplier'] ?? null;
 
         if (!\is_array($created)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating supplier.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when creating supplier.');
         }
 
         return Supplier::fromArray($created);
@@ -136,7 +136,7 @@ final class SuppliersApi extends AbstractApi
 
         $row = $data['supplier'] ?? null;
         if (!\is_array($row)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating supplier.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when updating supplier.');
         }
 
         return Supplier::fromArray($row);

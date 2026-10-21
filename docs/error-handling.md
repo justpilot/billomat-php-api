@@ -7,10 +7,11 @@ Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatE
 ```text
 \RuntimeException
 └── BillomatException
-    └── HttpException
-        ├── AuthenticationException
-        ├── ValidationException
-        └── NotFoundException
+    ├── HttpException
+    │   ├── AuthenticationException
+    │   ├── ValidationException
+    │   └── NotFoundException
+    └── UnexpectedResponseException
 ```
 
 | Klasse | Datei | Bedeutung |
@@ -20,6 +21,7 @@ Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatE
 | `AuthenticationException` | `src/Exception/AuthenticationException.php` | 401/403 — ungültiger oder fehlender API-Key, Berechtigung fehlt. |
 | `NotFoundException` | `src/Exception/NotFoundException.php` | 404 — Ressource existiert nicht. |
 | `ValidationException` | `src/Exception/ValidationException.php` | 400/422 — Payload abgelehnt, Pflichtfeld fehlt, Wert ungültig. |
+| `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, aber der Body passt nicht zur erwarteten Struktur (seit 3.2). |
 
 ## Mapping HTTP-Status → Exception
 
@@ -132,4 +134,8 @@ try {
 
 ## Hinweise zu nicht-HTTP-Fehlern
 
-Einige API-Methoden werfen eine `\RuntimeException` (ohne SDK-Subtyp), wenn Billomat zwar mit 2xx antwortet, der Antwort-Body aber nicht zur erwarteten Struktur passt — z. B. wenn das Wrapper-Element `client` oder `invoice` fehlt. Das ist defensiv und sollte in der Praxis nicht auftreten; falls doch, lohnt sich ein Issue mit dem Roh-Body.
+API-Methoden werfen eine `UnexpectedResponseException`, wenn Billomat zwar mit 2xx antwortet, der Antwort-Body aber nicht zur erwarteten Struktur passt — z. B. wenn das Wrapper-Element `client` oder `invoice` fehlt. Das ist defensiv und sollte in der Praxis nicht auftreten; falls doch, lohnt sich ein Issue mit dem Roh-Body.
+
+Bis einschließlich 3.1 war das eine einfache `\RuntimeException`. Da `UnexpectedResponseException` über `BillomatException` weiterhin von `\RuntimeException` erbt, greifen bestehende `catch (\RuntimeException)`-Blöcke unverändert.
+
+Antwortet Billomat mit 2xx und einem Body, der kein gültiges JSON ist, wirft `json_decode()` eine `\JsonException`. Diese ist (noch) keine `BillomatException`.

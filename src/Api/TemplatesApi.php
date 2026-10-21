@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
-use RuntimeException;
 
 /**
  * API-Wrapper für Vorlagen (Templates).
@@ -69,7 +69,7 @@ final class TemplatesApi extends AbstractApi
         $tpl = $data['template'] ?? null;
 
         if (!\is_array($tpl)) {
-            throw new RuntimeException('Unexpected response from Billomat when fetching template.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when fetching template.');
         }
 
         /** @var array<string,mixed> $tpl */
@@ -92,7 +92,7 @@ final class TemplatesApi extends AbstractApi
         $tpl = $data['template'] ?? null;
 
         if (!\is_array($tpl)) {
-            throw new RuntimeException('Unexpected response from Billomat when creating template.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when creating template.');
         }
 
         /** @var array<string,mixed> $tpl */
@@ -115,7 +115,7 @@ final class TemplatesApi extends AbstractApi
         $tpl = $data['template'] ?? null;
 
         if (!\is_array($tpl)) {
-            throw new RuntimeException('Unexpected response from Billomat when updating template.');
+            throw new UnexpectedResponseException('Unexpected response from Billomat when updating template.');
         }
 
         /** @var array<string,mixed> $tpl */

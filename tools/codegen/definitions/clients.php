@@ -18,6 +18,7 @@ declare(strict_types=1);
  *   optionsOnly true = nur in den Options, nicht im Read-Model.
  *   writable    true = in den Options, obwohl die Spec das Feld nicht beim Anlegen nennt.
  *   deprecated  Text für @deprecated am Read-Model.
+ *   enum        Name eines Enums aus src/Model/Enum/ (z. B. 'NetGross') als Typ in Model und Options.
  *   model       ['required' => true]  → Konstruktor-Parameter ohne Default
  *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
  *               ['type' => 'int']     → abweichender Typ im Read-Model
@@ -25,6 +26,9 @@ declare(strict_types=1);
  *   create      ['nonNull' => true, 'default' => <wert>] → nicht-nullbare Property mit Default
  *               ['constructor' => true] → Pflicht-Parameter im Konstruktor der Create-Options
  *   update      ['skip' => true]      → fehlt in den Update-Options
+ *
+ * Ressourcen-Schlüssel: 'createOptions' und 'updateOptions' sind optional. Fehlen sie,
+ * entsteht nur das Read-Model; 'specEndpoint' nennt dann den Endpunkt für den Drift-Abgleich.
  *
  * Nach Änderungen: composer generate
  */

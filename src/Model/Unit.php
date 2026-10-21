@@ -10,27 +10,42 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use const DATE_ATOM;
 
 /**
- * Einheit (z.B. Stück, Stunde) aus den Billomat-Einstellungen.
+ * Einheit (z. B. Stück, Stunde) aus den Billomat-Einstellungen.
+ *
+ * Dieses Model bildet die Struktur von GET /units bzw. GET /units/{id} ab.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/en/api/settings/units/
+ *
+ * Generiert aus tools/codegen/definitions/units.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Unit
 {
     public function __construct(
+        /** Interne Billomat-ID der Einheit. */
         public ?int $id,
+        /** Bezeichnung der Einheit. */
         public string $name,
+        /** Erstellungszeitpunkt der Einheit. */
         public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            name: (string) ($data['name'] ?? ''),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -38,6 +53,10 @@ final readonly class Unit
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

@@ -14,52 +14,118 @@ use const DATE_ATOM;
 /**
  * Artikel (Article) aus der Billomat-API.
  *
- * Doku: https://www.billomat.com/en/api/articles/
+ * Dieses Model bildet die Struktur von GET /articles bzw. GET /articles/{id} ab.
+ * Es ist als Read-Model gedacht: Die Erstellung erfolgt über ArticleCreateOptions.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/en/api/articles/
+ *
+ * Generiert aus tools/codegen/definitions/articles.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Article
 {
     public function __construct(
+        /** Interne Billomat-ID des Artikels. */
         public ?int $id,
+        /** Erstellungszeitpunkt des Artikels. */
         public ?DateTimeImmutable $created,
+        /** Vollständige Artikelnummer (Präfix + laufende Nummer). */
         public ?string $articleNumber = null,
+        /** Laufende Nummer (ohne Präfix). */
         public ?int $number = null,
+        /** Präfix der Artikelnummer. */
         public ?string $numberPre = null,
+        /** Mindestlänge der Artikelnummer (wird mit führenden Nullen aufgefüllt). */
         public ?int $numberLength = null,
+        /** Titel des Artikels. */
         public ?string $title = null,
+        /** Beschreibung. */
         public ?string $description = null,
+        /** Verkaufspreis. */
         public ?float $salesPrice = null,
+        /**
+         * Währung (ISO-Währungscode).
+         *
+         * Beispiel: "EUR"
+         */
         public ?string $currencyCode = null,
+        /**
+         * Preis für Kunden der Preisgruppe 2.
+         *
+         * Ohne Angabe gilt der Normalpreis.
+         */
         public ?float $salesPrice2 = null,
+        /**
+         * Preis für Kunden der Preisgruppe 3.
+         *
+         * Ohne Angabe gilt der Normalpreis.
+         */
         public ?float $salesPrice3 = null,
+        /**
+         * Preis für Kunden der Preisgruppe 4.
+         *
+         * Ohne Angabe gilt der Normalpreis.
+         */
         public ?float $salesPrice4 = null,
+        /**
+         * Preis für Kunden der Preisgruppe 5.
+         *
+         * Ohne Angabe gilt der Normalpreis.
+         */
         public ?float $salesPrice5 = null,
         /**
+         * Bezeichnung der Einheit.
+         *
+         * Besser `unitId` verwenden.
+         *
          * @deprecated since 3.1 – Billomat liefert `unit` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $unit = null,
+        /** ID der verknüpften Einheit. */
         public ?int $unitId = null,
+        /** Einkaufspreis. */
         public ?float $purchasePrice = null,
         /**
+         * Währung des Einkaufspreises (ISO-Währungscode).
+         *
          * @deprecated since 3.1 – Billomat liefert `purchase_price_currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $purchasePriceCurrencyCode = null,
+        /** ID des verknüpften Lieferanten. */
         public ?int $supplierId = null,
+        /** ID des verknüpften Steuersatzes. */
         public ?int $taxId = null,
         /**
+         * ID der Artikelkategorie.
+         *
          * @deprecated since 3.1 – Billomat liefert `category_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?int $categoryId = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Archivierungsstatus.
+         *
+         * true = archiviert, false = aktiv.
+         */
         public ?bool $archived = null,
+        /** Artikeltyp: Produkt oder Dienstleistung. */
         public ?ArticleType $type = null,
+        /** Erlöskonto. */
         public ?string $revenueAccountNumber = null,
+        /** Kostenstelle. */
         public ?string $costCenter = null,
+        /** Preisbasis des Einkaufspreises (netto oder brutto). */
         public ?NetGross $purchasePriceNetGross = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -89,7 +155,7 @@ final readonly class Article
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
-            type: ArticleType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
+            type: ArticleType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
             costCenter: ScalarCaster::toStringOrNull($data['cost_center'] ?? null),
             purchasePriceNetGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null) ?? ''),
@@ -97,6 +163,10 @@ final readonly class Article
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

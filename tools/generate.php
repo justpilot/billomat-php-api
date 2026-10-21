@@ -94,14 +94,21 @@ function renderResource(array $definition, array $spec, string $source): array
     $slug = $definition['specResource'];
     $resource = $spec['resources'][$slug] ?? throw new RuntimeException("Spec-Ressource '{$slug}' nicht gefunden ({$source}).");
 
-    $specFields = specFields($resource['endpoints'], $definition['createOptions']['endpoint'], $source);
+    // Ohne Create-Options (reines Read-Model) nennt `specEndpoint` den Endpunkt für den Drift-Abgleich.
+    $endpoint = $definition['createOptions']['endpoint'] ?? $definition['specEndpoint']
+        ?? throw new RuntimeException("Weder 'createOptions' noch 'specEndpoint' angegeben ({$source}).");
+    $specFields = specFields($resource['endpoints'], $endpoint, $source);
     $fields = resolveFields($definition['fields'], $specFields, $source);
 
-    return [
-        'src/Model/' . $definition['model']['class'] . '.php' => renderModel($definition, $fields, $source),
-        'src/Api/' . $definition['createOptions']['class'] . '.php' => renderOptions($definition, $definition['createOptions'], $fields, $source, true),
-        'src/Api/' . $definition['updateOptions']['class'] . '.php' => renderOptions($definition, $definition['updateOptions'], $fields, $source, false),
-    ];
+    $files = ['src/Model/' . $definition['model']['class'] . '.php' => renderModel($definition, $fields, $source)];
+    if (isset($definition['createOptions'])) {
+        $files['src/Api/' . $definition['createOptions']['class'] . '.php'] = renderOptions($definition, $definition['createOptions'], $fields, $source, true);
+    }
+    if (isset($definition['updateOptions'])) {
+        $files['src/Api/' . $definition['updateOptions']['class'] . '.php'] = renderOptions($definition, $definition['updateOptions'], $fields, $source, false);
+    }
+
+    return $files;
 }
 
 /**
@@ -165,6 +172,7 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
             'doc' => $field['doc'] ?? ($specField['description_de'] ?? null) ?? throw new RuntimeException("Feld '{$name}' hat keine Doku ({$source})."),
             'details' => $field['details'] ?? [],
             'enum' => $enum,
+            'enumClass' => $field['enum'] ?? null,
             'specType' => null !== $specField ? (null !== $enum ? implode(' | ', $enum) : (string) $specField['type']) : null,
             'specDefault' => $specField['default'] ?? null,
             'writable' => empty($field['readOnly']),
@@ -205,11 +213,16 @@ function renderModel(array $definition, array $fields, string $source): string
     $usesDate = [] !== array_intersect($types, ['date', 'datetime']);
     $usesAtom = \in_array('datetime', $types, true);
 
-    $out = "<?php\n\ndeclare(strict_types=1);\n\nnamespace Justpilot\\Billomat\\Model;\n\n";
+    $imports = ['Justpilot\\Billomat\\Internal\\ScalarCaster', ...enumImports($fields)];
     if ($usesDate) {
-        $out .= "use DateTimeImmutable;\n";
+        $imports[] = 'DateTimeImmutable';
     }
-    $out .= "use Justpilot\\Billomat\\Internal\\ScalarCaster;\n";
+    sort($imports);
+
+    $out = "<?php\n\ndeclare(strict_types=1);\n\nnamespace Justpilot\\Billomat\\Model;\n\n";
+    foreach ($imports as $import) {
+        $out .= "use {$import};\n";
+    }
     if ($usesAtom) {
         $out .= "\nuse const DATE_ATOM;\n";
     }
@@ -251,9 +264,10 @@ function renderModel(array $definition, array $fields, string $source): string
     $out .= "    public function toArray(): array\n    {\n        return [\n";
     foreach ($fields as $field) {
         $value = '$this->' . $field['property'];
-        $value = match (modelType($field)) {
-            'date' => $value . "?->format('Y-m-d')",
-            'datetime' => $value . '?->format(DATE_ATOM)',
+        $value = match (true) {
+            null !== $field['enumClass'] => $value . '?->value',
+            'date' === modelType($field) => $value . "?->format('Y-m-d')",
+            'datetime' === modelType($field) => $value . '?->format(DATE_ATOM)',
             default => $value,
         };
         $out .= "            '" . $field['wire'] . "' => " . $value . ",\n";
@@ -291,6 +305,10 @@ function nonNullFallback(string $type): string
  */
 function modelTypeHint(array $field): string
 {
+    if (null !== $field['enumClass']) {
+        return '?' . $field['enumClass'];
+    }
+
     $type = match (modelType($field)) {
         'date', 'datetime' => 'DateTimeImmutable',
         default => modelType($field),
@@ -317,6 +335,11 @@ function hydrateExpression(array $field): string
     $lookup = implode(' ?? ', array_map(static fn (string $s): string => "\$data['{$s}']", $sources));
     $expression = 'ScalarCaster::' . $caster . '(' . $lookup . ' ?? null)';
 
+    // Unbekannte oder leere Werte werden zu null statt eine Exception zu werfen.
+    if (null !== $field['enumClass']) {
+        return $field['enumClass'] . "::tryFrom(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
+    }
+
     return empty($field['model']['nonNull']) ? $expression : $expression . ' ?? ' . nonNullFallback(modelType($field));
 }
 
@@ -338,6 +361,14 @@ function renderOptions(array $definition, array $options, array $fields, string 
     ));
 
     $out = "<?php\n\ndeclare(strict_types=1);\n\nnamespace Justpilot\\Billomat\\Api;\n\n";
+    $imports = enumImports($writable);
+    sort($imports);
+    foreach ($imports as $import) {
+        $out .= "use {$import};\n";
+    }
+    if ([] !== $imports) {
+        $out .= "\n";
+    }
     $out .= classDoc($options['doc'], $definition['docUrl'], $source, 'Doku:');
     $out .= 'final class ' . $options['class'] . "\n{\n";
 
@@ -371,6 +402,9 @@ function renderOptions(array $definition, array $options, array $fields, string 
     foreach ($writable as $field) {
         $value = '$this->' . $field['property'];
         $nonNull = $isCreate && (!empty($field['create']['nonNull']) || !empty($field['create']['constructor']));
+        if (null !== $field['enumClass']) {
+            $value .= $nonNull ? '->value' : '?->value';
+        }
         if ($boolAsInt && 'bool' === $field['type']) {
             $value = $nonNull
                 ? "({$value} ? 1 : 0)"
@@ -389,7 +423,24 @@ function renderOptions(array $definition, array $options, array $fields, string 
  */
 function optionsPhpType(array $field): string
 {
-    return 'date' === $field['type'] ? 'string' : $field['type'];
+    return $field['enumClass'] ?? ('date' === $field['type'] ? 'string' : $field['type']);
+}
+
+/**
+ * Use-Statements für die Enum-Klassen der Felder (`enum` in der Definition).
+ *
+ * @param list<array<string, mixed>> $fields
+ *
+ * @return list<string>
+ */
+function enumImports(array $fields): array
+{
+    $enums = array_filter(array_column($fields, 'enumClass'));
+
+    return array_values(array_unique(array_map(
+        static fn (string $enum): string => 'Justpilot\\Billomat\\Model\\Enum\\' . $enum,
+        $enums,
+    )));
 }
 
 /**

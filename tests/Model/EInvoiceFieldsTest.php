@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
@@ -34,6 +35,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(SupplyDateType::class)]
 #[UsesClass(InvoiceItem::class)]
 #[UsesClass(InvoiceItemType::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 final class EInvoiceFieldsTest extends TestCase
 {

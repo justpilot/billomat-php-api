@@ -1363,50 +1363,8 @@ parameters:
 			path: src/Model/CreditNote.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
 			message: '#^Cannot access offset ''tax'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 3
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\CreditNoteItem given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNote.php
-
-		-
-			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\CreditNote constructor expects list\<Justpilot\\Billomat\\Model\\CreditNoteItem\>, array\<Justpilot\\Billomat\\Model\\CreditNoteItem\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/CreditNote.php
 
@@ -1483,19 +1441,7 @@ parameters:
 			path: src/Model/IncomingCategory.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
 			message: '#^Cannot access offset ''invoice\-item'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Model/Invoice.php
@@ -1507,42 +1453,6 @@ parameters:
 			path: src/Model/Invoice.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 3
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\InvoiceItem given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \#1 \$status of static method Justpilot\\Billomat\\Model\\Enum\\InvoiceStatus\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
-			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Invoice constructor expects list\<Justpilot\\Billomat\\Model\\InvoiceItem\>, array\<Justpilot\\Billomat\\Model\\InvoiceItem\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Invoice.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -1565,18 +1475,6 @@ parameters:
 			identifier: cast.string
 			count: 3
 			path: src/Model/LetterPdf.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/Offer.php
 
 		-
 			message: '#^Cannot access offset ''offer\-item'' on mixed\.$#'
@@ -1591,36 +1489,6 @@ parameters:
 			path: src/Model/Offer.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 3
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\OfferItem given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
-			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Offer constructor expects list\<Justpilot\\Billomat\\Model\\OfferItem\>, array\<Justpilot\\Billomat\\Model\\OfferItem\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Offer.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -1631,18 +1499,6 @@ parameters:
 			identifier: cast.string
 			count: 3
 			path: src/Model/OfferPdf.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/Recurring.php
 
 		-
 			message: '#^Cannot access offset ''recurring\-item'' on mixed\.$#'
@@ -1653,36 +1509,6 @@ parameters:
 		-
 			message: '#^Cannot access offset ''tax'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 5
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\RecurringItem given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Recurring.php
-
-		-
-			message: '#^Parameter \$items of class Justpilot\\Billomat\\Model\\Recurring constructor expects list\<Justpilot\\Billomat\\Model\\RecurringItem\>, array\<Justpilot\\Billomat\\Model\\RecurringItem\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Model/Recurring.php
 

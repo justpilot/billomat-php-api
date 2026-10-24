@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
@@ -16,10 +17,14 @@ use const DATE_ATOM;
 /**
  * Repräsentiert eine Abo-Rechnung (Recurring) aus der Billomat-API.
  *
- * Doku: https://www.billomat.com/api/abo-rechnungen/
- *
  * Eine Abo-Rechnung erzeugt periodisch (gemäß cycle/cycle_number) neue
  * "echte" Rechnungen. Was bei jedem Lauf geschieht, steuert `action`.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/abo-rechnungen/
+ *
+ * Generiert aus tools/codegen/definitions/recurrings.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Recurring
 {
@@ -28,120 +33,146 @@ final readonly class Recurring
      * @param list<RecurringItem>                                   $items
      */
     public function __construct(
+        /** Interne Billomat-ID der Abo-Rechnung. */
         public ?int $id,
+        /** ID des Kunden. */
         public int $clientId,
+        /** ID des Kontakts. */
         public ?int $contactId = null,
+        /** Erstellungszeitpunkt der Abo-Rechnung. */
         public ?DateTimeImmutable $created = null,
+        /**
+         * Komplette Adresse.
+         *
+         * Wird ein leerer Wert übergeben, wird die aktuelle Kunden-Adresse verwendet.
+         */
         public ?string $address = null,
+        /** Liefer-/Leistungsdatum. */
         public ?DateTimeImmutable $supplyDate = null,
+        /** Typ des Liefer-/Leistungsdatums. */
         public ?SupplyDateType $supplyDateType = null,
+        /** Tage bis zur Fälligkeit der erzeugten Rechnungen. */
         public ?int $dueDays = null,
+        /** Skonto in Prozent. */
         public ?float $discountRate = null,
+        /** Skontofrist in Tagen. */
         public ?int $discountDays = null,
+        /** Name der Abo-Rechnung (nur intern sichtbar). */
         public ?string $name = null,
         /**
+         * Präfix der Rechnungsnummer.
+         *
          * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $numberPre = null,
+        /** Dokumentenüberschrift. */
         public ?string $title = null,
+        /** Bezeichnung. */
         public ?string $label = null,
+        /** Einleitungstext. */
         public ?string $intro = null,
+        /** Anmerkungstext. */
         public ?string $note = null,
+        /** Währung (ISO-Währungscode). */
         public ?string $currencyCode = null,
+        /** Preisbasis (Brutto- oder Netto-Preise). */
         public ?NetGross $netGross = null,
+        /** Währungskurs (für Umrechnung in die Standard-Währung). */
         public ?float $quote = null,
+        /** Akzeptierte Zahlungsarten (kommasepariert). */
         public ?string $paymentTypes = null,
+        /** Aktion, die bei jedem Lauf ausgeführt wird. */
         public ?RecurringAction $action = null,
+        /** Anzahl der Intervall-Einheiten zwischen zwei Läufen. */
         public ?int $cycleNumber = null,
+        /** Intervall-Einheit (z. B. monatlich). */
         public ?RecurringCycle $cycle = null,
+        /** Stunde, zu der die Rechnung erzeugt wird. */
         public ?int $hour = null,
+        /** Startdatum. */
         public ?DateTimeImmutable $startDate = null,
+        /** Enddatum. */
         public ?DateTimeImmutable $endDate = null,
+        /** Datum der zuletzt erzeugten Rechnung. */
         public ?DateTimeImmutable $lastCreationDate = null,
+        /** Datum der nächsten Rechnung. */
         public ?DateTimeImmutable $nextCreationDate = null,
+        /** Anzahl der Läufe, nach denen die Abo-Rechnung endet. */
         public ?int $iterations = null,
+        /** Anzahl der bisher erzeugten Rechnungen. */
         public ?int $counter = null,
+        /** Gesamtbetrag brutto. */
         public ?float $totalGross = null,
+        /** Gesamtbetrag netto. */
         public ?float $totalNet = null,
+        /** Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction = null,
+        /** Absender-Adresse der E-Mail. */
         public ?string $emailSender = null,
+        /** Betreff der E-Mail. */
         public ?string $emailSubject = null,
+        /** Text der E-Mail. */
         public ?string $emailMessage = null,
+        /** ID der E-Mail-Vorlage. */
         public ?int $emailTemplateId = null,
+        /** ID des Freitextes zur Belegung von title, label, intro und note. */
         public ?int $freeTextId = null,
+        /** ID der Vorlage für die erzeugten Rechnungen. */
         public ?int $templateId = null,
+        /** Steuerzeilen der Abo-Rechnung. */
         public array $taxes = [],
+        /** Positionen der Abo-Rechnung (nur bei GET /recurrings/{id}). */
         public array $items = [],
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Summe der Rabatte. */
         public ?float $totalReduction = null,
+        /** Gesamtbetrag netto vor Rabatt. */
         public ?float $totalNetUnreduced = null,
+        /** Gesamtbetrag brutto vor Rabatt. */
         public ?float $totalGrossUnreduced = null,
+        /** Skontobetrag. */
         public ?float $discountAmount = null,
+        /** Status der Abo-Rechnung. */
         public ?string $status = null,
+        /** Läuft gerade eine Rechnungserzeugung? */
         public ?bool $inProgress = null,
+        /** Rechnungen immer zum Monatsletzten erzeugen? */
         public ?bool $ultimo = null,
+        /** Dateiname des PDF-Anhangs. */
         public ?string $emailFilename = null,
+        /** E-Mail zusätzlich als BCC an den Absender senden? */
         public ?bool $emailBcc = null,
+        /** Brief farbig drucken? */
         public ?bool $letterColor = null,
+        /** Brief beidseitig drucken? */
         public ?bool $letterDuplex = null,
+        /** Papiergewicht des Briefs in g/m². */
         public ?int $letterPaperWeight = null,
+        /** ID des Quell-Angebots. */
         public ?int $offerId = null,
+        /** ID der Quell-Auftragsbestätigung. */
         public ?int $confirmationId = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
-        $taxes = [];
-        if (isset($data['taxes']['tax'])) {
-            $rawTaxes = $data['taxes']['tax'];
-
-            if (isset($rawTaxes['name'])) {
-                $rawTaxes = [$rawTaxes];
-            }
-
-            if (\is_array($rawTaxes)) {
-                foreach ($rawTaxes as $taxRow) {
-                    if (!\is_array($taxRow)) {
-                        continue;
-                    }
-
-                    $taxes[] = [
-                        'name' => (string) ($taxRow['name'] ?? ''),
-                        'rate' => isset($taxRow['rate']) ? (float) $taxRow['rate'] : 0.0,
-                        'amount' => isset($taxRow['amount']) ? (float) $taxRow['amount'] : 0.0,
-                    ];
-                }
-            }
-        }
-
-        $items = [];
-        if (isset($data['recurring-items']['recurring-item'])) {
-            $rawItems = $data['recurring-items']['recurring-item'];
-
-            if (isset($rawItems['id'])) {
-                $rawItems = [$rawItems];
-            }
-
-            if (\is_array($rawItems)) {
-                $items = array_map(RecurringItem::fromArray(...), $rawItems);
-            }
-        }
-
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            clientId: (int) ($data['client_id'] ?? 0),
+            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
-            supplyDateType: isset($data['supply_date_type'])
-                ? SupplyDateType::tryFrom((string) $data['supply_date_type'])
-                : null,
+            supplyDateType: SupplyDateType::tryFrom(ScalarCaster::toStringOrNull($data['supply_date_type'] ?? null) ?? ''),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
             discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
@@ -152,18 +183,12 @@ final readonly class Recurring
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
-            netGross: isset($data['net_gross'])
-                ? NetGross::tryFrom((string) $data['net_gross'])
-                : null,
+            netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             paymentTypes: ScalarCaster::toStringOrNull($data['payment_types'] ?? null),
-            action: isset($data['action'])
-                ? RecurringAction::tryFrom((string) $data['action'])
-                : null,
+            action: RecurringAction::tryFrom(ScalarCaster::toStringOrNull($data['action'] ?? null) ?? ''),
             cycleNumber: ScalarCaster::toIntOrNull($data['cycle_number'] ?? null),
-            cycle: isset($data['cycle'])
-                ? RecurringCycle::tryFrom((string) $data['cycle'])
-                : null,
+            cycle: RecurringCycle::tryFrom(ScalarCaster::toStringOrNull($data['cycle'] ?? null) ?? ''),
             hour: ScalarCaster::toIntOrNull($data['hour'] ?? null),
             startDate: ScalarCaster::toDateTimeOrNull($data['start_date'] ?? null),
             endDate: ScalarCaster::toDateTimeOrNull($data['end_date'] ?? null),
@@ -180,8 +205,8 @@ final readonly class Recurring
             emailTemplateId: ScalarCaster::toIntOrNull($data['email_template_id'] ?? null),
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            taxes: $taxes,
-            items: $items,
+            taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
+            items: ListCaster::toList($data['recurring-items']['recurring-item'] ?? null, 'id', RecurringItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
@@ -202,6 +227,10 @@ final readonly class Recurring
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array
@@ -265,24 +294,12 @@ final readonly class Recurring
         ];
 
         if ([] !== $this->taxes) {
-            $data['taxes'] = [
-                'tax' => array_map(
-                    static fn (array $t): array => [
-                        'name' => $t['name'],
-                        'rate' => $t['rate'],
-                        'amount' => $t['amount'],
-                    ],
-                    $this->taxes,
-                ),
-            ];
+            $data['taxes'] = ['tax' => $this->taxes];
         }
 
         if ([] !== $this->items) {
             $data['recurring-items'] = [
-                'recurring-item' => array_map(
-                    static fn (RecurringItem $item): array => $item->toArray(),
-                    $this->items,
-                ),
+                'recurring-item' => array_map(static fn (RecurringItem $item): array => $item->toArray(), $this->items),
             ];
         }
 

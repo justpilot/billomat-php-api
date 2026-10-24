@@ -11,23 +11,26 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
 /**
  * Typisierter Payload für POST /invoices gemäß Billomat-API.
  *
- * Dokumentation:
- * https://www.billomat.com/api/invoices/
- *
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert,
  * sodass Billomat seine Defaults verwenden kann.
+ * Positionen lassen sich beim Anlegen über addItem() direkt mitsenden.
+ *
+ * Doku:
+ * https://www.billomat.com/en/api/invoices/
+ *
+ * Generiert aus tools/codegen/definitions/invoices.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final class InvoiceCreateOptions
 {
     public function __construct(
         /**
-         * ID des Kunden (client_id).
+         * ID des Kunden.
          *
          * Billomat-Feld: client_id
          * Typ: INT
-         * Pflicht: ja
          */
-        public int $clientId
+        public int $clientId,
     ) {
     }
 
@@ -40,25 +43,7 @@ final class InvoiceCreateOptions
     public ?int $contactId = null;
 
     /**
-     * Komplette Rechnungsadresse.
-     *
-     * Billomat-Feld: address
-     * Typ: ALNUM
-     * Default: Adresse des Kunden
-     */
-    public ?string $address = null;
-
-    /**
-     * Präfix der Rechnungsnummer.
-     *
-     * Billomat-Feld: number_pre
-     * Typ: ALNUM
-     * Default: Wert aus Einstellungen
-     */
-    public ?string $numberPre = null;
-
-    /**
-     * Laufende Rechnungsnummer.
+     * Laufende Nummer (ohne Präfix).
      *
      * Billomat-Feld: number
      * Typ: INT
@@ -67,16 +52,27 @@ final class InvoiceCreateOptions
     public ?int $number = null;
 
     /**
-     * Mindestlänge der Rechnungsnummer (mit führenden Nullen).
+     * Präfix der Rechnungsnummer (z. B. "RE").
+     *
+     * Billomat-Feld: number_pre
+     * Typ: ALNUM
+     * Default: Wert aus Einstellungen
+     */
+    public ?string $numberPre = null;
+
+    /**
+     * Mindestlänge der Rechnungsnummer (wird mit führenden Nullen aufgefüllt).
      *
      * Billomat-Feld: number_length
      * Typ: INT
-     * Default: Wert aus Einstellungen
+     * Default: Wert aus den Einstellungen
      */
     public ?int $numberLength = null;
 
     /**
-     * Rechnungsdatum (YYYY-MM-DD).
+     * Rechnungsdatum.
+     *
+     * Format: YYYY-MM-DD
      *
      * Billomat-Feld: date
      * Typ: DATE
@@ -86,6 +82,8 @@ final class InvoiceCreateOptions
 
     /**
      * Liefer-/Leistungsdatum.
+     *
+     * Format: YYYY-MM-DD
      *
      * Billomat-Feld: supply_date
      * Typ: MIXED (DATE/ALNUM)
@@ -101,22 +99,33 @@ final class InvoiceCreateOptions
     public ?SupplyDateType $supplyDateType = null;
 
     /**
-     * Tage bis Fälligkeit.
+     * Fälligkeitsdatum.
      *
-     * Billomat-Feld: due_days
-     * Typ: INT
-     * Default: Fälligkeit aus Einstellungen
-     */
-    public ?int $dueDays = null;
-
-    /**
-     * Fälligkeitsdatum (YYYY-MM-DD).
+     * Format: YYYY-MM-DD
      *
      * Billomat-Feld: due_date
      * Typ: DATE
      * Default: date + due_days
      */
     public ?DateTimeImmutable $dueDate = null;
+
+    /**
+     * Tage bis zur Fälligkeit.
+     *
+     * Billomat-Feld: due_days
+     * Typ: INT
+     * Default: Fälligkeit in Tagen aus Einstellungen
+     */
+    public ?int $dueDays = null;
+
+    /**
+     * Vollständige Rechnungsadresse (formatiert).
+     *
+     * Billomat-Feld: address
+     * Typ: ALNUM
+     * Default: Adresse des Kunden
+     */
+    public ?string $address = null;
 
     /**
      * Skonto in Prozent.
@@ -128,22 +137,24 @@ final class InvoiceCreateOptions
     public ?int $discountRate = null;
 
     /**
-     * Skontofrist in Tagen.
+     * Skontodatum.
      *
-     * Billomat-Feld: discount_days
-     * Typ: INT
-     * Default: Wert aus Einstellungen
-     */
-    public ?int $discountDays = null;
-
-    /**
-     * Skontodatum (YYYY-MM-DD).
+     * Format: YYYY-MM-DD
      *
      * Billomat-Feld: discount_date
      * Typ: DATE
      * Default: date + discount_days
      */
     public ?DateTimeImmutable $discountDate = null;
+
+    /**
+     * Skontofrist in Tagen.
+     *
+     * Billomat-Feld: discount_days
+     * Typ: INT
+     * Default: Skontozeitraum in Tagen aus Einstellungen
+     */
+    public ?int $discountDays = null;
 
     /**
      * Dokumentenüberschrift.
@@ -175,11 +186,21 @@ final class InvoiceCreateOptions
      *
      * Billomat-Feld: note
      * Typ: ALNUM
+     * Default: Wert aus Einstellungen
      */
     public ?string $note = null;
 
     /**
-     * Rabatt (absolut oder als Prozentwert, z.B. "10" oder "10%").
+     * Preisbasis (NET, GROSS oder SETTINGS).
+     *
+     * Billomat-Feld: net_gross
+     * Typ: ALNUM („NET“, „GROSS“)
+     * Default: Wert aus den Einstellungen
+     */
+    public ?NetGross $netGross = null;
+
+    /**
+     * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
      *
      * Billomat-Feld: reduction
      * Typ: ALNUM
@@ -187,7 +208,7 @@ final class InvoiceCreateOptions
     public ?string $reduction = null;
 
     /**
-     * Währungscode.
+     * Währung (ISO-Währungscode, z. B. "EUR").
      *
      * Billomat-Feld: currency_code
      * Typ: ISO-Währungscode
@@ -196,16 +217,7 @@ final class InvoiceCreateOptions
     public ?string $currencyCode = null;
 
     /**
-     * Preisbasis (NET, GROSS oder SETTINGS).
-     *
-     * Billomat-Feld: net_gross
-     * Typ: ENUM („NET“, „GROSS“, „SETTINGS“)
-     * Default: Wert aus Einstellungen
-     */
-    public ?NetGross $netGross = null;
-
-    /**
-     * Währungskurs.
+     * Währungskurs (für Umrechnung in die Standard-Währung).
      *
      * Billomat-Feld: quote
      * Typ: FLOAT
@@ -214,18 +226,7 @@ final class InvoiceCreateOptions
     public ?float $quote = null;
 
     /**
-     * Akzeptierte Zahlungsarten (kommasepariert).
-     *
-     * Billomat-Feld: payment_types
-     * Typ: ALNUM
-     * Default: Wert aus Einstellungen
-     *
-     * Beispiel: "BANK_TRANSFER,CASH"
-     */
-    public ?string $paymentTypes = null;
-
-    /**
-     * ID der korrigierten Rechnung (für Korrekturrechnung).
+     * ID der korrigierten Rechnung (bei Korrekturrechnung).
      *
      * Billomat-Feld: invoice_id
      * Typ: INT
@@ -257,15 +258,18 @@ final class InvoiceCreateOptions
     public ?int $recurringId = null;
 
     /**
-     * ID des Freitextes (für title, label, intro, note).
+     * Akzeptierte Zahlungsarten (kommasepariert).
      *
-     * Billomat-Feld: free_text_id
-     * Typ: INT
+     * Beispiel: "BANK_TRANSFER,CASH"
+     *
+     * Billomat-Feld: payment_types
+     * Typ: ALNUM
+     * Default: Wert aus den Einstellungen
      */
-    public ?int $freeTextId = null;
+    public ?string $paymentTypes = null;
 
     /**
-     * ID der Vorlage, mit der die Rechnung abgeschlossen werden soll.
+     * ID der Vorlage, mit der die Rechnung abgeschlossen wird.
      *
      * Billomat-Feld: template_id
      * Typ: INT
@@ -274,12 +278,20 @@ final class InvoiceCreateOptions
     public ?int $templateId = null;
 
     /**
+     * ID des Freitextes zur Belegung von title, label, intro und note.
+     *
+     * Billomat-Feld: free_text_id
+     * Typ: INT
+     */
+    public ?int $freeTextId = null;
+
+    /**
      * @var list<InvoiceItemCreateOptions>
      */
     private array $items = [];
 
     /**
-     * Fügt eine Rechnungsposition hinzu.
+     * Fügt eine Position hinzu, die beim Anlegen mitgesendet wird.
      */
     public function addItem(InvoiceItemCreateOptions $item): self
     {
@@ -297,7 +309,7 @@ final class InvoiceCreateOptions
     }
 
     /**
-     * Serialisiert die Optionen in das Billomat-Payload-Array.
+     * Serialisiert die Options in ein Billomat-Payload-Array.
      *
      * @return array<string,mixed>
      */
@@ -335,15 +347,12 @@ final class InvoiceCreateOptions
             'template_id' => $this->templateId,
         ];
 
-        // Null-Werte entfernen, damit Billomat Defaults ziehen kann
-        $data = array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);
+        // Null-Felder entfernen
+        $data = array_filter($data, static fn (mixed $v): bool => null !== $v);
 
         if ([] !== $this->items) {
             $data['invoice-items'] = [
-                'invoice-item' => array_map(
-                    static fn (InvoiceItemCreateOptions $item): array => $item->toArray(),
-                    $this->items
-                ),
+                'invoice-item' => array_map(static fn (InvoiceItemCreateOptions $item): array => $item->toArray(), $this->items),
             ];
         }
 

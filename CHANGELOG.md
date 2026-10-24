@@ -6,6 +6,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-10-24
+
 ### Changed
 - **`Client`, `Contact`, `Supplier` und `Article` samt ihren `*CreateOptions`/`*UpdateOptions` sowie das Read-Model `Unit` werden generiert.** `composer generate` erzeugt sie aus `docs/spec/billomat.json` und je einer Definition unter `tools/codegen/definitions/` (`clients.php`, `contacts.php`, `suppliers.php`, `articles.php`, `units.php`). Typen, Defaults und Enum-Werte der schreibbaren Felder kommen damit direkt aus der Billomat-Doku. Öffentliche API und Payloads sind unverändert (Properties, Typen, Defaults, Konstruktor-Reihenfolge und `toArray()`-Ausgaben gegen den bisherigen Stand geprüft); geändert haben sich nur Docblocks und die Reihenfolge der Properties in den Options. `composer generate:check` läuft in der CI und schlägt fehl, wenn generierte Dateien von Hand geändert wurden oder die Spec ein Feld nennt, das die Definition nicht kennt.
 

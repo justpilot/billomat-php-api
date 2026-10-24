@@ -13,6 +13,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\ReminderStatus;
@@ -37,6 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 final class RemindersApiTest extends TestCase
 {

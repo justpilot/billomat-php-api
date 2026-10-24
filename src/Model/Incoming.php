@@ -13,54 +13,91 @@ use const DATE_ATOM;
 /**
  * Eingangsrechnung (Incoming) aus der Billomat-API.
  *
- * Doku: https://www.billomat.com/en/api/incomings/
+ * Dokumentation:
+ * https://www.billomat.com/en/api/incomings/
+ *
+ * Generiert aus tools/codegen/definitions/incomings.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Incoming
 {
     public function __construct(
+        /** Interne Billomat-ID der Eingangsrechnung. */
         public ?int $id,
+        /** ID des Lieferanten. */
         public ?int $supplierId,
+        /** Erstellungszeitpunkt der Eingangsrechnung. */
         public ?DateTimeImmutable $created = null,
+        /** Rechnungsdatum. */
         public ?DateTimeImmutable $date = null,
         /**
+         * Liefer-/Leistungsdatum.
+         *
          * @deprecated since 3.1 – Billomat liefert `supply_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?DateTimeImmutable $supplyDate = null,
+        /** Fälligkeitsdatum. */
         public ?DateTimeImmutable $dueDate = null,
         /**
+         * Tage bis zur Fälligkeit.
+         *
          * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?int $dueDays = null,
         /**
+         * Zahlungsdatum.
+         *
          * @deprecated since 3.1 – Billomat liefert `paid_at` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?DateTimeImmutable $paidAt = null,
+        /** Status der Eingangsrechnung. */
         public ?IncomingStatus $status = null,
+        /** Rechnungsnummer des Lieferanten. */
         public ?string $incomingNumber = null,
+        /** Komplette Absendeadresse. */
         public ?string $address = null,
+        /** Bezeichnung. */
         public ?string $label = null,
         /**
+         * Einleitungstext.
+         *
          * @deprecated since 3.1 – Billomat liefert `intro` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $intro = null,
+        /** Anmerkungstext. */
         public ?string $note = null,
+        /** Gesamtbetrag brutto. */
         public ?float $totalGross = null,
+        /** Gesamtbetrag netto. */
         public ?float $totalNet = null,
+        /** Bereits bezahlter Betrag. */
         public ?float $paidAmount = null,
+        /** Offener Betrag. */
         public ?float $openAmount = null,
+        /** Währung (ISO-Währungscode). */
         public ?string $currencyCode = null,
+        /** Währungskurs (für Umrechnung in die Standard-Währung). */
         public ?float $quote = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Kundennummer beim Lieferanten (z. B. eigene Vertragsnummer). */
         public ?string $clientNumber = null,
+        /** Aufwandskonto laut SKR/Konten-Mapping. */
         public ?string $expenseAccountNumber = null,
+        /** Kategorie. */
         public ?string $category = null,
+        /** Seitenzahl des Belegdokuments. */
         public ?int $pageCount = null,
+        /** Ist ein Belegdokument angehängt? */
         public ?bool $hasAttachment = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -74,8 +111,7 @@ final readonly class Incoming
             dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             paidAt: ScalarCaster::toDateTimeOrNull($data['paid_at'] ?? null),
-            status: IncomingStatus::fromApi(isset($data['status']) ? (string) $data['status'] : null),
-            // Billomat liefert die Belegnummer als `number`; `incoming_number` nur als Fallback.
+            status: IncomingStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             incomingNumber: ScalarCaster::toStringOrNull($data['number'] ?? $data['incoming_number'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
@@ -98,6 +134,10 @@ final readonly class Incoming
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Model;
 use Closure;
 use DateTimeImmutable;
 use Generator;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationItem;
@@ -71,6 +72,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(DeliveryNoteItem::class)]
 #[UsesClass(InvoiceItem::class)]
 #[UsesClass(RecurringItem::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 final class DocumentFieldsTest extends TestCase
 {

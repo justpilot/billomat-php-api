@@ -6,6 +6,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-10-24
+
 ### Changed
 - **`TaxRate` samt `TaxRateCreateOptions` sowie die Read-Models `FreeText`, `EmailTemplate`, `ReminderText` und `CountryTax` werden generiert** (Definitionen `taxes.php`, `free-texts.php`, `email-templates.php`, `reminder-texts.php`, `country-taxes.php` unter `tools/codegen/definitions/`). Öffentliche API und `toArray()`-Ausgaben sind unverändert; neu sind nur Docblocks an jeder Property. Der Generator kann dafür jetzt abweichende Property-Namen und `toArray()`-Schlüssel (`EmailTemplate::$body` aus `text`, `ReminderText::$sort` aus `sorting`), Bool-Werte als 1/0 im Read-Model und Konstruktor-Parameter mit Default.
 - **`Template` samt `TemplateCreateOptions`/`TemplateUpdateOptions`, die fünf Attribut-Definitionen `ArticleProperty`, `ClientProperty`, `SupplierProperty`, `IncomingProperty`, `UserProperty` und die geteilten `PropertyCreateOptions` werden generiert** (Definitionen `templates.php` und `*-properties.php` unter `tools/codegen/definitions/`, die Attribute teilen sich `shared/properties.php`). Öffentliche API und `toArray()`-Ausgaben sind unverändert; neu sind nur Docblocks an jeder Property. Der Generator kann dafür jetzt Null-Felder in `toArray()` des Read-Models weglassen (`filterNulls`). `Role` bleibt handgeschrieben, weil es die Rechte-Felder als `permissions`-Map bündelt.

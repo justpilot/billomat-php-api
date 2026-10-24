@@ -1381,18 +1381,6 @@ parameters:
 			path: src/Model/Confirmation.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/ConfirmationItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/ConfirmationItem.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -1465,18 +1453,6 @@ parameters:
 			path: src/Model/CreditNote.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/CreditNoteItem.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -1547,18 +1523,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Model/DeliveryNote.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/DeliveryNoteItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/DeliveryNoteItem.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
@@ -1669,18 +1633,6 @@ parameters:
 			path: src/Model/Invoice.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/InvoiceItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/InvoiceItem.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -1771,18 +1723,6 @@ parameters:
 			path: src/Model/Offer.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/OfferItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/OfferItem.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -1861,18 +1801,6 @@ parameters:
 			path: src/Model/RecurringEmailReceiver.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/RecurringItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/RecurringItem.php
-
-		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -1907,12 +1835,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Model/Reminder.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 2
-			path: src/Model/ReminderItem.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'

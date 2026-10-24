@@ -10,44 +10,71 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use const DATE_ATOM;
 
 /**
- * Position einer Mahnung (Reminder Item).
+ * Repräsentiert eine Mahnungsposition aus der Billomat-API.
  *
- * Reminder-Items repräsentieren die in der Mahnung aufgeführten Rechnungen
- * mit dem ursprünglichen Rechnungsbetrag und den Verzugskosten.
+ * Dieses Model bildet die Struktur von GET /reminder-items?reminder_id={id} bzw. GET /reminder-items/{id} ab.
  *
- * Doku: https://www.billomat.com/en/api/reminders/items/
+ * Dokumentation:
+ * https://www.billomat.com/api/mahnungen/positionen/
+ *
+ * Generiert aus tools/codegen/definitions/reminder-items.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class ReminderItem
 {
     public function __construct(
+        /** Interne Billomat-ID der Position. */
         public ?int $id,
+        /** ID des zugehörigen Dokuments. */
         public ?int $reminderId,
+        /** ID des Artikels (falls verknüpft). */
         public ?int $articleId,
+        /**
+         * Laufende Positionsnummer innerhalb des Dokuments.
+         *
+         * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
+         */
         public ?int $position,
+        /** Einheit (z. B. "Stück", "Stunde"). */
         public ?string $unit,
+        /** Menge. */
         public float $quantity,
+        /** Einzelpreis. */
         public float $unitPrice,
+        /** Titel der Position. */
         public ?string $title,
+        /** Beschreibung der Position. */
         public ?string $description,
         /**
+         * Gesamtbetrag brutto.
+         *
          * @deprecated since 3.1 – Billomat liefert `total_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?float $totalGross,
         /**
+         * Gesamtbetrag netto.
+         *
          * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?float $totalNet,
         /**
+         * Erstellungszeitpunkt der Position.
+         *
          * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?DateTimeImmutable $created,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Gesamtbetrag der Position. */
         public ?float $total = null,
+        /** Mahngebühr statt Artikelposition? */
         public ?bool $isCharge = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -58,8 +85,8 @@ final readonly class ReminderItem
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
-            quantity: isset($data['quantity']) ? (float) $data['quantity'] : 0.0,
-            unitPrice: isset($data['unit_price']) ? (float) $data['unit_price'] : 0.0,
+            quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
+            unitPrice: ScalarCaster::toFloatOrNull($data['unit_price'] ?? null) ?? 0.0,
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
@@ -72,6 +99,10 @@ final readonly class ReminderItem
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

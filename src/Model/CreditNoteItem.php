@@ -11,41 +11,79 @@ use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use const DATE_ATOM;
 
 /**
- * Position einer Gutschrift (Credit Note Item).
+ * Repräsentiert eine Gutschriftsposition aus der Billomat-API.
  *
- * Doku: https://www.billomat.com/en/api/credit-notes/items/
+ * Dieses Model bildet die Struktur von GET /credit-note-items?credit_note_id={id} bzw. GET /credit-note-items/{id} ab.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/gutschriften/positionen/
+ *
+ * Generiert aus tools/codegen/definitions/credit-note-items.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class CreditNoteItem
 {
     public function __construct(
+        /** Interne Billomat-ID der Position. */
         public ?int $id,
+        /** ID des zugehörigen Dokuments. */
         public ?int $creditNoteId,
+        /** ID des Artikels (falls verknüpft). */
         public ?int $articleId,
+        /**
+         * Laufende Positionsnummer innerhalb des Dokuments.
+         *
+         * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
+         */
         public ?int $position,
+        /** Einheit (z. B. "Stück", "Stunde"). */
         public ?string $unit,
+        /** Menge. */
         public float $quantity,
+        /** Einzelpreis. */
         public float $unitPrice,
+        /** Steuerbezeichnung (z. B. "MwSt"). */
         public ?string $taxName,
+        /** Steuerrate in Prozent. */
         public ?float $taxRate,
+        /**
+         * Flag, ob die Steuerrate manuell geändert wurde.
+         *
+         * Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz angewendet werden soll.
+         */
         public ?bool $taxChangedManually,
+        /** Titel der Position. */
         public ?string $title,
+        /** Beschreibung der Position. */
         public ?string $description,
+        /** Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction,
+        /** Typ der Position (Produkt/Dienstleistung). */
         public ?InvoiceItemType $type,
+        /** Gesamtbetrag brutto. */
         public ?float $totalGross,
+        /** Gesamtbetrag netto. */
         public ?float $totalNet,
+        /** Unreduzierter Gesamtbetrag brutto. */
         public ?float $totalGrossUnreduced,
+        /** Unreduzierter Gesamtbetrag netto. */
         public ?float $totalNetUnreduced,
         /**
+         * Erstellungszeitpunkt der Position.
+         *
          * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?DateTimeImmutable $created,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Steuerrate bei Reverse-Charge in Prozent. */
         public ?float $taxRateReverseCharge = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -56,15 +94,15 @@ final readonly class CreditNoteItem
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
-            quantity: isset($data['quantity']) ? (float) $data['quantity'] : 0.0,
-            unitPrice: isset($data['unit_price']) ? (float) $data['unit_price'] : 0.0,
+            quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
+            unitPrice: ScalarCaster::toFloatOrNull($data['unit_price'] ?? null) ?? 0.0,
             taxName: ScalarCaster::toStringOrNull($data['tax_name'] ?? null),
             taxRate: ScalarCaster::toFloatOrNull($data['tax_rate'] ?? null),
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
-            type: isset($data['type']) ? InvoiceItemType::tryFrom((string) $data['type']) : null,
+            type: InvoiceItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
@@ -76,6 +114,10 @@ final readonly class CreditNoteItem
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

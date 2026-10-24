@@ -279,6 +279,9 @@ function renderModel(array $definition, array $fields, string $source): string
         if (isListField($field)) {
             $out .= ' = []';
         } elseif (empty($field['model']['required'])) {
+            if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
+                throw new RuntimeException("Nicht-nullbares Enum-Feld '{$field['wire']}' braucht 'required' ({$source}).");
+            }
             $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : nonNullFallback(modelType($field)));
         }
         $out .= ",\n";
@@ -304,7 +307,7 @@ function renderModel(array $definition, array $fields, string $source): string
     foreach (exportFields($scalarFields, $definition['model']['toArray'] ?? null, $source) as $field) {
         $value = '$this->' . $field['property'];
         $value = match (true) {
-            null !== $field['enumClass'] => $value . '?->value',
+            null !== $field['enumClass'] => $value . (empty($field['model']['nonNull']) ? '?->value' : '->value'),
             'date' === modelType($field) => $value . "?->format('Y-m-d')",
             'datetime' === modelType($field) => $value . '?->format(DATE_ATOM)',
             $boolAsInt && 'bool' === modelType($field) => boolAsIntExpression($value, !empty($field['model']['nonNull'])),
@@ -382,7 +385,7 @@ function nonNullFallback(string $type): string
 function modelTypeHint(array $field): string
 {
     if (null !== $field['enumClass']) {
-        return '?' . $field['enumClass'];
+        return (empty($field['model']['nonNull']) ? '?' : '') . $field['enumClass'];
     }
     if (isListField($field)) {
         return 'array';
@@ -431,6 +434,10 @@ function hydrateExpression(array $field): string
         return $lookup . ' ?? null';
     }
 
+    // Nicht-nullbare Enums brauchen ein `fromApi(string): self`, das unbekannte Werte auf einen Default abbildet.
+    if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
+        return $field['enumClass'] . "::fromApi(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
+    }
     // Unbekannte oder leere Werte werden zu null statt eine Exception zu werfen.
     if (null !== $field['enumClass']) {
         return $field['enumClass'] . "::tryFrom(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";

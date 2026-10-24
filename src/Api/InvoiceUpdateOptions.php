@@ -11,20 +11,23 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
 /**
  * Typisierter Payload für PUT /invoices/{id} (Rechnung bearbeiten).
  *
- * Laut Billomat:
- * - Nur im Status DRAFT bearbeitbar.
- * - `clientId` / `contactId` können nur im DRAFT-Status geändert werden.
- * - Positionen und Kommentare nicht hier, sondern über die jeweiligen
- *   Sub-Ressourcen (/invoice-items, /invoice-comments).
+ * Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update).
+ * Laut Billomat nur im Status DRAFT bearbeitbar; Positionen und Kommentare
+ * werden über die Sub-Ressourcen (/invoice-items, /invoice-comments) verwaltet.
  *
- * Dokumentation: https://www.billomat.com/en/api/invoices/
+ * Doku:
+ * https://www.billomat.com/en/api/invoices/
+ *
+ * Generiert aus tools/codegen/definitions/invoices.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final class InvoiceUpdateOptions
 {
     /**
-     * ID des Kunden (nur im DRAFT änderbar).
+     * ID des Kunden.
      *
      * Billomat-Feld: client_id
+     * Typ: INT
      */
     public ?int $clientId = null;
 
@@ -32,36 +35,51 @@ final class InvoiceUpdateOptions
      * ID des Kontakts.
      *
      * Billomat-Feld: contact_id
+     * Typ: INT
      */
     public ?int $contactId = null;
 
     /**
-     * Vollständige (überschriebene) Rechnungsadresse.
+     * Laufende Nummer (ohne Präfix).
      *
-     * Billomat-Feld: address
+     * Billomat-Feld: number
+     * Typ: INT
      */
-    public ?string $address = null;
-
-    /** Präfix der Rechnungsnummer. */
-    public ?string $numberPre = null;
-
-    /** Laufende Nummer (ohne Präfix). */
     public ?int $number = null;
 
-    /** Mindestlänge der Rechnungsnummer. */
+    /**
+     * Präfix der Rechnungsnummer (z. B. "RE").
+     *
+     * Billomat-Feld: number_pre
+     * Typ: ALNUM
+     */
+    public ?string $numberPre = null;
+
+    /**
+     * Mindestlänge der Rechnungsnummer (wird mit führenden Nullen aufgefüllt).
+     *
+     * Billomat-Feld: number_length
+     * Typ: INT
+     */
     public ?int $numberLength = null;
 
     /**
      * Rechnungsdatum.
      *
+     * Format: YYYY-MM-DD
+     *
      * Billomat-Feld: date
+     * Typ: DATE
      */
     public ?DateTimeImmutable $date = null;
 
     /**
      * Liefer-/Leistungsdatum.
      *
+     * Format: YYYY-MM-DD
+     *
      * Billomat-Feld: supply_date
+     * Typ: MIXED (DATE/ALNUM)
      */
     public ?DateTimeImmutable $supplyDate = null;
 
@@ -69,90 +87,187 @@ final class InvoiceUpdateOptions
      * Typ des Liefer-/Leistungsdatums.
      *
      * Billomat-Feld: supply_date_type
+     * Typ: ALNUM („SUPPLY_DATE“, „DELIVERY_DATE“, „SUPPLY_TEXT“, „DELIVERY_TEXT“)
      */
     public ?SupplyDateType $supplyDateType = null;
 
     /**
-     * Tage bis Fälligkeit.
+     * Fälligkeitsdatum.
+     *
+     * Format: YYYY-MM-DD
+     *
+     * Billomat-Feld: due_date
+     * Typ: DATE
+     */
+    public ?DateTimeImmutable $dueDate = null;
+
+    /**
+     * Tage bis zur Fälligkeit.
      *
      * Billomat-Feld: due_days
+     * Typ: INT
      */
     public ?int $dueDays = null;
 
     /**
-     * Fälligkeitsdatum.
+     * Vollständige Rechnungsadresse (formatiert).
      *
-     * Billomat-Feld: due_date
+     * Billomat-Feld: address
+     * Typ: ALNUM
      */
-    public ?DateTimeImmutable $dueDate = null;
+    public ?string $address = null;
 
     /**
      * Skonto in Prozent.
      *
      * Billomat-Feld: discount_rate
+     * Typ: INT
      */
     public ?float $discountRate = null;
+
+    /**
+     * Skontodatum.
+     *
+     * Format: YYYY-MM-DD
+     *
+     * Billomat-Feld: discount_date
+     * Typ: DATE
+     */
+    public ?DateTimeImmutable $discountDate = null;
 
     /**
      * Skontofrist in Tagen.
      *
      * Billomat-Feld: discount_days
+     * Typ: INT
      */
     public ?int $discountDays = null;
 
     /**
-     * Skontodatum.
+     * Dokumentenüberschrift.
      *
-     * Billomat-Feld: discount_date
+     * Billomat-Feld: title
+     * Typ: ALNUM
      */
-    public ?DateTimeImmutable $discountDate = null;
-
-    /** Dokumentenüberschrift. */
     public ?string $title = null;
 
-    /** Bezeichnung / Label. */
+    /**
+     * Bezeichnung.
+     *
+     * Billomat-Feld: label
+     * Typ: ALNUM
+     */
     public ?string $label = null;
 
-    /** Einleitungstext. */
+    /**
+     * Einleitungstext.
+     *
+     * Billomat-Feld: intro
+     * Typ: ALNUM
+     */
     public ?string $intro = null;
 
-    /** Anmerkungstext. */
+    /**
+     * Anmerkungstext.
+     *
+     * Billomat-Feld: note
+     * Typ: ALNUM
+     */
     public ?string $note = null;
 
-    /** Rabatt (z. B. "10" oder "10%"). */
-    public ?string $reduction = null;
-
-    /** Preisbasis (NET/GROSS/SETTINGS). */
+    /**
+     * Preisbasis (NET, GROSS oder SETTINGS).
+     *
+     * Billomat-Feld: net_gross
+     * Typ: ALNUM („NET“, „GROSS“)
+     */
     public ?NetGross $netGross = null;
 
-    /** Währungscode (z. B. EUR). */
+    /**
+     * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
+     *
+     * Billomat-Feld: reduction
+     * Typ: ALNUM
+     */
+    public ?string $reduction = null;
+
+    /**
+     * Währung (ISO-Währungscode, z. B. "EUR").
+     *
+     * Billomat-Feld: currency_code
+     * Typ: ISO-Währungscode
+     */
     public ?string $currencyCode = null;
 
-    /** Währungskurs. */
+    /**
+     * Währungskurs (für Umrechnung in die Standard-Währung).
+     *
+     * Billomat-Feld: quote
+     * Typ: FLOAT
+     */
     public ?float $quote = null;
 
-    /** Zahlungsarten (CSV). */
-    public ?string $paymentTypes = null;
-
-    /** ID einer korrigierten Rechnung. */
+    /**
+     * ID der korrigierten Rechnung (bei Korrekturrechnung).
+     *
+     * Billomat-Feld: invoice_id
+     * Typ: INT
+     */
     public ?int $invoiceId = null;
 
-    /** ID des Quell-Angebots. */
+    /**
+     * ID des Angebots, aus dem die Rechnung entstanden ist.
+     *
+     * Billomat-Feld: offer_id
+     * Typ: INT
+     */
     public ?int $offerId = null;
 
-    /** ID der Quell-Auftragsbestätigung. */
+    /**
+     * ID der Auftragsbestätigung, aus der die Rechnung entstanden ist.
+     *
+     * Billomat-Feld: confirmation_id
+     * Typ: INT
+     */
     public ?int $confirmationId = null;
 
-    /** ID der Quell-Abo-Rechnung. */
+    /**
+     * ID der Abo-Rechnung, aus der die Rechnung entstanden ist.
+     *
+     * Billomat-Feld: recurring_id
+     * Typ: INT
+     */
     public ?int $recurringId = null;
 
-    /** ID eines Freitext-Bausteins. */
-    public ?int $freeTextId = null;
+    /**
+     * Akzeptierte Zahlungsarten (kommasepariert).
+     *
+     * Beispiel: "BANK_TRANSFER,CASH"
+     *
+     * Billomat-Feld: payment_types
+     * Typ: ALNUM
+     */
+    public ?string $paymentTypes = null;
 
-    /** Vorlagen-ID für die PDF-Erzeugung. */
+    /**
+     * ID der Vorlage, mit der die Rechnung abgeschlossen wird.
+     *
+     * Billomat-Feld: template_id
+     * Typ: INT
+     */
     public ?int $templateId = null;
 
     /**
+     * ID des Freitextes zur Belegung von title, label, intro und note.
+     *
+     * Billomat-Feld: free_text_id
+     * Typ: INT
+     */
+    public ?int $freeTextId = null;
+
+    /**
+     * Serialisiert die Options in ein Billomat-Payload-Array.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array
@@ -189,6 +304,7 @@ final class InvoiceUpdateOptions
             'template_id' => $this->templateId,
         ];
 
-        return array_filter($data, static fn (int|string|float|null $v): bool => null !== $v);
+        // Null-Felder entfernen
+        return array_filter($data, static fn (mixed $v): bool => null !== $v);
     }
 }

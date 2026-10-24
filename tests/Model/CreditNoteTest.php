@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNoteItem;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(CreditNote::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(CreditNoteItem::class)]
 #[UsesClass(CreditNoteStatus::class)]

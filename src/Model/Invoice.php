@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
@@ -20,6 +21,12 @@ use const DATE_ATOM;
  *
  * Die meisten Felder sind optional und hängen davon ab,
  * welcher Endpoint genutzt wurde und welche Einstellungen im Account aktiv sind.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/en/api/invoices/
+ *
+ * Generiert aus tools/codegen/definitions/invoices.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Invoice
 {
@@ -32,7 +39,7 @@ final readonly class Invoice
         public ?int $id,
         /** ID des Kunden. */
         public int $clientId,
-        /** ID des Kontakts (optional). */
+        /** ID des Kontakts. */
         public ?int $contactId = null,
         /** Erstellungszeitpunkt der Rechnung. */
         public ?DateTimeImmutable $created = null,
@@ -40,11 +47,11 @@ final readonly class Invoice
         public ?string $invoiceNumber = null,
         /** Laufende Nummer (ohne Präfix). */
         public ?int $number = null,
-        /** Präfix (z. B. "RE"). */
+        /** Präfix der Rechnungsnummer (z. B. "RE"). */
         public ?string $numberPre = null,
-        /** Mindestlänge der Rechnungsnummer. */
+        /** Mindestlänge der Rechnungsnummer (wird mit führenden Nullen aufgefüllt). */
         public ?int $numberLength = null,
-        /** Status, z. B. DRAFT, OPEN, PAID. */
+        /** Status der Rechnung, z. B. DRAFT, OPEN, PAID. */
         public ?InvoiceStatus $status = null,
         /** Rechnungsdatum. */
         public ?DateTimeImmutable $date = null,
@@ -68,31 +75,31 @@ final readonly class Invoice
         public ?float $discountAmount = null,
         /** Dokumentenüberschrift. */
         public ?string $title = null,
-        /** Bezeichnung / Label. */
+        /** Bezeichnung. */
         public ?string $label = null,
         /** Einleitungstext. */
         public ?string $intro = null,
         /** Anmerkungstext. */
         public ?string $note = null,
-        /** Bruttosumme der Rechnung. */
+        /** Gesamtbetrag brutto. */
         public ?float $totalGross = null,
-        /** Nettosumme der Rechnung. */
+        /** Gesamtbetrag netto. */
         public ?float $totalNet = null,
         /** Preisbasis (NET, GROSS oder SETTINGS). */
         public ?NetGross $netGross = null,
-        /** Gesamtrabatt (z. B. "10" oder "10%"). */
+        /** Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction = null,
-        /** Bruttosumme ohne Rabatt. */
+        /** Gesamtbetrag brutto vor Rabatt. */
         public ?float $totalGrossUnreduced = null,
-        /** Nettosumme ohne Rabatt. */
+        /** Gesamtbetrag netto vor Rabatt. */
         public ?float $totalNetUnreduced = null,
         /** Bereits bezahlter Betrag. */
         public ?float $paidAmount = null,
         /** Offener Betrag. */
         public ?float $openAmount = null,
-        /** Währungscode, z. B. "EUR". */
+        /** Währung (ISO-Währungscode, z. B. "EUR"). */
         public ?string $currencyCode = null,
-        /** Währungskurs. */
+        /** Währungskurs (für Umrechnung in die Standard-Währung). */
         public ?float $quote = null,
         /** ID der korrigierten Rechnung (bei Korrekturrechnung). */
         public ?int $invoiceId = null,
@@ -102,17 +109,13 @@ final readonly class Invoice
         public ?int $confirmationId = null,
         /** ID der Abo-Rechnung, aus der die Rechnung entstanden ist. */
         public ?int $recurringId = null,
-        /**
-         * Steuerzusammenfassung pro Steuersatz.
-         *
-         * Struktur:
-         * [
-         *     ['name' => string, 'rate' => float, 'amount' => float],
-         *     ...
-         * ]
-         */
+        /** Steuerzeilen der Rechnung (Zusammenfassung pro Steuersatz). */
         public array $taxes = [],
-        /** Akzeptierte Zahlungsarten (kommasepariert, z. B. "CASH,BANK_TRANSFER"). */
+        /**
+         * Akzeptierte Zahlungsarten (kommasepariert).
+         *
+         * Beispiel: "BANK_TRANSFER,CASH"
+         */
         public ?string $paymentTypes = null,
         /**
          * URL zum Customer-Portal für diese Rechnung.
@@ -120,84 +123,43 @@ final readonly class Invoice
          * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $customerportalUrl = null,
-        /** ID der Vorlage, mit der die Rechnung erzeugt/abgeschlossen wurde. */
+        /** ID der Vorlage, mit der die Rechnung abgeschlossen wird. */
         public ?int $templateId = null,
-        /**
-         * Rechnungspositionen, falls im API-Response enthalten.
-         */
+        /** Positionen der Rechnung (nur bei GET /invoices/{id}). */
         public array $items = [],
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Referenz der Factur-X-/ZUGFeRD-Rechnung. */
         public ?string $facturxReference = null,
+        /** Summe der Rabatte. */
         public ?float $totalReduction = null,
+        /** Wurde die Rechnung digital weiterverarbeitet? */
         public ?bool $digProceeded = null,
     ) {
     }
 
     /**
-     * Hydriert eine Invoice aus einem Billomat-Array.
+     * Hydriert das Model aus einem Billomat-Response-Array.
      *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
-        // Taxes
-        $taxes = [];
-        if (isset($data['taxes']['tax'])) {
-            $rawTaxes = $data['taxes']['tax'];
-
-            // Einzelner Eintrag → normalisieren auf Liste
-            if (isset($rawTaxes['name'])) {
-                $rawTaxes = [$rawTaxes];
-            }
-
-            if (\is_array($rawTaxes)) {
-                foreach ($rawTaxes as $taxRow) {
-                    if (!\is_array($taxRow)) {
-                        continue;
-                    }
-
-                    $taxes[] = [
-                        'name' => (string) ($taxRow['name'] ?? ''),
-                        'rate' => isset($taxRow['rate']) ? (float) $taxRow['rate'] : 0.0,
-                        'amount' => isset($taxRow['amount']) ? (float) $taxRow['amount'] : 0.0,
-                    ];
-                }
-            }
-        }
-
-        // Invoice-Items, falls vorhanden
-        $items = [];
-        if (isset($data['invoice-items']['invoice-item'])) {
-            $rawItems = $data['invoice-items']['invoice-item'];
-
-            if (isset($rawItems['id'])) {
-                $rawItems = [$rawItems];
-            }
-
-            if (\is_array($rawItems)) {
-                $items = array_map(
-                    InvoiceItem::fromArray(...),
-                    $rawItems,
-                );
-            }
-        }
-
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            clientId: (int) ($data['client_id'] ?? 0),
+            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             invoiceNumber: ScalarCaster::toStringOrNull($data['invoice_number'] ?? null),
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),
             numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
             numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
-            status: InvoiceStatus::fromApi($data['status'] ?? null),
+            status: InvoiceStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
-            supplyDateType: isset($data['supply_date_type'])
-                ? SupplyDateType::tryFrom((string) $data['supply_date_type'])
-                : null,
+            supplyDateType: SupplyDateType::tryFrom(ScalarCaster::toStringOrNull($data['supply_date_type'] ?? null) ?? ''),
             dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
@@ -211,9 +173,7 @@ final readonly class Invoice
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
-            netGross: isset($data['net_gross'])
-                ? NetGross::tryFrom((string) $data['net_gross'])
-                : null,
+            netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
@@ -225,11 +185,11 @@ final readonly class Invoice
             offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
-            taxes: $taxes,
+            taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
             paymentTypes: ScalarCaster::toStringOrNull($data['payment_types'] ?? null),
             customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            items: $items,
+            items: ListCaster::toList($data['invoice-items']['invoice-item'] ?? null, 'id', InvoiceItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
@@ -239,10 +199,9 @@ final readonly class Invoice
     }
 
     /**
-     * Exportiert die Rechnung als Array mit Billomat-Feldnamen.
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
      *
-     * Hinweis: Nicht alle Felder sind für POST/PUT gedacht,
-     * dieses Array eignet sich eher für Debug/Logging oder interne Weitergabe.
+     * Praktisch für Debugging oder Log-Ausgaben.
      *
      * @return array<string,mixed>
      */
@@ -297,24 +256,12 @@ final readonly class Invoice
         ];
 
         if ([] !== $this->taxes) {
-            $data['taxes'] = [
-                'tax' => array_map(
-                    static fn (array $t): array => [
-                        'name' => $t['name'],
-                        'rate' => $t['rate'],
-                        'amount' => $t['amount'],
-                    ],
-                    $this->taxes,
-                ),
-            ];
+            $data['taxes'] = ['tax' => $this->taxes];
         }
 
         if ([] !== $this->items) {
             $data['invoice-items'] = [
-                'invoice-item' => array_map(
-                    static fn (InvoiceItem $item): array => $item->toArray(),
-                    $this->items,
-                ),
+                'invoice-item' => array_map(static fn (InvoiceItem $item): array => $item->toArray(), $this->items),
             ];
         }
 

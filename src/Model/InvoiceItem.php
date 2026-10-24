@@ -11,21 +11,30 @@ use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use const DATE_ATOM;
 
 /**
- * Repräsentiert eine Rechnungsposition (Invoice Item) aus der Billomat-API.
+ * Repräsentiert eine Rechnungsposition aus der Billomat-API.
+ *
+ * Dieses Model bildet die Struktur von GET /invoice-items?invoice_id={id} bzw. GET /invoice-items/{id} ab.
  *
  * Dokumentation:
  * https://www.billomat.com/api/rechnungen/positionen/
+ *
+ * Generiert aus tools/codegen/definitions/invoice-items.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class InvoiceItem
 {
     public function __construct(
         /** Interne Billomat-ID der Position. */
         public ?int $id,
-        /** ID der zugehörigen Rechnung. */
+        /** ID des zugehörigen Dokuments. */
         public ?int $invoiceId,
         /** ID des Artikels (falls verknüpft). */
         public ?int $articleId,
-        /** Laufende Positionsnummer innerhalb der Rechnung. */
+        /**
+         * Laufende Positionsnummer innerhalb des Dokuments.
+         *
+         * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
+         */
         public ?int $position,
         /** Einheit (z. B. "Stück", "Stunde"). */
         public ?string $unit,
@@ -37,13 +46,17 @@ final readonly class InvoiceItem
         public ?string $taxName,
         /** Steuerrate in Prozent. */
         public ?float $taxRate,
-        /** Flag, ob die Steuerrate manuell geändert wurde. */
+        /**
+         * Flag, ob die Steuerrate manuell geändert wurde.
+         *
+         * Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz angewendet werden soll.
+         */
         public ?bool $taxChangedManually,
         /** Titel der Position. */
         public ?string $title,
         /** Beschreibung der Position. */
         public ?string $description,
-        /** Positionsrabatt (z. B. "10" oder "10%"). */
+        /** Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction,
         /** Typ der Position (Produkt/Dienstleistung). */
         public ?InvoiceItemType $type,
@@ -61,12 +74,13 @@ final readonly class InvoiceItem
          * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?DateTimeImmutable $created,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
     }
 
     /**
-     * Hydriert eine InvoiceItem-Instanz aus einem Billomat-Array.
+     * Hydriert das Model aus einem Billomat-Response-Array.
      *
      * @param array<string,mixed> $data
      */
@@ -78,15 +92,15 @@ final readonly class InvoiceItem
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
-            quantity: isset($data['quantity']) ? (float) $data['quantity'] : 0.0,
-            unitPrice: isset($data['unit_price']) ? (float) $data['unit_price'] : 0.0,
+            quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
+            unitPrice: ScalarCaster::toFloatOrNull($data['unit_price'] ?? null) ?? 0.0,
             taxName: ScalarCaster::toStringOrNull($data['tax_name'] ?? null),
             taxRate: ScalarCaster::toFloatOrNull($data['tax_rate'] ?? null),
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
-            type: isset($data['type']) ? InvoiceItemType::tryFrom((string) $data['type']) : null,
+            type: InvoiceItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
@@ -97,7 +111,9 @@ final readonly class InvoiceItem
     }
 
     /**
-     * Exportiert die Position als Array mit Billomat-Feldnamen.
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
      *
      * @return array<string,mixed>
      */

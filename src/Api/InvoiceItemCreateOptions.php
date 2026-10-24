@@ -6,27 +6,42 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 
-use const ARRAY_FILTER_USE_BOTH;
-
 /**
- * Typisierter Payload für POST /invoices (invoice-items-Block)
- * bzw. POST /invoice-items.
+ * Typisierter Payload für POST /invoice-items gemäß Billomat-API
+ * sowie für eingebettete Positionen beim Anlegen des Dokuments.
  *
- * Dokumentation:
+ * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
+ *
+ * Doku:
  * https://www.billomat.com/api/rechnungen/positionen/
+ *
+ * Generiert aus tools/codegen/definitions/invoice-items.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final class InvoiceItemCreateOptions
 {
-    /**
-     * Typ der Position (Produkt/Dienstleistung).
-     *
-     * Billomat-Feld: type
-     * ENUM: PRODUCT / SERVICE
-     */
-    public ?InvoiceItemType $type = null;
+    public function __construct(
+        /**
+         * Menge.
+         *
+         * Billomat-Feld: quantity
+         * Typ: FLOAT
+         * Default: 0.0
+         */
+        public float $quantity,
+        /**
+         * Einzelpreis.
+         *
+         * Billomat-Feld: unit_price
+         * Typ: FLOAT
+         * Default: 0.0
+         */
+        public float $unitPrice,
+    ) {
+    }
 
     /**
-     * ID des Artikels.
+     * ID des Artikels (falls verknüpft).
      *
      * Billomat-Feld: article_id
      * Typ: INT
@@ -34,7 +49,53 @@ final class InvoiceItemCreateOptions
     public ?int $articleId = null;
 
     /**
-     * Titel / Bezeichnung der Position.
+     * Laufende Positionsnummer innerhalb des Dokuments.
+     *
+     * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
+     *
+     * Billomat-Feld: position
+     */
+    public ?int $position = null;
+
+    /**
+     * Einheit (z. B. "Stück", "Stunde").
+     *
+     * Billomat-Feld: unit
+     * Typ: ALNUM
+     */
+    public ?string $unit = null;
+
+    /**
+     * Steuerbezeichnung (z. B. "MwSt").
+     *
+     * Billomat-Feld: tax_name
+     * Typ: ALNUM
+     * Default: Standard-Steuersatz
+     */
+    public ?string $taxName = null;
+
+    /**
+     * Steuerrate in Prozent.
+     *
+     * Billomat-Feld: tax_rate
+     * Typ: FLOAT
+     * Default: Standard-Steuersatz
+     */
+    public ?float $taxRate = null;
+
+    /**
+     * Flag, ob die Steuerrate manuell geändert wurde.
+     *
+     * Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz angewendet werden soll.
+     *
+     * Billomat-Feld: tax_changed_manually
+     * Typ: BOOL
+     * Default: true
+     */
+    public ?bool $taxChangedManually = null;
+
+    /**
+     * Titel der Position.
      *
      * Billomat-Feld: title
      * Typ: ALNUM
@@ -50,42 +111,7 @@ final class InvoiceItemCreateOptions
     public ?string $description = null;
 
     /**
-     * Einheit (z. B. "Stück", "Stunde").
-     *
-     * Billomat-Feld: unit
-     * Typ: ALNUM
-     */
-    public ?string $unit = null;
-
-    /**
-     * Steuerbezeichnung (z. B. "MwSt").
-     *
-     * Billomat-Feld: tax_name
-     * Typ: ALNUM
-     */
-    public ?string $taxName = null;
-
-    /**
-     * Steuerrate in Prozent (z. B. 19.0).
-     *
-     * Billomat-Feld: tax_rate
-     * Typ: FLOAT
-     */
-    public ?float $taxRate = null;
-
-    /**
-     * Flag, ob die Steuerrate manuell geändert wurde.
-     *
-     * Billomat-Feld: tax_changed_manually
-     * Typ: BOOL
-     *
-     * Hinweis: Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz
-     * angewendet werden soll.
-     */
-    public ?bool $taxChangedManually = null;
-
-    /**
-     * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
+     * Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
      *
      * Billomat-Feld: reduction
      * Typ: ALNUM
@@ -93,37 +119,15 @@ final class InvoiceItemCreateOptions
     public ?string $reduction = null;
 
     /**
-     * Sortierreihenfolge der Position.
+     * Typ der Position (Produkt/Dienstleistung).
      *
-     * Billomat-Feld: position
-     * Typ: INT
-     *
-     * Wird bei POST /invoice-items in der API normalerweise automatisch
-     * vergeben (anhängen ans Ende). Kann aber für spätere PUT-Requests
-     * nützlich sein.
+     * Billomat-Feld: type
+     * Typ: ENUM (PRODUCT/SERVICE)
      */
-    public ?int $position = null;
-
-    public function __construct(
-        /**
-         * Menge.
-         *
-         * Billomat-Feld: quantity
-         * Typ: FLOAT
-         */
-        public float $quantity,
-        /**
-         * Preis pro Einheit.
-         *
-         * Billomat-Feld: unit_price
-         * Typ: FLOAT
-         */
-        public float $unitPrice
-    ) {
-    }
+    public ?InvoiceItemType $type = null;
 
     /**
-     * Serialisiert die Positionsdaten in ein Billomat-Payload-Array.
+     * Serialisiert die Options in ein Billomat-Payload-Array.
      *
      * @return array<string,mixed>
      */
@@ -144,11 +148,7 @@ final class InvoiceItemCreateOptions
             'position' => $this->position,
         ];
 
-        // Null-Werte raus, aber quantity/unit_price bleiben drin
-        return array_filter(
-            $data,
-            static fn ($v, string $k): bool => null !== $v || \in_array($k, ['quantity', 'unit_price'], true),
-            ARRAY_FILTER_USE_BOTH,
-        );
+        // Null-Felder entfernen
+        return array_filter($data, static fn (mixed $v): bool => null !== $v);
     }
 }

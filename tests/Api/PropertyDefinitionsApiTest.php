@@ -69,7 +69,6 @@ final class PropertyDefinitionsApiTest extends TestCase
         self::assertCount(2, $props);
         self::assertSame('VAT-ID', $props[0]->name);
         self::assertSame(PropertyType::TEXTFIELD, $props[0]->type);
-        self::assertSame(2, $props[1]->position);
         self::assertNull($props[0]->isNvl);
         self::assertTrue($props[1]->isNvl);
     }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Closure;
-use Deprecated;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
@@ -112,21 +111,6 @@ abstract class AbstractApi
     {
         $response = $this->http->request('PUT', $path, [], $body);
         $this->handleErrors($response);
-    }
-
-    /**
-     * @param array<string,mixed> $body
-     */
-    #[Deprecated(message: <<<'TXT'
-        since 2.1 use {@see putVoid()} stattdessen. `putEmptyResponse()`
-                     materialisiert die Response NICHT – HTTP-Fehler 4xx/5xx wurden
-                     daher stillschweigend verschluckt, weil
-                     {@see ResponseInterface::getStatusCode()}
-                     nur bei Transport-Fehlern wirft. Wird in 3.0 entfernt.
-        TXT)]
-    protected function putEmptyResponse(string $path, array $body = []): ResponseInterface
-    {
-        return $this->http->request('PUT', $path, [], $body);
     }
 
     protected function deleteVoid(string $path): void

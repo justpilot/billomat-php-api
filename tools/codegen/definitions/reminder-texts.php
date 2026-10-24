@@ -35,12 +35,6 @@ return [
         'subject' => ['doc' => 'Betreff.'],
         'header' => ['doc' => 'Einleitung.'],
         'footer' => ['doc' => 'Anmerkung.'],
-        'due_days' => [
-            'type' => 'int',
-            'readOnly' => true,
-            'doc' => 'Fälligkeit in Tagen.',
-            'deprecated' => 'since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
-        ],
         // BC: Property und toArray()-Schlüssel heißen weiterhin `sort`; `sort` bleibt als Fallback.
         'sorting' => [
             'doc' => 'Reihenfolge der Mahnstufe.',

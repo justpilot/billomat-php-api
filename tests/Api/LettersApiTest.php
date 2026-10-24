@@ -93,7 +93,6 @@ final class LettersApiTest extends TestCase
 
         self::assertInstanceOf(Letter::class, $letter);
         self::assertSame(LetterStatus::OPEN, $letter->status);
-        self::assertSame('B-2026-0001', $letter->letterNumber);
     }
 
     #[Test]

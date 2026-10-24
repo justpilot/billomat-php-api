@@ -116,12 +116,6 @@ final class InvoiceTest extends TestCase
         self::assertSame(100.0, $item->totalNet);
         self::assertSame(130.0, $item->totalGrossUnreduced);
         self::assertSame(110.0, $item->totalNetUnreduced);
-
-        self::assertInstanceOf(DateTimeImmutable::class, $item->created);
-        self::assertSame(
-            '2025-03-01T12:00:00+01:00',
-            $item->created?->format('Y-m-d\TH:i:sP')
-        );
     }
 
     #[Test]
@@ -280,7 +274,6 @@ final class InvoiceTest extends TestCase
         self::assertNull($invoice->recurringId);
 
         self::assertSame('CASH,BANK_TRANSFER,PAYPAL', $invoice->paymentTypes);
-        self::assertSame($data['customerportal_url'], $invoice->customerportalUrl);
         self::assertNull($invoice->templateId);
 
         // Taxes

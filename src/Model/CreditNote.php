@@ -86,12 +86,6 @@ final readonly class CreditNote
         public ?int $templateId = null,
         /** Steuerzeilen der Gutschrift. */
         public array $taxes = [],
-        /**
-         * Persönliche URL zum Kundenportal.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** Positionen der Gutschrift (nur bei GET /credit-notes/{id}). */
         public array $items = [],
         /** Zeitpunkt der letzten Änderung. */
@@ -140,7 +134,6 @@ final readonly class CreditNote
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             items: ListCaster::toList($data['credit-note-items']['credit-note-item'] ?? null, 'id', CreditNoteItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -186,7 +179,6 @@ final readonly class CreditNote
             'invoice_id' => $this->invoiceId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
-            'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'total_reduction' => $this->totalReduction,

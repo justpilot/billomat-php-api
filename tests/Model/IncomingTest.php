@@ -48,10 +48,7 @@ final class IncomingTest extends TestCase
         self::assertSame(11, $incoming->supplierId);
         self::assertInstanceOf(DateTimeImmutable::class, $incoming->created);
         self::assertInstanceOf(DateTimeImmutable::class, $incoming->date);
-        self::assertInstanceOf(DateTimeImmutable::class, $incoming->supplyDate);
         self::assertInstanceOf(DateTimeImmutable::class, $incoming->dueDate);
-        self::assertInstanceOf(DateTimeImmutable::class, $incoming->paidAt);
-        self::assertSame(30, $incoming->dueDays);
         self::assertSame(IncomingStatus::PAID, $incoming->status);
         self::assertSame('ER-2025-0050', $incoming->incomingNumber);
         self::assertSame(119.0, $incoming->totalGross);
@@ -73,7 +70,6 @@ final class IncomingTest extends TestCase
         ]);
 
         self::assertNull($incoming->supplierId);
-        self::assertNull($incoming->dueDays);
         self::assertNull($incoming->totalGross);
         self::assertNull($incoming->totalNet);
         self::assertNull($incoming->paidAmount);

@@ -1,21 +1,19 @@
 <!-- Quelle: https://www.billomat.com/api/einstellungen/mahnstufen/ -->
 
-# Reminder Levels / Dunning Levels (Mahnstufen)
+# Reminder Levels (Mahnstufen)
 
-Mahnstufen werden in Billomat über `/reminder-texts` abgebildet. Das SDK exponiert zusätzlich das ältere `DunningLevelsApi`, das inzwischen **deprecated** ist:
+Mahnstufen werden in Billomat über `/reminder-texts` abgebildet. Das SDK exponiert dafür `ReminderTextsApi`:
 
 | API | Endpunkt | Inhalt |
 |---|---|---|
 | `ReminderTextsApi` | `/reminder-texts` | Text-Bausteine pro Mahnstufe (Betreff, Header, Footer, Gebühren) — entspricht der offiziell dokumentierten *Mahnstufen*-Seite. |
-| `DunningLevelsApi` | `/dunning-levels` | **Deprecated seit 3.1.** Billomat antwortet mit `404 resource not found`; der Endpoint ist nicht dokumentiert. Wird in 4.0 entfernt. |
 
-Beide Endpunkte sind read-only im SDK.
+Der Endpunkt ist im SDK read-only.
 
 ## Zugriff
 
 ```php
 $billomat->reminderTexts   // Justpilot\Billomat\Api\ReminderTextsApi
-$billomat->dunningLevels   // Justpilot\Billomat\Api\DunningLevelsApi
 ```
 
 ## Endpunkt-Übersicht
@@ -26,13 +24,6 @@ $billomat->dunningLevels   // Justpilot\Billomat\Api\DunningLevelsApi
 |---|---|---|
 | `list($filters?)` | GET | `/reminder-texts` |
 | `get($id)` | GET | `/reminder-texts/{id}` |
-
-### `DunningLevelsApi`
-
-| Methode | HTTP | Pfad |
-|---|---|---|
-| `list($filters?)` | GET | `/dunning-levels` |
-| `get($id)` | GET | `/dunning-levels/{id}` |
 
 > Anlegen/Bearbeiten/Löschen sind bei Billomat verfügbar (POST/PUT/DELETE auf `/reminder-texts`), aber nicht als SDK-Methoden exponiert.
 
@@ -54,11 +45,7 @@ foreach ($billomat->reminderTexts->list() as $rt) {
 
 Liefert `null` bei 404.
 
-### `DunningLevelsApi::list(array $filters = []): list<DunningLevel>`
-
-### `DunningLevelsApi::get(int $id): ?DunningLevel`
-
-## Read-Modelle
+## Read-Modell
 
 ### `ReminderText`
 
@@ -71,35 +58,17 @@ Liefert `null` bei 404.
 | `subject` | `subject` | `?string` | Betreff der Mahn-E-Mail/des Briefs |
 | `header` | `header` | `?string` | Einleitung |
 | `footer` | `footer` | `?string` | Anmerkung |
-| `dueDays` | `due_days` | `?int` | Liefert Billomat nicht mehr; nur aus Kompatibilitätsgründen vorhanden |
 | `sort` | `sorting` (Fallback `sort`) | `?int` | Reihenfolge der Stufe |
 | `chargeName` | `charge_name` | `?string` | Name der Mahngebühr |
 | `chargeDescription` | `charge_description` | `?string` | Beschreibung der Mahngebühr |
 | `chargeAmount` | `charge_amount` | `?float` | Höhe der Mahngebühr |
-
-### `DunningLevel`
-
-`final readonly class DunningLevel`.
-
-| Property | Billomat-Feld | Typ | Zweck |
-|---|---|---|---|
-| `id` | `id` | `?int` | |
-| `name` | `name` | `?string` | Name der Stufe |
-| `position` | `position` | `?int` | Position in der Mahn-Reihenfolge |
-| `dueDays` | `due_days` | `?int` | Fälligkeitstage bis zur nächsten Stufe |
-| `charge` | `charge` | `?float` | Mahngebühr |
-| `interest` | `interest` | `?float` | Verzugszinsen (Prozent) |
-
-## Welche der beiden API nutzen?
-
-- **`ReminderTextsApi`** für alles rund um Mahnstufen: Texte (Betreff, Einleitung, Footer), Reihenfolge (`sort`) und Mahngebühr (`charge*`).
-- **`DunningLevelsApi`** nicht mehr verwenden — der Endpoint antwortet mit 404.
+| `customfield` | `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 ## Stolpersteine
 
-- **`/dunning-levels` antwortet mit 404** (Stand 2026-10). Der Integration-Test (`tests/Integration/Lookups/LookupsIntegrationTest.php`) markiert sich als `skipped`, wenn Billomat 404 zurückgibt.
-- **Spec-Drift im Read-Modell.** Wie oben erwähnt — `ReminderText` exponiert `sort` (das Billomat-Feld heisst `sorting`) und kennt die `charge_*`-Felder nicht. Wer Mahngebühren aus der API lesen muss, ergänzt `ReminderText`.
-- **Single-Item-List-Quirk.** Beide APIs normalisieren über `listResource()`.
+- **`sort` statt `sorting`.** Billomat liefert die Reihenfolge als `sorting` (früher `sort`); das SDK stellt sie weiterhin als `ReminderText::$sort` bereit, und `toArray()` schreibt sie unter dem Schlüssel `sort` zurück.
+- **Mahnstufe einer Mahnung.** `Reminder::$reminderLevel` und `Reminder::$reminderLevelName` verweisen auf die hier gepflegten Stufen, siehe [Reminders](reminders.md).
+- **Single-Item-List-Quirk.** `list()` normalisiert über `listResource()`, auch wenn Billomat nur eine einzelne Stufe als Objekt statt als Liste liefert.
 
 ## End-to-End-Beispiel
 
@@ -117,30 +86,17 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Mahn-Texte in Reihenfolge
+// Mahnstufen in Reihenfolge
 $texts = $billomat->reminderTexts->list();
 usort($texts, static fn ($a, $b) => ($a->sort ?? 0) <=> ($b->sort ?? 0));
 
 foreach ($texts as $rt) {
-    printf("Stufe %d: %s\n  Betreff: %s\n",
+    printf("Stufe %d: %s\n  Betreff: %s\n  Gebühr: %.2f € (%s)\n",
         $rt->sort ?? 0,
         $rt->name ?? '',
         $rt->subject ?? '',
+        $rt->chargeAmount ?? 0.0,
+        $rt->chargeName ?? 'keine',
     );
-}
-
-// Numerische Konfiguration (falls Tenant unterstützt)
-try {
-    foreach ($billomat->dunningLevels->list() as $level) {
-        printf("[Pos %d] %s — %d Tage, %.2f € Gebühr, %.1f %% Zinsen\n",
-            $level->position ?? 0,
-            $level->name ?? '',
-            $level->dueDays ?? 0,
-            $level->charge ?? 0.0,
-            $level->interest ?? 0.0,
-        );
-    }
-} catch (\Justpilot\Billomat\Exception\NotFoundException) {
-    echo "Sandbox stellt /dunning-levels nicht bereit.\n";
 }
 ```

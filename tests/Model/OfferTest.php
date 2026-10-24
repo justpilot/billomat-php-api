@@ -86,7 +86,6 @@ final class OfferTest extends TestCase
         self::assertSame(OfferStatus::ACCEPTED, $offer->status);
         self::assertInstanceOf(DateTimeImmutable::class, $offer->date);
         self::assertSame(30, $offer->validityDays);
-        self::assertSame(2.5, $offer->discountRate);
         self::assertSame('Angebot Web-Relaunch', $offer->title);
         self::assertSame(1190.0, $offer->totalGross);
         self::assertSame(NetGross::NET, $offer->netGross);

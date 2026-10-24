@@ -10,7 +10,6 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNoteItem;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
-use Justpilot\Billomat\Model\Enum\NetGross;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -60,7 +59,6 @@ final class DeliveryNoteTest extends TestCase
         self::assertSame(12, $note->confirmationId);
         self::assertSame(DeliveryNoteStatus::OPEN, $note->status);
         self::assertInstanceOf(DateTimeImmutable::class, $note->date);
-        self::assertSame(NetGross::NET, $note->netGross);
 
         self::assertCount(1, $note->items);
         self::assertContainsOnlyInstancesOf(DeliveryNoteItem::class, $note->items);

@@ -27,12 +27,6 @@ final readonly class TaxRate
         /** Interne Billomat-ID des Steuersatzes. */
         public ?int $id,
         /**
-         * ID des Accounts, zu dem der Steuersatz gehört.
-         *
-         * @deprecated since 3.1 – Billomat liefert `account_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $accountId,
-        /**
          * Name des Steuersatzes.
          *
          * Beispiel: "MwSt"
@@ -70,7 +64,6 @@ final readonly class TaxRate
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            accountId: ScalarCaster::toIntOrNull($data['account_id'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             rate: ScalarCaster::toFloatOrNull($data['rate'] ?? null) ?? 0.0,
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
@@ -92,7 +85,6 @@ final readonly class TaxRate
     {
         return [
             'id' => $this->id,
-            'account_id' => $this->accountId,
             'name' => $this->name,
             'rate' => $this->rate,
             'is_default' => ($this->isDefault ? 1 : 0),

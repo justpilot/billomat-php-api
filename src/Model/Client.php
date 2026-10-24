@@ -195,12 +195,6 @@ final readonly class Client
         public ?string $defaultPaymentTypes = null,
         /** Kundenportal aktiviert? */
         public ?bool $enableCustomerportal = null,
-        /**
-         * Persönliche URL zum Kundenportal.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** Brutto-Umsatz (read-only Auswertungsfeld). */
         public ?float $revenueGross = null,
         /** Netto-Umsatz (read-only Auswertungsfeld). */
@@ -287,7 +281,6 @@ final readonly class Client
             sepaMandateDate: ScalarCaster::toDateTimeOrNull($data['sepa_mandate_date'] ?? null),
             defaultPaymentTypes: ScalarCaster::toStringOrNull($data['default_payment_types'] ?? null),
             enableCustomerportal: ScalarCaster::toBoolOrNull($data['enable_customerportal'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             revenueGross: ScalarCaster::toFloatOrNull($data['revenue_gross'] ?? null),
             revenueNet: ScalarCaster::toFloatOrNull($data['revenue_net'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -361,7 +354,6 @@ final readonly class Client
             'sepa_mandate_date' => $this->sepaMandateDate?->format('Y-m-d'),
             'default_payment_types' => $this->defaultPaymentTypes,
             'enable_customerportal' => $this->enableCustomerportal,
-            'customerportal_url' => $this->customerportalUrl,
             'revenue_gross' => $this->revenueGross,
             'revenue_net' => $this->revenueNet,
             'updated' => $this->updated?->format(DATE_ATOM),

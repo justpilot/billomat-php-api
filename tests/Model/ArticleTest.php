@@ -54,12 +54,10 @@ final class ArticleTest extends TestCase
         self::assertSame(179.0, $article->salesPrice3);
         self::assertSame(169.0, $article->salesPrice4);
         self::assertSame(159.0, $article->salesPrice5);
-        self::assertSame('Stück', $article->unit);
         self::assertSame(42, $article->unitId);
         self::assertSame(50.0, $article->purchasePrice);
         self::assertSame(11, $article->supplierId);
         self::assertSame(1, $article->taxId);
-        self::assertSame(5, $article->categoryId);
     }
 
     #[Test]
@@ -84,7 +82,6 @@ final class ArticleTest extends TestCase
         self::assertNull($article->unitId);
         self::assertNull($article->supplierId);
         self::assertNull($article->taxId);
-        self::assertNull($article->categoryId);
         self::assertNull($article->numberLength);
     }
 
@@ -109,6 +106,6 @@ final class ArticleTest extends TestCase
 
         self::assertSame(99.99, $array['sales_price']);
         self::assertSame('EUR', $array['currency_code']);
-        self::assertSame('Stück', $array['unit']);
+        self::assertArrayNotHasKey('unit', $array);
     }
 }

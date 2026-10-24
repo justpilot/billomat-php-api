@@ -32,7 +32,7 @@ Listet alle Länder.
 $countries = $billomat->countries->list();
 
 foreach ($countries as $country) {
-    echo $country->code . ': ' . ($country->nameDe ?? $country->name) . PHP_EOL;
+    echo $country->code . ': ' . $country->name . PHP_EOL;
 }
 ```
 
@@ -56,10 +56,6 @@ Lazy-Iteration über alle Seiten.
 |---|---|---|
 | `code` | `string` | `code` (Fallback: `country_code`) |
 | `name` | `?string` | `name` |
-| `nameDe` | `?string` | `name_de` |
-| `eu` | `?bool` | `eu` |
 | `id` | `?int` |  |
-
-> **Veraltet seit 3.1:** `nameDe`, `eu`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 `Country::fromArray($data)` hydratisiert aus dem Wire-Format; `Country::toArray()` schreibt snake_case zurück.

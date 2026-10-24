@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration\Lookups;
 
-use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\Country;
 use Justpilot\Billomat\Model\Currency;
-use Justpilot\Billomat\Model\DunningLevel;
 use Justpilot\Billomat\Model\EmailTemplate;
 use Justpilot\Billomat\Model\FreeText;
 use Justpilot\Billomat\Model\ReminderText;
@@ -80,23 +78,6 @@ final class LookupsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         self::assertIsArray($units);
         self::assertContainsOnlyInstancesOf(Unit::class, $units);
-    }
-
-    #[Group('integration')]
-    #[Test]
-    public function canListDunningLevelsFromSandbox(): void
-    {
-        $billomat = $this->createBillomatClientOrSkip();
-
-        // Manche Billomat-Tenants stellen /dunning-levels nicht bereit.
-        try {
-            $levels = $billomat->dunningLevels->list();
-        } catch (NotFoundException) {
-            self::markTestSkipped('Sandbox does not expose /dunning-levels (404).');
-        }
-
-        self::assertIsArray($levels);
-        self::assertContainsOnlyInstancesOf(DunningLevel::class, $levels);
     }
 
     #[Group('integration')]

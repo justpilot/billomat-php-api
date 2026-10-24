@@ -125,7 +125,6 @@ final class TextResourcesApiTest extends TestCase
 
         $texts = $api->list();
         self::assertCount(1, $texts);
-        self::assertSame(14, $texts[0]->dueDays);
         self::assertSame(2, $texts[0]->sort);
         self::assertSame('Mahngebühr', $texts[0]->chargeName);
         self::assertSame('Pauschale', $texts[0]->chargeDescription);

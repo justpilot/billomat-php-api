@@ -305,9 +305,6 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 | `status` | `?ConfirmationStatus` |
 | `date` | `?\DateTimeImmutable` |
 | `address` | `?string` |
-| `discountRate`, `discountAmount` | `?float`, `?float` |
-| `discountDate` | `?\DateTimeImmutable` |
-| `discountDays` | `?int` |
 | `title`, `label`, `intro`, `note`, `reduction` | `?string` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
 | `netGross` | `?NetGross` |
@@ -316,13 +313,10 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 | `offerId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
-| `customerportalUrl` | `?string` |
 | `items` | `list<ConfirmationItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?float` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `discountRate`, `discountDate`, `discountDays`, `discountAmount`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `ConfirmationItem`
 
@@ -339,10 +333,7 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 | `title`, `description`, `reduction` | `?string` |
 | `type` | `?InvoiceItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `created` | `?\DateTimeImmutable` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `ConfirmationComment`
 

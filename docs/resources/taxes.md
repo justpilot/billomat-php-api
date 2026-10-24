@@ -81,15 +81,12 @@ Konstruktor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefaul
 | Property | Typ | Notes |
 |---|---|---|
 | `id` | `?int` | |
-| `accountId` | `?int` | Billomat-Account-ID, zu dem der Satz gehört |
 | `name` | `string` | |
 | `rate` | `float` | Prozentwert |
 | `isDefault` | `bool` | |
 | `created`, `updated` | `?\DateTimeImmutable` |  |
 | `canDelete` | `?bool` | Ob sich der Steuersatz löschen lässt |
 | `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
-
-> **Veraltet seit 3.1:** `accountId`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Verwendete Enums
 

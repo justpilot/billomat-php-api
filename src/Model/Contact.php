@@ -60,12 +60,6 @@ final readonly class Contact
         public ?string $fax = null,
         /** Mobilnummer. */
         public ?string $mobile = null,
-        /**
-         * Notiz zum Kontakt.
-         *
-         * @deprecated since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $note = null,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
@@ -113,7 +107,6 @@ final readonly class Contact
             phone: ScalarCaster::toStringOrNull($data['phone'] ?? null),
             fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
             mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
-            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
@@ -149,7 +142,6 @@ final readonly class Contact
             'phone' => $this->phone,
             'fax' => $this->fax,
             'mobile' => $this->mobile,
-            'note' => $this->note,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'name' => $this->name,

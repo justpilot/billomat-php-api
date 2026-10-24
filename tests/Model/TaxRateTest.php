@@ -27,7 +27,6 @@ final class TaxRateTest extends TestCase
         ]);
 
         self::assertSame(12, $tax->id);
-        self::assertSame(99, $tax->accountId);
         self::assertSame('MwSt', $tax->name);
         self::assertSame(19.0, $tax->rate);
         self::assertTrue($tax->isDefault);
@@ -60,7 +59,6 @@ final class TaxRateTest extends TestCase
         $tax = TaxRate::fromArray([]);
 
         self::assertNull($tax->id);
-        self::assertNull($tax->accountId);
         self::assertSame('', $tax->name);
         self::assertSame(0.0, $tax->rate);
         self::assertFalse($tax->isDefault);
@@ -80,7 +78,6 @@ final class TaxRateTest extends TestCase
         self::assertSame(
             [
                 'id' => 12,
-                'account_id' => 99,
                 'name' => 'MwSt',
                 'rate' => 19.0,
                 'is_default' => 1,

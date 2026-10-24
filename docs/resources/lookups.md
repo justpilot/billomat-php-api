@@ -2,7 +2,7 @@
 
 # Lookups (Stammdaten & Settings)
 
-API-Wrapper für die elf read-only Lookup-Endpoints — Stammdaten und Account-Einstellungen, die andere Ressourcen referenzieren.
+API-Wrapper für die zehn read-only Lookup-Endpoints — Stammdaten und Account-Einstellungen, die andere Ressourcen referenzieren.
 
 ## Zugriff
 
@@ -10,7 +10,6 @@ API-Wrapper für die elf read-only Lookup-Endpoints — Stammdaten und Account-E
 $billomat->countries           // ISO-Länderliste
 $billomat->currencies          // Währungsliste
 $billomat->units               // Einheiten (Stück, Stunde, …)
-$billomat->dunningLevels       // deprecated: /dunning-levels antwortet mit 404
 $billomat->users               // Mitarbeiter/Benutzer des Accounts
 $billomat->roles               // Rollen samt Permission-Map
 $billomat->emailTemplates      // E-Mail-Vorlagen
@@ -22,7 +21,7 @@ $billomat->incomingCategories  // Eingangsrechnungs-Kategorien (String-ID)
 
 ## Modell
 
-Alle elf APIs sind read-only — sie kennen keine `create`/`update`/`delete`-Verben. `countries` und `currencies` bieten nur `list()`; die übrigen zusätzlich ein `get($id)`. `UsersApi` hat einen Bonus-Endpoint `getMyself()` für den aktuell authentifizierten Account. Für `incomingCategories` ist `$id` ein **String**-Slug (z.B. `goods`), nicht numerisch.
+Alle zehn APIs sind read-only — sie kennen keine `create`/`update`/`delete`-Verben. `countries` und `currencies` bieten nur `list()`; die übrigen zusätzlich ein `get($id)`. `UsersApi` hat einen Bonus-Endpoint `getMyself()` für den aktuell authentifizierten Account. Für `incomingCategories` ist `$id` ein **String**-Slug (z.B. `goods`), nicht numerisch.
 
 Jede dieser Ressourcen liefert Stammdaten, die andere Modelle nur per ID/Code referenzieren — z. B. `Recurring::$emailTemplateId`, `Invoice::$currencyCode`, `InvoiceItem::$unit`.
 
@@ -33,7 +32,6 @@ Jede dieser Ressourcen liefert Stammdaten, die andere Modelle nur per ID/Code re
 | `countries` | GET | `/countries` | `list()` |
 | `currencies` | GET | `/currencies` | `list()` |
 | `units` | GET | `/units`, `/units/{id}` | `list($filters?)`, `get($id)` |
-| `dunningLevels` | GET | `/dunning-levels`, `/dunning-levels/{id}` | `list($filters?)`, `get($id)` |
 | `users` | GET | `/users`, `/users/{id}`, `/users/myself` | `list($filters?)`, `get($id)`, `getMyself()` |
 | `emailTemplates` | GET | `/email-templates`, `/email-templates/{id}` | `list($filters?)`, `get($id)` |
 | `freeTexts` | GET | `/free-texts`, `/free-texts/{id}` | `list($filters?)`, `get($id)` |
@@ -51,25 +49,21 @@ Endpoint: `/countries`. Nur `list()` — kein `get()`.
 ```php
 $countries = $billomat->countries->list();
 
-$eu = array_values(array_filter(
+$de = array_values(array_filter(
     $countries,
-    static fn ($c) => true === $c->eu,
-));
+    static fn ($c) => 'DE' === $c->code,
+))[0] ?? null;
 ```
 
 #### Read-Modell: `Country`
 
-`final readonly class Country`. Wire-Felder: `code` (oder `country_code`), `name`, `name_de`, `eu` (0/1).
+`final readonly class Country`. Wire-Felder: `code` (oder `country_code`), `name`, `id`.
 
 | Property | Typ |
 |---|---|
 | `code` | `string` |
 | `name` | `?string` |
-| `nameDe` | `?string` |
-| `eu` | `?bool` |
 | `id` | `?int` |
-
-> **Veraltet seit 3.1:** `nameDe`, `eu`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ### `currencies`
 
@@ -110,29 +104,6 @@ $piece = $billomat->units->get(42);
 | `created`, `updated` | `?\DateTimeImmutable` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
-### `dunningLevels`
-
-> **Deprecated seit 3.1.** Billomat liefert `/dunning-levels` nicht (mehr) aus (`404 resource not found`) und dokumentiert den Endpoint nicht. Mahnstufen über `reminderTexts` lesen. Wird in 4.0 entfernt.
-
-Endpoint: `/dunning-levels`. `list($filters?)` und `get($id)`.
-
-```php
-$levels = $billomat->dunningLevels->list(['order_by' => 'position+ASC']);
-```
-
-#### Read-Modell: `DunningLevel`
-
-`final readonly class DunningLevel`.
-
-| Property | Typ |
-|---|---|
-| `id` | `?int` |
-| `name` | `?string` |
-| `position` | `?int` |
-| `dueDays` | `?int` |
-| `charge` | `?float` |
-| `interest` | `?float` |
-
 ### `users`
 
 Endpoint: `/users`. Bietet zusätzlich `getMyself()` für `/users/myself`.
@@ -154,17 +125,12 @@ $all = $billomat->users->list();
 | `firstName` | `?string` |
 | `lastName` | `?string` |
 | `salutation` | `?string` |
-| `phone` | `?string` |
-| `mobile` | `?string` |
-| `fax` | `?string` |
 | `roleId` | `?int` |
 | `created`, `updated` | `?\DateTimeImmutable` |
 | `locale` | `?string` |
 | `timezone` | `?string` |
 | `isAccountOwner` | `?bool` (Inhaber des Accounts) |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `phone`, `mobile`, `fax`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ### `emailTemplates`
 
@@ -237,14 +203,11 @@ $texts = $billomat->reminderTexts->list(['order_by' => 'sorting+ASC']);
 | `subject` | `?string` |
 | `header` | `?string` |
 | `footer` | `?string` |
-| `dueDays` | `?int` |
 | `sort` | `?int` |
 | `chargeName` | `?string` |
 | `chargeDescription` | `?string` |
 | `chargeAmount` | `?float` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `dueDays`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ### `roles`
 
@@ -306,7 +269,7 @@ Keine.
 
 ## Stolpersteine
 
-- **Alles read-only.** Keine dieser acht APIs hat `create`/`update`/`delete`. Wer einen neuen Mitarbeiter oder eine neue E-Mail-Vorlage anlegen will, muss das in der Billomat-Web-UI tun — die JSON-API gibt nichts her.
+- **Alles read-only.** Keine dieser zehn APIs hat `create`/`update`/`delete`. Wer einen neuen Mitarbeiter oder eine neue E-Mail-Vorlage anlegen will, muss das in der Billomat-Web-UI tun — die JSON-API gibt nichts her.
 - **`countries` und `currencies` bieten kein `get()`.** Wer ein einzelnes Land oder eine einzelne Währung braucht, muss die volle Liste laden und clientseitig filtern. Die Listen sind klein (~250 Länder, ~170 Währungen).
 - **`code` ist der Schlüssel, nicht `id`.** Für `Country` und `Currency` gibt es keine numerische ID — alle Querverweise (`Client::$countryCode`, `Invoice::$currencyCode`) zielen auf den ISO-Code.
 - **Billomat antwortet uneinheitlich.** Manche Endpoints liefern `code`, andere `country_code`/`currency_code` — das Read-Modell akzeptiert beides. Keine Logik daran hängen, welches Feld zurückkommt.
@@ -373,13 +336,12 @@ if (null !== $default) {
 }
 
 // 4) Mahnstufen für Reporting laden
-foreach ($billomat->dunningLevels->list(['order_by' => 'position+ASC']) as $level) {
+foreach ($billomat->reminderTexts->list(['order_by' => 'sorting+ASC']) as $level) {
     printf(
-        "Stufe %d: %s — fällig nach %d Tagen, %.2f EUR Mahngebühr\n",
-        $level->position ?? 0,
+        "Stufe %d: %s — %.2f EUR Mahngebühr\n",
+        $level->sort ?? 0,
         $level->name ?? '-',
-        $level->dueDays ?? 0,
-        $level->charge ?? 0.0,
+        $level->chargeAmount ?? 0.0,
     );
 }
 

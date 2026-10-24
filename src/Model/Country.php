@@ -22,18 +22,6 @@ final readonly class Country
         public string $code,
         /** Name des Landes. */
         public ?string $name = null,
-        /**
-         * Deutscher Name des Landes.
-         *
-         * @deprecated since 3.1 – Billomat liefert `name_de` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $nameDe = null,
-        /**
-         * Gehört das Land zur EU?
-         *
-         * @deprecated since 3.1 – Billomat liefert `eu` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?bool $eu = null,
         /** Interne Billomat-ID des Landes. */
         public ?int $id = null,
     ) {
@@ -49,8 +37,6 @@ final readonly class Country
         return new self(
             code: ScalarCaster::toStringOrNull($data['code'] ?? $data['country_code'] ?? null) ?? '',
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
-            nameDe: ScalarCaster::toStringOrNull($data['name_de'] ?? null),
-            eu: ScalarCaster::toBoolOrNull($data['eu'] ?? null),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
         );
     }
@@ -67,8 +53,6 @@ final readonly class Country
         return [
             'code' => $this->code,
             'name' => $this->name,
-            'name_de' => $this->nameDe,
-            'eu' => $this->eu,
             'id' => $this->id,
         ];
     }

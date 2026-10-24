@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
-use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -130,7 +129,6 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertSame(100.0, $first->totalNet);
         self::assertSame(130.0, $first->totalGrossUnreduced);
         self::assertSame(110.0, $first->totalNetUnreduced);
-        self::assertInstanceOf(DateTimeImmutable::class, $first->created);
 
         $second = $items[1];
         self::assertSame(2, $second->id);

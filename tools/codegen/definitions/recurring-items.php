@@ -17,5 +17,5 @@ return (require __DIR__ . '/shared/items.php')(
     specResource: 'abo-rechnungen/positionen',
     docUrl: 'https://www.billomat.com/api/abo-rechnungen/positionen/',
     omit: ['created'],
-    deprecated: [],
+    optionsOnly: [],
 );

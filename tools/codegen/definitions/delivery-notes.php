@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 return [
     'specResource' => 'lieferscheine',
@@ -65,20 +64,15 @@ return [
         'label' => ['doc' => 'Bezeichnung.'],
         'intro' => ['doc' => 'Einleitungstext.'],
         'note' => ['doc' => 'Anmerkungstext.'],
-        'total_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag brutto.', 'deprecated' => $gone('total_gross')],
-        'total_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag netto.', 'deprecated' => $gone('total_net')],
-        'net_gross' => ['type' => 'string', 'writable' => true, 'enum' => 'NetGross', 'doc' => 'Preisbasis (Brutto- oder Netto-Preise).', 'deprecated' => $gone('net_gross')],
-        'reduction' => ['type' => 'string', 'writable' => true, 'doc' => 'Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").', 'deprecated' => $gone('reduction')],
-        'total_gross_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag brutto vor Rabatt.', 'deprecated' => $gone('total_gross_unreduced')],
-        'total_net_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag netto vor Rabatt.', 'deprecated' => $gone('total_net_unreduced')],
-        'currency_code' => ['type' => 'string', 'writable' => true, 'doc' => 'Währung (ISO-Währungscode).', 'deprecated' => $gone('currency_code')],
-        'quote' => ['type' => 'float', 'writable' => true, 'doc' => 'Währungskurs (für Umrechnung in die Standard-Währung).', 'deprecated' => $gone('quote')],
+        'net_gross' => ['type' => 'string', 'writable' => true, 'enum' => 'NetGross', 'doc' => 'Preisbasis (Brutto- oder Netto-Preise).', 'optionsOnly' => true],
+        'reduction' => ['type' => 'string', 'writable' => true, 'doc' => 'Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").', 'optionsOnly' => true],
+        'currency_code' => ['type' => 'string', 'writable' => true, 'doc' => 'Währung (ISO-Währungscode).', 'optionsOnly' => true],
+        'quote' => ['type' => 'float', 'writable' => true, 'doc' => 'Währungskurs (für Umrechnung in die Standard-Währung).', 'optionsOnly' => true],
         'invoice_id' => ['doc' => 'ID der Quell-Rechnung.'],
         'confirmation_id' => ['doc' => 'ID der Quell-Auftragsbestätigung.'],
         'free_text_id' => ['doc' => 'ID des Freitextes zur Belegung von title, label, intro und note.'],
         'template_id' => ['doc' => 'ID der Vorlage, mit der der Lieferschein abgeschlossen wird.'],
         'taxes' => ['type' => 'taxes', 'readOnly' => true, 'doc' => 'Steuerzeilen des Lieferscheins.'],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Persönliche URL zum Kundenportal.', 'deprecated' => $gone('customerportal_url')],
         'delivery-note-items' => [
             'type' => 'list',
             'readOnly' => true,

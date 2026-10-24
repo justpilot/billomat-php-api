@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
-use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
@@ -56,7 +55,6 @@ final class InvoiceItemTest extends TestCase
         self::assertSame(InvoiceItemType::SERVICE, $item->type);
         self::assertSame(208.05, $item->totalGross);
         self::assertSame(174.83, $item->totalNet);
-        self::assertInstanceOf(DateTimeImmutable::class, $item->created);
     }
 
     #[Test]
@@ -92,18 +90,6 @@ final class InvoiceItemTest extends TestCase
         ]);
 
         self::assertNull($item->type);
-    }
-
-    #[Test]
-    public function itHandlesInvalidCreatedGracefully(): void
-    {
-        $item = InvoiceItem::fromArray([
-            'quantity' => 1,
-            'unit_price' => 1,
-            'created' => 'invalid',
-        ]);
-
-        self::assertNull($item->created);
     }
 
     #[Test]

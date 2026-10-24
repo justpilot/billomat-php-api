@@ -55,30 +55,6 @@ final readonly class Offer
         public ?int $validityDays = null,
         /** Vollständige Angebotsadresse (formatiert). */
         public ?string $address = null,
-        /**
-         * Skonto in Prozent.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_rate` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $discountRate = null,
-        /**
-         * Skontodatum.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?DateTimeImmutable $discountDate = null,
-        /**
-         * Skontozeitraum in Tagen.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $discountDays = null,
-        /**
-         * Skontobetrag.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_amount` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $discountAmount = null,
         /** Dokumentenüberschrift. */
         public ?string $title = null,
         /** Bezeichnung. */
@@ -109,12 +85,6 @@ final readonly class Offer
         public ?int $templateId = null,
         /** Steuerzeilen des Angebots. */
         public array $taxes = [],
-        /**
-         * Persönliche URL zum Kundenportal.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** Positionen des Angebots (nur bei GET /offers/{id}). */
         public array $items = [],
         /** Zeitpunkt der letzten Änderung. */
@@ -152,10 +122,6 @@ final readonly class Offer
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             validityDays: ScalarCaster::toIntOrNull($data['validity_days'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
-            discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
-            discountDate: ScalarCaster::toDateTimeOrNull($data['discount_date'] ?? null),
-            discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
-            discountAmount: ScalarCaster::toFloatOrNull($data['discount_amount'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
@@ -171,7 +137,6 @@ final readonly class Offer
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             items: ListCaster::toList($data['offer-items']['offer-item'] ?? null, 'id', OfferItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -202,10 +167,6 @@ final readonly class Offer
             'date' => $this->date?->format('Y-m-d'),
             'validity_days' => $this->validityDays,
             'address' => $this->address,
-            'discount_rate' => $this->discountRate,
-            'discount_date' => $this->discountDate?->format('Y-m-d'),
-            'discount_days' => $this->discountDays,
-            'discount_amount' => $this->discountAmount,
             'title' => $this->title,
             'label' => $this->label,
             'intro' => $this->intro,
@@ -220,7 +181,6 @@ final readonly class Offer
             'quote' => $this->quote,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
-            'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'validity_date' => $this->validityDate?->format('Y-m-d'),

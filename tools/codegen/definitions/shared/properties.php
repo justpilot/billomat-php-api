@@ -65,7 +65,7 @@ return static fn (string $class, string $label, string $specResource, string $pa
             'type' => 'int',
             'writable' => true,
             'doc' => 'Sortierposition.',
-            'deprecated' => 'since 3.1 – Billomat liefert `position` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
+            'optionsOnly' => true,
         ],
         'is_nvl' => ['doc' => 'Standardwert verwenden, wenn kein anderer Wert gesetzt ist?'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],

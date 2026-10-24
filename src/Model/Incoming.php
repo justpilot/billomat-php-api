@@ -30,26 +30,8 @@ final readonly class Incoming
         public ?DateTimeImmutable $created = null,
         /** Rechnungsdatum. */
         public ?DateTimeImmutable $date = null,
-        /**
-         * Liefer-/Leistungsdatum.
-         *
-         * @deprecated since 3.1 – Billomat liefert `supply_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?DateTimeImmutable $supplyDate = null,
         /** Fälligkeitsdatum. */
         public ?DateTimeImmutable $dueDate = null,
-        /**
-         * Tage bis zur Fälligkeit.
-         *
-         * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $dueDays = null,
-        /**
-         * Zahlungsdatum.
-         *
-         * @deprecated since 3.1 – Billomat liefert `paid_at` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?DateTimeImmutable $paidAt = null,
         /** Status der Eingangsrechnung. */
         public ?IncomingStatus $status = null,
         /** Rechnungsnummer des Lieferanten. */
@@ -58,12 +40,6 @@ final readonly class Incoming
         public ?string $address = null,
         /** Bezeichnung. */
         public ?string $label = null,
-        /**
-         * Einleitungstext.
-         *
-         * @deprecated since 3.1 – Billomat liefert `intro` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $intro = null,
         /** Anmerkungstext. */
         public ?string $note = null,
         /** Gesamtbetrag brutto. */
@@ -107,15 +83,11 @@ final readonly class Incoming
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
-            supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
             dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
-            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
-            paidAt: ScalarCaster::toDateTimeOrNull($data['paid_at'] ?? null),
             status: IncomingStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             incomingNumber: ScalarCaster::toStringOrNull($data['number'] ?? $data['incoming_number'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
-            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
@@ -147,15 +119,11 @@ final readonly class Incoming
             'supplier_id' => $this->supplierId,
             'created' => $this->created?->format(DATE_ATOM),
             'date' => $this->date?->format('Y-m-d'),
-            'supply_date' => $this->supplyDate?->format('Y-m-d'),
             'due_date' => $this->dueDate?->format('Y-m-d'),
-            'due_days' => $this->dueDays,
-            'paid_at' => $this->paidAt?->format('Y-m-d'),
             'status' => $this->status?->value,
             'incoming_number' => $this->incomingNumber,
             'address' => $this->address,
             'label' => $this->label,
-            'intro' => $this->intro,
             'note' => $this->note,
             'total_gross' => $this->totalGross,
             'total_net' => $this->totalNet,

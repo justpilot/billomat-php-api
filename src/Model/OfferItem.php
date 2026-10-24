@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
-use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-
-use const DATE_ATOM;
 
 /**
  * Repräsentiert eine Angebotsposition aus der Billomat-API.
@@ -68,12 +65,6 @@ final readonly class OfferItem
         public ?float $totalGrossUnreduced,
         /** Unreduzierter Gesamtbetrag netto. */
         public ?float $totalNetUnreduced,
-        /**
-         * Erstellungszeitpunkt der Position.
-         *
-         * @deprecated since 3.1 – Billomat liefert `created` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?DateTimeImmutable $created,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /** Optionale Position (wird nicht in die Summe eingerechnet). */
@@ -107,7 +98,6 @@ final readonly class OfferItem
             totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
-            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             optional: ScalarCaster::toBoolOrNull($data['optional'] ?? null),
         );
@@ -141,7 +131,6 @@ final readonly class OfferItem
             'total_net' => $this->totalNet,
             'total_gross_unreduced' => $this->totalGrossUnreduced,
             'total_net_unreduced' => $this->totalNetUnreduced,
-            'created' => $this->created?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'optional' => $this->optional,
         ];

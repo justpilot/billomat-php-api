@@ -54,30 +54,6 @@ final readonly class Confirmation
          * Laut Doku veraltet – Billomat verarbeitet das Feld nicht mehr, bitte contact_id oder client_id verwenden.
          */
         public ?string $address = null,
-        /**
-         * Skonto in Prozent.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_rate` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $discountRate = null,
-        /**
-         * Skontodatum.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_date` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?DateTimeImmutable $discountDate = null,
-        /**
-         * Skontozeitraum in Tagen.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $discountDays = null,
-        /**
-         * Skontobetrag.
-         *
-         * @deprecated since 3.1 – Billomat liefert `discount_amount` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $discountAmount = null,
         /** Dokumentenüberschrift. */
         public ?string $title = null,
         /** Bezeichnung. */
@@ -110,12 +86,6 @@ final readonly class Confirmation
         public ?int $templateId = null,
         /** Steuerzeilen der Auftragsbestätigung. */
         public array $taxes = [],
-        /**
-         * Persönliche URL zum Kundenportal.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** Positionen der Auftragsbestätigung (nur bei GET /confirmations/{id}). */
         public array $items = [],
         /** Zeitpunkt der letzten Änderung. */
@@ -146,10 +116,6 @@ final readonly class Confirmation
             status: ConfirmationStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
-            discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
-            discountDate: ScalarCaster::toDateTimeOrNull($data['discount_date'] ?? null),
-            discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
-            discountAmount: ScalarCaster::toFloatOrNull($data['discount_amount'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
@@ -166,7 +132,6 @@ final readonly class Confirmation
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             items: ListCaster::toList($data['confirmation-items']['confirmation-item'] ?? null, 'id', ConfirmationItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -195,10 +160,6 @@ final readonly class Confirmation
             'status' => $this->status?->value,
             'date' => $this->date?->format('Y-m-d'),
             'address' => $this->address,
-            'discount_rate' => $this->discountRate,
-            'discount_date' => $this->discountDate?->format('Y-m-d'),
-            'discount_days' => $this->discountDays,
-            'discount_amount' => $this->discountAmount,
             'title' => $this->title,
             'label' => $this->label,
             'intro' => $this->intro,
@@ -214,7 +175,6 @@ final readonly class Confirmation
             'offer_id' => $this->offerId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
-            'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'total_reduction' => $this->totalReduction,

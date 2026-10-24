@@ -12,39 +12,63 @@ use const DATE_ATOM;
 /**
  * Benutzer/Mitarbeiter aus der Billomat-API.
  *
- * Doku: https://www.billomat.com/en/api/users/
+ * Dokumentation:
+ * https://www.billomat.com/en/api/users/
+ *
+ * Generiert aus tools/codegen/definitions/users.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class User
 {
     public function __construct(
+        /** Interne Billomat-ID des Benutzers. */
         public ?int $id,
+        /** E-Mail-Adresse (Login). */
         public ?string $email,
+        /** Vorname. */
         public ?string $firstName = null,
+        /** Nachname. */
         public ?string $lastName = null,
+        /** Anrede. */
         public ?string $salutation = null,
         /**
+         * Telefonnummer.
+         *
          * @deprecated since 3.1 – Billomat liefert `phone` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $phone = null,
         /**
+         * Mobilnummer.
+         *
          * @deprecated since 3.1 – Billomat liefert `mobile` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $mobile = null,
         /**
+         * Faxnummer.
+         *
          * @deprecated since 3.1 – Billomat liefert `fax` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $fax = null,
+        /** ID der Rolle des Benutzers. */
         public ?int $roleId = null,
+        /** Erstellungszeitpunkt des Benutzers. */
         public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Sprache der Oberfläche (z. B. "de_DE"). */
         public ?string $locale = null,
+        /** Zeitzone (z. B. "Europe/Berlin"). */
         public ?string $timezone = null,
+        /** Ist der Benutzer Inhaber des Accounts? */
         public ?bool $isAccountOwner = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -69,6 +93,10 @@ final readonly class User
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

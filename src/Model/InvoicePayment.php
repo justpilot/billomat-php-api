@@ -11,25 +11,30 @@ use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use const DATE_ATOM;
 
 /**
- * Repräsentiert eine Zahlung einer Rechnung in Billomat.
+ * Zahlung einer Rechnung.
+ *
+ * Dieses Model bildet die Struktur von GET /invoice-payments?invoice_id={id} bzw. GET /invoice-payments/{id} ab.
  *
  * Dokumentation:
- * https://www.billomat.com/en/api/invoices/payments/
+ * https://www.billomat.com/api/rechnungen/zahlungen/
+ *
+ * Generiert aus tools/codegen/definitions/invoice-payments.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class InvoicePayment
 {
     public function __construct(
-        /** Interne ID der Zahlung */
+        /** Interne ID der Zahlung. */
         public ?int $id,
-        /** ID der zugehörigen Rechnung */
+        /** ID des Dokuments, zu dem die Zahlung gehört. */
         public int $invoiceId,
-        /** Zahlungsdatum */
+        /** Zahlungsdatum. */
         public ?DateTimeImmutable $date,
-        /** Zahlungsbetrag */
+        /** Zahlungsbetrag. */
         public float $amount,
-        /** Zahlungsart, z. B. BANK_TRANSFER, PAYPAL … */
+        /** Zahlungsart. */
         public ?InvoicePaymentType $type,
-        /** Optionaler Kommentar */
+        /** Kommentar zur Zahlung. */
         public ?string $comment,
         /** Erstellungszeitpunkt der Zahlung. */
         public ?DateTimeImmutable $created = null,
@@ -37,18 +42,25 @@ final readonly class InvoicePayment
         public ?int $userId = null,
         /** Verwendungszweck (z. B. Buchungstext aus dem Bankexport). */
         public ?string $transactionPurpose = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /** Währung der Zahlung (ISO-Währungscode). */
         public ?string $currencyCode = null,
+        /** Umrechnungskurs zur Hauptwährung. */
         public ?float $quote = null,
+        /** Gruppe zusammengehöriger Zahlungen (z. B. Sammelzahlung). */
         public ?string $paymentGroup = null,
+        /** ID der Banktransaktion (finAPI), falls die Zahlung daraus stammt. */
         public ?string $finapiTransactionId = null,
+        /** Betrag der Banktransaktion (finAPI). */
         public ?float $finapiTransactionAmount = null,
+        /** Titel des zugehörigen Dokuments. */
         public ?string $documentTitle = null,
     ) {
     }
 
     /**
-     * Hydriert ein InvoicePayment-Objekt aus einem API-Array.
+     * Hydriert das Model aus einem Billomat-Response-Array.
      *
      * @param array<string,mixed> $data
      */
@@ -56,10 +68,10 @@ final readonly class InvoicePayment
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            invoiceId: (int) ($data['invoice_id'] ?? 0),
+            invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null) ?? 0,
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
-            amount: isset($data['amount']) ? (float) $data['amount'] : 0.0,
-            type: InvoicePaymentType::fromApi($data['type'] ?? null),
+            amount: ScalarCaster::toFloatOrNull($data['amount'] ?? null) ?? 0.0,
+            type: InvoicePaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
@@ -75,7 +87,9 @@ final readonly class InvoicePayment
     }
 
     /**
-     * Exportiert die Zahlung zurück in ein Billomat-kompatibles Array.
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
      *
      * @return array<string,mixed>
      */

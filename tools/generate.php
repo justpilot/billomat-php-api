@@ -275,7 +275,7 @@ function renderModel(array $definition, array $fields, string $source): string
     $filterNulls = !empty($definition['model']['filterNulls']);
     $out .= "    public function toArray(): array\n    {\n        return " . ($filterNulls ? 'array_filter(' : '') . "[\n";
     $boolAsInt = !empty($definition['model']['boolAsInt']);
-    foreach ($fields as $field) {
+    foreach (exportFields($fields, $definition['model']['toArray'] ?? null, $source) as $field) {
         $value = '$this->' . $field['property'];
         $value = match (true) {
             null !== $field['enumClass'] => $value . '?->value',
@@ -323,6 +323,10 @@ function modelTypeHint(array $field): string
     if (null !== $field['enumClass']) {
         return '?' . $field['enumClass'];
     }
+    // `mixed` schließt null bereits ein.
+    if ('mixed' === modelType($field)) {
+        return 'mixed';
+    }
 
     $type = match (modelType($field)) {
         'date', 'datetime' => 'DateTimeImmutable',
@@ -350,6 +354,11 @@ function hydrateExpression(array $field): string
     $lookup = implode(' ?? ', array_map(static fn (string $s): string => "\$data['{$s}']", $sources));
     $expression = 'ScalarCaster::' . $caster . '(' . $lookup . ' ?? null)';
 
+    // `mixed`: Wert unverändert übernehmen (z. B. Eigenschaftswerte, deren Typ von der Eigenschaft abhängt).
+    if ('mixed' === modelType($field)) {
+        return $lookup . ' ?? null';
+    }
+
     // Unbekannte oder leere Werte werden zu null statt eine Exception zu werfen.
     if (null !== $field['enumClass']) {
         return $field['enumClass'] . "::tryFrom(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
@@ -375,8 +384,14 @@ function renderOptions(array $definition, array $options, array $fields, string 
         static fn (array $f): bool => $f['writable'] && ($isCreate || empty($f['update']['skip'])),
     ));
 
+    // `dateObjects`: Datumsfelder sind DateTimeImmutable statt String (BC).
+    $dateObjects = !empty($options['dateObjects']);
+
     $out = "<?php\n\ndeclare(strict_types=1);\n\nnamespace Justpilot\\Billomat\\Api;\n\n";
     $imports = enumImports($writable);
+    if ($dateObjects && \in_array('date', array_column($writable, 'type'), true)) {
+        $imports[] = 'DateTimeImmutable';
+    }
     sort($imports);
     foreach ($imports as $import) {
         $out .= "use {$import};\n";
@@ -395,7 +410,7 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $out .= "    public function __construct(\n";
         foreach ($promoted as $field) {
             $out .= docBlock(optionsDocLines($field, $isCreate), '        ');
-            $out .= '        public ' . optionsPhpType($field) . ' $' . $field['property'];
+            $out .= '        public ' . optionsPhpType($field, $dateObjects) . ' $' . $field['property'];
             if (\array_key_exists('default', $field['create'])) {
                 $out .= ' = ' . var_export($field['create']['default'], true);
             }
@@ -412,19 +427,23 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $nonNull = $isCreate && !empty($field['create']['nonNull']);
 
         $out .= docBlock(optionsDocLines($field, $isCreate), '    ');
-        $out .= '    public ' . ($nonNull ? '' : '?') . optionsPhpType($field) . ' $' . $field['property'] . ' = '
+        $type = optionsPhpType($field, $dateObjects);
+        $out .= '    public ' . ($nonNull || 'mixed' === $type ? '' : '?') . $type . ' $' . $field['property'] . ' = '
             . ($nonNull ? var_export($field['create']['default'], true) : 'null') . ";\n\n";
     }
 
     $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n     *\n     * @return array<string,mixed>\n     */\n";
     $entries = '';
     $filterNulls = false;
-    foreach ($writable as $field) {
+    foreach (exportFields($writable, $options['toArray'] ?? null, $source) as $field) {
         $value = '$this->' . $field['property'];
         $nonNull = $isCreate && (!empty($field['create']['nonNull']) || !empty($field['create']['constructor']));
         $filterNulls = $filterNulls || !$nonNull;
         if (null !== $field['enumClass']) {
             $value .= $nonNull ? '->value' : '?->value';
+        }
+        if ($dateObjects && 'date' === $field['type']) {
+            $value .= ($nonNull ? '->' : '?->') . "format('Y-m-d')";
         }
         if ($boolAsInt && 'bool' === $field['type']) {
             $value = boolAsIntExpression($value, $nonNull);
@@ -454,9 +473,32 @@ function boolAsIntExpression(string $value, bool $nonNull): string
 /**
  * @param array<string, mixed> $field
  */
-function optionsPhpType(array $field): string
+function optionsPhpType(array $field, bool $dateObjects = false): string
 {
-    return $field['enumClass'] ?? ('date' === $field['type'] ? 'string' : $field['type']);
+    return $field['enumClass'] ?? ('date' === $field['type'] ? ($dateObjects ? 'DateTimeImmutable' : 'string') : $field['type']);
+}
+
+/**
+ * Felder für toArray(): ohne Liste in Feldreihenfolge, mit Liste (Billomat-Feldnamen)
+ * genau diese Felder in dieser Reihenfolge (BC, wenn toArray() anders sortiert ist als der Konstruktor).
+ *
+ * @param list<array<string, mixed>> $fields
+ * @param list<string>|null $order
+ *
+ * @return list<array<string, mixed>>
+ */
+function exportFields(array $fields, ?array $order, string $source): array
+{
+    if (null === $order) {
+        return $fields;
+    }
+
+    $byWire = array_column($fields, null, 'wire');
+
+    return array_map(
+        static fn (string $wire): array => $byWire[$wire] ?? throw new RuntimeException("toArray-Feld '{$wire}' ist nicht definiert ({$source})."),
+        $order,
+    );
 }
 
 /**

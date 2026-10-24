@@ -11,44 +11,73 @@ use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use const DATE_ATOM;
 
 /**
- * Kommentar zu einer Eingangsrechnung.
+ * Kommentar an einer Eingangsrechnung.
+ *
+ * Dieses Model bildet die Struktur von GET /incoming-comments?incoming_id={id} bzw. GET /incoming-comments/{id} ab.
+ *
+ * Hinweis zum `actionkey`:
+ *  - Bei System-Kommentaren (Statuswechsel, Versand, Zahlung) ist das Feld gesetzt.
+ *  - Bei manuell angelegten Kommentaren ist das Feld typischerweise leer.
+ *  - Unbekannte Werte werden über das Enum als null geparst; `actionkeyRaw`
+ *    enthält den ursprünglichen String aus der API.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/eingangsrechnungen/kommentare/
+ *
+ * Generiert aus tools/codegen/definitions/incoming-comments.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class IncomingComment
 {
     public function __construct(
+        /** Interne ID des Kommentars. */
         public ?int $id,
+        /** ID des Dokuments, an dem der Kommentar hängt. */
         public int $incomingId,
+        /** Kommentartext. */
         public ?string $comment = null,
+        /** Erstellungszeitpunkt. */
         public ?DateTimeImmutable $created = null,
+        /** ID des Users, der den Kommentar erzeugt hat (oder null bei System). */
         public ?int $userId = null,
+        /**
+         * ActionKey als Enum, sofern bekannt.
+         *
+         * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
+         * bei system-getriebenen Kommentaren selbst.
+         */
         public ?IncomingCommentActionKey $actionkey = null,
+        /** Roher ActionKey-String aus der API (auch wenn das Enum den Wert nicht kennt). */
         public ?string $actionkeyRaw = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
-        $actionkeyRaw = ScalarCaster::toStringOrNull($data['actionkey'] ?? null);
-
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            incomingId: (int) ($data['incoming_id'] ?? 0),
+            incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
-            actionkey: null !== $actionkeyRaw
-                ? IncomingCommentActionKey::tryFrom($actionkeyRaw)
-                : null,
-            actionkeyRaw: $actionkeyRaw,
+            actionkey: IncomingCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
+            actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

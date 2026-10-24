@@ -12,24 +12,41 @@ use const DATE_ATOM;
 /**
  * Wert einer Kunden-Eigenschaft.
  *
- * Doku: https://www.billomat.com/api/kunden/attribute/
+ * Dieses Model bildet die Struktur von GET /client-property-values?client_id={id} bzw. GET /client-property-values/{id} ab.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/kunden/attribute/
+ *
+ * Generiert aus tools/codegen/definitions/client-property-values.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class ClientPropertyValue
 {
     public function __construct(
+        /** Interne Billomat-ID des Eigenschaftswerts. */
         public ?int $id,
+        /** ID des Datensatzes, zu dem der Wert gehört. */
         public int $clientId,
+        /** ID der Eigenschaft. */
         public int $clientPropertyId,
+        /** Typ der Eigenschaft (z. B. TEXTFIELD, CHECKBOX). */
         public ?string $type,
+        /** Name der Eigenschaft. */
         public ?string $name,
+        /** Wert der Eigenschaft. */
         public mixed $value,
+        /** Erstellungszeitpunkt. */
         public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -48,6 +65,10 @@ final readonly class ClientPropertyValue
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

@@ -11,31 +11,50 @@ use const DATE_ATOM;
 
 /**
  * Wert einer Eigenschaft einer Eingangsrechnung.
+ *
+ * Dieses Model bildet die Struktur von GET /incoming-property-values?incoming_id={id} bzw. GET /incoming-property-values/{id} ab.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/eingangsrechnungen/attribute/
+ *
+ * Generiert aus tools/codegen/definitions/incoming-property-values.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class IncomingPropertyValue
 {
     public function __construct(
+        /** Interne Billomat-ID des Eigenschaftswerts. */
         public ?int $id,
+        /** ID des Datensatzes, zu dem der Wert gehört. */
         public int $incomingId,
+        /** ID der Eigenschaft. */
         public int $incomingPropertyId,
+        /** Typ der Eigenschaft (z. B. TEXTFIELD, CHECKBOX). */
         public ?string $type,
+        /** Name der Eigenschaft. */
         public ?string $name,
+        /** Wert der Eigenschaft. */
         public mixed $value,
+        /** Erstellungszeitpunkt. */
         public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            incomingId: (int) ($data['incoming_id'] ?? 0),
-            incomingPropertyId: (int) ($data['incoming_property_id'] ?? 0),
+            incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
+            incomingPropertyId: ScalarCaster::toIntOrNull($data['incoming_property_id'] ?? null) ?? 0,
             type: ScalarCaster::toStringOrNull($data['type'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
@@ -46,6 +65,10 @@ final readonly class IncomingPropertyValue
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

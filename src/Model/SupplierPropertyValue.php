@@ -12,32 +12,49 @@ use const DATE_ATOM;
 /**
  * Wert einer Lieferanten-Eigenschaft.
  *
- * Doku: https://www.billomat.com/en/api/suppliers/properties/
+ * Dieses Model bildet die Struktur von GET /supplier-property-values?supplier_id={id} bzw. GET /supplier-property-values/{id} ab.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/lieferanten/attribute/
+ *
+ * Generiert aus tools/codegen/definitions/supplier-property-values.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class SupplierPropertyValue
 {
     public function __construct(
+        /** Interne Billomat-ID des Eigenschaftswerts. */
         public ?int $id,
+        /** ID des Datensatzes, zu dem der Wert gehört. */
         public int $supplierId,
+        /** ID der Eigenschaft. */
         public int $supplierPropertyId,
+        /** Typ der Eigenschaft (z. B. TEXTFIELD, CHECKBOX). */
         public ?string $type,
+        /** Name der Eigenschaft. */
         public ?string $name,
+        /** Wert der Eigenschaft. */
         public mixed $value,
+        /** Erstellungszeitpunkt. */
         public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            supplierId: (int) ($data['supplier_id'] ?? 0),
-            supplierPropertyId: (int) ($data['supplier_property_id'] ?? 0),
+            supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null) ?? 0,
+            supplierPropertyId: ScalarCaster::toIntOrNull($data['supplier_property_id'] ?? null) ?? 0,
             type: ScalarCaster::toStringOrNull($data['type'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
@@ -48,6 +65,10 @@ final readonly class SupplierPropertyValue
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

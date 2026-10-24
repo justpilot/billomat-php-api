@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Activity;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für den Aktivitätsfeed (`/activity-feed`).
@@ -27,6 +28,7 @@ final class ActivitiesApi extends AbstractApi
      *
      * @return list<Activity>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/activity-feed', 'activity-feed', 'activity', Activity::fromArray(...), $filters);
@@ -39,6 +41,7 @@ final class ActivitiesApi extends AbstractApi
      *
      * @return Page<Activity>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/activity-feed', 'activity-feed', 'activity', Activity::fromArray(...), $filters);
@@ -51,6 +54,7 @@ final class ActivitiesApi extends AbstractApi
      *
      * @return Generator<int, Activity>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/activity-feed', 'activity-feed', 'activity', Activity::fromArray(...), $filters, $pageSize);

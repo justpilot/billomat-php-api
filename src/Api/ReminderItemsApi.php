@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ReminderItem;
+use NoDiscard;
 
 /**
  * API-Wrapper für Reminder-Items (read-only — Mahnungspositionen werden vom System generiert).
@@ -22,6 +23,7 @@ final class ReminderItemsApi extends AbstractApi
      *
      * @return list<ReminderItem>
      */
+    #[NoDiscard]
     public function listByReminder(int $reminderId, array $query = []): array
     {
         $params = array_merge(['reminder_id' => $reminderId], $query);
@@ -29,6 +31,7 @@ final class ReminderItemsApi extends AbstractApi
         return $this->listResource('/reminder-items', 'reminder-items', 'reminder-item', ReminderItem::fromArray(...), $params);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ReminderItem
     {
         $data = $this->getJsonOrNull("/reminder-items/{$id}");

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\User;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Mitarbeiter/Users.
@@ -20,6 +21,7 @@ final class UsersApi extends AbstractApi
      *
      * @return list<User>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         $data = $this->getJson('/users', $filters);
@@ -55,6 +57,7 @@ final class UsersApi extends AbstractApi
      *
      * @return Page<User>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/users', 'users', 'user', User::fromArray(...), $filters);
@@ -72,11 +75,13 @@ final class UsersApi extends AbstractApi
      *
      * @return Generator<int, User>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/users', 'users', 'user', User::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?User
     {
         $data = $this->getJsonOrNull("/users/{$id}");
@@ -94,6 +99,7 @@ final class UsersApi extends AbstractApi
     }
 
     /** Gibt den aktuell authentifizierten Benutzer zurück. */
+    #[NoDiscard]
     public function getMyself(): ?User
     {
         $data = $this->getJsonOrNull('/users/myself');

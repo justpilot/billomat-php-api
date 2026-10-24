@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ConfirmationComment;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
+use NoDiscard;
 
 /**
  * API-Wrapper für Confirmation-Comments.
@@ -19,6 +20,7 @@ final class ConfirmationCommentsApi extends AbstractApi
      *
      * @return list<ConfirmationComment>
      */
+    #[NoDiscard]
     public function listByConfirmation(int $confirmationId, ?array $actionKeys = null): array
     {
         $query = ['confirmation_id' => $confirmationId];
@@ -33,6 +35,7 @@ final class ConfirmationCommentsApi extends AbstractApi
         return $this->listResource('/confirmation-comments', 'confirmation-comments', 'confirmation-comment', ConfirmationComment::fromArray(...), $query);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ConfirmationComment
     {
         $data = $this->getJsonOrNull("/confirmation-comments/{$id}");

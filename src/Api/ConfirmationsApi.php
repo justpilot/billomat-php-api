@@ -12,6 +12,7 @@ use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -40,6 +41,7 @@ final class ConfirmationsApi extends AbstractApi
      *
      * @return list<Confirmation>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters);
@@ -56,6 +58,7 @@ final class ConfirmationsApi extends AbstractApi
      *
      * @return Page<Confirmation>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters);
@@ -73,11 +76,13 @@ final class ConfirmationsApi extends AbstractApi
      *
      * @return Generator<int, Confirmation>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Confirmation
     {
         $data = $this->getJsonOrNull("/confirmations/{$id}");
@@ -186,6 +191,7 @@ final class ConfirmationsApi extends AbstractApi
      *
      * @return ConfirmationPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
+    #[NoDiscard]
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string
     {
         $query = [];

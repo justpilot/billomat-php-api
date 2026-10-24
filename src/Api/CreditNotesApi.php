@@ -12,6 +12,7 @@ use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNotePdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -39,6 +40,7 @@ final class CreditNotesApi extends AbstractApi
      *
      * @return list<CreditNote>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters);
@@ -55,6 +57,7 @@ final class CreditNotesApi extends AbstractApi
      *
      * @return Page<CreditNote>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters);
@@ -72,11 +75,13 @@ final class CreditNotesApi extends AbstractApi
      *
      * @return Generator<int, CreditNote>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?CreditNote
     {
         $data = $this->getJsonOrNull("/credit-notes/{$id}");
@@ -174,6 +179,7 @@ final class CreditNotesApi extends AbstractApi
     /**
      * @return CreditNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
+    #[NoDiscard]
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): CreditNotePdf|string
     {
         $query = [];

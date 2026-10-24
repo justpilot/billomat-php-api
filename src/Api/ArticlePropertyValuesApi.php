@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\ArticlePropertyValue;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Werte von Artikel-Eigenschaften (Article Property Values).
@@ -25,6 +26,7 @@ final class ArticlePropertyValuesApi extends AbstractApi
      *
      * @return list<ArticlePropertyValue>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/article-property-values', 'article-property-values', 'article-property-value', ArticlePropertyValue::fromArray(...), $filters);
@@ -41,6 +43,7 @@ final class ArticlePropertyValuesApi extends AbstractApi
      *
      * @return Page<ArticlePropertyValue>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/article-property-values', 'article-property-values', 'article-property-value', ArticlePropertyValue::fromArray(...), $filters);
@@ -58,11 +61,13 @@ final class ArticlePropertyValuesApi extends AbstractApi
      *
      * @return Generator<int, ArticlePropertyValue>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/article-property-values', 'article-property-values', 'article-property-value', ArticlePropertyValue::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ArticlePropertyValue
     {
         $data = $this->getJsonOrNull("/article-property-values/{$id}");

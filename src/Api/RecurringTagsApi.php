@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\RecurringTag;
 use Justpilot\Billomat\Model\RecurringTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Schlagworte von Abo-Rechnungen.
@@ -24,6 +25,7 @@ final class RecurringTagsApi extends AbstractApi
     /**
      * @return list<RecurringTag>
      */
+    #[NoDiscard]
     public function listByRecurring(int $recurringId): array
     {
         return $this->listResource('/recurring-tags', 'recurring-tags', 'recurring-tag', RecurringTag::fromArray(...), ['recurring_id' => $recurringId]);
@@ -34,11 +36,13 @@ final class RecurringTagsApi extends AbstractApi
      *
      * @return list<RecurringTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/recurring-tags', 'recurring-tags', 'tag', RecurringTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?RecurringTag
     {
         $data = $this->getJsonOrNull("/recurring-tags/{$id}");

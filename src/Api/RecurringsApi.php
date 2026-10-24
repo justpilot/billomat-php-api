@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Abo-Rechnungen (Recurrings).
@@ -32,6 +33,7 @@ final class RecurringsApi extends AbstractApi
      *
      * @return list<Recurring>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters);
@@ -48,6 +50,7 @@ final class RecurringsApi extends AbstractApi
      *
      * @return Page<Recurring>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters);
@@ -65,11 +68,13 @@ final class RecurringsApi extends AbstractApi
      *
      * @return Generator<int, Recurring>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Recurring
     {
         $data = $this->getJsonOrNull("/recurrings/{$id}");

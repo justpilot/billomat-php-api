@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\FreeText;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Freitext-Bausteine.
@@ -20,6 +21,7 @@ final class FreeTextsApi extends AbstractApi
      *
      * @return list<FreeText>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/free-texts', 'free-texts', 'free-text', FreeText::fromArray(...), $filters);
@@ -36,6 +38,7 @@ final class FreeTextsApi extends AbstractApi
      *
      * @return Page<FreeText>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/free-texts', 'free-texts', 'free-text', FreeText::fromArray(...), $filters);
@@ -53,11 +56,13 @@ final class FreeTextsApi extends AbstractApi
      *
      * @return Generator<int, FreeText>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/free-texts', 'free-texts', 'free-text', FreeText::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?FreeText
     {
         $data = $this->getJsonOrNull("/free-texts/{$id}");

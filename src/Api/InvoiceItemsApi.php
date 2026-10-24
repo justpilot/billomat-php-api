@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InvoiceItem;
+use NoDiscard;
 
 /**
  * API-Wrapper für Rechnungspositionen (Invoice Items).
@@ -26,6 +27,7 @@ final class InvoiceItemsApi extends AbstractApi
      *
      * @return list<InvoiceItem>
      */
+    #[NoDiscard]
     public function listByInvoice(int $invoiceId, array $query = []): array
     {
         $params = array_merge(['invoice_id' => $invoiceId], $query);
@@ -38,6 +40,7 @@ final class InvoiceItemsApi extends AbstractApi
      *
      * @return InvoiceItem|null null, wenn nicht gefunden (404)
      */
+    #[NoDiscard]
     public function get(int $id): ?InvoiceItem
     {
         $data = $this->getJsonOrNull("/invoice-items/{$id}");

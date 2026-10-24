@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\IncomingProperty;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Definitionen von Eigenschaften für Eingangsrechnungen.
@@ -18,6 +19,7 @@ final class IncomingPropertiesApi extends AbstractApi
      *
      * @return list<IncomingProperty>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/incoming-properties', 'incoming-properties', 'incoming-property', IncomingProperty::fromArray(...), $filters);
@@ -34,6 +36,7 @@ final class IncomingPropertiesApi extends AbstractApi
      *
      * @return Page<IncomingProperty>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/incoming-properties', 'incoming-properties', 'incoming-property', IncomingProperty::fromArray(...), $filters);
@@ -51,11 +54,13 @@ final class IncomingPropertiesApi extends AbstractApi
      *
      * @return Generator<int, IncomingProperty>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/incoming-properties', 'incoming-properties', 'incoming-property', IncomingProperty::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?IncomingProperty
     {
         $data = $this->getJsonOrNull("/incoming-properties/{$id}");

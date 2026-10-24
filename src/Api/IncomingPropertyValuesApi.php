@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\IncomingPropertyValue;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Werte von Eingangsrechnungs-Eigenschaften.
@@ -18,6 +19,7 @@ final class IncomingPropertyValuesApi extends AbstractApi
      *
      * @return list<IncomingPropertyValue>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/incoming-property-values', 'incoming-property-values', 'incoming-property-value', IncomingPropertyValue::fromArray(...), $filters);
@@ -34,6 +36,7 @@ final class IncomingPropertyValuesApi extends AbstractApi
      *
      * @return Page<IncomingPropertyValue>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/incoming-property-values', 'incoming-property-values', 'incoming-property-value', IncomingPropertyValue::fromArray(...), $filters);
@@ -51,11 +54,13 @@ final class IncomingPropertyValuesApi extends AbstractApi
      *
      * @return Generator<int, IncomingPropertyValue>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/incoming-property-values', 'incoming-property-values', 'incoming-property-value', IncomingPropertyValue::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?IncomingPropertyValue
     {
         $data = $this->getJsonOrNull("/incoming-property-values/{$id}");

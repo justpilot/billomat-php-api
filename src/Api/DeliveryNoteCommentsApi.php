@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\DeliveryNoteComment;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
+use NoDiscard;
 
 /**
  * API-Wrapper für Delivery-Note-Comments.
@@ -17,6 +18,7 @@ final class DeliveryNoteCommentsApi extends AbstractApi
      *
      * @return list<DeliveryNoteComment>
      */
+    #[NoDiscard]
     public function listByDeliveryNote(int $deliveryNoteId, ?array $actionKeys = null): array
     {
         $query = ['delivery_note_id' => $deliveryNoteId];
@@ -31,6 +33,7 @@ final class DeliveryNoteCommentsApi extends AbstractApi
         return $this->listResource('/delivery-note-comments', 'delivery-note-comments', 'delivery-note-comment', DeliveryNoteComment::fromArray(...), $query);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?DeliveryNoteComment
     {
         $data = $this->getJsonOrNull("/delivery-note-comments/{$id}");

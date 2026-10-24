@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\OfferTag;
 use Justpilot\Billomat\Model\OfferTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Angebots-Schlagworte (Offer Tags).
@@ -24,6 +25,7 @@ final class OfferTagsApi extends AbstractApi
     /**
      * @return list<OfferTag>
      */
+    #[NoDiscard]
     public function listByOffer(int $offerId): array
     {
         return $this->listResource('/offer-tags', 'offer-tags', 'offer-tag', OfferTag::fromArray(...), ['offer_id' => $offerId]);
@@ -34,11 +36,13 @@ final class OfferTagsApi extends AbstractApi
      *
      * @return list<OfferTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/offer-tags', 'offer-tags', 'tag', OfferTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?OfferTag
     {
         $data = $this->getJsonOrNull("/offer-tags/{$id}");

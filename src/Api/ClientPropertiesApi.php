@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\ClientProperty;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Definitionen von Kunden-Eigenschaften.
@@ -20,6 +21,7 @@ final class ClientPropertiesApi extends AbstractApi
      *
      * @return list<ClientProperty>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/client-properties', 'client-properties', 'client-property', ClientProperty::fromArray(...), $filters);
@@ -36,6 +38,7 @@ final class ClientPropertiesApi extends AbstractApi
      *
      * @return Page<ClientProperty>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/client-properties', 'client-properties', 'client-property', ClientProperty::fromArray(...), $filters);
@@ -53,11 +56,13 @@ final class ClientPropertiesApi extends AbstractApi
      *
      * @return Generator<int, ClientProperty>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/client-properties', 'client-properties', 'client-property', ClientProperty::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ClientProperty
     {
         $data = $this->getJsonOrNull("/client-properties/{$id}");

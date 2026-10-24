@@ -61,6 +61,8 @@ $billomat = new BillomatClient($config);
 
 `BillomatConfig` ist `final readonly`. Der Default für `baseUri` enthält ein `%s`-Platzhalter, das `getBaseUri()` mit der `billomatId` per `sprintf` ersetzt. Für reine Tests gegen einen lokalen Mock-Server kann hier eine andere URL gesetzt werden.
 
+Der Konstruktor prüft beide Werte: Die `billomatId` muss ein gültiger Subdomain-Name sein (Buchstaben, Ziffern und Bindestriche im Inneren, höchstens 63 Zeichen), und die daraus gebaute Basis-URI muss sich mit `Uri\Rfc3986\Uri` als absolute URI parsen lassen. Sonst wirft er eine `InvalidArgumentException`.
+
 ## HTTP-Header, die das SDK setzt
 
 Pro Request sendet `BillomatHttpClient`:

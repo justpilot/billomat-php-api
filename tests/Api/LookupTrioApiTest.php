@@ -256,6 +256,6 @@ final class LookupTrioApiTest extends TestCase
         $api = new RolesApi($this->client($mock));
 
         $this->expectException(AuthenticationException::class);
-        $api->get(1);
+        (void) $api->get(1);
     }
 }

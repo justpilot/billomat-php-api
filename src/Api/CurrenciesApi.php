@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Currency;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für die Währungsliste.
@@ -18,6 +19,7 @@ final class CurrenciesApi extends AbstractApi
     /**
      * @return list<Currency>
      */
+    #[NoDiscard]
     public function list(): array
     {
         return $this->listResource('/currencies', 'currencies', 'currency', Currency::fromArray(...));
@@ -34,6 +36,7 @@ final class CurrenciesApi extends AbstractApi
      *
      * @return Page<Currency>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/currencies', 'currencies', 'currency', Currency::fromArray(...), $filters);
@@ -51,6 +54,7 @@ final class CurrenciesApi extends AbstractApi
      *
      * @return Generator<int, Currency>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/currencies', 'currencies', 'currency', Currency::fromArray(...), $filters, $pageSize);

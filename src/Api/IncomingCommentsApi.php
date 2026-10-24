@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\IncomingComment;
+use NoDiscard;
 
 /**
  * API-Wrapper für Incoming-Comments.
@@ -17,6 +18,7 @@ final class IncomingCommentsApi extends AbstractApi
      *
      * @return list<IncomingComment>
      */
+    #[NoDiscard]
     public function listByIncoming(int $incomingId, ?array $actionKeys = null): array
     {
         $query = ['incoming_id' => $incomingId];
@@ -31,6 +33,7 @@ final class IncomingCommentsApi extends AbstractApi
         return $this->listResource('/incoming-comments', 'incoming-comments', 'incoming-comment', IncomingComment::fromArray(...), $query);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?IncomingComment
     {
         $data = $this->getJsonOrNull("/incoming-comments/{$id}");

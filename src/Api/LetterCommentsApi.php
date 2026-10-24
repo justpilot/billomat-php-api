@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\LetterComment;
+use NoDiscard;
 
 /**
  * API-Wrapper für Letter-Comments.
@@ -17,6 +18,7 @@ final class LetterCommentsApi extends AbstractApi
      *
      * @return list<LetterComment>
      */
+    #[NoDiscard]
     public function listByLetter(int $letterId, ?array $actionKeys = null): array
     {
         $query = ['letter_id' => $letterId];
@@ -31,6 +33,7 @@ final class LetterCommentsApi extends AbstractApi
         return $this->listResource('/letter-comments', 'letter-comments', 'letter-comment', LetterComment::fromArray(...), $query);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?LetterComment
     {
         $data = $this->getJsonOrNull("/letter-comments/{$id}");

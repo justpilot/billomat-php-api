@@ -10,6 +10,7 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Incoming;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Incomings-Ressource (Eingangsrechnungen).
@@ -33,6 +34,7 @@ final class IncomingsApi extends AbstractApi
      *
      * @return list<Incoming>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters);
@@ -49,6 +51,7 @@ final class IncomingsApi extends AbstractApi
      *
      * @return Page<Incoming>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters);
@@ -66,11 +69,13 @@ final class IncomingsApi extends AbstractApi
      *
      * @return Generator<int, Incoming>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Incoming
     {
         $data = $this->getJsonOrNull("/incomings/{$id}");

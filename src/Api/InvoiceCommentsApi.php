@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\InvoiceComment;
+use NoDiscard;
 
 /**
  * API-Wrapper für Rechnungskommentare (Invoice Comments).
@@ -30,6 +31,7 @@ final class InvoiceCommentsApi extends AbstractApi
      *
      * @return list<InvoiceComment>
      */
+    #[NoDiscard]
     public function listByInvoice(int $invoiceId, ?array $actionKeys = null): array
     {
         $query = ['invoice_id' => $invoiceId];
@@ -44,6 +46,7 @@ final class InvoiceCommentsApi extends AbstractApi
         return $this->listResource('/invoice-comments', 'invoice-comments', 'invoice-comment', InvoiceComment::fromArray(...), $query);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?InvoiceComment
     {
         $data = $this->getJsonOrNull("/invoice-comments/{$id}");

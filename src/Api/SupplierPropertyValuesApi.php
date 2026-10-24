@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\SupplierPropertyValue;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Werte von Lieferanten-Eigenschaften.
@@ -21,6 +22,7 @@ final class SupplierPropertyValuesApi extends AbstractApi
      *
      * @return list<SupplierPropertyValue>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         $data = $this->getJson('/supplier-property-values', $filters);
@@ -64,6 +66,7 @@ final class SupplierPropertyValuesApi extends AbstractApi
      *
      * @return Page<SupplierPropertyValue>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/supplier-property-values', 'supplier-property-values', 'supplier-property-value', SupplierPropertyValue::fromArray(...), $filters);
@@ -81,11 +84,13 @@ final class SupplierPropertyValuesApi extends AbstractApi
      *
      * @return Generator<int, SupplierPropertyValue>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/supplier-property-values', 'supplier-property-values', 'supplier-property-value', SupplierPropertyValue::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?SupplierPropertyValue
     {
         $data = $this->getJsonOrNull("/supplier-property-values/{$id}");

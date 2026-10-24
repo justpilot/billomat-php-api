@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ConfirmationItem;
+use NoDiscard;
 
 /**
  * API-Wrapper für Confirmation-Items.
@@ -25,6 +26,7 @@ final class ConfirmationItemsApi extends AbstractApi
      *
      * @return list<ConfirmationItem>
      */
+    #[NoDiscard]
     public function listByConfirmation(int $confirmationId, array $query = []): array
     {
         $params = array_merge(['confirmation_id' => $confirmationId], $query);
@@ -32,6 +34,7 @@ final class ConfirmationItemsApi extends AbstractApi
         return $this->listResource('/confirmation-items', 'confirmation-items', 'confirmation-item', ConfirmationItem::fromArray(...), $params);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ConfirmationItem
     {
         $data = $this->getJsonOrNull("/confirmation-items/{$id}");

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Settings;
+use NoDiscard;
 
 /**
  * API-Wrapper für Account-Einstellungen.
@@ -15,6 +16,7 @@ final class SettingsApi extends AbstractApi
     /**
      * GET /settings.
      */
+    #[NoDiscard]
     public function get(): Settings
     {
         $data = $this->getJson('/settings');

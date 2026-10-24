@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\RecurringEmailReceiver;
+use NoDiscard;
 
 /**
  * API-Wrapper für E-Mail-Empfänger einer Abo-Rechnung.
@@ -22,11 +23,13 @@ final class RecurringEmailReceiversApi extends AbstractApi
     /**
      * @return list<RecurringEmailReceiver>
      */
+    #[NoDiscard]
     public function listByRecurring(int $recurringId): array
     {
         return $this->listResource('/recurring-email-receivers', 'recurring-email-receivers', 'recurring-email-receiver', RecurringEmailReceiver::fromArray(...), ['recurring_id' => $recurringId]);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?RecurringEmailReceiver
     {
         $data = $this->getJsonOrNull("/recurring-email-receivers/{$id}");

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\CountryTax;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für die Liste steuerfreier Länder
@@ -27,6 +28,7 @@ final class CountryTaxesApi extends AbstractApi
      *
      * @return list<CountryTax>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/country-taxes', 'country-taxes', 'country-tax', CountryTax::fromArray(...), $filters);
@@ -37,6 +39,7 @@ final class CountryTaxesApi extends AbstractApi
      *
      * @return Page<CountryTax>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/country-taxes', 'country-taxes', 'country-tax', CountryTax::fromArray(...), $filters);
@@ -47,11 +50,13 @@ final class CountryTaxesApi extends AbstractApi
      *
      * @return Generator<int, CountryTax>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/country-taxes', 'country-taxes', 'country-tax', CountryTax::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?CountryTax
     {
         $data = $this->getJsonOrNull("/country-taxes/{$id}");

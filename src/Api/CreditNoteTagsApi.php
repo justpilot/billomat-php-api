@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\CreditNoteTag;
 use Justpilot\Billomat\Model\CreditNoteTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Credit-Note-Tags.
@@ -15,6 +16,7 @@ final class CreditNoteTagsApi extends AbstractApi
     /**
      * @return list<CreditNoteTag>
      */
+    #[NoDiscard]
     public function listByCreditNote(int $creditNoteId): array
     {
         return $this->listResource('/credit-note-tags', 'credit-note-tags', 'credit-note-tag', CreditNoteTag::fromArray(...), ['credit_note_id' => $creditNoteId]);
@@ -23,11 +25,13 @@ final class CreditNoteTagsApi extends AbstractApi
     /**
      * @return list<CreditNoteTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/credit-note-tags', 'credit-note-tags', 'tag', CreditNoteTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?CreditNoteTag
     {
         $data = $this->getJsonOrNull("/credit-note-tags/{$id}");

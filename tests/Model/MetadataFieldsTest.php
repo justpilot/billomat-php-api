@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Model;
 use Closure;
 use DateTimeImmutable;
 use Generator;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\ArticleProperty;
@@ -166,6 +167,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(User::class)]
 #[CoversClass(UserProperty::class)]
 #[UsesClass(ArticleType::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(ConfirmationCommentActionKey::class)]
 #[UsesClass(ConfirmationStatus::class)]

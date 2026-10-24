@@ -1351,12 +1351,6 @@ parameters:
 			path: src/Model/ConfirmationPdf.php
 
 		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Country.php
-
-		-
 			message: '#^Cannot access offset ''credit\-note\-item'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -1379,12 +1373,6 @@ parameters:
 			identifier: cast.string
 			count: 3
 			path: src/Model/CreditNotePdf.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Currency.php
 
 		-
 			message: '#^Cannot access offset ''delivery\-note\-item'' on mixed\.$#'

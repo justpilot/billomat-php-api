@@ -9,25 +9,35 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 /**
  * Währung aus der Billomat-Währungsliste.
  *
- * Doku: https://www.billomat.com/en/api/currencies/
+ * Dokumentation:
+ * https://www.billomat.com/en/api/currencies/
+ *
+ * Generiert aus tools/codegen/definitions/currencies.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Currency
 {
     public function __construct(
+        /** ISO-Währungscode (z. B. "EUR"). */
         public string $code,
+        /** Name der Währung. */
         public ?string $name = null,
+        /** Währungssymbol (z. B. "€"). */
         public ?string $symbol = null,
+        /** Interne Billomat-ID der Währung. */
         public ?int $id = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            code: (string) ($data['code'] ?? $data['currency_code'] ?? ''),
+            code: ScalarCaster::toStringOrNull($data['code'] ?? $data['currency_code'] ?? null) ?? '',
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             symbol: ScalarCaster::toStringOrNull($data['symbol'] ?? null),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
@@ -35,6 +45,10 @@ final readonly class Currency
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

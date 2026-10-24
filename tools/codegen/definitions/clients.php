@@ -14,6 +14,10 @@ declare(strict_types=1);
  *   doc         Ein-Satz-Beschreibung (deutsch). Fehlt sie, wird description_de aus der Spec genommen.
  *   details     Weitere Doku-Zeilen (z. B. „Beispiel: …“).
  *   type        string|int|float|bool|date|datetime|mixed – Pflicht für Felder, die nicht in der Spec stehen.
+ *               Dazu die read-only Listen `taxes` (Steuerzeilen unter taxes.tax) und `list`
+ *               (verschachtelte Objekte, z. B. Positionen; braucht 'list').
+ *   list        ['class' => 'InvoiceItem', 'item' => 'invoice-item'] → Element-Klasse und innerer Schlüssel
+ *               einer `list` (der Feldname ist der äußere Schlüssel, z. B. 'invoice-items').
  *   readOnly    true = nur im Read-Model, nicht in den Options.
  *   optionsOnly true = nur in den Options, nicht im Read-Model.
  *   writable    true = in den Options, obwohl die Spec das Feld nicht beim Anlegen nennt.
@@ -28,7 +32,9 @@ declare(strict_types=1);
  *   create      ['nonNull' => true, 'default' => <wert>] → nicht-nullbare Property mit Default
  *               ['constructor' => true] → Pflicht-Parameter im Konstruktor der Create-Options
  *               ['constructor' => true, 'default' => <wert>] → Konstruktor-Parameter mit Default
+ *               ['type' => 'int']     → abweichender Typ in den Create-Options
  *   update      ['skip' => true]      → fehlt in den Update-Options
+ *               ['type' => 'float']   → abweichender Typ in den Update-Options
  *
  * Ressourcen-Schlüssel: 'createOptions' und 'updateOptions' sind optional. Fehlen sie,
  * entsteht nur das Read-Model; 'specEndpoint' nennt dann den Endpunkt für den Drift-Abgleich.
@@ -40,6 +46,8 @@ declare(strict_types=1);
  * 'toArray' => [...] an 'model' oder an den Options legt Auswahl und Reihenfolge der
  * toArray()-Schlüssel fest (Billomat-Feldnamen); ohne die Liste gilt die Feldreihenfolge.
  * 'dateObjects' => true an den Options führt Datumsfelder als DateTimeImmutable statt als String.
+ * 'items' => ['class' => …, 'wire' => …, 'item' => …] an den Create-Options erzeugt addItem()/getItems()
+ * und sendet die gesammelten Positionen verschachtelt mit (z. B. invoice-items.invoice-item).
  *
  * Nach Änderungen: composer generate
  */

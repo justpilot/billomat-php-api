@@ -173,6 +173,9 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
         }
 
         $type = $field['type'] ?? phpTypeFromSpec((string) $specField['type']);
+        if (\in_array($type, ['taxes', 'list'], true) && empty($field['readOnly'])) {
+            throw new RuntimeException("Listen-Feld '{$name}' muss 'readOnly' sein ({$source}).");
+        }
         $enum = $specField['enum'] ?? null;
 
         $resolved[] = [
@@ -188,6 +191,7 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
             'writable' => empty($field['readOnly']),
             'inModel' => empty($field['optionsOnly']),
             'deprecated' => $field['deprecated'] ?? null,
+            'list' => $field['list'] ?? null,
             'model' => $field['model'] ?? [],
             'create' => $field['create'] ?? [],
             'update' => $field['update'] ?? [],
@@ -223,9 +227,15 @@ function renderModel(array $definition, array $fields, string $source): string
     $usesDate = [] !== array_intersect($types, ['date', 'datetime']);
     $usesAtom = \in_array('datetime', $types, true);
 
+    $listFields = array_values(array_filter($fields, isListField(...)));
+    $scalarFields = array_values(array_filter($fields, static fn (array $f): bool => !isListField($f)));
+
     $imports = ['Justpilot\\Billomat\\Internal\\ScalarCaster', ...enumImports($fields)];
     if ($usesDate) {
         $imports[] = 'DateTimeImmutable';
+    }
+    if ([] !== $listFields) {
+        $imports[] = 'Justpilot\\Billomat\\Internal\\ListCaster';
     }
     sort($imports);
 
@@ -238,7 +248,18 @@ function renderModel(array $definition, array $fields, string $source): string
     }
 
     $out .= "\n" . classDoc($definition['model']['doc'], $definition['docUrl'], $source, 'Dokumentation:');
-    $out .= 'final readonly class ' . $definition['model']['class'] . "\n{\n    public function __construct(\n";
+    $out .= 'final readonly class ' . $definition['model']['class'] . "\n{\n";
+    // Listen-Felder brauchen den Element-Typ als @param am Konstruktor.
+    if ([] !== $listFields) {
+        $listTypes = array_map(listTypeHint(...), $listFields);
+        $width = max(array_map(\strlen(...), $listTypes));
+        $out .= docBlock(array_map(
+            static fn (array $f, string $t): string => '@param ' . str_pad($t, $width) . ' $' . $f['property'],
+            $listFields,
+            $listTypes,
+        ), '    ');
+    }
+    $out .= "    public function __construct(\n";
 
     foreach ($fields as $field) {
         $lines = [$field['doc']];
@@ -255,7 +276,9 @@ function renderModel(array $definition, array $fields, string $source): string
 
         $out .= docBlock($lines, '        ');
         $out .= '        public ' . modelTypeHint($field) . ' $' . $field['property'];
-        if (empty($field['model']['required'])) {
+        if (isListField($field)) {
+            $out .= ' = []';
+        } elseif (empty($field['model']['required'])) {
             $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : nonNullFallback(modelType($field)));
         }
         $out .= ",\n";
@@ -273,9 +296,12 @@ function renderModel(array $definition, array $fields, string $source): string
     $out .= "    /**\n     * Exportiert das Model als Array mit Billomat-Feldnamen.\n     *\n     * Praktisch für Debugging oder Log-Ausgaben.\n     *\n     * @return array<string,mixed>\n     */\n";
     // `model.filterNulls`: toArray() lässt Null-Felder weg (BC).
     $filterNulls = !empty($definition['model']['filterNulls']);
-    $out .= "    public function toArray(): array\n    {\n        return " . ($filterNulls ? 'array_filter(' : '') . "[\n";
+    if ($filterNulls && [] !== $listFields) {
+        throw new RuntimeException("'filterNulls' und Listen-Felder lassen sich nicht kombinieren ({$source}).");
+    }
+    $out .= "    public function toArray(): array\n    {\n        " . ([] !== $listFields ? '$data = ' : 'return ') . ($filterNulls ? 'array_filter(' : '') . "[\n";
     $boolAsInt = !empty($definition['model']['boolAsInt']);
-    foreach (exportFields($fields, $definition['model']['toArray'] ?? null, $source) as $field) {
+    foreach (exportFields($scalarFields, $definition['model']['toArray'] ?? null, $source) as $field) {
         $value = '$this->' . $field['property'];
         $value = match (true) {
             null !== $field['enumClass'] => $value . '?->value',
@@ -287,9 +313,44 @@ function renderModel(array $definition, array $fields, string $source): string
         // `model.key`: abweichender Schlüssel in toArray() (BC, z. B. nach einer Umbenennung bei Billomat).
         $out .= "            '" . ($field['model']['key'] ?? $field['wire']) . "' => " . $value . ",\n";
     }
-    $out .= '        ]' . ($filterNulls ? ', static fn (mixed $v): bool => null !== $v)' : '') . ";\n    }\n}\n";
+    $out .= '        ]' . ($filterNulls ? ', static fn (mixed $v): bool => null !== $v)' : '') . ";\n";
 
-    return $out;
+    // Listen werden wie bei Billomat verschachtelt und nur ausgegeben, wenn sie Einträge haben.
+    foreach ($listFields as $field) {
+        $value = '$this->' . $field['property'];
+        if ('taxes' === $field['type']) {
+            $entry = "['tax' => {$value}]";
+        } else {
+            $class = $field['list']['class'];
+            $entry = "[\n                '{$field['list']['item']}' => array_map(static fn ({$class} \$item): array => \$item->toArray(), {$value}),\n            ]";
+        }
+        $out .= "\n        if ([] !== {$value}) {\n            \$data['{$field['wire']}'] = {$entry};\n        }\n";
+    }
+    if ([] !== $listFields) {
+        $out .= "\n        return \$data;\n";
+    }
+
+    return $out . "    }\n}\n";
+}
+
+/**
+ * Verschachtelte Liste im Read-Model: `taxes` (Steuerzeilen) oder `list` (z. B. Positionen).
+ *
+ * @param array<string, mixed> $field
+ */
+function isListField(array $field): bool
+{
+    return \in_array($field['type'], ['taxes', 'list'], true);
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function listTypeHint(array $field): string
+{
+    return 'taxes' === $field['type']
+        ? 'list<array{name: string, rate: float, amount: float}>'
+        : 'list<' . $field['list']['class'] . '>';
 }
 
 /**
@@ -323,6 +384,9 @@ function modelTypeHint(array $field): string
     if (null !== $field['enumClass']) {
         return '?' . $field['enumClass'];
     }
+    if (isListField($field)) {
+        return 'array';
+    }
     // `mixed` schließt null bereits ein.
     if ('mixed' === modelType($field)) {
         return 'mixed';
@@ -354,6 +418,14 @@ function hydrateExpression(array $field): string
     $lookup = implode(' ?? ', array_map(static fn (string $s): string => "\$data['{$s}']", $sources));
     $expression = 'ScalarCaster::' . $caster . '(' . $lookup . ' ?? null)';
 
+    if ('taxes' === $field['type']) {
+        return "ListCaster::toTaxList(\$data['{$field['wire']}']['tax'] ?? null)";
+    }
+    // Ein einzelnes Element liefert Billomat als Objekt statt als Liste – erkennbar an der `id`.
+    if ('list' === $field['type']) {
+        return "ListCaster::toList(\$data['{$field['wire']}']['{$field['list']['item']}'] ?? null, 'id', {$field['list']['class']}::fromArray(...))";
+    }
+
     // `mixed`: Wert unverändert übernehmen (z. B. Eigenschaftswerte, deren Typ von der Eigenschaft abhängt).
     if ('mixed' === modelType($field)) {
         return $lookup . ' ?? null';
@@ -383,6 +455,11 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $fields,
         static fn (array $f): bool => $f['writable'] && ($isCreate || empty($f['update']['skip'])),
     ));
+    // `create.type` / `update.type`: abweichender Typ in Create- bzw. Update-Options (BC).
+    $writable = array_map(
+        static fn (array $f): array => ['type' => $f[$isCreate ? 'create' : 'update']['type'] ?? $f['type']] + $f,
+        $writable,
+    );
 
     // `dateObjects`: Datumsfelder sind DateTimeImmutable statt String (BC).
     $dateObjects = !empty($options['dateObjects']);
@@ -432,6 +509,16 @@ function renderOptions(array $definition, array $options, array $fields, string 
             . ($nonNull ? var_export($field['create']['default'], true) : 'null') . ";\n\n";
     }
 
+    // `items`: Positionen, die über addItem() gesammelt und verschachtelt mitgesendet werden.
+    $items = $isCreate ? ($options['items'] ?? null) : null;
+    if (null !== $items) {
+        $class = $items['class'];
+        $out .= "    /**\n     * @var list<{$class}>\n     */\n    private array \$items = [];\n\n";
+        $out .= "    /**\n     * Fügt eine Position hinzu, die beim Anlegen mitgesendet wird.\n     */\n";
+        $out .= "    public function addItem({$class} \$item): self\n    {\n        \$this->items[] = \$item;\n\n        return \$this;\n    }\n\n";
+        $out .= "    /**\n     * @return list<{$class}>\n     */\n    public function getItems(): array\n    {\n        return \$this->items;\n    }\n\n";
+    }
+
     $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n     *\n     * @return array<string,mixed>\n     */\n";
     $entries = '';
     $filterNulls = false;
@@ -452,6 +539,18 @@ function renderOptions(array $definition, array $options, array $fields, string 
     }
 
     $out .= "    public function toArray(): array\n    {\n";
+    if (null !== $items) {
+        if (!$filterNulls) {
+            throw new RuntimeException("'items' braucht mindestens ein nullbares Feld ({$source}).");
+        }
+        $out .= "        \$data = [\n" . $entries . "        ];\n\n        // Null-Felder entfernen\n";
+        $out .= "        \$data = array_filter(\$data, static fn (mixed \$v): bool => null !== \$v);\n\n";
+        $out .= "        if ([] !== \$this->items) {\n            \$data['{$items['wire']}'] = [\n";
+        $out .= "                '{$items['item']}' => array_map(static fn ({$class} \$item): array => \$item->toArray(), \$this->items),\n";
+        $out .= "            ];\n        }\n\n        return \$data;\n    }\n}\n";
+
+        return $out;
+    }
     // Sind alle Felder nicht-nullbar, gibt es nichts zu filtern.
     if (!$filterNulls) {
         return $out . "        return [\n" . $entries . "        ];\n    }\n}\n";

@@ -13,67 +13,107 @@ use const DATE_ATOM;
 /**
  * Repräsentiert einen Brief (Letter) aus der Billomat-API.
  *
- * Doku: https://www.billomat.com/en/api/letters/
+ * Dokumentation:
+ * https://www.billomat.com/en/api/letters/
+ *
+ * Generiert aus tools/codegen/definitions/letters.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class Letter
 {
     public function __construct(
+        /** Interne Billomat-ID des Briefs. */
         public ?int $id,
+        /** ID des Kunden. */
         public int $clientId,
+        /** ID des Kontakts. */
         public ?int $contactId = null,
+        /** Erstellungszeitpunkt des Briefs. */
         public ?DateTimeImmutable $created = null,
         /**
+         * Briefnummer.
+         *
          * @deprecated since 3.1 – Billomat liefert `letter_number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $letterNumber = null,
         /**
+         * Laufende Nummer (ohne Präfix).
+         *
          * @deprecated since 3.1 – Billomat liefert `number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?int $number = null,
         /**
+         * Präfix der Briefnummer.
+         *
          * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $numberPre = null,
         /**
+         * Mindestlänge der Briefnummer.
+         *
          * @deprecated since 3.1 – Billomat liefert `number_length` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?int $numberLength = null,
+        /** Status des Briefs. */
         public ?LetterStatus $status = null,
+        /** Briefdatum. */
         public ?DateTimeImmutable $date = null,
+        /**
+         * Komplette Briefadresse.
+         *
+         * Laut Doku veraltet – Billomat verarbeitet das Feld nicht mehr, bitte contact_id oder client_id verwenden.
+         */
         public ?string $address = null,
+        /** Dokumentenüberschrift. */
         public ?string $subject = null,
+        /** Bezeichnung. */
         public ?string $label = null,
+        /** Brieftext. */
         public ?string $intro = null,
         /**
+         * Anmerkung.
+         *
          * @deprecated since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $note = null,
+        /** ID der Vorlage, mit der der Brief abgeschlossen wird. */
         public ?int $templateId = null,
         /**
+         * Persönliche URL zum Kundenportal.
+         *
          * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?string $customerportalUrl = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * ID des Lieferanten.
+         *
+         * Wird statt `client_id` verwendet, wenn der Brief an einen Lieferanten geht.
+         */
         public ?int $supplierId = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            clientId: (int) ($data['client_id'] ?? 0),
+            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             letterNumber: ScalarCaster::toStringOrNull($data['letter_number'] ?? null),
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),
             numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
             numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
-            status: LetterStatus::fromApi(isset($data['status']) ? (string) $data['status'] : null),
+            status: LetterStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
@@ -89,6 +129,10 @@ final readonly class Letter
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

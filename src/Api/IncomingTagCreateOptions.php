@@ -5,17 +5,37 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 /**
- * Payload für POST /incoming-tags.
+ * Typisierter Payload für POST /incoming-tags gemäß Billomat-API.
+ *
+ * Doku:
+ * https://www.billomat.com/api/eingangsrechnungen/schlagworte/
+ *
+ * Generiert aus tools/codegen/definitions/incoming-tags.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final class IncomingTagCreateOptions
 {
     public function __construct(
+        /**
+         * ID des Datensatzes, an dem das Schlagwort hängt.
+         *
+         * Billomat-Feld: incoming_id
+         * Typ: INT
+         */
         public int $incomingId,
+        /**
+         * Name des Schlagworts.
+         *
+         * Billomat-Feld: name
+         * Typ: ALNUM
+         */
         public string $name,
     ) {
     }
 
     /**
+     * Serialisiert die Options in ein Billomat-Payload-Array.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

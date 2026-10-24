@@ -47,11 +47,17 @@ function main(array $argv): void
     $outdated = [];
 
     foreach ($definitionFiles as $definitionFile) {
-        /** @var array<string, mixed> $definition */
-        $definition = require $definitionFile;
+        /** @var array<string, mixed>|list<array<string, mixed>> $loaded */
+        $loaded = require $definitionFile;
         $source = 'tools/codegen/definitions/' . basename($definitionFile);
 
-        foreach (renderResource($definition, $spec, $source) as $relativePath => $code) {
+        // Eine Datei darf mehrere Definitionen liefern (z. B. Tag und Tag-Cloud einer Ressource).
+        $files = [];
+        foreach (array_is_list($loaded) ? $loaded : [$loaded] as $definition) {
+            $files = [...$files, ...renderResource($definition, $spec, $source)];
+        }
+
+        foreach ($files as $relativePath => $code) {
             $path = PROJECT_ROOT . '/' . $relativePath;
             $current = is_file($path) ? file_get_contents($path) : null;
 
@@ -91,13 +97,17 @@ function main(array $argv): void
  */
 function renderResource(array $definition, array $spec, string $source): array
 {
-    $slug = $definition['specResource'];
-    $resource = $spec['resources'][$slug] ?? throw new RuntimeException("Spec-Ressource '{$slug}' nicht gefunden ({$source}).");
+    // Ohne `specResource` (Billomat dokumentiert die Ressource nicht) entfällt der Drift-Abgleich;
+    // alle Felder brauchen dann einen expliziten 'type'.
+    $specFields = [];
+    if (null !== ($slug = $definition['specResource'] ?? null)) {
+        $resource = $spec['resources'][$slug] ?? throw new RuntimeException("Spec-Ressource '{$slug}' nicht gefunden ({$source}).");
 
-    // Ohne Create-Options (reines Read-Model) nennt `specEndpoint` den Endpunkt für den Drift-Abgleich.
-    $endpoint = $definition['createOptions']['endpoint'] ?? $definition['specEndpoint']
-        ?? throw new RuntimeException("Weder 'createOptions' noch 'specEndpoint' angegeben ({$source}).");
-    $specFields = specFields($resource['endpoints'], $endpoint, $source);
+        // Ohne Create-Options (reines Read-Model) nennt `specEndpoint` den Endpunkt für den Drift-Abgleich.
+        $endpoint = $definition['createOptions']['endpoint'] ?? $definition['specEndpoint']
+            ?? throw new RuntimeException("Weder 'createOptions' noch 'specEndpoint' angegeben ({$source}).");
+        $specFields = specFields($resource['endpoints'], $endpoint, $source);
+    }
     $fields = resolveFields($definition['fields'], $specFields, $source);
 
     $files = ['src/Model/' . $definition['model']['class'] . '.php' => renderModel($definition, $fields, $source)];

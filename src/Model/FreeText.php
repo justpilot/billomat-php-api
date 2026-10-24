@@ -12,25 +12,47 @@ use const DATE_ATOM;
 /**
  * Freitext-Baustein (verwendbar als title/label/intro/note auf Dokumenten).
  *
- * Doku: https://www.billomat.com/en/api/settings/free-texts/
+ * Dieses Model bildet die Struktur von GET /free-texts bzw. GET /free-texts/{id} ab.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/en/api/settings/free-texts/
+ *
+ * Generiert aus tools/codegen/definitions/free-texts.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class FreeText
 {
     public function __construct(
+        /** Interne Billomat-ID des Freitexts. */
         public ?int $id,
+        /** Überschrift bzw. Betreff. */
         public ?string $title,
+        /** Bezeichnung. */
         public ?string $label = null,
+        /** Einleitungstext bzw. Brieftext. */
         public ?string $intro = null,
+        /** Anmerkungen. */
         public ?string $note = null,
+        /** Erstellungszeitpunkt des Freitexts. */
         public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /**
+         * Dokumenttyp, für den der Freitext gilt.
+         *
+         * Mögliche Werte: INVOICE, CORRECTION, OFFER, CONFIRMATION, CREDIT_NOTE, DELIVERY_NOTE, LETTER
+         */
         public ?string $type = null,
+        /** Name der Textvorlage. */
         public ?string $name = null,
+        /** Standard-Freitext für den Dokumenttyp? */
         public ?bool $isDefault = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -50,6 +72,10 @@ final readonly class FreeText
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 /**
- * Typisierter Payload für POST/PUT /taxes.
+ * Typisierter Payload für POST /taxes und PUT /taxes/{id} gemäß Billomat-API.
  *
- * Dokumentation:
+ * Doku:
  * https://www.billomat.com/api/einstellungen/steuersaetze/
+ *
+ * Generiert aus tools/codegen/definitions/taxes.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final class TaxRateCreateOptions
 {
@@ -16,31 +19,35 @@ final class TaxRateCreateOptions
         /**
          * Name des Steuersatzes.
          *
+         * Beispiel: "MwSt"
+         *
          * Billomat-Feld: name
          * Typ: ALNUM
-         * Pflicht: ja
          */
         public string $name,
         /**
          * Höhe des Steuersatzes in Prozent.
          *
+         * Beispiel: 19.0
+         *
          * Billomat-Feld: rate
          * Typ: FLOAT
-         * Pflicht: ja
          */
         public float $rate,
         /**
-         * Ob es sich um den Standard-Steuersatz handelt (1 = ja, 0 = nein).
+         * Standard-Steuersatz?
          *
          * Billomat-Feld: is_default
-         * Typ: BOOL (0/1)
-         * Pflicht: ja
+         * Typ: BOOL
+         * Default: nein
          */
-        public bool $isDefault = false
+        public bool $isDefault = false,
     ) {
     }
 
     /**
+     * Serialisiert die Options in ein Billomat-Payload-Array.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array
@@ -48,7 +55,7 @@ final class TaxRateCreateOptions
         return [
             'name' => $this->name,
             'rate' => $this->rate,
-            'is_default' => $this->isDefault ? 1 : 0,
+            'is_default' => ($this->isDefault ? 1 : 0),
         ];
     }
 }

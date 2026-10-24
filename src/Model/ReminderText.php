@@ -7,35 +7,54 @@ namespace Justpilot\Billomat\Model;
 use Justpilot\Billomat\Internal\ScalarCaster;
 
 /**
- * Mahn-Textbaustein.
+ * Mahn-Textbaustein (Mahnstufe).
  *
- * Doku: https://www.billomat.com/api/einstellungen/mahnstufen/
+ * Dieses Model bildet die Struktur von GET /reminder-texts bzw. GET /reminder-texts/{id} ab.
  *
- * Billomat liefert die Reihenfolge als `sorting` (früher `sort`) und optional
- * eine Mahngebühr (`charge_*`). `due_days` liefert die API nicht mehr;
- * `$dueDays` bleibt nur aus Kompatibilitätsgründen erhalten.
+ * Billomat liefert die Reihenfolge als `sorting` (früher `sort`), das SDK
+ * stellt sie weiterhin als `$sort` bereit.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/einstellungen/mahnstufen/
+ *
+ * Generiert aus tools/codegen/definitions/reminder-texts.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class ReminderText
 {
     public function __construct(
+        /** Interne Billomat-ID der Mahnstufe. */
         public ?int $id,
+        /** Name der Mahnstufe. */
         public ?string $name,
+        /** Betreff. */
         public ?string $subject = null,
+        /** Einleitung. */
         public ?string $header = null,
+        /** Anmerkung. */
         public ?string $footer = null,
         /**
+         * Fälligkeit in Tagen.
+         *
          * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?int $dueDays = null,
+        /** Reihenfolge der Mahnstufe. */
         public ?int $sort = null,
+        /** Name der Mahngebühr (falls vorhanden). */
         public ?string $chargeName = null,
+        /** Beschreibung der Mahngebühr (falls vorhanden). */
         public ?string $chargeDescription = null,
+        /** Höhe der Mahngebühr (falls vorhanden). */
         public ?float $chargeAmount = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -56,6 +75,10 @@ final readonly class ReminderText
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

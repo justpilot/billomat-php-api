@@ -7,20 +7,33 @@ namespace Justpilot\Billomat\Model;
 use Justpilot\Billomat\Internal\ScalarCaster;
 
 /**
- * Steuerfreies Land (`/country-taxes`) — Ländercode nach ISO 3166 Alpha-2,
- * für das Billomat keine Mehrwertsteuer berechnet.
+ * Steuerfreies Land, für das Billomat keine Mehrwertsteuer berechnet.
  *
- * Quelle: https://www.billomat.com/api/einstellungen/steuerfreie-laender/
+ * Dieses Model bildet die Struktur von GET /country-taxes bzw. GET /country-taxes/{id} ab.
+ *
+ * Dokumentation:
+ * https://www.billomat.com/api/einstellungen/steuerfreie-laender/
+ *
+ * Generiert aus tools/codegen/definitions/country-taxes.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class CountryTax
 {
     public function __construct(
+        /** Interne Billomat-ID des Eintrags. */
         public ?int $id,
+        /**
+         * Ländercode nach ISO 3166 Alpha-2.
+         *
+         * Beispiel: "CH"
+         */
         public ?string $countryCode = null,
     ) {
     }
 
     /**
+     * Hydriert das Model aus einem Billomat-Response-Array.
+     *
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
@@ -32,6 +45,10 @@ final readonly class CountryTax
     }
 
     /**
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
+     *
      * @return array<string,mixed>
      */
     public function toArray(): array

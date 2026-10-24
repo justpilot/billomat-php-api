@@ -1327,18 +1327,6 @@ parameters:
 			path: src/Http/BillomatHttpClientInterface.php
 
 		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/ArticleProperty.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\PropertyType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ArticleProperty.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 2
@@ -1367,18 +1355,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/ArticleTagCloudEntry.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/ClientProperty.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\PropertyType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/ClientProperty.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
@@ -1817,18 +1793,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Model/IncomingPayment.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/IncomingProperty.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\PropertyType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/IncomingProperty.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
@@ -2347,18 +2311,6 @@ parameters:
 			path: src/Model/Settings.php
 
 		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/SupplierProperty.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\PropertyType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/SupplierProperty.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 2
@@ -2387,42 +2339,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/SupplierTagCloudEntry.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/Template.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\TemplateDocumentType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Template.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\TemplateFormat\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Template.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\TemplateType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/Template.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: src/Model/UserProperty.php
-
-		-
-			message: '#^Parameter \#1 \$value of static method Justpilot\\Billomat\\Model\\Enum\\PropertyType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/UserProperty.php
 
 		-
 			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertNull\(\)\.$#'

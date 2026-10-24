@@ -72,6 +72,22 @@ final class TemplateTest extends TestCase
     }
 
     #[Test]
+    public function itTreatsIsDefaultTrueStringAsTrue(): void
+    {
+        $template = Template::fromArray(['id' => 1, 'is_default' => 'true']);
+
+        self::assertTrue($template->isDefault);
+    }
+
+    #[Test]
+    public function itTreatsIsDefaultFalseStringAsFalse(): void
+    {
+        $template = Template::fromArray(['id' => 1, 'is_default' => 'false']);
+
+        self::assertFalse($template->isDefault);
+    }
+
+    #[Test]
     public function itHandlesUnknownEnumValuesAsNull(): void
     {
         $template = Template::fromArray([

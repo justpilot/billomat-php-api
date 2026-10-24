@@ -8,7 +8,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Changed
 - **`TaxRate` samt `TaxRateCreateOptions` sowie die Read-Models `FreeText`, `EmailTemplate`, `ReminderText` und `CountryTax` werden generiert** (Definitionen `taxes.php`, `free-texts.php`, `email-templates.php`, `reminder-texts.php`, `country-taxes.php` unter `tools/codegen/definitions/`). Öffentliche API und `toArray()`-Ausgaben sind unverändert; neu sind nur Docblocks an jeder Property. Der Generator kann dafür jetzt abweichende Property-Namen und `toArray()`-Schlüssel (`EmailTemplate::$body` aus `text`, `ReminderText::$sort` aus `sorting`), Bool-Werte als 1/0 im Read-Model und Konstruktor-Parameter mit Default.
-- **`TaxRate::$isDefault` liest `is_default` wie alle anderen Models über `ScalarCaster`.** Bisher galt nur `1`/`"1"` als `true`; jetzt auch z. B. `"true"`. `"0"`, `"false"`, `""` und ein fehlendes Feld ergeben weiterhin `false`.
+- **`Template` samt `TemplateCreateOptions`/`TemplateUpdateOptions`, die fünf Attribut-Definitionen `ArticleProperty`, `ClientProperty`, `SupplierProperty`, `IncomingProperty`, `UserProperty` und die geteilten `PropertyCreateOptions` werden generiert** (Definitionen `templates.php` und `*-properties.php` unter `tools/codegen/definitions/`, die Attribute teilen sich `shared/properties.php`). Öffentliche API und `toArray()`-Ausgaben sind unverändert; neu sind nur Docblocks an jeder Property. Der Generator kann dafür jetzt Null-Felder in `toArray()` des Read-Models weglassen (`filterNulls`). `Role` bleibt handgeschrieben, weil es die Rechte-Felder als `permissions`-Map bündelt.
+- **`TaxRate::$isDefault` und `Template::$isDefault` lesen `is_default` wie alle anderen Models über `ScalarCaster`.** Bisher galt nur `1`/`"1"` (bei `Template` auch `true`) als `true`; jetzt auch z. B. `"true"`. `"0"`, `"false"`, `""` und ein fehlendes Feld ergeben weiterhin `false`.
+- **Enum-Felder von `Template` und den `*Property`-Models werfen bei Werten, die keine Strings sind, keinen `TypeError` mehr**, sondern ergeben `null` wie unbekannte Werte.
 
 ## [3.3.0] - 2026-10-24
 

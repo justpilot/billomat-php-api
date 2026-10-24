@@ -33,6 +33,7 @@ declare(strict_types=1);
  * Ressourcen-Schlüssel: 'createOptions' und 'updateOptions' sind optional. Fehlen sie,
  * entsteht nur das Read-Model; 'specEndpoint' nennt dann den Endpunkt für den Drift-Abgleich.
  * 'boolAsInt' => true an 'model' oder an den Options gibt Bool-Felder in toArray() als 1/0 aus.
+ * 'filterNulls' => true an 'model' lässt Null-Felder in toArray() des Read-Models weg.
  *
  * Nach Änderungen: composer generate
  */

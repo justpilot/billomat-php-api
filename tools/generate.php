@@ -261,7 +261,9 @@ function renderModel(array $definition, array $fields, string $source): string
     $out .= "        );\n    }\n\n";
 
     $out .= "    /**\n     * Exportiert das Model als Array mit Billomat-Feldnamen.\n     *\n     * Praktisch für Debugging oder Log-Ausgaben.\n     *\n     * @return array<string,mixed>\n     */\n";
-    $out .= "    public function toArray(): array\n    {\n        return [\n";
+    // `model.filterNulls`: toArray() lässt Null-Felder weg (BC).
+    $filterNulls = !empty($definition['model']['filterNulls']);
+    $out .= "    public function toArray(): array\n    {\n        return " . ($filterNulls ? 'array_filter(' : '') . "[\n";
     $boolAsInt = !empty($definition['model']['boolAsInt']);
     foreach ($fields as $field) {
         $value = '$this->' . $field['property'];
@@ -275,7 +277,7 @@ function renderModel(array $definition, array $fields, string $source): string
         // `model.key`: abweichender Schlüssel in toArray() (BC, z. B. nach einer Umbenennung bei Billomat).
         $out .= "            '" . ($field['model']['key'] ?? $field['wire']) . "' => " . $value . ",\n";
     }
-    $out .= "        ];\n    }\n}\n";
+    $out .= '        ]' . ($filterNulls ? ', static fn (mixed $v): bool => null !== $v)' : '') . ";\n    }\n}\n";
 
     return $out;
 }

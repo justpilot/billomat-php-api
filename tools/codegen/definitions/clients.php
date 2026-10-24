@@ -13,7 +13,7 @@ declare(strict_types=1);
  * Feld-Schlüssel (alle optional):
  *   doc         Ein-Satz-Beschreibung (deutsch). Fehlt sie, wird description_de aus der Spec genommen.
  *   details     Weitere Doku-Zeilen (z. B. „Beispiel: …“).
- *   type        string|int|float|bool|date|datetime – Pflicht für Felder, die nicht in der Spec stehen.
+ *   type        string|int|float|bool|date|datetime|mixed – Pflicht für Felder, die nicht in der Spec stehen.
  *   readOnly    true = nur im Read-Model, nicht in den Options.
  *   optionsOnly true = nur in den Options, nicht im Read-Model.
  *   writable    true = in den Options, obwohl die Spec das Feld nicht beim Anlegen nennt.
@@ -37,6 +37,9 @@ declare(strict_types=1);
  * Eine Definitionsdatei darf statt einer Definition eine Liste von Definitionen zurückgeben.
  * 'boolAsInt' => true an 'model' oder an den Options gibt Bool-Felder in toArray() als 1/0 aus.
  * 'filterNulls' => true an 'model' lässt Null-Felder in toArray() des Read-Models weg.
+ * 'toArray' => [...] an 'model' oder an den Options legt Auswahl und Reihenfolge der
+ * toArray()-Schlüssel fest (Billomat-Feldnamen); ohne die Liste gilt die Feldreihenfolge.
+ * 'dateObjects' => true an den Options führt Datumsfelder als DateTimeImmutable statt als String.
  *
  * Nach Änderungen: composer generate
  */

@@ -1327,12 +1327,6 @@ parameters:
 			path: src/Http/BillomatHttpClientInterface.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/ArticlePropertyValue.php
-
-		-
 			message: '#^Cannot access offset ''confirmation\-item'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -1385,12 +1379,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Model/Confirmation.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/ConfirmationComment.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
@@ -1477,12 +1465,6 @@ parameters:
 			path: src/Model/CreditNote.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/CreditNoteComment.php
-
-		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
 			count: 2
@@ -1493,24 +1475,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/CreditNoteItem.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 1
-			path: src/Model/CreditNotePayment.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/CreditNotePayment.php
-
-		-
-			message: '#^Parameter \#1 \$type of static method Justpilot\\Billomat\\Model\\Enum\\InvoicePaymentType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/CreditNotePayment.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
@@ -1585,12 +1549,6 @@ parameters:
 			path: src/Model/DeliveryNote.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/DeliveryNoteComment.php
-
-		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
 			count: 2
@@ -1649,36 +1607,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/IncomingCategory.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/IncomingComment.php
-
-		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 1
-			path: src/Model/IncomingPayment.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/IncomingPayment.php
-
-		-
-			message: '#^Parameter \#1 \$type of static method Justpilot\\Billomat\\Model\\Enum\\InvoicePaymentType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/IncomingPayment.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/IncomingPropertyValue.php
 
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
@@ -1741,12 +1669,6 @@ parameters:
 			path: src/Model/Invoice.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/InvoiceComment.php
-
-		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
 			count: 2
@@ -1759,24 +1681,6 @@ parameters:
 			path: src/Model/InvoiceItem.php
 
 		-
-			message: '#^Cannot cast mixed to float\.$#'
-			identifier: cast.double
-			count: 1
-			path: src/Model/InvoicePayment.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/InvoicePayment.php
-
-		-
-			message: '#^Parameter \#1 \$type of static method Justpilot\\Billomat\\Model\\Enum\\InvoicePaymentType\:\:fromApi\(\) expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Model/InvoicePayment.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
 			count: 3
@@ -1799,12 +1703,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: src/Model/Letter.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/LetterComment.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
@@ -1871,12 +1769,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Model/Offer.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: src/Model/OfferComment.php
 
 		-
 			message: '#^Cannot cast mixed to float\.$#'
@@ -2045,12 +1937,6 @@ parameters:
 			identifier: booleanAnd.rightNotBoolean
 			count: 1
 			path: src/Model/Settings.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 2
-			path: src/Model/SupplierPropertyValue.php
 
 		-
 			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertNull\(\)\.$#'

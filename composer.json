@@ -1,6 +1,6 @@
 {
   "name": "justpilot/billomat-php-api",
-  "description": "Unofficial PHP 8.4+ SDK for the Billomat API, powered by Symfony components.",
+  "description": "Unofficial PHP 8.5+ SDK for the Billomat API, powered by Symfony components.",
   "type": "library",
   "license": "Apache-2.0",
   "homepage": "https://github.com/justpilot/billomat-php-api",
@@ -18,7 +18,7 @@
     "http-client",
     "typed",
     "readonly",
-    "php84",
+    "php85",
     "dach",
     "gobd"
   ],
@@ -27,7 +27,7 @@
     "source": "https://github.com/justpilot/billomat-php-api"
   },
   "require": {
-    "php": "^8.4",
+    "php": "^8.5",
     "symfony/http-client": "^8.1"
   },
   "require-dev": {

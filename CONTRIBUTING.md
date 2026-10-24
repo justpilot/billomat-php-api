@@ -12,7 +12,7 @@ Danke, dass du zu `justpilot/billomat-php-api` beitragen möchtest. Dieses Dokum
 
 ## Coding-Standards
 
-- **PHP 8.4+**. Verwende moderne Sprachfeatures: `final readonly` Klassen für Read-Modelle, `readonly` Properties für Konfiguration, Constructor Property Promotion, Named Arguments, Enums.
+- **PHP 8.5+**. Verwende moderne Sprachfeatures: `final readonly` Klassen für Read-Modelle, `readonly` Properties für Konfiguration, Constructor Property Promotion, Named Arguments, Enums.
 - **`declare(strict_types=1);` am Anfang jeder PHP-Datei**.
 - **`final` für API-Klassen**, `final readonly` für Read-Modelle in `src/Model/`.
 - **PSR-4**:

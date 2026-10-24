@@ -47,6 +47,14 @@ final class TaxRateTest extends TestCase
     }
 
     #[Test]
+    public function itTreatsIsDefaultTrueStringAsTrue(): void
+    {
+        $tax = TaxRate::fromArray(['is_default' => 'true']);
+
+        self::assertTrue($tax->isDefault);
+    }
+
+    #[Test]
     public function itDefaultsMissingFields(): void
     {
         $tax = TaxRate::fromArray([]);

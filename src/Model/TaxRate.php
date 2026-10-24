@@ -12,8 +12,14 @@ use const DATE_ATOM;
 /**
  * Repräsentiert einen Steuersatz aus der Billomat-API.
  *
+ * Dieses Model bildet die Struktur von GET /taxes bzw. GET /taxes/{id} ab.
+ * Es ist als Read-Model gedacht: Anlegen und Ändern erfolgen über TaxRateCreateOptions.
+ *
  * Dokumentation:
  * https://www.billomat.com/api/einstellungen/steuersaetze/
+ *
+ * Generiert aus tools/codegen/definitions/taxes.php – nicht von Hand bearbeiten,
+ * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class TaxRate
 {
@@ -26,21 +32,37 @@ final readonly class TaxRate
          * @deprecated since 3.1 – Billomat liefert `account_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
          */
         public ?int $accountId,
-        /** Name des Steuersatzes, z. B. "MwSt". */
+        /**
+         * Name des Steuersatzes.
+         *
+         * Beispiel: "MwSt"
+         */
         public string $name,
-        /** Höhe des Steuersatzes in Prozent, z. B. 19.0. */
+        /**
+         * Höhe des Steuersatzes in Prozent.
+         *
+         * Beispiel: 19.0
+         */
         public float $rate,
-        /** Gibt an, ob es sich um den Standardsteuersatz handelt. */
+        /** Standard-Steuersatz? */
         public bool $isDefault,
+        /** Erstellungszeitpunkt des Steuersatzes. */
         public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Kann der Steuersatz gelöscht werden?
+         *
+         * false, solange er auf Belegen oder Artikeln verwendet wird.
+         */
         public ?bool $canDelete = null,
     ) {
     }
 
     /**
-     * Hydriert ein TaxRate-Model aus einem Billomat-Array.
+     * Hydriert das Model aus einem Billomat-Response-Array.
      *
      * @param array<string,mixed> $data
      */
@@ -49,9 +71,9 @@ final readonly class TaxRate
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             accountId: ScalarCaster::toIntOrNull($data['account_id'] ?? null),
-            name: (string) ($data['name'] ?? ''),
-            rate: isset($data['rate']) ? (float) $data['rate'] : 0.0,
-            isDefault: isset($data['is_default']) && 1 === (int) $data['is_default'],
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            rate: ScalarCaster::toFloatOrNull($data['rate'] ?? null) ?? 0.0,
+            isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -60,7 +82,9 @@ final readonly class TaxRate
     }
 
     /**
-     * Exportiert den Steuersatz als Array mit Billomat-Feldnamen.
+     * Exportiert das Model als Array mit Billomat-Feldnamen.
+     *
+     * Praktisch für Debugging oder Log-Ausgaben.
      *
      * @return array<string,mixed>
      */
@@ -71,7 +95,7 @@ final readonly class TaxRate
             'account_id' => $this->accountId,
             'name' => $this->name,
             'rate' => $this->rate,
-            'is_default' => $this->isDefault ? 1 : 0,
+            'is_default' => ($this->isDefault ? 1 : 0),
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,

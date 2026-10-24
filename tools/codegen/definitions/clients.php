@@ -23,12 +23,16 @@ declare(strict_types=1);
  *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
  *               ['type' => 'int']     → abweichender Typ im Read-Model
  *               ['sources' => [...]]  → Billomat-Felder, die beim Hydrieren der Reihe nach probiert werden
+ *               ['property' => 'x']   → abweichender Property-Name im Read-Model
+ *               ['key' => 'x']        → abweichender Schlüssel in toArray() des Read-Models
  *   create      ['nonNull' => true, 'default' => <wert>] → nicht-nullbare Property mit Default
  *               ['constructor' => true] → Pflicht-Parameter im Konstruktor der Create-Options
+ *               ['constructor' => true, 'default' => <wert>] → Konstruktor-Parameter mit Default
  *   update      ['skip' => true]      → fehlt in den Update-Options
  *
  * Ressourcen-Schlüssel: 'createOptions' und 'updateOptions' sind optional. Fehlen sie,
  * entsteht nur das Read-Model; 'specEndpoint' nennt dann den Endpunkt für den Drift-Abgleich.
+ * 'boolAsInt' => true an 'model' oder an den Options gibt Bool-Felder in toArray() als 1/0 aus.
  *
  * Nach Änderungen: composer generate
  */

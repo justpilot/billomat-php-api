@@ -6,6 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Changed
+- **`TaxRate` samt `TaxRateCreateOptions` sowie die Read-Models `FreeText`, `EmailTemplate`, `ReminderText` und `CountryTax` werden generiert** (Definitionen `taxes.php`, `free-texts.php`, `email-templates.php`, `reminder-texts.php`, `country-taxes.php` unter `tools/codegen/definitions/`). Öffentliche API und `toArray()`-Ausgaben sind unverändert; neu sind nur Docblocks an jeder Property. Der Generator kann dafür jetzt abweichende Property-Namen und `toArray()`-Schlüssel (`EmailTemplate::$body` aus `text`, `ReminderText::$sort` aus `sorting`), Bool-Werte als 1/0 im Read-Model und Konstruktor-Parameter mit Default.
+- **`TaxRate::$isDefault` liest `is_default` wie alle anderen Models über `ScalarCaster`.** Bisher galt nur `1`/`"1"` als `true`; jetzt auch z. B. `"true"`. `"0"`, `"false"`, `""` und ein fehlendes Feld ergeben weiterhin `false`.
+
 ## [3.3.0] - 2026-10-24
 
 ### Changed

@@ -167,7 +167,7 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
 
         $resolved[] = [
             'wire' => $name,
-            'property' => lcfirst(str_replace('_', '', ucwords($name, '_'))),
+            'property' => $field['model']['property'] ?? lcfirst(str_replace('_', '', ucwords($name, '_'))),
             'type' => $type,
             'doc' => $field['doc'] ?? ($specField['description_de'] ?? null) ?? throw new RuntimeException("Feld '{$name}' hat keine Doku ({$source})."),
             'details' => $field['details'] ?? [],
@@ -262,15 +262,18 @@ function renderModel(array $definition, array $fields, string $source): string
 
     $out .= "    /**\n     * Exportiert das Model als Array mit Billomat-Feldnamen.\n     *\n     * Praktisch für Debugging oder Log-Ausgaben.\n     *\n     * @return array<string,mixed>\n     */\n";
     $out .= "    public function toArray(): array\n    {\n        return [\n";
+    $boolAsInt = !empty($definition['model']['boolAsInt']);
     foreach ($fields as $field) {
         $value = '$this->' . $field['property'];
         $value = match (true) {
             null !== $field['enumClass'] => $value . '?->value',
             'date' === modelType($field) => $value . "?->format('Y-m-d')",
             'datetime' === modelType($field) => $value . '?->format(DATE_ATOM)',
+            $boolAsInt && 'bool' === modelType($field) => boolAsIntExpression($value, !empty($field['model']['nonNull'])),
             default => $value,
         };
-        $out .= "            '" . $field['wire'] . "' => " . $value . ",\n";
+        // `model.key`: abweichender Schlüssel in toArray() (BC, z. B. nach einer Umbenennung bei Billomat).
+        $out .= "            '" . ($field['model']['key'] ?? $field['wire']) . "' => " . $value . ",\n";
     }
     $out .= "        ];\n    }\n}\n";
 
@@ -380,7 +383,11 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $out .= "    public function __construct(\n";
         foreach ($promoted as $field) {
             $out .= docBlock(optionsDocLines($field, $isCreate), '        ');
-            $out .= '        public ' . optionsPhpType($field) . ' $' . $field['property'] . ",\n";
+            $out .= '        public ' . optionsPhpType($field) . ' $' . $field['property'];
+            if (\array_key_exists('default', $field['create'])) {
+                $out .= ' = ' . var_export($field['create']['default'], true);
+            }
+            $out .= ",\n";
         }
         $out .= "    ) {\n    }\n\n";
     }
@@ -398,24 +405,38 @@ function renderOptions(array $definition, array $options, array $fields, string 
     }
 
     $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n     *\n     * @return array<string,mixed>\n     */\n";
-    $out .= "    public function toArray(): array\n    {\n        \$data = [\n";
+    $entries = '';
+    $filterNulls = false;
     foreach ($writable as $field) {
         $value = '$this->' . $field['property'];
         $nonNull = $isCreate && (!empty($field['create']['nonNull']) || !empty($field['create']['constructor']));
+        $filterNulls = $filterNulls || !$nonNull;
         if (null !== $field['enumClass']) {
             $value .= $nonNull ? '->value' : '?->value';
         }
         if ($boolAsInt && 'bool' === $field['type']) {
-            $value = $nonNull
-                ? "({$value} ? 1 : 0)"
-                : "null === {$value} ? null : ({$value} ? 1 : 0)";
+            $value = boolAsIntExpression($value, $nonNull);
         }
-        $out .= "            '" . $field['wire'] . "' => " . $value . ",\n";
+        $entries .= "            '" . $field['wire'] . "' => " . $value . ",\n";
     }
-    $out .= "        ];\n\n        // Null-Felder entfernen\n";
+
+    $out .= "    public function toArray(): array\n    {\n";
+    // Sind alle Felder nicht-nullbar, gibt es nichts zu filtern.
+    if (!$filterNulls) {
+        return $out . "        return [\n" . $entries . "        ];\n    }\n}\n";
+    }
+    $out .= "        \$data = [\n" . $entries . "        ];\n\n        // Null-Felder entfernen\n";
     $out .= "        return array_filter(\$data, static fn (mixed \$v): bool => null !== \$v);\n    }\n}\n";
 
     return $out;
+}
+
+/**
+ * Billomat erwartet bzw. liefert an manchen Stellen 1/0 statt true/false.
+ */
+function boolAsIntExpression(string $value, bool $nonNull): string
+{
+    return $nonNull ? "({$value} ? 1 : 0)" : "null === {$value} ? null : ({$value} ? 1 : 0)";
 }
 
 /**

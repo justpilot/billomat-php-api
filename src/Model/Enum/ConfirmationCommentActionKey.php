@@ -11,6 +11,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum ConfirmationCommentActionKey: string
 {
+    use FromApi;
+
     case CREATE = 'CREATE';
     case EDIT = 'EDIT';
     case OPEN = 'OPEN';

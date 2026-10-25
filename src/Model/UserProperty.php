@@ -68,7 +68,7 @@ final readonly class UserProperty
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
-            type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: PropertyType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
             isNvl: ScalarCaster::toBoolOrNull($data['is_nvl'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),

@@ -104,10 +104,7 @@ final class ModelRoundTripTest extends TestCase
                 'bool' => false,
                 'array' => [],
                 Money::class => Money::zero(),
-                // Pflicht-Enums bilden unbekannte Werte über fromApi() auf einen Fallback ab.
-                default => method_exists($type->getName(), 'fromApi')
-                    ? $type->getName()::fromApi('')
-                    : self::fail('Kein Leerwert für Typ '.$type->getName()),
+                default => self::fail('Kein Leerwert für Typ '.$type->getName()),
             };
             self::assertEquals($expected, $value, $class.'::$'.$parameter->name);
         }

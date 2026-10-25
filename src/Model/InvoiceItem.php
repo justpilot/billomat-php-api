@@ -121,7 +121,7 @@ final readonly class InvoiceItem
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
-            type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: ItemType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),

@@ -27,7 +27,7 @@ declare(strict_types=1);
  *   enumList    true = kommaseparierte Werte (z. B. Zahlarten) als list<Enum>.
  *   model       ['required' => true]  → Konstruktor-Parameter ohne Default
  *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
- *                                       (Enums: über Enum::fromApi(), braucht zusätzlich 'required')
+ *                                       (nicht für Enums: unbekannte Werte werden immer zu null)
  *               ['type' => 'int']     → abweichender Typ im Read-Model
  *               ['sources' => [...]]  → Billomat-Felder, die beim Hydrieren der Reihe nach probiert werden
  *               ['property' => 'x']   → abweichender Property-Name im Read-Model

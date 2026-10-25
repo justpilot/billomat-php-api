@@ -97,7 +97,7 @@ final readonly class ConfirmationComment
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
-            actionkey: ConfirmationCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
+            actionkey: ConfirmationCommentActionKey::fromApi(ScalarCaster::toStringOrNull($data['actionkey'] ?? null)),
             actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             public: ScalarCaster::toBoolOrNull($data['public'] ?? null),

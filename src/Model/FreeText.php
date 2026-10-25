@@ -87,7 +87,7 @@ final readonly class FreeText
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            type: FreeTextType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: FreeTextType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
             extra: array_diff_key($data, self::FIELDS),

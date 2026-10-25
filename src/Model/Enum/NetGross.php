@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Model\Enum;
 
 enum NetGross: string
 {
+    use FromApi;
+
     case NET = 'NET';
     case GROSS = 'GROSS';
     case SETTINGS = 'SETTINGS';

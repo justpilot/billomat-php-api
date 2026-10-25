@@ -94,7 +94,7 @@ final readonly class EmailTemplate
             body: ScalarCaster::toStringOrNull($data['text'] ?? $data['body'] ?? null),
             fromAddress: ScalarCaster::toStringOrNull($data['from'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
-            type: EmailTemplateType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: EmailTemplateType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             bcc: ScalarCaster::toBoolOrNull($data['bcc'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),

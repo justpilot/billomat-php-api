@@ -168,10 +168,10 @@ final readonly class Article
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
-            type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: ItemType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
             costCenter: ScalarCaster::toStringOrNull($data['cost_center'] ?? null),
-            purchasePriceNetGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null) ?? ''),
+            purchasePriceNetGross: NetGross::fromApi(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null)),
             extra: array_diff_key($data, self::FIELDS),
         );
     }

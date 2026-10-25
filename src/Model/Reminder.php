@@ -137,7 +137,7 @@ final readonly class Reminder
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            status: ReminderStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
+            status: ReminderStatus::fromApi(ScalarCaster::toStringOrNull($data['status'] ?? null)),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),

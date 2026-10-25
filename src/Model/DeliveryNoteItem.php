@@ -93,7 +93,7 @@ final readonly class DeliveryNoteItem
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
-            type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: ItemType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );

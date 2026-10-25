@@ -97,7 +97,7 @@ final readonly class OfferComment
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
-            actionkey: OfferCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
+            actionkey: OfferCommentActionKey::fromApi(ScalarCaster::toStringOrNull($data['actionkey'] ?? null)),
             actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             public: ScalarCaster::toBoolOrNull($data['public'] ?? null),

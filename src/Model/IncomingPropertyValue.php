@@ -76,7 +76,7 @@ final readonly class IncomingPropertyValue
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             incomingPropertyId: ScalarCaster::toIntOrNull($data['incoming_property_id'] ?? null) ?? 0,
-            type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: PropertyType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

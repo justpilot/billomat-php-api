@@ -98,10 +98,10 @@ final readonly class Template
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            type: TemplateDocumentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
-            templateType: TemplateType::tryFrom(ScalarCaster::toStringOrNull($data['template_type'] ?? null) ?? ''),
+            type: TemplateDocumentType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
+            templateType: TemplateType::fromApi(ScalarCaster::toStringOrNull($data['template_type'] ?? null)),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
-            format: TemplateFormat::tryFrom(ScalarCaster::toStringOrNull($data['format'] ?? null) ?? ''),
+            format: TemplateFormat::fromApi(ScalarCaster::toStringOrNull($data['format'] ?? null)),
             base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),

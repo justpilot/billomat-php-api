@@ -98,7 +98,7 @@ final readonly class IncomingPayment
             incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             amount: ScalarCaster::toMoneyOrNull($data['amount'] ?? null) ?? Money::zero(),
-            type: PaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: PaymentType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

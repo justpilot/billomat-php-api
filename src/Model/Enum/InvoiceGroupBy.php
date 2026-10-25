@@ -15,6 +15,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum InvoiceGroupBy: string
 {
+    use FromApi;
+
     case CLIENT = 'client';
     case STATUS = 'status';
     case DAY = 'day';

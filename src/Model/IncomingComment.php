@@ -85,7 +85,7 @@ final readonly class IncomingComment
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
-            actionkey: IncomingCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
+            actionkey: IncomingCommentActionKey::fromApi(ScalarCaster::toStringOrNull($data['actionkey'] ?? null)),
             actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),

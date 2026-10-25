@@ -15,6 +15,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum PaymentType: string
 {
+    use FromApi;
+
     case INVOICE_CORRECTION = 'INVOICE_CORRECTION';
     case CREDIT_NOTE = 'CREDIT_NOTE';
     case BANK_CARD = 'BANK_CARD';
@@ -26,15 +28,6 @@ enum PaymentType: string
     case CREDIT_CARD = 'CREDIT_CARD';
     case COUPON = 'COUPON';
     case MISC = 'MISC';
-
-    public static function fromApi(?string $type): ?self
-    {
-        if (null === $type || '' === $type) {
-            return null;
-        }
-
-        return self::tryFrom($type);
-    }
 
     /**
      * Deutsche Labels für die UI.

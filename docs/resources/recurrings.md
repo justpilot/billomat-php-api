@@ -321,7 +321,7 @@ Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt: `recurrin
 
 ### Read-Modell: `RecurringEmailReceiver`
 
-`final readonly`. Felder: `id`, `recurringId`, `type` (`RecurringEmailReceiverType`), `address`.
+`final readonly`. Felder: `id`, `recurringId`, `type` (`?RecurringEmailReceiverType`, null bei unbekanntem Wert), `address`.
 
 ## Verwendete Enums
 
@@ -331,7 +331,7 @@ Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt: `recurrin
   - `COMPLETE` — erstellt und schließt die Rechnung ab (PDF wird generiert),
   - `EMAIL` — erstellt, schließt ab und versendet per E-Mail (nutzt `recurring-email-receivers`),
   - `MAIL` — erstellt, schließt ab und versendet postalisch (Pixelletter, kostenpflichtig).
-- [`RecurringEmailReceiverType`](../../src/Model/Enum/RecurringEmailReceiverType.php): `TO`, `CC`, `BCC` (Wire-Werte kleingeschrieben).
+- [`RecurringEmailReceiverType`](../../src/Model/Enum/RecurringEmailReceiverType.php): `TO`, `CC`, `BCC` (Billomat liefert `To`/`Cc`/`Bcc`, `fromApi()` akzeptiert auch Kleinbuchstaben).
 
 ## Stolpersteine
 

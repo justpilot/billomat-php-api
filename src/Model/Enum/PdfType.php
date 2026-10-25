@@ -9,19 +9,13 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum PdfType: string
 {
+    use FromApi;
+
     /** Signiertes PDF */
     case SIGNED = 'signed';
 
     /** Druckversion (ohne Hintergrund) */
     case PRINT = 'print';
-
-    /**
-     * Wandelt ein API-String oder null in ein Enum um.
-     */
-    public static function fromApi(?string $value): ?self
-    {
-        return $value ? self::tryFrom($value) : null;
-    }
 
     /**
      * Menschlich lesbares Label.

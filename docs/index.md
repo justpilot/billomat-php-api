@@ -41,7 +41,3 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: getenv('BILL
 $invoice = $billomat->invoices->getOrFail(42);
 echo $invoice->totalGross?->format(2, ',', '.');
 ```
-
-::: info Documentation language
-The documentation is being translated to English for 4.0; most pages are still German.
-:::

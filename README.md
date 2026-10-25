@@ -80,7 +80,7 @@ More runnable scripts in [examples/](examples/).
 | Upgrading from 3.x | [UPGRADE-4.0.md](UPGRADE-4.0.md) |
 | Coming from `phobetor/billomat` | [docs/migration-from-phobetor.md](docs/migration-from-phobetor.md) |
 
-The documentation is being translated to English and moves to a documentation website for 4.0; most pages under `docs/` are still German.
+The full documentation is also published at [billomat-php.justpilot.io](https://billomat-php.justpilot.io).
 
 ## Supported versions
 

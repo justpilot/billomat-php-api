@@ -1,6 +1,6 @@
 # Resources
 
-Every Billomat resource is a property on `BillomatClient`; sub-resources hang off their parent (`$billomat->invoices->payments`). Each page lists the methods, fields and quirks of one resource (most pages are still German).
+Every Billomat resource is a property on `BillomatClient`; sub-resources hang off their parent (`$billomat->invoices->payments`). Each page lists the methods, fields and quirks of one resource.
 
 ## Master data
 

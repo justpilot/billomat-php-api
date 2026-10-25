@@ -7,8 +7,6 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\NotFoundException;
-use Justpilot\Billomat\Model\Client;
-use Justpilot\Billomat\Model\InvoiceComment;
 use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -21,6 +19,8 @@ use ReflectionProperty;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
+
+use const PHP_URL_PATH;
 
 /**
  * Prüft `getOrFail()` auf allen Ressourcen und Sub-Ressourcen von {@see BillomatClient}.
@@ -78,13 +78,34 @@ final class GetOrFailTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('apis')]
+    public function getOrFailReturnsWhatGetReturns(string $resource, string $subResource): void
+    {
+        // Envelope-Schlüssel aus dem Pfad: /credit-notes/7 → credit-note, /taxes/7 → tax, /incoming-categories/x → incoming-category.
+        $mock = new MockHttpClient(static function (string $method, string $url): MockResponse {
+            $slug = explode('/', (string) parse_url($url, PHP_URL_PATH))[2] ?? '';
+            $key = (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
+
+            return new MockResponse((string) json_encode([$key => ['id' => '7']]));
+        });
+        $billomat = new BillomatClient(new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'), new Psr18Client($mock));
+        $api = $this->api($billomat, $resource, $subResource);
+        $id = 'incomingCategories' === $resource ? 'abc' : 7;
+
+        $expected = new ReflectionMethod($api, 'get')->invoke($api, $id);
+        $actual = new ReflectionMethod($api, 'getOrFail')->invoke($api, $id);
+
+        self::assertNotNull($expected);
+        self::assertEquals($expected, $actual);
+    }
+
+    #[Test]
     public function getOrFailReturnsTheResource(): void
     {
         $billomat = self::client(new MockResponse('{"client":{"id":"7","name":"ACME"}}'));
 
         $client = $billomat->clients->getOrFail(7);
 
-        self::assertInstanceOf(Client::class, $client);
         self::assertSame('ACME', $client->name);
     }
 
@@ -95,7 +116,6 @@ final class GetOrFailTest extends TestCase
 
         $comment = $billomat->invoices->comments->getOrFail(3);
 
-        self::assertInstanceOf(InvoiceComment::class, $comment);
         self::assertSame('Hallo', $comment->comment);
     }
 

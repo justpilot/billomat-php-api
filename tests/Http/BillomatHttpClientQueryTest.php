@@ -209,23 +209,38 @@ final class BillomatHttpClientQueryTest extends TestCase
     #[Test]
     public function itSendsTheConfiguredLanguage(): void
     {
-        $captured = [];
-        $client = new BillomatHttpClient(new Psr18Client($this->captureMock($captured)), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: 'en-gb'));
-
-        $client->request('GET', '/clients');
-
-        self::assertSame('en-gb', $this->normaliseHeaders($captured['options']['headers'] ?? [])['accept-language'] ?? null);
+        self::assertContains('Accept-Language: en-gb', $this->sentHeaders('en-gb'));
     }
 
     #[Test]
     public function itOmitsAcceptLanguageWithoutLanguage(): void
     {
-        $captured = [];
-        $client = new BillomatHttpClient(new Psr18Client($this->captureMock($captured)), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: null));
+        $headers = $this->sentHeaders(null);
+
+        self::assertNotSame([], $headers);
+        foreach ($headers as $header) {
+            self::assertStringStartsNotWith('Accept-Language:', $header);
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function sentHeaders(?string $language): array
+    {
+        $headers = [];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$headers): MockResponse {
+            foreach ((array) ($options['headers'] ?? []) as $header) {
+                $headers[] = \is_string($header) ? $header : '';
+            }
+
+            return new MockResponse('{}');
+        });
+        $client = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: $language));
 
         $client->request('GET', '/clients');
 
-        self::assertArrayNotHasKey('accept-language', $this->normaliseHeaders($captured['options']['headers'] ?? []));
+        return $headers;
     }
 
     /**

@@ -220,7 +220,7 @@ final class CreditNotesApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            return $this->getRaw("/credit-notes/{$id}/pdf", $query);
+            return $this->getPdf("/credit-notes/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/credit-notes/{$id}/pdf", $query);

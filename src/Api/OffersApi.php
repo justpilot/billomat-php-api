@@ -261,7 +261,7 @@ final class OffersApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            return $this->getRaw("/offers/{$id}/pdf", $query);
+            return $this->getPdf("/offers/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/offers/{$id}/pdf", $query);

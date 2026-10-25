@@ -352,7 +352,7 @@ final class InvoicesApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            return $this->getRaw("/invoices/{$id}/pdf", $query);
+            return $this->getPdf("/invoices/{$id}/pdf", $query);
         }
 
         // Standard-Modus: JSON → { "pdf": { ... } }

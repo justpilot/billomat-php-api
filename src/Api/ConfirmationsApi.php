@@ -220,7 +220,7 @@ final class ConfirmationsApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            return $this->getRaw("/confirmations/{$id}/pdf", $query);
+            return $this->getPdf("/confirmations/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/confirmations/{$id}/pdf", $query);

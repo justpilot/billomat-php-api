@@ -201,6 +201,23 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry:
   `getPrevious()` is no longer a Symfony exception. Status code and response body are unchanged.
 - A 2xx response whose body is not a JSON object throws `UnexpectedResponseException` instead of `JsonException`.
 
+### Raw PDFs are checked
+
+`pdf($id, rawPdf: true)` on invoices, offers, confirmations, credit notes, delivery notes, letters and reminders
+throws `UnexpectedResponseException` when Billomat answers 2xx with an empty body or a body that is not a PDF
+(no `%PDF-` header). 3.x returned such bodies as they were. If you checked the result yourself, you can drop that check:
+
+```php
+// 3.x
+$pdf = $billomat->invoices->pdf($id, rawPdf: true);
+if ('' === $pdf || !str_starts_with($pdf, '%PDF-')) {
+    throw new RuntimeException('Billomat did not return a PDF');
+}
+
+// 4.0
+$pdf = $billomat->invoices->pdf($id, rawPdf: true); // throws UnexpectedResponseException
+```
+
 ## Read-only methods are `#[\NoDiscard]`
 
 `get()`, `getMyself()`, `list()`, `listPage()`, `listGrouped()`, `iterateAll()`, `cloud()`,

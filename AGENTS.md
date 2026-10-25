@@ -106,7 +106,7 @@ A 2xx response whose body isn't a JSON object, or doesn't match the expected env
 
 ### Binary responses
 
-For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`), use `AbstractApi::getRaw($path, $query)` instead of `getJson()`. Pattern is in `InvoicesApi::pdf()`.
+For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`), use `AbstractApi::getRaw($path, $query)` instead of `getJson()`; for PDFs use `getPdf()`, which throws `UnexpectedResponseException` on an empty body or a missing `%PDF-` header. Pattern is in `InvoicesApi::pdf()`.
 
 ## Conventions
 

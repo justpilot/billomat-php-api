@@ -40,7 +40,7 @@ Every Billomat resource follows the same pattern; look at `ClientsApi`, `ClientC
 ## Adding a resource
 
 1. Add a codegen definition (or the handwritten classes for resources that don't fit) and run `composer generate`.
-2. Write the `*Api` class by hand and register it as a `public readonly` property on `BillomatClient`.
+2. Write the `*Api` class by hand and add it as a lazy property hook on `BillomatClient` (same pattern as the other APIs).
 3. New enums go into `src/Model/Enum/` (`enum X: string { use FromApi; case … }`, optionally `label()`).
 4. Add unit tests in `tests/Api/{Resource}ApiTest.php` (see below) and optionally an integration test under `tests/Integration/{Resource}/`.
 5. Add a documentation page under `docs/resources/<resource-name>.md` and link it from the README.
@@ -80,7 +80,7 @@ composer audit            # security audit of the dependencies
 
 **PHPStan:** fix findings instead of adding baseline entries, `@phpstan-ignore` comments or casts that only silence them.
 
-**Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x`. The full run on `main`/`4.x` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
+**Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x --ignore-msi-with-no-mutations` (the last flag keeps a change without any mutants, e.g. only property hooks, from failing with 0 %). The full run on `main`/`4.x` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
 
 **Rector vs. PHP-CS-Fixer:** if one tool reverts the other's change, that's a configuration bug; please open an issue instead of committing a workaround.
 

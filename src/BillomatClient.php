@@ -46,47 +46,107 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
 
-final readonly class BillomatClient
+final class BillomatClient
 {
-    private BillomatHttpClient $http;
+    private readonly BillomatHttpClient $http;
 
-    public SettingsApi $settings;
+    public private(set) SettingsApi $settings {
+        get => $this->settings ??= new SettingsApi($this->http);
+    }
 
     // Dokumente; Positionen, Zahlungen, Kommentare und Schlagworte hängen an der jeweiligen Ressource,
     // z. B. `$billomat->invoices->comments`.
-    public InvoicesApi $invoices;
-    public RecurringsApi $recurrings;
-    public OffersApi $offers;
-    public ConfirmationsApi $confirmations;
-    public DeliveryNotesApi $deliveryNotes;
-    public CreditNotesApi $creditNotes;
-    public RemindersApi $reminders;
-    public LettersApi $letters;
-    public IncomingsApi $incomings;
-    public InboxDocumentsApi $inboxDocuments;
+    public private(set) InvoicesApi $invoices {
+        get => $this->invoices ??= new InvoicesApi($this->http);
+    }
+    public private(set) RecurringsApi $recurrings {
+        get => $this->recurrings ??= new RecurringsApi($this->http);
+    }
+    public private(set) OffersApi $offers {
+        get => $this->offers ??= new OffersApi($this->http);
+    }
+    public private(set) ConfirmationsApi $confirmations {
+        get => $this->confirmations ??= new ConfirmationsApi($this->http);
+    }
+    public private(set) DeliveryNotesApi $deliveryNotes {
+        get => $this->deliveryNotes ??= new DeliveryNotesApi($this->http);
+    }
+    public private(set) CreditNotesApi $creditNotes {
+        get => $this->creditNotes ??= new CreditNotesApi($this->http);
+    }
+    public private(set) RemindersApi $reminders {
+        get => $this->reminders ??= new RemindersApi($this->http);
+    }
+    public private(set) LettersApi $letters {
+        get => $this->letters ??= new LettersApi($this->http);
+    }
+    public private(set) IncomingsApi $incomings {
+        get => $this->incomings ??= new IncomingsApi($this->http);
+    }
+    public private(set) InboxDocumentsApi $inboxDocuments {
+        get => $this->inboxDocuments ??= new InboxDocumentsApi($this->http);
+    }
 
     // Stammdaten; Schlagworte und Attribute hängen an der jeweiligen Ressource, z. B. `$billomat->clients->tags`.
-    public ClientsApi $clients;
-    public ContactsApi $contacts;
-    public ArticlesApi $articles;
-    public SuppliersApi $suppliers;
+    public private(set) ClientsApi $clients {
+        get => $this->clients ??= new ClientsApi($this->http);
+    }
+    public private(set) ContactsApi $contacts {
+        get => $this->contacts ??= new ContactsApi($this->http);
+    }
+    public private(set) ArticlesApi $articles {
+        get => $this->articles ??= new ArticlesApi($this->http);
+    }
+    public private(set) SuppliersApi $suppliers {
+        get => $this->suppliers ??= new SuppliersApi($this->http);
+    }
 
-    public EmailTemplatesApi $emailTemplates;
-    public FreeTextsApi $freeTexts;
-    public ReminderTextsApi $reminderTexts;
-    public UnitsApi $units;
-    public UsersApi $users;
-    public CountriesApi $countries;
-    public CurrenciesApi $currencies;
-    public CountryTaxesApi $countryTaxes;
-    public IncomingCategoriesApi $incomingCategories;
-    public RolesApi $roles;
-    public TemplatesApi $templates;
-    public TaxesApi $taxes;
+    public private(set) EmailTemplatesApi $emailTemplates {
+        get => $this->emailTemplates ??= new EmailTemplatesApi($this->http);
+    }
+    public private(set) FreeTextsApi $freeTexts {
+        get => $this->freeTexts ??= new FreeTextsApi($this->http);
+    }
+    public private(set) ReminderTextsApi $reminderTexts {
+        get => $this->reminderTexts ??= new ReminderTextsApi($this->http);
+    }
+    public private(set) UnitsApi $units {
+        get => $this->units ??= new UnitsApi($this->http);
+    }
+    public private(set) UsersApi $users {
+        get => $this->users ??= new UsersApi($this->http);
+    }
+    public private(set) CountriesApi $countries {
+        get => $this->countries ??= new CountriesApi($this->http);
+    }
+    public private(set) CurrenciesApi $currencies {
+        get => $this->currencies ??= new CurrenciesApi($this->http);
+    }
+    public private(set) CountryTaxesApi $countryTaxes {
+        get => $this->countryTaxes ??= new CountryTaxesApi($this->http);
+    }
+    public private(set) IncomingCategoriesApi $incomingCategories {
+        get => $this->incomingCategories ??= new IncomingCategoriesApi($this->http);
+    }
+    public private(set) RolesApi $roles {
+        get => $this->roles ??= new RolesApi($this->http);
+    }
+    public private(set) TemplatesApi $templates {
+        get => $this->templates ??= new TemplatesApi($this->http);
+    }
+    public private(set) TaxesApi $taxes {
+        get => $this->taxes ??= new TaxesApi($this->http);
+    }
 
-    public AccountApi $account;
-    public ActivitiesApi $activities;
-    public SearchApi $search;
+    public private(set) AccountApi $account {
+        get => $this->account ??= new AccountApi($this->http);
+    }
+    public private(set) ActivitiesApi $activities {
+        get => $this->activities ??= new ActivitiesApi($this->http);
+    }
+    public private(set) SearchApi $search {
+        get => $this->search ??= new SearchApi($this->http);
+    }
 
     /**
      * @param ClientInterface|null          $httpClient     beliebiger PSR-18-Client; ohne Angabe sucht das SDK einen per php-http/discovery
@@ -111,39 +171,6 @@ final readonly class BillomatClient
             logger: $logger,
             events: $events,
         );
-
-        // APIs
-        $this->settings = new SettingsApi($this->http);
-        $this->clients = new ClientsApi($this->http);
-        $this->invoices = new InvoicesApi($this->http);
-        $this->recurrings = new RecurringsApi($this->http);
-        $this->offers = new OffersApi($this->http);
-        $this->confirmations = new ConfirmationsApi($this->http);
-        $this->deliveryNotes = new DeliveryNotesApi($this->http);
-        $this->creditNotes = new CreditNotesApi($this->http);
-        $this->reminders = new RemindersApi($this->http);
-        $this->letters = new LettersApi($this->http);
-        $this->articles = new ArticlesApi($this->http);
-        $this->suppliers = new SuppliersApi($this->http);
-        $this->contacts = new ContactsApi($this->http);
-        $this->incomings = new IncomingsApi($this->http);
-        $this->inboxDocuments = new InboxDocumentsApi($this->http);
-        $this->emailTemplates = new EmailTemplatesApi($this->http);
-        $this->freeTexts = new FreeTextsApi($this->http);
-        $this->reminderTexts = new ReminderTextsApi($this->http);
-        $this->units = new UnitsApi($this->http);
-        $this->users = new UsersApi($this->http);
-        $this->countries = new CountriesApi($this->http);
-        $this->currencies = new CurrenciesApi($this->http);
-        $this->countryTaxes = new CountryTaxesApi($this->http);
-        $this->incomingCategories = new IncomingCategoriesApi($this->http);
-        $this->roles = new RolesApi($this->http);
-        $this->taxes = new TaxesApi($this->http);
-        $this->templates = new TemplatesApi($this->http);
-
-        $this->account = new AccountApi($this->http);
-        $this->activities = new ActivitiesApi($this->http);
-        $this->search = new SearchApi($this->http);
     }
 
     public static function create(

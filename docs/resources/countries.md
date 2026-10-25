@@ -1,32 +1,32 @@
-<!-- Quelle: https://www.billomat.com/api/laender/ -->
+<!-- Source: https://www.billomat.com/api/laender/ -->
 
 # Countries (Länder)
 
-Read-only API-Wrapper für die Billomat-Länderliste — entspricht den Endpunkten unter `/countries`.
+Read-only API wrapper for the Billomat country list at `/countries`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->countries
 ```
 
-`Justpilot\Billomat\Api\CountriesApi`, intern angelegt in `BillomatClient::__construct()`.
+`Justpilot\Billomat\Api\CountriesApi`, created lazily on first access to `$billomat->countries`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list()` | GET | `/countries` |
-| `listPage()` | GET | `/countries` (Seite mit Metadaten) |
-| `iterateAll()` | GET | `/countries` (lazy über alle Seiten) |
+| `listPage()` | GET | `/countries` (page with metadata) |
+| `iterateAll()` | GET | `/countries` (lazy over all pages) |
 
-Einzelabruf per ID (`GET /countries/{id}`) ist im SDK nicht implementiert; der `list()`-Endpunkt akzeptiert den Filter `code` und liefert das passende Land direkt.
+Fetching a single country by ID (`GET /countries/{id}`) is not implemented in the SDK; the list endpoint accepts the filter `code` and returns the matching country directly.
 
-## Methoden
+## Methods
 
 ### `list(): list<Country>`
 
-Listet alle Länder.
+Lists all countries.
 
 ```php
 $countries = $billomat->countries->list();
@@ -36,26 +36,32 @@ foreach ($countries as $country) {
 }
 ```
 
-Hinweis: Diese SDK-Variante akzeptiert (anders als `users->list()`) keine Filter — der zugrundeliegende Billomat-Endpunkt unterstützt allerdings den Query-Parameter `code` für ISO-3166-Alpha-2-Codes. Wer ein einzelnes Land sucht, kann `BillomatClient::getHttpClient()` direkt verwenden oder die Liste clientseitig filtern.
+Note: unlike `users->list()`, `list()` takes no filters. The Billomat endpoint does support the query parameter `code` (ISO 3166 alpha-2). To look up a single country, pass it to `listPage()` or filter the list on the client side:
+
+```php
+$page = $billomat->countries->listPage(['code' => 'DE']);
+$de   = $page->items[0] ?? null;
+```
 
 **Exceptions:** `AuthenticationException`, `HttpException`.
 
 ### `listPage(array $filters = []): Page<Country>`
 
-Wie `list()`, mit Pagination-Metadaten (`page`, `per_page`, `total`).
+Like `list()`, with pagination metadata (`page`, `perPage`, `total`) in `$page->info`.
 
 ### `iterateAll(array $filters = [], int $pageSize = 100): Generator<int, Country>`
 
-Lazy-Iteration über alle Seiten.
+Lazy iteration over all pages.
 
-## Read-Modell: `Country`
+## Read model: `Country`
 
 `final readonly class Justpilot\Billomat\Model\Country`
 
-| Property | Typ | Mapping |
+| Property | Type | Mapping |
 |---|---|---|
-| `code` | `string` | `code` (Fallback: `country_code`) |
+| `code` | `string` | `code` (fallback: `country_code`) |
 | `name` | `?string` | `name` |
-| `id` | `?int` |  |
+| `id` | `?int` | `id` |
+| `extra` | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-`Country::fromArray($data)` hydratisiert aus dem Wire-Format; `Country::toArray()` schreibt snake_case zurück.
+`Country::fromArray($data)` hydrates from the wire format; `Country::toArray()` writes snake_case back.

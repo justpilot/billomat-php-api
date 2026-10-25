@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/email-vorlagen/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/email-vorlagen/ -->
 
 # Email Templates (E-Mail-Vorlagen)
 
-API-Wrapper für E-Mail-Vorlagen unter `/email-templates`. Vorlagen werden beim Versand von Dokumenten (Rechnungen, Angeboten, Mahnungen etc.) aus dem Billomat-UI ausgewählt; pro Dokumenttyp gibt es genau eine Standard-Vorlage.
+API wrapper for e-mail templates at `/email-templates`. Templates are chosen in the Billomat UI when sending documents (invoices, offers, reminders, etc.); each document type has exactly one default template.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->emailTemplates
@@ -12,18 +12,19 @@ $billomat->emailTemplates
 
 `Justpilot\Billomat\Api\EmailTemplatesApi`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/email-templates` |
 | `listPage($filters?)` | GET | `/email-templates` |
-| `iterateAll($filters?, $pageSize?)` | GET | `/email-templates` (mehrseitig) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/email-templates` (all pages) |
 | `get($id)` | GET | `/email-templates/{id}` |
+| `getOrFail($id)` | GET | `/email-templates/{id}` |
 
-> Read-only im SDK. Anlegen/Bearbeiten/Löschen sind bei Billomat verfügbar, aber nicht als SDK-Methoden exponiert.
+> Read-only in the SDK. Billomat supports create/update/delete, but the SDK doesn't expose them as methods.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<EmailTemplate>`
 
@@ -31,62 +32,69 @@ $billomat->emailTemplates
 foreach ($billomat->emailTemplates->list() as $tpl) {
     printf("#%d %s%s\n",
         $tpl->id,
-        $tpl->name ?? '(ohne Name)',
-        $tpl->isDefault ? ' (Default)' : '',
+        $tpl->name ?? '(no name)',
+        $tpl->isDefault ? ' (default)' : '',
     );
 }
 ```
 
-Pagination via `page`/`per_page`; siehe [Konzept](../concepts/pagination-and-filtering.md).
+Pagination via `page`/`per_page`; see [Pagination and filtering](../concepts/pagination-and-filtering.md).
 
 ### `listPage(array $filters = []): Page<EmailTemplate>`
 
-Einzelne Seite samt `PageInfo`.
+One page plus `PageInfo`.
 
 ### `iterateAll(array $filters = [], int $pageSize = 100): Generator<EmailTemplate>`
 
-Lazy-Iteration.
+Lazy iteration over all pages.
 
 ### `get(int $id): ?EmailTemplate`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
 
-## Read-Modell: `EmailTemplate`
+### `getOrFail(int $id): EmailTemplate`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+## Read model: `EmailTemplate`
 
 `final readonly class EmailTemplate`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `id` | `id` | `?int` |
 | `name` | `name` | `?string` |
 | `subject` | `subject` | `?string` |
-| `body` | `text` (Fallback `body`) | `?string` |
+| `body` | `text` (fallback `body`) | `?string` |
 | `fromAddress` | `from` | `?string` |
 | `isDefault` | `is_default` | `?bool` |
 | `type` | `type` | `?EmailTemplateType` |
 | `bcc` | `bcc` | `?bool` |
-| `created`, `updated` | `?\DateTimeImmutable` |  |
+| `created`, `updated` | `created`, `updated` | `?\DateTimeImmutable` |
+| `extra` | — | `array<string,mixed>`: fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-> Billomat liefert den Nachrichtentext im Feld `text`; das SDK stellt ihn weiterhin als `$body` bereit. Ein Feld `from` liefert die API nicht mehr — `fromAddress` ist daher in der Regel `null` und bleibt nur aus Kompatibilitätsgründen erhalten.
+> Billomat returns the message text in the field `text`; the SDK still exposes it as `$body`. The API no longer returns a `from` field, so `fromAddress` is usually `null` and only kept for backward compatibility.
 
-## Dokumenttypen (`EmailTemplateType`)
+## Document types (`EmailTemplateType`)
 
-| Wert | Verwendung |
+| Value | Used for |
 |---|---|
-| `INVOICES` | Rechnungs-Versand |
-| `OFFERS` | Angebote |
-| `CONFIRMATIONS` | Auftragsbestätigungen |
-| `CREDIT_NOTES` | Gutschriften |
-| `DELIVERY_NOTES` | Lieferscheine |
-| `REMINDERS` | Mahnungen |
-| `PAYMENT_THANKS` | Zahlungsbestätigung |
+| `INVOICES` | Invoices |
+| `OFFERS` | Offers |
+| `CONFIRMATIONS` | Order confirmations |
+| `CREDIT_NOTES` | Credit notes |
+| `DELIVERY_NOTES` | Delivery notes |
+| `REMINDERS` | Reminders (dunning letters) |
+| `PAYMENT_THANKS` | Payment confirmation |
 
-## Stolpersteine
+Unknown values become `null`.
 
-- **`isDefault`-Eindeutigkeit pro Typ.** Pro Dokumenttyp ist genau eine Vorlage Default; das Setzen eines neuen Defaults überschreibt das alte serverseitig.
-- **Single-Item-List-Quirk.** Bei nur einer Vorlage liefert Billomat ein Objekt statt einer Liste — `listResource()` normalisiert.
+## Pitfalls
 
-## End-to-End-Beispiel
+- **`isDefault` is unique per type.** Each document type has exactly one default template; setting a new default replaces the old one on the server.
+- **Single-item list quirk.** With only one template Billomat returns an object instead of a list; `listResource()` normalizes this.
+
+## End-to-end example
 
 ```php
 <?php
@@ -96,6 +104,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Model\Enum\EmailTemplateType;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -108,10 +117,16 @@ $defaults = array_filter(
 );
 
 foreach ($defaults as $tpl) {
-    printf("Default: #%d %s — Betreff '%s'\n",
+    printf("Default: #%d %s — subject '%s'\n",
         $tpl->id,
         $tpl->name ?? '',
         $tpl->subject ?? '',
     );
 }
+
+// Default template for invoices
+$invoiceDefault = array_find(
+    $defaults,
+    static fn ($tpl) => $tpl->type === EmailTemplateType::INVOICES,
+);
 ```

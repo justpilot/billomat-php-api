@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/ -->
 
-# Settings (Account-Einstellungen)
+# Settings (Einstellungen / account settings)
 
-API-Wrapper für die Account-weiten Einstellungen unter `/settings`. Liefert Konfigurations-Defaults für Nummernkreise, Pflichtangaben in Dokumenten, Farben des Kundenportals und mehr.
+API wrapper for the account-wide settings at `/settings`. Holds the defaults for number ranges, document texts, client portal colors and more.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->settings
@@ -12,32 +12,32 @@ $billomat->settings
 
 `Justpilot\Billomat\Api\SettingsApi`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `get()` | GET | `/settings` |
 | `update($options)` | PUT | `/settings` |
 
-Es gibt keine `list`/`create`/`delete` — Einstellungen sind ein Singleton pro Account.
+There is no `list`/`create`/`delete`; settings are a singleton per account.
 
-## Methoden
+## Methods
 
 ### `get(): Settings`
 
 ```php
 $settings = $billomat->settings->get();
 
-echo $settings->currencyCode;           // z. B. "EUR"
-echo $settings->invoiceNumberPre;        // z. B. "RE-"
-echo $settings->dueDays;                 // z. B. 14
+echo $settings->currencyCode;           // e.g. "EUR"
+echo $settings->invoiceNumberPre;       // e.g. "RE-"
+echo $settings->dueDays;                // e.g. 14
 ```
 
-Wirft eine `UnexpectedResponseException`, wenn die API ein unerwartetes Response-Format liefert (sollte praktisch nicht vorkommen).
+Throws `UnexpectedResponseException` if the response doesn't contain a `settings` object (shouldn't happen in practice).
 
 ### `update(SettingsUpdateOptions $options): Settings`
 
-Partial-Update. Nur Felder, die in `SettingsUpdateOptions` nicht `null` sind, werden gesendet.
+Partial update. Only fields that are not `null` in `SettingsUpdateOptions` are sent. Returns the updated settings; throws `UnexpectedResponseException` like `get()`.
 
 ```php
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
@@ -46,86 +46,120 @@ use Justpilot\Billomat\Model\Enum\NetGross;
 $opts = new SettingsUpdateOptions(
     dueDays: 21,
     netGross: NetGross::NET,
-    defaultEmailSender: 'rechnungen@meinefirma.de',
+    defaultEmailSender: 'invoices@mycompany.com',
 );
 
 $updated = $billomat->settings->update($opts);
 ```
 
-## Write-Modell: `SettingsUpdateOptions`
+## Write model: `SettingsUpdateOptions`
 
-Nur die wirklich änderbaren Felder sind hier abgebildet — Read-only-Felder wie `*_number_next` fehlen bewusst. Wie alle Write-Modelle ist die Klasse `final readonly`: Felder werden als benannte Konstruktor-Argumente übergeben, `with*()`-Methoden liefern eine geänderte Kopie. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new SettingsUpdateOptions(defaultEmailSender: Clear::Field)`.
+Only the writable fields are included; read-only fields such as `*_number_next`, `created` and `updated` are deliberately missing. Like all write models the class is `final readonly`: pass fields as named constructor arguments, and use the `with*()` methods (e.g. `$opts->withDueDays(30)`) to get a modified copy.
 
-### Kundenportal & Branding
+`null` means "don't send", the value stays unchanged. Every scalar field also accepts `Clear::Field` (`Justpilot\Billomat\Api\Clear`): the field is then sent as JSON `null` and Billomat clears it, e.g. `new SettingsUpdateOptions(defaultEmailSender: Clear::Field)`. The types below omit `|Clear` for readability.
 
-| Property | Billomat-Feld | Typ |
+### Client portal and branding
+
+| Property | Billomat field | Type |
 |---|---|---|
-| `bgcolor` | `bgcolor` | `?string` (Hex) |
-| `color1` | `color1` | `?string` (Hex) |
-| `color2` | `color2` | `?string` (Hex) |
-| `color3` | `color3` | `?string` (Hex) |
+| `bgcolor` | `bgcolor` | `?string` (hex) |
+| `color1` | `color1` | `?string` (hex) |
+| `color2` | `color2` | `?string` (hex) |
+| `color3` | `color3` | `?string` (hex) |
 
-### Sprache, Währung, Preisbasis
+### Language, currency, price basis
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `currencyCode` | `currency_code` | `?string` |
-| `locale` | `locale` | `?string` (z. B. `de_DE`) |
+| `locale` | `locale` | `?string` (e.g. `de_DE`) |
 | `netGross` | `net_gross` | `?NetGross` |
 
-### SEPA & Nummernlogik
+### SEPA and number ranges
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `sepaCreditorId` | `sepa_creditor_id` | `?string` |
 | `numberRangeMode` | `number_range_mode` | `?NumberRangeMode` |
 
-### Kundennummern
+### Article numbers and price groups
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
+|---|---|---|
+| `articleNumberPre` | `article_number_pre` | `?string` |
+| `articleNumberLength` | `article_number_length` | `?int` |
+| `priceGroups` | `price_group2`, `price_group3`, … | `array<int,string>` (index → name; empty array = don't send) |
+
+### Client numbers
+
+| Property | Billomat field | Type |
 |---|---|---|
 | `clientNumberPre` | `client_number_pre` | `?string` |
 | `clientNumberLength` | `client_number_length` | `?int` |
 
-### Rechnungs-Defaults
+### Invoice defaults
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `invoiceNumberPre` | `invoice_number_pre` | `?string` |
 | `invoiceNumberLength` | `invoice_number_length` | `?int` |
+| `invoiceLabel` | `invoice_label` | `?string` |
+| `invoiceIntro` | `invoice_intro` | `?string` |
+| `invoiceNote` | `invoice_note` | `?string` |
 | `invoiceFilename` | `invoice_filename` | `?string` |
 | `dueDays` | `due_days` | `?int` |
-| `discountRate` | `discount_rate` | `?float` |
+| `discountRate` | `discount_rate` | `?float` (percent) |
 | `discountDays` | `discount_days` | `?int` |
 
-### Angebots-Defaults
+### Offer defaults
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `offerNumberPre` | `offer_number_pre` | `?string` |
 | `offerNumberLength` | `offer_number_length` | `?int` |
+| `offerLabel`, `offerIntro`, `offerNote`, `offerFilename` | `offer_label`, `offer_intro`, `offer_note`, `offer_filename` | `?string` |
 | `offerValidityDays` | `offer_validity_days` | `?int` |
 
-### Druck & E-Mail
+### Confirmations, credit notes, delivery notes
 
-| Property | Billomat-Feld | Typ |
+Each of the three document types has the same block (`x` = `confirmation`, `creditNote`, `deliveryNote`; Billomat fields `confirmation_*`, `credit_note_*`, `delivery_note_*`):
+
+| Property | Billomat field | Type |
 |---|---|---|
-| `printVersion` | `print_version` | `?bool` (als `1`/`0` serialisiert) |
+| `xNumberPre` | `x_number_pre` | `?string` |
+| `xNumberLength` | `x_number_length` | `?int` |
+| `xLabel`, `xIntro`, `xNote`, `xFilename` | `x_label`, `x_intro`, `x_note`, `x_filename` | `?string` |
+
+### Reminders and letters
+
+| Property | Billomat field | Type |
+|---|---|---|
+| `reminderFilename` | `reminder_filename` | `?string` |
+| `reminderDueDays` | `reminder_due_days` | `?int` |
+| `letterLabel`, `letterIntro`, `letterFilename` | `letter_label`, `letter_intro`, `letter_filename` | `?string` |
+
+### Print, e-mail, taxation
+
+| Property | Billomat field | Type |
+|---|---|---|
+| `printVersion` | `print_version` | `?bool` (serialized as `1`/`0`) |
 | `defaultEmailSender` | `default_email_sender` | `?string` |
+| `bccAddresses` | `bcc_addresses` | `list<string>` (sent as a comma-separated string; empty list = don't send) |
+| `taxation` | `taxation` | `?string` |
 
-## Read-Modell: `Settings`
+## Read model: `Settings`
 
-`final readonly class Settings`. Umfasst ~ 60 Properties; die wichtigsten Gruppen:
+`final readonly class Settings`. About 60 properties; the main groups:
 
-### Metadaten
+### Metadata
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `created`, `updated` | `?\DateTimeImmutable` |
 
-### Account-Grundlagen
+### Account basics
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `bgcolor`, `color1`, `color2`, `color3` | `?string` |
 | `currencyCode`, `locale` | `?string` |
@@ -133,9 +167,9 @@ Nur die wirklich änderbaren Felder sind hier abgebildet — Read-only-Felder wi
 | `sepaCreditorId` | `?string` |
 | `numberRangeMode` | `?NumberRangeMode` |
 
-### Nummernkreise (Präfix, Länge, „Next“ als read-only)
+### Number ranges (prefix, length, read-only "next")
 
-Pro Dokumenttyp existiert ein Block `xNumberPre`, `xNumberLength`, `xNumberNext` (read-only):
+Each document type has a block `xNumberPre` (`?string`), `xNumberLength` (`?int`) and `xNumberNext` (`?int`, read-only):
 
 - `articleNumberPre/Length/Next`
 - `clientNumberPre/Length/Next`
@@ -145,53 +179,53 @@ Pro Dokumenttyp existiert ein Block `xNumberPre`, `xNumberLength`, `xNumberNext`
 - `creditNoteNumberPre/Length/Next`
 - `deliveryNoteNumberPre/Length/Next`
 
-### Dokument-Texte
+### Document texts
 
-Pro Dokumenttyp gibt es `xLabel`, `xIntro`, `xNote`, `xFilename`:
+Each document type has `xLabel`, `xIntro`, `xNote`, `xFilename`:
 
 - `invoiceLabel`, `invoiceIntro`, `invoiceNote`, `invoiceFilename`
-- analog für `offer`, `confirmation`, `creditNote`, `deliveryNote`
+- the same for `offer`, `confirmation`, `creditNote`, `deliveryNote`
 - `reminderFilename`, `reminderDueDays`
 - `letterLabel`, `letterIntro`, `letterFilename`
 
-### Konditionen
+### Terms
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `dueDays` | `?int` |
 | `discountRate` | `?float` |
 | `discountDays` | `?int` |
 | `offerValidityDays` | `?int` |
 
-### Sonstiges
+### Other
 
-| Property | Typ | Notes |
+| Property | Type | Notes |
 |---|---|---|
-| `priceGroups` | `array<int,string>` | Indexiert über die Preisgruppen-Nummer (z. B. `2 => "Preisgruppe 2"`) |
+| `priceGroups` | `array<int,string>` | Keyed by price group number (e.g. `2 => "Preisgruppe 2"`) |
 | `templateEngine` | `?TemplateEngine` | |
 | `printVersion` | `?bool` | |
 | `defaultEmailSender` | `?string` | |
-| `bccAddresses` | `list<string>` | Normalisiert aus dem CSV-/Listen-Format, das Billomat liefert |
+| `bccAddresses` | `list<string>` | Normalized from the CSV/list format Billomat returns |
 | `taxation` | `?string` | |
 
-`Settings::fromArray()` macht die Typ-Normalisierung: Billomat liefert viele Werte als String (`"14"`, `"1"`, …), das Modell castet zu `int`/`float`/`bool`/`DateTimeImmutable`.
+`Settings::fromArray()` normalizes the types: Billomat sends many values as strings (`"14"`, `"1"`, …), and the model casts them to `int`/`float`/`bool`/`DateTimeImmutable`.
 
-## Verwendete Enums
+## Enums
 
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
-- [`NumberRangeMode`](../../src/Model/Enum/NumberRangeMode.php): `IGNORE_PREFIX`, `CONSIDER_PREFIX`. Bestimmt, ob Nummern-Präfixe einen eigenen Nummernkreis bekommen.
+- [`NumberRangeMode`](../../src/Model/Enum/NumberRangeMode.php): `IGNORE_PREFIX`, `CONSIDER_PREFIX`. Controls whether number prefixes get their own number range.
 - [`TemplateEngine`](../../src/Model/Enum/TemplateEngine.php): `DEFAULT`.
-- [`ValueType`](../../src/Model/Enum/ValueType.php): `SETTINGS`, `ABSOLUTE`, `RELATIVE` — taucht in Settings selbst nicht direkt auf, ist aber ein verwandtes Werte-Modell für Clients/Invoices.
+- [`ValueType`](../../src/Model/Enum/ValueType.php): `SETTINGS`, `ABSOLUTE`, `RELATIVE` — not used in settings directly, but a related value type for clients/invoices.
 
-## Stolpersteine
+## Pitfalls
 
-- **Read-only-Felder ignorieren PUT-Versuche.** Felder wie `*NumberNext` oder `created`/`updated` lassen sich nicht setzen. Die `SettingsUpdateOptions`-Klasse blendet sie zur Sicherheit komplett aus.
-- **`printVersion` als `?bool`.** Billomat erwartet `1`/`0` — das SDK macht das Mapping automatisch.
-- **`priceGroups` ist zur Lesezeit aufgebaut.** Billomat schickt sie als Einzelfelder `price_group2`, `price_group3`, … `Settings::fromArray()` aggregiert sie in ein assoziatives Array, wobei der Schlüssel die Preisgruppen-Nummer ist.
-- **`bccAddresses` als CSV.** Billomat liefert die Liste mal als kommagetrennten String, mal als verschachtelte `bcc_address`-Knoten. Das Modell normalisiert beides zu `list<string>`.
-- **`locale`-Konsistenz.** Wenn du `locale` änderst, ändert sich nichts an `Accept-Language` im HTTP-Header des SDK — den steuert `BillomatConfig::$language` (Standard `de-de`).
+- **Read-only fields can't be set.** Fields like `*NumberNext` or `created`/`updated` can't be changed via PUT, so `SettingsUpdateOptions` doesn't offer them at all.
+- **`printVersion` is a `?bool`.** Billomat expects `1`/`0`; the SDK converts automatically.
+- **`priceGroups` is assembled on read.** Billomat sends separate fields `price_group2`, `price_group3`, … `Settings::fromArray()` collects them into an array keyed by the price group number; `SettingsUpdateOptions` splits them up again.
+- **`bccAddresses` as CSV.** Billomat returns the list either as a comma-separated string or as nested `bcc_address` nodes. The model normalizes both to `list<string>`; on write the SDK sends a comma-separated string.
+- **`locale` doesn't affect the SDK.** Changing `locale` doesn't change the SDK's `Accept-Language` header; that comes from `BillomatConfig::$language` (default `de-de`).
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -210,19 +244,19 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Aktuelle Settings lesen
+// Read the current settings
 $current = $billomat->settings->get();
-printf("Aktuelle Standard-Fälligkeit: %d Tage\n", $current->dueDays ?? 0);
-printf("Nummernkreismodus: %s\n", $current->numberRangeMode?->value ?? 'unbekannt');
+printf("Current default due days: %d\n", $current->dueDays ?? 0);
+printf("Number range mode: %s\n", $current->numberRangeMode?->value ?? 'unknown');
 
-// Ändern
+// Change them
 $opts = new SettingsUpdateOptions(
     dueDays: 21,
     netGross: NetGross::NET,
     numberRangeMode: NumberRangeMode::CONSIDER_PREFIX,
-    defaultEmailSender: 'rechnungen@meinefirma.de',
+    defaultEmailSender: 'invoices@mycompany.com',
 );
 
 $updated = $billomat->settings->update($opts);
-printf("Neue Fälligkeit gespeichert: %d Tage\n", $updated->dueDays ?? 0);
+printf("New due days saved: %d\n", $updated->dueDays ?? 0);
 ```

@@ -1,41 +1,42 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/mahnstufen/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/mahnstufen/ -->
 
 # Reminder Levels (Mahnstufen)
 
-Mahnstufen werden in Billomat über `/reminder-texts` abgebildet. Das SDK exponiert dafür `ReminderTextsApi`:
+Billomat models reminder (dunning) levels via `/reminder-texts`. The SDK exposes them through `ReminderTextsApi`:
 
-| API | Endpunkt | Inhalt |
+| API | Endpoint | Content |
 |---|---|---|
-| `ReminderTextsApi` | `/reminder-texts` | Text-Bausteine pro Mahnstufe (Betreff, Header, Footer, Gebühren) — entspricht der offiziell dokumentierten *Mahnstufen*-Seite. |
+| `ReminderTextsApi` | `/reminder-texts` | Text blocks per reminder level (subject, header, footer, fees) — matches the official *Mahnstufen* page. |
 
-Der Endpunkt ist im SDK read-only.
+The endpoint is read-only in the SDK. The former `DunningLevelsApi` was removed in 4.0; use `$billomat->reminderTexts` instead.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->reminderTexts   // Justpilot\Billomat\Api\ReminderTextsApi
 ```
 
-## Endpunkt-Übersicht
+## Endpoints
 
 ### `ReminderTextsApi`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/reminder-texts` |
 | `get($id)` | GET | `/reminder-texts/{id}` |
+| `getOrFail($id)` | GET | `/reminder-texts/{id}` |
 
-> Anlegen/Bearbeiten/Löschen sind bei Billomat verfügbar (POST/PUT/DELETE auf `/reminder-texts`), aber nicht als SDK-Methoden exponiert.
+> Billomat supports create/update/delete (POST/PUT/DELETE on `/reminder-texts`), but the SDK doesn't expose them as methods.
 
-## Methoden
+## Methods
 
 ### `ReminderTextsApi::list(array $filters = []): list<ReminderText>`
 
 ```php
 foreach ($billomat->reminderTexts->list() as $rt) {
-    printf("Stufe %d: %s — '%s'\n",
+    printf("Level %d: %s — '%s'\n",
         $rt->sort ?? 0,
-        $rt->name ?? '(ohne Name)',
+        $rt->name ?? '(no name)',
         $rt->subject ?? '',
     );
 }
@@ -43,34 +44,39 @@ foreach ($billomat->reminderTexts->list() as $rt) {
 
 ### `ReminderTextsApi::get(int $id): ?ReminderText`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
 
-## Read-Modell
+### `ReminderTextsApi::getOrFail(int $id): ReminderText`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+## Read model
 
 ### `ReminderText`
 
 `final readonly class ReminderText`.
 
-| Property | Billomat-Feld | Typ | Zweck |
+| Property | Billomat field | Type | Purpose |
 |---|---|---|---|
 | `id` | `id` | `?int` | |
-| `name` | `name` | `?string` | Name der Mahnstufe (intern) |
-| `subject` | `subject` | `?string` | Betreff der Mahn-E-Mail/des Briefs |
-| `header` | `header` | `?string` | Einleitung |
-| `footer` | `footer` | `?string` | Anmerkung |
-| `sort` | `sorting` (Fallback `sort`) | `?int` | Reihenfolge der Stufe |
-| `chargeName` | `charge_name` | `?string` | Name der Mahngebühr |
-| `chargeDescription` | `charge_description` | `?string` | Beschreibung der Mahngebühr |
-| `chargeAmount` | `charge_amount` | `?Money` | Höhe der Mahngebühr |
-| `customfield` | `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+| `name` | `name` | `?string` | Name of the reminder level (internal) |
+| `subject` | `subject` | `?string` | Subject of the reminder e-mail/letter |
+| `header` | `header` | `?string` | Introduction |
+| `footer` | `footer` | `?string` | Closing note |
+| `sort` | `sorting` (fallback `sort`) | `?int` | Order of the level |
+| `chargeName` | `charge_name` | `?string` | Name of the reminder fee |
+| `chargeDescription` | `charge_description` | `?string` | Description of the reminder fee |
+| `chargeAmount` | `charge_amount` | `?Money` | Amount of the reminder fee (see [Money](../concepts/money.md)) |
+| `customfield` | `customfield` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `extra` | — | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-## Stolpersteine
+## Pitfalls
 
-- **`sort` statt `sorting`.** Billomat liefert die Reihenfolge als `sorting` (früher `sort`); das SDK stellt sie weiterhin als `ReminderText::$sort` bereit, und `toArray()` schreibt sie unter dem Schlüssel `sort` zurück.
-- **Mahnstufe einer Mahnung.** `Reminder::$reminderLevel` und `Reminder::$reminderLevelName` verweisen auf die hier gepflegten Stufen, siehe [Reminders](reminders.md).
-- **Single-Item-List-Quirk.** `list()` normalisiert über `listResource()`, auch wenn Billomat nur eine einzelne Stufe als Objekt statt als Liste liefert.
+- **`sort` instead of `sorting`.** Billomat returns the order as `sorting` (formerly `sort`); the SDK keeps exposing it as `ReminderText::$sort`, and `toArray()` writes it under the key `sort`.
+- **Reminder level of a reminder.** `Reminder::$reminderLevel` and `Reminder::$reminderLevelName` refer to the levels configured here, and `Reminder::$reminderTextId` to the text used; see [Reminders](reminders.md).
+- **Single-item list quirk.** `list()` normalizes via `listResource()`, even if Billomat returns a single level as an object instead of a list.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -86,17 +92,17 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Mahnstufen in Reihenfolge
+// Reminder levels in order
 $texts = $billomat->reminderTexts->list();
 usort($texts, static fn ($a, $b) => ($a->sort ?? 0) <=> ($b->sort ?? 0));
 
 foreach ($texts as $rt) {
-    printf("Stufe %d: %s\n  Betreff: %s\n  Gebühr: %s € (%s)\n",
+    printf("Level %d: %s\n  Subject: %s\n  Fee: %s EUR (%s)\n",
         $rt->sort ?? 0,
         $rt->name ?? '',
         $rt->subject ?? '',
-        $rt->chargeAmount?->format(2, ',', '.') ?? '0,00',
-        $rt->chargeName ?? 'keine',
+        $rt->chargeAmount?->format(2) ?? '0.00',
+        $rt->chargeName ?? 'none',
     );
 }
 ```

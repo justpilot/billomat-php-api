@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/einheiten/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/einheiten/ -->
 
 # Units (Einheiten)
 
-API-Wrapper für die globalen Einheiten unter `/units` (z.B. „Stunde", „Stück", „Paletten"). Einheiten werden in Artikel- und Rechnungspositionen referenziert.
+API wrapper for the account's units at `/units` (e.g. "Stunde", "Stück", "Paletten"). Articles and document items refer to units.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->units
@@ -12,18 +12,19 @@ $billomat->units
 
 `Justpilot\Billomat\Api\UnitsApi`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/units` |
 | `listPage($filters?)` | GET | `/units` |
-| `iterateAll($filters?, $pageSize?)` | GET | `/units` (mehrseitig) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/units` (all pages) |
 | `get($id)` | GET | `/units/{id}` |
+| `getOrFail($id)` | GET | `/units/{id}` |
 
-> Die API ist **read-only** im SDK. Anlegen, Bearbeiten und Löschen werden von Billomat unterstützt, sind aber nicht als SDK-Methoden exponiert — wer das braucht, kann `BillomatHttpClient` direkt nutzen oder eine `UnitCreateOptions`-Klasse nachreichen.
+> The API is **read-only** in the SDK. Billomat supports create, update and delete, but the SDK doesn't expose them as methods. If you need them, call `$billomat->getHttpClient()` directly.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<Unit>`
 
@@ -33,44 +34,47 @@ foreach ($billomat->units->list() as $unit) {
 }
 ```
 
-Filterparameter:
+Filter parameters:
 
-| Parameter | Beschreibung |
+| Parameter | Description |
 |---|---|
-| `name` | Teilstring-Suche auf der Bezeichnung; case-insensitive |
-| `page`, `per_page` | Pagination — siehe [Konzept](../concepts/pagination-and-filtering.md) |
+| `name` | Substring match on the name; case-insensitive |
+| `page`, `per_page` | Pagination — see [Pagination and filtering](../concepts/pagination-and-filtering.md) |
 
 ### `listPage(array $filters = []): Page<Unit>`
 
-Eine einzelne Seite mit `PageInfo` (`page`, `perPage`, `total`).
+One page plus `PageInfo` (`page`, `perPage`, `total`) in `$page->info`.
 
 ### `iterateAll(array $filters = [], int $pageSize = 100): Generator<Unit>`
 
-Lazy-Iteration über alle Seiten.
+Lazy iteration over all pages.
 
 ### `get(int $id): ?Unit`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
 
-## Read-Modell: `Unit`
+### `getOrFail(int $id): Unit`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+## Read model: `Unit`
 
 `final readonly class Unit`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `id` | `id` | `?int` |
 | `name` | `name` | `string` |
-| `updated` | `?\DateTimeImmutable` |  |
-| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+| `created`, `updated` | `created`, `updated` | `?\DateTimeImmutable` |
+| `customfield` | `customfield` | `?string` — free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `extra` | — | `array<string,mixed>`: fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-> Die Billomat-Antwort enthält zusätzlich ein `created` (Zeitstempel der Anlage). Das SDK exponiert es aktuell nicht — bei Bedarf in `Unit` ergänzen.
+## Pitfalls
 
-## Stolpersteine
+- **Single-item list quirk.** With only one unit in the account Billomat returns an object instead of a list; `UnitsApi::list()` normalizes this.
+- **Deleting fails while in use.** Billomat rejects `DELETE /units/{id}` as long as the unit is still assigned to articles (not relevant for the SDK right now, as there is no `delete()`).
 
-- **Single-Item-List-Quirk.** Bei nur einer Einheit im Account liefert Billomat ein Objekt statt einer Liste — `list()` normalisiert das in `UnitsApi::list()`.
-- **Löschen scheitert bei Verwendung.** `DELETE /units/{id}` schlägt bei Billomat fehl, sobald die Einheit noch Artikeln zugeordnet ist (im SDK aktuell nicht relevant, da kein `delete()`).
-
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -86,12 +90,12 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Alle Einheiten
+// All units
 foreach ($billomat->units->iterateAll() as $unit) {
     printf("[#%d] %s\n", $unit->id, $unit->name);
 }
 
-// Suche per Filter
+// Search by filter
 $matches = $billomat->units->list(['name' => 'stunde']);
-printf("%d Treffer für 'stunde'\n", \count($matches));
+printf("%d matches for 'stunde'\n", \count($matches));
 ```

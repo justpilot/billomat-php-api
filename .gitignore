@@ -48,3 +48,8 @@ Thumbs.db
 # Compat-Smoke-Tests
 /.github/compat/*/vendor/
 /.github/compat/*/composer.lock
+
+# Doku-Website (VitePress)
+/docs/node_modules/
+/docs/.vitepress/cache/
+/docs/.vitepress/dist/

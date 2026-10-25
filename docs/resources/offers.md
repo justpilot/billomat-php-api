@@ -18,14 +18,15 @@ $billomat->offers->tags     // tags
 An offer goes through a fixed status lifecycle:
 
 ```text
-DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON
-                         │
-                         ├──lose()────▶  LOST
-                         ├──clear()───▶  CLEARED
-                         └──cancel()──▶  CANCELED
+DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON  ──clear()────▶  CLEARED
+                         │                   ▲  ◀──unclear()─────┘
+                         │                   │
+                         ├──lose()────▶  LOST  (also from WON)
+                         └──cancel()──▶  CANCELED  (also from WON)
+                                         └──uncancel()──▶  OPEN
 ```
 
-`undo()` takes each of these follow-up states back to `OPEN`. An offer is fully editable only as a `DRAFT`; `complete()` assigns the final `offer_number` and limits editing to a few fields. An accepted offer usually becomes a [confirmation](confirmations.md) (Auftragsbestätigung) or directly an [invoice](invoices.md).
+`clear()` ("billed") only works on a `WON` offer; `unclear()` takes it back to `WON`. `uncancel()` takes a `CANCELED` offer back to `OPEN`. There is no generic `undo` endpoint (Billomat answers `PUT /offers/{id}/undo` with 404). An offer is fully editable only as a `DRAFT`; `complete()` assigns the final `offer_number` and limits editing to a few fields. An accepted offer usually becomes a [confirmation](confirmations.md) (Auftragsbestätigung) or directly an [invoice](invoices.md).
 
 ## Endpoints
 
@@ -42,10 +43,11 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON
 | `delete($id)` | DELETE | `/offers/{id}` |
 | `complete($id, $templateId?)` | PUT | `/offers/{id}/complete` |
 | `cancel($id)` | PUT | `/offers/{id}/cancel` |
+| `uncancel($id)` | PUT | `/offers/{id}/uncancel` |
 | `win($id)` | PUT | `/offers/{id}/win` |
 | `lose($id)` | PUT | `/offers/{id}/lose` |
 | `clear($id)` | PUT | `/offers/{id}/clear` |
-| `undo($id)` | PUT | `/offers/{id}/undo` |
+| `unclear($id)` | PUT | `/offers/{id}/unclear` |
 | `email($id, $options?)` | POST | `/offers/{id}/email` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/offers/{id}/upload-signature` |
 | `pdf($id, $type?, $rawPdf?)` | GET | `/offers/{id}/pdf` |
@@ -148,13 +150,14 @@ Only allowed as a `DRAFT`. For any other status Billomat responds with 422 → `
 
 ```php
 $billomat->offers->cancel($offer->id);   // OPEN/WON → CANCELED
+$billomat->offers->uncancel($offer->id); // CANCELED → OPEN
 $billomat->offers->win($offer->id);      // OPEN     → WON
-$billomat->offers->lose($offer->id);     // OPEN     → LOST
-$billomat->offers->clear($offer->id);    // OPEN     → CLEARED
-$billomat->offers->undo($offer->id);     // {win,lose,clear,cancel} → OPEN
+$billomat->offers->lose($offer->id);     // OPEN/WON → LOST
+$billomat->offers->clear($offer->id);    // WON      → CLEARED
+$billomat->offers->unclear($offer->id);  // CLEARED  → WON
 ```
 
-All of them return `void`. Invalid transitions throw a `ValidationException` (422) or an `HttpException`.
+All of them return `void`. Invalid transitions throw a `ValidationException` (Billomat answers 400 "status change not possible").
 
 #### `email(int $id, ?EmailOptions $options = null): void`
 
@@ -459,7 +462,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 
 ## Pitfalls
 
-- **Status transitions are strict.** `win()`/`lose()`/`clear()` only work from `OPEN`. Trying them on a `DRAFT` gets you a 422. Order: first `complete()`, then set the status.
+- **Status transitions are strict.** `win()` only works from `OPEN`, `clear()` only from `WON` (not from `OPEN`). Trying them in the wrong status gets you a 400 → `ValidationException`. Order: first `complete()`, then `win()`, then `clear()`.
 - **`update()` doesn't change items.** Billomat ignores embedded `offer-items` on a PUT to `/offers/{id}`. Always use `$billomat->offers->items`.
 - **`delete()` only as a `DRAFT`.** Once `complete()` has run, the offer is numbered and can't be deleted; only `cancel()` is possible.
 - **`OfferItemCreateOptions` is also the update type.** There is no separate `OfferItemUpdateOptions`. The constructor always requires `quantity` and `unitPrice`, even if you only want to change the title. Copy the values from the existing `OfferItem` if needed.

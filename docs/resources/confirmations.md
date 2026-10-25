@@ -18,12 +18,14 @@ $billomat->confirmations->tags       // tags
 An order confirmation is the binding record of an order, typically issued after an [offer](offers.md) has been accepted and before the actual invoice. Its status lifecycle is simpler than the offer's and has no accept/reject step:
 
 ```
-DRAFT  ──complete()──▶  OPEN / COMPLETED  ──clear()───▶  CLEARED
-                         │
+DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEARED
+                         │   ▲  ◀──unclear()──────┘
+                         │   │
+                         │   └──uncancel()──┐
                          └──cancel()──▶  CANCELED
 ```
 
-`undo()` sets `CLEARED`/`CANCELED` back to `OPEN`. The confirmation is only fully editable in status `DRAFT`. The source offer is referenced via `offerId`.
+`unclear()` and `uncancel()` set `CLEARED`/`CANCELED` back to `COMPLETED` (older accounts may report `OPEN` instead of `COMPLETED`). The confirmation is only fully editable in status `DRAFT`. The source offer is referenced via `offerId`.
 
 ## Endpoint overview
 
@@ -40,8 +42,9 @@ DRAFT  ──complete()──▶  OPEN / COMPLETED  ──clear()───▶  C
 | `delete($id)` | DELETE | `/confirmations/{id}` |
 | `complete($id, $templateId?)` | PUT | `/confirmations/{id}/complete` |
 | `cancel($id)` | PUT | `/confirmations/{id}/cancel` |
+| `uncancel($id)` | PUT | `/confirmations/{id}/uncancel` |
 | `clear($id)` | PUT | `/confirmations/{id}/clear` |
-| `undo($id)` | PUT | `/confirmations/{id}/undo` |
+| `unclear($id)` | PUT | `/confirmations/{id}/unclear` |
 | `email($id, $options?)` | POST | `/confirmations/{id}/email` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/confirmations/{id}/upload-signature` |
 | `pdf($id, $type?, $rawPdf?)` | GET | `/confirmations/{id}/pdf` |
@@ -139,12 +142,13 @@ Only allowed in `DRAFT`; after that, use `cancel()`.
 #### Status transitions
 
 ```php
-$billomat->confirmations->cancel($conf->id);   // OPEN/CLEARED  → CANCELED
-$billomat->confirmations->clear($conf->id);    // OPEN          → CLEARED
-$billomat->confirmations->undo($conf->id);     // {clear,cancel} → OPEN
+$billomat->confirmations->cancel($conf->id);   // COMPLETED → CANCELED
+$billomat->confirmations->uncancel($conf->id); // CANCELED  → COMPLETED
+$billomat->confirmations->clear($conf->id);    // COMPLETED → CLEARED
+$billomat->confirmations->unclear($conf->id);  // CLEARED   → COMPLETED
 ```
 
-All three return `void`. Invalid transitions throw a `ValidationException` (422).
+All four return `void`. Invalid transitions throw a `ValidationException` (Billomat answers 400 "status change not possible"). There is no generic `undo` endpoint; Billomat answers `PUT /confirmations/{id}/undo` with 404.
 
 #### `email(int $id, ?EmailOptions $options = null): void`
 
@@ -406,7 +410,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 ## Pitfalls
 
-- **Simpler lifecycle than offers.** There is no `win()`/`lose()`: a confirmation is either marked as done (`clear()`) or canceled (`cancel()`). Calling `win()` out of habit means looking for the wrong endpoint.
+- **Simpler lifecycle than offers.** There is no `win()`/`lose()`: a confirmation is either marked as done (`clear()`, reverted by `unclear()`) or canceled (`cancel()`, reverted by `uncancel()`). Calling `win()` out of habit means looking for the wrong endpoint.
 - **`update()` doesn't change line items.** Billomat ignores embedded `confirmation-items` on PUT. Always use `$billomat->confirmations->items`.
 - **`delete()` only in `DRAFT`.** After `complete()`, only `cancel()` is possible.
 - **`ConfirmationItemCreateOptions` is also the update type.** The constructor requires `quantity` and `unitPrice` even for updates where these values aren't supposed to change.

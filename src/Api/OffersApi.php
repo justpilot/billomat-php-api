@@ -33,10 +33,11 @@ use NoDiscard;
  *  - DELETE /offers/{id}
  *  - PUT    /offers/{id}/complete
  *  - PUT    /offers/{id}/cancel
+ *  - PUT    /offers/{id}/uncancel
  *  - PUT    /offers/{id}/win
  *  - PUT    /offers/{id}/lose
  *  - PUT    /offers/{id}/clear
- *  - PUT    /offers/{id}/undo (Status zurücksetzen)
+ *  - PUT    /offers/{id}/unclear
  *  - POST   /offers/{id}/email
  *  - GET    /offers/{id}/pdf
  *  - PUT    /offers/{id}/upload-signature
@@ -206,10 +207,16 @@ final class OffersApi extends AbstractApi
         $this->deleteVoid("/offers/{$id}");
     }
 
-    /** Storniert ein Angebot. */
+    /** Storniert ein Angebot (Status → CANCELED). */
     public function cancel(int $id): void
     {
         $this->putVoid("/offers/{$id}/cancel");
+    }
+
+    /** Hebt die Stornierung auf (CANCELED → OPEN). */
+    public function uncancel(int $id): void
+    {
+        $this->putVoid("/offers/{$id}/uncancel");
     }
 
     /** Markiert ein Angebot als gewonnen (Status → WON). */
@@ -224,18 +231,20 @@ final class OffersApi extends AbstractApi
         $this->putVoid("/offers/{$id}/lose");
     }
 
-    /** Markiert ein Angebot als erledigt (Status → CLEARED). */
+    /**
+     * Markiert ein gewonnenes Angebot als abgerechnet (WON → CLEARED).
+     *
+     * Aus OPEN lehnt Billomat das mit „status change not possible“ ab.
+     */
     public function clear(int $id): void
     {
         $this->putVoid("/offers/{$id}/clear");
     }
 
-    /**
-     * Setzt einen Status zurück auf OPEN (Rückgängigmachen von win/lose/clear/cancel).
-     */
-    public function undo(int $id): void
+    /** Nimmt die Abgerechnet-Markierung zurück (CLEARED → WON). */
+    public function unclear(int $id): void
     {
-        $this->putVoid("/offers/{$id}/undo");
+        $this->putVoid("/offers/{$id}/unclear");
     }
 
     /** Versendet ein Angebot per E-Mail. */

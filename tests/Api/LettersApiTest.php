@@ -178,16 +178,12 @@ final class LettersApiTest extends TestCase
         ));
 
         $api->complete(1);
-        $api->cancel(2);
-        $api->clear(3);
-        $api->undo(4);
         $api->delete(5);
 
+        self::assertSame('PUT', $captured[0]->method);
         self::assertSame('https://mycompany.billomat.net/api/letters/1/complete', $captured[0]->url);
-        self::assertSame('https://mycompany.billomat.net/api/letters/2/cancel', $captured[1]->url);
-        self::assertSame('https://mycompany.billomat.net/api/letters/3/clear', $captured[2]->url);
-        self::assertSame('https://mycompany.billomat.net/api/letters/4/undo', $captured[3]->url);
-        self::assertSame('DELETE', $captured[4]->method);
+        self::assertSame('https://mycompany.billomat.net/api/letters/5', $captured[1]->url);
+        self::assertSame('DELETE', $captured[1]->method);
     }
 
     #[Test]

@@ -16,18 +16,13 @@ $billomat->letters->tags      // tags
 
 A letter is free-form, formal correspondence to a client (or supplier, via `supplierId`), with no line items, no tax calculation and no payment lifecycle. Its main purposes are sending by email, uploading an externally generated PDF (`upload()`) and keeping a record in the client's history. Billomat also offers postal delivery for letters (Pixelletter, `POST /letters/{id}/mail`); the SDK doesn't wrap that endpoint.
 
-The lifecycle is status-driven, but simpler than for invoices or credit notes:
+The lifecycle is a single step:
 
 ```
-DRAFT  ── complete() ──▶  OPEN / COMPLETED  ── clear() ──▶  CLEARED   (done)
-  │                        │
-  │                        ├── cancel() ──▶  CANCELED
-  │                        │
-  │                        └── undo() ──▶  DRAFT          (reset)
-  └── delete() (only in DRAFT)
+DRAFT  ── complete() ──▶  COMPLETED
 ```
 
-`undo()` is the letter-specific way to move an open letter back to draft; there is deliberately no `uncancel()` variant.
+The API offers no further status transitions for letters: `PUT /letters/{id}/cancel` and `/uncancel` answer 400 ("cancellation not supported"), `/clear`, `/unclear` and `/undo` answer 404. A completed letter can't be moved back to `DRAFT`. The enum still knows `OPEN`, `CLEARED` and `CANCELED`, which Billomat may report for letters changed in the web app.
 
 ## Endpoint overview
 
@@ -43,9 +38,6 @@ DRAFT  ── complete() ──▶  OPEN / COMPLETED  ── clear() ──▶  
 | `update($id, $options)` | PUT | `/letters/{id}` |
 | `delete($id)` | DELETE | `/letters/{id}` |
 | `complete($id, $templateId?)` | PUT | `/letters/{id}/complete` |
-| `cancel($id)` | PUT | `/letters/{id}/cancel` |
-| `clear($id)` | PUT | `/letters/{id}/clear` |
-| `undo($id)` | PUT | `/letters/{id}/undo` |
 | `email($id, $options?)` | POST | `/letters/{id}/email` |
 | `pdf($id, $type?, $rawPdf?)` | GET | `/letters/{id}/pdf` |
 | `upload($id, $base64Pdf)` | PUT | `/letters/{id}/upload` |
@@ -122,12 +114,6 @@ Only advisable in status `DRAFT`. Fields left at `null` are not touched on the s
 #### `complete(int $id, ?int $templateId = null): void`
 
 Completes the draft (Billomat now reports `COMPLETED`). Optionally forces a specific layout template.
-
-#### `cancel(int $id): void` / `clear(int $id): void` / `undo(int $id): void`
-
-- `cancel()` → status `CANCELED` (terminal from a workflow perspective).
-- `clear()` → status `CLEARED` ("done", e.g. once the letter has been handled).
-- `undo()` → moves an `OPEN` letter back to `DRAFT` so it becomes editable again.
 
 #### `email(int $id, ?EmailOptions $options = null): void`
 
@@ -343,9 +329,8 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 
 - **No line items.** Unlike invoices, offers, confirmations and credit notes, letters have no list of line items. To show amounts or tables, put them as formatted text into `note` or upload a finished PDF via `upload()`.
 - **`upload()` replaces the layout completely.** The uploaded PDF is used as is when sending; `templateId` and `subject` are then ignored for the PDF. This doesn't apply to the accompanying email texts.
-- **`undo()` instead of `uncancel()`.** Letters can go back from `OPEN` to `DRAFT` (`/letters/{id}/undo`), but there is **no** way back from `CANCELED`. An accidentally canceled letter has to be created again.
-- **`clear()` is not `cancel()`.** `clear()` marks the letter as "done" (`CLEARED`), e.g. when the internal action it triggered is finished; `cancel()` marks it as "void".
-- **`update()` only in DRAFT.** Once the letter is `OPEN`, Billomat ignores most fields. Call `undo()` first, then edit, then `complete()`.
+- **No status transitions after `complete()`.** The SDK has no `cancel()`, `clear()` or `undo()` for letters because Billomat's API doesn't support them (400/404). Up to 3.x the SDK had these methods; they always failed.
+- **`update()` only in DRAFT.** Once the letter is completed, Billomat ignores most fields, and there is no way back to `DRAFT`. Check the letter before calling `complete()`.
 - **Setting `number` manually conflicts with auto-numbering.** If the account uses automatic numbers, `complete()` fails with a `ValidationException`.
 - **`actionkey` in the comment filter is CSV, not an array.** `list($id, [...])` sends multiple action keys as a comma-separated string, not as `actionkey[]=…`.
 - **Tag cloud and list share the same endpoint.** `GET /letter-tags` without `letter_id` returns the aggregated cloud (`tag` wrapper); with `letter_id` it returns the actual tags (`letter-tag` wrapper). The SDK splits this into `cloud()` and `list()`.
@@ -418,7 +403,4 @@ $billomat->letters->comments->create(
 // 6) Save the PDF locally
 $pdfBinary = $billomat->letters->pdf($letter->id, rawPdf: true);
 file_put_contents("letter-{$letter->id}.pdf", $pdfBinary);
-
-// 7) Once the letter has been handled internally → CLEARED
-$billomat->letters->clear($letter->id);
 ```

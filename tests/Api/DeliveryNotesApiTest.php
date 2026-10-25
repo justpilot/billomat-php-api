@@ -225,17 +225,12 @@ final class DeliveryNotesApiTest extends TestCase
         ));
 
         $api->complete(1);
-        $api->cancel(2);
-        $api->clear(3);
-        $api->undo(4);
         $api->delete(5);
 
+        self::assertSame('PUT', $captured[0]->method);
         self::assertSame('https://mycompany.billomat.net/api/delivery-notes/1/complete', $captured[0]->url);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/2/cancel', $captured[1]->url);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/3/clear', $captured[2]->url);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/4/undo', $captured[3]->url);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/5', $captured[4]->url);
-        self::assertSame('DELETE', $captured[4]->method);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/5', $captured[1]->url);
+        self::assertSame('DELETE', $captured[1]->method);
     }
 
     #[Test]
@@ -344,11 +339,11 @@ final class DeliveryNotesApiTest extends TestCase
     }
 
     #[Test]
-    public function undoMapsHttpErrorToValidationException(): void
+    public function completeMapsHttpErrorToValidationException(): void
     {
-        // Regression: vor Bug-Fix verschluckte `undo()` 4xx/5xx und gab still `false` zurück.
+        // Regression: Status-Aktionen dürfen 4xx/5xx nicht verschlucken.
         $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
-            json_encode(['errors' => ['error' => 'Delivery note status cannot be reverted.']], JSON_THROW_ON_ERROR),
+            json_encode(['errors' => ['error' => 'Delivery note cannot be completed.']], JSON_THROW_ON_ERROR),
             ['http_code' => 422],
         ));
 
@@ -359,6 +354,6 @@ final class DeliveryNotesApiTest extends TestCase
 
         $this->expectException(ValidationException::class);
 
-        $api->undo(21);
+        $api->complete(21);
     }
 }

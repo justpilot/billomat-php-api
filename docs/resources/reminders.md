@@ -25,7 +25,7 @@ DRAFT  ── complete() ──▶  OPEN  ── invoice is paid ──▶  PAID
   │                        │
   │                        ├── due date passed ──▶  OVERDUE
   │                        │
-  │                        └── cancel() ──▶  CANCELED
+  │                        └── cancel() ──▶  CANCELED  ── uncancel() ──▶  OPEN
   └── delete() (only in DRAFT)
 ```
 
@@ -46,6 +46,7 @@ An open reminder can be followed by further dunning levels: Billomat increments 
 | `delete($id)` | DELETE | `/reminders/{id}` |
 | `complete($id, $templateId?)` | PUT | `/reminders/{id}/complete` |
 | `cancel($id)` | PUT | `/reminders/{id}/cancel` |
+| `uncancel($id)` | PUT | `/reminders/{id}/uncancel` |
 | `email($id, $options?)` | POST | `/reminders/{id}/email` |
 | `pdf($id, $type?, $rawPdf?)` | GET | `/reminders/{id}/pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/reminders/{id}/upload-signature` |
@@ -121,9 +122,9 @@ Only advisable in status `DRAFT`. `invoiceId` can no longer be changed here; the
 
 Status `DRAFT → OPEN`. An optional `templateId` forces a specific layout template.
 
-#### `cancel(int $id): void`
+#### `cancel(int $id): void` / `uncancel(int $id): void`
 
-Sets the status to `CANCELED`. The SDK has **no** `uncancel()` for reminders; if needed, create a new reminder.
+`cancel()` sets the status to `CANCELED`, `uncancel()` reactivates a canceled reminder (`CANCELED → OPEN`). Reminders have no `clear()`/`unclear()` (Billomat answers 404).
 
 #### `email(int $id, ?EmailOptions $options = null): void`
 
@@ -324,7 +325,6 @@ There is **no** comment action key enum for reminders: reminders simply have no 
 
 - **`invoiceId` is required and immutable.** A reminder without an invoice doesn't exist; after `create()` the link is fixed and not part of `ReminderUpdateOptions`.
 - **Items are read-only.** To add line items, adjust the reminder text block (`/reminder-texts`) or set a different `reminderTextId` before calling `complete()`.
-- **No `uncancel()` in the SDK.** Unlike invoices or credit notes, `RemindersApi` can't reactivate a canceled reminder.
 - **No `/reminder-comments` endpoint.** The activity log and free-form notes belong to the parent invoice workflow, not to the reminder itself.
 - **`dueDate` beats `dueDays`.** If both are set, the absolute `due_date` wins. It is cleaner to maintain only one of the two fields.
 - **A `reminderTextId` without a matching entry in `/reminder-texts` leads to 422.** Before `create()`, make sure the reminder text block exists (via `$billomat->reminderTexts->list()`).

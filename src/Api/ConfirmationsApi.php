@@ -33,8 +33,9 @@ use NoDiscard;
  *  - DELETE /confirmations/{id}
  *  - PUT    /confirmations/{id}/complete
  *  - PUT    /confirmations/{id}/cancel
+ *  - PUT    /confirmations/{id}/uncancel
  *  - PUT    /confirmations/{id}/clear   (als erledigt markieren)
- *  - PUT    /confirmations/{id}/undo    (Status zurücksetzen)
+ *  - PUT    /confirmations/{id}/unclear (Erledigt-Markierung zurücknehmen)
  *  - POST   /confirmations/{id}/email
  *  - GET    /confirmations/{id}/pdf
  *  - PUT    /confirmations/{id}/upload-signature
@@ -184,9 +185,16 @@ final class ConfirmationsApi extends AbstractApi
         $this->deleteVoid("/confirmations/{$id}");
     }
 
+    /** Storniert eine Auftragsbestätigung (Status → CANCELED). */
     public function cancel(int $id): void
     {
         $this->putVoid("/confirmations/{$id}/cancel");
+    }
+
+    /** Hebt die Stornierung auf (CANCELED → COMPLETED). */
+    public function uncancel(int $id): void
+    {
+        $this->putVoid("/confirmations/{$id}/uncancel");
     }
 
     /** Markiert eine Auftragsbestätigung als erledigt (Status → CLEARED). */
@@ -195,10 +203,10 @@ final class ConfirmationsApi extends AbstractApi
         $this->putVoid("/confirmations/{$id}/clear");
     }
 
-    /** Setzt einen Status zurück auf OPEN (Rückgängigmachen von clear/cancel). */
-    public function undo(int $id): void
+    /** Nimmt die Erledigt-Markierung zurück (CLEARED → COMPLETED). */
+    public function unclear(int $id): void
     {
-        $this->putVoid("/confirmations/{$id}/undo");
+        $this->putVoid("/confirmations/{$id}/unclear");
     }
 
     public function email(int $id, ?EmailOptions $options = null): void

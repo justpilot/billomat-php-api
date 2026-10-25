@@ -66,7 +66,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -85,7 +85,7 @@ $invoice = $billomat->invoices->create($options);
 $billomat->invoices->complete($invoice->id);
 
 // 3) Download the PDF
-$pdf = $billomat->invoices->pdf($invoice->id, InvoicePdfType::SIGNED, rawPdf: true);
+$pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED, rawPdf: true);
 file_put_contents(sprintf('invoice-%d.pdf', $invoice->id), $pdf);
 ```
 

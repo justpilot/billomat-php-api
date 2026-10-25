@@ -6,7 +6,7 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 
 use const DATE_ATOM;
 
@@ -33,7 +33,7 @@ final readonly class IncomingPayment
         /** Zahlungsbetrag. */
         public Money $amount,
         /** Zahlungsart. */
-        public ?InvoicePaymentType $type,
+        public ?PaymentType $type,
         /** Kommentar zur Zahlung. */
         public ?string $comment,
         /** Erstellungszeitpunkt der Zahlung. */
@@ -71,7 +71,7 @@ final readonly class IncomingPayment
             incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             amount: ScalarCaster::toMoneyOrNull($data['amount'] ?? null) ?? Money::zero(),
-            type: InvoicePaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: PaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

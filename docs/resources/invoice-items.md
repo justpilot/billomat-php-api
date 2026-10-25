@@ -44,13 +44,13 @@ Hängt eine Position an eine bestehende Rechnung. `invoice_id` wird vom SDK in d
 
 ```php
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 
 $item = new InvoiceItemCreateOptions(
     quantity: 3.0, unitPrice: Money::of('49.90'),
     title: 'Premium-Support (3 Monate)',
-    type: InvoiceItemType::SERVICE,
+    type: ItemType::SERVICE,
     unit: 'Monat',
 );
 
@@ -71,7 +71,7 @@ Konstruktor: `new InvoiceItemCreateOptions(float $quantity, Money $unitPrice)`.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
-| `type` | `type` | `?InvoiceItemType` | `PRODUCT` oder `SERVICE` |
+| `type` | `type` | `?ItemType` | `PRODUCT` oder `SERVICE` |
 | `articleId` | `article_id` | `?int` | Falls verknüpft mit einem Artikel |
 | `title` | `title` | `?string` | Bezeichnung der Position |
 | `description` | `description` | `?string` | Mehrzeilige Detailbeschreibung |
@@ -105,14 +105,14 @@ Konstruktor: `new InvoiceItemCreateOptions(float $quantity, Money $unitPrice)`.
 | `title` | `?string` | |
 | `description` | `?string` | |
 | `reduction` | `?string` | |
-| `type` | `?InvoiceItemType` | |
+| `type` | `?ItemType` | |
 | `totalGross`, `totalNet` | `?Money` | Inkl. Rabatt |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` | Ohne Rabatt |
 | `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 ## Verwendete Enums
 
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE`.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE`.
 
 ## Stolpersteine
 
@@ -133,7 +133,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -148,7 +148,7 @@ $invoice = $billomat->invoices->create(new InvoiceCreateOptions(clientId: 12345)
 $first = new InvoiceItemCreateOptions(
     quantity: 10.0, unitPrice: Money::of('12.5'),
     title: 'Lizenzgebühr Modul A',
-    type: InvoiceItemType::PRODUCT,
+    type: ItemType::PRODUCT,
     unit: 'Lizenz',
 );
 
@@ -158,7 +158,7 @@ $created = $billomat->invoices->items->create($invoice->id, $first);
 $second = new InvoiceItemCreateOptions(
     quantity: 2.5, unitPrice: Money::of('110'),
     title: 'Anpassung & Support',
-    type: InvoiceItemType::SERVICE,
+    type: ItemType::SERVICE,
     unit: 'Stunde',
 );
 

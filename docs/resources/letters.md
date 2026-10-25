@@ -141,7 +141,7 @@ $mail = new EmailOptions(
 $billomat->letters->email($letter->id, $mail);
 ```
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): LetterPdf|string`
+#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): LetterPdf|string`
 
 Per Default ein `LetterPdf`-Modell. Mit `$rawPdf = true` wird `?format=pdf` gehängt und das binäre PDF zurückgegeben.
 
@@ -328,7 +328,7 @@ Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurü
 
 - [`LetterStatus`](../../src/Model/Enum/LetterStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Beachte: kein `PAID`, kein `OVERDUE` — Briefe haben keinen Zahlungs-Lifecycle.
 - [`LetterCommentActionKey`](../../src/Model/Enum/LetterCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`, `UPLOAD`. Der zusätzliche `UPLOAD`-Key markiert ein über `upload()` hochgeladenes Brief-PDF.
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): wiederverwendet für die PDF-Varianten in `pdf()`.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): wiederverwendet für die PDF-Varianten in `pdf()`.
 
 ## Stolpersteine
 

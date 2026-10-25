@@ -162,7 +162,7 @@ $mail = new EmailOptions(
 $billomat->creditNotes->email($creditNote->id, $mail);
 ```
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): CreditNotePdf|string`
+#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): CreditNotePdf|string`
 
 Liefert per Default ein `CreditNotePdf`-Modell (Metadaten + base64-Body). Mit `$rawPdf = true` wird `?format=pdf` gehängt und der binäre PDF-Inhalt zurückgegeben.
 
@@ -238,13 +238,13 @@ Ein Update gibt es nicht — zum Umbenennen muss der Tag gelöscht und neu angel
 
 ```php
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $payment = new CreditNotePaymentCreateOptions(
     creditNoteId: $creditNote->id,
         amount: Money::of('19.90'),
-    type: InvoicePaymentType::BANK_TRANSFER,
+    type: PaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('2026-06-05'),
     markCreditNoteAsPaid: true,
 );
@@ -293,7 +293,7 @@ Konstruktor: `new CreditNoteItemCreateOptions(float $quantity, Money $unitPrice)
 |---|---|---|---|
 | `quantity` | `quantity` | `float` (Pflicht) | |
 | `unitPrice` | `unit_price` | `Money` (Pflicht) | negativ möglich, üblich bei Rückerstattung |
-| `type` | `type` | `?InvoiceItemType` | wiederverwendet aus Invoice-Domain |
+| `type` | `type` | `?ItemType` | wiederverwendet aus Invoice-Domain |
 | `articleId` | `article_id` | `?int` | |
 | `title` | `title` | `?string` | |
 | `description` | `description` | `?string` | |
@@ -332,7 +332,7 @@ Konstruktor: `new CreditNotePaymentCreateOptions(int $creditNoteId, Money $amoun
 | `date` | `date` | `?\DateTimeImmutable` | `Y-m-d` |
 | `comment` | `comment` | `?string` | |
 | `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck der Überweisung |
-| `type` | `type` | `?InvoicePaymentType` | dieselbe Enum wie bei Rechnungs-Zahlungen |
+| `type` | `type` | `?PaymentType` | dieselbe Enum wie bei Rechnungs-Zahlungen |
 | `markCreditNoteAsPaid` | `mark_credit_note_as_paid` | `bool` | wird **immer** mitgesendet, als `1` oder `0` |
 
 ## Write-Modell: `EmailOptions`
@@ -395,7 +395,7 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `quantity`, `unitPrice` | `float`, `Money` |
 | `taxName`, `taxRate`, `taxChangedManually` | `?string`, `?float`, `?bool` |
 | `title`, `description`, `reduction` | `?string` |
-| `type` | `?InvoiceItemType` |
+| `type` | `?ItemType` |
 | `totalGross`, `totalNet` | `?Money` |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `taxRateReverseCharge` | `?float` |
@@ -443,7 +443,7 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `creditNoteId` | `int` |
 | `date` | `?\DateTimeImmutable` |
 | `amount` | `Money` |
-| `type` | `?InvoicePaymentType` |
+| `type` | `?PaymentType` |
 | `comment`, `transactionPurpose` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
@@ -474,9 +474,9 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 - [`CreditNoteStatus`](../../src/Model/Enum/CreditNoteStatus.php): `DRAFT`, `OPEN`, `PAID`, `CANCELED`.
 - [`CreditNoteCommentActionKey`](../../src/Model/Enum/CreditNoteCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `UNCANCEL`, `CHANGE_STATUS`, `PAYMENT`, `EMAIL`, `MAIL`, `COMMENT`.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`.
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): wiederverwendet für Item-Typen.
-- [`InvoicePaymentType`](../../src/Model/Enum/InvoicePaymentType.php): wiederverwendet für Zahlungsarten (`BANK_TRANSFER`, `PAYPAL`, `CASH`, …).
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `pdf()` akzeptiert dieselben PDF-Varianten wie bei Invoices.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): wiederverwendet für Item-Typen.
+- [`PaymentType`](../../src/Model/Enum/PaymentType.php): wiederverwendet für Zahlungsarten (`BANK_TRANSFER`, `PAYPAL`, `CASH`, …).
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `pdf()` akzeptiert dieselben PDF-Varianten wie bei Invoices.
 
 ## Stolpersteine
 
@@ -505,7 +505,7 @@ use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -555,7 +555,7 @@ $billomat->creditNotes->email($creditNote->id, $mail);
 $payment = new CreditNotePaymentCreateOptions(
     creditNoteId: $creditNote->id,
         amount: Money::of('19.90'),
-    type: InvoicePaymentType::BANK_TRANSFER,
+    type: PaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('2026-06-05'),
     transactionPurpose: 'Erstattung Hosting Mai',
     markCreditNoteAsPaid: true,

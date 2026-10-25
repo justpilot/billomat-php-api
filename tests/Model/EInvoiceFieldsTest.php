@@ -9,8 +9,8 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
 use Justpilot\Billomat\Model\Client;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\InboxDocument;
@@ -34,7 +34,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(NetGross::class)]
 #[UsesClass(SupplyDateType::class)]
 #[UsesClass(InvoiceItem::class)]
-#[UsesClass(InvoiceItemType::class)]
+#[UsesClass(ItemType::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 final class EInvoiceFieldsTest extends TestCase

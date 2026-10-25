@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model\Enum;
 
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(InvoicePaymentType::class)]
-final class InvoicePaymentTypeTest extends TestCase
+#[CoversClass(PaymentType::class)]
+final class PaymentTypeTest extends TestCase
 {
     #[Test]
     public function itExposesAllExpectedCasesAndApiValues(): void
@@ -30,23 +30,23 @@ final class InvoicePaymentTypeTest extends TestCase
                 'COUPON',
                 'MISC',
             ],
-            array_map(static fn (InvoicePaymentType $c): string => $c->value, InvoicePaymentType::cases())
+            array_map(static fn (PaymentType $c): string => $c->value, PaymentType::cases())
         );
     }
 
     #[Test]
     public function fromApiReturnsNullForNullEmptyOrUnknown(): void
     {
-        self::assertNull(InvoicePaymentType::fromApi(null));
-        self::assertNull(InvoicePaymentType::fromApi(''));
-        self::assertNull(InvoicePaymentType::fromApi('BOGUS'));
-        self::assertSame(InvoicePaymentType::CASH, InvoicePaymentType::fromApi('CASH'));
+        self::assertNull(PaymentType::fromApi(null));
+        self::assertNull(PaymentType::fromApi(''));
+        self::assertNull(PaymentType::fromApi('BOGUS'));
+        self::assertSame(PaymentType::CASH, PaymentType::fromApi('CASH'));
     }
 
     #[Test]
     public function eachCaseHasGermanLabel(): void
     {
-        foreach (InvoicePaymentType::cases() as $case) {
+        foreach (PaymentType::cases() as $case) {
             self::assertNotSame('', $case->label());
         }
     }

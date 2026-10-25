@@ -8,8 +8,8 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterComment;
 use Justpilot\Billomat\Model\LetterPdf;
@@ -209,11 +209,11 @@ final class LettersApi extends AbstractApi
      * @return LetterPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
     #[NoDiscard]
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): LetterPdf|string
+    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): LetterPdf|string
     {
         $query = [];
 
-        if ($type instanceof InvoicePdfType) {
+        if ($type instanceof PdfType) {
             $query['type'] = $type->value;
         }
 

@@ -207,7 +207,7 @@ Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argum
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
-| `defaultPaymentTypes` | `default_payment_types` | `list<InvoicePaymentType>` (Billomat: kommasepariert, z. B. `CASH,BANK_TRANSFER`) |
+| `defaultPaymentTypes` | `default_payment_types` | `list<PaymentType>` (Billomat: kommasepariert, z. B. `CASH,BANK_TRANSFER`) |
 | `reduction` | `reduction` | `?float` (Rabatt in %) |
 | `discountRateType` | `discount_rate_type` | `?ValueType` (`SETTINGS`, `ABSOLUTE`, `RELATIVE`) |
 | `discountRate` | `discount_rate` | `?float` |

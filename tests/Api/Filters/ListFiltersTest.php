@@ -22,8 +22,8 @@ use Justpilot\Billomat\Api\ReminderFilter;
 use Justpilot\Billomat\Api\SupplierFilter;
 use Justpilot\Billomat\Api\TemplateFilter;
 use Justpilot\Billomat\Api\UserFilter;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -69,7 +69,7 @@ final class ListFiltersTest extends TestCase
             clientId: 7,
             invoiceNumber: 'RE-1',
             status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE],
-            paymentType: [InvoicePaymentType::CASH],
+            paymentType: [PaymentType::CASH],
             from: new DateTimeImmutable('2026-01-01 13:45'),
             to: new DateTimeImmutable('2026-03-31'),
             tags: ['vip', 'b2b'],

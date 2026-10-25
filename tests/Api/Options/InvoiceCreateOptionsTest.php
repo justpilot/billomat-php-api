@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Tests\Api\Options;
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\Money;
@@ -100,7 +100,7 @@ final class InvoiceCreateOptionsTest extends TestCase
             quantity: 3.0,
             unitPrice: Money::of('49.9'),
             title: 'Beratung',
-            type: InvoiceItemType::SERVICE,
+            type: ItemType::SERVICE,
         );
         $options = $options->withItem($item);
 

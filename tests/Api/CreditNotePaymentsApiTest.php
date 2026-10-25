@@ -14,7 +14,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNotePayment;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -35,7 +35,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
-#[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(PaymentType::class)]
 #[UsesClass(Money::class)]
 final class CreditNotePaymentsApiTest extends TestCase
 {
@@ -73,7 +73,7 @@ final class CreditNotePaymentsApiTest extends TestCase
 
         self::assertCount(1, $payments);
         self::assertSame('100', $payments[0]->amount->toString());
-        self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payments[0]->type);
+        self::assertSame(PaymentType::BANK_TRANSFER, $payments[0]->type);
         self::assertStringContainsString('credit_note_id=42', $captured['url']);
     }
 
@@ -102,7 +102,7 @@ final class CreditNotePaymentsApiTest extends TestCase
         $payment = $api->get(1);
 
         self::assertInstanceOf(CreditNotePayment::class, $payment);
-        self::assertSame(InvoicePaymentType::CASH, $payment->type);
+        self::assertSame(PaymentType::CASH, $payment->type);
     }
 
     #[Test]
@@ -134,7 +134,7 @@ final class CreditNotePaymentsApiTest extends TestCase
             creditNoteId: 42,
             amount: Money::of('100'),
             date: new DateTimeImmutable('2026-02-01'),
-            type: InvoicePaymentType::BANK_TRANSFER,
+            type: PaymentType::BANK_TRANSFER,
             markCreditNoteAsPaid: true,
         );
 

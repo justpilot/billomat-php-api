@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model\Enum;
 
 /**
- * Zahlungsarten für Invoice-Payments laut Billomat.
+ * Zahlungsarten laut Billomat.
+ *
+ * Gilt für Zahlungen von Rechnungen, Gutschriften und Eingangsrechnungen sowie für die
+ * akzeptierten Zahlarten (`payment_types`) und die Zahlart-Filter.
  *
  * Quelle:
  * https://www.billomat.com/api/rechnungen/zahlungen/
  */
-enum InvoicePaymentType: string
+enum PaymentType: string
 {
     case INVOICE_CORRECTION = 'INVOICE_CORRECTION';
     case CREDIT_NOTE = 'CREDIT_NOTE';

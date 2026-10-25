@@ -20,7 +20,7 @@ use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 
 $billomatId = getenv('BILLOMAT_ID') ?: null;
 $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
@@ -48,7 +48,7 @@ try {
     $workshop = new OfferItemCreateOptions(
         quantity: 1.0, unitPrice: Money::of('980'),
         title: 'Workshop "Discovery"',
-        type: InvoiceItemType::SERVICE,
+        type: ItemType::SERVICE,
         unit: 'Tag',
     );
     $opts = $opts->withItem($workshop);
@@ -56,7 +56,7 @@ try {
     $followUp = new OfferItemCreateOptions(
         quantity: 4.0, unitPrice: Money::of('110'),
         title: 'Nachgespräche & Reporting',
-        type: InvoiceItemType::SERVICE,
+        type: ItemType::SERVICE,
         unit: 'Stunde',
     );
     $opts = $opts->withItem($followUp);

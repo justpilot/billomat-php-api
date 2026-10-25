@@ -42,14 +42,14 @@ use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
@@ -179,8 +179,8 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(IncomingCommentActionKey::class)]
 #[UsesClass(IncomingStatus::class)]
 #[UsesClass(InvoiceCommentActionKey::class)]
-#[UsesClass(InvoiceItemType::class)]
-#[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(ItemType::class)]
+#[UsesClass(PaymentType::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(LetterCommentActionKey::class)]
 #[UsesClass(LetterStatus::class)]

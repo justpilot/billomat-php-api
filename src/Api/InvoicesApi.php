@@ -10,7 +10,7 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\InvoiceGroup;
@@ -329,8 +329,8 @@ final class InvoicesApi extends AbstractApi
      * Entspricht GET /invoices/{id}/pdf
      *
      * - Optionaler Typ:
-     *   - InvoicePdfType::SIGNED → type=signed
-     *   - InvoicePdfType::PRINT  → type=print
+     *   - PdfType::SIGNED → type=signed
+     *   - PdfType::PRINT  → type=print
      *
      * - Raw-PDF-Modus:
      *   - $rawPdf = true → format=pdf, Rückgabe ist der binäre PDF-String
@@ -339,11 +339,11 @@ final class InvoicesApi extends AbstractApi
      * @return InvoicePdf|string InvoicePdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
      */
     #[NoDiscard]
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string
+    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): InvoicePdf|string
     {
         $query = [];
 
-        if ($type instanceof InvoicePdfType) {
+        if ($type instanceof PdfType) {
             // Enum → API-String (signed / print)
             $query['type'] = $type->value;
         }

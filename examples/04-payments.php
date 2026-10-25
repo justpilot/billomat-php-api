@@ -19,7 +19,7 @@ use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 
 $billomatId = getenv('BILLOMAT_ID') ?: null;
 $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
@@ -39,7 +39,7 @@ try {
     $opts = new InvoicePaymentCreateOptions(
         invoiceId: $invoiceId, amount: Money::of('1'),
         date: new DateTimeImmutable('today'),
-        type: InvoicePaymentType::BANK_TRANSFER,
+        type: PaymentType::BANK_TRANSFER,
         comment: 'Test-Zahlung aus examples/04-payments.php',
     );
 

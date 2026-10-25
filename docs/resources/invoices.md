@@ -81,7 +81,7 @@ Empfohlen ist der typisierte Filter `InvoiceFilter`. Mehrfachwerte (`status`, `p
 | `client_id` / `contact_id` | `clientId` / `contactId` |
 | `invoice_number` | `invoiceNumber` |
 | `status` | `status` (`list<InvoiceStatus>`) |
-| `payment_type` | `paymentType` (`list<InvoicePaymentType>`) |
+| `payment_type` | `paymentType` (`list<PaymentType>`) |
 | `from` / `to` | `from` / `to` |
 | `label` / `intro` / `note` | `label` / `intro` / `note` |
 | `tags` | `tags` |
@@ -238,27 +238,27 @@ $billomat->invoices->uploadSignature($invoice->id, $signed);
 $billomat->invoices->encash($invoice->id);
 ```
 
-### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string`
+### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): InvoicePdf|string`
 
 Zwei Modi:
 
 ```php
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 
 // 1) Standardmodus: JSON mit Base64-PDF
-$pdf = $billomat->invoices->pdf($invoice->id, InvoicePdfType::SIGNED);
+$pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED);
 // $pdf ist InvoicePdf — mit getBinary() zum Dekodieren
 file_put_contents('rechnung.pdf', $pdf->getBinary());
 
 // 2) Raw-Modus: direkt application/pdf, Rückgabe ist der Binärinhalt als String
-$binary = $billomat->invoices->pdf($invoice->id, InvoicePdfType::SIGNED, rawPdf: true);
+$binary = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED, rawPdf: true);
 file_put_contents('rechnung.pdf', $binary);
 ```
 
 `type` ist optional:
 
-- `InvoicePdfType::SIGNED` (`signed`) — signierte Version
-- `InvoicePdfType::PRINT` (`print`) — Druckversion ohne Hintergrund
+- `PdfType::SIGNED` (`signed`) — signierte Version
+- `PdfType::PRINT` (`print`) — Druckversion ohne Hintergrund
 
 Ohne `type` liefert Billomat das Standard-PDF.
 
@@ -312,7 +312,7 @@ Konstruktor: `new InvoiceCreateOptions(int $clientId, …)` — `clientId` ist P
 | `currencyCode` | `currency_code` | `?string` |
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` (Währungskurs) |
-| `paymentTypes` | `payment_types` | `list<InvoicePaymentType>` (Billomat: kommasepariert, z. B. `BANK_TRANSFER,CASH`) |
+| `paymentTypes` | `payment_types` | `list<PaymentType>` (Billomat: kommasepariert, z. B. `BANK_TRANSFER,CASH`) |
 
 ### Verknüpfungen
 
@@ -349,7 +349,7 @@ Schmaler Subset für Partial-Updates, aufgebaut wie `InvoiceCreateOptions` (bena
 | `netGross` | `net_gross` | `?NetGross` |
 | `currencyCode` | `currency_code` | `?string` |
 | `quote` | `quote` | `?float` |
-| `paymentTypes` | `payment_types` | `list<InvoicePaymentType>\|Clear` |
+| `paymentTypes` | `payment_types` | `list<PaymentType>\|Clear` |
 
 ## Write-Modell: `EmailOptions`
 
@@ -404,7 +404,7 @@ Payload für `mail()` (Pixelletter), wie die übrigen Options `final readonly` m
 | `paidAmount`, `openAmount` | `?Money` |
 | `netGross` | `?NetGross` |
 | `currencyCode` | `?string` |
-| `paymentTypes` | `list<InvoicePaymentType>` (unbekannte Werte fallen heraus) |
+| `paymentTypes` | `list<PaymentType>` (unbekannte Werte fallen heraus) |
 | `quote` | `?float` |
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | `?int` |
 | `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) — Steuer-Zusammenfassung |
@@ -421,7 +421,7 @@ Payload für `mail()` (Pixelletter), wie die übrigen Options `final readonly` m
 ## Verwendete Enums
 
 - [`InvoiceStatus`](../../src/Model/Enum/InvoiceStatus.php): `DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`. Hat `label(): string` für UI-Labels (z. B. „Bezahlt“).
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`).
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`).
 - [`InvoiceGroupBy`](../../src/Model/Enum/InvoiceGroupBy.php): `CLIENT`, `STATUS`, `DAY`, `WEEK`, `MONTH`, `YEAR` — Aggregationsachsen für `listGrouped()`.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 - [`SupplyDateType`](../../src/Model/Enum/SupplyDateType.php): `SUPPLY_DATE`, `DELIVERY_DATE`, `SUPPLY_TEXT`, `DELIVERY_TEXT`.
@@ -450,7 +450,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -489,6 +489,6 @@ printf(
 );
 
 // 4) PDF speichern
-$pdf = $billomat->invoices->pdf($invoice->id, InvoicePdfType::SIGNED, rawPdf: true);
+$pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED, rawPdf: true);
 file_put_contents(sprintf('rechnung-%d.pdf', $invoice->id), $pdf);
 ```

@@ -21,7 +21,7 @@ use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
 use Justpilot\Billomat\Api\IncomingTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 
 $billomatId = getenv('BILLOMAT_ID') ?: null;
 $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
@@ -66,7 +66,7 @@ try {
         incomingId: $incoming->id,
             amount: $incoming->totalGross ?? 119.0,
         date: new DateTimeImmutable('today'),
-        type: InvoicePaymentType::BANK_TRANSFER,
+        type: PaymentType::BANK_TRANSFER,
         markIncomingAsPaid: true,
         transactionPurpose: $incoming->incomingNumber ?? '',
     );

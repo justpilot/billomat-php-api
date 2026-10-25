@@ -172,17 +172,17 @@ $billomat->offers->email($offer->id, $email);
 
 Lädt eine unterschriebene PDF-Version hoch. `$base64Pdf` ist der Base64-codierte PDF-Inhalt (ohne `data:`-Prefix).
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): OfferPdf|string`
+#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): OfferPdf|string`
 
-Standardmäßig liefert die Methode ein `OfferPdf`-Model mit Base64-Inhalt; mit `$rawPdf = true` umgeht sie die JSON-Schicht und gibt die rohen Binärbytes zurück. Der `$type`-Parameter teilt das `InvoicePdfType`-Enum mit dem Rechnungs-PDF (`SIGNED`, `PRINT`).
+Standardmäßig liefert die Methode ein `OfferPdf`-Model mit Base64-Inhalt; mit `$rawPdf = true` umgeht sie die JSON-Schicht und gibt die rohen Binärbytes zurück. Der `$type`-Parameter teilt das `PdfType`-Enum mit dem Rechnungs-PDF (`SIGNED`, `PRINT`).
 
 ```php
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 
 $pdf = $billomat->offers->pdf($offer->id);              // OfferPdf
 file_put_contents('angebot.pdf', $pdf->getBinary());
 
-$bytes = $billomat->offers->pdf($offer->id, InvoicePdfType::SIGNED, rawPdf: true);
+$bytes = $billomat->offers->pdf($offer->id, PdfType::SIGNED, rawPdf: true);
 ```
 
 ### Offer Items
@@ -300,7 +300,7 @@ Konstruktor: `new OfferItemCreateOptions(float $quantity, Money $unitPrice)`. Be
 |---|---|---|---|
 | `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
 | `unitPrice` | `unit_price` | `Money` | Pflicht (Konstruktor) |
-| `type` | `type` | `?InvoiceItemType` | `PRODUCT`/`SERVICE` |
+| `type` | `type` | `?ItemType` | `PRODUCT`/`SERVICE` |
 | `articleId` | `article_id` | `?int` | |
 | `title` | `title` | `?string` | |
 | `description` | `description` | `?string` | |
@@ -391,7 +391,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `taxRate` | `?float` |
 | `taxChangedManually` | `?bool` |
 | `title`, `description`, `reduction` | `?string` |
-| `type` | `?InvoiceItemType` |
+| `type` | `?ItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `optional` | `?bool` (Optionale Position) |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
@@ -443,8 +443,8 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 
 - [`OfferStatus`](../../src/Model/Enum/OfferStatus.php): `DRAFT`, `OPEN`, `WON`, `LOST`, `CLEARED`, `CANCELED`. Hat `label()` für deutsche Bezeichnung.
 - [`OfferCommentActionKey`](../../src/Model/Enum/OfferCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `WIN`, `LOSE`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`.
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 
 ## Stolpersteine
@@ -475,7 +475,7 @@ use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\Money;
 
@@ -496,7 +496,7 @@ $opts = new OfferCreateOptions(
 $setup = new OfferItemCreateOptions(
     quantity: 1.0, unitPrice: Money::of('250.00'),
     title: 'Setup-Pauschale',
-    type: InvoiceItemType::SERVICE,
+    type: ItemType::SERVICE,
 );
 $opts = $opts->withItem($setup);
 

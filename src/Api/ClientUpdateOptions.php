@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\TaxRule;
 use Justpilot\Billomat\Model\Enum\ValueType;
 
@@ -389,7 +389,7 @@ final readonly class ClientUpdateOptions implements WriteOptions
          * Billomat-Feld: default_payment_types
          * Typ: ALNUM
          *
-         * @var list<InvoicePaymentType>|Clear
+         * @var list<PaymentType>|Clear
          */
         public array|Clear $defaultPaymentTypes = [],
     ) {
@@ -686,7 +686,7 @@ final readonly class ClientUpdateOptions implements WriteOptions
     /**
      * Kopie mit geändertem `defaultPaymentTypes`.
      *
-     * @param list<InvoicePaymentType>|Clear $defaultPaymentTypes
+     * @param list<PaymentType>|Clear $defaultPaymentTypes
      */
     public function withDefaultPaymentTypes(array|Clear $defaultPaymentTypes): self
     {
@@ -753,7 +753,7 @@ final readonly class ClientUpdateOptions implements WriteOptions
                 'bank_iban' => $this->bankIban,
                 'sepa_mandate' => $this->sepaMandate,
                 'sepa_mandate_date' => $this->sepaMandateDate,
-                'default_payment_types' => $this->defaultPaymentTypes instanceof Clear ? $this->defaultPaymentTypes : ([] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->defaultPaymentTypes))),
+                'default_payment_types' => $this->defaultPaymentTypes instanceof Clear ? $this->defaultPaymentTypes : ([] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->defaultPaymentTypes))),
             ], static fn (mixed $v): bool => null !== $v),
         );
     }

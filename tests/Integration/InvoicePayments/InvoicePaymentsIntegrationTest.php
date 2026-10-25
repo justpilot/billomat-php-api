@@ -9,8 +9,8 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -85,7 +85,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
             invoiceId: $invoiceId,
             amount: $amount,
             date: new DateTimeImmutable('today'),
-            type: InvoicePaymentType::BANK_TRANSFER,
+            type: PaymentType::BANK_TRANSFER,
             comment: 'Integrationstest Zahlung',
             transactionPurpose: 'Testzahlung für Invoice #'.$invoiceId,
             markInvoiceAsPaid: true,

@@ -19,8 +19,8 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
@@ -565,7 +565,7 @@ final class InvoicesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
-        (void) $api->pdf(999, InvoicePdfType::SIGNED);
+        (void) $api->pdf(999, PdfType::SIGNED);
 
         self::assertNotNull($capturedUrl);
         self::assertStringContainsString(

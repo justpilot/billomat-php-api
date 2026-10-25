@@ -7,9 +7,9 @@ namespace Justpilot\Billomat\Model;
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
 use const DATE_ATOM;
@@ -32,9 +32,9 @@ use const DATE_ATOM;
 final readonly class Invoice
 {
     /**
-     * @param list<TaxSummary>         $taxes
-     * @param list<InvoicePaymentType> $paymentTypes
-     * @param list<InvoiceItem>        $items
+     * @param list<TaxSummary>  $taxes
+     * @param list<PaymentType> $paymentTypes
+     * @param list<InvoiceItem> $items
      */
     public function __construct(
         /** Interne Billomat-ID der Rechnung. */
@@ -182,7 +182,7 @@ final readonly class Invoice
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
             taxes: ListCaster::toList($data['taxes']['tax'] ?? null, 'name', TaxSummary::fromArray(...)),
-            paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, InvoicePaymentType::class),
+            paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, PaymentType::class),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toList($data['invoice-items']['invoice-item'] ?? null, 'id', InvoiceItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -240,7 +240,7 @@ final readonly class Invoice
             'offer_id' => $this->offerId,
             'confirmation_id' => $this->confirmationId,
             'recurring_id' => $this->recurringId,
-            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes)),
+            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes)),
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,

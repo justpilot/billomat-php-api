@@ -150,14 +150,14 @@ Versendet den Lieferschein per E-Mail. Ohne Options nutzt Billomat die Defaults 
 
 Lädt eine unterschriebene PDF-Version hoch — typischer Use Case: der Fahrer fotografiert die unterschriebene Empfangsbestätigung, das PDF wird Base64-encodiert hochgeladen.
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string`
+#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string`
 
 Liefert `DeliveryNotePdf` (Base64-Container) oder mit `$rawPdf = true` die rohen Bytes.
 
 ```php
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 
-$pdf = $billomat->deliveryNotes->pdf($note->id, InvoicePdfType::SIGNED);
+$pdf = $billomat->deliveryNotes->pdf($note->id, PdfType::SIGNED);
 file_put_contents('lieferschein.pdf', $pdf->getBinary());
 ```
 
@@ -256,7 +256,7 @@ Konstruktor: `new DeliveryNoteItemCreateOptions(float $quantity, Money $unitPric
 |---|---|---|---|
 | `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
 | `unitPrice` | `unit_price` | `Money` | Pflicht (Konstruktor) |
-| `type` | `type` | `?InvoiceItemType` | |
+| `type` | `type` | `?ItemType` | |
 | `articleId` | `article_id` | `?int` | |
 | `title`, `description`, `unit` | analog | `?string` | |
 | `taxName`, `taxRate`, `taxChangedManually` | analog | `?string`/`?float`/`?bool` | |
@@ -328,7 +328,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `quantity` | `float` |
 | `taxChangedManually` | `?bool` |
 | `title`, `description` | `?string` |
-| `type` | `?InvoiceItemType` |
+| `type` | `?ItemType` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `DeliveryNoteComment`
@@ -378,8 +378,8 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 
 - [`DeliveryNoteStatus`](../../src/Model/Enum/DeliveryNoteStatus.php): `DRAFT`, `OPEN`, `CREATED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `CREATED`. Hat `label()` für deutsche Bezeichnung.
 - [`DeliveryNoteCommentActionKey`](../../src/Model/Enum/DeliveryNoteCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`.
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 
 ## Stolpersteine
@@ -410,8 +410,8 @@ use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -431,7 +431,7 @@ $opts = new DeliveryNoteCreateOptions(
 $item = new DeliveryNoteItemCreateOptions(
     quantity: 3.0, unitPrice: Money::of('49.90'),
     title: 'Hardware-Paket',
-    type: InvoiceItemType::PRODUCT,
+    type: ItemType::PRODUCT,
     unit: 'Stück',
 );
 $opts = $opts->withItem($item);
@@ -473,6 +473,6 @@ $billomat->deliveryNotes->comments->create(
 $billomat->deliveryNotes->clear($note->id);
 
 // 7) Signierte PDF-Version archivieren
-$pdf = $billomat->deliveryNotes->pdf($note->id, InvoicePdfType::SIGNED);
+$pdf = $billomat->deliveryNotes->pdf($note->id, PdfType::SIGNED);
 file_put_contents("ls-{$opened?->deliveryNoteNumber}.pdf", $pdf->getBinary());
 ```

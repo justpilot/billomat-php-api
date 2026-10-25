@@ -173,14 +173,14 @@ $paymentEvents = $billomat->incomings->comments->list(
 
 ```php
 use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $payment = new IncomingPaymentCreateOptions(
     incomingId: $incoming->id,
         amount: Money::of('357.00'),
     date: new DateTimeImmutable('2026-06-15'),
-    type: InvoicePaymentType::BANK_TRANSFER,
+    type: PaymentType::BANK_TRANSFER,
     markIncomingAsPaid: true,
 );
 
@@ -270,7 +270,7 @@ Konstruktor: `new IncomingPaymentCreateOptions(int $incomingId, Money $amount)`.
 | `date` | `date` | `?\DateTimeImmutable` | Zahlungsdatum |
 | `comment` | `comment` | `?string` | |
 | `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck |
-| `type` | `type` | `?InvoicePaymentType` | Geteilter Enum mit Invoices |
+| `type` | `type` | `?PaymentType` | Geteilter Enum mit Invoices |
 | `markIncomingAsPaid` | `mark_incoming_as_paid` | `bool` (Default `false`) | Wird als `1`/`0` serialisiert |
 
 ## Write-Modell: `IncomingTagCreateOptions`
@@ -340,7 +340,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `incomingId` | `int` |
 | `date` | `?\DateTimeImmutable` |
 | `amount` | `Money` |
-| `type` | `?InvoicePaymentType` |
+| `type` | `?PaymentType` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
@@ -400,7 +400,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 
 - [`IncomingStatus`](../../src/Model/Enum/IncomingStatus.php): `DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`. Wird vom Server gesetzt, nicht vom Client.
 - [`IncomingCommentActionKey`](../../src/Model/Enum/IncomingCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `UNCANCEL`, `CHANGE_STATUS`, `PAYMENT`, `UPLOAD`, `COMMENT`. Die meisten Werte erzeugt Billomat automatisch — manuell sinnvoll ist üblicherweise nur `COMMENT`.
-- [`InvoicePaymentType`](../../src/Model/Enum/InvoicePaymentType.php): geteilter Enum mit Invoices (`BANK_TRANSFER`, `CASH`, `PAYPAL`, …).
+- [`PaymentType`](../../src/Model/Enum/PaymentType.php): geteilter Enum mit Invoices (`BANK_TRANSFER`, `CASH`, `PAYPAL`, …).
 - [`PropertyType`](../../src/Model/Enum/PropertyType.php): Datentyp der Property-Definition (für `IncomingProperty`).
 
 ## Stolpersteine
@@ -429,7 +429,7 @@ use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
 use Justpilot\Billomat\Api\IncomingTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -469,7 +469,7 @@ $billomat->incomings->payments->create(
             incomingId: $incoming->id,
                 amount: Money::of('357.00'),
             date: new DateTimeImmutable('2026-06-15'),
-            type: InvoicePaymentType::BANK_TRANSFER,
+            type: PaymentType::BANK_TRANSFER,
             transactionPurpose: 'RG LR-2026-0815',
             markIncomingAsPaid: true,
         );

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 
 /**
@@ -113,7 +113,7 @@ final readonly class InvoiceItemCreateOptions implements WriteOptions
          * Billomat-Feld: type
          * Typ: ENUM (PRODUCT/SERVICE)
          */
-        public ?InvoiceItemType $type = null,
+        public ?ItemType $type = null,
     ) {
     }
 
@@ -184,7 +184,7 @@ final readonly class InvoiceItemCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `type`. */
-    public function withType(?InvoiceItemType $type): self
+    public function withType(?ItemType $type): self
     {
         return clone($this, ['type' => $type]);
     }

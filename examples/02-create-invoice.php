@@ -20,7 +20,7 @@ use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 
 $billomatId = getenv('BILLOMAT_ID') ?: null;
 $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
@@ -46,7 +46,7 @@ $opts = new InvoiceCreateOptions(
 $item1 = new InvoiceItemCreateOptions(
     quantity: 5.0, unitPrice: Money::of('19.9'),
     title: 'Demo-Artikel A',
-    type: InvoiceItemType::PRODUCT,
+    type: ItemType::PRODUCT,
     unit: 'Stück',
 );
 $opts = $opts->withItem($item1);
@@ -54,7 +54,7 @@ $opts = $opts->withItem($item1);
 $item2 = new InvoiceItemCreateOptions(
     quantity: 1.5, unitPrice: Money::of('95'),
     title: 'Demo-Dienstleistung',
-    type: InvoiceItemType::SERVICE,
+    type: ItemType::SERVICE,
     unit: 'Stunde',
 );
 $opts = $opts->withItem($item2);

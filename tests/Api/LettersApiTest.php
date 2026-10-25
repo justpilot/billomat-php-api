@@ -15,8 +15,8 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterPdf;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -271,7 +271,7 @@ final class LettersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, InvoicePdfType::PRINT, rawPdf: true);
+        $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
 
         self::assertIsString($result);
         self::assertStringContainsString('format=pdf', $captured['url']);

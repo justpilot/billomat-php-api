@@ -51,13 +51,13 @@ Liefert `null` bei 404.
 
 ```php
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $opts = new InvoicePaymentCreateOptions(
     invoiceId: 98765, amount: Money::of('1190.00'),
     date: new DateTimeImmutable('2026-06-01'),
-    type: InvoicePaymentType::BANK_TRANSFER,
+    type: PaymentType::BANK_TRANSFER,
     comment: 'Überweisung Eingang vom 01.06.',
     markInvoiceAsPaid: true,
 );
@@ -80,7 +80,7 @@ Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount)`. B
 | `date` | `date` | `?\DateTimeImmutable` | Default: heute |
 | `comment` | `comment` | `?string` | Freitext |
 | `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck |
-| `type` | `type` | `?InvoicePaymentType` | siehe Enum unten |
+| `type` | `type` | `?PaymentType` | siehe Enum unten |
 | `markInvoiceAsPaid` | `mark_invoice_as_paid` | `bool` | Default `false`. Bei `true` markiert Billomat die Rechnung als `PAID`, auch wenn der Zahlbetrag den offenen Betrag nicht exakt deckt. |
 
 `toArray()` filtert `null`-Werte heraus, erhält aber `invoice_id`, `amount` und `mark_invoice_as_paid` (das wird immer als `1`/`0` mitgeschickt).
@@ -95,7 +95,7 @@ Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount)`. B
 | `invoiceId` | `int` |
 | `date` | `?\DateTimeImmutable` |
 | `amount` | `Money` |
-| `type` | `?InvoicePaymentType` |
+| `type` | `?PaymentType` |
 | `comment` | `?string` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
@@ -107,7 +107,7 @@ Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount)`. B
 
 ## Verwendete Enums
 
-[`InvoicePaymentType`](../../src/Model/Enum/InvoicePaymentType.php) bildet die Zahlungsarten ab — mit deutschsprachigen Labels via `label()`:
+[`PaymentType`](../../src/Model/Enum/PaymentType.php) bildet die Zahlungsarten ab — mit deutschsprachigen Labels via `label()`:
 
 | Case | Wire-Wert | Label |
 |---|---|---|
@@ -141,7 +141,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -154,7 +154,7 @@ $invoiceId = 98765;
 // Zahlung anlegen
 $opts = new InvoicePaymentCreateOptions(
     invoiceId: $invoiceId, amount: Money::of('590.00'),
-    type: InvoicePaymentType::BANK_TRANSFER,
+    type: PaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('today'),
     transactionPurpose: 'Rechnung RE-2026-0042',
 );

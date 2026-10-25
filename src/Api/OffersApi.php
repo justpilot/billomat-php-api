@@ -8,8 +8,8 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferComment;
 use Justpilot\Billomat\Model\OfferItem;
@@ -250,11 +250,11 @@ final class OffersApi extends AbstractApi
      * @return OfferPdf|string OfferPdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
      */
     #[NoDiscard]
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): OfferPdf|string
+    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): OfferPdf|string
     {
         $query = [];
 
-        if ($type instanceof InvoicePdfType) {
+        if ($type instanceof PdfType) {
             $query['type'] = $type->value;
         }
 

@@ -230,10 +230,10 @@ file_put_contents("invoice-{$invoiceId}.pdf", (string) $response->getBody());
 
 ```php
 // After
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 
 $billomat->invoices->complete($invoiceId);
-$pdf = $billomat->invoices->pdf($invoiceId, InvoicePdfType::SIGNED, rawPdf: true);
+$pdf = $billomat->invoices->pdf($invoiceId, PdfType::SIGNED, rawPdf: true);
 file_put_contents("invoice-{$invoiceId}.pdf", $pdf);
 ```
 

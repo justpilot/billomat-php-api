@@ -7,7 +7,7 @@ declare(strict_types=1);
  * (/{resource}-payments).
  *
  * Rechnungen, Gutschriften und Eingangsrechnungen haben dieselben Zahlungsfelder und
- * teilen sich das Enum InvoicePaymentType. Pro Ressource entstehen das Read-Model und die
+ * teilen sich das Enum PaymentType. Pro Ressource entstehen das Read-Model und die
  * Create-Options. Liegt in einem Unterordner, damit der Generator die Datei nicht selbst
  * als Definition lädt.
  *
@@ -71,7 +71,7 @@ return static function (string $prefix, string $label, string $parentField, stri
                 'model' => ['required' => true, 'nonNull' => true],
                 'create' => ['constructor' => true],
             ],
-            'type' => ['enum' => 'InvoicePaymentType', 'doc' => 'Zahlungsart.', 'model' => ['required' => true]],
+            'type' => ['enum' => 'PaymentType', 'doc' => 'Zahlungsart.', 'model' => ['required' => true]],
             'comment' => ['doc' => 'Kommentar zur Zahlung.', 'model' => ['required' => true]],
             'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Zahlung.'],
             'user_id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'ID des Users, der die Zahlung erfasst hat.'],

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 
 /**
  * Repräsentiert eine Lieferscheinposition aus der Billomat-API.
@@ -48,7 +48,7 @@ final readonly class DeliveryNoteItem
         /** Beschreibung der Position. */
         public ?string $description,
         /** Typ der Position (Produkt/Dienstleistung). */
-        public ?InvoiceItemType $type,
+        public ?ItemType $type,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
@@ -71,7 +71,7 @@ final readonly class DeliveryNoteItem
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
-            type: InvoiceItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }

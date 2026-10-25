@@ -15,7 +15,7 @@ use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\ConfirmationTag;
 use Justpilot\Billomat\Model\ConfirmationTagCloudEntry;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -209,11 +209,11 @@ final class ConfirmationsApi extends AbstractApi
      * @return ConfirmationPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
     #[NoDiscard]
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string
+    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string
     {
         $query = [];
 
-        if ($type instanceof InvoicePdfType) {
+        if ($type instanceof PdfType) {
             $query['type'] = $type->value;
         }
 

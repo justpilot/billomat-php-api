@@ -6,7 +6,7 @@ namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\InvoicePayment;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoicePayment::class)]
 #[UsesClass(ScalarCaster::class)]
-#[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(PaymentType::class)]
 #[UsesClass(Money::class)]
 final class InvoicePaymentTest extends TestCase
 {
@@ -41,7 +41,7 @@ final class InvoicePaymentTest extends TestCase
         self::assertSame('2025-03-10', $payment->date?->format('Y-m-d'));
 
         self::assertSame('119.9', $payment->amount->toString());
-        self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payment->type);
+        self::assertSame(PaymentType::BANK_TRANSFER, $payment->type);
         self::assertSame('Testzahlung', $payment->comment);
     }
 
@@ -53,7 +53,7 @@ final class InvoicePaymentTest extends TestCase
             invoiceId: 200,
             date: new DateTimeImmutable('2025-03-01'),
             amount: Money::of('89.5'),
-            type: InvoicePaymentType::CASH,
+            type: PaymentType::CASH,
             comment: 'Barzahlung',
         );
 

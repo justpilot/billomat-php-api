@@ -15,7 +15,7 @@ use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\DeliveryNoteTag;
 use Justpilot\Billomat\Model\DeliveryNoteTagCloudEntry;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -205,11 +205,11 @@ final class DeliveryNotesApi extends AbstractApi
      * @return DeliveryNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
     #[NoDiscard]
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string
+    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string
     {
         $query = [];
 
-        if ($type instanceof InvoicePdfType) {
+        if ($type instanceof PdfType) {
             $query['type'] = $type->value;
         }
 

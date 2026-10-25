@@ -7,10 +7,10 @@ namespace Justpilot\Billomat\Tests\Model;
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceItem;
@@ -114,8 +114,8 @@ final class InvoiceTest extends TestCase
         self::assertSame('Eine Testposition', $item->description);
         self::assertSame('10%', $item->reduction);
 
-        self::assertInstanceOf(InvoiceItemType::class, $item->type);
-        self::assertSame(InvoiceItemType::SERVICE, $item->type);
+        self::assertInstanceOf(ItemType::class, $item->type);
+        self::assertSame(ItemType::SERVICE, $item->type);
 
         self::assertSame('119', $item->totalGross?->toString());
         self::assertSame('100', $item->totalNet?->toString());
@@ -175,7 +175,7 @@ final class InvoiceTest extends TestCase
         self::assertSame(123, $item->invoiceId);
         self::assertSame(1.0, $item->quantity);
         self::assertSame('100', $item->unitPrice->toString());
-        self::assertSame(InvoiceItemType::PRODUCT, $item->type);
+        self::assertSame(ItemType::PRODUCT, $item->type);
     }
 
     #[Test]
@@ -278,7 +278,7 @@ final class InvoiceTest extends TestCase
         self::assertSame(7, $invoice->confirmationId);
         self::assertNull($invoice->recurringId);
 
-        self::assertSame([InvoicePaymentType::CASH, InvoicePaymentType::BANK_TRANSFER, InvoicePaymentType::PAYPAL], $invoice->paymentTypes);
+        self::assertSame([PaymentType::CASH, PaymentType::BANK_TRANSFER, PaymentType::PAYPAL], $invoice->paymentTypes);
         self::assertNull($invoice->templateId);
 
         // Taxes

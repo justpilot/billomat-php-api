@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api\Options;
 
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -36,7 +36,7 @@ final class InvoiceItemCreateOptionsTest extends TestCase
         $options = new InvoiceItemCreateOptions(
             quantity: 1.0,
             unitPrice: Money::of('10'),
-            type: InvoiceItemType::PRODUCT,
+            type: ItemType::PRODUCT,
         );
 
         $payload = $options->toArray();
@@ -77,7 +77,7 @@ final class InvoiceItemCreateOptionsTest extends TestCase
             title: 'Workshop',
             description: 'Tagesworkshop',
             reduction: '10%',
-            type: InvoiceItemType::SERVICE,
+            type: ItemType::SERVICE,
         );
 
         $payload = $options->toArray();

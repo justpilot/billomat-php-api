@@ -17,7 +17,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 
 $billomatId = getenv('BILLOMAT_ID') ?: null;
 $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
@@ -48,7 +48,7 @@ try {
         $invoice->status?->label() ?? '?',
     );
 
-    $pdfBinary = $billomat->invoices->pdf($invoiceId, InvoicePdfType::SIGNED, rawPdf: true);
+    $pdfBinary = $billomat->invoices->pdf($invoiceId, PdfType::SIGNED, rawPdf: true);
 } catch (BillomatException $e) {
     fwrite(STDERR, sprintf("Fehler: %s\n", $e->getMessage()));
     exit(1);

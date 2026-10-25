@@ -12,7 +12,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\IncomingPayment;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -34,7 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
-#[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(PaymentType::class)]
 #[UsesClass(Money::class)]
 final class IncomingPaymentsApiTest extends TestCase
 {
@@ -64,7 +64,7 @@ final class IncomingPaymentsApiTest extends TestCase
 
         $payments = $api->list(filters: ['incoming_id' => 42]);
         self::assertCount(1, $payments);
-        self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payments[0]->type);
+        self::assertSame(PaymentType::BANK_TRANSFER, $payments[0]->type);
     }
 
     #[Test]

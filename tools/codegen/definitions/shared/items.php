@@ -61,7 +61,7 @@ return static function (
         'title' => ['type' => 'string', 'writable' => true, 'doc' => 'Titel der Position.'],
         'description' => ['type' => 'string', 'writable' => true, 'doc' => 'Beschreibung der Position.'],
         'reduction' => ['type' => 'string', 'writable' => true, 'doc' => 'Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").'],
-        'type' => ['type' => 'string', 'writable' => true, 'enum' => 'InvoiceItemType', 'doc' => 'Typ der Position (Produkt/Dienstleistung).'],
+        'type' => ['type' => 'string', 'writable' => true, 'enum' => 'ItemType', 'doc' => 'Typ der Position (Produkt/Dienstleistung).'],
         'total_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag brutto.'],
         'total_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag netto.'],
         'total_gross_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Unreduzierter Gesamtbetrag brutto.'],

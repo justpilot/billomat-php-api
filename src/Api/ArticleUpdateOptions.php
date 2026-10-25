@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
-use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Money;
 
@@ -163,7 +163,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
          * Billomat-Feld: type
          * Typ: ENUM (PRODUCT/SERVICE)
          */
-        public ArticleType|Clear|null $type = null,
+        public ItemType|Clear|null $type = null,
         /**
          * Preisbasis des Einkaufspreises (netto oder brutto).
          *
@@ -283,7 +283,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `type`. */
-    public function withType(ArticleType|Clear|null $type): self
+    public function withType(ItemType|Clear|null $type): self
     {
         return clone($this, ['type' => $type]);
     }
@@ -324,7 +324,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
                 'supplier_id' => $this->supplierId,
                 'tax_id' => $this->taxId,
                 'category_id' => $this->categoryId,
-                'type' => $this->type instanceof ArticleType ? $this->type->value : $this->type,
+                'type' => $this->type instanceof ItemType ? $this->type->value : $this->type,
                 'purchase_price_net_gross' => $this->purchasePriceNetGross instanceof NetGross ? $this->purchasePriceNetGross->value : $this->purchasePriceNetGross,
             ], static fn (mixed $v): bool => null !== $v),
         );

@@ -161,7 +161,7 @@ Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und
 | `taxId` | `?int` |
 | `updated` | `?\DateTimeImmutable` |
 | `archived` | `?bool` |
-| `type` | `?ArticleType` |
+| `type` | `?ItemType` |
 | `revenueAccountNumber` | `?string` |
 | `costCenter` | `?string` |
 | `purchasePriceNetGross` | `?NetGross` (Ob `purchasePrice` netto oder brutto ist) |

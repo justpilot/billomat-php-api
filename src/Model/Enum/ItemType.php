@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model\Enum;
 
 /**
- * Typ einer Dokumentposition (Rechnung, Angebot, Gutschrift, Auftragsbestätigung,
- * Lieferschein, Abo-Rechnung) laut Billomat-Dokumentation.
+ * Typ eines Artikels bzw. einer Dokumentposition (Rechnung, Angebot, Gutschrift,
+ * Auftragsbestätigung, Lieferschein, Abo-Rechnung): Produkt oder Dienstleistung.
  */
 enum ItemType: string
 {

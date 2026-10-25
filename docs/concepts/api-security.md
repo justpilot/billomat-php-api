@@ -8,7 +8,7 @@ Die Billomat-API ist über `https://{billomatId}.billomat.net/api/` erreichbar �
 
 - **Base-URI ist HTTPS** — `BillomatConfig::getBaseUri()` baut die URL fest als `https://`. Ein nachträglicher Downgrade auf HTTP ist nicht vorgesehen.
 - **API-Schlüssel als Header** — `X-BillomatApiKey` (und optional `X-AppId`/`X-AppSecret`) werden im Request-Header gesendet, nie in der URL. Damit landen Schlüssel **nicht** in Server-Access-Logs, Browser-History oder Referer-Headern (siehe [Authentifizierung](authentication.md)).
-- **Symfony-`HttpClient`** als Transport — folgt System-Trust-Store, prüft Zertifikate. TLS-Verifikation lässt sich zwar abschalten, sollte aber nicht.
+- **PSR-18-Client** als Transport — TLS-Prüfung übernimmt der eingesetzte Client (Symfony `HttpClient`, Guzzle, …). Beide folgen per Default dem System-Trust-Store und prüfen Zertifikate. TLS-Verifikation lässt sich dort zwar abschalten, sollte aber nicht — wer einen eigenen Client übergibt, ist für dessen TLS-Konfiguration verantwortlich.
 
 ## Empfehlungen für den Aufrufer
 

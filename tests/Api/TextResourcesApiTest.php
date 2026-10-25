@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\EmailTemplatesApi;
 use Justpilot\Billomat\Api\FreeTextsApi;
 use Justpilot\Billomat\Api\ReminderTextsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\EmailTemplate;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -29,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(FreeText::class)]
 #[CoversClass(ReminderText::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class TextResourcesApiTest extends TestCase
@@ -57,7 +60,7 @@ final class TextResourcesApiTest extends TestCase
         });
 
         $api = new EmailTemplatesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -86,7 +89,7 @@ final class TextResourcesApiTest extends TestCase
         });
 
         $api = new FreeTextsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -119,7 +122,7 @@ final class TextResourcesApiTest extends TestCase
         });
 
         $api = new ReminderTextsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

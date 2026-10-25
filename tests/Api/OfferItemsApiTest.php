@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OfferItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -24,6 +26,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(OfferItemCreateOptions::class)]
 #[CoversClass(OfferItem::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class OfferItemsApiTest extends TestCase
@@ -55,7 +58,7 @@ final class OfferItemsApiTest extends TestCase
         });
 
         $api = new OfferItemsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -85,7 +88,7 @@ final class OfferItemsApiTest extends TestCase
         });
 
         $api = new OfferItemsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -118,7 +121,7 @@ final class OfferItemsApiTest extends TestCase
         });
 
         $api = new OfferItemsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -162,7 +165,7 @@ final class OfferItemsApiTest extends TestCase
         });
 
         $api = new OfferItemsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -186,7 +189,7 @@ final class OfferItemsApiTest extends TestCase
         });
 
         $api = new OfferItemsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

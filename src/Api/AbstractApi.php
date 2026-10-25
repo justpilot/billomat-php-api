@@ -6,18 +6,14 @@ namespace Justpilot\Billomat\Api;
 
 use Closure;
 use Generator;
-use Justpilot\Billomat\Exception\AuthenticationException;
-use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
+use JsonException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
-use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
-use Throwable;
+use Psr\Http\Message\ResponseInterface;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -96,27 +92,21 @@ abstract class AbstractApi
     }
 
     /**
-     * Führt einen PUT-Request aus und löst HTTP-Fehler (4xx/5xx) in SDK-Exceptions auf.
+     * Führt einen PUT-Request aus, dessen Response-Body uns nicht interessiert
+     * (z. B. PUT /invoices/{id}/complete, /cancel, /uncancel, …).
      *
-     * Wird für Endpunkte verwendet, deren Body uns nicht interessiert
-     * (z. B. PUT /invoices/{id}/complete, /cancel, /uncancel, …). Wichtig:
-     * {@see ResponseInterface::getStatusCode()}
-     * wirft NICHT bei 4xx/5xx – nur ein Aufruf wie hier (über getContent()
-     * im {@see handleErrors()}-Pfad) materialisiert den HTTP-Fehler und mapped
-     * ihn auf die passende {@see \Justpilot\Billomat\Exception\BillomatException}.
+     * HTTP-Fehler wirft bereits {@see BillomatHttpClientInterface::request()}.
      *
      * @param array<string,mixed> $body
      */
     protected function putVoid(string $path, array $body = []): void
     {
-        $response = $this->http->request('PUT', $path, [], $body);
-        $this->handleErrors($response);
+        $this->http->request('PUT', $path, [], $body);
     }
 
     protected function deleteVoid(string $path): void
     {
-        $response = $this->http->request('DELETE', $path);
-        $this->handleErrors($response);
+        $this->http->request('DELETE', $path);
     }
 
     /**
@@ -280,65 +270,26 @@ abstract class AbstractApi
     }
 
     /**
-     * Liest eine JSON-Response und mapped HTTP-Fehler auf SDK-Exceptions.
+     * Dekodiert den JSON-Body einer erfolgreichen Response.
      *
      * @return array<string,mixed>
+     *
+     * @throws UnexpectedResponseException wenn der Body kein JSON-Objekt ist
      */
     private function decodeJsonResponse(ResponseInterface $response): array
     {
         try {
-            $content = $response->getContent(); // wir erwarten 2xx
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
+            $decoded = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new UnexpectedResponseException('Unexpected response from Billomat: the body is not valid JSON.', 0, $e);
+        }
+
+        if (!\is_array($decoded)) {
+            throw new UnexpectedResponseException('Unexpected response from Billomat: expected a JSON object.');
         }
 
         /** @var array<string,mixed> $decoded */
-        $decoded = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
-
         return $decoded;
-    }
-
-    /**
-     * Mappt eine Symfony-HttpException auf unsere eigenen Exception-Typen.
-     */
-    protected function mapHttpException(HttpExceptionInterface $e): BillomatHttpException
-    {
-        $symfonyResponse = $e->getResponse();
-        $statusCode = $symfonyResponse->getStatusCode();
-
-        // Roh-Body, falls wir später Details extrahieren wollen
-        $rawBody = null;
-        try {
-            $rawBody = $symfonyResponse->getContent(false);
-        } catch (Throwable) {
-            // ignorieren
-        }
-
-        $message = '' !== $e->getMessage()
-            ? $e->getMessage()
-            : \sprintf('HTTP error from Billomat (status %d)', $statusCode);
-
-        // Grobes Mapping nach Status-Code
-        return match ($statusCode) {
-            401, 403 => new AuthenticationException($message, $statusCode, $rawBody, $e),
-            404 => new NotFoundException($message, $statusCode, $rawBody, $e),
-            400, 422 => new ValidationException($message, $statusCode, $rawBody, $e),
-            default => new BillomatHttpException($message, $statusCode, $rawBody, $e),
-        };
-    }
-
-    /**
-     * Führt nur die Fehlerbehandlung aus, ohne JSON zu dekodieren.
-     *
-     * Wird z.B. von deleteVoid() verwendet, wenn wir keinen JSON-Body erwarten.
-     */
-    private function handleErrors(ResponseInterface $response): void
-    {
-        try {
-            $response->getContent();
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
-        }
     }
 
     /**
@@ -348,12 +299,6 @@ abstract class AbstractApi
      */
     protected function getRaw(string $path, array $query = []): string
     {
-        $response = $this->http->request('GET', $path, $query);
-
-        try {
-            return $response->getContent(); // 2xx erwartet
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
-        }
+        return (string) $this->http->request('GET', $path, $query)->getBody();
     }
 }

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\SupplierPropertyValuesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\SupplierPropertyValue;
@@ -15,6 +16,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -23,6 +25,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(SupplierPropertyValueCreateOptions::class)]
 #[CoversClass(SupplierPropertyValue::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class SupplierPropertyValuesApiTest extends TestCase
@@ -47,7 +50,7 @@ final class SupplierPropertyValuesApiTest extends TestCase
         });
 
         $api = new SupplierPropertyValuesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -75,7 +78,7 @@ final class SupplierPropertyValuesApiTest extends TestCase
         });
 
         $api = new SupplierPropertyValuesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

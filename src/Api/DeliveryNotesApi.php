@@ -13,7 +13,6 @@ use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Delivery-Notes-Ressource (Lieferscheine).
@@ -199,13 +198,7 @@ final class DeliveryNotesApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            $response = $this->http->request('GET', "/delivery-notes/{$id}/pdf", $query);
-
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
+            return $this->getRaw("/delivery-notes/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/delivery-notes/{$id}/pdf", $query);

@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\DeliveryNoteUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -25,6 +26,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -38,6 +40,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(DeliveryNoteStatus::class)]
 #[UsesClass(DeliveryNoteItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
@@ -70,7 +73,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -101,7 +104,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -121,7 +124,7 @@ final class DeliveryNotesApiTest extends TestCase
         ]);
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -149,7 +152,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -189,7 +192,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -215,7 +218,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -245,7 +248,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -282,7 +285,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -306,7 +309,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -329,7 +332,7 @@ final class DeliveryNotesApiTest extends TestCase
         });
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -371,7 +374,7 @@ final class DeliveryNotesApiTest extends TestCase
         ));
 
         $api = new DeliveryNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

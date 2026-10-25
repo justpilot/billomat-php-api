@@ -51,6 +51,29 @@ jobs:
       - name: Run unit tests
         run: composer test:unit
 
+  compat-guzzle:
+    name: PSR-18 compat (Guzzle, no Symfony)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v4
+        with:
+          working-directory: .github/compat/guzzle
+          dependency-versions: highest
+
+      - name: Run smoke test
+        working-directory: .github/compat/guzzle
+        run: php smoke.php
+
   quality:
     name: Static Analysis & Style
     runs-on: ubuntu-latest

@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -20,6 +21,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -32,6 +34,7 @@ use const PHP_URL_QUERY;
 #[CoversClass(Page::class)]
 #[CoversClass(PageInfo::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
@@ -66,7 +69,7 @@ final class ClientsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
         $me = $api->getMyself();
@@ -127,7 +130,7 @@ final class ClientsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
         $filters = ['per_page' => 50];
@@ -197,7 +200,7 @@ final class ClientsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
         $client = $api->get(123);
@@ -251,7 +254,7 @@ final class ClientsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
         $opts = new ClientCreateOptions();
@@ -333,7 +336,7 @@ final class ClientsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
         $opts = new ClientUpdateOptions();
@@ -509,7 +512,7 @@ final class ClientsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
         $api = new ClientsApi($http);
 
         $result = $api->delete(42);
@@ -535,7 +538,7 @@ final class ClientsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 400]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
         $api = new ClientsApi($http);
 
         $this->expectException(ValidationException::class);
@@ -562,7 +565,7 @@ final class ClientsApiTest extends TestCase
             ]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
         $api = new ClientsApi($http);
 
         $binary = $api->avatar(42, 256);
@@ -598,7 +601,7 @@ final class ClientsApiTest extends TestCase
             ]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
         $api = new ClientsApi($http);
 
         (void) $api->avatar(7);
@@ -628,7 +631,7 @@ final class ClientsApiTest extends TestCase
         ));
 
         $api = new ClientsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -676,7 +679,7 @@ final class ClientsApiTest extends TestCase
         });
 
         $api = new ClientsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -714,7 +717,7 @@ final class ClientsApiTest extends TestCase
         });
 
         $api = new ClientsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

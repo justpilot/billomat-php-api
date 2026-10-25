@@ -13,7 +13,6 @@ use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Confirmations-Ressource (Auftragsbestätigungen).
@@ -203,13 +202,7 @@ final class ConfirmationsApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            $response = $this->http->request('GET', "/confirmations/{$id}/pdf", $query);
-
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
+            return $this->getRaw("/confirmations/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/confirmations/{$id}/pdf", $query);

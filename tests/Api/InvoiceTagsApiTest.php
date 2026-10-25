@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\Api\InvoiceTagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
@@ -17,6 +18,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -26,6 +28,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(InvoiceTagCloudEntry::class)]
 #[CoversClass(InvoiceTagCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
@@ -51,7 +54,7 @@ final class InvoiceTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoiceTagsApi($http);
 
         $tags = $api->listByInvoice(100);
@@ -81,7 +84,7 @@ final class InvoiceTagsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoiceTagsApi($http);
 
         $cloud = $api->cloud();
@@ -102,7 +105,7 @@ final class InvoiceTagsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoiceTagsApi($http);
 
         $cloud = $api->cloud();
@@ -116,7 +119,7 @@ final class InvoiceTagsApiTest extends TestCase
     {
         $mock = new MockHttpClient([new MockResponse('', ['http_code' => 404])]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoiceTagsApi($http);
 
         self::assertNull($api->get(999));
@@ -137,7 +140,7 @@ final class InvoiceTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoiceTagsApi($http);
 
         $tag = $api->create(new InvoiceTagCreateOptions(invoiceId: 100, name: 'wichtig'));
@@ -158,7 +161,7 @@ final class InvoiceTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoiceTagsApi($http);
 
         self::assertTrue($api->delete(7));

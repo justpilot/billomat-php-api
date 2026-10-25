@@ -12,6 +12,7 @@ use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -28,6 +29,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -42,6 +44,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(InvoiceItemCreateOptions::class)]
 #[UsesClass(InvoiceMailOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
@@ -97,7 +100,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $filters = ['per_page' => 50];
@@ -167,7 +170,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $invoice = $api->get(1234);
@@ -223,7 +226,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         // --- Build invoice create options ---
@@ -328,7 +331,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $templateId = 5;
@@ -382,7 +385,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $result = $api->delete(777);
@@ -415,7 +418,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $this->expectException(ValidationException::class);
@@ -435,7 +438,7 @@ final class InvoicesApiTest extends TestCase
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -462,7 +465,7 @@ final class InvoicesApiTest extends TestCase
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -507,7 +510,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $pdf = $api->pdf(240);
@@ -565,7 +568,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         (void) $api->pdf(999, InvoicePdfType::SIGNED);
@@ -608,7 +611,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $result = $api->pdf(
@@ -658,7 +661,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $opts = new InvoiceUpdateOptions();
@@ -727,7 +730,7 @@ final class InvoicesApiTest extends TestCase
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -784,7 +787,7 @@ final class InvoicesApiTest extends TestCase
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -811,7 +814,7 @@ final class InvoicesApiTest extends TestCase
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -852,7 +855,7 @@ final class InvoicesApiTest extends TestCase
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -883,7 +886,7 @@ final class InvoicesApiTest extends TestCase
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -1000,7 +1003,7 @@ final class InvoicesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
         $groups = $api->listGrouped([InvoiceGroupBy::CLIENT, InvoiceGroupBy::YEAR]);
@@ -1040,7 +1043,7 @@ final class InvoicesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoicesApi($http);
 
         $groups = $api->listGrouped(InvoiceGroupBy::STATUS);
@@ -1065,7 +1068,7 @@ final class InvoicesApiTest extends TestCase
         ));
 
         $api = new InvoicesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

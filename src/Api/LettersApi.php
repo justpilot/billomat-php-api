@@ -13,7 +13,6 @@ use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterPdf;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Letters-Ressource (Briefe).
@@ -215,13 +214,7 @@ final class LettersApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            $response = $this->http->request('GET', "/letters/{$id}/pdf", $query);
-
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
+            return $this->getRaw("/letters/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/letters/{$id}/pdf", $query);

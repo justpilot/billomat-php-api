@@ -5,16 +5,22 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractApi;
+use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
-use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 /**
@@ -63,132 +69,55 @@ final class TestApi extends AbstractApi
 
 #[CoversClass(AbstractApi::class)]
 #[CoversClass(BillomatException::class)]
-#[CoversClass(AuthenticationException::class)]
-#[CoversClass(NotFoundException::class)]
-#[CoversClass(ValidationException::class)]
-#[CoversClass(BillomatHttpException::class)]
 #[CoversClass(UnexpectedResponseException::class)]
+#[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
+#[UsesClass(BillomatHttpException::class)]
 final class AbstractApiExceptionTest extends TestCase
 {
+    /**
+     * @param class-string<BillomatHttpException> $expected
+     */
     #[Test]
-    public function getJsonMaps401And403ToAuthenticationException(): void
+    #[DataProvider('errorStatuses')]
+    public function getJsonPassesMappedHttpExceptionsThrough(int $status, string $expected): void
     {
-        $statuses = [401, 403];
+        $api = $this->api(new MockResponse('', ['http_code' => $status]));
 
-        foreach ($statuses as $status) {
-            $mockResponse = new MockResponse('', [
-                'http_code' => $status,
-            ]);
-
-            $http = $this->createMock(BillomatHttpClientInterface::class);
-            $http
-                ->expects($this->once())
-                ->method('request')
-                ->with('GET', '/clients', [])
-                ->willReturn($mockResponse);
-
-            $api = new TestApi($http);
-
-            try {
-                $api->publicGetJson('/clients');
-                $this->fail(\sprintf('Expected AuthenticationException for status %d', $status));
-            } catch (AuthenticationException $e) {
-                $this->assertSame($status, $e->getStatusCode());
-            }
-
-            // mock expectation zurücksetzen für nächste Schleifen-Iteration
-            $this->addToAssertionCount(1);
+        try {
+            $api->publicGetJson('/clients');
+            self::fail(\sprintf('Expected %s for status %d', $expected, $status));
+        } catch (BillomatHttpException $e) {
+            self::assertInstanceOf($expected, $e);
+            self::assertSame($status, $e->getStatusCode());
         }
     }
 
-    #[Test]
-    public function getJsonMaps400And422ToValidationException(): void
+    /**
+     * @return iterable<string, array{int, class-string<BillomatHttpException>}>
+     */
+    public static function errorStatuses(): iterable
     {
-        $statuses = [400, 422];
-
-        foreach ($statuses as $status) {
-            $mockResponse = new MockResponse('', [
-                'http_code' => $status,
-            ]);
-
-            $http = $this->createMock(BillomatHttpClientInterface::class);
-            $http
-                ->expects($this->once())
-                ->method('request')
-                ->with('GET', '/clients', [])
-                ->willReturn($mockResponse);
-
-            $api = new TestApi($http);
-
-            try {
-                $api->publicGetJson('/clients');
-                $this->fail(\sprintf('Expected ValidationException for status %d', $status));
-            } catch (ValidationException $e) {
-                $this->assertSame($status, $e->getStatusCode());
-            }
-
-            $this->addToAssertionCount(1);
-        }
-    }
-
-    #[Test]
-    public function getJsonMapsOther4xx5xxToGenericHttpException(): void
-    {
-        $mockResponse = new MockResponse('', [
-            'http_code' => 500,
-        ]);
-
-        $http = $this->createMock(BillomatHttpClientInterface::class);
-        $http
-            ->expects($this->once())
-            ->method('request')
-            ->with('GET', '/clients', [])
-            ->willReturn($mockResponse);
-
-        $api = new TestApi($http);
-
-        $this->expectException(BillomatHttpException::class);
-        $this->expectExceptionCode(500);
-
-        $api->publicGetJson('/clients');
+        yield '401' => [401, AuthenticationException::class];
+        yield '403' => [403, AuthenticationException::class];
+        yield '400' => [400, ValidationException::class];
+        yield '422' => [422, ValidationException::class];
+        yield '500' => [500, BillomatHttpException::class];
     }
 
     #[Test]
     public function getJsonOrNullReturnsNullOn404(): void
     {
-        $mockResponse = new MockResponse('', [
-            'http_code' => 404,
-        ]);
+        $api = $this->api(new MockResponse('', ['http_code' => 404]));
 
-        $http = $this->createMock(BillomatHttpClientInterface::class);
-        $http
-            ->expects($this->once())
-            ->method('request')
-            ->with('GET', '/clients/9999')
-            ->willReturn($mockResponse);
-
-        $api = new TestApi($http);
-
-        $result = $api->publicGetJsonOrNull('/clients/9999');
-
-        $this->assertNull($result);
+        self::assertNull($api->publicGetJsonOrNull('/clients/9999'));
     }
 
     #[Test]
     public function getJsonOrNullStillThrowsForNon404Errors(): void
     {
-        $mockResponse = new MockResponse('', [
-            'http_code' => 401,
-        ]);
-
-        $http = $this->createMock(BillomatHttpClientInterface::class);
-        $http
-            ->expects($this->once())
-            ->method('request')
-            ->with('GET', '/clients/1')
-            ->willReturn($mockResponse);
-
-        $api = new TestApi($http);
+        $api = $this->api(new MockResponse('', ['http_code' => 401]));
 
         $this->expectException(AuthenticationException::class);
 
@@ -198,22 +127,33 @@ final class AbstractApiExceptionTest extends TestCase
     #[Test]
     public function postJsonUsesSameExceptionMapping(): void
     {
-        $mockResponse = new MockResponse('', [
-            'http_code' => 400,
-        ]);
-
-        $http = $this->createMock(BillomatHttpClientInterface::class);
-        $http
-            ->expects($this->once())
-            ->method('request')
-            ->with('POST', '/clients', [], ['foo' => 'bar'])
-            ->willReturn($mockResponse);
-
-        $api = new TestApi($http);
+        $api = $this->api(new MockResponse('', ['http_code' => 400]));
 
         $this->expectException(ValidationException::class);
 
         $api->publicPostJson('/clients', ['foo' => 'bar']);
+    }
+
+    #[Test]
+    public function invalidJsonBodyThrowsUnexpectedResponseException(): void
+    {
+        $api = $this->api(new MockResponse('<html>Wartungsarbeiten</html>', ['http_code' => 200]));
+
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('the body is not valid JSON');
+
+        $api->publicGetJson('/clients');
+    }
+
+    #[Test]
+    public function scalarJsonBodyThrowsUnexpectedResponseException(): void
+    {
+        $api = $this->api(new MockResponse('"ok"', ['http_code' => 200]));
+
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('expected a JSON object');
+
+        $api->publicGetJson('/clients');
     }
 
     #[Test]
@@ -233,5 +173,12 @@ final class AbstractApiExceptionTest extends TestCase
         $api = new TestApi(self::createStub(BillomatHttpClientInterface::class));
 
         self::assertSame(['id' => 1], $api->publicUnwrapEnvelope(['client' => ['id' => 1]], 'client'));
+    }
+
+    private function api(MockResponse $response): TestApi
+    {
+        $config = new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key', retry: RetryPolicy::none());
+
+        return new TestApi(new BillomatHttpClient(new Psr18Client(new MockHttpClient($response)), $config));
     }
 }

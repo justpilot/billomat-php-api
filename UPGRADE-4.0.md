@@ -89,6 +89,93 @@ BillomatClient::create(billomatId: 'mycompany.billomat.net', apiKey: $key);
 BillomatClient::create(billomatId: 'mycompany', apiKey: $key);
 ```
 
+## PSR-18 instead of Symfony HttpClient
+
+`symfony/http-client` is no longer a dependency. The SDK talks to any PSR-18 client and needs
+PSR-17 factories. Install one, for example:
+
+```bash
+composer require justpilot/billomat-php-api symfony/http-client nyholm/psr7
+# or
+composer require justpilot/billomat-php-api guzzlehttp/guzzle
+```
+
+If you allow the `php-http/discovery` Composer plugin, it installs a client for you when none is present.
+
+### Passing your own client
+
+`BillomatClient::__construct()` and `BillomatClient::create()` take a `Psr\Http\Client\ClientInterface`.
+Wrap a Symfony client in `Psr18Client`:
+
+```php
+// 3.x
+$billomat = new BillomatClient($config, HttpClient::create(['proxy' => 'http://proxy:3128']));
+
+// 4.0
+use Symfony\Component\HttpClient\Psr18Client;
+
+$billomat = new BillomatClient($config, new Psr18Client(HttpClient::create(['proxy' => 'http://proxy:3128'])));
+```
+
+`BillomatConfig::$timeout` only applies to the client the SDK creates itself. A client you pass in
+uses its own timeout settings.
+
+### Tests with `MockHttpClient`
+
+```php
+// 3.x
+$http = new BillomatHttpClient(new MockHttpClient($responses), $config);
+
+// 4.0
+$http = new BillomatHttpClient(new Psr18Client(new MockHttpClient($responses)), $config);
+```
+
+The mock callback receives the JSON payload in `$options['body']` (a string); `$options['json']` is no longer set.
+Array query parameters arrive as `key%5B%5D=value`.
+
+### Custom `AbstractApi` subclasses and `BillomatHttpClientInterface`
+
+`BillomatHttpClientInterface::request()` returns a PSR-7 `ResponseInterface` and already throws the SDK
+exceptions for 4xx/5xx. `AbstractApi::mapHttpException()` and `HttpException::fromResponse()` are gone.
+
+```php
+// 3.x
+$response = $this->http->request('GET', "/invoices/{$id}/pdf", $query);
+try {
+    return $response->getContent();
+} catch (HttpExceptionInterface $e) {
+    throw $this->mapHttpException($e);
+}
+
+// 4.0
+return $this->getRaw("/invoices/{$id}/pdf", $query);
+// or: (string) $this->http->request('GET', $path, $query)->getBody();
+```
+
+### Retries are on by default
+
+4.0 retries 429 responses (after the wait Billomat announces, up to 10 seconds) and GET requests that fail
+with 502/503/504 or a network error (up to 2 retries). If you had your own retry layer, remove it or turn the
+SDK's off:
+
+```php
+use Justpilot\Billomat\Config\RetryPolicy;
+
+$billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry: RetryPolicy::none());
+
+// Batch jobs that may wait for the next 15-minute window:
+$billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry: new RetryPolicy(maxDelayMs: 900_000));
+```
+
+### Exceptions
+
+- A 429 throws `RateLimitException` (a subclass of `HttpException`); `getRetryAfter()` returns the seconds until the next window.
+- Network failures throw `TransportException` (a subclass of `BillomatException`) instead of Symfony's `TransportExceptionInterface`.
+  If you caught Symfony exceptions, catch `BillomatException` instead.
+- Exception messages changed to `Billomat responded with HTTP <status> to <METHOD> /<path>. <Billomat error text>`.
+  `getPrevious()` is no longer a Symfony exception. Status code and response body are unchanged.
+- A 2xx response whose body is not a JSON object throws `UnexpectedResponseException` instead of `JsonException`.
+
 ## Read-only methods are `#[\NoDiscard]`
 
 `get()`, `getMyself()`, `list()`, `listPage()`, `listBy*()`, `listGrouped()`, `iterateAll()`, `cloud()`,

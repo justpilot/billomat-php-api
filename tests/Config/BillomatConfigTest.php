@@ -6,12 +6,14 @@ namespace Justpilot\Billomat\Tests\Config;
 
 use InvalidArgumentException;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(BillomatConfig::class)]
+#[CoversClass(RetryPolicy::class)]
 final class BillomatConfigTest extends TestCase
 {
     #[Test]
@@ -30,6 +32,44 @@ final class BillomatConfigTest extends TestCase
         self::assertSame('app-id', $config->appId);
         self::assertSame('app-secret', $config->appSecret);
         self::assertSame(5.0, $config->timeout);
+    }
+
+    #[Test]
+    public function itRetriesTwiceByDefault(): void
+    {
+        $retry = new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key')->retry;
+
+        self::assertSame(2, $retry->maxRetries);
+        self::assertSame(500, $retry->baseDelayMs);
+        self::assertSame(10_000, $retry->maxDelayMs);
+    }
+
+    #[Test]
+    public function retryPolicyAcceptsZero(): void
+    {
+        $retry = new RetryPolicy(maxRetries: 0, baseDelayMs: 0, maxDelayMs: 0);
+
+        self::assertSame(0, $retry->maxDelayMs);
+    }
+
+    /**
+     * @return iterable<string, array{int, int, int}>
+     */
+    public static function negativeRetrySettings(): iterable
+    {
+        yield 'maxRetries' => [-1, 0, 0];
+        yield 'baseDelayMs' => [0, -1, 0];
+        yield 'maxDelayMs' => [0, 0, -1];
+    }
+
+    #[Test]
+    #[DataProvider('negativeRetrySettings')]
+    public function retryPolicyRejectsNegativeSettings(int $maxRetries, int $baseDelayMs, int $maxDelayMs): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageIsOrContains('Retry settings must not be negative.');
+
+        new RetryPolicy($maxRetries, $baseDelayMs, $maxDelayMs);
     }
 
     #[Test]

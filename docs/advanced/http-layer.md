@@ -1,41 +1,71 @@
 # HTTP-Layer
 
-Die HTTP-Schicht des SDK ist absichtlich dünn. Sie kapselt drei Aufgaben: Authentifizierungs-Header setzen, URL und Query-String bauen, JSON-Body serialisieren. Dieses Dokument beschreibt die wenigen, aber wichtigen Eigenheiten — und wie du eingreifen kannst.
+Die HTTP-Schicht des SDK ist absichtlich dünn. Sie setzt auf PSR-18 (HTTP-Client) und PSR-17 (Request-/Stream-Factories) und kapselt fünf Aufgaben: Authentifizierungs-Header setzen, URL und Query-String bauen, JSON-Body serialisieren, 4xx/5xx in SDK-Exceptions übersetzen und Requests gemäß `RetryPolicy` wiederholen. Dieses Dokument beschreibt die wenigen, aber wichtigen Eigenheiten — und wie du eingreifen kannst.
 
 ## Klassen und Verantwortlichkeiten
 
 | Klasse | Aufgabe | Datei |
 |---|---|---|
-| `BillomatHttpClientInterface` | Vertrag: `request(method, path, query, json): ResponseInterface` | `src/Http/BillomatHttpClientInterface.php` |
-| `BillomatHttpClient` | Konkrete Implementierung. Bekommt `HttpClientInterface` + `BillomatConfig` injiziert. | `src/Http/BillomatHttpClient.php` |
-| `AbstractApi` | Wrapper über `BillomatHttpClientInterface` mit JSON-Decoding und Exception-Mapping. | `src/Api/AbstractApi.php` |
+| `BillomatHttpClientInterface` | Vertrag: `request(method, path, query, json): ResponseInterface` (PSR-7). Die Response hat immer einen Status unter 400; Fehler kommen als Exception. | `src/Http/BillomatHttpClientInterface.php` |
+| `BillomatHttpClient` | Konkrete Implementierung. Bekommt einen PSR-18-`ClientInterface` + `BillomatConfig` injiziert, optional PSR-17-Factories (sonst per `php-http/discovery`). Übernimmt Fehler-Mapping und Retries. | `src/Http/BillomatHttpClient.php` |
+| `AbstractApi` | Wrapper über `BillomatHttpClientInterface` mit JSON-Decoding und Hüllen-Entpackung. | `src/Api/AbstractApi.php` |
 
-`BillomatClient` instanziiert intern ein `BillomatHttpClient` und reicht es an alle `*Api`-Klassen weiter. Eine eigene Implementierung von `BillomatHttpClientInterface` lässt sich aktuell nicht ohne Verzicht auf die Factory `BillomatClient::create()` einhängen — wer das braucht, instanziert `BillomatClient` manuell und kann den darin gehaltenen `BillomatHttpClient` durch die Symfony-Layer ersetzen (siehe nächster Abschnitt).
+`BillomatClient` instanziiert intern ein `BillomatHttpClient` und reicht es an alle `*Api`-Klassen weiter. Eine eigene Implementierung von `BillomatHttpClientInterface` lässt sich nicht in `BillomatClient` einhängen — der Hebel ist der darunterliegende PSR-18-Client (siehe nächster Abschnitt).
 
-## Symfony-`HttpClientInterface` austauschen
+## PSR-18-Client austauschen
 
-Der schnelle Hebel: nicht den `BillomatHttpClient` ersetzen, sondern den darunterliegenden Symfony-Client. Beide Konstruktoren akzeptieren ihn:
+Der schnelle Hebel: nicht den `BillomatHttpClient` ersetzen, sondern den darunterliegenden PSR-18-Client. `BillomatClient::create()` und der Konstruktor akzeptieren jeden `Psr\Http\Client\ClientInterface`; der Konstruktor nimmt zusätzlich eigene PSR-17-`RequestFactoryInterface`/`StreamFactoryInterface` entgegen.
+
+Ohne Angabe nutzt das SDK Symfonys `Psr18Client` mit `BillomatConfig::$timeout`, falls `symfony/http-client` installiert ist, sonst den per `php-http/discovery` gefundenen Client (Guzzle, …). Ein eigener Client konfiguriert seinen Timeout selbst — `$timeout` gilt dann nicht.
+
+Einen Symfony-`HttpClientInterface` wickelst du in `Psr18Client` ein:
 
 ```php
 use Justpilot\Billomat\BillomatClient;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\RetryableHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 
 $inner = HttpClient::create([
+    'timeout' => 10.0,
     'max_duration' => 30.0,
 ]);
-
-$decorated = new TraceableHttpClient(new RetryableHttpClient($inner));
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
-    httpClient: $decorated,
+    httpClient: new Psr18Client(new TraceableHttpClient($inner)),
 );
 ```
 
-Mit diesem Pattern bekommst du Logging, Tracing, Retry, Auth-Decoration etc., ohne SDK-internen Code zu ändern.
+Mit Guzzle sieht es genauso aus: `httpClient: new GuzzleHttp\Client(['timeout' => 10.0])`. Mit diesem Pattern bekommst du Logging, Tracing, Auth-Decoration etc., ohne SDK-internen Code zu ändern. Retries übernimmt das SDK selbst (siehe unten); ein zusätzlicher Retry-Decorator würde Wiederholungen doppeln.
+
+## Retries und Rate-Limits
+
+`BillomatHttpClient` wiederholt Requests nach `BillomatConfig::$retry` (`RetryPolicy`, Default: `maxRetries: 2`, `baseDelayMs: 500`, `maxDelayMs: 10_000`):
+
+| Situation | Methoden | Verhalten |
+|---|---|---|
+| 429 Too Many Requests | alle | Wartet die von Billomat genannte Zeit (`Retry-After`, sonst `X-Rate-Limit-Reset`), aber nur wenn sie ≤ `maxDelayMs` ist — sonst sofort `RateLimitException`. Ohne Header: exponentielles Backoff. |
+| 502, 503, 504 | nur GET | Exponentielles Backoff mit Jitter (`baseDelayMs * 2^Versuch`, gedeckelt bei `maxDelayMs`). |
+| Netzwerkfehler (PSR-18 `NetworkExceptionInterface`) | nur GET | Wie 502–504. |
+| 500 und alle anderen Fehler | — | Kein Retry. |
+
+POST/PUT/DELETE werden außer bei 429 nie wiederholt, weil sie bei Billomat nicht idempotent sind (z. B. `PUT /invoices/{id}/complete`). Bei 429 hat Billomat den Request nicht verarbeitet, daher ist die Wiederholung dort sicher.
+
+```php
+use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
+
+$config = new BillomatConfig(
+    billomatId: 'mycompany',
+    apiKey: '…',
+    retry: new RetryPolicy(maxRetries: 4, maxDelayMs: 30_000),
+    // retry: RetryPolicy::none(), // Wiederholungen abschalten
+);
+```
+
+Sind alle Versuche verbraucht, wirft der Client die Exception der letzten Antwort (siehe [Fehlerbehandlung](../error-handling.md)); Netzwerkfehler kommen als `TransportException` mit der PSR-18-Exception als `getPrevious()`.
 
 ## Eigenheit 1: `+` bleibt im Query-String literal
 
@@ -64,6 +94,8 @@ Ergibt:
 ```text
 ?status[]=OPEN&status[]=OVERDUE
 ```
+
+Auf der Leitung stehen die Klammern percent-kodiert (`?status%5B%5D=OPEN&status%5B%5D=OVERDUE`), weil die PSR-7-URI `[` und `]` im Query kodiert. Billomat dekodiert das wie `status[]`; in Tests auf die kodierte Form prüfen.
 
 `null` als Wert (sowohl Top-Level als auch innerhalb eines Arrays) wird stillschweigend übersprungen — der Schlüssel landet nicht im Query-String.
 
@@ -98,11 +130,11 @@ public function thumb(int $id, TemplateThumbFormat $format = TemplateThumbFormat
 }
 ```
 
-`getRaw()` macht den Request, ruft `$response->getContent()` auf und mappt HTTP-Fehler in SDK-Exceptions. Rückgabe ist der Binär-String.
+`getRaw()` macht den Request und gibt `(string) $response->getBody()` zurück. HTTP-Fehler hat zu diesem Zeitpunkt bereits `BillomatHttpClient::request()` als SDK-Exception geworfen. Rückgabe ist der Binär-String.
 
-### Pattern B: Direkter Request für Endpoints mit Modus-Schalter
+### Pattern B: Endpoints mit Modus-Schalter
 
-Verwendet von `InvoicesApi::pdf()`, weil derselbe Endpoint je nach `format=pdf` entweder JSON oder Binärdaten liefert. In dem Fall ruft die Methode `$this->http->request(...)` direkt auf und ruft entweder `getContent()` (Binär) oder `getJson(...)` (für die strukturierte Variante).
+Verwendet von `InvoicesApi::pdf()`, weil derselbe Endpoint je nach `format=pdf` entweder JSON oder Binärdaten liefert. Die Methode ruft je nach Modus `getRaw(...)` (Binär) oder `getJson(...)` (für die strukturierte Variante) auf.
 
 Beim Schreiben eigener Ressourcen orientiere dich an diesen zwei Patterns; ein generischer Helfer für „Endpoint mit Inhalt-Switch“ existiert (noch) nicht.
 
@@ -117,7 +149,7 @@ Eigenheit: Bei genau **einem** Listeneintrag liefert Billomat manchmal ein einze
 
 ## Was die Schicht **nicht** macht
 
-- Kein Rate-Limiting, kein Backoff out-of-the-box. Wenn nötig, wickle den Symfony-Client mit `RetryableHttpClient` ein.
-- Keine automatischen Wiederholungen bei Idempotenz-fähigen Operationen.
+- Kein proaktives Rate-Limiting: Das SDK drosselt nicht vorab anhand von `X-Rate-Limit-Remaining`, sondern reagiert erst auf 429.
+- Keine Wiederholung von POST/PUT/DELETE außer bei 429 und keine Wiederholung bei 500.
 - Kein Caching von GET-Responses.
 - Keine Validierung des Payloads, bevor er Billomat erreicht. Das SDK schickt, was du angibst — Validierungsfehler liefert Billomat als `ValidationException` zurück, siehe [docs/error-handling.md](../error-handling.md).

@@ -15,7 +15,6 @@ use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Invoices-Ressource.
@@ -331,14 +330,7 @@ final class InvoicesApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            $response = $this->http->request('GET', "/invoices/{$id}/pdf", $query);
-
-            try {
-                // Binärer PDF-Content
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
+            return $this->getRaw("/invoices/{$id}/pdf", $query);
         }
 
         // Standard-Modus: JSON → { "pdf": { ... } }

@@ -1513,24 +1513,6 @@ parameters:
 			path: src/Model/Settings.php
 
 		-
-			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertNull\(\)\.$#'
-			identifier: staticMethod.dynamicCall
-			count: 1
-			path: tests/Api/AbstractApiExceptionTest.php
-
-		-
-			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:assertSame\(\)\.$#'
-			identifier: staticMethod.dynamicCall
-			count: 2
-			path: tests/Api/AbstractApiExceptionTest.php
-
-		-
-			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:fail\(\)\.$#'
-			identifier: staticMethod.dynamicCall
-			count: 2
-			path: tests/Api/AbstractApiExceptionTest.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Tests\\Api\\TestApi\:\:publicGetJson\(\) has parameter \$query with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1750,12 +1732,6 @@ parameters:
 			message: '#^Cannot access offset ''headers'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 4
-			path: tests/Http/BillomatHttpClientQueryTest.php
-
-		-
-			message: '#^Cannot access offset ''timeout'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
 			path: tests/Http/BillomatHttpClientQueryTest.php
 
 		-

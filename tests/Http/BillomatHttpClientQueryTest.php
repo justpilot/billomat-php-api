@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Http;
 
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -12,18 +13,20 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 /**
  * Sichert die Billomat-spezifischen Query-/Header-Quirks im HTTP-Layer ab.
  *
  * Hintergrund (siehe CLAUDE.md): Billomat erwartet:
- *  - Arrays als `key[]=v1&key[]=v2`
+ *  - Arrays als `key[]=v1&key[]=v2` (PSR-7 kodiert die Klammern als `%5B%5D`, Billomat dekodiert sie wieder)
  *  - `+` literal (z. B. `order_by=date+DESC`), nicht `%2B`
  *  - keine leeren Werte
  */
 #[CoversClass(BillomatHttpClient::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 final class BillomatHttpClientQueryTest extends TestCase
 {
     /**
@@ -67,12 +70,12 @@ final class BillomatHttpClientQueryTest extends TestCase
 
         yield 'Arrays werden als key[]=v Paare serialisiert' => [
             ['payment_type' => ['CASH', 'BANK_TRANSFER']],
-            '?payment_type[]=CASH&payment_type[]=BANK_TRANSFER',
+            '?payment_type%5B%5D=CASH&payment_type%5B%5D=BANK_TRANSFER',
         ];
 
         yield 'null-Elemente in Arrays werden übersprungen' => [
             ['ids' => [1, null, 3]],
-            '?ids[]=1&ids[]=3',
+            '?ids%5B%5D=1&ids%5B%5D=3',
         ];
 
         yield 'Plus-Zeichen bleibt literal (date+DESC)' => [
@@ -147,31 +150,13 @@ final class BillomatHttpClientQueryTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $client = new BillomatHttpClient($mock, $config);
+        $client = new BillomatHttpClient(new Psr18Client($mock), $config);
         $client->request('GET', '/clients');
 
         $headers = $this->normaliseHeaders($captured['options']['headers'] ?? []);
         self::assertSame('secret-key', $headers['x-billomatapikey'] ?? null);
         self::assertArrayNotHasKey('x-appid', $headers);
         self::assertArrayNotHasKey('x-appsecret', $headers);
-    }
-
-    #[Test]
-    public function itPassesTimeoutFromConfig(): void
-    {
-        $captured = [];
-        $mock = $this->captureMock($captured);
-
-        $config = new BillomatConfig(
-            billomatId: 'mycompany',
-            apiKey: 'secret-key',
-            timeout: 30.0,
-        );
-
-        $client = new BillomatHttpClient($mock, $config);
-        $client->request('GET', '/clients');
-
-        self::assertSame(30.0, $captured['options']['timeout']);
     }
 
     #[Test]
@@ -244,7 +229,7 @@ final class BillomatHttpClientQueryTest extends TestCase
             appSecret: 'app-secret',
         );
 
-        return new BillomatHttpClient($mock, $config);
+        return new BillomatHttpClient(new Psr18Client($mock), $config);
     }
 
     /**

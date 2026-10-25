@@ -8,7 +8,7 @@
 
 **Sprache / Language:** Deutsch (diese Datei) · [English](README.en.md)
 
-Modernes, typisiertes PHP 8.5+ SDK für die [Billomat-API](https://www.billomat.com/api/) — basiert auf Symfony-Komponenten, mit Read-Modellen, getrennten Write-Optionen und einer sauberen Exception-Hierarchie.
+Modernes, typisiertes PHP 8.5+ SDK für die [Billomat-API](https://www.billomat.com/api/) — läuft mit jedem PSR-18-HTTP-Client (Symfony, Guzzle, …), mit Read-Modellen, getrennten Write-Optionen und einer sauberen Exception-Hierarchie.
 
 > Unoffizielles SDK. Dieses Projekt steht in keiner offiziellen Verbindung zur Billomat GmbH und wird unabhängig entwickelt und gepflegt.
 
@@ -34,7 +34,7 @@ Modernes, typisiertes PHP 8.5+ SDK für die [Billomat-API](https://www.billomat.
 
 - PHP 8.5 oder neuer
 - Composer
-- Symfony-Komponenten ab Version 8.1 (`^8.1`). Symfony 7.x wird nicht mehr unterstützt.
+- Ein PSR-18-HTTP-Client samt PSR-17-Factories, z. B. `symfony/http-client` mit `nyholm/psr7` oder `guzzlehttp/guzzle`
 - Ein Billomat-Account mit aktiviertem API-Zugriff
 - Ein API-Schlüssel aus den Account-Einstellungen unter `https://<billomatId>.billomat.net/app/settings/api`
 
@@ -44,6 +44,14 @@ Modernes, typisiertes PHP 8.5+ SDK für die [Billomat-API](https://www.billomat.
 
 ```bash
 composer require justpilot/billomat-php-api
+```
+
+Das SDK bringt keinen eigenen HTTP-Client mit, sondern braucht einen PSR-18-Client und PSR-17-Factories. Ist das Composer-Plugin `php-http/discovery` erlaubt, installiert es bei Bedarf automatisch eine Implementierung. Sonst einen Client explizit mitinstallieren:
+
+```bash
+composer require justpilot/billomat-php-api symfony/http-client nyholm/psr7
+# oder
+composer require justpilot/billomat-php-api guzzlehttp/guzzle
 ```
 
 ## Quickstart
@@ -88,10 +96,11 @@ Vollständige, ausführbare Beispiele liegen unter [examples/](examples/).
 ## Features
 
 - PHP 8.5+, durchgängig typisiert (`final readonly` Models, Enums, Named Arguments).
-- HTTP-Layer auf `symfony/http-client`; eigenes `HttpClientInterface` injizierbar.
+- HTTP-Layer auf PSR-18/PSR-17: beliebiger Client (Symfony, Guzzle, …) injizierbar, sonst automatisch per `php-http/discovery` gefunden.
+- Automatische Wiederholungen: 429 mit der von Billomat genannten Wartezeit (`Retry-After` bzw. `X-Rate-Limit-Reset`), GET-Requests zusätzlich bei 502/503/504 und Netzwerkfehlern mit exponentiellem Backoff — konfigurierbar über `RetryPolicy`.
 - Eine `*Api`-Klasse je Billomat-Ressource mit einheitlichen Verben (`list`, `get`, `create`, `update`, `delete`) plus ressourcenspezifischen Aktionen (`complete`, `cancel`, `pdf`, `thumb` …).
 - Auto-Pagination via `iterateAll()`-Generator und `listPage()` mit Metadaten.
-- Strukturierte Exception-Hierarchie mit Mapping auf HTTP-Statuscodes (401/403, 404, 400/422).
+- Strukturierte Exception-Hierarchie mit Mapping auf HTTP-Statuscodes (401/403, 404, 400/422, 429) und eigener `TransportException` für Netzwerkfehler.
 
 ## Ressourcen
 
@@ -157,8 +166,9 @@ $billomat = BillomatClient::create(
     apiKey: '…',
     appId: null,        // optional, nur für eingetragene Drittanbieter-Apps
     appSecret: null,    // optional
-    timeout: 10.0,      // Sekunden
-    httpClient: null,   // optional eigener HttpClientInterface
+    timeout: 10.0,      // Sekunden (nur für den vom SDK erzeugten Client)
+    httpClient: null,   // optional eigener PSR-18-Client
+    retry: new RetryPolicy(maxRetries: 2), // RetryPolicy::none() schaltet Wiederholungen ab
 );
 ```
 
@@ -205,7 +215,9 @@ Alle vom SDK geworfenen Exceptions erben von `BillomatException`. HTTP-Fehler we
 | 401, 403 | `AuthenticationException` |
 | 404 | `NotFoundException` |
 | 400, 422 | `ValidationException` |
+| 429 | `RateLimitException` (mit `getRetryAfter()`) |
 | sonstige 4xx/5xx | `HttpException` |
+| keine Antwort (DNS, Timeout, Verbindungsabbruch) | `TransportException` |
 
 `get($id)`-Methoden geben bei einer 404-Antwort `null` zurück, statt eine Exception zu werfen. Auf jeder `HttpException` sind `getStatusCode()` und `getResponseBody()` verfügbar — letzteres enthält den Roh-Body von Billomat und ist beim Debuggen oft hilfreich.
 
@@ -213,25 +225,27 @@ Beispiele und Patterns: [docs/error-handling.md](docs/error-handling.md), Hinter
 
 ## Logging & HTTP-Client
 
-Der Symfony-HTTP-Client lässt sich vor der Übergabe an `BillomatClient` dekorieren — für Logging, Tracing, Retry oder Tests reicht die Standard-Symfony-Toolbox:
+`httpClient` nimmt jeden PSR-18-Client (`Psr\Http\Client\ClientInterface`) entgegen. Ohne Angabe nutzt das SDK Symfonys `Psr18Client` mit dem konfigurierten Timeout, falls `symfony/http-client` installiert ist, sonst den per `php-http/discovery` gefundenen Client. Ein eigener Client konfiguriert seinen Timeout selbst. Einen Symfony-`HttpClientInterface` — etwa mit Logging oder Tracing dekoriert — wickelst du in `Psr18Client` ein:
 
 ```php
 use Justpilot\Billomat\BillomatClient;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\RetryableHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 
-$inner = HttpClient::create(['max_duration' => 30.0]);
-$decorated = new TraceableHttpClient(new RetryableHttpClient($inner));
+$inner = HttpClient::create(['timeout' => 10.0, 'max_duration' => 30.0]);
+$decorated = new TraceableHttpClient($inner);
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
-    httpClient: $decorated,
+    httpClient: new Psr18Client($decorated),
 );
 ```
 
-Für Unit-Tests eignet sich `Symfony\Component\HttpClient\MockHttpClient` als Drop-in. Patterns und Eigenheiten des HTTP-Layers (Query-Encoding, `+` vs. `%2B`, Array-Filter) sind in [docs/advanced/http-layer.md](docs/advanced/http-layer.md) beschrieben.
+Wiederholungen bei 429 und transienten Fehlern übernimmt das SDK selbst (`RetryPolicy`); ein zusätzlicher `RetryableHttpClient` ist nicht nötig.
+
+Für Unit-Tests eignet sich `Symfony\Component\HttpClient\MockHttpClient`, eingewickelt in `Psr18Client`. Patterns und Eigenheiten des HTTP-Layers (Query-Encoding, `+` vs. `%2B`, Array-Filter) sind in [docs/advanced/http-layer.md](docs/advanced/http-layer.md) beschrieben.
 
 ## Tests
 

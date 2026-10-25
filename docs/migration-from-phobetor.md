@@ -277,7 +277,7 @@ try {
 
 This SDK does not yet ship an automatic rate-limit wait loop equivalent to
 phobetor's `setDoWaitForRateLimitReset(true)`. If you need it, decorate the
-HTTP client (see the [configuration guide](configuration.md#beispiel-request-response-logging)
+HTTP client (see the [configuration guide](configuration.md#example-logging-requests-and-responses)
 section).
 
 ## Property name mapping

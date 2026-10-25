@@ -1,36 +1,36 @@
-<!-- Quelle: https://www.billomat.com/api/webhooks/ -->
+<!-- Source: https://www.billomat.com/api/webhooks/ -->
 
 # Webhooks
 
-Billomat kann auf Ereignisse hin einen HTTP-Aufruf an eine selbst gewählte URL absetzen ("Webhook"). Für jeden Ereignistyp lässt sich genau eine URL hinterlegen.
+Billomat can send an HTTP request to a URL of your choice when an event occurs ("webhook"). Exactly one URL can be configured per event type.
 
-> Webhooks haben **keinen REST-API-Endpunkt**. Sie werden ausschließlich im Billomat-UI unter *Einstellungen → Webhooks* konfiguriert. Dieses SDK kann also weder Webhooks anlegen noch auflisten — wohl aber das, was wirklich gebraucht wird: **eingehende Webhook-Requests auswerten** (`WebhookHeaders`, `WebhookPayload`, `WebhookEvent`, siehe [unten](#webhooks-empfangen-mit-dem-sdk)).
+> Webhooks have **no REST API endpoint**. They are configured exclusively in the Billomat UI under *Settings → Webhooks* (*Einstellungen → Webhooks*). This SDK can therefore neither create nor list webhooks — but it covers what you actually need: **parsing incoming webhook requests** (`WebhookHeaders`, `WebhookPayload`, `WebhookEvent`, see [below](#receiving-webhooks-with-the-sdk)).
 
-## Konfiguration im UI
+## Configuration in the UI
 
-Pro Ereignis (siehe [Event-Katalog](#event-katalog)) wird hinterlegt:
+For each event (see [Event catalog](#event-catalog)) you configure:
 
-- **URL** — Zieladresse für den POST-Request.
-- **Format** — `xml` oder `json`. Bestimmt `Content-Type` und Body des Requests.
-- **HTTP-Basic-Auth (optional)** — Nutzername und Passwort, falls der Empfänger authentifiziert.
+- **URL** — target address for the POST request.
+- **Format** — `xml` or `json`. Determines the `Content-Type` and body of the request.
+- **HTTP Basic Auth (optional)** — user name and password, if the receiver authenticates requests.
 
-## Eingehender Request
+## Incoming request
 
-Tritt ein Ereignis ein, schickt Billomat einen POST-Request an die hinterlegte URL.
+When an event occurs, Billomat sends a POST request to the configured URL.
 
-### Header
+### Headers
 
-| Header | Bedeutung |
+| Header | Meaning |
 |---|---|
-| `Content-Type` | `application/xml` oder `application/json` (je nach UI-Einstellung) |
+| `Content-Type` | `application/xml` or `application/json` (depending on the UI setting) |
 | `User-Agent` | `Billomat-Webhook` |
-| `X-Billomat-Webhook-Id` | ID der hinterlegten Webhook-Konfiguration |
-| `X-Billomat-Webhook-Request-Id` | Eindeutige, **monoton steigende** Ganzzahl pro Request (z. B. `1792857895`) — geeignet zum Sortieren paralleler Folge-Ereignisse |
-| `X-Billomat-Webhook-Event` | Eventname, z.B. `invoice.create` |
+| `X-Billomat-Webhook-Id` | ID of the webhook configuration |
+| `X-Billomat-Webhook-Request-Id` | Unique, **monotonically increasing** integer per request (e.g. `1792857895`) — suitable for ordering parallel follow-up events |
+| `X-Billomat-Webhook-Event` | Event name, e.g. `invoice.create` |
 
 ### Body
 
-Der Body enthält den Datensatz im konfigurierten Format, **mit demselben Envelope wie die REST-API**: ein Objekt mit genau einem Schlüssel, dem Ressourcennamen mit Bindestrich (`invoice`, `invoice-payment`, `credit-note`, …). Beispiel (JSON, `invoice_payment.create`, gekürzt):
+The body contains the record in the configured format, **with the same envelope as the REST API**: an object with exactly one key, the resource name with a hyphen (`invoice`, `invoice-payment`, `credit-note`, …). Example (JSON, `invoice_payment.create`, shortened):
 
 ```json
 {
@@ -50,42 +50,42 @@ Der Body enthält den Datensatz im konfigurierten Format, **mit demselben Envelo
 }
 ```
 
-Wie bei der REST-API gilt:
+As with the REST API:
 
-- **Alle Werte sind Strings**, auch IDs, Beträge und Flags (`"id": "4711"`, `"amount": "119"`). Leere Felder kommen als `""`, nicht als `null`.
-- Verschachtelte Listen haben dieselbe Form wie in der REST-Antwort, z. B. `"taxes": {"tax": {…}}` mit einem einzelnen Objekt statt einer Liste, wenn es nur einen Eintrag gibt.
-- Der Envelope-Schlüssel folgt aus dem Eventnamen: Ressource vor dem Punkt, `_` durch `-` ersetzt (`invoice_payment.create` → `invoice-payment`).
+- **All values are strings**, including IDs, amounts and flags (`"id": "4711"`, `"amount": "119"`). Empty fields arrive as `""`, not as `null`.
+- Nested lists have the same shape as in the REST response, e.g. `"taxes": {"tax": {…}}` with a single object instead of a list when there is only one entry.
+- The envelope key follows from the event name: the resource before the dot, with `_` replaced by `-` (`invoice_payment.create` → `invoice-payment`).
 
-Deshalb lässt sich der innere Datensatz direkt mit dem passenden Model hydrieren; `WebhookPayload` erledigt das (siehe [unten](#webhooks-empfangen-mit-dem-sdk)).
+That's why the inner record can be hydrated directly with the matching model; `WebhookPayload` does this (see [below](#receiving-webhooks-with-the-sdk)).
 
-### Der Payload ist ein Trigger, kein aktueller Stand
+### The payload is a trigger, not the current state
 
-Der mitgeschickte Datensatz ist oft **veraltet**. Auswertung von rund 29.000 echten Webhook-Requests (drei Accounts, `invoice.*` und `invoice_payment.*`):
+The record sent along is often **stale**. Analysis of about 29,000 real webhook requests (three accounts, `invoice.*` and `invoice_payment.*`):
 
-- In **über 99 %** der `invoice.status`- und `invoice.update`-Events mit `status = PAID` steht noch `open_amount` = `total_gross` und `paid_amount` = `0`, also der Stand vor der Zahlung.
-- `invoice_payment.create` und das zugehörige `invoice.status` kommen in rund 92 % der Fälle in derselben Sekunde (± 1 s) an; die Reihenfolge ist nicht garantiert.
+- In **over 99 %** of the `invoice.status` and `invoice.update` events with `status = PAID`, `open_amount` still equals `total_gross` and `paid_amount` is `0`, i.e. the state before the payment.
+- `invoice_payment.create` and the related `invoice.status` arrive within the same second (± 1 s) in about 92 % of cases; the order is not guaranteed.
 
-Den Webhook daher nur als Signal „Ressource X hat sich geändert“ behandeln und den aktuellen Stand per API nachladen (`$billomat->invoices->get($id)`). Das macht die Verarbeitung zugleich unempfindlich gegen doppelt zugestellte Requests.
+Treat the webhook only as a signal "resource X has changed" and reload the current state via the API (`$billomat->invoices->get($id)`). This also makes processing robust against duplicate deliveries.
 
-## Antwortverhalten
+## Response behavior
 
-Der Empfänger **muss**:
+The receiver **must**:
 
-- innerhalb von **10 Sekunden** antworten,
-- mit einem HTTP-Statuscode aus `2xx` quittieren.
+- respond within **10 seconds**,
+- acknowledge with an HTTP status code in the `2xx` range.
 
-Alles andere zählt als Fehler. Wichtig:
+Anything else counts as a failure. Note:
 
-- **3xx-Weiterleitungen** sind nicht erlaubt — Billomat folgt ihnen nicht.
-- Status **`410 Gone`** signalisiert "URL endgültig weg" — Billomat retryt dann **nicht**.
-- Bei jedem anderen Fehler retryt Billomat nach **1 Minute**, danach nach **1 Stunde**, danach nach **6 Stunden**. Schlägt auch der vierte Versuch fehl, wird der Webhook deaktiviert und der Account-Inhaber per E-Mail informiert.
-- Folge-Requests desselben Ereignis-Typs (z.B. mehrere `invoice.create` hintereinander) werden in der Reihenfolge der Auslösung gefeuert. Bleibt ein Request dauerhaft hängen, blockiert er die folgenden.
+- **3xx redirects** are not allowed — Billomat doesn't follow them.
+- Status **`410 Gone`** signals "URL permanently gone" — Billomat then does **not** retry.
+- On any other failure Billomat retries after **1 minute**, then after **1 hour**, then after **6 hours**. If the fourth attempt fails as well, the webhook is deactivated and the account owner is notified by email.
+- Follow-up requests of the same event type (e.g. several `invoice.create` in a row) are sent in the order they were triggered. A request that keeps failing blocks the following ones.
 
-## Event-Katalog
+## Event catalog
 
-Vollständige Liste der von Billomat gesendeten Events (Stand der Spec: `docs/spec/billomat.json`):
+Complete list of events Billomat sends (as of the spec in `docs/spec/billomat.json`):
 
-### Verkauf
+### Sales
 
 - `invoice.create`, `invoice.update`, `invoice.status`, `invoice.send`, `invoice.delete`
 - `invoice_comment.create`, `invoice_comment.delete`
@@ -102,7 +102,7 @@ Vollständige Liste der von Billomat gesendeten Events (Stand der Spec: `docs/sp
 - `reminder.create`, `reminder.update`, `reminder.status`, `reminder.send`, `reminder.delete`
 - `recurring.create`, `recurring.update`, `recurring.delete`
 
-### Einkauf
+### Purchasing
 
 - `incoming.create`, `incoming.update`, `incoming.status`, `incoming.delete`
 - `incoming_comment.create`, `incoming_comment.delete`
@@ -110,7 +110,7 @@ Vollständige Liste der von Billomat gesendeten Events (Stand der Spec: `docs/sp
 - `incoming_property.create`, `incoming_property.update`, `incoming_property.delete`
 - `incoming_property_value.update`
 
-### Stammdaten
+### Master data
 
 - `article.create`, `article.update`, `article.delete`
 - `article_property.create`, `article_property.update`, `article_property.delete`
@@ -123,18 +123,18 @@ Vollständige Liste der von Billomat gesendeten Events (Stand der Spec: `docs/sp
 - `supplier_property.create`, `supplier_property.update`, `supplier_property.delete`
 - `supplier_property_value.update`
 
-## Webhooks empfangen mit dem SDK
+## Receiving webhooks with the SDK
 
-Das SDK liefert bewusst keinen Controller mit — Routing, Auth (Basic), Idempotenz und Queue sind Aufgabe der Anwendung. Es nimmt aber das Auswerten ab (`src/Webhook/`):
+The SDK deliberately ships no controller — routing, auth (Basic), idempotency and queueing are the application's job. It does take care of parsing (`src/Webhook/`):
 
-| Klasse | Aufgabe |
+| Class | Responsibility |
 |---|---|
-| `WebhookEvent` | Backed Enum mit allen 83 Events (`WebhookEvent::INVOICE_PAYMENT_CREATE` = `'invoice_payment.create'`); `resource()`, `action()` (`WebhookAction::CREATE` …), `envelopeKey()` (`'invoice-payment'`), `modelClass()` (`InvoicePayment::class`) |
-| `WebhookHeaders` | `fromServerRequest()` (PSR-7) bzw. `fromArray()` (`$_SERVER`, Symfony-`HeaderBag::all()`, gespeicherte Header) → `event`, `requestId` (int), `webhookId` |
-| `WebhookPayload` | `fromJson()` / `fromArray()` packt den Envelope aus; `data` (Rohdaten), `id()`, `int('invoice_id')`, `model()` hydriert das passende Model |
-| `InvalidWebhookException` | unbekanntes Event, fehlender Header, kein JSON, falscher Envelope — mit `4xx` antworten |
+| `WebhookEvent` | Backed enum with all 83 events (`WebhookEvent::INVOICE_PAYMENT_CREATE` = `'invoice_payment.create'`); `resource()`, `action()` (`WebhookAction::CREATE` …), `envelopeKey()` (`'invoice-payment'`), `modelClass()` (`InvoicePayment::class`) |
+| `WebhookHeaders` | `fromServerRequest()` (PSR-7) or `fromArray()` (`$_SERVER`, Symfony `HeaderBag::all()`, stored headers) → `event`, `requestId` (int), `webhookId` |
+| `WebhookPayload` | `fromJson()` / `fromArray()` unwraps the envelope; `data` (raw data), `id()`, `int('invoice_id')`, `model()` hydrates the matching model |
+| `InvalidWebhookException` (`Justpilot\Billomat\Exception`) | unknown event, missing header, no JSON, wrong envelope — respond with `4xx` |
 
-Die Klassen arbeiten auch mit gespeicherten Requests, damit der Controller nur annimmt und ein Worker später verarbeitet. Nur das JSON-Format wird unterstützt.
+The classes also work with stored requests, so the controller only accepts the request and a worker processes it later. Only the JSON format is supported.
 
 ```php
 <?php
@@ -146,24 +146,24 @@ use Justpilot\Billomat\Webhook\WebhookEvent;
 use Justpilot\Billomat\Webhook\WebhookHeaders;
 use Justpilot\Billomat\Webhook\WebhookPayload;
 
-// Controller: annehmen, speichern, sofort 2xx (10 s Timeout).
+// Controller: accept, store, respond 2xx right away (10 s timeout).
 $body = (string) file_get_contents('php://input');
 try {
     $headers = WebhookHeaders::fromArray($_SERVER);
-    WebhookPayload::fromJson($headers->event, $body); // Body prüfen, bevor er gespeichert wird
+    WebhookPayload::fromJson($headers->event, $body); // validate the body before storing it
 } catch (InvalidWebhookException) {
     http_response_code(400);
     return;
 }
 
-// Idempotenz: Request-ID mit Unique-Index speichern, Duplikate still quittieren.
+// Idempotency: store the request ID with a unique index, acknowledge duplicates silently.
 if (!$inbox->store($headers->requestId, $headers->event->value, $body)) {
     http_response_code(200);
     return;
 }
 http_response_code(202);
 
-// Worker: der Payload ist ein Trigger — aktuellen Stand per API nachladen.
+// Worker: the payload is a trigger — reload the current state via the API.
 $payload = WebhookPayload::fromJson(WebhookEvent::from($row['event']), $row['body']);
 
 match ($payload->event) {
@@ -176,21 +176,21 @@ match ($payload->event) {
 };
 ```
 
-`$payload->model()` liefert den Datensatz als Model (`Invoice`, `InvoicePayment`, …), etwa fürs Logging. Für Entscheidungen den nachgeladenen Stand verwenden, nicht den Payload.
+`$payload->model()` returns the record as a model (`Invoice`, `InvoicePayment`, …), e.g. for logging. Base decisions on the reloaded state, not on the payload.
 
-## Best Practices
+## Best practices
 
-- **Idempotent verarbeiten.** `X-Billomat-Webhook-Request-Id` ist eindeutig pro Request — verarbeitete IDs in einer kleinen Tabelle / einem Cache vorhalten (z. B. mit Unique-Index) und beim zweiten Erscheinen verwerfen. Ob ein Retry dieselbe ID trägt, dokumentiert Billomat nicht; wer ohnehin per API nachlädt, verarbeitet ein Duplikat ohne Schaden.
-- **Sofort 2xx zurück, asynchron verarbeiten.** 10 Sekunden Timeout sind eng. Den Datensatz in eine Queue legen und die HTTP-Antwort sofort senden.
-- **Immer gegen die API gegenchecken.** Der Body ist oft veraltet (siehe [oben](#der-payload-ist-ein-trigger-kein-aktueller-stand)) — vor jeder fachlichen Entscheidung mit `$billomat->invoices->get($id)` den aktuellen Stand holen.
-- **HTTPS + HTTP-Basic-Auth.** Da Billomat keine Signatur mitschickt, ist Basic-Auth (im UI eintragbar) plus TLS die einzige Absicherung gegen gefälschte Aufrufe.
-- **`410 Gone` zum Beenden.** Wird ein Empfänger abgeschaltet, mit `410` antworten — Billomat hört dann sofort auf und stoppt nicht erst nach dem letzten Retry.
+- **Process idempotently.** `X-Billomat-Webhook-Request-Id` is unique per request — keep processed IDs in a small table or cache (e.g. with a unique index) and discard them on the second occurrence. Billomat doesn't document whether a retry carries the same ID; if you reload via the API anyway, a duplicate does no harm.
+- **Respond 2xx immediately, process asynchronously.** A 10-second timeout is tight. Put the record in a queue and send the HTTP response right away.
+- **Always cross-check with the API.** The body is often stale (see [above](#the-payload-is-a-trigger-not-the-current-state)) — fetch the current state with `$billomat->invoices->get($id)` before every business decision.
+- **HTTPS + HTTP Basic Auth.** Since Billomat sends no signature, Basic Auth (configurable in the UI) plus TLS is the only protection against forged requests.
+- **`410 Gone` to stop.** When you shut down a receiver, respond with `410` — Billomat then stops immediately instead of after the last retry.
 
-## Bezug zum SDK
+## Relation to the SDK
 
-| Konzept | SDK-Bezug |
+| Concept | SDK counterpart |
 |---|---|
-| Datensatz aus dem Body | `WebhookPayload::fromJson($event, $body)->model()`; gleiches Schema wie die REST-Antwort |
-| Header | `WebhookHeaders::fromServerRequest($request)` bzw. `fromArray($_SERVER)` |
-| `invoice.status`, `invoice.send`, … | korrespondieren zu `InvoicesApi::complete()`, `cancel()`, `email()` etc. |
-| Vollständigen Datensatz nachladen | `$billomat->invoices->get($id)`, `$billomat->offers->get($id)`, … |
+| Record from the body | `WebhookPayload::fromJson($event, $body)->model()`; same schema as the REST response |
+| Headers | `WebhookHeaders::fromServerRequest($request)` or `fromArray($_SERVER)` |
+| `invoice.status`, `invoice.send`, … | correspond to `InvoicesApi::complete()`, `cancel()`, `email()` etc. |
+| Reloading the full record | `$billomat->invoices->get($id)`, `$billomat->offers->get($id)`, … |

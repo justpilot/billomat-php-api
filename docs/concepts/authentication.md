@@ -1,44 +1,44 @@
-<!-- Quelle: https://www.billomat.com/api/grundlagen/authentifizierung/ -->
+<!-- Source: https://www.billomat.com/api/grundlagen/authentifizierung/ -->
 
-# Authentifizierung
+# Authentication
 
-Jeder API-Aufruf wird über einen persönlichen **API-Schlüssel** authentifiziert, der einem konkreten Billomat-Benutzer gehört. Die API ist zustandslos — es gibt keine Sessions, der Schlüssel muss bei jedem Request mitgeschickt werden.
+Every API call is authenticated with a personal **API key** that belongs to a specific Billomat user. The API is stateless — there are no sessions; the key must be sent with every request.
 
-## API-Schlüssel erzeugen
+## Creating an API key
 
-1. Im Billomat-UI unter *Einstellungen → Mitarbeiter* den Benutzer öffnen und **API-Zugriff freischalten**.
-2. Anschließend lässt sich für diesen Benutzer ein API-Schlüssel generieren.
+1. In the Billomat UI, open the user under *Settings → Employees* (*Einstellungen → Mitarbeiter*) and **enable API access**.
+2. You can then generate an API key for this user.
 
-Der Schlüssel wirkt als Passwort: Wer ihn besitzt, kann mit den Rechten des zugeordneten Benutzers auf die API zugreifen.
+The key acts as a password: whoever has it can access the API with the permissions of the associated user.
 
-## Übertragung
+## Transmission
 
-Billomat akzeptiert den Schlüssel auf zwei Wegen:
+Billomat accepts the key in two ways:
 
-| Weg | Form | Empfehlung |
+| Method | Form | Recommendation |
 |---|---|---|
-| HTTP-Header | `X-BillomatApiKey: <key>` | Standard — in Logs leichter zu filtern als URLs, kein Risiko durch Referer-Header. |
-| Query-Parameter | `?api_key=<key>` | Nur für ad-hoc-Tests; landet in Server-Logs und Browser-History. |
+| HTTP header | `X-BillomatApiKey: <key>` | Default — easier to filter from logs than URLs, no risk via `Referer` headers. |
+| Query parameter | `?api_key=<key>` | Only for ad-hoc tests; ends up in server logs and browser history. |
 
-Dieses SDK verwendet ausschließlich den **Header-Weg** (siehe `src/Http/BillomatHttpClient.php`).
+This SDK uses the **header** only (see `src/Http/BillomatHttpClient.php`).
 
-## Apps registrieren (`X-AppId`, `X-AppSecret`)
+## Registered apps (`X-AppId`, `X-AppSecret`)
 
-Wenn das aufrufende System in Billomat unter *Einstellungen → Administration → Apps* als eigene App registriert wurde, sollten zusätzlich die App-Header gesendet werden:
+If the calling system is registered as an app in Billomat under *Settings → Administration → Apps* (*Einstellungen → Administration → Apps*), send the app headers as well:
 
-| Header | Bedeutung |
+| Header | Meaning |
 |---|---|
-| `X-AppId` | ID der registrierten App |
-| `X-AppSecret` | Geheimer Schlüssel der App |
+| `X-AppId` | ID of the registered app |
+| `X-AppSecret` | Secret key of the app |
 
-Ohne diese Header werden Aufrufe als „unregistrierte App" gezählt und teilen sich das geringere Tarif-Kontingent (siehe [Errors & Rate-Limits](errors-and-rate-limits.md)).
+Without these headers, calls count as an "unregistered app" and share the smaller plan quota (see [Errors and rate limits](errors-and-rate-limits.md)).
 
-## Konfiguration im SDK
+## Configuration in the SDK
 
-`BillomatConfig::credentials()` nimmt alle drei Werte entgegen:
+`BillomatClient::create()` (or `BillomatConfig` directly) takes all three values:
 
 ```php
-$client = BillomatClient::create(
+$billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: '…',
     appId: '…',       // optional
@@ -46,15 +46,14 @@ $client = BillomatClient::create(
 );
 ```
 
-`BillomatHttpClient` setzt daraus pro Request:
+From these, `BillomatHttpClient` sets on every request:
 
 - `X-BillomatApiKey: <apiKey>`
-- `X-AppId: <appId>` (falls gesetzt)
-- `X-AppSecret: <appSecret>` (falls gesetzt)
+- `X-AppId: <appId>` and `X-AppSecret: <appSecret>` (only when both are set)
 
-## Sicherheitshinweise
+## Security notes
 
-- API-Schlüssel **niemals** in versionierten Code commiten — `.env.test.local` ist gitignored, und produktive Schlüssel gehören in einen Secret-Store.
-- Aus demselben Grund: keine Schlüssel in URL-Parametern (Server-/Proxy-Logs).
-- Immer über HTTPS (siehe [API-Sicherheit](api-security.md)).
-- Wer Read-Only-Zugriff braucht, bekommt einen separaten Benutzer mit eingeschränkten Rollen — der Schlüssel erbt dessen Rechte.
+- **Never** commit API keys to version control — `.env.test.local` is gitignored, and production keys belong in a secret store.
+- For the same reason: no keys in URL parameters (server/proxy logs).
+- Always use HTTPS (see [API security](api-security.md)).
+- If you need read-only access, use a separate user with restricted roles — the key inherits that user's permissions.

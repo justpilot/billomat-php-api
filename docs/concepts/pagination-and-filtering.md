@@ -1,8 +1,8 @@
-<!-- Quelle: https://www.billomat.com/api/grundlagen/daten-lesen/ -->
+<!-- Source: https://www.billomat.com/api/grundlagen/daten-lesen/ -->
 
-# Pagination, Filterung, Sortierung, Sprache
+# Pagination, filtering, sorting, language
 
-Listen-Endpunkte (`GET /api/<resource>`) liefern paginierte Treffer und akzeptieren einen festen Satz von Steuer-Parametern. Dieses SDK kapselt das durchgängig über `list()`, `listPage()` und `iterateAll()` auf jeder `*Api`-Klasse.
+List endpoints (`GET /api/<resource>`) return paginated results and accept a fixed set of control parameters. This SDK wraps them consistently in `list()`, `listPage()` and `iterateAll()` on the `*Api` classes.
 
 ## Pagination
 
@@ -11,17 +11,17 @@ Listen-Endpunkte (`GET /api/<resource>`) liefern paginierte Treffer und akzeptie
 | `page` | `1` | — |
 | `per_page` | `100` | `1000` |
 
-Die Antwort einer Listen-Ressource enthält auf dem Root-Element drei Pagination-Felder:
+The response of a list resource carries three pagination fields on the root element:
 
-- `page` — aktuelle Seite
-- `per_page` — Einträge pro Seite
-- `total` — Gesamtanzahl über alle Seiten hinweg
+- `page` — current page
+- `per_page` — entries per page
+- `total` — total count across all pages
 
-### Im SDK
+### In the SDK
 
-- `list($filters)` — eine einzelne Seite (kein Auto-Paging).
-- `listPage($filters)` — liefert `Page<T>` mit Items **und** `PageInfo` (`page`, `perPage`, `total`).
-- `iterateAll($filters)` — `Generator<T>`, der über alle Seiten transparent durchläuft und intern `page` hochzählt.
+- `list($filters)` — a single page (no auto-paging).
+- `listPage($filters)` — returns a `Page<T>` with the items **and** a `PageInfo` (`page`, `perPage`, `total`).
+- `iterateAll($filters)` — a `Generator<T>` that walks through all pages transparently and increments `page` internally.
 
 ```php
 foreach ($billomat->invoices->iterateAll(new InvoiceFilter(status: [InvoiceStatus::OPEN]), pageSize: 200) as $invoice) {
@@ -29,13 +29,13 @@ foreach ($billomat->invoices->iterateAll(new InvoiceFilter(status: [InvoiceStatu
 }
 ```
 
-`iterateAll()` setzt `page` und `per_page` selbst; die Seitengröße kommt aus `pageSize`.
+`iterateAll()` sets `page` and `per_page` itself; the page size comes from `pageSize`.
 
-Siehe `AbstractApi::listResource()`, `listResourcePage()` und `iterateResource()` in `src/Api/AbstractApi.php`.
+See `AbstractApi::listResource()`, `listResourcePage()` and `iterateResource()` in `src/Api/AbstractApi.php`, and [Pagination](../advanced/pagination.md) for details.
 
-## Filterung
+## Filtering
 
-Die unterstützten Filterparameter sind pro Ressource in `docs/resources/<resource>.md` aufgeführt. Für die großen Ressourcen gibt es typisierte Filter-Klassen, generiert aus der Billomat-Doku: `ClientFilter`, `SupplierFilter`, `ArticleFilter`, `UserFilter`, `InvoiceFilter`, `OfferFilter`, `ConfirmationFilter`, `CreditNoteFilter`, `DeliveryNoteFilter`, `LetterFilter`, `ReminderFilter`, `IncomingFilter`, `RecurringFilter` und `TemplateFilter`.
+The supported filter parameters are listed per resource in `docs/resources/<resource>.md`. The large resources have typed filter classes, generated from the Billomat documentation: `ClientFilter`, `SupplierFilter`, `ArticleFilter`, `UserFilter`, `InvoiceFilter`, `OfferFilter`, `ConfirmationFilter`, `CreditNoteFilter`, `DeliveryNoteFilter`, `LetterFilter`, `ReminderFilter`, `IncomingFilter`, `RecurringFilter` and `TemplateFilter`.
 
 ```php
 use Justpilot\Billomat\Api\InvoiceFilter;
@@ -51,63 +51,63 @@ $invoices = $billomat->invoices->list(new InvoiceFilter(
 ));
 ```
 
-- Alle Felder sind optionale benannte Argumente; nicht gesetzte Felder (null bzw. leere Liste) fehlen im Query.
-- Mehrfachwerte (`status`, `tags`, ID-Listen wie `ClientFilter::$invoiceId`) sind Listen und werden kommasepariert gesendet (`status=OPEN,OVERDUE`); Billomat verknüpft sie mit ODER.
-- `from`/`to` sind `DateTimeImmutable` und gehen als `YYYY-MM-DD` raus; Status, Zahlarten und Intervalle sind Enums.
-- Die Filter sind unveränderlich: `$filter->withStatus(InvoiceStatus::PAID)` oder `$filter->withPage(2)` liefert eine geänderte Kopie.
-- Jeder Filter hat `orderBy`, `page`, `perPage` und `extra`. Über `extra` gehen weitere Query-Parameter mit, etwa [benutzerdefinierte Attribute](custom-meta-attributes.md); sie überschreiben gleichnamige Felder.
+- All fields are optional named arguments; unset fields (`null` or an empty list) are left out of the query.
+- Multi-value fields (`status`, `tags`, ID lists like `ClientFilter::$invoiceId`) are lists and are sent comma-separated (`status=OPEN,OVERDUE`); Billomat combines them with OR.
+- `from`/`to` are `DateTimeImmutable` and are sent as `YYYY-MM-DD`; statuses, payment types and intervals are enums.
+- Filters are immutable: `$filter->withStatus(InvoiceStatus::PAID)` (variadic for list fields) or `$filter->withPage(2)` returns a modified copy.
+- Every filter has `orderBy`, `page`, `perPage` and `extra`. `extra` passes additional query parameters, such as [custom attributes](custom-meta-attributes.md); they override fields with the same name.
 
-Ein Array funktioniert weiterhin überall, auch bei Ressourcen ohne Filter-Klasse:
+An array still works everywhere, including resources without a filter class:
 
 ```php
 $billomat->clients->list(['name' => 'Acme', 'country_code' => 'DE']);
 ```
 
-### Schnelles Zählen via HEAD
+### Fast counting via HEAD
 
-Wer nur wissen will, **wieviele** Treffer ein Filter ergibt, schickt einen `HEAD`-Request statt `GET` und liest den Response-Header `X-Total-Count`. Das spart die Übertragung der eigentlichen Datensätze.
+If you only want to know **how many** results a filter matches, send a `HEAD` request instead of `GET` and read the `X-Total-Count` response header. This saves transferring the actual records.
 
-Dieses SDK exponiert HEAD aktuell nicht direkt; bei Bedarf lässt sich `BillomatHttpClient::request('HEAD', …)` nutzen.
+The SDK doesn't expose HEAD directly; if needed, create your own `BillomatHttpClient` with the same `BillomatConfig` and call `request('HEAD', …)`.
 
-## Sortierung — `order_by`
+## Sorting — `order_by`
 
-Format: `<feld> <ASC|DESC>`, mehrere Sortierungen kommasepariert. Im SDK baut `OrderBy` den Wert:
+Format: `<field> <ASC|DESC>`, multiple sort orders comma-separated. In the SDK, `OrderBy` builds the value:
 
 ```php
 OrderBy::desc('date')->thenAsc('invoice_number'); // order_by=date+DESC,invoice_number+ASC
 ```
 
-`OrderBy` prüft, dass der Feldname snake_case ist, und wirft sonst eine `InvalidArgumentException`.
+`OrderBy` checks that the field name is snake_case and throws an `InvalidArgumentException` otherwise.
 
-### Quirk: `+` statt Space
+### Quirk: `+` instead of a space
 
-Billomat erwartet den Trenner als **literales `+`**, nicht als `%20` oder `%2B`. `BillomatHttpClient::buildBillomatQuery()` baut den Querystring deshalb manuell:
+Billomat expects the separator as a **literal `+`**, not as `%20` or `%2B`. `BillomatHttpClient::buildBillomatQuery()` therefore builds the query string by hand:
 
-- Array-Werte werden als `key[]=v1&key[]=v2` serialisiert.
-- Nach `rawurlencode` werden `%2B`-Sequenzen wieder in `+` zurückübersetzt.
+- Array values are serialized as `key[]=v1&key[]=v2`.
+- After `rawurlencode`, `%2B` sequences are turned back into `+`.
 
-`http_build_query()` würde beides falsch machen.
+`http_build_query()` would get both wrong.
 
-## Sprache — `Accept-Language`
+## Language — `Accept-Language`
 
-Einige Antworten enthalten lokalisierte Strings (z.B. der Activity-Feed). Über den HTTP-Header `Accept-Language` lässt sich das Gebietsschema steuern:
+Some responses contain localized strings (e.g. error messages or the activity feed). The `Accept-Language` HTTP header selects the locale:
 
 ```
 Accept-Language: de-de
 Accept-Language: en-gb
 ```
 
-Im SDK setzt du den Wert für alle Requests über `BillomatConfig::$language` bzw. `BillomatClient::create(language: 'en-gb')`; Standard ist `de-de`.
+In the SDK you set the value for all requests via `BillomatConfig::$language` or `BillomatClient::create(language: 'en-gb')`; the default is `de-de`, and `null` omits the header.
 
-## Single-Resource lesen
+## Reading a single resource
 
-Einzel-Ressourcen liest `get($id)`:
+Single resources are read with `get($id)`:
 
 ```php
-$invoice = $billomat->invoices->get(42);        // null bei 404
-$invoice = $billomat->invoices->getOrFail(42);  // NotFoundException bei 404
+$invoice = $billomat->invoices->get(42);        // null on 404
+$invoice = $billomat->invoices->getOrFail(42);  // NotFoundException on 404
 ```
 
-`getOrFail()` gibt es auf allen Ressourcen und Sub-Ressourcen; es spart den `null`-Check, wenn ein fehlender Datensatz ein Fehler ist.
+`getOrFail()` exists on all resources and sub-resources that have `get()`; it saves the `null` check when a missing record is an error.
 
-`AbstractApi::getJsonOrNull()` schluckt `NotFoundException` und gibt `null` zurück. Andere Fehler werden zu typisierten Exceptions gemappt (siehe [Errors & Rate-Limits](errors-and-rate-limits.md)).
+`AbstractApi::getJsonOrNull()` swallows `NotFoundException` and returns `null`. Other errors are mapped to typed exceptions (see [Errors and rate limits](errors-and-rate-limits.md)).

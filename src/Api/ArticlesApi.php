@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\ArticleProperty;
@@ -119,6 +120,17 @@ final class ArticlesApi extends AbstractApi
         }
 
         return Article::fromArray($row);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Article
+    {
+        return $this->get($id) ?? throw $this->notFound("/articles/{$id}");
     }
 
     /**

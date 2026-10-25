@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\User;
 use Justpilot\Billomat\Model\UserProperty;
 use Justpilot\Billomat\Pagination\Page;
@@ -106,6 +107,17 @@ final class UsersApi extends AbstractApi
         }
 
         return User::fromArray($row);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): User
+    {
+        return $this->get($id) ?? throw $this->notFound("/users/{$id}");
     }
 
     /** Gibt den aktuell authentifizierten Benutzer zurück. */

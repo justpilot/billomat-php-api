@@ -73,6 +73,50 @@ final class BillomatConfigTest extends TestCase
     }
 
     #[Test]
+    public function itSendsGermanByDefault(): void
+    {
+        self::assertSame('de-de', new BillomatConfig(billomatId: 'mycompany', apiKey: 'k')->language);
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function validLanguages(): iterable
+    {
+        yield 'Sprache mit Region' => ['en-gb'];
+        yield 'Liste mit Gewichtung' => ['de-DE, en;q=0.8'];
+        yield 'Platzhalter' => ['*'];
+    }
+
+    #[Test]
+    #[DataProvider('validLanguages')]
+    public function itAcceptsAcceptLanguageValues(string $language): void
+    {
+        self::assertSame($language, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: $language)->language);
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidLanguages(): iterable
+    {
+        yield 'leer' => [''];
+        yield 'Zeilenumbruch' => ["de-de\r\nX-Injected: 1"];
+        yield 'beginnt mit Leerzeichen' => [' de'];
+        yield 'Sonderzeichen' => ['de/de'];
+    }
+
+    #[Test]
+    #[DataProvider('invalidLanguages')]
+    public function itRejectsInvalidLanguages(string $language): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageIsOrContains('Invalid language "'.$language.'"');
+
+        new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: $language);
+    }
+
+    #[Test]
     public function itBuildsTheCorrectBaseUri(): void
     {
         $config = new BillomatConfig(

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Contact;
 use NoDiscard;
@@ -55,6 +56,17 @@ final class ContactsApi extends AbstractApi
         }
 
         return Contact::fromArray($row);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Contact
+    {
+        return $this->get($id) ?? throw $this->notFound("/contacts/{$id}");
     }
 
     /**

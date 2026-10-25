@@ -97,14 +97,17 @@ Accept-Language: de-de
 Accept-Language: en-gb
 ```
 
-Im SDK lässt sich das pro Request über `BillomatHttpClient`-Optionen setzen; pro-Resource-Helfer sind aktuell nicht vorgesehen.
+Im SDK setzt du den Wert für alle Requests über `BillomatConfig::$language` bzw. `BillomatClient::create(language: 'en-gb')`; Standard ist `de-de`.
 
 ## Single-Resource lesen
 
 Einzel-Ressourcen liest `get($id)`:
 
 ```php
-$invoice = $billomat->invoices->get(42); // null bei 404
+$invoice = $billomat->invoices->get(42);        // null bei 404
+$invoice = $billomat->invoices->getOrFail(42);  // NotFoundException bei 404
 ```
+
+`getOrFail()` gibt es auf allen Ressourcen und Sub-Ressourcen; es spart den `null`-Check, wenn ein fehlender Datensatz ein Fehler ist.
 
 `AbstractApi::getJsonOrNull()` schluckt `NotFoundException` und gibt `null` zurück. Andere Fehler werden zu typisierten Exceptions gemappt (siehe [Errors & Rate-Limits](errors-and-rate-limits.md)).

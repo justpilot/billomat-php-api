@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\IncomingCategory;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
@@ -86,5 +87,16 @@ final class IncomingCategoriesApi extends AbstractApi
         }
 
         return IncomingCategory::fromArray($row);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(string $id): IncomingCategory
+    {
+        return $this->get($id) ?? throw $this->notFound("/incoming-categories/{$id}");
     }
 }

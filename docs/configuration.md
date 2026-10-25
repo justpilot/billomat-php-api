@@ -26,6 +26,7 @@ $billomat = BillomatClient::create(
 | `timeout` | `float` | `10.0` | Timeout in Sekunden für jeden Request. Gilt nur für den Client, den das SDK selbst erzeugt; ein eigener `httpClient` konfiguriert seinen Timeout selbst. |
 | `httpClient` | `?ClientInterface` | `null` | Optionaler eigener PSR-18-Client (`Psr\Http\Client\ClientInterface`). Wenn `null`, nutzt das SDK Symfonys `Psr18Client` mit `timeout`, falls `symfony/http-client` installiert ist, sonst den per `php-http/discovery` gefundenen Client. |
 | `retry` | `RetryPolicy` | `new RetryPolicy()` | Automatische Wiederholungen bei 429 und transienten Fehlern (siehe [Retries](#retries-retrypolicy)). `RetryPolicy::none()` schaltet sie ab. |
+| `language` | `?string` | `'de-de'` | Wert für `Accept-Language`, z. B. `'en-gb'` für englische Fehlermeldungen. `null` sendet den Header nicht. |
 
 Die Methode signiert als:
 
@@ -38,6 +39,7 @@ public static function create(
     float $timeout = 10.0,
     ?ClientInterface $httpClient = null,
     RetryPolicy $retry = new RetryPolicy(),
+    ?string $language = 'de-de',
 ): self
 ```
 
@@ -114,7 +116,7 @@ Pro Request sendet `BillomatHttpClient`:
 | `X-AppId` | aus `BillomatConfig::$appId`, nur wenn beide App-Werte gesetzt sind |
 | `X-AppSecret` | aus `BillomatConfig::$appSecret`, nur wenn beide App-Werte gesetzt sind |
 | `Accept` | `application/json` |
-| `Accept-Language` | `de-de` |
+| `Accept-Language` | aus `BillomatConfig::$language` (Standard `de-de`), fehlt bei `null` |
 | `Content-Type` | `application/json` (nur bei POST/PUT mit Body) |
 
 ## Eigenen HTTP-Client injizieren

@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/suche/ -->
+<!-- Source: https://www.billomat.com/api/suche/ -->
 
-# Search (Volltextsuche)
+# Search (Volltextsuche / full-text search)
 
-API-Wrapper für die globale Volltextsuche unter `/search`.
+API wrapper for the global full-text search at `/search`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->search
@@ -12,21 +12,21 @@ $billomat->search
 
 `Justpilot\Billomat\Api\SearchApi`.
 
-## Überblick
+## Overview
 
-Billomat bietet eine resource-übergreifende Volltextsuche, die schlanke Treffer-Datensätze liefert (Ressourcen-Slug, ID, Überschrift, Unterzeile). Sie ist gedacht, um den Nutzer schnell zu einem Datensatz zu navigieren — nicht, um vollständige Datensätze auszuliefern.
+Billomat offers a full-text search across resources that returns slim hits (resource slug, ID, headline, subline). It is meant to navigate quickly to a record, not to return full records.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `query($query, $extraFilters?)` | GET | `/search?query={query}` |
 
-## Methode
+## Method
 
 ### `query(string $query, array $extraFilters = []): list<SearchResult>`
 
-Führt die Suche aus.
+Runs the search.
 
 ```php
 $hits = $billomat->search->query('Hans Wurst');
@@ -36,24 +36,24 @@ foreach ($hits as $hit) {
 }
 ```
 
-Weitere Query-Parameter (z. B. `per_page`) lassen sich über `$extraFilters` mitgeben.
+Pass further query parameters (e.g. `per_page`) via `$extraFilters`.
 
-## Modell `SearchResult`
+## Model `SearchResult`
 
 `Justpilot\Billomat\Model\SearchResult` — `final readonly`.
 
-| Feld | Typ | Beschreibung |
+| Field | Type | Description |
 |---|---|---|
-| `resource` | `string` | Slug der Ressource, z. B. `"invoices"`, `"delivery-notes"`, `"reminders"` |
-| `id` | `?int` | ID des Treffers innerhalb der Ressource |
-| `headline` | `?string` | Überschrift, meist Belegnummer in eckigen Klammern (`[14709-003]`) |
-| `subline` | `?string` | Unterzeile, üblicherweise Datum und Empfänger |
+| `resource` | `string` | Resource slug, e.g. `"invoices"`, `"delivery-notes"`, `"reminders"` |
+| `id` | `?int` | ID of the hit within the resource |
+| `headline` | `?string` | Headline, usually the document number in square brackets (`[14709-003]`) |
+| `subline` | `?string` | Subline, usually date and recipient |
 
-Vollständige Datensätze sind nicht enthalten — wer mehr braucht, navigiert über `resource` + `id` zur richtigen API:
+Full records are not included. To get more, use `resource` + `id` to call the matching API:
 
 ```php
 foreach ($billomat->search->query('Hans Wurst') as $hit) {
-    $invoice = match ($hit->resource) {
+    $record = match ($hit->resource) {
         'invoices'        => $billomat->invoices->get((int) $hit->id),
         'delivery-notes'  => $billomat->deliveryNotes->get((int) $hit->id),
         // ...
@@ -62,15 +62,15 @@ foreach ($billomat->search->query('Hans Wurst') as $hit) {
 }
 ```
 
-## Stolpersteine
+## Pitfalls
 
-- **Pflicht-Parameter `query`.** Ohne `query` antwortet Billomat mit einem Fehler. Der Wrapper sorgt dafür, dass er gesetzt ist.
-- **Doku-Tippfehler `sublineline`.** Die HTML-Doku führt das Feld als `sublineline`; tatsächlich liefert die API `subline`. Das SDK kennt beides, normalisiert es aber auf `subline`.
-- **`resource` ist ein Slug.** `delivery-notes` (mit Bindestrich), nicht `deliveryNotes`. Beim Mapping auf SDK-APIs ist die `match`-Form oben das saubere Vorgehen.
-- **Schmale Treffer.** Keine Datums-, Status-, oder Betrag-Felder. Für Listenfilter ist `*Api::list($filters)` der richtige Weg, die Suche ist auf Tipp-Geschwindigkeit optimiert.
-- **Pagination dünn dokumentiert.** Die Spec nennt nur `query`. `page`/`per_page` lassen sich per `$extraFilters` mitgeben, falls Billomat sie akzeptiert.
+- **`query` is required.** Without `query` Billomat returns an error. The wrapper always sends it.
+- **Docs typo `sublineline`.** The HTML docs list the field as `sublineline`; the API actually returns `subline`, which is what the SDK reads.
+- **`resource` is a slug.** `delivery-notes` (with a hyphen), not `deliveryNotes`. Map it to SDK APIs with a `match` as shown above.
+- **Slim hits.** No date, status or amount fields. For filtered lists use `*Api::list($filters)`; the search is optimized for type-ahead.
+- **Pagination is barely documented.** The spec only lists `query`. You can pass `page`/`per_page` via `$extraFilters` in case Billomat accepts them.
 
-## End-to-End
+## End-to-end
 
 ```php
 use Justpilot\Billomat\BillomatClient;

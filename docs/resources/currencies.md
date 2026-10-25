@@ -1,32 +1,32 @@
-<!-- Quelle: https://www.billomat.com/api/waehrungen/ -->
+<!-- Source: https://www.billomat.com/api/waehrungen/ -->
 
 # Currencies (Währungen)
 
-Read-only API-Wrapper für die Billomat-Währungsliste — entspricht den Endpunkten unter `/currencies`.
+Read-only API wrapper for the Billomat currency list at `/currencies`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->currencies
 ```
 
-`Justpilot\Billomat\Api\CurrenciesApi`, intern angelegt in `BillomatClient::__construct()`.
+`Justpilot\Billomat\Api\CurrenciesApi`, created lazily on first access to `$billomat->currencies`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list()` | GET | `/currencies` |
-| `listPage()` | GET | `/currencies` (Seite mit Metadaten) |
-| `iterateAll()` | GET | `/currencies` (lazy über alle Seiten) |
+| `listPage()` | GET | `/currencies` (page with metadata) |
+| `iterateAll()` | GET | `/currencies` (lazy over all pages) |
 
-Einzelabruf per ID (`GET /currencies/{id}`) ist im SDK nicht implementiert; der `list()`-Endpunkt unterstützt den Filter `code` für ISO-Währungscodes.
+Fetching a single currency by ID (`GET /currencies/{id}`) is not implemented in the SDK; the list endpoint supports the filter `code` for ISO currency codes.
 
-## Methoden
+## Methods
 
 ### `list(): list<Currency>`
 
-Listet alle Währungen.
+Lists all currencies.
 
 ```php
 $currencies = $billomat->currencies->list();
@@ -36,7 +36,7 @@ foreach ($currencies as $currency) {
 }
 ```
 
-Wer eine einzelne Währung sucht (z.B. `EUR`), kann die Liste clientseitig filtern oder den HTTP-Client direkt verwenden:
+`list()` takes no filters. To look up a single currency (e.g. `EUR`), pass `code` to `listPage()` or filter the list on the client side:
 
 ```php
 $page = $billomat->currencies->listPage(['code' => 'EUR']);
@@ -47,21 +47,22 @@ $eur  = $page->items[0] ?? null;
 
 ### `listPage(array $filters = []): Page<Currency>`
 
-Wie `list()`, mit Pagination-Metadaten (`page`, `per_page`, `total`).
+Like `list()`, with pagination metadata (`page`, `perPage`, `total`) in `$page->info`.
 
 ### `iterateAll(array $filters = [], int $pageSize = 100): Generator<int, Currency>`
 
-Lazy-Iteration über alle Seiten.
+Lazy iteration over all pages.
 
-## Read-Modell: `Currency`
+## Read model: `Currency`
 
 `final readonly class Justpilot\Billomat\Model\Currency`
 
-| Property | Typ | Mapping |
+| Property | Type | Mapping |
 |---|---|---|
-| `code` | `string` | `code` (Fallback: `currency_code`) |
+| `code` | `string` | `code` (fallback: `currency_code`) |
 | `name` | `?string` | `name` |
 | `symbol` | `?string` | `symbol` |
-| `id` | `?int` |  |
+| `id` | `?int` | `id` |
+| `extra` | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-`Currency::fromArray($data)` hydratisiert aus dem Wire-Format; `Currency::toArray()` schreibt snake_case zurück.
+`Currency::fromArray($data)` hydrates from the wire format; `Currency::toArray()` writes snake_case back.

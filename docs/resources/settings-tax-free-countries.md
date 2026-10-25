@@ -1,12 +1,12 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/steuerfreie-laender/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/steuerfreie-laender/ -->
 
-# Country Taxes (Steuerfreie Länder)
+# Country Taxes (Steuerfreie Länder / tax-free countries)
 
-API-Wrapper für die Liste steuerfreier Länder unter `/country-taxes`. Für jeden eingetragenen Ländercode (ISO 3166 Alpha-2) berechnet Billomat keine Mehrwertsteuer — relevant für Rechnungen ins Ausland.
+API wrapper for the list of tax-free countries at `/country-taxes`. Billomat charges no VAT for each listed country code (ISO 3166 alpha-2) — relevant for invoices to other countries.
 
-> **Endpunktname beachten.** Die Billomat-Doku trägt den Titel *Steuerfreie Länder*, der HTTP-Pfad heisst aber `/country-taxes` (nicht `/tax-free-countries`). Die SDK-Klasse spiegelt das wider: `CountryTaxesApi`.
+> **Mind the endpoint name.** The Billomat docs page is called *Steuerfreie Länder* (tax-free countries), but the HTTP path is `/country-taxes` (not `/tax-free-countries`). The SDK class follows the path: `CountryTaxesApi`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->countryTaxes
@@ -14,18 +14,19 @@ $billomat->countryTaxes
 
 `Justpilot\Billomat\Api\CountryTaxesApi`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/country-taxes` |
 | `listPage($filters?)` | GET | `/country-taxes` |
-| `iterateAll($filters?, $pageSize?)` | GET | `/country-taxes` (mehrseitig) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/country-taxes` (all pages) |
 | `get($id)` | GET | `/country-taxes/{id}` |
+| `getOrFail($id)` | GET | `/country-taxes/{id}` |
 
-> Read-only im SDK. Anlegen/Bearbeiten/Löschen sind bei Billomat verfügbar (`POST`/`PUT`/`DELETE /country-taxes`), aber nicht als SDK-Methoden exponiert.
+> Read-only in the SDK. Billomat supports create/update/delete (`POST`/`PUT`/`DELETE /country-taxes`), but the SDK doesn't expose them as methods.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<CountryTax>`
 
@@ -35,32 +36,37 @@ foreach ($billomat->countryTaxes->list() as $row) {
 }
 ```
 
-Filter:
+Filters:
 
-| Parameter | Beschreibung |
+| Parameter | Description |
 |---|---|
-| `country` | ISO 3166 Alpha-2 Ländercode, z.B. `CH`, `US` |
-| `page`, `per_page` | Pagination — siehe [Konzept](../concepts/pagination-and-filtering.md) |
+| `country` | ISO 3166 alpha-2 country code, e.g. `CH`, `US` |
+| `page`, `per_page` | Pagination — see [Pagination and filtering](../concepts/pagination-and-filtering.md) |
 
 ### `get(int $id): ?CountryTax`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
 
-## Read-Modell: `CountryTax`
+### `getOrFail(int $id): CountryTax`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+## Read model: `CountryTax`
 
 `final readonly class CountryTax`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `id` | `id` | `?int` |
 | `countryCode` | `country_code` | `?string` |
+| `extra` | — | `array<string,mixed>`: fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-## Stolpersteine
+## Pitfalls
 
-- **Kein Steuersatz im Modell.** Anders als `/taxes` (siehe [taxes.md](taxes.md)) hält dieser Endpunkt nur die Ländercode-Liste vor; der Steuersatz für diese Länder ist implizit 0 %.
-- **Single-Item-List-Quirk.** Bei nur einem Eintrag liefert Billomat ein Objekt statt einer Liste — `listResource()` normalisiert.
+- **No tax rate in the model.** Unlike `/taxes` (see [taxes.md](taxes.md)), this endpoint only holds the list of country codes; the tax rate for these countries is implicitly 0 %.
+- **Single-item list quirk.** With only one entry Billomat returns an object instead of a list; `listResource()` normalizes this.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -81,5 +87,5 @@ $taxFree = array_map(
     $billomat->countryTaxes->list(),
 );
 
-printf("Steuerfrei: %s\n", implode(', ', array_filter($taxFree)));
+printf("Tax-free: %s\n", implode(', ', array_filter($taxFree)));
 ```

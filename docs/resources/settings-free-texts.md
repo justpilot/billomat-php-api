@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/freitexte/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/freitexte/ -->
 
 # Free Texts (Freitexte)
 
-API-Wrapper für Freitext-Bausteine unter `/free-texts`. Freitexte sind vorgefertigte Texte für die Felder `title`, `label`, `intro`, `note` auf Dokumenten (Rechnungen, Angeboten, Lieferscheinen, Briefen etc.). Sie unterstützen Billomat-Platzhalter wie `[Invoice.invoice_number]` oder `[Invoice.due_date]`.
+API wrapper for free text snippets at `/free-texts`. Free texts are predefined texts for the `title`, `label`, `intro` and `note` fields of documents (invoices, offers, delivery notes, letters, etc.). They support Billomat placeholders such as `[Invoice.invoice_number]` or `[Invoice.due_date]`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->freeTexts
@@ -12,18 +12,19 @@ $billomat->freeTexts
 
 `Justpilot\Billomat\Api\FreeTextsApi`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/free-texts` |
 | `listPage($filters?)` | GET | `/free-texts` |
-| `iterateAll($filters?, $pageSize?)` | GET | `/free-texts` (mehrseitig) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/free-texts` (all pages) |
 | `get($id)` | GET | `/free-texts/{id}` |
+| `getOrFail($id)` | GET | `/free-texts/{id}` |
 
-> Read-only im SDK. Anlegen/Bearbeiten/Löschen sind bei Billomat verfügbar, aber nicht als SDK-Methoden exponiert.
+> Read-only in the SDK. Billomat supports create/update/delete, but the SDK doesn't expose them as methods.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<FreeText>`
 
@@ -31,71 +32,78 @@ $billomat->freeTexts
 foreach ($billomat->freeTexts->list() as $ft) {
     printf("#%d %s — %s\n",
         $ft->id,
-        $ft->title ?? '(ohne Titel)',
+        $ft->title ?? '(no title)',
         $ft->label ?? '',
     );
 }
 ```
 
-Pagination via `page`/`per_page`; siehe [Konzept](../concepts/pagination-and-filtering.md).
+Pagination via `page`/`per_page`; see [Pagination and filtering](../concepts/pagination-and-filtering.md).
 
 ### `listPage(array $filters = []): Page<FreeText>`
 
-Einzelne Seite samt `PageInfo`.
+One page plus `PageInfo`.
 
 ### `iterateAll(array $filters = [], int $pageSize = 100): Generator<FreeText>`
 
-Lazy-Iteration.
+Lazy iteration over all pages.
 
 ### `get(int $id): ?FreeText`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
 
-## Read-Modell: `FreeText`
+### `getOrFail(int $id): FreeText`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+## Read model: `FreeText`
 
 `final readonly class FreeText`.
 
-| Property | Billomat-Feld | Typ | Zweck |
+| Property | Billomat field | Type | Purpose |
 |---|---|---|---|
 | `id` | `id` | `?int` | |
-| `title` | `title` | `?string` | Überschrift bzw. Betreff des Dokuments |
-| `label` | `label` | `?string` | Untertitel/Bezeichnung |
-| `intro` | `intro` | `?string` | Einleitungstext / Brieftext |
-| `note` | `note` | `?string` | Anmerkungen am Dokumentende |
-| `created`, `updated` | `?\DateTimeImmutable` |  | |
-| `type` | `type` | `?FreeTextType` | Dokumenttyp (siehe unten) |
-| `name` | `name` | `?string` | interner Bezeichner der Vorlage |
+| `title` | `title` | `?string` | Document title or subject |
+| `label` | `label` | `?string` | Subtitle/label |
+| `intro` | `intro` | `?string` | Introduction / letter body |
+| `note` | `note` | `?string` | Notes at the end of the document |
+| `created`, `updated` | `created`, `updated` | `?\DateTimeImmutable` | |
+| `type` | `type` | `?FreeTextType` | Document type (see below) |
+| `name` | `name` | `?string` | Internal name of the snippet |
 | `isDefault` | `is_default` | `?bool` | |
+| `extra` | — | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-## Dokumenttypen (`FreeTextType`)
+## Document types (`FreeTextType`)
 
-| Wert | Verwendung |
+| Value | Used for |
 |---|---|
-| `INVOICE` | Rechnung |
-| `CORRECTION` | Korrektur |
-| `OFFER` | Angebot |
-| `CONFIRMATION` | Auftragsbestätigung |
-| `CREDIT_NOTE` | Gutschrift |
-| `DELIVERY_NOTE` | Lieferschein |
-| `LETTER` | Brief |
+| `INVOICE` | Invoice |
+| `CORRECTION` | Corrective invoice (Korrekturrechnung) |
+| `OFFER` | Offer |
+| `CONFIRMATION` | Order confirmation |
+| `CREDIT_NOTE` | Credit note |
+| `DELIVERY_NOTE` | Delivery note |
+| `LETTER` | Letter |
 
-## Platzhalter
+`FreeTextType::label()` returns the German label (e.g. "Rechnung"). Unknown values become `null`.
 
-In allen Textfeldern lassen sich Billomat-Platzhalter verwenden, z.B.:
+## Placeholders
 
-- `[Invoice.invoice_number]` — Rechnungsnummer
-- `[Invoice.date]` — Rechnungsdatum
-- `[Invoice.due_date]` — Fälligkeitsdatum
-- `[Client.name]` — Kundenname
+All text fields accept Billomat placeholders, e.g.:
 
-Die vollständige Platzhalter-Liste hängt am Dokumenttyp und wird im Billomat-UI unter *Einstellungen → Vorlagen* dokumentiert.
+- `[Invoice.invoice_number]` — invoice number
+- `[Invoice.date]` — invoice date
+- `[Invoice.due_date]` — due date
+- `[Client.name]` — client name
 
-## Stolpersteine
+The full list depends on the document type and is documented in the Billomat UI under *Einstellungen → Vorlagen* (Settings → Templates).
 
-- **`is_default` pro Typ exklusiv.** Pro Dokumenttyp ist genau ein Freitext Default; das Setzen eines neuen Defaults überschreibt das alte serverseitig.
-- **Single-Item-List-Quirk.** Bei nur einem Freitext im Account liefert Billomat ein Objekt statt einer Liste — `listResource()` normalisiert.
+## Pitfalls
 
-## End-to-End-Beispiel
+- **`is_default` is exclusive per type.** Each document type has exactly one default free text; setting a new default replaces the old one on the server.
+- **Single-item list quirk.** With only one free text in the account Billomat returns an object instead of a list; `listResource()` normalizes this.
+
+## End-to-end example
 
 ```php
 <?php
@@ -105,6 +113,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Model\Enum\FreeTextType;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -112,8 +121,11 @@ $billomat = BillomatClient::create(
 );
 
 foreach ($billomat->freeTexts->iterateAll() as $ft) {
+    if ($ft->type !== FreeTextType::INVOICE) {
+        continue;
+    }
     if ($ft->intro !== null && str_contains($ft->intro, '[Invoice')) {
-        printf("Vorlage #%d enthält Rechnungs-Platzhalter\n", $ft->id);
+        printf("Free text #%d contains invoice placeholders\n", $ft->id);
     }
 }
 ```

@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/steuersaetze/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/steuersaetze/ -->
 
-# Taxes (Steuersätze)
+# Taxes (Steuersätze / tax rates)
 
-API-Wrapper für die Verwaltung von Steuersätzen unter `/taxes`. Steuersätze sind die globalen Account-Steuersätze (z. B. „MwSt 19 %“). Die pro Rechnungsposition tatsächlich angewendete Steuer liegt in der Position selbst (`InvoiceItemCreateOptions::$taxRate`).
+API wrapper for managing tax rates at `/taxes`. These are the account-wide tax rates (e.g. "MwSt 19 %"). The tax actually applied to a document item is stored on the item itself (`InvoiceItemCreateOptions::$taxRate`).
 
-## Zugriff
+## Access
 
 ```php
 $billomat->taxes
@@ -12,17 +12,18 @@ $billomat->taxes
 
 `Justpilot\Billomat\Api\TaxesApi`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($query?)` | GET | `/taxes` |
 | `get($id)` | GET | `/taxes/{id}` |
+| `getOrFail($id)` | GET | `/taxes/{id}` |
 | `create($options)` | POST | `/taxes` |
 | `update($id, $options)` | PUT | `/taxes/{id}` |
 | `delete($id)` | DELETE | `/taxes/{id}` |
 
-## Methoden
+## Methods
 
 ### `list(array $query = []): list<TaxRate>`
 
@@ -34,16 +35,20 @@ foreach ($rates as $rate) {
         $rate->id,
         $rate->name,
         $rate->rate,
-        $rate->isDefault ? '(Default)' : '',
+        $rate->isDefault ? '(default)' : '',
     );
 }
 ```
 
-`$query` erlaubt Pagination (`page`, `per_page`).
+`$query` takes pagination parameters (`page`, `per_page`).
 
 ### `get(int $id): ?TaxRate`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
+
+### `getOrFail(int $id): TaxRate`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
 ### `create(TaxRateCreateOptions $options): TaxRate`
 
@@ -56,49 +61,50 @@ $created = $billomat->taxes->create($opts);
 
 ### `update(int $id, TaxRateCreateOptions $options): TaxRate`
 
-Verwendet **dieselbe** Options-Klasse wie `create()`. Es gibt also kein Partial-Update — du sendest immer einen vollständigen Steuersatz.
+Uses the **same** options class as `create()`. There is no partial update: you always send a complete tax rate.
 
 ### `delete(int $id): void`
 
-Löscht einen Steuersatz. Achtung: das schlägt fehl, wenn der Satz noch in Rechnungen referenziert wird.
+Deletes a tax rate. Note: this fails while the rate is still used on documents or articles (see `TaxRate::$canDelete`).
 
-## Write-Modell: `TaxRateCreateOptions`
+## Write model: `TaxRateCreateOptions`
 
-Konstruktor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefault = false)`. Das Objekt ist `final readonly`; `with*()`-Methoden (z. B. `$opts->withRate(7.0)`) liefern eine geänderte Kopie.
+Constructor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefault = false)`. The object is `final readonly`; the `with*()` methods (e.g. `$opts->withRate(7.0)`) return a modified copy.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `name` | `name` | `string` | Pflicht (z. B. `MwSt`) |
-| `rate` | `rate` | `float` | Pflicht, Prozentwert (z. B. `19.0`) |
-| `isDefault` | `is_default` | `bool` | Default `false`. Wird als `1`/`0` serialisiert. |
+| `name` | `name` | `string` | Required (e.g. `MwSt`) |
+| `rate` | `rate` | `float` | Required, percentage (e.g. `19.0`) |
+| `isDefault` | `is_default` | `bool` | Defaults to `false`. Serialized as `1`/`0`. |
 
-`toArray()` filtert hier nichts heraus — alle drei Felder sind immer gesetzt.
+`toArray()` doesn't filter anything here — all three fields are always set.
 
-## Read-Modell: `TaxRate`
+## Read model: `TaxRate`
 
 `final readonly class TaxRate`.
 
-| Property | Typ | Notes |
+| Property | Type | Notes |
 |---|---|---|
 | `id` | `?int` | |
 | `name` | `string` | |
-| `rate` | `float` | Prozentwert |
+| `rate` | `float` | Percentage |
 | `isDefault` | `bool` | |
 | `created`, `updated` | `?\DateTimeImmutable` |  |
-| `canDelete` | `?bool` | Ob sich der Steuersatz löschen lässt |
-| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+| `canDelete` | `?bool` | Whether the tax rate can be deleted; `false` while it is used on documents or articles |
+| `customfield` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `extra` | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-## Verwendete Enums
+## Enums
 
-Keine. Die Ressource ist enum-frei — `name` ist freitextlich, `rate` ein `float`.
+None. `name` is free text and `rate` a `float`. Tax rates are percentages, not amounts, so they stay `float` rather than `Money`.
 
-## Stolpersteine
+## Pitfalls
 
-- **`isDefault = true` ist exklusiv.** Setzt du einen Steuersatz auf Default, verlieren andere automatisch das Flag. Das passiert serverseitig.
-- **Löschen eines referenzierten Satzes scheitert.** Wenn `delete()` mit 422 zurückkommt, ist der Satz noch in Rechnungen verwendet. Lösung: Steuersatz inaktivieren (manuell im Billomat-Backend) statt löschen.
-- **Single-Item-List-Quirk.** Bei nur einem Steuersatz im Account liefert Billomat ein Objekt statt einer Liste — `list()` normalisiert das.
+- **`isDefault = true` is exclusive.** When you make a tax rate the default, the others lose the flag automatically on the server.
+- **Deleting a rate that is in use fails.** If `delete()` throws a `ValidationException` (422), the rate is still used. Check `canDelete` first, or deactivate the rate in the Billomat UI instead of deleting it.
+- **Single-item list quirk.** With only one tax rate in the account Billomat returns an object instead of a list; `list()` normalizes this.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -115,32 +121,31 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Aktuelle Steuersätze
+// Current tax rates
 foreach ($billomat->taxes->list() as $rate) {
     printf("[#%d] %s — %.2f %%%s\n",
         $rate->id,
         $rate->name,
         $rate->rate,
-        $rate->isDefault ? ' (Default)' : '',
+        $rate->isDefault ? ' (default)' : '',
     );
 }
 
-// Neuen Steuersatz anlegen
+// Create a new tax rate
 $new = $billomat->taxes->create(new TaxRateCreateOptions(
     name: 'Reverse-Charge',
     rate: 0.0,
     isDefault: false,
 ));
-printf("Angelegt: #%d %s\n", $new->id, $new->name);
+printf("Created: #%d %s\n", $new->id, $new->name);
 
-// Auf Default umstellen
-$updated = $billomat->taxes->update($new->id, new TaxRateCreateOptions(
-    name: $new->name,
-    rate: $new->rate,
-    isDefault: true,
-));
+// Make it the default (full payload, no partial update)
+$updated = $billomat->taxes->update(
+    $new->id,
+    new TaxRateCreateOptions(name: $new->name, rate: $new->rate)->withIsDefault(true),
+);
 var_dump($updated->isDefault); // true
 
-// Löschen
+// Delete
 $billomat->taxes->delete($new->id);
 ```

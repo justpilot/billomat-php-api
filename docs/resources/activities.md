@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/aktivitaeten/ -->
+<!-- Source: https://www.billomat.com/api/aktivitaeten/ -->
 
-# Activities (Aktivitäten / Aktivitätsfeed)
+# Activities (Aktivitäten / activity feed)
 
-API-Wrapper für den Aktivitätsfeed unter `/activity-feed`.
+API wrapper for the activity feed at `/activity-feed`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->activities
@@ -12,25 +12,25 @@ $billomat->activities
 
 `Justpilot\Billomat\Api\ActivitiesApi`.
 
-## Überblick
+## Overview
 
-Billomat protokolliert in einem zentralen Feed jede Veränderung an den eigenen Datensätzen — Statuswechsel an Rechnungen, Mailversand, Erstellen von Belegen, Zahlungsbuchungen. Der Feed ist read-only: Aktivitäten entstehen ausschließlich als Seiteneffekt anderer Operationen.
+Billomat logs every change to your records in a central feed: status changes on invoices, e-mails sent, documents created, payments booked. The feed is read-only; activities are only created as a side effect of other operations.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/activity-feed` |
 | `listPage($filters?)` | GET | `/activity-feed?page=N&per_page=M` |
 | `iterateAll($filters?, $pageSize?)` | GET (lazy) | `/activity-feed?page=…` |
 
-Pagination funktioniert über `page` und `per_page` wie überall im SDK.
+Pagination uses `page` and `per_page`, as everywhere in the SDK.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<Activity>`
 
-Holt eine Seite. Filter werden als Query-String mitgegeben.
+Fetches one page. Filters are sent as query parameters.
 
 ```php
 $activities = $billomat->activities->list([
@@ -45,56 +45,57 @@ foreach ($activities as $a) {
 
 ### `listPage(array $filters = []): Page<Activity>`
 
-Einzelne Seite samt `PageInfo` (`page`, `perPage`, `total`).
+One page plus `PageInfo` (`page`, `perPage`, `total`) in `$page->info`.
 
 ### `iterateAll(array $filters = [], int $pageSize = 100): Generator<int, Activity>`
 
-Lazy über den gesamten Feed, seitenweise pro `pageSize`-Items. Stoppt selbsttätig bei der letzten Seite.
+Iterates lazily over the whole feed, `pageSize` items per request. Stops after the last page.
 
 ```php
 foreach ($billomat->activities->iterateAll() as $activity) {
     if ($activity->isSystemActivity()) {
         continue;
     }
-    // ... nur Benutzer-Aktivitäten
+    // ... user activities only
 }
 ```
 
-## Modell `Activity`
+## Model `Activity`
 
 `Justpilot\Billomat\Model\Activity` — `final readonly`.
 
-| Feld | Typ | Beschreibung |
+| Field | Type | Description |
 |---|---|---|
-| `resource` | `string` | Slug der Ressource (`invoices`, `delivery-notes`, `clients`, …) |
-| `id` | `?int` | ID des betroffenen Datensatzes innerhalb der Ressource |
-| `date` | `?DateTimeImmutable` | Zeitpunkt der Aktivität |
-| `title` | `?string` | Überschrift, z. B. `"Rechnung RE123"` |
-| `text` | `?string` | Freitext, z. B. `"Status geändert von Entwurf nach offen."` |
-| `userId` | `?int` | Auslösender Benutzer; `null` für System-Aktivitäten |
+| `resource` | `string` | Resource slug (`invoices`, `delivery-notes`, `clients`, …) |
+| `id` | `?int` | ID of the affected record within the resource |
+| `date` | `?DateTimeImmutable` | When the activity happened |
+| `title` | `?string` | Headline, e.g. `"Rechnung RE123"` |
+| `text` | `?string` | Free text, e.g. `"Status geändert von Entwurf nach offen."` |
+| `userId` | `?int` | User who triggered it; `null` for system activities |
 
-Hilfsmethode `isSystemActivity(): bool` für `null === userId`.
+Helper `isSystemActivity(): bool` returns `true` when `userId` is `null`.
 
-## Stolpersteine
+## Pitfalls
 
-- **`user_id` kann leerer String sein.** Bei System-Aktivitäten liefert Billomat `<user_id></user_id>` — im JSON als `""`. `Activity::fromArray()` normalisiert das via `ScalarCaster::toIntOrNull()` zu `null`.
-- **Slug, nicht Klassen-Name.** `resource` ist der URL-Pfad-Slug, also `"delivery-notes"` (mit Bindestrich), nicht `"deliveryNotes"`.
-- **Read-only, kein `get()`.** Es gibt keinen Einzel-Endpoint `/activity-feed/{id}` — wer einen einzelnen Datensatz braucht, muss die Ressource direkt abfragen (`$billomat->invoices->get($a->id)`).
-- **Schema-Drift möglich.** Billomat liefert in `resource` neue Werte, wenn Features hinzukommen; daher bewusst kein Enum.
-- **Server-seitige Filter.** Die Doku nennt keine Filter-Parameter explizit, aber `page`/`per_page` funktionieren. Resource-Filter müssen ggf. clientseitig erfolgen.
+- **`user_id` can be an empty string.** For system activities Billomat sends `<user_id></user_id>`, which is `""` in JSON. `Activity::fromArray()` normalizes it to `null` via `ScalarCaster::toIntOrNull()`.
+- **Slug, not class name.** `resource` is the URL path slug, i.e. `"delivery-notes"` (with a hyphen), not `"deliveryNotes"`.
+- **Read-only, no `get()`.** There is no single-record endpoint `/activity-feed/{id}`. To load the record, query its resource directly (`$billomat->invoices->get($a->id)`).
+- **The schema can drift.** Billomat adds new `resource` values when it adds features, which is why the field is a plain string and not an enum.
+- **Server-side filters.** The docs don't list any filter parameters, but `page`/`per_page` work. Filter by resource on the client side if needed.
+- **Title and text are localized.** Billomat renders them in the language of the `Accept-Language` header, which the SDK takes from `BillomatConfig::$language` (default `de-de`; e.g. `BillomatClient::create(..., language: 'en-gb')`).
 
-## End-to-End
+## End-to-end
 
 ```php
 use Justpilot\Billomat\BillomatClient;
 
 $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: 'secret');
 
-// Alle Aktivitäten der letzten Iteration sammeln
+// Collect all user activities on invoices
 foreach ($billomat->activities->iterateAll() as $activity) {
     if ($activity->resource !== 'invoices' || $activity->isSystemActivity()) {
         continue;
     }
-    // ... Audit-Log
+    // ... audit log
 }
 ```

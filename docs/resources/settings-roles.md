@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/rollen/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/rollen/ -->
 
-# Roles (Mitarbeiter-Rollen)
+# Roles (Mitarbeiter-Rollen / user roles)
 
-API-Wrapper für Mitarbeiter-Rollen unter `/roles`. Rollen bündeln Zugriffsrechte pro Ressource (Artikel, Kunden, Rechnungen …) und werden Benutzern zugewiesen — siehe [users.md](users.md) für den `roleId`-Bezug.
+API wrapper for user roles at `/roles`. A role bundles access rights per resource (articles, clients, invoices, …) and is assigned to users; see [users.md](users.md) for `roleId`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->roles
@@ -12,18 +12,19 @@ $billomat->roles
 
 `Justpilot\Billomat\Api\RolesApi`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/roles` |
 | `listPage($filters?)` | GET | `/roles` |
-| `iterateAll($filters?, $pageSize?)` | GET | `/roles` (mehrseitig) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/roles` (all pages) |
 | `get($id)` | GET | `/roles/{id}` |
+| `getOrFail($id)` | GET | `/roles/{id}` |
 
-> Read-only im SDK. Anlegen/Bearbeiten/Löschen sind bei Billomat verfügbar (`POST`/`PUT`/`DELETE /roles`), aber nicht als SDK-Methoden exponiert.
+> Read-only in the SDK. Billomat supports create/update/delete (`POST`/`PUT`/`DELETE /roles`), but the SDK doesn't expose them as methods.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<Role>`
 
@@ -33,51 +34,55 @@ foreach ($billomat->roles->list() as $role) {
 }
 ```
 
-Filter:
+Filters:
 
-| Parameter | Beschreibung |
+| Parameter | Description |
 |---|---|
-| `name` | Teilstring-Suche auf dem Rollennamen; case-insensitive |
-| `page`, `per_page` | Pagination — siehe [Konzept](../concepts/pagination-and-filtering.md) |
+| `name` | Substring match on the role name; case-insensitive |
+| `page`, `per_page` | Pagination — see [Pagination and filtering](../concepts/pagination-and-filtering.md) |
 
 ### `get(int $id): ?Role`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
 
-## Read-Modell: `Role`
+### `getOrFail(int $id): Role`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+## Read model: `Role`
 
 `final readonly class Role`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `id` | `id` | `?int` |
 | `name` | `name` | `?string` |
-| `permissions` | (mehrere Felder, s.u.) | `array<string,?string>` |
+| `permissions` | (several fields, see below) | `array<string,?string>` |
 
-### Rechte-Werte
+### Permission values
 
-Jedes Permission-Feld enthält einen von vier Werten:
+Each permission field holds one of four values:
 
-| Wert | Bedeutung |
+| Value | Meaning |
 |---|---|
-| `READ` | Lesen |
-| `UPDATE` | Bearbeiten (impliziert `READ`) |
-| `DELETE` | Vollzugriff (impliziert `UPDATE`+`READ`) |
-| `null` | Kein Zugriff (Billomat sendet einen leeren String; `ScalarCaster` normalisiert ihn auf `null`) |
+| `READ` | Read |
+| `UPDATE` | Edit (implies `READ`) |
+| `DELETE` | Full access (implies `UPDATE` + `READ`) |
+| `null` | No access (Billomat sends an empty string; `ScalarCaster` normalizes it to `null`) |
 
-### Bekannte Permission-Keys
+### Known permission keys
 
 `articles`, `clients`, `suppliers`, `offers`, `confirmations`, `invoices`, `credit_notes`, `delivery_notes`, `reminders`, `incomings`, `letters`, `banking`, `net_income_statement`, `accounting_export`, `settings_my_account`, `settings_documents`, `settings_configuration`, `settings_administration`, `settings_addons`, `settings_my_addons`.
 
-`fromArray()` nimmt zusätzlich jeden Key entgegen, der mit `settings_` beginnt — falls Billomat das Set erweitert, landen neue Settings-Rechte automatisch in `permissions`.
+`fromArray()` also accepts any key starting with `settings_`, so new settings permissions end up in `permissions` automatically if Billomat adds them.
 
-## Stolpersteine
+## Pitfalls
 
-- **Master-Rolle nicht löschbar.** Die System-Rolle `Master` (üblicherweise `id=1`) kann auch via UI nicht entfernt werden.
-- **Empty-String → null.** Wer prüft, ob eine Rolle ein Recht hat, vergleicht `$role->permissions['articles'] === null` (kein Recht) statt `=== ''`.
-- **Single-Item-List-Quirk.** Bei nur einer Rolle liefert Billomat ein Objekt statt einer Liste — `listResource()` normalisiert.
+- **The master role can't be deleted.** The system role `Master` (usually `id=1`) can't be removed, not even in the UI.
+- **Empty string → null.** To check whether a role lacks a permission, compare `$role->permissions['articles'] === null`, not `=== ''`.
+- **Single-item list quirk.** With only one role Billomat returns an object instead of a list; `listResource()` normalizes this.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -94,7 +99,7 @@ $billomat = BillomatClient::create(
 );
 
 foreach ($billomat->roles->list() as $role) {
-    printf("Rolle %s (#%d):\n", $role->name ?? '?', $role->id ?? 0);
+    printf("Role %s (#%d):\n", $role->name ?? '?', $role->id ?? 0);
     foreach ($role->permissions as $resource => $access) {
         if (null === $access) {
             continue;

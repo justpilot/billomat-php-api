@@ -317,4 +317,25 @@ abstract class AbstractApi
     {
         return $filters instanceof ListFilter ? $filters->toQuery() : $filters;
     }
+
+    /**
+     * Wie {@see getRaw()}, prüft aber, dass der Body ein PDF ist.
+     *
+     * Billomat antwortet gelegentlich mit 200 und leerem Body oder einer HTML-/JSON-Seite;
+     * ohne Prüfung landet das unbemerkt als „PDF“ beim Kunden.
+     *
+     * @param array<string, scalar|array<mixed>|null> $query
+     *
+     * @throws UnexpectedResponseException bei leerem Body oder fehlendem `%PDF-`-Header
+     */
+    protected function getPdf(string $path, array $query = []): string
+    {
+        $body = $this->getRaw($path, $query);
+
+        if (!str_starts_with($body, '%PDF-')) {
+            throw new UnexpectedResponseException(\sprintf('Unexpected response from Billomat for GET /%s: %s.', ltrim($path, '/'), '' === $body ? 'empty body instead of a PDF' : 'the body is not a PDF'));
+        }
+
+        return $body;
+    }
 }

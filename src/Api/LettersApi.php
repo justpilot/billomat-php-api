@@ -220,7 +220,7 @@ final class LettersApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            return $this->getRaw("/letters/{$id}/pdf", $query);
+            return $this->getPdf("/letters/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/letters/{$id}/pdf", $query);

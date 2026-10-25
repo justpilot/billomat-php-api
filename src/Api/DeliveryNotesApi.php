@@ -216,7 +216,7 @@ final class DeliveryNotesApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            return $this->getRaw("/delivery-notes/{$id}/pdf", $query);
+            return $this->getPdf("/delivery-notes/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/delivery-notes/{$id}/pdf", $query);

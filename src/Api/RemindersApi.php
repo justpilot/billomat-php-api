@@ -190,7 +190,7 @@ final class RemindersApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            return $this->getRaw("/reminders/{$id}/pdf", $query);
+            return $this->getPdf("/reminders/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/reminders/{$id}/pdf", $query);

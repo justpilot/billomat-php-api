@@ -25,26 +25,47 @@ Tritt ein Ereignis ein, schickt Billomat einen POST-Request an die hinterlegte U
 | `Content-Type` | `application/xml` oder `application/json` (je nach UI-Einstellung) |
 | `User-Agent` | `Billomat-Webhook` |
 | `X-Billomat-Webhook-Id` | ID der hinterlegten Webhook-Konfiguration |
-| `X-Billomat-Webhook-Request-Id` | Eindeutige, **monoton steigende** ID des einzelnen Requests — geeignet zum Sortieren paralleler Folge-Ereignisse |
+| `X-Billomat-Webhook-Request-Id` | Eindeutige, **monoton steigende** Ganzzahl pro Request (z. B. `1792857895`) — geeignet zum Sortieren paralleler Folge-Ereignisse |
 | `X-Billomat-Webhook-Event` | Eventname, z.B. `invoice.create` |
 
 ### Body
 
-Der Body enthält den vollständigen Datensatz im konfigurierten Format. Beispiel (XML, `invoice.create`):
+Der Body enthält den Datensatz im konfigurierten Format, **mit demselben Envelope wie die REST-API**: ein Objekt mit genau einem Schlüssel, dem Ressourcennamen mit Bindestrich (`invoice`, `invoice-payment`, `credit-note`, …). Beispiel (JSON, `invoice_payment.create`, gekürzt):
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<invoice>
-  <id type="integer">1</id>
-  <client_id type="integer">123</client_id>
-  <invoice_number>RE123</invoice_number>
-  <status>OPEN</status>
-  <date type="date">2009-10-14</date>
-  <!-- ... -->
-</invoice>
+```json
+{
+  "invoice-payment": {
+    "id": "4711",
+    "created": "2026-10-20T09:14:02+02:00",
+    "invoice_id": "1234",
+    "user_id": "",
+    "date": "2026-10-20",
+    "amount": "119",
+    "comment": "",
+    "transaction_purpose": "RE-2026-0042",
+    "currency_code": "EUR",
+    "quote": "1",
+    "type": "BANK_TRANSFER"
+  }
+}
 ```
 
-Das Schema entspricht der `GET`-Antwort der jeweiligen Ressource ohne Envelope-Wrapper.
+Wie bei der REST-API gilt:
+
+- **Alle Werte sind Strings**, auch IDs, Beträge und Flags (`"id": "4711"`, `"amount": "119"`). Leere Felder kommen als `""`, nicht als `null`.
+- Verschachtelte Listen haben dieselbe Form wie in der REST-Antwort, z. B. `"taxes": {"tax": {…}}` mit einem einzelnen Objekt statt einer Liste, wenn es nur einen Eintrag gibt.
+- Der Envelope-Schlüssel folgt aus dem Eventnamen: Ressource vor dem Punkt, `_` durch `-` ersetzt (`invoice_payment.create` → `invoice-payment`).
+
+Deshalb lässt sich der innere Datensatz direkt mit dem passenden Model hydrieren: `Invoice::fromArray($payload['invoice'])`, `InvoicePayment::fromArray($payload['invoice-payment'])`.
+
+### Der Payload ist ein Trigger, kein aktueller Stand
+
+Der mitgeschickte Datensatz ist oft **veraltet**. Auswertung von rund 29.000 echten Webhook-Requests (drei Accounts, `invoice.*` und `invoice_payment.*`):
+
+- In **über 99 %** der `invoice.status`- und `invoice.update`-Events mit `status = PAID` steht noch `open_amount` = `total_gross` und `paid_amount` = `0`, also der Stand vor der Zahlung.
+- `invoice_payment.create` und das zugehörige `invoice.status` kommen in rund 92 % der Fälle in derselben Sekunde (± 1 s) an; die Reihenfolge ist nicht garantiert.
+
+Den Webhook daher nur als Signal „Ressource X hat sich geändert“ behandeln und den aktuellen Stand per API nachladen (`$billomat->invoices->get($id)`). Das macht die Verarbeitung zugleich unempfindlich gegen doppelt zugestellte Requests.
 
 ## Antwortverhalten
 
@@ -139,11 +160,15 @@ if ($this->seen($requestId)) {
 }
 $this->markSeen($requestId);
 
-// 4. Dispatch
+// 4. Dispatch — der Datensatz steckt im Envelope (`invoice_payment` → `invoice-payment`),
+//    alle Werte sind Strings. Nur die ID verwenden und den aktuellen Stand nachladen.
+$record = $payload[str_replace('_', '-', $resource)] ?? [];
+
 match ($eventName) {
-    'invoice.create', 'invoice.update' => $this->onInvoiceChanged((int) $payload['id']),
-    'invoice.delete'                   => $this->onInvoiceDeleted((int) $payload['id']),
-    default                            => null,
+    'invoice.create', 'invoice.update', 'invoice.status' => $this->onInvoiceChanged((int) $record['id']),
+    'invoice_payment.create', 'invoice_payment.delete'   => $this->onInvoiceChanged((int) $record['invoice_id']),
+    'invoice.delete'                                     => $this->onInvoiceDeleted((int) $record['id']),
+    default                                              => null,
 };
 
 // 5. 2xx zurück — sonst retryt Billomat.
@@ -152,9 +177,9 @@ http_response_code(200);
 
 ## Best Practices
 
-- **Idempotent verarbeiten.** `X-Billomat-Webhook-Request-Id` ist eindeutig pro Versuch — verarbeitete IDs in einer kleinen Tabelle / einem Cache vorhalten und beim zweiten Erscheinen verwerfen.
+- **Idempotent verarbeiten.** `X-Billomat-Webhook-Request-Id` ist eindeutig pro Request — verarbeitete IDs in einer kleinen Tabelle / einem Cache vorhalten (z. B. mit Unique-Index) und beim zweiten Erscheinen verwerfen. Ob ein Retry dieselbe ID trägt, dokumentiert Billomat nicht; wer ohnehin per API nachlädt, verarbeitet ein Duplikat ohne Schaden.
 - **Sofort 2xx zurück, asynchron verarbeiten.** 10 Sekunden Timeout sind eng. Den Datensatz in eine Queue legen und die HTTP-Antwort sofort senden.
-- **Bei Bedarf gegen die API gegenchecken.** Der Body ist ein Snapshot zum Auslöse-Zeitpunkt — bei Folge-Ereignissen ggf. mit `$billomat->invoices->get($id)` den aktuellen Stand holen.
+- **Immer gegen die API gegenchecken.** Der Body ist oft veraltet (siehe [oben](#der-payload-ist-ein-trigger-kein-aktueller-stand)) — vor jeder fachlichen Entscheidung mit `$billomat->invoices->get($id)` den aktuellen Stand holen.
 - **HTTPS + HTTP-Basic-Auth.** Da Billomat keine Signatur mitschickt, ist Basic-Auth (im UI eintragbar) plus TLS die einzige Absicherung gegen gefälschte Aufrufe.
 - **`410 Gone` zum Beenden.** Wird ein Empfänger abgeschaltet, mit `410` antworten — Billomat hört dann sofort auf und stoppt nicht erst nach dem letzten Retry.
 
@@ -162,6 +187,6 @@ http_response_code(200);
 
 | Konzept | SDK-Bezug |
 |---|---|
-| Datensatz aus dem Body | gleiches Schema wie `Justpilot\Billomat\Model\*::fromArray()` (JSON) bzw. `simplexml`-Output (XML) |
+| Datensatz aus dem Body | inneres Objekt des Envelopes, gleiches Schema wie die REST-Antwort: `Justpilot\Billomat\Model\*::fromArray($payload['invoice'])` (JSON) |
 | `invoice.status`, `invoice.send`, … | korrespondieren zu `InvoicesApi::complete()`, `cancel()`, `email()` etc. |
 | Vollständigen Datensatz nachladen | `$billomat->invoices->get($id)`, `$billomat->offers->get($id)`, … |

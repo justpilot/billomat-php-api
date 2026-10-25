@@ -1,66 +1,68 @@
-<!-- Quelle: https://www.billomat.com/api/abo-rechnungen/ -->
+<!-- Source: https://www.billomat.com/api/abo-rechnungen/ -->
 
 # Recurrings (Abo-Rechnungen)
 
-API-Wrapper für Abo-Rechnungen unter `/recurrings` und ihre drei Sub-Ressourcen (`/recurring-items`, `/recurring-tags`, `/recurring-email-receivers`).
+API wrapper for recurring invoices at `/recurrings` and their three sub-resources (`/recurring-items`, `/recurring-tags`, `/recurring-email-receivers`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->recurrings              // Abo-Rechnungen selbst
-$billomat->recurrings->items          // Positionen einer Abo-Rechnung
-$billomat->recurrings->tags           // Schlagworte
-$billomat->recurrings->emailReceivers // E-Mail-Empfänger (TO/CC/BCC)
+$billomat->recurrings                 // recurring invoices
+$billomat->recurrings->items          // items of a recurring invoice
+$billomat->recurrings->tags           // tags
+$billomat->recurrings->emailReceivers // email recipients (TO/CC/BCC)
 ```
 
-## Modell
+## Model
 
-Eine Abo-Rechnung beschreibt eine wiederkehrende Rechnungs-Vorlage: Was wird wem in welchem Rhythmus berechnet, und was passiert beim Lauf?
+A recurring invoice is a template for repeating invoices: what is billed to whom, at what interval, and what happens on each run?
 
-- **Rhythmus**: `cycle` + `cycleNumber` (z. B. `MONTHLY` × `2` → alle zwei Monate) plus `startDate`, `endDate`, optional `iterations`.
-- **Aktion**: `action` legt fest, was Billomat bei jedem Lauf macht — von „nur Entwurf erzeugen“ bis „erzeugen, abschließen, per E-Mail versenden“.
-- **Inhalt**: Positionen werden separat als `RecurringItem`s gepflegt.
+- **Interval**: `cycle` + `cycleNumber` (e.g. `MONTHLY` × `2` → every two months) plus `startDate`, `endDate` and optionally `iterations`.
+- **Action**: `action` defines what Billomat does on each run, from "only create a draft" to "create, complete and send by email".
+- **Content**: items are maintained separately as `RecurringItem`s.
 
-Aus einem Recurring entstehen mit der Zeit „echte“ Rechnungen — diese referenzieren den ursprünglichen Recurring über `Invoice::$recurringId` (siehe [Invoices](invoices.md)).
+Over time, a recurring invoice produces regular invoices; they reference their recurring invoice via `Invoice::$recurringId` (see [Invoices](invoices.md)).
 
-## Endpunkt-Übersicht
+## Endpoints
 
 ### `/recurrings`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/recurrings` |
-| `get($id)` | GET | `/recurrings/{id}` |
+| `listPage($filters?)` | GET | `/recurrings` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/recurrings` (lazy, across all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/recurrings/{id}` |
 | `create($options)` | POST | `/recurrings` |
 | `update($id, $options)` | PUT | `/recurrings/{id}` |
 | `delete($id)` | DELETE | `/recurrings/{id}` |
 
 ### `/recurring-items`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($recurringId, $query?)` | GET | `/recurring-items?recurring_id={id}` |
-| `get($id)` | GET | `/recurring-items/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/recurring-items/{id}` |
 | `create($recurringId, $options)` | POST | `/recurring-items` |
 | `update($id, $options)` | PUT | `/recurring-items/{id}` |
 | `delete($id)` | DELETE | `/recurring-items/{id}` |
 
 ### `/recurring-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($recurringId)` | GET | `/recurring-tags?recurring_id={id}` |
 | `cloud()` | GET | `/recurring-tags` |
-| `get($id)` | GET | `/recurring-tags/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/recurring-tags/{id}` |
 | `create($options)` | POST | `/recurring-tags` |
 | `delete($id)` | DELETE | `/recurring-tags/{id}` |
 
 ### `/recurring-email-receivers`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($recurringId)` | GET | `/recurring-email-receivers?recurring_id={id}` |
-| `get($id)` | GET | `/recurring-email-receivers/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/recurring-email-receivers/{id}` |
 | `create($options)` | POST | `/recurring-email-receivers` |
 | `delete($id)` | DELETE | `/recurring-email-receivers/{id}` |
 
@@ -68,9 +70,9 @@ Aus einem Recurring entstehen mit der Zeit „echte“ Rechnungen — diese refe
 
 ### `list(RecurringFilter|array $filters = []): list<Recurring>`
 
-Filter laut Billomat-Doku: `client_id`, `contact_id`, `name`, `payment_type`, `cycle_number`, `cycle`, `label`, `intro`, `note`, `tags`, `article_id`.
+Filters according to the Billomat docs: `client_id`, `contact_id`, `name`, `payment_type`, `cycle_number`, `cycle`, `label`, `intro`, `note`, `tags`, `article_id`.
 
-Empfohlen ist der typisierte Filter `RecurringFilter` mit den camelCase-Feldern `clientId`, `contactId`, `name`, `paymentType` (`list<PaymentType>`), `cycle` (`RecurringCycle`), `label`, `intro`, `note` und `tags`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `cycle_number`, `article_id`). Ein einfaches Array funktioniert weiterhin. Array-Werte werden dort als `key[]=…` codiert.
+The typed `RecurringFilter` is the recommended way to filter. Its camelCase fields are `clientId`, `contactId`, `name`, `paymentType` (`list<PaymentType>`), `cycle` (`RecurringCycle`), `label`, `intro`, `note` and `tags`; multi-value fields are lists and are sent comma-separated. On top come `orderBy`, `page`, `perPage` and `extra` for further query parameters (e.g. `cycle_number`, `article_id`). A plain array still works; array values in it are encoded as `key[]=…`.
 
 ```php
 use Justpilot\Billomat\Api\OrderBy;
@@ -83,13 +85,15 @@ $monthly = $billomat->recurrings->list(new RecurringFilter(
 ));
 ```
 
-### `get(int $id): ?Recurring`
+`listPage()` and `iterateAll()` work as described in [Pagination](../advanced/pagination.md).
 
-Liefert `null` bei 404. Die Response enthält eingebettete `recurring-items` und die Tax-Aufschlüsselung — beide werden automatisch hydriert.
+### `get(int $id): ?Recurring` / `getOrFail(int $id): Recurring`
+
+`get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead. The response contains embedded `recurring-items` and the tax breakdown; both are hydrated automatically.
 
 ### `create(RecurringCreateOptions $options): Recurring`
 
-Positionen können direkt im `create()`-Call über `items: […]` oder `withItem()` mitgegeben werden — sie landen unter `recurring-items.recurring-item` im Payload.
+Items can be passed directly in the `create()` call via `items: […]` or `withItem()`; they end up under `recurring-items.recurring-item` in the payload.
 
 ```php
 use Justpilot\Billomat\Api\RecurringCreateOptions;
@@ -107,7 +111,7 @@ $opts = new RecurringCreateOptions(
     startDate: new DateTimeImmutable('2026-07-01'),
 );
 
-$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90'), title: 'Webhosting Basic');
+$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90'), title: 'Web hosting Basic');
 $opts = $opts->withItem($item);
 
 $recurring = $billomat->recurrings->create($opts);
@@ -115,37 +119,41 @@ $recurring = $billomat->recurrings->create($opts);
 
 ### `update(int $id, RecurringUpdateOptions $options): Recurring`
 
-Schmaler Subset für Partial-Updates. Positionen sind hier laut Billomat-Doku **nicht** veränderbar — dafür die `$billomat->recurrings->items` nutzen. Die Klasse hat daher kein `items`-Feld.
+For partial updates. According to the Billomat docs, items **cannot** be changed here; use `$billomat->recurrings->items` for that. The class therefore has no `items` field.
 
 ### `delete(int $id): void`
 
-## Write-Modell: `RecurringCreateOptions`
+Deletes a recurring invoice. Errors are thrown as exceptions.
 
-Konstruktor: `new RecurringCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
+## Write model: `RecurringCreateOptions`
 
-### Identifikation & Stamm
+Constructor: `new RecurringCreateOptions(int $clientId, …)`. `clientId` is required and the first parameter. All other fields are constructor parameters with a default and are passed as named arguments. The object is immutable (`final readonly`); every field has a `with*()` method that returns a modified copy (e.g. `$opts->withTitle('New')`).
 
-| Property | Billomat-Feld | Typ |
+### Identification and master data
+
+| Property | Billomat field | Type |
 |---|---|---|
-| `clientId` | `client_id` | `int` (Pflicht) |
+| `clientId` | `client_id` | `int` (required) |
 | `contactId` | `contact_id` | `?int` |
 | `address` | `address` | `?string` |
 | `numberPre` | `number_pre` | `?string` |
-| `name` | `name` | `?string` — interner Name |
+| `name` | `name` | `?string`, internal name |
 | `title` | `title` | `?string` |
 | `label` | `label` | `?string` |
-| `intro`, `note` | analog | `?string` |
+| `intro`, `note` | same | `?string` |
 | `reduction` | `reduction` | `?string` |
 | `currencyCode` | `currency_code` | `?string` |
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` |
-| `paymentTypes` | `payment_types` | `list<PaymentType>` (Billomat: kommasepariert) |
+| `paymentTypes` | `payment_types` | `list<PaymentType>` (Billomat: comma-separated) |
 | `freeTextId` | `free_text_id` | `?int` |
 | `templateId` | `template_id` | `?int` |
+| `offerId` | `offer_id` | `?int`, source [offer](offers.md) |
+| `confirmationId` | `confirmation_id` | `?int`, source [confirmation](confirmations.md) |
 
-### Datumsangaben & Konditionen
+### Dates and terms
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `supplyDate` | `supply_date` | `?\DateTimeImmutable` |
 | `supplyDateType` | `supply_date_type` | `?SupplyDateType` |
@@ -153,46 +161,57 @@ Konstruktor: `new RecurringCreateOptions(int $clientId, …)` — `clientId` ist
 | `discountRate` | `discount_rate` | `?int` |
 | `discountDays` | `discount_days` | `?int` |
 
-### Wiederholung
+### Recurrence
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `action` | `action` | `?RecurringAction` |
 | `cycle` | `cycle` | `?RecurringCycle` |
 | `cycleNumber` | `cycle_number` | `?int` |
-| `hour` | `hour` | `?int` (0–23, Uhrzeit des Laufs) |
+| `hour` | `hour` | `?int` (0–23, time of the run) |
 | `startDate` | `start_date` | `?\DateTimeImmutable` |
 | `endDate` | `end_date` | `?\DateTimeImmutable` |
-| `iterations` | `iterations` | `?int` — Begrenzung der Anzahl Läufe |
+| `nextCreationDate` | `next_creation_date` | `?\DateTimeImmutable` |
+| `iterations` | `iterations` | `?int`, limits the number of runs |
 
-### E-Mail-Default (greift bei `action = EMAIL`)
+### Email defaults (apply with `action = EMAIL`)
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `emailSender` | `email_sender` | `?string` |
 | `emailSubject` | `email_subject` | `?string` |
 | `emailMessage` | `email_message` | `?string` |
 | `emailTemplateId` | `email_template_id` | `?int` |
+| `emailFilename` | `email_filename` | `?string` |
+| `emailBcc` | `email_bcc` | `?bool` |
 
-### Positionen
+### Postal mail (apply with `action = MAIL`)
 
-Positionen werden über den Konstruktor-Parameter `items` (`list<RecurringItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
+| Property | Billomat field | Type |
+|---|---|---|
+| `letterColor` | `letter_color` | `?bool` |
+| `letterDuplex` | `letter_duplex` | `?bool` |
+| `letterPaperWeight` | `letter_paper_weight` | `?int` |
+
+### Items
+
+Items are passed via the constructor parameter `items` (`list<RecurringItemCreateOptions>`) and are then available in the `$items` property. `withItem()` returns a copy with one more item:
 
 ```php
 $opts = $opts->withItem(new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90')));
 ```
 
-`toArray()` rendert sie in `recurring-items.recurring-item`.
+`toArray()` renders them into `recurring-items.recurring-item`.
 
-## Write-Modell: `RecurringUpdateOptions`
+## Write model: `RecurringUpdateOptions`
 
-Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls Umhängen auf einen anderen Kunden gewünscht) und ohne `items`. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new RecurringUpdateOptions(note: Clear::Field)`.
+Has the same fields as `RecurringCreateOptions`, but `clientId` is optional (for moving the recurring invoice to another client) and there is no `items` field. `null` means "don't send", the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null` so Billomat empties it, e.g. `new RecurringUpdateOptions(note: Clear::Field)`.
 
-## Read-Modell: `Recurring`
+## Read model: `Recurring`
 
-`final readonly class Recurring`. Die wichtigsten Felder:
+`final readonly class Recurring`. The main fields:
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `clientId` | `int` |
@@ -204,7 +223,7 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `dueDays`, `discountRate`, `discountDays` | `?int`, `?float`, `?int` |
 | `name`, `title`, `label`, `intro`, `note`, `reduction` | `?string` |
 | `currencyCode` | `?string` |
-| `paymentTypes` | `list<PaymentType>` (unbekannte Werte fallen heraus) |
+| `paymentTypes` | `list<PaymentType>` (unknown values are dropped) |
 | `netGross` | `?NetGross` |
 | `quote` | `?float` |
 | `action`, `cycle` | `?RecurringAction`, `?RecurringCycle` |
@@ -213,7 +232,7 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `totalGross`, `totalNet` | `?Money` |
 | `emailSender`, `emailSubject`, `emailMessage` | `?string` |
 | `emailTemplateId`, `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) |
+| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` as `Money`) |
 | `items` | `list<RecurringItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |
@@ -230,52 +249,51 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `letterPaperWeight` | `?int` |
 | `offerId` | `?int` |
 | `confirmationId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
-`counter` zählt die bereits ausgeführten Läufe; `nextCreationDate` ist der nächste geplante Erzeugungs-Tag.
+`counter` counts the runs executed so far; `nextCreationDate` is the next scheduled creation date.
 
-## Recurring Items
+## Recurring items
 
-Strukturell identisch zu `InvoiceItem`, referenzieren aber `recurring_id` statt `invoice_id`.
+Structurally identical to `InvoiceItem`, but they reference `recurring_id` instead of `invoice_id`. `$billomat->recurrings->items` is the same generic `ItemsApi` as for [invoice items](invoice-items.md).
 
-### Methoden
+### Methods
 
 ```php
 $items = $billomat->recurrings->items->list($recurring->id);
 
-$item = $billomat->recurrings->items->create(
-    $recurring->id,
-    new RecurringItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
-);
+$opts = new RecurringItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90'));
+$item = $billomat->recurrings->items->create($recurring->id, $opts);
 
-$billomat->recurrings->items->update($item->id, $opts);
+$billomat->recurrings->items->update($item->id, $opts->withUnitPrice(Money::of('44.90')));
 $billomat->recurrings->items->delete($item->id);
 ```
 
-`create()` injiziert `recurring_id` automatisch in den Payload — `RecurringItemCreateOptions` selbst hat dieses Feld nicht.
+`create()` injects `recurring_id` into the payload automatically; `RecurringItemCreateOptions` itself has no such field.
 
-### Write-Modell: `RecurringItemCreateOptions`
+### Write model: `RecurringItemCreateOptions`
 
-Konstruktor: `new RecurringItemCreateOptions(float $quantity, Money $unitPrice)`. Beide Werte sind Pflicht und werden auch dann mitgeschickt, wenn sie `0` sind.
+Constructor: `new RecurringItemCreateOptions(float $quantity, Money $unitPrice, …)`. Both values are required and always sent, even if they are `0`. Like the other options classes, it is `final readonly` with a `with*()` method per field.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
-| `quantity` | `quantity` | `float` (Pflicht) |
-| `unitPrice` | `unit_price` | `Money` (Pflicht) |
+| `quantity` | `quantity` | `float` (required) |
+| `unitPrice` | `unit_price` | `Money` (required) |
 | `type` | `type` | `?ItemType` |
 | `articleId` | `article_id` | `?int` |
-| `title`, `description`, `unit` | analog | `?string` |
-| `taxName`, `taxRate`, `taxChangedManually` | analog | `?string`, `?float`, `?bool` |
+| `title`, `description`, `unit` | same | `?string` |
+| `taxName`, `taxRate`, `taxChangedManually` | same | `?string`, `?float`, `?bool` |
 | `reduction` | `reduction` | `?string` |
 | `position` | `position` | `?int` |
 
-### Read-Modell: `RecurringItem`
+### Read model: `RecurringItem`
 
-`final readonly`. Felder analog zu `InvoiceItem`, mit `recurringId` statt `invoiceId`.
+`final readonly`. Same fields as `InvoiceItem`, with `recurringId` instead of `invoiceId`.
 
-## Recurring Tags
+## Recurring tags
 
-Funktional identisch zu [Invoice Tags](invoice-tags.md), bezogen auf eine Abo-Rechnung statt auf eine Rechnung.
+Works exactly like [invoice tags](invoice-tags.md), but for a recurring invoice instead of an invoice.
 
 ```php
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
@@ -285,14 +303,14 @@ $tag = $billomat->recurrings->tags->create(
 );
 
 $tags = $billomat->recurrings->tags->list($recurring->id);
-$cloud = $billomat->recurrings->tags->cloud(); // aggregiert, mit count
+$cloud = $billomat->recurrings->tags->cloud(); // aggregated, with count
 ```
 
-Read-Modelle: `RecurringTag` (Verknüpfung mit `recurringId`) und `RecurringTagCloudEntry` (aggregiert).
+Read models: `RecurringTag` (link with `recurringId`) and `RecurringTagCloudEntry` (aggregated).
 
-## Recurring Email Receivers
+## Recurring email receivers
 
-Pflegt die TO/CC/BCC-Liste für die automatische E-Mail-Versendung (`action = EMAIL`). Es gibt kein `update()` — Empfänger werden gelöscht und neu angelegt.
+Maintains the TO/CC/BCC list for automatic email delivery (`action = EMAIL`). There is no `update()`; delete recipients and create them again.
 
 ```php
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
@@ -302,7 +320,7 @@ $billomat->recurrings->emailReceivers->create(
     new RecurringEmailReceiverCreateOptions(
         recurringId: $recurring->id,
         type: RecurringEmailReceiverType::TO,
-        address: 'kunde@example.com',
+        address: 'client@example.com',
     ),
 );
 
@@ -315,34 +333,35 @@ $billomat->recurrings->emailReceivers->create(
 );
 ```
 
-### Write-Modell: `RecurringEmailReceiverCreateOptions`
+### Write model: `RecurringEmailReceiverCreateOptions`
 
-Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt: `recurringId`, `type`, `address`.
+All three values are required constructor parameters: `recurringId` (`int`), `type` (`RecurringEmailReceiverType`), `address` (`string`). The object is `final readonly` with `with*()` methods.
 
-### Read-Modell: `RecurringEmailReceiver`
+### Read model: `RecurringEmailReceiver`
 
-`final readonly`. Felder: `id`, `recurringId`, `type` (`?RecurringEmailReceiverType`, null bei unbekanntem Wert), `address`.
+`final readonly`. Fields: `id` (`?int`), `recurringId` (`int`), `type` (`?RecurringEmailReceiverType`, `null` for an unknown value), `address` (`string`), `extra`.
 
-## Verwendete Enums
+## Enums
 
 - [`RecurringCycle`](../../src/Model/Enum/RecurringCycle.php): `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`.
 - [`RecurringAction`](../../src/Model/Enum/RecurringAction.php):
-  - `CREATE` — erstellt nur eine Entwurfs-Rechnung,
-  - `COMPLETE` — erstellt und schließt die Rechnung ab (PDF wird generiert),
-  - `EMAIL` — erstellt, schließt ab und versendet per E-Mail (nutzt `recurring-email-receivers`),
-  - `MAIL` — erstellt, schließt ab und versendet postalisch (Pixelletter, kostenpflichtig).
-- [`RecurringEmailReceiverType`](../../src/Model/Enum/RecurringEmailReceiverType.php): `TO`, `CC`, `BCC` (Billomat liefert `To`/`Cc`/`Bcc`, `fromApi()` akzeptiert auch Kleinbuchstaben).
+  - `CREATE`: only creates a draft invoice,
+  - `COMPLETE`: creates and completes the invoice (the PDF is generated),
+  - `EMAIL`: creates, completes and sends it by email (uses `recurring-email-receivers`),
+  - `MAIL`: creates, completes and sends it by post (Pixelletter, costs money).
+- [`RecurringEmailReceiverType`](../../src/Model/Enum/RecurringEmailReceiverType.php): `TO`, `CC`, `BCC` with the wire values `To`/`Cc`/`Bcc`, as Billomat returns them. `fromApi()` also accepts other casing (the Billomat docs use lowercase).
+- [`PaymentType`](../../src/Model/Enum/PaymentType.php), [`NetGross`](../../src/Model/Enum/NetGross.php), [`SupplyDateType`](../../src/Model/Enum/SupplyDateType.php), [`ItemType`](../../src/Model/Enum/ItemType.php): see [Invoices](invoices.md#enums).
 
-## Stolpersteine
+## Pitfalls
 
-- **Items nicht über `update()` ändern.** Billomat ignoriert eingebettete `recurring-items` beim PUT auf `/recurrings/{id}`. Stets die `$billomat->recurrings->items` verwenden.
-- **`action = EMAIL` ohne Empfänger geht schief.** Wer `action` auf `EMAIL` setzt, muss mindestens einen `RecurringEmailReceiver` vom Typ `TO` angelegt haben.
-- **`emailTemplateId`** zieht eine im Billomat-Account hinterlegte E-Mail-Vorlage; `emailSender`/`emailSubject`/`emailMessage` überschreiben einzelne Felder davon punktuell.
-- **`cycle` und `cycleNumber` zusammen lesen.** `cycle=MONTHLY` allein heißt nicht „monatlich“ — es heißt „`cycleNumber` Monate“. Default ist 1, wenn nicht gesetzt.
-- **`type` bei Email-Empfängern ist lowercase.** Der Enum-Wire-Wert ist `to`/`cc`/`bcc`, nicht `TO`/`CC`/`BCC`.
-- **`hour`** beeinflusst lediglich die Uhrzeit am Erzeugungstag — das Datum kommt aus `cycle` + `cycleNumber`.
+- **Don't change items via `update()`.** Billomat ignores embedded `recurring-items` on a PUT to `/recurrings/{id}`. Always use `$billomat->recurrings->items`.
+- **`action = EMAIL` without recipients fails.** If you set `action` to `EMAIL`, you need at least one `RecurringEmailReceiver` of type `TO`.
+- **`emailTemplateId`** selects an email template stored in the Billomat account; `emailSender`/`emailSubject`/`emailMessage` override individual parts of it.
+- **Read `cycle` and `cycleNumber` together.** `cycle=MONTHLY` alone doesn't mean "monthly"; it means "every `cycleNumber` months". The default is 1 if not set.
+- **Email receiver `type` casing.** The enum sends `To`/`Cc`/`Bcc` (capitalized), matching what Billomat returns; the Billomat docs show lowercase. When reading, `fromApi()` accepts either.
+- **`hour`** only affects the time of day on the creation date; the date itself comes from `cycle` + `cycleNumber`.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -366,11 +385,11 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Abo anlegen — monatlich, automatischer E-Mail-Versand
+// 1) Create the recurring invoice: monthly, sent automatically by email
 $opts = new RecurringCreateOptions(
     clientId: 12345,
     name: 'Hosting Basic',
-    title: 'Webhosting-Abo',
+    title: 'Web hosting subscription',
     cycle: RecurringCycle::MONTHLY,
     cycleNumber: 1,
     action: RecurringAction::EMAIL,
@@ -378,21 +397,21 @@ $opts = new RecurringCreateOptions(
     dueDays: 14,
 );
 
-$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90'), title: 'Webhosting Basic');
+$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90'), title: 'Web hosting Basic');
 $opts = $opts->withItem($item);
 
 $recurring = $billomat->recurrings->create($opts);
-printf("Abo #%d angelegt, nächster Lauf: %s\n",
+printf("Recurring invoice #%d created, next run: %s\n",
     $recurring->id,
     $recurring->nextCreationDate?->format('Y-m-d') ?? 'tbd',
 );
 
-// 2) E-Mail-Empfänger pflegen
+// 2) Add email recipients
 $billomat->recurrings->emailReceivers->create(
     new RecurringEmailReceiverCreateOptions(
         recurringId: $recurring->id,
         type: RecurringEmailReceiverType::TO,
-        address: 'kunde@example.com',
+        address: 'client@example.com',
     ),
 );
 
@@ -400,18 +419,18 @@ $billomat->recurrings->emailReceivers->create(
     new RecurringEmailReceiverCreateOptions(
         recurringId: $recurring->id,
         type: RecurringEmailReceiverType::BCC,
-        address: 'buchhaltung@meinefirma.de',
+        address: 'accounting@mycompany.example',
     ),
 );
 
-// 3) Tag setzen, damit Filtern leichter fällt
+// 3) Add a tag to make filtering easier
 $billomat->recurrings->tags->create(
     new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'hosting'),
 );
 
-// 4) Position später anpassen — Preis-Update
+// 4) Change an item later: price update
 foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
-    $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('24.90'), title: $current->title);
+    $update = new RecurringItemCreateOptions(quantity: $current->quantity, unitPrice: Money::of('24.90'), title: $current->title);
     $billomat->recurrings->items->update($current->id, $update);
 }
 ```

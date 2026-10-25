@@ -1,51 +1,53 @@
-<!-- Quelle: https://www.billomat.com/api/rechnungen/zahlungen/ -->
+<!-- Source: https://www.billomat.com/api/rechnungen/zahlungen/ -->
 
 # Invoice Payments (Zahlungen)
 
-API-Wrapper für Rechnungszahlungen unter `/invoice-payments`.
+API wrapper for invoice payments at `/invoice-payments`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->invoices->payments
 ```
 
-`Justpilot\Billomat\Api\PaymentsApi` (`$billomat->invoices->payments`).
+The generic `Justpilot\Billomat\Api\PaymentsApi`, typed for `InvoicePayment` and `InvoicePaymentCreateOptions`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($invoiceId?, $filters?)` | GET | `/invoice-payments` |
-| `get($id)` | GET | `/invoice-payments/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/invoice-payments/{id}` |
 | `create($options)` | POST | `/invoice-payments` |
 | `delete($id)` | DELETE | `/invoice-payments/{id}` |
 
-Es gibt keine `update()`-Methode — Billomat unterstützt das Bearbeiten einer Zahlung nicht. Korrekturen erfolgen über Löschen + Neuanlage.
+There is no `update()` method; Billomat doesn't support editing a payment. To correct one, delete it and create a new one.
 
-## Methoden
+## Methods
 
 ### `list(?int $parentId = null, array $filters = []): list<InvoicePayment>`
 
-Filter laut Billomat-Doku:
+`$parentId` is the invoice ID and is sent as `invoice_id`. Without it, the payments of all invoices are listed. Filters according to the Billomat docs:
 
-| Filter | Beschreibung |
+| Filter | Description |
 |---|---|
-| `invoice_id` | Nur Zahlungen zu einer bestimmten Rechnung |
-| `from` | Datum von (`YYYY-MM-DD`) |
-| `to` | Datum bis (`YYYY-MM-DD`) |
-| `type` | Zahlungsart, CSV möglich (`BANK_TRANSFER,PAYPAL`) |
-| `user_id` | Eingebende User-ID |
+| `invoice_id` | Only payments for a specific invoice (set via `$parentId`) |
+| `from` | Date from (`YYYY-MM-DD`) |
+| `to` | Date to (`YYYY-MM-DD`) |
+| `type` | Payment type, comma-separated values allowed (`BANK_TRANSFER,PAYPAL`) |
+| `user_id` | ID of the user who entered the payment |
 
 ```php
+use Justpilot\Billomat\Api\OrderBy;
+
 $payments = $billomat->invoices->payments->list($invoice->id, [
-    'order_by' => 'date+DESC',
+    'order_by' => OrderBy::desc('date')->toQuery(),
 ]);
 ```
 
-### `get(int $id): ?InvoicePayment`
+### `get(int $id): ?InvoicePayment` / `getOrFail(int $id): InvoicePayment`
 
-Liefert `null` bei 404.
+`get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
 ### `create(InvoicePaymentCreateOptions $options): InvoicePayment`
 
@@ -55,10 +57,11 @@ use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $opts = new InvoicePaymentCreateOptions(
-    invoiceId: 98765, amount: Money::of('1190.00'),
+    invoiceId: 98765,
+    amount: Money::of('1190.00'),
     date: new DateTimeImmutable('2026-06-01'),
     type: PaymentType::BANK_TRANSFER,
-    comment: 'Überweisung Eingang vom 01.06.',
+    comment: 'Bank transfer received on 2026-06-01',
     markInvoiceAsPaid: true,
 );
 
@@ -67,70 +70,76 @@ $payment = $billomat->invoices->payments->create($opts);
 
 ### `delete(int $id): void`
 
-Setzt laut Billomat-Doku den Status der Rechnung zurück auf `OPEN` oder `OVERDUE`, wenn die Zahlung sie vorher auf `PAID` gesetzt hatte.
+According to the Billomat docs, this resets the invoice status to `OPEN` or `OVERDUE` if the payment had set it to `PAID`.
 
-## Write-Modell: `InvoicePaymentCreateOptions`
+## Write model: `InvoicePaymentCreateOptions`
 
-Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount)`. Beide Werte sind Pflicht.
+Constructor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount, …)`. Both values are required; the other fields are optional named arguments. The object is immutable (`final readonly`) and has a `with*()` method per field.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `invoiceId` | `invoice_id` | `int` | Pflicht (Konstruktor) |
-| `amount` | `amount` | `Money` | Pflicht (Konstruktor) |
-| `date` | `date` | `?\DateTimeImmutable` | Default: heute |
-| `comment` | `comment` | `?string` | Freitext |
-| `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck |
-| `type` | `type` | `?PaymentType` | siehe Enum unten |
-| `markInvoiceAsPaid` | `mark_invoice_as_paid` | `bool` | Default `false`. Bei `true` markiert Billomat die Rechnung als `PAID`, auch wenn der Zahlbetrag den offenen Betrag nicht exakt deckt. |
+| `invoiceId` | `invoice_id` | `int` | Required (constructor) |
+| `amount` | `amount` | `Money` | Required (constructor) |
+| `date` | `date` | `?\DateTimeImmutable` | Default: today |
+| `comment` | `comment` | `?string` | Free text |
+| `transactionPurpose` | `transaction_purpose` | `?string` | Payment reference |
+| `type` | `type` | `?PaymentType` | See the enum below |
+| `markInvoiceAsPaid` | `mark_invoice_as_paid` | `bool` | Default `false`. With `true`, Billomat marks the invoice as `PAID` even if the amount doesn't exactly cover the open amount. |
 
-`toArray()` filtert `null`-Werte heraus, erhält aber `invoice_id`, `amount` und `mark_invoice_as_paid` (das wird immer als `1`/`0` mitgeschickt).
+`toArray()` drops `null` values but always keeps `invoice_id`, `amount` (as a string) and `mark_invoice_as_paid` (always sent as `1`/`0`).
 
-## Read-Modell: `InvoicePayment`
+## Read model: `InvoicePayment`
 
 `final readonly class InvoicePayment`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `invoiceId` | `int` |
+| `created` | `?\DateTimeImmutable` |
 | `date` | `?\DateTimeImmutable` |
 | `amount` | `Money` |
 | `type` | `?PaymentType` |
 | `comment` | `?string` |
+| `userId` | `?int` |
+| `transactionPurpose` | `?string` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `paymentGroup` | `?string` |
-| `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
-| `finapiTransactionAmount` | `?Money` (finAPI-Bankabgleich) |
+| `finapiTransactionId` | `?string` (finAPI bank reconciliation) |
+| `finapiTransactionAmount` | `?Money` (finAPI bank reconciliation) |
 | `documentTitle` | `?string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
-## Verwendete Enums
+## Enums
 
-[`PaymentType`](../../src/Model/Enum/PaymentType.php) bildet die Zahlungsarten ab — mit deutschsprachigen Labels via `label()`:
+[`PaymentType`](../../src/Model/Enum/PaymentType.php) maps the payment types, with German labels via `label()`:
 
-| Case | Wire-Wert | Label |
+| Case | Wire value | Label |
 |---|---|---|
-| `INVOICE_CORRECTION` | `INVOICE_CORRECTION` | Korrekturrechnung |
-| `CREDIT_NOTE` | `CREDIT_NOTE` | Gutschrift |
-| `BANK_CARD` | `BANK_CARD` | Bankkarte |
-| `BANK_TRANSFER` | `BANK_TRANSFER` | Überweisung |
-| `DEBIT` | `DEBIT` | Lastschrift |
-| `CASH` | `CASH` | Barzahlung |
-| `CHECK` | `CHECK` | Scheck |
+| `INVOICE_CORRECTION` | `INVOICE_CORRECTION` | Korrekturrechnung (correction invoice) |
+| `CREDIT_NOTE` | `CREDIT_NOTE` | Gutschrift (credit note) |
+| `BANK_CARD` | `BANK_CARD` | Bankkarte (bank card) |
+| `BANK_TRANSFER` | `BANK_TRANSFER` | Überweisung (bank transfer) |
+| `DEBIT` | `DEBIT` | Lastschrift (direct debit) |
+| `CASH` | `CASH` | Barzahlung (cash) |
+| `CHECK` | `CHECK` | Scheck (check) |
 | `PAYPAL` | `PAYPAL` | PayPal |
-| `CREDIT_CARD` | `CREDIT_CARD` | Kreditkarte |
-| `COUPON` | `COUPON` | Gutschein |
-| `MISC` | `MISC` | Sonstiges |
+| `CREDIT_CARD` | `CREDIT_CARD` | Kreditkarte (credit card) |
+| `COUPON` | `COUPON` | Gutschein (voucher) |
+| `MISC` | `MISC` | Sonstiges (other) |
 
-## Stolpersteine
+The same enum is used for the accepted payment types of documents (`paymentTypes`, `list<PaymentType>`).
 
-- **Keine Updates.** Eine Zahlung lässt sich nicht ändern — nur löschen und neu anlegen.
-- **`markInvoiceAsPaid` überstimmt den offenen Betrag.** Setze das Flag nur, wenn du wirklich auf `PAID` flippen willst, auch bei Teilzahlung.
-- **Statuswechsel der Rechnung.** Nach `create()` kann die Rechnung in `PAID` (`amount` deckt offenen Betrag) oder bleibt `OPEN`/`OVERDUE` (Teilzahlung). Bei `delete()` springt sie zurück.
-- **Status-Filter.** Beim Listen ist `type` ein CSV-Feld auf API-Seite — du kannst entweder einen Wert oder mehrere kommagetrennt mitgeben.
+## Pitfalls
 
-## End-to-End-Beispiel
+- **No updates.** A payment can't be changed, only deleted and created again.
+- **`markInvoiceAsPaid` overrides the open amount.** Only set the flag if you really want the invoice to switch to `PAID`, even for a partial payment.
+- **Invoice status changes.** After `create()`, the invoice becomes `PAID` (if `amount` covers the open amount) or stays `OPEN`/`OVERDUE` (partial payment). After `delete()` it switches back.
+- **Type filter.** When listing, `type` is a comma-separated field on the API side; you can pass one value or several separated by commas.
+
+## End-to-end example
 
 ```php
 <?php
@@ -140,8 +149,10 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\InvoicePayment;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -151,25 +162,26 @@ $billomat = BillomatClient::create(
 
 $invoiceId = 98765;
 
-// Zahlung anlegen
+// Record a payment
 $opts = new InvoicePaymentCreateOptions(
-    invoiceId: $invoiceId, amount: Money::of('590.00'),
+    invoiceId: $invoiceId,
+    amount: Money::of('590.00'),
     type: PaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('today'),
-    transactionPurpose: 'Rechnung RE-2026-0042',
+    transactionPurpose: 'Invoice RE-2026-0042',
 );
 
 $payment = $billomat->invoices->payments->create($opts);
-printf("Zahlung #%d angelegt: %s EUR per %s\n", $payment->id, $payment->amount->format(2, ',', '.'), $payment->type?->label());
+printf("Payment #%d recorded: %s EUR via %s\n", $payment->id, $payment->amount->format(2), $payment->type?->value);
 
-// Alle Zahlungen zur Rechnung listen
+// List all payments for the invoice
 $paymentsForInvoice = $billomat->invoices->payments->list($invoiceId, [
-    'order_by' => 'date+ASC',
+    'order_by' => OrderBy::asc('date')->toQuery(),
 ]);
 
-$sum = Money::sum(...array_map(static fn ($p): Money => $p->amount, $paymentsForInvoice));
-printf("Bislang verbucht: %s EUR über %d Eingänge\n", $sum->format(2, ',', '.'), count($paymentsForInvoice));
+$sum = Money::sum(...array_map(static fn (InvoicePayment $p): Money => $p->amount, $paymentsForInvoice));
+printf("Recorded so far: %s EUR from %d payments\n", $sum->format(2), count($paymentsForInvoice));
 
-// Letzte Zahlung wieder entfernen (Storno)
+// Remove the last payment again
 $billomat->invoices->payments->delete($payment->id);
 ```

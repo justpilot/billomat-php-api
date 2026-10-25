@@ -1,0 +1,20 @@
+{
+    "invoice-payment": {
+        "id": "5005",
+        "created": "2026-10-20T09:14:02+02:00",
+        "invoice_id": "1001",
+        "user_id": "",
+        "date": "2026-10-20",
+        "amount": "119",
+        "comment": "",
+        "transaction_purpose": "",
+        "currency_code": "EUR",
+        "quote": "1",
+        "payment_group": "",
+        "finapi_transaction_id": "",
+        "finapi_transaction_amount": "",
+        "type": "BANK_TRANSFER",
+        "document_title": "Rechnung RE-2026-0042",
+        "customfield": ""
+    }
+}

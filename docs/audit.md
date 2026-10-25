@@ -81,7 +81,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `rechnungen/zahlungen` | Zahlungen | ✓ | ✓ | ✓ | — | ✓ |  |
 | `suche` | Suche | ✓ | ✓ | — | — | ✓ |  |
 | `waehrungen` | Währungen | ✓ | ✓ | — | — | ✓ |  |
-| `webhooks` | Webhooks | — | — | — | — | ✓ | Empfänger-seitiges Konzept – kein REST-Endpunkt; siehe docs/concepts/webhooks.md. |
+| `webhooks` | Webhooks | — | — | — | — | ✓ | Kein REST-Endpunkt; Empfang über `src/Webhook/` (`WebhookEvent`, `WebhookHeaders`, `WebhookPayload`), siehe docs/concepts/webhooks.md. |
 
 ## Feld-Lücken in `*Options`-Klassen
 

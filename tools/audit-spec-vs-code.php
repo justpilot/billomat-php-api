@@ -152,7 +152,7 @@ $mapping = [
     'laender' => ['api' => 'CountriesApi', 'model' => 'Country', 'docFile' => 'countries.md'],
     'waehrungen' => ['api' => 'CurrenciesApi', 'model' => 'Currency', 'docFile' => 'currencies.md'],
     'webhooks' => ['conceptFile' => 'webhooks.md',
-        'note' => 'Empfänger-seitiges Konzept – kein REST-Endpunkt; siehe docs/concepts/webhooks.md.'],
+        'note' => 'Kein REST-Endpunkt; Empfang über `src/Webhook/` (`WebhookEvent`, `WebhookHeaders`, `WebhookPayload`), siehe docs/concepts/webhooks.md.'],
     'account' => ['api' => 'AccountApi', 'model' => 'Account', 'docFile' => 'account.md'],
     'aktivitaeten' => ['api' => 'ActivitiesApi', 'model' => 'Activity', 'docFile' => 'activities.md'],
     'suche' => ['api' => 'SearchApi', 'model' => 'SearchResult', 'docFile' => 'search.md'],

@@ -4,7 +4,7 @@
 
 Billomat kann auf Ereignisse hin einen HTTP-Aufruf an eine selbst gewählte URL absetzen ("Webhook"). Für jeden Ereignistyp lässt sich genau eine URL hinterlegen.
 
-> Webhooks haben **keinen REST-API-Endpunkt**. Sie werden ausschließlich im Billomat-UI unter *Einstellungen → Webhooks* konfiguriert. Dieses SDK kann also weder Webhooks anlegen noch auflisten — wohl aber das, was wirklich gebraucht wird: **eingehende Webhook-Requests zuverlässig empfangen und verarbeiten**.
+> Webhooks haben **keinen REST-API-Endpunkt**. Sie werden ausschließlich im Billomat-UI unter *Einstellungen → Webhooks* konfiguriert. Dieses SDK kann also weder Webhooks anlegen noch auflisten — wohl aber das, was wirklich gebraucht wird: **eingehende Webhook-Requests auswerten** (`WebhookHeaders`, `WebhookPayload`, `WebhookEvent`, siehe [unten](#webhooks-empfangen-mit-dem-sdk)).
 
 ## Konfiguration im UI
 
@@ -56,7 +56,7 @@ Wie bei der REST-API gilt:
 - Verschachtelte Listen haben dieselbe Form wie in der REST-Antwort, z. B. `"taxes": {"tax": {…}}` mit einem einzelnen Objekt statt einer Liste, wenn es nur einen Eintrag gibt.
 - Der Envelope-Schlüssel folgt aus dem Eventnamen: Ressource vor dem Punkt, `_` durch `-` ersetzt (`invoice_payment.create` → `invoice-payment`).
 
-Deshalb lässt sich der innere Datensatz direkt mit dem passenden Model hydrieren: `Invoice::fromArray($payload['invoice'])`, `InvoicePayment::fromArray($payload['invoice-payment'])`.
+Deshalb lässt sich der innere Datensatz direkt mit dem passenden Model hydrieren; `WebhookPayload` erledigt das (siehe [unten](#webhooks-empfangen-mit-dem-sdk)).
 
 ### Der Payload ist ein Trigger, kein aktueller Stand
 
@@ -123,57 +123,60 @@ Vollständige Liste der von Billomat gesendeten Events (Stand der Spec: `docs/sp
 - `supplier_property.create`, `supplier_property.update`, `supplier_property.delete`
 - `supplier_property_value.update`
 
-## Empfänger-Skizze in PHP
+## Webhooks empfangen mit dem SDK
 
-Das SDK liefert bewusst keinen Empfänger-Controller mit — wie der Endpoint in eine Anwendung eingebettet wird, ist Aufgabe des Frameworks. Eine framework-neutrale Skizze:
+Das SDK liefert bewusst keinen Controller mit — Routing, Auth (Basic), Idempotenz und Queue sind Aufgabe der Anwendung. Es nimmt aber das Auswerten ab (`src/Webhook/`):
+
+| Klasse | Aufgabe |
+|---|---|
+| `WebhookEvent` | Backed Enum mit allen 83 Events (`WebhookEvent::INVOICE_PAYMENT_CREATE` = `'invoice_payment.create'`); `resource()`, `action()` (`WebhookAction::CREATE` …), `envelopeKey()` (`'invoice-payment'`), `modelClass()` (`InvoicePayment::class`) |
+| `WebhookHeaders` | `fromServerRequest()` (PSR-7) bzw. `fromArray()` (`$_SERVER`, Symfony-`HeaderBag::all()`, gespeicherte Header) → `event`, `requestId` (int), `webhookId` |
+| `WebhookPayload` | `fromJson()` / `fromArray()` packt den Envelope aus; `data` (Rohdaten), `id()`, `int('invoice_id')`, `model()` hydriert das passende Model |
+| `InvalidWebhookException` | unbekanntes Event, fehlender Header, kein JSON, falscher Envelope — mit `4xx` antworten |
+
+Die Klassen arbeiten auch mit gespeicherten Requests, damit der Controller nur annimmt und ein Worker später verarbeitet. Nur das JSON-Format wird unterstützt.
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-// Eintrag der Webhook-URL bei Billomat: https://example.com/billomat/webhook
-$eventName  = $_SERVER['HTTP_X_BILLOMAT_WEBHOOK_EVENT'] ?? null;
-$webhookId  = $_SERVER['HTTP_X_BILLOMAT_WEBHOOK_ID'] ?? null;
-$requestId  = $_SERVER['HTTP_X_BILLOMAT_WEBHOOK_REQUEST_ID'] ?? null;
-$rawBody    = file_get_contents('php://input');
+use Justpilot\Billomat\Exception\InvalidWebhookException;
+use Justpilot\Billomat\Webhook\WebhookEvent;
+use Justpilot\Billomat\Webhook\WebhookHeaders;
+use Justpilot\Billomat\Webhook\WebhookPayload;
 
-if (null === $eventName) {
+// Controller: annehmen, speichern, sofort 2xx (10 s Timeout).
+$body = (string) file_get_contents('php://input');
+try {
+    $headers = WebhookHeaders::fromArray($_SERVER);
+    WebhookPayload::fromJson($headers->event, $body); // Body prüfen, bevor er gespeichert wird
+} catch (InvalidWebhookException) {
     http_response_code(400);
     return;
 }
 
-// 1. Identifizieren, was es ist
-[$resource, $action] = explode('.', $eventName, 2);
-
-// 2. Parsen — Content-Type beachten
-$payload = match (true) {
-    str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'json') => json_decode($rawBody, true),
-    default                                              => (array) simplexml_load_string($rawBody),
-};
-
-// 3. Idempotenz: X-Billomat-Webhook-Request-Id speichern und Duplikate verwerfen.
-//    Billomat retryt — derselbe Request kann mehrfach ankommen.
-if ($this->seen($requestId)) {
-    http_response_code(200); // Idempotent: 200 zurück, aber nichts tun.
+// Idempotenz: Request-ID mit Unique-Index speichern, Duplikate still quittieren.
+if (!$inbox->store($headers->requestId, $headers->event->value, $body)) {
+    http_response_code(200);
     return;
 }
-$this->markSeen($requestId);
+http_response_code(202);
 
-// 4. Dispatch — der Datensatz steckt im Envelope (`invoice_payment` → `invoice-payment`),
-//    alle Werte sind Strings. Nur die ID verwenden und den aktuellen Stand nachladen.
-$record = $payload[str_replace('_', '-', $resource)] ?? [];
+// Worker: der Payload ist ein Trigger — aktuellen Stand per API nachladen.
+$payload = WebhookPayload::fromJson(WebhookEvent::from($row['event']), $row['body']);
 
-match ($eventName) {
-    'invoice.create', 'invoice.update', 'invoice.status' => $this->onInvoiceChanged((int) $record['id']),
-    'invoice_payment.create', 'invoice_payment.delete'   => $this->onInvoiceChanged((int) $record['invoice_id']),
-    'invoice.delete'                                     => $this->onInvoiceDeleted((int) $record['id']),
-    default                                              => null,
+match ($payload->event) {
+    WebhookEvent::INVOICE_CREATE, WebhookEvent::INVOICE_UPDATE, WebhookEvent::INVOICE_STATUS
+        => $sync->invoice($billomat->invoices->get((int) $payload->id())),
+    WebhookEvent::INVOICE_PAYMENT_CREATE, WebhookEvent::INVOICE_PAYMENT_DELETE
+        => $sync->invoice($billomat->invoices->get((int) $payload->int('invoice_id'))),
+    WebhookEvent::INVOICE_DELETE => $sync->deleteInvoice((int) $payload->id()),
+    default => null,
 };
-
-// 5. 2xx zurück — sonst retryt Billomat.
-http_response_code(200);
 ```
+
+`$payload->model()` liefert den Datensatz als Model (`Invoice`, `InvoicePayment`, …), etwa fürs Logging. Für Entscheidungen den nachgeladenen Stand verwenden, nicht den Payload.
 
 ## Best Practices
 
@@ -187,6 +190,7 @@ http_response_code(200);
 
 | Konzept | SDK-Bezug |
 |---|---|
-| Datensatz aus dem Body | inneres Objekt des Envelopes, gleiches Schema wie die REST-Antwort: `Justpilot\Billomat\Model\*::fromArray($payload['invoice'])` (JSON) |
+| Datensatz aus dem Body | `WebhookPayload::fromJson($event, $body)->model()`; gleiches Schema wie die REST-Antwort |
+| Header | `WebhookHeaders::fromServerRequest($request)` bzw. `fromArray($_SERVER)` |
 | `invoice.status`, `invoice.send`, … | korrespondieren zu `InvoicesApi::complete()`, `cancel()`, `email()` etc. |
 | Vollständigen Datensatz nachladen | `$billomat->invoices->get($id)`, `$billomat->offers->get($id)`, … |

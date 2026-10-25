@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Internal;
 
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -40,5 +41,29 @@ final class ListCasterTest extends TestCase
         $ids = ListCaster::toList($value, 'id', static fn (array $row): ?int => ScalarCaster::toIntOrNull($row['id'] ?? null));
 
         self::assertSame($expected, $ids);
+    }
+
+    /**
+     * @return iterable<string, array{mixed, list<InvoicePaymentType>}>
+     */
+    public static function enumListCases(): iterable
+    {
+        yield 'null' => [null, []];
+        yield 'leerer String' => ['', []];
+        yield 'kein Skalar' => [['CASH'], []];
+        yield 'ein Wert' => ['CASH', [InvoicePaymentType::CASH]];
+        yield 'mehrere Werte in Billomat-Reihenfolge' => ['PAYPAL,CASH', [InvoicePaymentType::PAYPAL, InvoicePaymentType::CASH]];
+        yield 'Leerzeichen werden entfernt' => [' CASH , PAYPAL ', [InvoicePaymentType::CASH, InvoicePaymentType::PAYPAL]];
+        yield 'unbekannte und leere Werte fallen heraus' => ['CASH,,BITCOIN,PAYPAL', [InvoicePaymentType::CASH, InvoicePaymentType::PAYPAL]];
+    }
+
+    /**
+     * @param list<InvoicePaymentType> $expected
+     */
+    #[Test]
+    #[DataProvider('enumListCases')]
+    public function toEnumListSplitsCommaSeparatedValues(mixed $value, array $expected): void
+    {
+        self::assertSame($expected, ListCaster::toEnumList($value, InvoicePaymentType::class));
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
@@ -215,14 +216,16 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
          */
         public int|Clear|null $recurringId = null,
         /**
-         * Akzeptierte Zahlungsarten (kommasepariert).
+         * Akzeptierte Zahlungsarten.
          *
-         * Beispiel: "BANK_TRANSFER,CASH"
+         * Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".
          *
          * Billomat-Feld: payment_types
          * Typ: ALNUM
+         *
+         * @var list<InvoicePaymentType>|Clear
          */
-        public string|Clear|null $paymentTypes = null,
+        public array|Clear $paymentTypes = [],
         /**
          * ID der Vorlage, mit der die Rechnung abgeschlossen wird.
          *
@@ -396,8 +399,12 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
         return clone($this, ['recurringId' => $recurringId]);
     }
 
-    /** Kopie mit geändertem `paymentTypes`. */
-    public function withPaymentTypes(string|Clear|null $paymentTypes): self
+    /**
+     * Kopie mit geändertem `paymentTypes`.
+     *
+     * @param list<InvoicePaymentType>|Clear $paymentTypes
+     */
+    public function withPaymentTypes(array|Clear $paymentTypes): self
     {
         return clone($this, ['paymentTypes' => $paymentTypes]);
     }
@@ -448,7 +455,7 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
                 'net_gross' => $this->netGross instanceof NetGross ? $this->netGross->value : $this->netGross,
                 'currency_code' => $this->currencyCode,
                 'quote' => $this->quote,
-                'payment_types' => $this->paymentTypes,
+                'payment_types' => $this->paymentTypes instanceof Clear ? $this->paymentTypes : ([] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes))),
                 'invoice_id' => $this->invoiceId,
                 'offer_id' => $this->offerId,
                 'confirmation_id' => $this->confirmationId,

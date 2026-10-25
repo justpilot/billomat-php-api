@@ -19,14 +19,14 @@ final readonly class InvoiceMailOptions implements WriteOptions
     /**
      * @param bool|null                                                           $color       farbiger Druck? (`color`)
      * @param bool|null                                                           $duplex      doppelseitiger Druck? (`duplex`)
-     * @param string|null                                                         $paperWeight Papiergewicht in g/m² (z. B. "80", "90"; `paper_weight`)
+     * @param int|null                                                            $paperWeight Papiergewicht in g/m² (80 oder 90; `paper_weight`)
      * @param list<array{filename: string, mimetype: string, base64file: string}> $attachments zusätzliche PDF-Anhänge,
      *                                                                                         die mit ausgedruckt werden
      */
     public function __construct(
         public ?bool $color = null,
         public ?bool $duplex = null,
-        public ?string $paperWeight = null,
+        public ?int $paperWeight = null,
         public array $attachments = [],
     ) {
     }
@@ -44,7 +44,7 @@ final readonly class InvoiceMailOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `paperWeight`. */
-    public function withPaperWeight(?string $paperWeight): self
+    public function withPaperWeight(?int $paperWeight): self
     {
         return clone($this, ['paperWeight' => $paperWeight]);
     }

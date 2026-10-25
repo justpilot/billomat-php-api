@@ -389,7 +389,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 
 ## Verwendete Enums
 
-- [`ConfirmationStatus`](../../src/Model/Enum/ConfirmationStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Hat `label()` für deutsche Bezeichnung. Beachten: **kein** `ACCEPTED`/`REJECTED` wie beim Angebot.
+- [`ConfirmationStatus`](../../src/Model/Enum/ConfirmationStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Hat `label()` für deutsche Bezeichnung. Beachten: **kein** `WON`/`LOST` wie beim Angebot.
 - [`ConfirmationCommentActionKey`](../../src/Model/Enum/ConfirmationCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT` — schlanker als bei Offers (`WIN`/`LOSE` fehlen).
 - [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
 - [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
@@ -402,7 +402,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 - **`delete()` nur im `DRAFT`.** Nach `complete()` ist nur noch `cancel()` möglich.
 - **`ConfirmationItemCreateOptions` ist auch der Update-Typ.** Der Konstruktor verlangt `quantity` und `unitPrice` auch beim Update, an dem sich diese Werte gar nicht ändern sollen.
 - **`array_is_list`-Normalisierung in `list()`.** Bei genau einem Treffer liefert Billomat `confirmation` als Objekt — das SDK packt das selbst in eine Liste.
-- **`offerId`-Verknüpfung ist informativ.** Die Bestätigung wird nicht automatisch mit dem Angebots-Status synchronisiert — `OfferStatus::ACCEPTED` muss man separat über `OffersApi::win()` setzen.
+- **`offerId`-Verknüpfung ist informativ.** Die Bestätigung wird nicht automatisch mit dem Angebots-Status synchronisiert — `OfferStatus::WON` muss man separat über `OffersApi::win()` setzen.
 - **`tax_changed_manually` ist Pflicht für manuelle `taxRate`-Werte.** Ohne das Flag nimmt Billomat den Default des Artikels/Kunden.
 - **`ConfirmationPdf` ist nicht `readonly`** — pragmatische Ausnahme, damit der Container Binärdaten halten kann.
 - **`uploadSignature()` erwartet reines Base64**, kein `data:`-Prefix.

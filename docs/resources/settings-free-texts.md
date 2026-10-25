@@ -63,11 +63,11 @@ Liefert `null` bei 404.
 | `intro` | `intro` | `?string` | Einleitungstext / Brieftext |
 | `note` | `note` | `?string` | Anmerkungen am Dokumentende |
 | `created`, `updated` | `?\DateTimeImmutable` |  | |
-| `isDefault` | `?bool` |  | |
+| `type` | `type` | `?FreeTextType` | Dokumenttyp (siehe unten) |
+| `name` | `name` | `?string` | interner Bezeichner der Vorlage |
+| `isDefault` | `is_default` | `?bool` | |
 
-> Die Billomat-Spec listet zusätzlich `name` (interner Bezeichner der Vorlage), `type` (Dokumenttyp) und `is_default`. Das SDK exponiert diese Felder im Read-Modell aktuell nicht — die Erweiterung in `FreeText::fromArray()` ist trivial.
-
-## Dokumenttypen (laut Spec)
+## Dokumenttypen (`FreeTextType`)
 
 | Wert | Verwendung |
 |---|---|

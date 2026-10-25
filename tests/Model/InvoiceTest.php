@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
@@ -277,7 +278,7 @@ final class InvoiceTest extends TestCase
         self::assertSame(7, $invoice->confirmationId);
         self::assertNull($invoice->recurringId);
 
-        self::assertSame('CASH,BANK_TRANSFER,PAYPAL', $invoice->paymentTypes);
+        self::assertSame([InvoicePaymentType::CASH, InvoicePaymentType::BANK_TRANSFER, InvoicePaymentType::PAYPAL], $invoice->paymentTypes);
         self::assertNull($invoice->templateId);
 
         // Taxes

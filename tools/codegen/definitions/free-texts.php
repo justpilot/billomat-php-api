@@ -37,6 +37,7 @@ return [
         'type' => [
             'doc' => 'Dokumenttyp, für den der Freitext gilt.',
             'details' => ['Mögliche Werte: INVOICE, CORRECTION, OFFER, CONFIRMATION, CREDIT_NOTE, DELIVERY_NOTE, LETTER'],
+            'enum' => 'FreeTextType',
         ],
         'name' => ['doc' => 'Name der Textvorlage.'],
         'is_default' => ['doc' => 'Standard-Freitext für den Dokumenttyp?'],

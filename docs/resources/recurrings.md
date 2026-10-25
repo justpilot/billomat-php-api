@@ -139,7 +139,7 @@ Konstruktor: `new RecurringCreateOptions(int $clientId, …)` — `clientId` ist
 | `currencyCode` | `currency_code` | `?string` |
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` |
-| `paymentTypes` | `payment_types` | `?string` (CSV) |
+| `paymentTypes` | `payment_types` | `list<InvoicePaymentType>` (Billomat: kommasepariert) |
 | `freeTextId` | `free_text_id` | `?int` |
 | `templateId` | `template_id` | `?int` |
 
@@ -203,7 +203,8 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `supplyDateType` | `?SupplyDateType` |
 | `dueDays`, `discountRate`, `discountDays` | `?int`, `?float`, `?int` |
 | `name`, `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `currencyCode`, `paymentTypes` | `?string` |
+| `currencyCode` | `?string` |
+| `paymentTypes` | `list<InvoicePaymentType>` (unbekannte Werte fallen heraus) |
 | `netGross` | `?NetGross` |
 | `quote` | `?float` |
 | `action`, `cycle` | `?RecurringAction`, `?RecurringCycle` |

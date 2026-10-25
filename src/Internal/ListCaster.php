@@ -6,7 +6,8 @@ namespace Justpilot\Billomat\Internal;
 
 /**
  * Hilfsklasse für verschachtelte Listen in Billomat-Responses
- * (z. B. `taxes.tax` oder `invoice-items.invoice-item`).
+ * (z. B. `taxes.tax` oder `invoice-items.invoice-item`) und für kommaseparierte
+ * Enum-Werte (z. B. `payment_types`).
  *
  * Billomat liefert eine Liste mit genau einem Eintrag als einzelnes Objekt
  * statt als Liste. Diese Klasse normalisiert beide Formen auf eine Liste und
@@ -42,6 +43,35 @@ final class ListCaster
             if (\is_array($row)) {
                 /** @var array<string,mixed> $row */
                 $list[] = $hydrate($row);
+            }
+        }
+
+        return $list;
+    }
+
+    /**
+     * Zerlegt einen kommaseparierten Billomat-String (z. B. "BANK_TRANSFER,CASH") in Enum-Fälle.
+     *
+     * Leerzeichen um die Werte werden entfernt; unbekannte und leere Werte fallen heraus.
+     *
+     * @template T of \BackedEnum
+     *
+     * @param class-string<T> $enum
+     *
+     * @return list<T>
+     */
+    public static function toEnumList(mixed $value, string $enum): array
+    {
+        $string = ScalarCaster::toStringOrNull($value);
+        if (null === $string) {
+            return [];
+        }
+
+        $list = [];
+        foreach (explode(',', $string) as $part) {
+            $case = $enum::tryFrom(trim($part));
+            if (null !== $case) {
+                $list[] = $case;
             }
         }
 

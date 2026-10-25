@@ -811,7 +811,7 @@ final class InvoicesApiTest extends TestCase
         $opts = new InvoiceMailOptions(
             color: true,
             duplex: false,
-            paperWeight: '90',
+            paperWeight: 90,
             attachments: [
                 ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
             ],
@@ -826,7 +826,7 @@ final class InvoicesApiTest extends TestCase
         self::assertArrayHasKey('mail', $payload);
         self::assertSame(1, $payload['mail']['color']);
         self::assertSame(0, $payload['mail']['duplex']);
-        self::assertSame('90', $payload['mail']['paper_weight']);
+        self::assertSame(90, $payload['mail']['paper_weight']);
         self::assertArrayNotHasKey('recipient_address', $payload['mail']);
         self::assertCount(1, $payload['mail']['attachments']['attachment']);
         self::assertSame('agb.pdf', $payload['mail']['attachments']['attachment'][0]['filename']);
@@ -1034,7 +1034,7 @@ final class InvoicesApiTest extends TestCase
         $groups = $api->listGrouped(InvoiceGroupBy::STATUS);
 
         self::assertCount(1, $groups);
-        self::assertSame('OPEN', $groups[0]->status);
+        self::assertSame(InvoiceStatus::OPEN, $groups[0]->status);
 
         $parts = parse_url($captured['url']);
         $query = [];

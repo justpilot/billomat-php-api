@@ -11,10 +11,10 @@ namespace Justpilot\Billomat\Model\Enum;
  *
  * Lebenszyklus:
  *  - DRAFT  → über `complete()` → OPEN
- *  - OPEN   → über `win()`  → ACCEPTED
- *  - OPEN   → über `lose()` → REJECTED
+ *  - OPEN   → über `win()`  → WON
+ *  - OPEN   → über `lose()` → LOST
  *  - OPEN   → über `clear()`→ CLEARED
- *  - OPEN/ACCEPTED → über `cancel()` → CANCELED
+ *  - OPEN/WON → über `cancel()` → CANCELED
  */
 enum OfferStatus: string
 {
@@ -24,11 +24,11 @@ enum OfferStatus: string
     /** offen / versendet */
     case OPEN = 'OPEN';
 
-    /** angenommen */
-    case ACCEPTED = 'ACCEPTED';
+    /** gewonnen (angenommen) */
+    case WON = 'WON';
 
-    /** abgelehnt */
-    case REJECTED = 'REJECTED';
+    /** verloren (abgelehnt) */
+    case LOST = 'LOST';
 
     /** erledigt (z. B. in Rechnung übernommen) */
     case CLEARED = 'CLEARED';
@@ -46,8 +46,8 @@ enum OfferStatus: string
         return match ($this) {
             self::DRAFT => 'Entwurf',
             self::OPEN => 'Offen',
-            self::ACCEPTED => 'Angenommen',
-            self::REJECTED => 'Abgelehnt',
+            self::WON => 'Gewonnen',
+            self::LOST => 'Verloren',
             self::CLEARED => 'Erledigt',
             self::CANCELED => 'Storniert',
         };

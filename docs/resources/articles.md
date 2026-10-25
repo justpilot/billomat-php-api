@@ -270,7 +270,6 @@ Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt:
 - **`articleNumber` ist read-only.** Das Feld erscheint nur im Read-Modell und wird serverseitig aus `numberPre` + `number` (gepaddet auf `numberLength`) gebildet.
 - **`purchasePriceCurrencyCode` kann von `currencyCode` abweichen.** Für einen Artikel mit EK in USD und VK in EUR beide Felder setzen.
 - **`PropertyType::CHECKBOX` erwartet `0`/`1` als `value`.** Boolean-Strings (`"true"`/`"false"`) werden nicht erkannt.
-- **`ArticlePropertyValue::$type` ist String, nicht Enum.** Beim Wert selbst kommt der `type` als roher API-String mit; das `PropertyType`-Enum lebt nur im `ArticleProperty`-Read-Modell (Definition).
 
 ## End-to-End-Beispiel
 

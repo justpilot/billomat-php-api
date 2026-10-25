@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\TaxRule;
+use Justpilot\Billomat\Model\Enum\ValueType;
+
 /**
  * Typisierter Payload für POST /clients gemäß Billomat-API.
  *
@@ -188,7 +193,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Typ: TAX | NO_TAX | COUNTRY
          * Default: COUNTRY
          */
-        public ?string $taxRule = null,
+        public ?TaxRule $taxRule = null,
         /**
          * Preisbasis.
          *
@@ -196,7 +201,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Typ: NET | GROSS | SETTINGS
          * Default: SETTINGS
          */
-        public ?string $netGross = null,
+        public ?NetGross $netGross = null,
         /**
          * Währung des Kunden (ISO-Währungscode).
          *
@@ -258,7 +263,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Typ: SETTINGS | ABSOLUTE | RELATIVE
          * Default: SETTINGS
          */
-        public ?string $discountRateType = null,
+        public ?ValueType $discountRateType = null,
         /**
          * Skonto-Satz.
          *
@@ -273,7 +278,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Typ: SETTINGS | ABSOLUTE | RELATIVE
          * Default: SETTINGS
          */
-        public ?string $discountDaysType = null,
+        public ?ValueType $discountDaysType = null,
         /**
          * Skonto-Tage.
          *
@@ -288,7 +293,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Typ: SETTINGS | ABSOLUTE | RELATIVE
          * Default: SETTINGS
          */
-        public ?string $dueDaysType = null,
+        public ?ValueType $dueDaysType = null,
         /**
          * Fälligkeit in Tagen nach Rechnungsdatum.
          *
@@ -303,7 +308,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Typ: SETTINGS | ABSOLUTE | RELATIVE
          * Default: SETTINGS
          */
-        public ?string $reminderDueDaysType = null,
+        public ?ValueType $reminderDueDaysType = null,
         /**
          * Mahnfälligkeit in Tagen.
          *
@@ -318,7 +323,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Typ: SETTINGS | ABSOLUTE | RELATIVE
          * Default: SETTINGS
          */
-        public ?string $offerValidityDaysType = null,
+        public ?ValueType $offerValidityDaysType = null,
         /**
          * Angebotsgültigkeit in Tagen.
          *
@@ -385,14 +390,16 @@ final readonly class ClientCreateOptions implements WriteOptions
          */
         public ?string $sepaMandateDate = null,
         /**
-         * Standard-Zahlarten (CSV).
+         * Standard-Zahlarten.
          *
-         * Beispiel: "CASH,BANK_TRANSFER"
+         * Billomat überträgt sie kommasepariert, z. B. "CASH,BANK_TRANSFER".
          *
          * Billomat-Feld: default_payment_types
          * Typ: ALNUM
+         *
+         * @var list<InvoicePaymentType>
          */
-        public ?string $defaultPaymentTypes = null,
+        public array $defaultPaymentTypes = [],
     ) {
     }
 
@@ -529,13 +536,13 @@ final readonly class ClientCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `taxRule`. */
-    public function withTaxRule(?string $taxRule): self
+    public function withTaxRule(?TaxRule $taxRule): self
     {
         return clone($this, ['taxRule' => $taxRule]);
     }
 
     /** Kopie mit geändertem `netGross`. */
-    public function withNetGross(?string $netGross): self
+    public function withNetGross(?NetGross $netGross): self
     {
         return clone($this, ['netGross' => $netGross]);
     }
@@ -577,7 +584,7 @@ final readonly class ClientCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `discountRateType`. */
-    public function withDiscountRateType(?string $discountRateType): self
+    public function withDiscountRateType(?ValueType $discountRateType): self
     {
         return clone($this, ['discountRateType' => $discountRateType]);
     }
@@ -589,7 +596,7 @@ final readonly class ClientCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `discountDaysType`. */
-    public function withDiscountDaysType(?string $discountDaysType): self
+    public function withDiscountDaysType(?ValueType $discountDaysType): self
     {
         return clone($this, ['discountDaysType' => $discountDaysType]);
     }
@@ -601,7 +608,7 @@ final readonly class ClientCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `dueDaysType`. */
-    public function withDueDaysType(?string $dueDaysType): self
+    public function withDueDaysType(?ValueType $dueDaysType): self
     {
         return clone($this, ['dueDaysType' => $dueDaysType]);
     }
@@ -613,7 +620,7 @@ final readonly class ClientCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `reminderDueDaysType`. */
-    public function withReminderDueDaysType(?string $reminderDueDaysType): self
+    public function withReminderDueDaysType(?ValueType $reminderDueDaysType): self
     {
         return clone($this, ['reminderDueDaysType' => $reminderDueDaysType]);
     }
@@ -625,7 +632,7 @@ final readonly class ClientCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `offerValidityDaysType`. */
-    public function withOfferValidityDaysType(?string $offerValidityDaysType): self
+    public function withOfferValidityDaysType(?ValueType $offerValidityDaysType): self
     {
         return clone($this, ['offerValidityDaysType' => $offerValidityDaysType]);
     }
@@ -684,8 +691,12 @@ final readonly class ClientCreateOptions implements WriteOptions
         return clone($this, ['sepaMandateDate' => $sepaMandateDate]);
     }
 
-    /** Kopie mit geändertem `defaultPaymentTypes`. */
-    public function withDefaultPaymentTypes(?string $defaultPaymentTypes): self
+    /**
+     * Kopie mit geändertem `defaultPaymentTypes`.
+     *
+     * @param list<InvoicePaymentType> $defaultPaymentTypes
+     */
+    public function withDefaultPaymentTypes(array $defaultPaymentTypes): self
     {
         return clone($this, ['defaultPaymentTypes' => $defaultPaymentTypes]);
     }
@@ -720,23 +731,23 @@ final readonly class ClientCreateOptions implements WriteOptions
             'locale' => $this->locale,
             'tax_number' => $this->taxNumber,
             'vat_number' => $this->vatNumber,
-            'tax_rule' => $this->taxRule,
-            'net_gross' => $this->netGross,
+            'tax_rule' => $this->taxRule?->value,
+            'net_gross' => $this->netGross?->value,
             'currency_code' => $this->currencyCode,
             'debitor_account_number' => $this->debitorAccountNumber,
             'price_group' => $this->priceGroup,
             'archived' => $this->archived,
             'dunning_run' => $this->dunningRun,
             'reduction' => $this->reduction,
-            'discount_rate_type' => $this->discountRateType,
+            'discount_rate_type' => $this->discountRateType?->value,
             'discount_rate' => $this->discountRate,
-            'discount_days_type' => $this->discountDaysType,
+            'discount_days_type' => $this->discountDaysType?->value,
             'discount_days' => $this->discountDays,
-            'due_days_type' => $this->dueDaysType,
+            'due_days_type' => $this->dueDaysType?->value,
             'due_days' => $this->dueDays,
-            'reminder_due_days_type' => $this->reminderDueDaysType,
+            'reminder_due_days_type' => $this->reminderDueDaysType?->value,
             'reminder_due_days' => $this->reminderDueDays,
-            'offer_validity_days_type' => $this->offerValidityDaysType,
+            'offer_validity_days_type' => $this->offerValidityDaysType?->value,
             'offer_validity_days' => $this->offerValidityDays,
             'bank_account_owner' => $this->bankAccountOwner,
             'bank_number' => $this->bankNumber,
@@ -746,7 +757,7 @@ final readonly class ClientCreateOptions implements WriteOptions
             'bank_iban' => $this->bankIban,
             'sepa_mandate' => $this->sepaMandate,
             'sepa_mandate_date' => $this->sepaMandateDate,
-            'default_payment_types' => $this->defaultPaymentTypes,
+            'default_payment_types' => [] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->defaultPaymentTypes)),
         ], static fn (mixed $v): bool => null !== $v);
     }
 }

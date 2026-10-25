@@ -75,7 +75,7 @@ final class OffersApiTest extends TestCase
                         [
                             'id' => 2,
                             'client_id' => 456,
-                            'status' => OfferStatus::ACCEPTED->value,
+                            'status' => OfferStatus::WON->value,
                             'offer_number' => 'AN-2026-0002',
                             'date' => '2026-01-02',
                             'currency_code' => 'EUR',
@@ -99,7 +99,7 @@ final class OffersApiTest extends TestCase
         self::assertCount(2, $offers);
         self::assertContainsOnlyInstancesOf(Offer::class, $offers);
         self::assertSame(OfferStatus::DRAFT, $offers[0]->status);
-        self::assertSame(OfferStatus::ACCEPTED, $offers[1]->status);
+        self::assertSame(OfferStatus::WON, $offers[1]->status);
 
         $parts = parse_url($captured['url']);
         self::assertSame('/api/offers', $parts['path'] ?? null);

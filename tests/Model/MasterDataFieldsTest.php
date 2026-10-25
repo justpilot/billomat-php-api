@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Model;
 use Closure;
 use DateTimeImmutable;
 use Generator;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\Client;
@@ -21,6 +22,7 @@ use Justpilot\Billomat\Model\Enum\ArticleType;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
+use Justpilot\Billomat\Model\Enum\FreeTextType;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
@@ -88,6 +90,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(TemplateType::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(ListCaster::class)]
 final class MasterDataFieldsTest extends TestCase
 {
     /**
@@ -145,8 +148,8 @@ final class MasterDataFieldsTest extends TestCase
         ];
         yield 'FreeText' => [
             FreeText::fromArray(...),
-            ['id' => '1', 'type' => 'Text', 'name' => 'Text', 'is_default' => '1'],
-            ['type' => 'Text', 'name' => 'Text', 'isDefault' => true],
+            ['id' => '1', 'type' => 'CORRECTION', 'name' => 'Text', 'is_default' => '1'],
+            ['type' => FreeTextType::CORRECTION, 'name' => 'Text', 'isDefault' => true],
         ];
         yield 'InboxDocument' => [
             InboxDocument::fromArray(...),

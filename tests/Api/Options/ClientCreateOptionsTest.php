@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api\Options;
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\TaxRule;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -60,8 +63,8 @@ final class ClientCreateOptionsTest extends TestCase
             firstName: 'Max',
             lastName: 'Mustermann',
             email: 'max@example.com',
-            taxRule: 'TAX',
-            netGross: 'NET',
+            taxRule: TaxRule::TAX,
+            netGross: NetGross::NET,
             currencyCode: 'EUR',
             archived: true,
             dunningRun: true,
@@ -71,7 +74,7 @@ final class ClientCreateOptionsTest extends TestCase
             bankIban: 'DE89370400440532013000',
             sepaMandate: 'M-001',
             sepaMandateDate: '2024-01-01',
-            defaultPaymentTypes: 'BANK_TRANSFER,CASH',
+            defaultPaymentTypes: [InvoicePaymentType::BANK_TRANSFER, InvoicePaymentType::CASH],
         );
 
         $payload = $options->toArray();

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\EmailTemplateType;
 
 use const DATE_ATOM;
 
@@ -47,7 +48,7 @@ final readonly class EmailTemplate
          *
          * Mögliche Werte: INVOICES, OFFERS, CONFIRMATIONS, CREDIT_NOTES, DELIVERY_NOTES, REMINDERS, PAYMENT_THANKS
          */
-        public ?string $type = null,
+        public ?EmailTemplateType $type = null,
         /** Erhält der Absender eine BCC-Kopie? */
         public ?bool $bcc = null,
         /** Erstellungszeitpunkt der Vorlage. */
@@ -71,7 +72,7 @@ final readonly class EmailTemplate
             body: ScalarCaster::toStringOrNull($data['text'] ?? $data['body'] ?? null),
             fromAddress: ScalarCaster::toStringOrNull($data['from'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
-            type: ScalarCaster::toStringOrNull($data['type'] ?? null),
+            type: EmailTemplateType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             bcc: ScalarCaster::toBoolOrNull($data['bcc'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -94,7 +95,7 @@ final readonly class EmailTemplate
             'body' => $this->body,
             'from' => $this->fromAddress,
             'is_default' => $this->isDefault,
-            'type' => $this->type,
+            'type' => $this->type?->value,
             'bcc' => $this->bcc,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),

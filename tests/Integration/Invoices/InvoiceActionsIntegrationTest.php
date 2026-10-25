@@ -168,7 +168,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $billomat = $this->createBillomatClientOrSkip();
         $invoiceId = $this->createCompletedInvoice($billomat);
 
-        $opts = new InvoiceMailOptions(color: false, duplex: true, paperWeight: '80');
+        $opts = new InvoiceMailOptions(color: false, duplex: true, paperWeight: 80);
 
         $billomat->invoices->mail($invoiceId, $opts);
     }

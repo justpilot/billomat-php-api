@@ -200,13 +200,13 @@ final class OffersApi extends AbstractApi
         $this->putVoid("/offers/{$id}/cancel");
     }
 
-    /** Markiert ein Angebot als gewonnen (Status → ACCEPTED). */
+    /** Markiert ein Angebot als gewonnen (Status → WON). */
     public function win(int $id): void
     {
         $this->putVoid("/offers/{$id}/win");
     }
 
-    /** Markiert ein Angebot als verloren (Status → REJECTED). */
+    /** Markiert ein Angebot als verloren (Status → LOST). */
     public function lose(int $id): void
     {
         $this->putVoid("/offers/{$id}/lose");

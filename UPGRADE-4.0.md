@@ -495,3 +495,76 @@ foreach ($invoice->taxes as $tax) {
 ```
 
 `$tax->toArray()` gives the old array shape, with the amount as a string.
+
+## More fields are enums
+
+### `OfferStatus::ACCEPTED`/`REJECTED` are `WON`/`LOST`
+
+Billomat calls won and lost offers `WON` and `LOST`. In 3.x these offers hydrated to `status = null`,
+and filtering by `ACCEPTED`/`REJECTED` found nothing.
+
+```php
+// 3.x
+if ($offer->status === OfferStatus::ACCEPTED) { … }
+$billomat->offers->list(new OfferFilter(status: [OfferStatus::REJECTED]));
+
+// 4.0
+if ($offer->status === OfferStatus::WON) { … }
+$billomat->offers->list(new OfferFilter(status: [OfferStatus::LOST]));
+```
+
+`label()` returns „Gewonnen“ and „Verloren“.
+
+### Enums instead of strings
+
+| Field | 3.x | 4.0 |
+|---|---|---|
+| `Client::$taxRule`, `ClientCreateOptions`/`ClientUpdateOptions` `taxRule` | `?string` | `?TaxRule` |
+| `Client::$netGross`, options `netGross` | `?string` | `?NetGross` |
+| `Client::$discountRateType`, `$discountDaysType`, `$dueDaysType`, `$reminderDueDaysType`, `$offerValidityDaysType` and the same options | `?string` | `?ValueType` |
+| `ClientPropertyValue`, `SupplierPropertyValue`, `ArticlePropertyValue`, `IncomingPropertyValue` `$type` | `?string` | `?PropertyType` |
+| `InvoiceGroup::$status` | `?string` | `?InvoiceStatus` |
+| `FreeText::$type` | `?string` | `?FreeTextType` |
+| `EmailTemplate::$type` | `?string` | `?EmailTemplateType` |
+
+All enums live in `Justpilot\Billomat\Model\Enum`. Unknown values hydrate to `null`; `->value` gives the
+Billomat string.
+
+```php
+// 3.x
+new ClientCreateOptions(name: 'ACME', taxRule: 'NO_TAX', dueDaysType: 'ABSOLUTE', dueDays: 14);
+if ($client->netGross === 'GROSS') { … }
+
+// 4.0
+new ClientCreateOptions(name: 'ACME', taxRule: TaxRule::NO_TAX, dueDaysType: ValueType::ABSOLUTE, dueDays: 14);
+if ($client->netGross === NetGross::GROSS) { … }
+```
+
+### Payment types are a list of `InvoicePaymentType`
+
+`Invoice::$paymentTypes`, `Recurring::$paymentTypes`, `Client::$defaultPaymentTypes` and the matching
+`*CreateOptions`/`*UpdateOptions` are `list<InvoicePaymentType>` instead of a comma-separated string.
+The SDK still sends and exports the comma-separated string.
+
+```php
+// 3.x
+new InvoiceCreateOptions(clientId: $id, paymentTypes: 'BANK_TRANSFER,PAYPAL');
+$acceptsPaypal = str_contains($invoice->paymentTypes ?? '', 'PAYPAL');
+
+// 4.0
+new InvoiceCreateOptions(clientId: $id, paymentTypes: [InvoicePaymentType::BANK_TRANSFER, InvoicePaymentType::PAYPAL]);
+$acceptsPaypal = in_array(InvoicePaymentType::PAYPAL, $invoice->paymentTypes, true);
+```
+
+An empty list (the default) is not sent. In update options, `Clear::Field` empties the field. Values
+the enum doesn't know are dropped when hydrating.
+
+### `InvoiceMailOptions::$paperWeight` is an `int`
+
+```php
+// 3.x
+new InvoiceMailOptions(paperWeight: '90');
+
+// 4.0
+new InvoiceMailOptions(paperWeight: 90);
+```

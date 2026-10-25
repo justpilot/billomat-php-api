@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
@@ -148,12 +149,16 @@ final readonly class RecurringUpdateOptions implements WriteOptions
          */
         public float|Clear|null $quote = null,
         /**
-         * Akzeptierte Zahlungsarten (kommasepariert).
+         * Akzeptierte Zahlungsarten.
+         *
+         * Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".
          *
          * Billomat-Feld: payment_types
          * Typ: ALNUM
+         *
+         * @var list<InvoicePaymentType>|Clear
          */
-        public string|Clear|null $paymentTypes = null,
+        public array|Clear $paymentTypes = [],
         /**
          * Aktion, die bei jedem Lauf ausgeführt wird.
          *
@@ -418,8 +423,12 @@ final readonly class RecurringUpdateOptions implements WriteOptions
         return clone($this, ['quote' => $quote]);
     }
 
-    /** Kopie mit geändertem `paymentTypes`. */
-    public function withPaymentTypes(string|Clear|null $paymentTypes): self
+    /**
+     * Kopie mit geändertem `paymentTypes`.
+     *
+     * @param list<InvoicePaymentType>|Clear $paymentTypes
+     */
+    public function withPaymentTypes(array|Clear $paymentTypes): self
     {
         return clone($this, ['paymentTypes' => $paymentTypes]);
     }
@@ -586,7 +595,7 @@ final readonly class RecurringUpdateOptions implements WriteOptions
                 'currency_code' => $this->currencyCode,
                 'net_gross' => $this->netGross instanceof NetGross ? $this->netGross->value : $this->netGross,
                 'quote' => $this->quote,
-                'payment_types' => $this->paymentTypes,
+                'payment_types' => $this->paymentTypes instanceof Clear ? $this->paymentTypes : ([] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes))),
                 'action' => $this->action instanceof RecurringAction ? $this->action->value : $this->action,
                 'cycle_number' => $this->cycleNumber,
                 'cycle' => $this->cycle instanceof RecurringCycle ? $this->cycle->value : $this->cycle,

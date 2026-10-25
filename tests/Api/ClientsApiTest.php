@@ -14,8 +14,13 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\TaxRule;
+use Justpilot\Billomat\Model\Enum\ValueType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
@@ -44,6 +49,7 @@ use const PHP_URL_QUERY;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(ListCaster::class)]
 final class ClientsApiTest extends TestCase
 {
     #[Test]
@@ -408,28 +414,28 @@ final class ClientsApiTest extends TestCase
             numberPre: 'KU-',
             numberLength: 5,
             locale: 'de_DE',
-            taxRule: 'COUNTRY',
-            netGross: 'NET',
+            taxRule: TaxRule::COUNTRY,
+            netGross: NetGross::NET,
             currencyCode: 'EUR',
             priceGroup: 2,
             dunningRun: true,
             reduction: 5.0,
-            discountRateType: 'ABSOLUTE',
+            discountRateType: ValueType::ABSOLUTE,
             discountRate: 2.5,
-            discountDaysType: 'ABSOLUTE',
+            discountDaysType: ValueType::ABSOLUTE,
             discountDays: 7.0,
-            dueDaysType: 'ABSOLUTE',
+            dueDaysType: ValueType::ABSOLUTE,
             dueDays: 14,
-            reminderDueDaysType: 'SETTINGS',
+            reminderDueDaysType: ValueType::SETTINGS,
             reminderDueDays: 10,
-            offerValidityDaysType: 'SETTINGS',
+            offerValidityDaysType: ValueType::SETTINGS,
             offerValidityDays: 30,
             bankAccountOwner: 'Max Mustermann',
             bankSwift: 'COBADEFFXXX',
             bankIban: 'DE89370400440532013000',
             sepaMandate: 'MD-001',
             sepaMandateDate: '2026-01-15',
-            defaultPaymentTypes: 'CASH,BANK_TRANSFER',
+            defaultPaymentTypes: [InvoicePaymentType::CASH, InvoicePaymentType::BANK_TRANSFER],
         );
 
         $payload = $opts->toArray();
@@ -514,15 +520,15 @@ final class ClientsApiTest extends TestCase
         self::assertSame('MD-001', $c->sepaMandate);
         self::assertNotNull($c->sepaMandateDate);
         self::assertSame('2026-01-10', $c->sepaMandateDate->format('Y-m-d'));
-        self::assertSame('CASH,BANK_TRANSFER', $c->defaultPaymentTypes);
+        self::assertSame([InvoicePaymentType::CASH, InvoicePaymentType::BANK_TRANSFER], $c->defaultPaymentTypes);
         self::assertTrue($c->enableCustomerportal);
         self::assertSame('11900.5', $c->revenueGross?->toString());
         self::assertSame('10000.42', $c->revenueNet?->toString());
-        self::assertSame('ABSOLUTE', $c->discountRateType);
-        self::assertSame('ABSOLUTE', $c->discountDaysType);
-        self::assertSame('ABSOLUTE', $c->dueDaysType);
-        self::assertSame('SETTINGS', $c->reminderDueDaysType);
-        self::assertSame('SETTINGS', $c->offerValidityDaysType);
+        self::assertSame(ValueType::ABSOLUTE, $c->discountRateType);
+        self::assertSame(ValueType::ABSOLUTE, $c->discountDaysType);
+        self::assertSame(ValueType::ABSOLUTE, $c->dueDaysType);
+        self::assertSame(ValueType::SETTINGS, $c->reminderDueDaysType);
+        self::assertSame(ValueType::SETTINGS, $c->offerValidityDaysType);
     }
 
     #[Test]

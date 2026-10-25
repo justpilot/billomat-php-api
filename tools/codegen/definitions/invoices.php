@@ -115,8 +115,10 @@ return [
         'recurring_id' => ['doc' => 'ID der Abo-Rechnung, aus der die Rechnung entstanden ist.'],
         'taxes' => ['type' => 'taxes', 'readOnly' => true, 'doc' => 'Steuerzeilen der Rechnung (Zusammenfassung pro Steuersatz).'],
         'payment_types' => [
-            'doc' => 'Akzeptierte Zahlungsarten (kommasepariert).',
-            'details' => ['Beispiel: "BANK_TRANSFER,CASH"'],
+            'doc' => 'Akzeptierte Zahlungsarten.',
+            'details' => ['Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".'],
+            'enum' => 'InvoicePaymentType',
+            'enumList' => true,
         ],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Rechnung abgeschlossen wird.'],
         'invoice-items' => [

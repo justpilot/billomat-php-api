@@ -32,11 +32,11 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itPassesPaperWeightThroughUntouched(): void
     {
-        $options = new InvoiceMailOptions(paperWeight: '90');
+        $options = new InvoiceMailOptions(paperWeight: 90);
 
         $payload = $options->toArray();
 
-        self::assertSame('90', $payload['paper_weight']);
+        self::assertSame(90, $payload['paper_weight']);
     }
 
     #[Test]

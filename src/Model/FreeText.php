@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\FreeTextType;
 
 use const DATE_ATOM;
 
@@ -42,7 +43,7 @@ final readonly class FreeText
          *
          * Mögliche Werte: INVOICE, CORRECTION, OFFER, CONFIRMATION, CREDIT_NOTE, DELIVERY_NOTE, LETTER
          */
-        public ?string $type = null,
+        public ?FreeTextType $type = null,
         /** Name der Textvorlage. */
         public ?string $name = null,
         /** Standard-Freitext für den Dokumenttyp? */
@@ -65,7 +66,7 @@ final readonly class FreeText
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            type: ScalarCaster::toStringOrNull($data['type'] ?? null),
+            type: FreeTextType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
         );
@@ -88,7 +89,7 @@ final readonly class FreeText
             'note' => $this->note,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'type' => $this->type,
+            'type' => $this->type?->value,
             'name' => $this->name,
             'is_default' => $this->isDefault,
         ];

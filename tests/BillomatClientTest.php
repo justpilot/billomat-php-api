@@ -10,6 +10,7 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -30,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Client::class)]
+#[UsesClass(ListCaster::class)]
 final class BillomatClientTest extends TestCase
 {
     #[Test]

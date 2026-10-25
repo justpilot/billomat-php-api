@@ -54,6 +54,14 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'OfferFilter',
+        'endpoint' => 'GET /api/offers',
+        'fields' => [
+            'status' => ['enum' => 'OfferStatus'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Angebots.'],
         'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],

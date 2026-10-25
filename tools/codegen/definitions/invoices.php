@@ -65,6 +65,15 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'InvoiceFilter',
+        'endpoint' => 'GET /api/invoices',
+        'fields' => [
+            'status' => ['enum' => 'InvoiceStatus'],
+            'payment_type' => ['enum' => 'InvoicePaymentType'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Rechnung.'],
         'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],

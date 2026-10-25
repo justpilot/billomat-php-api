@@ -62,6 +62,15 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'RecurringFilter',
+        'endpoint' => 'GET /api/recurrings',
+        'fields' => [
+            'payment_type' => ['enum' => 'InvoicePaymentType'],
+            'cycle' => ['enum' => 'RecurringCycle'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Abo-Rechnung.'],
         'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],

@@ -51,6 +51,14 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'ReminderFilter',
+        'endpoint' => 'GET /api/reminders?invoice_number=RE123',
+        'fields' => [
+            'status' => ['enum' => 'ReminderStatus'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Mahnung.'],
         'client_id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'ID des Kunden.'],

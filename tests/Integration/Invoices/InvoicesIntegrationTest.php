@@ -7,8 +7,10 @@ namespace Justpilot\Billomat\Tests\Integration\Invoices;
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
+use Justpilot\Billomat\Api\InvoiceFilter;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -111,6 +113,41 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
             self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
             self::assertInstanceOf(InvoiceStatus::class, $first->status);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function canListInvoicesWithTypedFilter(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $statuses = [InvoiceStatus::DRAFT, InvoiceStatus::OPEN, InvoiceStatus::PAID];
+        $from = new DateTimeImmutable('2000-01-01');
+
+        // Mehrfach-Status und geschachtelte Sortierung gehen kommasepariert an Billomat.
+        $invoices = $billomat->invoices->list(new InvoiceFilter(
+            status: $statuses,
+            from: $from,
+            orderBy: OrderBy::desc('date')->thenAsc('id'),
+            perPage: 20,
+        ));
+
+        self::assertContainsOnlyInstancesOf(Invoice::class, $invoices);
+        $previous = null;
+        foreach ($invoices as $invoice) {
+            self::assertContains($invoice->status, $statuses);
+            self::assertNotNull($invoice->date);
+            self::assertGreaterThanOrEqual($from, $invoice->date);
+            if ($previous instanceof DateTimeImmutable) {
+                self::assertLessThanOrEqual($previous, $invoice->date, 'Rechnungen sind nicht absteigend nach Datum sortiert.');
+            }
+            $previous = $invoice->date;
+        }
+
+        // Ein Status, den keine der gelisteten Rechnungen hat, liefert eine disjunkte Menge.
+        $canceled = $billomat->invoices->list(new InvoiceFilter(status: [InvoiceStatus::CANCELED], perPage: 20));
+        foreach ($canceled as $invoice) {
+            self::assertSame(InvoiceStatus::CANCELED, $invoice->status);
         }
     }
 

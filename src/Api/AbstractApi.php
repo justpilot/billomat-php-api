@@ -125,17 +125,17 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                           $path     Endpunkt, z. B. "/clients"
-     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param array<string, scalar|array|null> $filters  optionale Query-Filter
+     * @param string                                      $path     Endpunkt, z. B. "/clients"
+     * @param string                                      $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                      $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T             $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array|null> $filters  optionale Query-Filter
      *
      * @return list<T>
      */
-    protected function listResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = []): array
+    protected function listResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, ListFilter|array $filters = []): array
     {
-        $data = $this->getJson($path, $filters);
+        $data = $this->getJson($path, self::filterQuery($filters));
 
         $node = $data[$outerKey][$innerKey] ?? null;
 
@@ -163,16 +163,17 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                           $path     Endpunkt, z. B. "/clients"
-     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param array<string, scalar|array|null> $filters  optionale Query-Filter
+     * @param string                                      $path     Endpunkt, z. B. "/clients"
+     * @param string                                      $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                      $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T             $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array|null> $filters  optionale Query-Filter
      *
      * @return Page<T>
      */
-    protected function listResourcePage(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = []): Page
+    protected function listResourcePage(string $path, string $outerKey, string $innerKey, Closure $hydrate, ListFilter|array $filters = []): Page
     {
+        $filters = self::filterQuery($filters);
         $data = $this->getJson($path, $filters);
 
         $envelope = $data[$outerKey] ?? null;
@@ -210,17 +211,18 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                           $path     Endpunkt, z. B. "/clients"
-     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param array<string, scalar|array|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
-     * @param int                              $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit)
+     * @param string                                      $path     Endpunkt, z. B. "/clients"
+     * @param string                                      $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                      $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T             $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
+     * @param int                                         $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit)
      *
      * @return Generator<int, T>
      */
-    protected function iterateResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = [], int $pageSize = 100): Generator
+    protected function iterateResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, ListFilter|array $filters = [], int $pageSize = 100): Generator
     {
+        $filters = self::filterQuery($filters);
         $pageSize = max(1, $pageSize);
         $page = 1;
 
@@ -302,5 +304,17 @@ abstract class AbstractApi
     protected function getRaw(string $path, array $query = []): string
     {
         return (string) $this->http->request('GET', $path, $query)->getBody();
+    }
+
+    /**
+     * Wandelt einen typisierten Filter in Query-Parameter um; Arrays bleiben unverändert.
+     *
+     * @param ListFilter|array<string, scalar|array<mixed>|null> $filters
+     *
+     * @return array<string, scalar|array<mixed>|null>
+     */
+    protected static function filterQuery(ListFilter|array $filters): array
+    {
+        return $filters instanceof ListFilter ? $filters->toQuery() : $filters;
     }
 }

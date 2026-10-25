@@ -48,6 +48,14 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'CreditNoteFilter',
+        'endpoint' => 'GET /api/credit-notes',
+        'fields' => [
+            'status' => ['enum' => 'CreditNoteStatus'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Gutschrift.'],
         'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],

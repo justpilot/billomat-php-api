@@ -68,12 +68,12 @@ final class ConfirmationsApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param ConfirmationFilter|array<string, scalar|array|null> $filters
      *
      * @return list<Confirmation>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(ConfirmationFilter|array $filters = []): array
     {
         return $this->listResource('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters);
     }
@@ -85,12 +85,12 @@ final class ConfirmationsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ConfirmationFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<Confirmation>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(ConfirmationFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters);
     }
@@ -103,12 +103,12 @@ final class ConfirmationsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ConfirmationFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, Confirmation>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(ConfirmationFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters, $pageSize);
     }

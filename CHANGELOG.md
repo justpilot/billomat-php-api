@@ -15,6 +15,8 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 - `WriteOptions` interface with `toArray()`, implemented by all `*CreateOptions`/`*UpdateOptions` and the other write options.
 - `Clear::Field` empties a field in `*UpdateOptions` and `SettingsUpdateOptions`: `null` still means "not sent, unchanged"; `Clear::Field` is sent as JSON `null`, which makes Billomat clear the field.
 - `with*()` methods on every options class return a copy with one field changed (PHP 8.5 `clone` with properties), e.g. `$options->withNote('…')`; `withItem()` on document create options appends a position.
+- **Typed list filters** for the main resources: `ClientFilter`, `SupplierFilter`, `ArticleFilter`, `UserFilter`, `InvoiceFilter`, `OfferFilter`, `ConfirmationFilter`, `CreditNoteFilter`, `DeliveryNoteFilter`, `LetterFilter`, `ReminderFilter`, `IncomingFilter`, `RecurringFilter` and `TemplateFilter`, generated from the Billomat docs. They're immutable (named arguments plus `with*()`), use enums for status and payment types, `DateTimeImmutable` for `from`/`to` and lists for multi-value filters (sent comma-separated). `list()`, `listPage()` and `iterateAll()` accept them next to the plain arrays, which keep working. `extra` passes further query parameters.
+- `OrderBy` builds `order_by`: `OrderBy::desc('date')->thenAsc('invoice_number')` gives `date+DESC,invoice_number+ASC`.
 - Exception messages include the method, the path and Billomat's error text, e.g. `Billomat responded with HTTP 422 to POST /clients. Name is missing`.
 
 ### Changed

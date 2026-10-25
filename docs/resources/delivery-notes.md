@@ -77,15 +77,21 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 ### Delivery Notes
 
-#### `list(array $filters = []): list<DeliveryNote>`
+#### `list(DeliveryNoteFilter|array $filters = []): list<DeliveryNote>`
 
 Filter laut Billomat-Doku: `client_id`, `contact_id`, `status`, `from`, `to`, `number_pre`, `tags`, `invoice_id`, `confirmation_id`, `order_by`. `array_is_list()` normalisiert Single-Treffer.
 
+Empfohlen ist der typisierte Filter `DeliveryNoteFilter` mit den camelCase-Feldern `clientId`, `contactId`, `deliveryNoteNumber`, `status` (`list<DeliveryNoteStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` und `articleId`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `invoice_id`, `confirmation_id`, `number_pre`). Ein einfaches Array funktioniert weiterhin.
+
 ```php
-$openDeliveries = $billomat->deliveryNotes->list([
-    'status' => 'OPEN',
-    'order_by' => 'date+DESC',
-]);
+use Justpilot\Billomat\Api\DeliveryNoteFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
+
+$openDeliveries = $billomat->deliveryNotes->list(new DeliveryNoteFilter(
+    status: [DeliveryNoteStatus::OPEN],
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
 #### `get(int $id): ?DeliveryNote`

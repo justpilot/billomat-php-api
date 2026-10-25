@@ -72,15 +72,21 @@ DRAFT  ── complete() ──▶  OPEN  ── clear() ──▶  CLEARED   (e
 
 ### Letters
 
-#### `list(array $filters = []): list<Letter>`
+#### `list(LetterFilter|array $filters = []): list<Letter>`
 
-Filter werden 1:1 als Query-String an Billomat durchgereicht (`client_id`, `contact_id`, `status`, `from`, `to`, `tags`, …). Array-Werte landen als `key[]=…`.
+Billomat filtert u. a. nach `client_id`, `contact_id`, `supplier_id`, `status`, `from`, `to`, `tags`, …
+
+Empfohlen ist der typisierte Filter `LetterFilter` mit den camelCase-Feldern `clientId`, `contactId`, `supplierId`, `status` (`list<LetterStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro` und `tags`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter. Ein einfaches Array funktioniert weiterhin. Arrays werden 1:1 als Query-String durchgereicht, Array-Werte landen als `key[]=…`.
 
 ```php
-$drafts = $billomat->letters->list([
-    'status' => 'DRAFT',
-    'order_by' => 'created+DESC',
-]);
+use Justpilot\Billomat\Api\LetterFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\LetterStatus;
+
+$drafts = $billomat->letters->list(new LetterFilter(
+    status: [LetterStatus::DRAFT],
+    orderBy: OrderBy::desc('created'),
+));
 ```
 
 #### `get(int $id): ?Letter`

@@ -26,26 +26,28 @@ Avatar-Endpunkt (`GET /users/{id}/avatar`) ist im SDK nicht implementiert; bei B
 
 ## Methoden
 
-### `list(array $filters = []): list<User>`
+### `list(UserFilter|array $filters = []): list<User>`
 
 Listet Benutzer mit optionalen Filtern.
 
 ```php
-public function list(array $filters = []): array
+public function list(UserFilter|array $filters = []): array
 ```
 
-Unterstützte Filter laut Billomat-Doku:
+Empfohlen ist der typisierte Filter `UserFilter`; ein einfaches Array mit Billomat-Parametern funktioniert weiterhin. Unterstützte Filter laut Billomat-Doku:
 
-| Filter | Bedeutung |
-|---|---|
-| `email` | E-Mail-Adresse (case-insensitiv) |
-| `first_name` | Vorname |
-| `last_name` | Nachname |
+| Filter | `UserFilter`-Feld | Bedeutung |
+|---|---|---|
+| `email` | `email` | E-Mail-Adresse (case-insensitiv) |
+| `first_name` | `firstName` | Vorname |
+| `last_name` | `lastName` | Nachname |
+
+Dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter.
 
 ```php
-$users = $billomat->users->list([
-    'email' => '@example.com',
-]);
+use Justpilot\Billomat\Api\UserFilter;
+
+$users = $billomat->users->list(new UserFilter(email: '@example.com'));
 
 foreach ($users as $user) {
     echo $user->id . ': ' . $user->email . PHP_EOL;
@@ -54,17 +56,17 @@ foreach ($users as $user) {
 
 **Exceptions:** `AuthenticationException`, `HttpException`.
 
-### `listPage(array $filters = []): Page<User>`
+### `listPage(UserFilter|array $filters = []): Page<User>`
 
 Wie `list()`, liefert aber zusätzlich `page`/`per_page`/`total` aus dem Response-Envelope.
 
 ```php
-$page = $billomat->users->listPage(['per_page' => 25]);
+$page = $billomat->users->listPage(new UserFilter(perPage: 25));
 
 echo $page->total, ' Benutzer (Seite ', $page->page, '/', $page->totalPages, ')';
 ```
 
-### `iterateAll(array $filters = [], int $pageSize = 100): Generator<int, User>`
+### `iterateAll(UserFilter|array $filters = [], int $pageSize = 100): Generator<int, User>`
 
 Lazy-Iteration über alle Seiten, analog `auto_paging_iter()` im Stripe-SDK.
 

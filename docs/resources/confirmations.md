@@ -77,15 +77,21 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 ### Confirmations
 
-#### `list(array $filters = []): list<Confirmation>`
+#### `list(ConfirmationFilter|array $filters = []): list<Confirmation>`
 
-Filter laut Billomat-Doku: `client_id`, `contact_id`, `status`, `from`, `to`, `number_pre`, `tags`, `order_by` u. a. Array-Werte serialisieren als `key[]=…`. Wie bei `OffersApi` normalisiert `array_is_list()` Single-Treffer auf eine Liste.
+Filter laut Billomat-Doku: `client_id`, `contact_id`, `status`, `from`, `to`, `number_pre`, `tags`, `order_by` u. a. Wie bei `OffersApi` normalisiert `array_is_list()` Single-Treffer auf eine Liste.
+
+Empfohlen ist der typisierte Filter `ConfirmationFilter` mit den camelCase-Feldern `clientId`, `contactId`, `confirmationNumber`, `status` (`list<ConfirmationStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` und `articleId`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `number_pre`). Ein einfaches Array funktioniert weiterhin. Array-Werte serialisieren dort als `key[]=…`.
 
 ```php
-$open = $billomat->confirmations->list([
-    'status' => 'OPEN',
-    'order_by' => 'date+DESC',
-]);
+use Justpilot\Billomat\Api\ConfirmationFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
+
+$open = $billomat->confirmations->list(new ConfirmationFilter(
+    status: [ConfirmationStatus::OPEN],
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
 #### `get(int $id): ?Confirmation`

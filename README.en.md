@@ -97,6 +97,7 @@ Full runnable examples live under [examples/](examples/).
 - Automatic retries: 429 after the wait Billomat announces (`Retry-After` or `X-Rate-Limit-Reset`), plus GET requests on 502/503/504 and network errors with exponential backoff — configurable via `RetryPolicy`.
 - One `*Api` class per Billomat resource with consistent verbs (`list`, `get`, `create`, `update`, `delete`) plus resource-specific actions (`complete`, `cancel`, `pdf`, `thumb`, …).
 - Auto-pagination via an `iterateAll()` generator and `listPage()` with metadata.
+- Typed list filters (`InvoiceFilter`, `ClientFilter`, …) with enums, `DateTimeImmutable` and `OrderBy`; plain arrays still work.
 - Structured exception hierarchy with mapping to HTTP status codes (401/403, 404, 400/422, 429) and a dedicated `TransportException` for network failures.
 
 ## Resources
@@ -188,17 +189,29 @@ Full options and HTTP client injection: [docs/configuration.md](docs/configurati
 
 ## Pagination
 
-In addition to `list()`, every list endpoint exposes two helpers:
+In addition to `list()`, every list endpoint exposes two helpers. For the main resources (clients, suppliers, articles, users, templates and all document types) the recommended way to filter is the typed filter class (`ClientFilter`, `InvoiceFilter`, …); a plain array of Billomat query parameters still works.
 
 ```php
+use Justpilot\Billomat\Api\ClientFilter;
+use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+
 // Auto-pagination — a lazy generator that walks every page
-foreach ($billomat->clients->iterateAll(['country_code' => 'DE']) as $client) {
+foreach ($billomat->clients->iterateAll(new ClientFilter(countryCode: 'DE')) as $client) {
     // …
 }
 
 // Single page with metadata
-$result = $billomat->clients->listPage(['per_page' => 50, 'page' => 3]);
+$result = $billomat->clients->listPage(new ClientFilter(page: 3, perPage: 50));
 echo "Page {$result->info->page} of " . ($result->info->totalPages() ?? '?');
+
+// Multiple values, dates and sorting, all typed
+$open = $billomat->invoices->list(new InvoiceFilter(
+    status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE],
+    from: new DateTimeImmutable('2026-01-01'),
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
 Details and examples: [docs/advanced/pagination.md](docs/advanced/pagination.md).

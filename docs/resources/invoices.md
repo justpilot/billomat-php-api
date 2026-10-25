@@ -54,19 +54,44 @@ Verwandte Ressourcen mit eigener Doku: [Positionen](invoice-items.md), [Zahlunge
 
 ## Methoden
 
-### `list(array $filters = []): list<Invoice>`
+### `list(InvoiceFilter|array $filters = []): list<Invoice>`
 
 ```php
-$invoices = $billomat->invoices->list([
-    'status' => ['OPEN', 'OVERDUE'],
-    'order_by' => 'date+DESC',
-    'per_page' => 20,
-]);
+use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+
+$invoices = $billomat->invoices->list(new InvoiceFilter(
+    status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE],
+    from: new DateTimeImmutable('2026-01-01'),
+    orderBy: OrderBy::desc('date')->thenAsc('invoice_number'),
+    perPage: 20,
+));
+
+// Gleicher Filter per Wither aufgebaut:
+$filter = new InvoiceFilter()
+    ->withStatus(InvoiceStatus::OPEN, InvoiceStatus::OVERDUE)
+    ->withPerPage(20);
 ```
 
-Filter siehe Billomat-Doku (`client_id`, `status`, `from`, `to`, `label`, `intro`, `note`, `order_by`, `per_page` …). Array-Werte werden korrekt als `key[]=…` codiert.
+Empfohlen ist der typisierte Filter `InvoiceFilter`. Mehrfachwerte (`status`, `paymentType`, `tags`) sind Listen und werden kommasepariert gesendet (Billomat verknüpft sie ODER), `from`/`to` sind `DateTimeImmutable`, `orderBy` ergibt hier `order_by=date+DESC,invoice_number+ASC`. Ein einfaches Array mit Billomat-Parametern funktioniert weiterhin; Array-Werte werden dort als `key[]=…` codiert.
 
-### `listGrouped(InvoiceGroupBy|array $groupBy, array $filters = []): list<InvoiceGroup>`
+| Billomat-Filter | `InvoiceFilter`-Feld |
+|---|---|
+| `client_id` / `contact_id` | `clientId` / `contactId` |
+| `invoice_number` | `invoiceNumber` |
+| `status` | `status` (`list<InvoiceStatus>`) |
+| `payment_type` | `paymentType` (`list<InvoicePaymentType>`) |
+| `from` / `to` | `from` / `to` |
+| `label` / `intro` / `note` | `label` / `intro` / `note` |
+| `tags` | `tags` |
+| `article_id` | `articleId` |
+| `order_by` | `orderBy` |
+| `page` / `per_page` | `page` / `perPage` |
+
+Weitere Query-Parameter (z. B. Filter auf benutzerdefinierte Attribute) gehen über `extra: [...]`; sie überschreiben gleichnamige Felder.
+
+### `listGrouped(InvoiceGroupBy|array $groupBy, InvoiceFilter|array $filters = []): list<InvoiceGroup>`
 
 Aggregiertes Listing über `?group_by=…`. Statt einzelner Rechnungen liefert Billomat Summen-Zeilen — eine pro Gruppe.
 
@@ -87,7 +112,8 @@ $byClientYear = $billomat->invoices->listGrouped([
 ]);
 
 // Drill-down auf eine konkrete Gruppe — Billomat liefert das passende
-// Filterset in $group->invoiceParams gleich mit.
+// Filterset in $group->invoiceParams gleich mit (als Array, das list()
+// weiterhin akzeptiert).
 $first = $byClient[0];
 $detail = $billomat->invoices->list($first->invoiceParams);
 ```

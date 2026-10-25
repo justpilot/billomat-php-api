@@ -81,15 +81,21 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  ACCEPTED
 
 ### Offers
 
-#### `list(array $filters = []): list<Offer>`
+#### `list(OfferFilter|array $filters = []): list<Offer>`
 
 Liefert Angebote mit optionalen Filtern (z. B. `client_id`, `status`, `from`/`to`, `number_pre`, `tags`, `order_by`). Billomat liefert bei genau einem Treffer das Objekt als Assoc-Array statt einer Liste; `array_is_list()` erkennt das und packt den Einzeltreffer in ein Array.
 
+Empfohlen ist der typisierte Filter `OfferFilter` mit den camelCase-Feldern `clientId`, `contactId`, `offerNumber`, `status` (`list<OfferStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` und `articleId`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `number_pre`). Ein einfaches Array funktioniert weiterhin.
+
 ```php
-$open = $billomat->offers->list([
-    'status' => 'OPEN,ACCEPTED',
-    'order_by' => 'date+DESC',
-]);
+use Justpilot\Billomat\Api\OfferFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\OfferStatus;
+
+$open = $billomat->offers->list(new OfferFilter(
+    status: [OfferStatus::OPEN, OfferStatus::ACCEPTED],
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
 #### `get(int $id): ?Offer`

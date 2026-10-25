@@ -68,12 +68,12 @@ final class DeliveryNotesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param DeliveryNoteFilter|array<string, scalar|array|null> $filters
      *
      * @return list<DeliveryNote>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(DeliveryNoteFilter|array $filters = []): array
     {
         return $this->listResource('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters);
     }
@@ -85,12 +85,12 @@ final class DeliveryNotesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param DeliveryNoteFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<DeliveryNote>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(DeliveryNoteFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters);
     }
@@ -103,12 +103,12 @@ final class DeliveryNotesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param DeliveryNoteFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, DeliveryNote>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(DeliveryNoteFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters, $pageSize);
     }

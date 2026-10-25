@@ -89,8 +89,30 @@ $clients = $billomat->getClients(['country_code' => 'DE', 'per_page' => 100]);
 ```
 
 ```php
-// After
+// After — typed filter (recommended)
+use Justpilot\Billomat\Api\ClientFilter;
+
+$clients = $billomat->clients->list(new ClientFilter(countryCode: 'DE', perPage: 100));
+
+// A plain array of Billomat query parameters still works
 $clients = $billomat->clients->list(['country_code' => 'DE', 'per_page' => 100]);
+```
+
+Clients, suppliers, articles, users, templates and every document type (invoices, offers, confirmations, credit notes, delivery notes, letters, reminders, incomings, recurrings) have such a filter class (`InvoiceFilter`, `OfferFilter`, …). Multi-value fields are lists of enums, dates are `DateTimeImmutable`, and sorting uses `OrderBy`:
+
+```php
+use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+
+// Before
+$invoices = $billomat->getInvoices(['status' => 'OPEN,OVERDUE', 'order_by' => 'date+DESC']);
+
+// After
+$invoices = $billomat->invoices->list(new InvoiceFilter(
+    status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE],
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
 ### List across pages
@@ -112,7 +134,7 @@ foreach ($billomat->clients->iterateAll() as $client) {
 }
 
 // Or one page with metadata
-$result = $billomat->clients->listPage(['per_page' => 50, 'page' => 3]);
+$result = $billomat->clients->listPage(new ClientFilter(page: 3, perPage: 50));
 echo "Page {$result->info->page} of " . ($result->info->totalPages() ?? '?');
 ```
 

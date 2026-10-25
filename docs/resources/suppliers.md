@@ -54,15 +54,18 @@ Ein Supplier ist ein Lieferant — strukturell das Gegenstück zu [Clients](clie
 
 ## Suppliers
 
-### `list(array $filters = []): list<Supplier>`
+### `list(SupplierFilter|array $filters = []): list<Supplier>`
 
-Filter laut Billomat-Doku: `name`, `client_number`, `email`, `first_name`, `last_name`, `country_code`, `note`, `tags`. Array-Werte werden als `key[]=…` codiert.
+Filter laut Billomat-Doku: `name`, `client_number`, `email`, `first_name`, `last_name`, `country_code`, `creditor_identifier`, `note`, `incoming_id`, `tags`. Empfohlen ist der typisierte Filter `SupplierFilter`, dessen Felder die camelCase-Varianten dieser Namen sind (`countryCode`, `creditorIdentifier`, `incomingId` …; `incomingId` und `tags` als Liste, kommasepariert gesendet), dazu `orderBy`, `page`, `perPage` und `extra` für weitere Parameter. Ein Array funktioniert weiterhin; Array-Werte werden dort als `key[]=…` codiert.
 
 ```php
-$german = $billomat->suppliers->list([
-    'country_code' => 'DE',
-    'order_by' => 'name+ASC',
-]);
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SupplierFilter;
+
+$german = $billomat->suppliers->list(new SupplierFilter(
+    countryCode: 'DE',
+    orderBy: OrderBy::asc('name'),
+));
 ```
 
 ### `get(int $id): ?Supplier`

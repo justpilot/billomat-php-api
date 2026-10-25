@@ -93,6 +93,11 @@ return [
         ],
     ],
 
+    'filter' => [
+        'class' => 'ClientFilter',
+        'endpoint' => 'GET /api/clients',
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Kunden.'],
         'name' => ['model' => ['required' => true, 'nonNull' => true], 'doc' => 'Firmenname des Kunden.'],

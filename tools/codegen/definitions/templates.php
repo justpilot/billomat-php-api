@@ -55,6 +55,15 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'TemplateFilter',
+        'endpoint' => 'GET /api/templates',
+        'fields' => [
+            'type' => ['enum' => 'TemplateDocumentType'],
+            'template_type' => ['enum' => 'TemplateType'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Vorlage.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Vorlage.'],

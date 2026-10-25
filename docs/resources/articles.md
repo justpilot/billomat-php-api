@@ -55,15 +55,18 @@ Ein Artikel ist ein wiederverwendbarer Posten, der in Rechnungen, Angeboten und 
 
 ## Articles
 
-### `list(array $filters = []): list<Article>`
+### `list(ArticleFilter|array $filters = []): list<Article>`
 
-Filter laut Billomat-Doku: `article_number`, `title`, `description`, `currency_code`, `unit_id`, `tags`, `supplier_id`, `category_id`. Array-Werte werden als `key[]=…` codiert.
+Filter laut Billomat-Doku: `article_number`, `title`, `description`, `currency_code`, `unit_id`, `tags`, `supplier_id`, `category_id`. Empfohlen ist der typisierte Filter `ArticleFilter` mit den camelCase-Feldern `articleNumber`, `title`, `description`, `currencyCode`, `unitId`, `tags` (Liste, kommasepariert gesendet) und `supplierId`, dazu `orderBy`, `page` und `perPage`. Parameter ohne eigenes Feld (z. B. `category_id`) gehen über `extra: [...]`; ein einfaches Array funktioniert ebenfalls weiterhin.
 
 ```php
-$active = $billomat->articles->list([
-    'currency_code' => 'EUR',
-    'order_by' => 'title+ASC',
-]);
+use Justpilot\Billomat\Api\ArticleFilter;
+use Justpilot\Billomat\Api\OrderBy;
+
+$active = $billomat->articles->list(new ArticleFilter(
+    currencyCode: 'EUR',
+    orderBy: OrderBy::asc('title'),
+));
 ```
 
 ### `get(int $id): ?Article`

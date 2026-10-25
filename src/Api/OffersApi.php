@@ -72,12 +72,12 @@ final class OffersApi extends AbstractApi
     /**
      * Listet Angebote mit optionalen Filtern.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param OfferFilter|array<string, scalar|array|null> $filters
      *
      * @return list<Offer>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(OfferFilter|array $filters = []): array
     {
         return $this->listResource('/offers', 'offers', 'offer', Offer::fromArray(...), $filters);
     }
@@ -89,12 +89,12 @@ final class OffersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param OfferFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<Offer>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(OfferFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/offers', 'offers', 'offer', Offer::fromArray(...), $filters);
     }
@@ -107,12 +107,12 @@ final class OffersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param OfferFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, Offer>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(OfferFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/offers', 'offers', 'offer', Offer::fromArray(...), $filters, $pageSize);
     }

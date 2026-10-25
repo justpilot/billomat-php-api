@@ -59,14 +59,14 @@ final class SuppliersApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array|null> $filters
      *
      * @return list<Supplier>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(SupplierFilter|array $filters = []): array
     {
-        $data = $this->getJson('/suppliers', $filters);
+        $data = $this->getJson('/suppliers', self::filterQuery($filters));
 
         $node = $data['suppliers']['supplier'] ?? [];
 
@@ -98,12 +98,12 @@ final class SuppliersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<Supplier>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(SupplierFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters);
     }
@@ -116,12 +116,12 @@ final class SuppliersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, Supplier>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(SupplierFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters, $pageSize);
     }

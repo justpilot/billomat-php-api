@@ -77,12 +77,12 @@ final class CreditNotesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param CreditNoteFilter|array<string, scalar|array|null> $filters
      *
      * @return list<CreditNote>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(CreditNoteFilter|array $filters = []): array
     {
         return $this->listResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters);
     }
@@ -94,12 +94,12 @@ final class CreditNotesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param CreditNoteFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<CreditNote>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(CreditNoteFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters);
     }
@@ -112,12 +112,12 @@ final class CreditNotesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param CreditNoteFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, CreditNote>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(CreditNoteFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters, $pageSize);
     }

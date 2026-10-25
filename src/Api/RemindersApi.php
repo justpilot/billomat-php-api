@@ -52,12 +52,12 @@ final class RemindersApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param ReminderFilter|array<string, scalar|array|null> $filters
      *
      * @return list<Reminder>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(ReminderFilter|array $filters = []): array
     {
         return $this->listResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
     }
@@ -69,12 +69,12 @@ final class RemindersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ReminderFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<Reminder>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(ReminderFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
     }
@@ -87,12 +87,12 @@ final class RemindersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ReminderFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, Reminder>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(ReminderFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters, $pageSize);
     }

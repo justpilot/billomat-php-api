@@ -71,15 +71,21 @@ Read-only — es gibt **kein** `create`/`update`/`delete` und keine `ReminderIte
 
 ### Reminders
 
-#### `list(array $filters = []): list<Reminder>`
+#### `list(ReminderFilter|array $filters = []): list<Reminder>`
 
-Filter werden 1:1 als Query-String an Billomat durchgereicht (`client_id`, `contact_id`, `invoice_id`, `status`, `from`, `to`, `tags`, …). Array-Werte landen als `key[]=…`.
+Billomat filtert u. a. nach `client_id`, `contact_id`, `invoice_id`, `invoice_number`, `status`, `from`, `to`, `tags`, …
+
+Empfohlen ist der typisierte Filter `ReminderFilter` mit den camelCase-Feldern `clientId`, `contactId`, `invoiceNumber`, `status` (`list<ReminderStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `subject`, `intro`, `note`, `tags` und `articleId`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `invoice_id`). Ein einfaches Array funktioniert weiterhin. Arrays werden 1:1 als Query-String durchgereicht, Array-Werte landen als `key[]=…`.
 
 ```php
-$overdue = $billomat->reminders->list([
-    'status' => 'OVERDUE',
-    'order_by' => 'due_date+ASC',
-]);
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\ReminderFilter;
+use Justpilot\Billomat\Model\Enum\ReminderStatus;
+
+$overdue = $billomat->reminders->list(new ReminderFilter(
+    status: [ReminderStatus::OVERDUE],
+    orderBy: OrderBy::asc('due_date'),
+));
 ```
 
 #### `get(int $id): ?Reminder`
@@ -329,8 +335,11 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\ReminderCreateOptions;
 use Justpilot\Billomat\Api\EmailOptions;
+use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Api\ReminderTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -338,11 +347,11 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Offene Rechnung herauspicken
-$openInvoices = $billomat->invoices->list([
-    'client_id' => 12345,
-    'status' => 'OPEN',
-    'order_by' => 'due_date+ASC',
-]);
+$openInvoices = $billomat->invoices->list(new InvoiceFilter(
+    clientId: 12345,
+    status: [InvoiceStatus::OPEN],
+    orderBy: OrderBy::asc('due_date'),
+));
 
 if ([] === $openInvoices) {
     exit('Keine offene Rechnung zu mahnen.');

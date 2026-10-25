@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Sicherheitslücke melden
+  - name: Report a vulnerability
     url: https://github.com/justpilot/billomat-php-api/security/policy
-    about: Bitte sicherheitsrelevante Findings NICHT als Issue öffnen. Stattdessen per E-Mail an dimitri@justpilot.io — Details in SECURITY.md.
-  - name: Billomat-API-Frage oder -Bug
+    about: Please do NOT open an issue for security findings. Email dimitri@justpilot.io instead; details in SECURITY.md.
+  - name: Billomat API question or bug
     url: https://www.billomat.com/kontakt/
-    about: Fragen oder Bugs in der Billomat-API selbst (nicht in diesem SDK) bitte direkt an Billomat melden.
-  - name: Allgemeine Fragen / Diskussion
+    about: Questions or bugs in the Billomat API itself (not in this SDK) go directly to Billomat.
+  - name: General questions / discussion
     url: https://github.com/justpilot/billomat-php-api/discussions
-    about: Für offene Fragen, Best-Practice-Diskussionen oder Ideen ohne konkretes Issue.
+    about: Open questions, best practices or ideas without a concrete issue.

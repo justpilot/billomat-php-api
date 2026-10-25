@@ -1,48 +1,48 @@
-name: Bug-Report
-description: Einen Fehler im SDK melden
+name: Bug report
+description: Report a bug in the SDK
 title: "[Bug] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Danke, dass du dir Zeit nimmst, einen Fehler zu melden. Bitte fülle die Felder so vollständig wie möglich aus — das beschleunigt die Diagnose deutlich.
+        Thanks for taking the time to report a bug. The more complete the form, the faster we can find the cause.
 
-        **Vor dem Melden bitte prüfen:**
-        - Es handelt sich um einen Bug in `justpilot/billomat-php-api`, nicht in der Billomat-API selbst (Billomat-Probleme bitte direkt an https://www.billomat.com/ melden).
-        - Es ist kein Sicherheitsthema — sonst bitte nach `SECURITY.md` per E-Mail melden, nicht hier.
+        **Before you report, please check:**
+        - The bug is in `justpilot/billomat-php-api`, not in the Billomat API itself (please report Billomat problems to https://www.billomat.com/).
+        - It's not a security issue; for those, follow `SECURITY.md` and send an email instead.
 
   - type: input
     id: sdk-version
     attributes:
-      label: SDK-Version
-      description: Welche Version von `justpilot/billomat-php-api` ist installiert?
-      placeholder: "z. B. 2.1.0"
+      label: SDK version
+      description: Which version of `justpilot/billomat-php-api` is installed?
+      placeholder: "e.g. 4.0.0"
     validations:
       required: true
 
   - type: input
     id: php-version
     attributes:
-      label: PHP-Version
-      placeholder: "z. B. 8.5.1"
+      label: PHP version
+      placeholder: "e.g. 8.5.1"
     validations:
       required: true
 
   - type: input
-    id: symfony-version
+    id: http-client
     attributes:
-      label: Symfony-Version (HttpClient)
-      description: "Ausgabe von `composer show symfony/http-client | grep versions`"
-      placeholder: "z. B. 7.4.1"
+      label: PSR-18 HTTP client
+      description: "Which client and version, e.g. from `composer show symfony/http-client` or `composer show guzzlehttp/guzzle`"
+      placeholder: "e.g. symfony/http-client 8.1.0"
     validations:
       required: false
 
   - type: textarea
     id: reproduction
     attributes:
-      label: Reproduktion
-      description: Minimaler Code-Snippet, der den Fehler auslöst. Bitte API-Keys/Personenbezogenes redigieren.
+      label: Reproduction
+      description: A minimal code snippet that triggers the bug. Please redact API keys and personal data.
       render: php
       placeholder: |
         $billomat = BillomatClient::create(billomatId: '...', apiKey: '...');
@@ -53,26 +53,26 @@ body:
   - type: textarea
     id: expected
     attributes:
-      label: Erwartetes Verhalten
+      label: Expected behaviour
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: Tatsächliches Verhalten
-      description: Wenn eine Exception fliegt, bitte Klasse + Message angeben.
+      label: Actual behaviour
+      description: If an exception is thrown, please include its class and message.
     validations:
       required: true
 
   - type: textarea
     id: stack-trace
     attributes:
-      label: Stack-Trace / Logs (optional)
+      label: Stack trace / logs (optional)
       render: text
 
   - type: textarea
     id: additional
     attributes:
-      label: Zusätzlicher Kontext (optional)
-      description: Alles, was bei der Diagnose helfen könnte — Workarounds, Hypothesen, Querverweise.
+      label: Additional context (optional)
+      description: Anything that could help, e.g. workarounds, hypotheses, related issues.

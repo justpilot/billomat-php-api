@@ -59,6 +59,8 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 - `composer generate` fails when a spec field has a fixed set of values but its definition maps it to no enum (`'enum' => 'X'`, or `'enum' => false` to keep the string on purpose).
 - Mutation testing covers the generated code on purpose: reflection-based tests check every read model's `fromArray()`/`toArray()` round trip and every write option's payload against the `Billomat-Feld` in its docblock. Covered MSI rises from 77 % to 97 % (generated code 73 % → 99.7 %), `minMsi`/`minCoveredMsi` from 60 to 95. `PublicVisibility`/`ProtectedVisibility` are disabled (about 1,500 mutants that never survived). CI mutates only the changed lines on pull requests (`--git-diff-lines`, 90 %) and all code on pushes to `main`/`4.x`.
 
+- `CONTRIBUTING.md`, `SECURITY.md`, the pull request template and the issue templates are in English and describe the 4.x workflow (PRs against `4.x`, generated code, PSR-only dependencies, supported versions 4.x/3.x). Packagist keywords drop `symfony`/`http-client` and add `psr-3`, `psr-14`, `money` and `e-invoice`.
+
 ### Removed
 - **BC break: everything marked `@deprecated since 3.1` is gone.**
   - `DunningLevelsApi`, `$billomat->dunningLevels` and the `DunningLevel` model (`/dunning-levels` answers with 404). Use `$billomat->reminderTexts` for reminder levels.

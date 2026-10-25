@@ -1,36 +1,36 @@
 <!--
-Vielen Dank für deinen Pull Request. Bitte fülle die Felder unten aus.
-Detaillierte Erwartungen stehen in CONTRIBUTING.md.
+Thanks for your pull request. Please fill in the sections below.
+See CONTRIBUTING.md for details.
 -->
 
-## Beschreibung
+## Description
 
-<!-- Was ändert sich und warum? (Fokus auf das Warum — das Was ergibt sich aus dem Diff.) -->
+<!-- What changes and why? Focus on the why; the what is in the diff. -->
 
-## Verlinktes Issue
+## Related issue
 
-<!-- "Closes #123" oder "Refs #456". Wenn kein Issue existiert: bitte zuerst eines eröffnen, damit Scope und Ansatz vorab geklärt sind. -->
+<!-- "Closes #123" or "Refs #456". If there's no issue yet, please open one first so scope and approach are agreed on. -->
 
 Closes #
 
-## Art der Änderung
+## Type of change
 
-- [ ] Bugfix (Verhalten ändert sich, kein API-Bruch)
-- [ ] Neues Feature / additive Erweiterung
-- [ ] Refactoring / interne Aufräumarbeit (kein Verhaltens- oder API-Wechsel)
-- [ ] Dokumentation
-- [ ] Breaking Change (vorher in Issue abgestimmt — nur Major-Bump)
+- [ ] Bug fix (behaviour changes, no API break)
+- [ ] New feature / additive change
+- [ ] Refactoring / internal cleanup (no behaviour or API change)
+- [ ] Documentation
+- [ ] Breaking change (agreed on in an issue; CHANGELOG + `UPGRADE-4.0.md` entry)
 
-## Checkliste
+## Checklist
 
-- [ ] `composer ci` läuft lokal grün (Lint + PHPStan + Rector-Dry + Tests)
-- [ ] Unit-Tests für neuen Code vorhanden (`#[Test]` + `#[CoversClass]`)
-- [ ] Bei neuen Ressourcen: Dokumentation unter `docs/resources/` + README-Eintrag
-- [ ] `CHANGELOG.md` unter `[Unreleased]` aktualisiert
-- [ ] Kommentare auf Deutsch (ä/ö/ü/ß statt ae/oe/ue/ss), Identifier auf Englisch
-- [ ] Keine neuen `phpstan-baseline.neon`-Einträge ohne Rückfrage
-- [ ] Keine Breaking Changes ohne vorherige Abstimmung
+- [ ] `composer ci` passes locally (lint, PHPStan, Rector, `generate:check`, tests)
+- [ ] Unit tests for new code (`#[Test]`, `#[CoversClass]`)
+- [ ] Generated files changed only via definitions + `composer generate`
+- [ ] New resources: docs under `docs/resources/` and a README entry
+- [ ] `CHANGELOG.md` updated under `[Unreleased]`
+- [ ] Code comments in German (ä/ö/ü/ß, not ae/oe/ue/ss), identifiers in English
+- [ ] No new PHPStan baseline entries
 
-## Zusätzliche Hinweise
+## Notes
 
-<!-- Migrations-Hinweise, Screenshots, Performance-Daten, etc. -->
+<!-- Migration notes, performance numbers, anything reviewers should know. -->

@@ -184,7 +184,7 @@ $id = $client->id;
 
 All `*CreateOptions` / `*UpdateOptions` classes are immutable (`final readonly`) and built
 with named constructor arguments; required fields (e.g. `clientId` on `InvoiceCreateOptions`)
-come first. `with*()` methods return a modified copy — see [README](../README.en.md#quickstart)
+come first. `with*()` methods return a modified copy — see [README](../README.md#quickstart)
 and the [examples/](../examples/) folder for the per-resource form. `ClientCreateOptions`
 has no required argument because Billomat treats every client field as optional.
 
@@ -277,7 +277,7 @@ try {
 
 This SDK does not yet ship an automatic rate-limit wait loop equivalent to
 phobetor's `setDoWaitForRateLimitReset(true)`. If you need it, decorate the
-HTTP client (see the [Logging & HTTP client](../README.en.md#logging--http-client)
+HTTP client (see the [configuration guide](configuration.md#beispiel-request-response-logging)
 section).
 
 ## Property name mapping
@@ -290,7 +290,7 @@ every resource.
 
 ## Where to go next
 
-- Resource overview: [README.en.md](../README.en.md#resources)
+- Resource overview: [docs/resources/](resources/)
 - Pagination details: [docs/advanced/pagination.md](advanced/pagination.md)
 - Error handling: [docs/error-handling.md](error-handling.md)
 - HTTP layer internals (query encoding, retry decoration): [docs/advanced/http-layer.md](advanced/http-layer.md)

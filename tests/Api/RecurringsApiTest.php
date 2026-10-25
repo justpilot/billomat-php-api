@@ -20,6 +20,7 @@ use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Model\RecurringItem;
+use Justpilot\Billomat\Model\TaxSummary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -37,6 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(RecurringAction::class)]
 #[CoversClass(RecurringCycle::class)]
 #[UsesClass(RecurringItemCreateOptions::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]

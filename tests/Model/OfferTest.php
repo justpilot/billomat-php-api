@@ -12,12 +12,14 @@ use Justpilot\Billomat\Model\Enum\OfferStatus;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferItem;
+use Justpilot\Billomat\Model\TaxSummary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Offer::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(OfferStatus::class)]
@@ -96,7 +98,7 @@ final class OfferTest extends TestCase
         self::assertSame(5, $offer->templateId);
 
         self::assertCount(1, $offer->taxes);
-        self::assertSame(19.0, $offer->taxes[0]['rate']);
+        self::assertSame(19.0, $offer->taxes[0]->rate);
 
         self::assertCount(1, $offer->items);
         self::assertContainsOnlyInstancesOf(OfferItem::class, $offer->items);

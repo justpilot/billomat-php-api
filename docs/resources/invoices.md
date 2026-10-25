@@ -406,7 +406,7 @@ Payload für `mail()` (Pixelletter), wie die übrigen Options `final readonly` m
 | `currencyCode`, `paymentTypes` | `?string` |
 | `quote` | `?float` |
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:Money}>` — Steuer-Zusammenfassung |
+| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) — Steuer-Zusammenfassung |
 | `templateId` | `?int` |
 | `items` | `list<InvoiceItem>` — falls die API die Positionen mitliefert |
 | `updated` | `?\DateTimeImmutable` |

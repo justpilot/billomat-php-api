@@ -311,7 +311,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `invoiceId` | `?int` |
 | `confirmationId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
+| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) |
 | `items` | `list<DeliveryNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `offerId` | `?int` |

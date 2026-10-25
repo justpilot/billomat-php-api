@@ -14,12 +14,14 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceItem;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Model\TaxSummary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Invoice::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoiceStatus::class)]
@@ -281,9 +283,9 @@ final class InvoiceTest extends TestCase
         // Taxes
         self::assertCount(1, $invoice->taxes);
         $firstTax = $invoice->taxes[0];
-        self::assertSame('MwSt', $firstTax['name']);
-        self::assertSame(19.0, $firstTax['rate']);
-        self::assertSame('19', $firstTax['amount']->toString());
+        self::assertSame('MwSt', $firstTax->name);
+        self::assertSame(19.0, $firstTax->rate);
+        self::assertSame('19', $firstTax->amount->toString());
 
         // Items ist in diesem Beispiel leer
         self::assertSame([], $invoice->items);

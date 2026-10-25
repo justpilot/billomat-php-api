@@ -212,7 +212,7 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `totalGross`, `totalNet` | `?Money` |
 | `emailSender`, `emailSubject`, `emailMessage` | `?string` |
 | `emailTemplateId`, `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
+| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) |
 | `items` | `list<RecurringItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |

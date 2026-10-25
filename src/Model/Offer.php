@@ -27,8 +27,8 @@ use const DATE_ATOM;
 final readonly class Offer
 {
     /**
-     * @param list<array{name: string, rate: float, amount: Money}> $taxes
-     * @param list<OfferItem>                                       $items
+     * @param list<TaxSummary> $taxes
+     * @param list<OfferItem>  $items
      */
     public function __construct(
         /** Interne Billomat-ID des Angebots. */
@@ -136,7 +136,7 @@ final readonly class Offer
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
+            taxes: ListCaster::toList($data['taxes']['tax'] ?? null, 'name', TaxSummary::fromArray(...)),
             items: ListCaster::toList($data['offer-items']['offer-item'] ?? null, 'id', OfferItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -189,7 +189,7 @@ final readonly class Offer
 
         if ([] !== $this->taxes) {
             $data['taxes'] = [
-                'tax' => array_map(static fn (array $tax): array => [...$tax, 'amount' => $tax['amount']->toString()], $this->taxes),
+                'tax' => array_map(static fn (TaxSummary $tax): array => $tax->toArray(), $this->taxes),
             ];
         }
 

@@ -321,7 +321,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `quote` | `?float` |
 | `offerId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
+| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) |
 | `items` | `list<ConfirmationItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |

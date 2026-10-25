@@ -15,7 +15,7 @@ Bei Rechnungssummen, offenen Posten oder Zahlungsabgleichen summieren sich solch
 
 ## Welche Felder sind `Money`?
 
-Alle Betragsfelder, u. a. `unitPrice`, `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced`, `totalReduction`, `discountAmount`, `openAmount`, `paidAmount`, `amount` (Zahlungen und die Steuerzeilen in `$invoice->taxes[n]['amount']`), `salesPrice` bis `salesPrice5`, `purchasePrice`, `chargeAmount`, `costsGross`/`costsNet`, `revenueGross`/`revenueNet`, `finapiTransactionAmount` sowie `InvoiceGroup::$totalGross`/`$totalNet`.
+Alle Betragsfelder, u. a. `unitPrice`, `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced`, `totalReduction`, `discountAmount`, `openAmount`, `paidAmount`, `amount` (Zahlungen und `TaxSummary::$amount` der Steuerzeilen in `$invoice->taxes`), `salesPrice` bis `salesPrice5`, `purchasePrice`, `chargeAmount`, `costsGross`/`costsNet`, `revenueGross`/`revenueNet`, `finapiTransactionAmount` sowie `InvoiceGroup::$totalGross`/`$totalNet`.
 
 Weiterhin `float` sind Werte, die keine Geldbeträge sind: `quantity`, `taxRate`, `discountRate`, `rate`, `quote` (Wechselkurs) und `discountDays`. `reduction` bleibt ein String, weil Billomat dort sowohl Beträge als auch Prozentangaben (`"10%"`) erlaubt.
 

@@ -11,7 +11,7 @@ return plain arrays. This SDK uses one `*Api` class per resource and returns
 
 ## Before you start
 
-- **PHP requirement.** This SDK requires PHP 8.4+. Check `php -v` and your CI
+- **PHP requirement.** This SDK requires PHP 8.5+. Check `php -v` and your CI
   matrix before migrating. If you cannot upgrade, this SDK is not for you.
 - **Composer.** You can install both side by side during the migration —
   `Phobetor\Billomat\Client\BillomatClient` and

@@ -161,7 +161,7 @@ composer analyse:baseline
 
 `.github/workflows/ci.yml` führt bei jedem Push/PR drei Jobs aus:
 
-1. **Tests** auf PHP 8.4 (Pflicht) und 8.5 (experimentell, `continue-on-error`).
+1. **Tests** auf PHP 8.5 (Pflicht) und 8.6 (experimentell, `continue-on-error`).
 2. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer audit`.
 3. **Mutation Testing** (nur PRs) — `composer mutate`.
 

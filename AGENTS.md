@@ -4,7 +4,7 @@ This file provides guidance for AI coding agents working with this repository. F
 
 ## Project
 
-Unofficial PHP 8.4+ SDK for the [Billomat API](https://www.billomat.com/api/). Library only — no application/runtime. Distributed as `justpilot/billomat-php-api`. Inline documentation and code comments are in German; identifiers and public API are English.
+Unofficial PHP 8.5+ SDK for the [Billomat API](https://www.billomat.com/api/). Library only — no application/runtime. Distributed as `justpilot/billomat-php-api`. Inline documentation and code comments are in German; identifiers and public API are English.
 
 ## Commands
 
@@ -39,7 +39,9 @@ vendor/bin/phpunit --filter it_lists_clients_and_passes_filters
 
 Integration tests under `tests/Integration/` hit the real Billomat sandbox. They `markTestSkipped` unless `BILLOMAT_ID` and `BILLOMAT_API_KEY` are set — put real credentials in `.env.test.local` (gitignored); `.env.test` is the placeholder template. Bootstrap (`tests/bootstrap.php`) loads both via `symfony/dotenv` with `usePutenv()`, so `getenv()` works in tests.
 
-CI runs via `.github/workflows/ci.yml` on PHP 8.4 (required) and 8.5 (experimental). Three jobs: tests, quality (lint + PHPStan + Rector + audit), and mutation testing on PRs.
+Branches: `4.x` collects the work for 4.0.0 (BC breaks allowed; feature branches target `4.x`). `main` only gets 3.x fixes until 4.0 is released and is merged into `4.x` regularly.
+
+CI runs via `.github/workflows/ci.yml` on PHP 8.5 (required) and 8.6 (experimental). Three jobs: tests, quality (lint + PHPStan + Rector + audit), and mutation testing on PRs.
 
 ## Architecture
 
@@ -97,7 +99,7 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 
 ## Conventions
 
-- PHP 8.4+ only. Use `final readonly` for read models, `readonly` properties on `BillomatClient`, named arguments, enums (`src/Model/Enum/`), and constructor property promotion.
+- PHP 8.5+ only. Use `final readonly` for read models, `readonly` properties on `BillomatClient`, named arguments, enums (`src/Model/Enum/`), and constructor property promotion.
 - Symfony version support: **Symfony 8 only** — currently `^8.1` on every `symfony/*` package. The only runtime dependency is `symfony/http-client`; don't add `symfony/http-foundation` just for status-code constants. Raise the lower bound when a security fix requires it or an older minor leaves maintenance. CI exercises the floor (Symfony 8.1 pinned via `extra.symfony.require` + Flex) and the ceiling (latest Symfony 8.x).
 - `declare(strict_types=1);` at the top of every file.
 - All API classes are `final`; models are `final readonly`.

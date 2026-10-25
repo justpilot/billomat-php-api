@@ -6,6 +6,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Changed
+- **BC break: PHP 8.5 is now the minimum version** (`"php": "^8.5"`). CI runs on PHP 8.5 (required) and 8.6 (experimental); Rector uses the PHP 8.5 rule set.
+
 ## [3.4.0] - 2026-10-24
 
 ### Changed

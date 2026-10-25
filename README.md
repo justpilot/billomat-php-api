@@ -1,6 +1,6 @@
 # Billomat PHP API SDK
 
-[![PHP Version](https://img.shields.io/badge/PHP-8.4%2B-8892BF.svg)](https://www.php.net/)
+[![PHP Version](https://img.shields.io/badge/PHP-8.5%2B-8892BF.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Packagist](https://img.shields.io/badge/packagist-justpilot%2Fbillomat--php--api-orange.svg)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
@@ -8,7 +8,7 @@
 
 **Sprache / Language:** Deutsch (diese Datei) · [English](README.en.md)
 
-Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.com/api/) — basiert auf Symfony-Komponenten, mit Read-Modellen, getrennten Write-Optionen und einer sauberen Exception-Hierarchie.
+Modernes, typisiertes PHP 8.5+ SDK für die [Billomat-API](https://www.billomat.com/api/) — basiert auf Symfony-Komponenten, mit Read-Modellen, getrennten Write-Optionen und einer sauberen Exception-Hierarchie.
 
 > Unoffizielles SDK. Dieses Projekt steht in keiner offiziellen Verbindung zur Billomat GmbH und wird unabhängig entwickelt und gepflegt.
 
@@ -32,7 +32,7 @@ Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.
 
 ## Voraussetzungen
 
-- PHP 8.4 oder neuer
+- PHP 8.5 oder neuer
 - Composer
 - Symfony-Komponenten ab Version 8.1 (`^8.1`). Symfony 7.x wird nicht mehr unterstützt.
 - Ein Billomat-Account mit aktiviertem API-Zugriff
@@ -87,7 +87,7 @@ Vollständige, ausführbare Beispiele liegen unter [examples/](examples/).
 
 ## Features
 
-- PHP 8.4+, durchgängig typisiert (`final readonly` Models, Enums, Named Arguments).
+- PHP 8.5+, durchgängig typisiert (`final readonly` Models, Enums, Named Arguments).
 - HTTP-Layer auf `symfony/http-client`; eigenes `HttpClientInterface` injizierbar.
 - Eine `*Api`-Klasse je Billomat-Ressource mit einheitlichen Verben (`list`, `get`, `create`, `update`, `delete`) plus ressourcenspezifischen Aktionen (`complete`, `cancel`, `pdf`, `thumb` …).
 - Auto-Pagination via `iterateAll()`-Generator und `listPage()` mit Metadaten.

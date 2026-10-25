@@ -20,9 +20,9 @@ return RectorConfig::configure()
         // Bewusste Stilentscheidung: PHPUnit-Assertions werden statisch aufgerufen (self::assert*).
         PreferPHPUnitThisCallRector::class,
     ])
-    ->withPhpSets(php84: true)
+    ->withPhpSets(php85: true)
     ->withSets([
-        LevelSetList::UP_TO_PHP_84,
+        LevelSetList::UP_TO_PHP_85,
         SetList::CODE_QUALITY,
         SetList::DEAD_CODE,
         SetList::TYPE_DECLARATION,

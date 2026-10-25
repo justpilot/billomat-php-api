@@ -1,6 +1,6 @@
 # Billomat PHP API SDK
 
-[![PHP Version](https://img.shields.io/badge/PHP-8.4%2B-8892BF.svg)](https://www.php.net/)
+[![PHP Version](https://img.shields.io/badge/PHP-8.5%2B-8892BF.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Packagist](https://img.shields.io/badge/packagist-justpilot%2Fbillomat--php--api-orange.svg)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
@@ -8,7 +8,7 @@
 
 **Language / Sprache:** English (this file) · [Deutsch](README.md)
 
-Modern, fully typed PHP 8.4+ SDK for the [Billomat API](https://www.billomat.com/api/) — built on Symfony components, with `final readonly` read models, separate typed write options, and a clean exception hierarchy.
+Modern, fully typed PHP 8.5+ SDK for the [Billomat API](https://www.billomat.com/api/) — built on Symfony components, with `final readonly` read models, separate typed write options, and a clean exception hierarchy.
 
 > Unofficial SDK. This project is not affiliated with Billomat GmbH and is developed and maintained independently.
 
@@ -32,7 +32,7 @@ Modern, fully typed PHP 8.4+ SDK for the [Billomat API](https://www.billomat.com
 
 ## Requirements
 
-- PHP 8.4 or newer
+- PHP 8.5 or newer
 - Composer
 - Symfony components 8.1 or newer (`^8.1`). Symfony 7.x is no longer supported.
 - A Billomat account with API access enabled
@@ -87,7 +87,7 @@ Full runnable examples live under [examples/](examples/).
 
 ## Features
 
-- PHP 8.4+, fully typed (`final readonly` models, enums, named arguments).
+- PHP 8.5+, fully typed (`final readonly` models, enums, named arguments).
 - HTTP layer on top of `symfony/http-client`; bring your own `HttpClientInterface`.
 - One `*Api` class per Billomat resource with consistent verbs (`list`, `get`, `create`, `update`, `delete`) plus resource-specific actions (`complete`, `cancel`, `pdf`, `thumb`, …).
 - Auto-pagination via an `iterateAll()` generator and `listPage()` with metadata.

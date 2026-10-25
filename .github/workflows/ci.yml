@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, 4.x]
 
 permissions:
   contents: read
@@ -16,16 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.4'
+          - php: '8.5'
             symfony: '8.1.*'
-            name: 'Tests (PHP 8.4, Symfony 8.1)'
-          - php: '8.4'
-            symfony: '^8.1'
-            name: 'Tests (PHP 8.4, Symfony 8.x)'
+            name: 'Tests (PHP 8.5, Symfony 8.1)'
           - php: '8.5'
             symfony: '^8.1'
-            experimental: true
             name: 'Tests (PHP 8.5, Symfony 8.x)'
+          - php: '8.6'
+            symfony: '^8.1'
+            experimental: true
+            name: 'Tests (PHP 8.6, Symfony 8.x)'
     continue-on-error: ${{ matrix.experimental == true }}
     steps:
       - name: Checkout
@@ -58,10 +58,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup PHP 8.4
+      - name: Setup PHP 8.5
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           tools: composer:v2
           ini-values: memory_limit=512M
 
@@ -92,10 +92,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup PHP 8.4
+      - name: Setup PHP 8.5
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           coverage: xdebug
           tools: composer:v2
           ini-values: memory_limit=512M

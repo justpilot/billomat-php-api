@@ -46,12 +46,12 @@ return static function (string $prefix, string $label, string $parentField, ?str
         // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
         'fields' => [
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Schlagworts.'],
+            // Die Eltern-ID übergibt `TagsApi::create()` als eigenes Argument.
             $parentField => [
-                ...$writable,
                 'type' => 'int',
+                'readOnly' => true,
                 'doc' => 'ID des Datensatzes, an dem das Schlagwort hängt.',
                 'model' => ['nonNull' => true],
-                'create' => ['constructor' => true],
             ],
             'name' => [
                 ...$writable,

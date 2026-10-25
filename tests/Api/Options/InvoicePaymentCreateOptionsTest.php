@@ -20,10 +20,10 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function minimalPayloadKeepsRequiredFields(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 240, amount: Money::of('99.95'));
+        $options = new InvoicePaymentCreateOptions(amount: Money::of('99.95'));
 
         self::assertSame(
-            ['invoice_id' => 240, 'amount' => '99.95', 'mark_invoice_as_paid' => 0],
+            ['amount' => '99.95', 'mark_invoice_as_paid' => 0],
             $options->toArray()
         );
     }
@@ -31,7 +31,7 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function markInvoiceAsPaidIsSerializedAsOneOrZero(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: Money::of('1'), markInvoiceAsPaid: true);
+        $options = new InvoicePaymentCreateOptions(amount: Money::of('1'), markInvoiceAsPaid: true);
 
         $payload = $options->toArray();
 
@@ -42,7 +42,6 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     public function itFormatsDateAsIsoLocalDate(): void
     {
         $options = new InvoicePaymentCreateOptions(
-            invoiceId: 1,
             amount: Money::of('1'),
             date: new DateTimeImmutable('2024-06-01T12:34:56'),
         );
@@ -56,7 +55,6 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     public function itSerializesPaymentTypeEnumAsStringValue(): void
     {
         $options = new InvoicePaymentCreateOptions(
-            invoiceId: 1,
             amount: Money::of('1'),
             type: PaymentType::BANK_TRANSFER,
         );
@@ -69,7 +67,7 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function itStripsAllOtherNullFields(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: Money::of('1'), comment: 'manuell');
+        $options = new InvoicePaymentCreateOptions(amount: Money::of('1'), comment: 'manuell');
 
         $payload = $options->toArray();
 

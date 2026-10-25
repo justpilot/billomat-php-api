@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\Enum\PdfType;
@@ -200,25 +201,27 @@ final class LettersApi extends AbstractApi
     }
 
     /**
-     * @return LetterPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Ruft das PDF eines Briefs als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /letters/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): LetterPdf|string
+    public function pdf(int $id, ?PdfType $type = null): LetterPdf
     {
-        $query = [];
-
-        if ($type instanceof PdfType) {
-            $query['type'] = $type->value;
-        }
-
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
-
-            return $this->getPdf("/letters/{$id}/pdf", $query);
-        }
-
-        $data = $this->getJson("/letters/{$id}/pdf", $query);
+        $data = $this->getJson("/letters/{$id}/pdf", self::pdfQuery($type));
 
         return LetterPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching letter PDF'));
+    }
+
+    /**
+     * Ruft das PDF eines Briefs als binären Inhalt ab (GET /letters/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/letters/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
 }

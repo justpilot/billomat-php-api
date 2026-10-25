@@ -92,7 +92,7 @@ final class DeliveryNoteCommentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->comments;
 
-        $created = $api->create(new DeliveryNoteCommentCreateOptions(deliveryNoteId: 42, comment: 'Hallo'));
+        $created = $api->create(42, new DeliveryNoteCommentCreateOptions(comment: 'Hallo'));
 
         self::assertSame(99, $created->id);
         $api->delete(99);

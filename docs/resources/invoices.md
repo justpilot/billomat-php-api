@@ -28,7 +28,7 @@ What this means for the API:
 
 - **`create()`** returns an invoice with status `DRAFT`. Only drafts can be changed with `update()`.
 - **`complete()`** assigns the final `invoice_number`, generates the PDF and moves the invoice to `OPEN`, `OVERDUE` or `PAID` (depending on received payments).
-- **`delete()`** only works on `DRAFT` invoices.
+- **`delete()`** works in any status, also on completed invoices. Use it for drafts; cancel completed invoices with `cancel()` instead (see below).
 - **`cancel()`** marks a completed invoice as `CANCELED` (it does not delete it). `uncancel()` reverts the cancellation.
 
 ## Endpoints
@@ -50,7 +50,8 @@ What this means for the API:
 | `mail($id, $options?)` | POST | `/invoices/{id}/mail` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/invoices/{id}/upload-signature` |
 | `encash($id)` | PUT | `/invoices/{id}/encash` |
-| `pdf($id, $type?, $rawPdf=false)` | GET | `/invoices/{id}/pdf` |
+| `pdf($id, $type?)` | GET | `/invoices/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/invoices/{id}/pdf?format=pdf` |
 
 Sub-resources with their own pages: [items](invoice-items.md) (`$billomat->invoices->items`), [payments](invoice-payments.md) (`->payments`), [comments](invoice-comments.md) (`->comments`), [tags](invoice-tags.md) (`->tags`). See also [recurring invoices](recurrings.md).
 
@@ -249,20 +250,20 @@ Hands an invoice over to Billomat's debt collection service (Inkasso). According
 $billomat->invoices->encash($invoice->id);
 ```
 
-### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): InvoicePdf|string`
+### `pdf(int $id, ?PdfType $type = null): InvoicePdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-Two modes:
+Two methods for the same endpoint:
 
 ```php
 use Justpilot\Billomat\Model\Enum\PdfType;
 
-// 1) Default mode: JSON with a Base64 PDF
+// 1) pdf(): JSON with a Base64 PDF
 $pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED);
 // $pdf is an InvoicePdf; getBinary() decodes it
 file_put_contents('invoice.pdf', $pdf->getBinary());
 
-// 2) Raw mode: application/pdf directly, returns the binary content as a string
-$binary = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED, rawPdf: true);
+// 2) pdfContent(): application/pdf directly, returns the binary content as a string
+$binary = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
 file_put_contents('invoice.pdf', $binary);
 ```
 
@@ -271,7 +272,7 @@ file_put_contents('invoice.pdf', $binary);
 - `PdfType::SIGNED` (`signed`): signed version
 - `PdfType::PRINT` (`print`): print version without background
 
-Without `type`, Billomat returns the standard PDF. In raw mode, an empty body or a body without the `%PDF-` header throws an `UnexpectedResponseException`.
+Without `type`, Billomat returns the standard PDF. In `pdfContent()`, an empty body or a body without the `%PDF-` header throws an `UnexpectedResponseException`.
 
 ## Write model: `InvoiceCreateOptions`
 
@@ -448,10 +449,10 @@ Payload for `mail()` (Pixelletter). Like the other options classes it is `final 
 
 - **E-invoice (undocumented).** Billomat returns `facturx_reference` (`Invoice::$facturxReference`) in API responses but doesn't describe it in the API docs. The SDK only reads it (types derived from observed values); writing it is not supported because there is no specification.
 - **`update()` only on `DRAFT`.** Once `complete()` has run, a PUT no longer changes the invoice. Use `cancel()` plus a new invoice, or a correction invoice linked via `invoiceId`.
-- **`delete()` only on `DRAFT`.** A completed invoice is canceled with `cancel()`, not deleted (accounting rules).
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes documents in any status (the sandbox returns 200 for completed and canceled ones as well). Prefer `cancel()` for completed documents: issued documents have to be kept for bookkeeping (GoBD), and deleting one leaves a gap in the number sequence.
 - **`pdf()` requires `complete()`.** A `DRAFT` invoice has no PDF yet; depending on the account the endpoint returns 404 or an error.
 - **Single-item list quirk.** As with all resources, `list()` normalizes it automatically.
-- **`pdf(rawPdf: true)` doesn't go through `getJson()`.** In a mock test, make the mock return a body that starts with `%PDF-`; otherwise `UnexpectedResponseException` is thrown. The HTTP status is still checked for errors.
+- **`pdfContent()` doesn't go through `getJson()`.** In a mock test, make the mock return a body that starts with `%PDF-`; otherwise `UnexpectedResponseException` is thrown. The HTTP status is still checked for errors.
 - **`email()` requires `complete()`.** A `DRAFT` invoice has no PDF yet; depending on the account Billomat responds with a `ValidationException` or sends an empty email.
 - **`mail()` costs money.** Pixelletter charges per letter; run tests only in the sandbox.
 - **`EmailOptions::$from`** must be a verified sender address in the Billomat account. Otherwise you get a 422.
@@ -506,6 +507,6 @@ printf(
 );
 
 // 4) Save the PDF
-$pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED, rawPdf: true);
+$pdf = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
 file_put_contents(sprintf('invoice-%d.pdf', $invoice->id), $pdf);
 ```

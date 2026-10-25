@@ -17,13 +17,6 @@ final readonly class ClientTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: client_id
-         * Typ: INT
-         */
-        public int $clientId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class ClientTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `clientId`. */
-    public function withClientId(int $clientId): self
-    {
-        return clone($this, ['clientId' => $clientId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class ClientTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'client_id' => $this->clientId,
             'name' => $this->name,
         ];
     }

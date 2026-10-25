@@ -80,7 +80,6 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         $amount = $completed->totalGross ?? $completed->totalNet ?? Money::of('10');
 
         $paymentOpts = new InvoicePaymentCreateOptions(
-            invoiceId: $invoiceId,
             amount: $amount,
             date: new DateTimeImmutable('today'),
             type: PaymentType::BANK_TRANSFER,
@@ -89,7 +88,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
             markInvoiceAsPaid: true,
         );
 
-        $payment = $billomat->invoices->payments->create($paymentOpts);
+        $payment = $billomat->invoices->payments->create($invoiceId, $paymentOpts);
 
         self::assertNotNull($payment->id);
         self::assertSame($invoiceId, $payment->invoiceId);

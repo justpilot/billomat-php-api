@@ -21,12 +21,6 @@ final readonly class DeliveryNoteCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: delivery_note_id
-         */
-        public int $deliveryNoteId,
-        /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
@@ -42,12 +36,6 @@ final readonly class DeliveryNoteCommentCreateOptions implements WriteOptions
          */
         public ?DeliveryNoteCommentActionKey $actionkey = null,
     ) {
-    }
-
-    /** Kopie mit geändertem `deliveryNoteId`. */
-    public function withDeliveryNoteId(int $deliveryNoteId): self
-    {
-        return clone($this, ['deliveryNoteId' => $deliveryNoteId]);
     }
 
     /** Kopie mit geändertem `comment`. */
@@ -70,7 +58,6 @@ final readonly class DeliveryNoteCommentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'delivery_note_id' => $this->deliveryNoteId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
         ], static fn (mixed $v): bool => null !== $v);

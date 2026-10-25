@@ -26,7 +26,7 @@ DRAFT  ── complete() ──▶  OPEN  ── invoice is paid ──▶  PAID
   │                        ├── due date passed ──▶  OVERDUE
   │                        │
   │                        └── cancel() ──▶  CANCELED  ── uncancel() ──▶  OPEN
-  └── delete() (only in DRAFT)
+  └── delete() (any status; prefer cancel() once completed)
 ```
 
 An open reminder can be followed by further dunning levels: Billomat increments the level internally and uses the templates stored as dunning levels in `reminderTexts` (see [Reminder levels](settings-reminder-levels.md)).
@@ -48,14 +48,16 @@ An open reminder can be followed by further dunning levels: Billomat increments 
 | `cancel($id)` | PUT | `/reminders/{id}/cancel` |
 | `uncancel($id)` | PUT | `/reminders/{id}/uncancel` |
 | `email($id, $options?)` | POST | `/reminders/{id}/email` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/reminders/{id}/pdf` |
+| `pdf($id, $type?)` | GET | `/reminders/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/reminders/{id}/pdf?format=pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/reminders/{id}/upload-signature` |
 
 ### `/reminder-items`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($reminderId, $query?)` | GET | `/reminder-items?reminder_id={id}` |
+| `list($reminderId, $filters?)` | GET | `/reminder-items?reminder_id={id}` |
+| `listPage($reminderId, $filters?)` / `iterateAll($reminderId, $filters?, $pageSize?)` | GET | `/reminder-items?reminder_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/reminder-items/{id}` |
 
 Read-only: there is **no** `create`/`update`/`delete` and no `ReminderItemCreateOptions` class. Billomat generates the items from the invoice.
@@ -64,10 +66,11 @@ Read-only: there is **no** `create`/`update`/`delete` and no `ReminderItemCreate
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($reminderId)` | GET | `/reminder-tags?reminder_id={id}` |
+| `list($reminderId, $filters?)` | GET | `/reminder-tags?reminder_id={id}` |
+| `listPage($reminderId, $filters?)` / `iterateAll($reminderId, $filters?, $pageSize?)` | GET | `/reminder-tags?reminder_id={id}` (paginated) |
 | `cloud()` | GET | `/reminder-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/reminder-tags/{id}` |
-| `create($options)` | POST | `/reminder-tags` |
+| `create($reminderId, $options)` | POST | `/reminder-tags` |
 | `delete($id)` | DELETE | `/reminder-tags/{id}` |
 
 ## Methods
@@ -138,13 +141,13 @@ $mail = new EmailOptions(to: ['client@example.com'], subject: 'Reminder: open in
 $billomat->reminders->email($reminder->id, $mail);
 ```
 
-#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): ReminderPdf|string`
+#### `pdf(int $id, ?PdfType $type = null): ReminderPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-Returns a `ReminderPdf` model (metadata plus base64 body) by default. With `$rawPdf = true`, `?format=pdf` is appended and the binary PDF content is returned directly.
+`pdf()` returns a `ReminderPdf` model (metadata plus base64 body). `pdfContent()` appends `?format=pdf` and returns the binary PDF content directly; it throws an `UnexpectedResponseException` if the body is empty or doesn't start with `%PDF-`.
 
 ```php
 $pdf = $billomat->reminders->pdf($reminder->id);                 // model
-$raw = $billomat->reminders->pdf($reminder->id, rawPdf: true);   // string (PDF binary)
+$raw = $billomat->reminders->pdfContent($reminder->id);        // string (PDF binary)
 ```
 
 #### `uploadSignature(int $id, string $base64Pdf): void`
@@ -170,7 +173,8 @@ There is **no** `ReminderItemCreateOptions` and no write endpoint. Items show th
 use Justpilot\Billomat\Api\ReminderTagCreateOptions;
 
 $billomat->reminders->tags->create(
-    new ReminderTagCreateOptions(reminderId: $reminder->id, name: 'dunning-level-2'),
+    $reminder->id,
+    new ReminderTagCreateOptions(name: 'dunning-level-2'),
 );
 
 $tags = $billomat->reminders->tags->list($reminder->id);
@@ -207,9 +211,10 @@ Mirrors `ReminderCreateOptions` **without** `invoiceId`; the link to the invoice
 
 ## Write model: `ReminderTagCreateOptions`
 
+The reminder ID isn't part of the options: pass it as the first argument of `create()`, which adds `reminder_id` to the payload.
+
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `reminderId` | `reminder_id` | `int` (required) | |
 | `name` | `name` | `string` (required) | |
 
 ## Write model: `EmailOptions`
@@ -323,6 +328,7 @@ There is **no** comment action key enum for reminders: reminders simply have no 
 
 ## Pitfalls
 
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes reminders in any status. Once completed, prefer `cancel()`: the document is numbered, and deleting it leaves a gap in the number sequence (GoBD).
 - **`invoiceId` is required and immutable.** A reminder without an invoice doesn't exist; after `create()` the link is fixed and not part of `ReminderUpdateOptions`.
 - **Items are read-only.** To add line items, adjust the reminder text block (`/reminder-texts`) or set a different `reminderTextId` before calling `complete()`.
 - **No `/reminder-comments` endpoint.** The activity log and free-form notes belong to the parent invoice workflow, not to the reminder itself.
@@ -387,7 +393,8 @@ printf("Reminder #%d created (status: %s)\n",
 
 // 4) Add a tag (e.g. the dunning level) before completing
 $billomat->reminders->tags->create(
-    new ReminderTagCreateOptions(reminderId: $reminder->id, name: 'dunning-level-1'),
+    $reminder->id,
+    new ReminderTagCreateOptions(name: 'dunning-level-1'),
 );
 
 // 5) Complete: DRAFT → OPEN
@@ -402,7 +409,7 @@ $mail = new EmailOptions(
 $billomat->reminders->email($reminder->id, $mail);
 
 // 7) Save the PDF locally
-$pdfBinary = $billomat->reminders->pdf($reminder->id, rawPdf: true);
+$pdfBinary = $billomat->reminders->pdfContent($reminder->id);
 file_put_contents("reminder-{$reminder->id}.pdf", $pdfBinary);
 
 // 8) Inspect the generated reminder items (read-only)

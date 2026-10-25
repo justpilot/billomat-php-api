@@ -77,7 +77,7 @@ final class ReminderTagsApiTest extends TestCase
         self::assertCount(1, $tags);
         self::assertSame('eilig', $tags[0]->name);
 
-        $tag = $api->create(new ReminderTagCreateOptions(reminderId: 42, name: 'neu'));
+        $tag = $api->create(42, new ReminderTagCreateOptions(name: 'neu'));
         self::assertSame(99, $tag->id);
 
         $api->delete(99);

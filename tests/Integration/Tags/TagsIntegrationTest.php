@@ -116,7 +116,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoiceId = $this->createDraftInvoiceId($billomat);
 
         try {
-            $tag = $billomat->invoices->tags->create(new InvoiceTagCreateOptions($invoiceId, 'IT-InvTag-'.date('His')));
+            $tag = $billomat->invoices->tags->create($invoiceId, new InvoiceTagCreateOptions('IT-InvTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->invoices->tags->list($invoiceId);
@@ -140,7 +140,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $offer = $billomat->offers->create(new OfferCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $tag = $billomat->offers->tags->create(new OfferTagCreateOptions($offer->id, 'IT-OffTag-'.date('His')));
+            $tag = $billomat->offers->tags->create($offer->id, new OfferTagCreateOptions('IT-OffTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->offers->tags->list($offer->id);
@@ -164,7 +164,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $conf = $billomat->confirmations->create(new ConfirmationCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $tag = $billomat->confirmations->tags->create(new ConfirmationTagCreateOptions($conf->id, 'IT-ConfTag-'.date('His')));
+            $tag = $billomat->confirmations->tags->create($conf->id, new ConfirmationTagCreateOptions('IT-ConfTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->confirmations->tags->list($conf->id);
@@ -188,7 +188,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $note = $billomat->creditNotes->create(new CreditNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $tag = $billomat->creditNotes->tags->create(new CreditNoteTagCreateOptions($note->id, 'IT-GsTag-'.date('His')));
+            $tag = $billomat->creditNotes->tags->create($note->id, new CreditNoteTagCreateOptions('IT-GsTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->creditNotes->tags->list($note->id);
@@ -212,7 +212,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $note = $billomat->deliveryNotes->create(new DeliveryNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $tag = $billomat->deliveryNotes->tags->create(new DeliveryNoteTagCreateOptions($note->id, 'IT-LsTag-'.date('His')));
+            $tag = $billomat->deliveryNotes->tags->create($note->id, new DeliveryNoteTagCreateOptions('IT-LsTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->deliveryNotes->tags->list($note->id);
@@ -236,7 +236,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $letter = $billomat->letters->create(new LetterCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $tag = $billomat->letters->tags->create(new LetterTagCreateOptions($letter->id, 'IT-BrTag-'.date('His')));
+            $tag = $billomat->letters->tags->create($letter->id, new LetterTagCreateOptions('IT-BrTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->letters->tags->list($letter->id);
@@ -264,7 +264,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $incoming = $billomat->incomings->create($incomingOpts);
 
         try {
-            $tag = $billomat->incomings->tags->create(new IncomingTagCreateOptions($incoming->id, 'IT-InTag-'.date('His')));
+            $tag = $billomat->incomings->tags->create($incoming->id, new IncomingTagCreateOptions('IT-InTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->incomings->tags->list($incoming->id);
@@ -295,7 +295,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $reminder = $billomat->reminders->create(new ReminderCreateOptions(invoiceId: $overdue[0]->id));
 
         try {
-            $tag = $billomat->reminders->tags->create(new ReminderTagCreateOptions($reminder->id, 'IT-MaTag-'.date('His')));
+            $tag = $billomat->reminders->tags->create($reminder->id, new ReminderTagCreateOptions('IT-MaTag-'.date('His')));
             self::assertNotNull($tag->id);
 
             $tags = $billomat->reminders->tags->list($reminder->id);

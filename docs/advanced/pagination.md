@@ -21,13 +21,14 @@ The SDK offers three levels, ordered by convenience:
 | `listPage($filters)` | You need pagination metadata for a classic UI ("page 1/12, 234 results"). |
 | `iterateAll($filters, int $pageSize = 100)` | You want to walk through all entries of a filter without dealing with page indexes. |
 
-For clients, suppliers, articles, users and all document types (invoices, offers, confirmations, credit notes, delivery notes, letters, reminders, incoming invoices, recurring invoices), `$filters` is the typed filter class (`ClientFilter`, `InvoiceFilter`, …) or an array (`ClientFilter|array`). `templates->list()` takes `TemplateFilter|array`. The other list APIs take an array.
+For clients, suppliers, articles, users and all document types (invoices, offers, confirmations, credit notes, delivery notes, letters, reminders, incoming invoices, recurring invoices), `$filters` is the typed filter class (`ClientFilter`, `InvoiceFilter`, …) or an array (`ClientFilter|array`). `templates->list()` takes `TemplateFilter|array`. Sub-resources get their parent ID as the first argument: payments take `InvoicePaymentFilter`/`CreditNotePaymentFilter`/`IncomingPaymentFilter`, property values `ClientPropertyValueFilter`/`ArticlePropertyValueFilter`/`SupplierPropertyValueFilter`/`IncomingPropertyValueFilter`, and items, comments, tags, email receivers and property definitions the generic `SubResourceFilter` (only `orderBy`, `page`, `perPage`, `extra`). The other list APIs take an array.
 
 `listPage()` and `iterateAll()` are available on these list APIs:
 
 - top-level resources: `clients`, `suppliers`, `articles`, `users`, `invoices`, `offers`, `confirmations`, `creditNotes`, `deliveryNotes`, `reminders`, `letters`, `incomings`, `recurrings`, `inboxDocuments`, `activities`, `roles`,
 - master data lookups: `countries`, `currencies`, `countryTaxes`, `units`, `emailTemplates`, `freeTexts`, `incomingCategories`,
-- the attribute sub-resources `properties` (on `clients`, `articles`, `suppliers`, `incomings`, `users`) and `propertyValues` (on `clients`, `articles`, `suppliers`, `incomings`), e.g. `$billomat->clients->propertyValues->iterateAll($clientId)`.
+- the attribute sub-resources `properties` (on `clients`, `articles`, `suppliers`, `incomings`, `users`) and `propertyValues` (on `clients`, `articles`, `suppliers`, `incomings`), e.g. `$billomat->clients->propertyValues->iterateAll($clientId)`,
+- the document sub-resources `items`, `comments`, `tags` and `payments` (where the parent has them) and `recurrings->emailReceivers`, e.g. `$billomat->invoices->items->iterateAll($invoiceId, new SubResourceFilter(orderBy: OrderBy::asc('position')))`.
 
 `contacts->list($clientId)` and `templates->list()` return a single list without pagination helpers.
 

@@ -40,11 +40,10 @@ $amount = $incoming->totalGross ?? Money::of('119.00');
 printf("Eingangsbeleg #%d angelegt: Brutto %s %s\n", $incomingId, $amount->format(2, ',', '.'), $incoming->currencyCode ?? '');
 
 // 2) Schlagwort anhängen
-$billomat->incomings->tags->create(new IncomingTagCreateOptions(incomingId: $incomingId, name: 'büro'));
+$billomat->incomings->tags->create($incomingId, new IncomingTagCreateOptions(name: 'büro'));
 
 // 3) Zahlung verbuchen und den Beleg direkt als bezahlt markieren
-$payment = $billomat->incomings->payments->create(new IncomingPaymentCreateOptions(
-    incomingId: $incomingId,
+$payment = $billomat->incomings->payments->create($incomingId, new IncomingPaymentCreateOptions(
     amount: $amount,
     date: new DateTimeImmutable('today'),
     type: PaymentType::BANK_TRANSFER,

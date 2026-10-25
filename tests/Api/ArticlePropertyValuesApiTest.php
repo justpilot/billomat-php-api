@@ -87,8 +87,7 @@ final class ArticlePropertyValuesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->propertyValues;
 
-        $value = $api->create(new ArticlePropertyValueCreateOptions(
-            articleId: 42,
+        $value = $api->create(42, new ArticlePropertyValueCreateOptions(
             articlePropertyId: 7,
             value: 'blau',
         ));

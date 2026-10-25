@@ -156,6 +156,6 @@ API methods throw an `UnexpectedResponseException` when Billomat responds with 2
 
 Up to and including 3.1 this was a plain `\RuntimeException`. Since `UnexpectedResponseException` still extends `\RuntimeException` through `BillomatException`, existing `catch (\RuntimeException)` blocks keep working.
 
-A 2xx body that isn't valid JSON or isn't a JSON object also results in an `UnexpectedResponseException` (the original `\JsonException` is available via `getPrevious()`). PDF downloads (`pdf()` in raw mode) throw it too when the body is empty or doesn't start with `%PDF-`.
+A 2xx body that isn't valid JSON or isn't a JSON object also results in an `UnexpectedResponseException` (the original `\JsonException` is available via `getPrevious()`). PDF downloads (`pdfContent()`) throw it too when the body is empty or doesn't start with `%PDF-`.
 
 If no response arrives at all (DNS error, connection reset, timeout), the SDK throws a `TransportException`. GET requests are retried first according to the `RetryPolicy`; POST/PUT/DELETE are not.

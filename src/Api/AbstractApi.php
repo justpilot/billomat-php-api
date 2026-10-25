@@ -11,6 +11,7 @@ use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
 use Psr\Http\Message\ResponseInterface;
@@ -341,6 +342,16 @@ abstract class AbstractApi
     protected static function filterQuery(ListFilter|array $filters): array
     {
         return $filters instanceof ListFilter ? $filters->toQuery() : $filters;
+    }
+
+    /**
+     * Query für GET /{dokumente}/{id}/pdf: `type=signed|print`, falls gesetzt.
+     *
+     * @return array<string, string>
+     */
+    protected static function pdfQuery(?PdfType $type): array
+    {
+        return $type instanceof PdfType ? ['type' => $type->value] : [];
     }
 
     /**

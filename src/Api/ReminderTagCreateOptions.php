@@ -17,13 +17,6 @@ final readonly class ReminderTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: reminder_id
-         * Typ: INT
-         */
-        public int $reminderId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class ReminderTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `reminderId`. */
-    public function withReminderId(int $reminderId): self
-    {
-        return clone($this, ['reminderId' => $reminderId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class ReminderTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'reminder_id' => $this->reminderId,
             'name' => $this->name,
         ];
     }

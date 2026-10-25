@@ -17,13 +17,6 @@ final readonly class IncomingPropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: incoming_id
-         * Typ: INT
-         */
-        public int $incomingId,
-        /**
          * ID der Eigenschaft.
          *
          * Billomat-Feld: incoming_property_id
@@ -38,12 +31,6 @@ final readonly class IncomingPropertyValueCreateOptions implements WriteOptions
          */
         public mixed $value,
     ) {
-    }
-
-    /** Kopie mit geändertem `incomingId`. */
-    public function withIncomingId(int $incomingId): self
-    {
-        return clone($this, ['incomingId' => $incomingId]);
     }
 
     /** Kopie mit geändertem `incomingPropertyId`. */
@@ -66,7 +53,6 @@ final readonly class IncomingPropertyValueCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'incoming_id' => $this->incomingId,
             'incoming_property_id' => $this->incomingPropertyId,
             'value' => $this->value,
         ];

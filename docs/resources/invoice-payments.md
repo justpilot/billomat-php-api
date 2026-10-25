@@ -10,46 +10,59 @@ API wrapper for invoice payments at `/invoice-payments`.
 $billomat->invoices->payments
 ```
 
-The generic `Justpilot\Billomat\Api\PaymentsApi`, typed for `InvoicePayment` and `InvoicePaymentCreateOptions`.
+The generic `Justpilot\Billomat\Api\PaymentsApi`, typed for `InvoicePayment`, `InvoicePaymentCreateOptions` and `InvoicePaymentFilter`.
 
 ## Endpoints
 
 | Method | HTTP | Path |
 |---|---|---|
 | `list($invoiceId?, $filters?)` | GET | `/invoice-payments` |
+| `listPage($invoiceId?, $filters?)` | GET | `/invoice-payments` (one page with metadata) |
+| `iterateAll($invoiceId?, $filters?, $pageSize?)` | GET | `/invoice-payments` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-payments/{id}` |
-| `create($options)` | POST | `/invoice-payments` |
+| `create($invoiceId, $options)` | POST | `/invoice-payments` |
 | `delete($id)` | DELETE | `/invoice-payments/{id}` |
 
 There is no `update()` method; Billomat doesn't support editing a payment. To correct one, delete it and create a new one.
 
 ## Methods
 
-### `list(?int $parentId = null, array $filters = []): list<InvoicePayment>`
+### `list(?int $parentId = null, InvoicePaymentFilter|array $filters = []): list<InvoicePayment>`
 
-`$parentId` is the invoice ID and is sent as `invoice_id`. Without it, the payments of all invoices are listed. Filters according to the Billomat docs:
+`$parentId` is the invoice ID and is sent as `invoice_id`; it wins over an `invoice_id` key in an array filter. Without it, the payments of all invoices are listed. The typed filter `InvoicePaymentFilter` (generated from the API spec) has these fields:
 
-| Filter | Description |
-|---|---|
-| `invoice_id` | Only payments for a specific invoice (set via `$parentId`) |
-| `from` | Date from (`YYYY-MM-DD`) |
-| `to` | Date to (`YYYY-MM-DD`) |
-| `type` | Payment type, comma-separated values allowed (`BANK_TRANSFER,PAYPAL`) |
-| `user_id` | ID of the user who entered the payment |
+| Property | Billomat filter | Type | Description |
+|---|---|---|---|
+| `from` | `from` | `?\DateTimeImmutable` | Payments from this date |
+| `to` | `to` | `?\DateTimeImmutable` | Payments up to this date |
+| `type` | `type` | `list<PaymentType>` | Payment types, OR-combined (sent as `BANK_TRANSFER,PAYPAL`) |
+| `userId` | `user_id` | `?int` | ID of the user who entered the payment |
+| `orderBy` | `order_by` | `?OrderBy` | Sorting |
+| `page` / `perPage` | `page` / `per_page` | `?int` | Pagination |
+| `extra` | | `array` | Further query parameters |
 
 ```php
+use Justpilot\Billomat\Api\InvoicePaymentFilter;
 use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 
-$payments = $billomat->invoices->payments->list($invoice->id, [
-    'order_by' => OrderBy::desc('date')->toQuery(),
-]);
+$payments = $billomat->invoices->payments->list($invoice->id, new InvoicePaymentFilter(
+    type: [PaymentType::BANK_TRANSFER, PaymentType::PAYPAL],
+    orderBy: OrderBy::desc('date'),
+));
 ```
+
+A raw array (`['from' => '2026-01-01']`) still works. A filter of another resource (e.g. `CreditNotePaymentFilter`) throws an `InvalidArgumentException`.
+
+### `listPage(?int $parentId = null, InvoicePaymentFilter|array $filters = []): Page<InvoicePayment>` / `iterateAll(?int $parentId = null, InvoicePaymentFilter|array $filters = [], int $pageSize = 100): Generator<int, InvoicePayment>`
+
+Like `list()`, with pagination metadata or as a lazy iterator over all pages. See [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?InvoicePayment` / `getOrFail(int $id): InvoicePayment`
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
-### `create(InvoicePaymentCreateOptions $options): InvoicePayment`
+### `create(int $invoiceId, InvoicePaymentCreateOptions $options): InvoicePayment`
 
 ```php
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
@@ -57,7 +70,6 @@ use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $opts = new InvoicePaymentCreateOptions(
-    invoiceId: 98765,
     amount: Money::of('1190.00'),
     date: new DateTimeImmutable('2026-06-01'),
     type: PaymentType::BANK_TRANSFER,
@@ -65,8 +77,10 @@ $opts = new InvoicePaymentCreateOptions(
     markInvoiceAsPaid: true,
 );
 
-$payment = $billomat->invoices->payments->create($opts);
+$payment = $billomat->invoices->payments->create($invoice->id, $opts);
 ```
+
+The invoice ID is the first argument; the SDK adds it to the payload as `invoice_id`.
 
 ### `delete(int $id): void`
 
@@ -74,11 +88,10 @@ According to the Billomat docs, this resets the invoice status to `OPEN` or `OVE
 
 ## Write model: `InvoicePaymentCreateOptions`
 
-Constructor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount, …)`. Both values are required; the other fields are optional named arguments. The object is immutable (`final readonly`) and has a `with*()` method per field.
+Constructor: `new InvoicePaymentCreateOptions(Money $amount, …)`. `amount` is required; the other fields are optional named arguments. The object is immutable (`final readonly`) and has a `with*()` method per field.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `invoiceId` | `invoice_id` | `int` | Required (constructor) |
 | `amount` | `amount` | `Money` | Required (constructor) |
 | `date` | `date` | `?\DateTimeImmutable` | Default: today |
 | `comment` | `comment` | `?string` | Free text |
@@ -86,7 +99,7 @@ Constructor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount, …
 | `type` | `type` | `?PaymentType` | See the enum below |
 | `markInvoiceAsPaid` | `mark_invoice_as_paid` | `bool` | Default `false`. With `true`, Billomat marks the invoice as `PAID` even if the amount doesn't exactly cover the open amount. |
 
-`toArray()` drops `null` values but always keeps `invoice_id`, `amount` (as a string) and `mark_invoice_as_paid` (always sent as `1`/`0`).
+The invoice ID isn't part of the options; `create()` takes it as an argument. `toArray()` drops `null` values but always keeps `amount` (as a string) and `mark_invoice_as_paid` (always sent as `1`/`0`).
 
 ## Read model: `InvoicePayment`
 
@@ -137,7 +150,7 @@ The same enum is used for the accepted payment types of documents (`paymentTypes
 - **No updates.** A payment can't be changed, only deleted and created again.
 - **`markInvoiceAsPaid` overrides the open amount.** Only set the flag if you really want the invoice to switch to `PAID`, even for a partial payment.
 - **Invoice status changes.** After `create()`, the invoice becomes `PAID` (if `amount` covers the open amount) or stays `OPEN`/`OVERDUE` (partial payment). After `delete()` it switches back.
-- **Type filter.** When listing, `type` is a comma-separated field on the API side; you can pass one value or several separated by commas.
+- **Type filter.** When listing, `type` is a comma-separated field on the API side; `InvoicePaymentFilter::$type` takes a list of `PaymentType` cases and joins them.
 
 ## End-to-end example
 
@@ -149,6 +162,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
+use Justpilot\Billomat\Api\InvoicePaymentFilter;
 use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\PaymentType;
@@ -164,20 +178,19 @@ $invoiceId = 98765;
 
 // Record a payment
 $opts = new InvoicePaymentCreateOptions(
-    invoiceId: $invoiceId,
     amount: Money::of('590.00'),
     type: PaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('today'),
     transactionPurpose: 'Invoice RE-2026-0042',
 );
 
-$payment = $billomat->invoices->payments->create($opts);
+$payment = $billomat->invoices->payments->create($invoiceId, $opts);
 printf("Payment #%d recorded: %s EUR via %s\n", $payment->id, $payment->amount->format(2), $payment->type?->value);
 
 // List all payments for the invoice
-$paymentsForInvoice = $billomat->invoices->payments->list($invoiceId, [
-    'order_by' => OrderBy::asc('date')->toQuery(),
-]);
+$paymentsForInvoice = $billomat->invoices->payments->list($invoiceId, new InvoicePaymentFilter(
+    orderBy: OrderBy::asc('date'),
+));
 
 $sum = Money::sum(...array_map(static fn (InvoicePayment $p): Money => $p->amount, $paymentsForInvoice));
 printf("Recorded so far: %s EUR from %d payments\n", $sum->format(2), count($paymentsForInvoice));

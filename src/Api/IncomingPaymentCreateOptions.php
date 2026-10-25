@@ -24,13 +24,6 @@ final readonly class IncomingPaymentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, zu dem die Zahlung gehört.
-         *
-         * Billomat-Feld: incoming_id
-         * Typ: INT
-         */
-        public int $incomingId,
-        /**
          * Zahlungsbetrag.
          *
          * Billomat-Feld: amount
@@ -78,12 +71,6 @@ final readonly class IncomingPaymentCreateOptions implements WriteOptions
     ) {
     }
 
-    /** Kopie mit geändertem `incomingId`. */
-    public function withIncomingId(int $incomingId): self
-    {
-        return clone($this, ['incomingId' => $incomingId]);
-    }
-
     /** Kopie mit geändertem `amount`. */
     public function withAmount(Money $amount): self
     {
@@ -128,7 +115,6 @@ final readonly class IncomingPaymentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'incoming_id' => $this->incomingId,
             'amount' => $this->amount->toString(),
             'date' => $this->date?->format('Y-m-d'),
             'comment' => $this->comment,

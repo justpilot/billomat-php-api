@@ -55,6 +55,8 @@ Run your code style fixer afterwards; Rector does not sort imports.
 | `OfferStatus::ACCEPTED`, `OfferStatus::REJECTED` | `OfferStatus::WON`, `OfferStatus::LOST` |
 | `$options->getItems()` on document create options | `$options->items` |
 | `$this->putEmptyResponse()` in `AbstractApi` subclasses | `$this->putVoid()` |
+| `pdf($id, $type, rawPdf: true)` / `pdf($id, $type, true)` on the document APIs | `pdfContent($id, $type)` (`rawPdf: false` is dropped) |
+| `create(new InvoicePaymentCreateOptions(invoiceId: $id, …))` and the other payment, comment, tag, property value and e-mail receiver options | `create($id, new InvoicePaymentCreateOptions(…))` |
 
 The set only touches calls it can attribute to the SDK: `$billomat->invoiceComments` is rewritten when
 Rector (via PHPStan) knows that `$billomat` is a `BillomatClient`. Untyped variables, values from a
@@ -73,6 +75,9 @@ These changes need a decision and are not automated. The sections below describe
 - Removed read-model properties, including the fields of `DunningLevel` that `ReminderText` doesn't have
   (`$position`, `$dueDays`, `$charge`, `$interest`).
 - `@template` types for the generic sub-resource classes (`CommentsApi<InvoiceComment, …>`) in your PHPDoc.
+- `pdf(rawPdf: $flag)` with a flag that is only known at runtime: split it into `pdf()` and `pdfContent()`.
+- Payment, comment, tag, property value and e-mail receiver options built outside the `create()` call
+  (`$options = new InvoiceTagCreateOptions(invoiceId: $id, …)`): move the ID into `create($id, $options)`.
 - The parent filter of payments and property values: `list(filters: ['invoice_id' => $id])` keeps
   working, `list($id)` is the 4.0 way.
 - PSR-18 setup, `MockHttpClient` in tests, exception handling, `#[\NoDiscard]`, `BillomatConfig` validation.
@@ -268,11 +273,26 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry:
   `getPrevious()` is no longer a Symfony exception. Status code and response body are unchanged.
 - A 2xx response whose body is not a JSON object throws `UnexpectedResponseException` instead of `JsonException`.
 
-### Raw PDFs are checked
+### `pdf(rawPdf: true)` is `pdfContent()`
 
-`pdf($id, rawPdf: true)` on invoices, offers, confirmations, credit notes, delivery notes, letters and reminders
-throws `UnexpectedResponseException` when Billomat answers 2xx with an empty body or a body that is not a PDF
-(no `%PDF-` header). 3.x returned such bodies as they were. If you checked the result yourself, you can drop that check:
+The document APIs (invoices, offers, confirmations, credit notes, delivery notes, letters and reminders)
+split `pdf()` into two methods: `pdf()` always returns the `*Pdf` model (metadata plus base64 content),
+`pdfContent()` the binary PDF. The `bool $rawPdf` flag is gone, and so is the `InvoicePdf|string` return
+type you had to narrow:
+
+```php
+// 3.x
+$pdf = $billomat->invoices->pdf($id, PdfType::SIGNED, rawPdf: true); // InvoicePdf|string
+$model = $billomat->invoices->pdf($id);                              // InvoicePdf|string
+
+// 4.0
+$pdf = $billomat->invoices->pdfContent($id, PdfType::SIGNED); // string
+$model = $billomat->invoices->pdf($id);                       // InvoicePdf
+```
+
+`pdfContent()` also throws `UnexpectedResponseException` when Billomat answers 2xx with an empty body or a
+body that is not a PDF (no `%PDF-` header). 3.x returned such bodies as they were. If you checked the result
+yourself, you can drop that check:
 
 ```php
 // 3.x
@@ -282,13 +302,13 @@ if ('' === $pdf || !str_starts_with($pdf, '%PDF-')) {
 }
 
 // 4.0
-$pdf = $billomat->invoices->pdf($id, rawPdf: true); // throws UnexpectedResponseException
+$pdf = $billomat->invoices->pdfContent($id); // throws UnexpectedResponseException
 ```
 
 ## Read-only methods are `#[\NoDiscard]`
 
 `get()`, `getMyself()`, `list()`, `listPage()`, `listGrouped()`, `iterateAll()`, `cloud()`,
-`pdf()`, `thumb()`, `avatar()` and `SearchApi::query()` carry `#[\NoDiscard]`. PHP 8.5 emits a warning
+`pdf()`, `pdfContent()`, `thumb()`, `avatar()` and `SearchApi::query()` carry `#[\NoDiscard]`. PHP 8.5 emits a warning
 when their result is ignored. This is not a hard break, but test suites that turn warnings into failures
 will notice it. If you call such a method only for its exception (for example to check that a resource
 exists), cast the result to `(void)`:
@@ -310,7 +330,7 @@ $billomat->clientTags->create($options);
 
 // 4.0
 $billomat->invoices->comments->list($invoiceId);
-$billomat->clients->tags->create($options);
+$billomat->clients->tags->create($clientId, $options); // see "The parent ID is an argument of create()" below
 ```
 
 | 3.x | 4.0 |
@@ -396,9 +416,39 @@ argument there:
 $billomat->invoicePayments->list(['invoice_id' => $invoiceId, 'order_by' => 'date+DESC']);
 
 // 4.0
-$billomat->invoices->payments->list($invoiceId, ['order_by' => 'date+DESC']);
-$billomat->invoices->payments->list(filters: ['from' => '2026-01-01']);
+$billomat->invoices->payments->list($invoiceId, new InvoicePaymentFilter(orderBy: OrderBy::desc('date')));
+$billomat->invoices->payments->list(filters: new InvoicePaymentFilter(from: new DateTimeImmutable('2026-01-01')));
 ```
+
+Plain arrays keep working. Payments and property values have typed filters (`InvoicePaymentFilter`,
+`ClientPropertyValueFilter`, …); the other sub-resources take a `SubResourceFilter` for sorting and
+pagination, and all of them have `listPage()` and `iterateAll()`:
+
+```php
+$billomat->invoices->items->list($invoiceId, new SubResourceFilter(orderBy: OrderBy::asc('position')));
+$billomat->invoices->comments->list($invoiceId, filters: new SubResourceFilter(perPage: 20));
+```
+
+### The parent ID is an argument of `create()`
+
+Payments, comments, tags, property values and recurring e-mail receivers take the parent ID as the first
+argument of `create()`, like items already did and like `list($parentId)`. The parent ID field is gone from
+their create options (`invoiceId`, `offerId`, `clientId`, `recurringId`, …, and their `with…Id()` methods):
+
+```php
+// 3.x
+$billomat->invoicePayments->create(new InvoicePaymentCreateOptions(invoiceId: $invoiceId, amount: 119.0));
+$billomat->clientTags->create(new ClientTagCreateOptions(clientId: $clientId, name: 'VIP'));
+$billomat->recurringEmailReceivers->create(new RecurringEmailReceiverCreateOptions(recurringId: $id, type: RecurringEmailReceiverType::CC, address: 'a@example.com'));
+
+// 4.0
+$billomat->invoices->payments->create($invoiceId, new InvoicePaymentCreateOptions(amount: Money::of('119')));
+$billomat->clients->tags->create($clientId, new ClientTagCreateOptions(name: 'VIP'));
+$billomat->recurrings->emailReceivers->create($id, new RecurringEmailReceiverCreateOptions(type: RecurringEmailReceiverType::CC, address: 'a@example.com'));
+```
+
+Positional calls change too: `new InvoiceTagCreateOptions($invoiceId, 'VIP')` becomes
+`create($invoiceId, new InvoiceTagCreateOptions('VIP'))`.
 
 ## Methods that always returned `true` return `void`
 
@@ -628,7 +678,7 @@ new InvoicePaymentCreateOptions(invoiceId: $id, amount: 119.0);
 
 // 4.0
 new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: Money::of('49.90'));
-new InvoicePaymentCreateOptions(invoiceId: $id, amount: Money::of('119'));
+new InvoicePaymentCreateOptions(amount: Money::of('119'));
 ```
 
 `Money::of()` takes a decimal string with a point or an int; `"19,99"` or `"1e3"` throw an `InvalidArgumentException`.

@@ -21,13 +21,6 @@ final readonly class OfferCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: offer_id
-         * Typ: INT
-         */
-        public int $offerId,
-        /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
@@ -52,12 +45,6 @@ final readonly class OfferCommentCreateOptions implements WriteOptions
          */
         public ?bool $public = null,
     ) {
-    }
-
-    /** Kopie mit geändertem `offerId`. */
-    public function withOfferId(int $offerId): self
-    {
-        return clone($this, ['offerId' => $offerId]);
     }
 
     /** Kopie mit geändertem `comment`. */
@@ -86,7 +73,6 @@ final readonly class OfferCommentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'offer_id' => $this->offerId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
             'public' => $this->public,

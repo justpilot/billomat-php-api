@@ -329,7 +329,6 @@ final class ConfirmationsApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(ConfirmationPdf::class, $pdf);
         self::assertSame(240, $pdf->confirmationId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
         self::assertSame('https://mycompany.billomat.net/api/confirmations/240/pdf', $captured->url);
@@ -351,7 +350,7 @@ final class ConfirmationsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
+        $result = $api->pdfContent(777, PdfType::PRINT);
 
         self::assertIsString($result);
         self::assertStringStartsWith('%PDF-1.4', $result);

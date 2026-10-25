@@ -48,9 +48,10 @@ Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRA
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($incomingId, $actionKeys?)` | GET | `/incoming-comments?incoming_id={id}` |
+| `list($incomingId, $actionKeys?, $filters?)` | GET | `/incoming-comments?incoming_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/incoming-comments?incoming_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/incoming-comments/{id}` |
-| `create($options)` | POST | `/incoming-comments` |
+| `create($incomingId, $options)` | POST | `/incoming-comments` |
 | `delete($id)` | DELETE | `/incoming-comments/{id}` |
 
 ### `/incoming-payments`
@@ -58,18 +59,20 @@ Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRA
 | Method | HTTP | Path |
 |---|---|---|
 | `list($incomingId?, $filters?)` | GET | `/incoming-payments` |
+| `listPage($incomingId?, $filters?)` / `iterateAll($incomingId?, $filters?, $pageSize?)` | GET | `/incoming-payments` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/incoming-payments/{id}` |
-| `create($options)` | POST | `/incoming-payments` |
+| `create($incomingId, $options)` | POST | `/incoming-payments` |
 | `delete($id)` | DELETE | `/incoming-payments/{id}` |
 
 ### `/incoming-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($incomingId)` | GET | `/incoming-tags?incoming_id={id}` |
+| `list($incomingId, $filters?)` | GET | `/incoming-tags?incoming_id={id}` |
+| `listPage($incomingId, $filters?)` / `iterateAll($incomingId, $filters?, $pageSize?)` | GET | `/incoming-tags?incoming_id={id}` (paginated) |
 | `cloud()` | GET | `/incoming-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/incoming-tags/{id}` |
-| `create($options)` | POST | `/incoming-tags` |
+| `create($incomingId, $options)` | POST | `/incoming-tags` |
 | `delete($id)` | DELETE | `/incoming-tags/{id}` |
 
 ### `/incoming-property-values`
@@ -80,7 +83,7 @@ Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRA
 | `listPage($incomingId?, $filters?)` | GET | `/incoming-property-values` |
 | `iterateAll($incomingId?, $filters?, $pageSize?)` | GET | `/incoming-property-values` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/incoming-property-values/{id}` |
-| `create($options)` | POST | `/incoming-property-values` |
+| `create($incomingId, $options)` | POST | `/incoming-property-values` |
 
 ## Methods
 
@@ -162,8 +165,8 @@ use Justpilot\Billomat\Api\IncomingCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 
 $billomat->incomings->comments->create(
+    $incoming->id,
     new IncomingCommentCreateOptions(
-        incomingId: $incoming->id,
         comment: 'Reminder sent',
     ),
 );
@@ -175,27 +178,32 @@ $paymentEvents = $billomat->incomings->comments->list(
 );
 ```
 
-`list(int $incomingId, ?array $actionKeys = null)` passes the `actionkey` list to Billomat as CSV (`actionkey=PAYMENT,UPLOAD`).
+`list(int $incomingId, ?array $actionKeys = null, SubResourceFilter|array $filters = [])` passes the `actionkey` list to Billomat as CSV (`actionkey=PAYMENT,UPLOAD`).
 
 ### Incoming payments
 
 ```php
 use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
+use Justpilot\Billomat\Api\IncomingPaymentFilter;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 $payment = new IncomingPaymentCreateOptions(
-    incomingId: $incoming->id,
     amount: Money::of('357.00'),
     date: new DateTimeImmutable('2026-06-15'),
     type: PaymentType::BANK_TRANSFER,
     markIncomingAsPaid: true,
 );
 
-$billomat->incomings->payments->create($payment);
+$billomat->incomings->payments->create($incoming->id, $payment);
+
+$payments = $billomat->incomings->payments->list($incoming->id, new IncomingPaymentFilter(
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
-`list(?int $incomingId = null, array $filters = [])` lists the payments of one incoming invoice, or of all of them when `$incomingId` is `null`. Billomat filters server-side by `from`, `to`, `type` and others.
+`list(?int $incomingId = null, IncomingPaymentFilter|array $filters = [])` lists the payments of one incoming invoice, or of all of them when `$incomingId` is `null`. `IncomingPaymentFilter` filters server-side by `from`, `to`, `type` (list of `PaymentType`) and `userId`, and sorts and paginates (`orderBy`, `page`, `perPage`); `listPage()` and `iterateAll()` take the same arguments.
 
 ### Incoming tags
 
@@ -203,7 +211,8 @@ $billomat->incomings->payments->create($payment);
 use Justpilot\Billomat\Api\IncomingTagCreateOptions;
 
 $billomat->incomings->tags->create(
-    new IncomingTagCreateOptions(incomingId: $incoming->id, name: 'rent'),
+    $incoming->id,
+    new IncomingTagCreateOptions(name: 'rent'),
 );
 
 $tags = $billomat->incomings->tags->list($incoming->id);
@@ -218,8 +227,8 @@ $cloud = $billomat->incomings->tags->cloud(); // aggregated, with count per tag
 use Justpilot\Billomat\Api\IncomingPropertyValueCreateOptions;
 
 $billomat->incomings->propertyValues->create(
+    $incoming->id,
     new IncomingPropertyValueCreateOptions(
-        incomingId: $incoming->id,
         incomingPropertyId: 42,
         value: 'Cost center marketing',
     ),
@@ -264,21 +273,19 @@ Mirrors `IncomingCreateOptions`, but `supplierId` is optional here (`?int`, not 
 
 ## Write model: `IncomingCommentCreateOptions`
 
-Constructor: `new IncomingCommentCreateOptions(int $incomingId, string $comment, ?IncomingCommentActionKey $actionkey = null)`.
+Constructor: `new IncomingCommentCreateOptions(string $comment, ?IncomingCommentActionKey $actionkey = null)`. The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`, which adds `incoming_id` to the payload.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `incomingId` | `incoming_id` | `int` (required) | |
 | `comment` | `comment` | `string` (required) | Free text |
 | `actionkey` | `actionkey` | `?IncomingCommentActionKey` | Default `COMMENT`; for manually set events `EDIT`, `OPEN`, … |
 
 ## Write model: `IncomingPaymentCreateOptions`
 
-Constructor: `new IncomingPaymentCreateOptions(int $incomingId, Money $amount, …)`. Both values are sent even if they are `0`. `mark_incoming_as_paid` is always sent as well, also for `false` (as `0`).
+Constructor: `new IncomingPaymentCreateOptions(Money $amount, …)`. `amount` is sent even if it is `0`. `mark_incoming_as_paid` is always sent as well, also for `false` (as `0`). The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`, which adds `incoming_id` to the payload.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `incomingId` | `incoming_id` | `int` (required) | |
 | `amount` | `amount` | `Money` (required) | |
 | `date` | `date` | `?\DateTimeImmutable` | Payment date |
 | `type` | `type` | `?PaymentType` | Enum shared with invoices |
@@ -288,20 +295,18 @@ Constructor: `new IncomingPaymentCreateOptions(int $incomingId, Money $amount, �
 
 ## Write model: `IncomingTagCreateOptions`
 
-Constructor: `new IncomingTagCreateOptions(int $incomingId, string $name)`. No optional fields.
+Constructor: `new IncomingTagCreateOptions(string $name)`. No optional fields. The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`, which adds `incoming_id` to the payload.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `incomingId` | `incoming_id` | `int` (required) | |
 | `name` | `name` | `string` (required) | |
 
 ## Write model: `IncomingPropertyValueCreateOptions`
 
-Constructor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incomingPropertyId, mixed $value)`. All three fields are required.
+Constructor: `new IncomingPropertyValueCreateOptions(int $incomingPropertyId, mixed $value)`. All fields are required. The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`, which adds `incoming_id` to the payload.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `incomingId` | `incoming_id` | `int` (required) | |
 | `incomingPropertyId` | `incoming_property_id` | `int` (required) | Refers to `IncomingProperty::$id` |
 | `value` | `value` | `mixed` (required) | Type depends on the definition's `PropertyType` |
 
@@ -480,13 +485,14 @@ $billomat->incomings->upload(
 
 // 3) Add a tag to make filtering easier
 $billomat->incomings->tags->create(
-    new IncomingTagCreateOptions(incomingId: $incoming->id, name: 'hosting'),
+    $incoming->id,
+    new IncomingTagCreateOptions(name: 'hosting'),
 );
 
 // 4) Record the payment; this marks the document as paid
 $billomat->incomings->payments->create(
+    $incoming->id,
     new IncomingPaymentCreateOptions(
-        incomingId: $incoming->id,
         amount: Money::of('357.00'),
         date: new DateTimeImmutable('2026-06-15'),
         type: PaymentType::BANK_TRANSFER,
@@ -497,8 +503,8 @@ $billomat->incomings->payments->create(
 
 // 5) Add your own comment
 $billomat->incomings->comments->create(
+    $incoming->id,
     new IncomingCommentCreateOptions(
-        incomingId: $incoming->id,
         comment: 'Included in the DATEV export.',
     ),
 );

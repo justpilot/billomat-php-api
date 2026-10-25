@@ -73,8 +73,8 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $supplier = $billomat->suppliers->create($supplierOpts);
 
         try {
-            $tagOpts = new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'IT-SupTag-'.date('His'));
-            $tag = $billomat->suppliers->tags->create($tagOpts);
+            $tagOpts = new SupplierTagCreateOptions(name: 'IT-SupTag-'.date('His'));
+            $tag = $billomat->suppliers->tags->create($supplier->id, $tagOpts);
 
             self::assertNotNull($tag->id);
 

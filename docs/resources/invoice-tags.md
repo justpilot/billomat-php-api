@@ -25,17 +25,18 @@ The SDK splits this into two methods with two separate read models.
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($invoiceId)` | GET | `/invoice-tags?invoice_id={id}` |
+| `list($invoiceId, $filters?)` | GET | `/invoice-tags?invoice_id={id}` |
+| `listPage($invoiceId, $filters?)` / `iterateAll($invoiceId, $filters?, $pageSize?)` | GET | `/invoice-tags?invoice_id={id}` (paginated) |
 | `cloud()` | GET | `/invoice-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-tags/{id}` |
-| `create($options)` | POST | `/invoice-tags` |
+| `create($invoiceId, $options)` | POST | `/invoice-tags` |
 | `delete($id)` | DELETE | `/invoice-tags/{id}` |
 
 There is no `update()` method; delete the tag and create it again.
 
 ## Methods
 
-### `list(int $invoiceId): list<InvoiceTag>`
+### `list(int $invoiceId, SubResourceFilter|array $filters = []): list<InvoiceTag>`
 
 Lists the tags of a single invoice.
 
@@ -45,6 +46,15 @@ $tags = $billomat->invoices->tags->list(98765);
 foreach ($tags as $tag) {
     echo $tag->name . "\n";
 }
+```
+
+`SubResourceFilter` sorts and paginates (`orderBy`, `page`, `perPage`, `extra`); `listPage()` and `iterateAll()` work the same way. See [Pagination](../advanced/pagination.md).
+
+```php
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SubResourceFilter;
+
+$tags = $billomat->invoices->tags->list(98765, new SubResourceFilter(orderBy: OrderBy::asc('name')));
 ```
 
 ### `cloud(): list<InvoiceTagCloudEntry>`
@@ -61,13 +71,14 @@ foreach ($billomat->invoices->tags->cloud() as $entry) {
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
-### `create(InvoiceTagCreateOptions $options): InvoiceTag`
+### `create(int $invoiceId, InvoiceTagCreateOptions $options): InvoiceTag`
 
 ```php
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 
 $tag = $billomat->invoices->tags->create(
-    new InvoiceTagCreateOptions(invoiceId: 98765, name: 'key-account'),
+    98765,
+    new InvoiceTagCreateOptions(name: 'key-account'),
 );
 ```
 
@@ -79,11 +90,10 @@ Removes the link between invoice and tag. Once the tag isn't used on any invoice
 
 ## Write model: `InvoiceTagCreateOptions`
 
-Constructor: `new InvoiceTagCreateOptions(int $invoiceId, string $name)`. Both values are required. The object is immutable (`final readonly`) and has `withInvoiceId()`/`withName()`.
+Constructor: `new InvoiceTagCreateOptions(string $name)`. The object is immutable (`final readonly`) and has `withName()`. The invoice ID is the first argument of `create()`, which adds it to the payload as `invoice_id`.
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `invoiceId` | `invoice_id` | `int` |
 | `name` | `name` | `string` |
 
 ## Read model: `InvoiceTag`
@@ -139,7 +149,8 @@ $invoiceId = 98765;
 // 1) Add tags
 foreach (['important', 'key-account', '2026-Q2'] as $name) {
     $billomat->invoices->tags->create(
-        new InvoiceTagCreateOptions(invoiceId: $invoiceId, name: $name),
+        $invoiceId,
+        new InvoiceTagCreateOptions(name: $name),
     );
 }
 

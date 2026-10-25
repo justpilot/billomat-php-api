@@ -67,8 +67,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         $article = $billomat->articles->create($articleOpts);
 
         try {
-            $value = $billomat->articles->propertyValues->create(new ArticlePropertyValueCreateOptions(
-                articleId: $article->id,
+            $value = $billomat->articles->propertyValues->create($article->id, new ArticlePropertyValueCreateOptions(
                 articlePropertyId: $prop->id,
                 value: 'Testwert',
             ));
@@ -97,8 +96,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         $client = $billomat->clients->create($clientOpts);
 
         try {
-            $value = $billomat->clients->propertyValues->create(new ClientPropertyValueCreateOptions(
-                clientId: $client->id,
+            $value = $billomat->clients->propertyValues->create($client->id, new ClientPropertyValueCreateOptions(
                 clientPropertyId: $prop->id,
                 value: 'Testwert',
             ));
@@ -127,8 +125,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         $supplierId = $this->ensureSupplierId($billomat);
 
         try {
-            $value = $billomat->suppliers->propertyValues->create(new SupplierPropertyValueCreateOptions(
-                supplierId: $supplierId,
+            $value = $billomat->suppliers->propertyValues->create($supplierId, new SupplierPropertyValueCreateOptions(
                 supplierPropertyId: $prop->id,
                 value: 'Testwert',
             ));
@@ -159,8 +156,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         $incoming = $billomat->incomings->create($incomingOpts);
 
         try {
-            $value = $billomat->incomings->propertyValues->create(new IncomingPropertyValueCreateOptions(
-                incomingId: $incoming->id,
+            $value = $billomat->incomings->propertyValues->create($incoming->id, new IncomingPropertyValueCreateOptions(
                 incomingPropertyId: $prop->id,
                 value: 'Testwert',
             ));

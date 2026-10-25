@@ -94,7 +94,7 @@ final class IncomingTagsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->tags;
 
-        $tag = $api->create(new IncomingTagCreateOptions(incomingId: 42, name: 'neu'));
+        $tag = $api->create(42, new IncomingTagCreateOptions(name: 'neu'));
         self::assertSame(99, $tag->id);
         $api->delete(99);
     }

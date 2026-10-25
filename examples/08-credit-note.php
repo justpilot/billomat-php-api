@@ -48,8 +48,7 @@ printf("Entwurf angelegt: #%d, Brutto %s %s\n", $creditNoteId, $amount->format(2
 $billomat->creditNotes->complete($creditNoteId);
 
 // 3) Auszahlung über den vollen Betrag verbuchen, Status wechselt auf PAID
-$payment = $billomat->creditNotes->payments->create(new CreditNotePaymentCreateOptions(
-    creditNoteId: $creditNoteId,
+$payment = $billomat->creditNotes->payments->create($creditNoteId, new CreditNotePaymentCreateOptions(
     amount: $amount,
     date: new DateTimeImmutable('today'),
     type: PaymentType::BANK_TRANSFER,

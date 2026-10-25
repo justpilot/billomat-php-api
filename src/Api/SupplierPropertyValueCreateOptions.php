@@ -17,13 +17,6 @@ final readonly class SupplierPropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: supplier_id
-         * Typ: INT
-         */
-        public int $supplierId,
-        /**
          * ID der Eigenschaft.
          *
          * Billomat-Feld: supplier_property_id
@@ -38,12 +31,6 @@ final readonly class SupplierPropertyValueCreateOptions implements WriteOptions
          */
         public mixed $value,
     ) {
-    }
-
-    /** Kopie mit geändertem `supplierId`. */
-    public function withSupplierId(int $supplierId): self
-    {
-        return clone($this, ['supplierId' => $supplierId]);
     }
 
     /** Kopie mit geändertem `supplierPropertyId`. */
@@ -66,7 +53,6 @@ final readonly class SupplierPropertyValueCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'supplier_id' => $this->supplierId,
             'supplier_property_id' => $this->supplierPropertyId,
             'value' => $this->value,
         ];

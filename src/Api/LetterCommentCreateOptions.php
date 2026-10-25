@@ -21,12 +21,6 @@ final readonly class LetterCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: letter_id
-         */
-        public int $letterId,
-        /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
@@ -42,12 +36,6 @@ final readonly class LetterCommentCreateOptions implements WriteOptions
          */
         public ?LetterCommentActionKey $actionkey = null,
     ) {
-    }
-
-    /** Kopie mit geändertem `letterId`. */
-    public function withLetterId(int $letterId): self
-    {
-        return clone($this, ['letterId' => $letterId]);
     }
 
     /** Kopie mit geändertem `comment`. */
@@ -70,7 +58,6 @@ final readonly class LetterCommentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'letter_id' => $this->letterId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
         ], static fn (mixed $v): bool => null !== $v);

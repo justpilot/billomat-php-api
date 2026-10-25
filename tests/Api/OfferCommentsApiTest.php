@@ -107,8 +107,8 @@ final class OfferCommentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->comments;
 
-        $opts = new OfferCommentCreateOptions(offerId: 42, comment: 'Hallo');
-        $created = $api->create($opts);
+        $opts = new OfferCommentCreateOptions(comment: 'Hallo');
+        $created = $api->create(42, $opts);
 
         self::assertSame(99, $created->id);
         self::assertSame('POST', $captured->method);

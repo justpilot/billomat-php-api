@@ -17,13 +17,6 @@ final readonly class ArticleTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: article_id
-         * Typ: INT
-         */
-        public int $articleId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class ArticleTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `articleId`. */
-    public function withArticleId(int $articleId): self
-    {
-        return clone($this, ['articleId' => $articleId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class ArticleTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'article_id' => $this->articleId,
             'name' => $this->name,
         ];
     }

@@ -16,7 +16,9 @@ The generic `Justpilot\Billomat\Api\ItemsApi`, typed for `InvoiceItem`, `Invoice
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($invoiceId, $query?)` | GET | `/invoice-items?invoice_id={id}` |
+| `list($invoiceId, $filters?)` | GET | `/invoice-items?invoice_id={id}` |
+| `listPage($invoiceId, $filters?)` | GET | `/invoice-items?invoice_id={id}` (one page with metadata) |
+| `iterateAll($invoiceId, $filters?, $pageSize?)` | GET | `/invoice-items?invoice_id={id}` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-items/{id}` |
 | `create($invoiceId, $options)` | POST | `/invoice-items` |
 | `update($id, $options)` | PUT | `/invoice-items/{id}` |
@@ -24,15 +26,22 @@ The generic `Justpilot\Billomat\Api\ItemsApi`, typed for `InvoiceItem`, `Invoice
 
 ## Methods
 
-### `list(int $invoiceId, array $query = []): list<InvoiceItem>`
+### `list(int $invoiceId, SubResourceFilter|array $filters = []): list<InvoiceItem>`
 
-Lists all items of an invoice. `invoice_id` is set as a filter automatically; further parameters (`page`, `per_page`, …) can be passed in `$query`.
+Lists all items of an invoice. `invoice_id` is set from `$invoiceId` automatically. Billomat filters items only by the invoice, but sorts and paginates them like any list: `SubResourceFilter` carries `orderBy`, `page`, `perPage` and `extra`.
 
 ```php
-$items = $billomat->invoices->items->list(98765, [
-    'per_page' => 100,
-]);
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SubResourceFilter;
+
+$items = $billomat->invoices->items->list(98765, new SubResourceFilter(
+    orderBy: OrderBy::asc('position'),
+));
 ```
+
+### `listPage(int $invoiceId, SubResourceFilter|array $filters = []): Page<InvoiceItem>` / `iterateAll(int $invoiceId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator<int, InvoiceItem>`
+
+Like `list()`, with pagination metadata or as a lazy iterator over all pages. See [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?InvoiceItem` / `getOrFail(int $id): InvoiceItem`
 

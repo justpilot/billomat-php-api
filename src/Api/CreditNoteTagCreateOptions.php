@@ -17,13 +17,6 @@ final readonly class CreditNoteTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: credit_note_id
-         * Typ: INT
-         */
-        public int $creditNoteId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class CreditNoteTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `creditNoteId`. */
-    public function withCreditNoteId(int $creditNoteId): self
-    {
-        return clone($this, ['creditNoteId' => $creditNoteId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class CreditNoteTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'credit_note_id' => $this->creditNoteId,
             'name' => $this->name,
         ];
     }

@@ -17,24 +17,12 @@ final readonly class DeliveryNoteTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: delivery_note_id
-         */
-        public int $deliveryNoteId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `deliveryNoteId`. */
-    public function withDeliveryNoteId(int $deliveryNoteId): self
-    {
-        return clone($this, ['deliveryNoteId' => $deliveryNoteId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -51,7 +39,6 @@ final readonly class DeliveryNoteTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'delivery_note_id' => $this->deliveryNoteId,
             'name' => $this->name,
         ];
     }

@@ -40,10 +40,11 @@ A supplier is the counterpart of a [client](clients.md) on the purchasing side: 
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($supplierId)` | GET | `/supplier-tags?supplier_id={id}` |
+| `list($supplierId, $filters?)` | GET | `/supplier-tags?supplier_id={id}` |
+| `listPage($supplierId, $filters?)` / `iterateAll($supplierId, $filters?, $pageSize?)` | GET | `/supplier-tags?supplier_id={id}` (paginated) |
 | `cloud()` | GET | `/supplier-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/supplier-tags/{id}` |
-| `create($options)` | POST | `/supplier-tags` |
+| `create($supplierId, $options)` | POST | `/supplier-tags` |
 | `delete($id)` | DELETE | `/supplier-tags/{id}` |
 
 ### `/supplier-property-values`
@@ -54,7 +55,7 @@ A supplier is the counterpart of a [client](clients.md) on the purchasing side: 
 | `listPage($supplierId?, $filters?)` | GET | `/supplier-property-values` |
 | `iterateAll($supplierId?, $filters?, $pageSize?)` | GET | `/supplier-property-values` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/supplier-property-values/{id}` |
-| `create($options)` | POST | `/supplier-property-values` |
+| `create($supplierId, $options)` | POST | `/supplier-property-values` |
 
 ## Suppliers
 
@@ -199,7 +200,8 @@ Works exactly like [Article tags](articles.md#article-tags), but for a supplier 
 use Justpilot\Billomat\Api\SupplierTagCreateOptions;
 
 $tag = $billomat->suppliers->tags->create(
-    new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'hosting'),
+    $supplier->id,
+    new SupplierTagCreateOptions(name: 'hosting'),
 );
 
 $tags  = $billomat->suppliers->tags->list($supplier->id);
@@ -211,9 +213,10 @@ There is no `update()`: delete the tag and create a new one.
 
 ### Write model: `SupplierTagCreateOptions`
 
+The supplier ID isn't part of the options: pass it as the first argument of `create()`, which adds `supplier_id` to the payload.
+
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `supplierId` | `supplier_id` | `int` (required) | — |
 | `name` | `name` | `string` (required) | — |
 
 ### Read model: `SupplierTag`
@@ -241,14 +244,22 @@ Stores the values for the supplier properties defined in [`properties.md`](prope
 
 ```php
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
+use Justpilot\Billomat\Api\SupplierPropertyValueFilter;
+use Justpilot\Billomat\Api\OrderBy;
 
 // List the values of one supplier
 $values = $billomat->suppliers->propertyValues->list($supplier->id);
 
+// Only the values of property 12, typed filter with sorting
+$values = $billomat->suppliers->propertyValues->list($supplier->id, new SupplierPropertyValueFilter(
+    supplierPropertyId: 12,
+    orderBy: OrderBy::desc('updated'),
+));
+
 // Set the value of the property "Accounting creditor number" (id = 17)
 $value = $billomat->suppliers->propertyValues->create(
+    $supplier->id,
     new SupplierPropertyValueCreateOptions(
-        supplierId: $supplier->id,
         supplierPropertyId: 17,
         value: '70001',
     ),
@@ -259,11 +270,12 @@ There is neither `update()` nor `delete()`: calling `create()` again with the sa
 
 ### Write model: `SupplierPropertyValueCreateOptions`
 
-All three values are required and set via the constructor:
+The supplier ID isn't part of the options: pass it as the first argument of `create()`, which adds `supplier_id` to the payload.
+
+Both values are required and set via the constructor.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `supplierId` | `supplier_id` | `int` (required) | — |
 | `supplierPropertyId` | `supplier_property_id` | `int` (required) | ID of the property definition |
 | `value` | `value` | `mixed` (required) | `CHECKBOX` expects `0`/`1` |
 
@@ -340,16 +352,18 @@ printf("Supplier #%d (%s) created\n", $supplier->id, $supplier->name);
 
 // 2) Add tags
 $billomat->suppliers->tags->create(
-    new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'hosting'),
+    $supplier->id,
+    new SupplierTagCreateOptions(name: 'hosting'),
 );
 $billomat->suppliers->tags->create(
-    new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'monthly-invoice'),
+    $supplier->id,
+    new SupplierTagCreateOptions(name: 'monthly-invoice'),
 );
 
 // 3) Set a custom property (SupplierProperty #17 = "Accounting creditor number")
 $billomat->suppliers->propertyValues->create(
+    $supplier->id,
     new SupplierPropertyValueCreateOptions(
-        supplierId: $supplier->id,
         supplierPropertyId: 17,
         value: '70001',
     ),

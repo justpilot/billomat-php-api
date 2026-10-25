@@ -507,10 +507,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $invoiceId = $this->ensureInvoiceId();
 
-        $binary = $billomat->invoices->pdf(
-            id: $invoiceId,
-            rawPdf: true,
-        );
+        $binary = $billomat->invoices->pdfContent(id: $invoiceId);
 
         self::assertIsString($binary);
         self::assertNotSame('', $binary);

@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\Enum\PdfType;
@@ -266,27 +267,27 @@ final class OffersApi extends AbstractApi
     }
 
     /**
-     * Ruft das PDF eines Angebots ab.
+     * Ruft das PDF eines Angebots als JSON ab (Metadaten und base64-kodierter Inhalt).
      *
-     * @return OfferPdf|string OfferPdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
+     * Entspricht GET /offers/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): OfferPdf|string
+    public function pdf(int $id, ?PdfType $type = null): OfferPdf
     {
-        $query = [];
-
-        if ($type instanceof PdfType) {
-            $query['type'] = $type->value;
-        }
-
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
-
-            return $this->getPdf("/offers/{$id}/pdf", $query);
-        }
-
-        $data = $this->getJson("/offers/{$id}/pdf", $query);
+        $data = $this->getJson("/offers/{$id}/pdf", self::pdfQuery($type));
 
         return OfferPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching offer PDF'));
+    }
+
+    /**
+     * Ruft das PDF eines Angebots als binären Inhalt ab (GET /offers/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/offers/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
 }

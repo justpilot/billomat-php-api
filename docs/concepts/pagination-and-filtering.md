@@ -57,6 +57,18 @@ $invoices = $billomat->invoices->list(new InvoiceFilter(
 - Filters are immutable: `$filter->withStatus(InvoiceStatus::PAID)` (variadic for list fields) or `$filter->withPage(2)` returns a modified copy.
 - Every filter has `orderBy`, `page`, `perPage` and `extra`. `extra` passes additional query parameters, such as [custom attributes](custom-meta-attributes.md); they override fields with the same name.
 
+Sub-resources take the parent ID as the first argument and a filter after it. Payments and property values have their own generated filters (`InvoicePaymentFilter`, `ClientPropertyValueFilter`, …); items, comments, tags, email receivers and property definitions only sort and paginate, via the generic `SubResourceFilter`:
+
+```php
+use Justpilot\Billomat\Api\InvoicePaymentFilter;
+use Justpilot\Billomat\Api\SubResourceFilter;
+
+$payments = $billomat->invoices->payments->list($invoiceId, new InvoicePaymentFilter(orderBy: OrderBy::desc('date')));
+$items = $billomat->invoices->items->list($invoiceId, new SubResourceFilter(orderBy: OrderBy::asc('position')));
+```
+
+The parent ID wins over a same-named key in the filter. Passing the filter of another resource (e.g. `CreditNotePaymentFilter` to `invoices->payments`) throws an `InvalidArgumentException`.
+
 An array still works everywhere, including resources without a filter class:
 
 ```php

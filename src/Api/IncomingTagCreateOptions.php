@@ -17,13 +17,6 @@ final readonly class IncomingTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: incoming_id
-         * Typ: INT
-         */
-        public int $incomingId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class IncomingTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `incomingId`. */
-    public function withIncomingId(int $incomingId): self
-    {
-        return clone($this, ['incomingId' => $incomingId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class IncomingTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'incoming_id' => $this->incomingId,
             'name' => $this->name,
         ];
     }

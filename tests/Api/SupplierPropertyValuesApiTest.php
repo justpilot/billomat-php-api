@@ -87,8 +87,7 @@ final class SupplierPropertyValuesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->propertyValues;
 
-        $value = $api->create(new SupplierPropertyValueCreateOptions(
-            supplierId: 42,
+        $value = $api->create(42, new SupplierPropertyValueCreateOptions(
             supplierPropertyId: 7,
             value: 'Logistik',
         ));

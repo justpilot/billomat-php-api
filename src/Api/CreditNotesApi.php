@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNoteComment;
@@ -53,10 +54,10 @@ final class CreditNotesApi extends AbstractApi
     /**
      * Zahlungen, siehe {@see PaymentsApi}.
      *
-     * @var PaymentsApi<CreditNotePayment, CreditNotePaymentCreateOptions>
+     * @var PaymentsApi<CreditNotePayment, CreditNotePaymentCreateOptions, CreditNotePaymentFilter>
      */
     public private(set) PaymentsApi $payments {
-        get => $this->payments ??= new PaymentsApi($this->http, 'credit-note', CreditNotePayment::fromArray(...), CreditNotePaymentCreateOptions::class);
+        get => $this->payments ??= new PaymentsApi($this->http, 'credit-note', CreditNotePayment::fromArray(...), CreditNotePaymentCreateOptions::class, CreditNotePaymentFilter::class);
     }
 
     /**
@@ -218,25 +219,27 @@ final class CreditNotesApi extends AbstractApi
     }
 
     /**
-     * @return CreditNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Ruft das PDF einer Gutschrift als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /credit-notes/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): CreditNotePdf|string
+    public function pdf(int $id, ?PdfType $type = null): CreditNotePdf
     {
-        $query = [];
-
-        if ($type instanceof PdfType) {
-            $query['type'] = $type->value;
-        }
-
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
-
-            return $this->getPdf("/credit-notes/{$id}/pdf", $query);
-        }
-
-        $data = $this->getJson("/credit-notes/{$id}/pdf", $query);
+        $data = $this->getJson("/credit-notes/{$id}/pdf", self::pdfQuery($type));
 
         return CreditNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching credit note PDF'));
+    }
+
+    /**
+     * Ruft das PDF einer Gutschrift als binären Inhalt ab (GET /credit-notes/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/credit-notes/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
 }

@@ -14,12 +14,12 @@ use PHPUnit\Framework\TestCase;
 final class CreditNoteCommentCreateOptionsTest extends TestCase
 {
     #[Test]
-    public function minimalPayloadHasParentIdAndComment(): void
+    public function minimalPayloadHasOnlyTheComment(): void
     {
-        $options = new CreditNoteCommentCreateOptions(creditNoteId: 17, comment: 'Sammelgutschrift erstellt.');
+        $options = new CreditNoteCommentCreateOptions(comment: 'Sammelgutschrift erstellt.');
 
         self::assertSame(
-            ['credit_note_id' => 17, 'comment' => 'Sammelgutschrift erstellt.'],
+            ['comment' => 'Sammelgutschrift erstellt.'],
             $options->toArray(),
         );
     }
@@ -28,7 +28,6 @@ final class CreditNoteCommentCreateOptionsTest extends TestCase
     public function itSerializesActionkeyAsApiString(): void
     {
         $options = new CreditNoteCommentCreateOptions(
-            creditNoteId: 1,
             comment: 'x',
             actionkey: CreditNoteCommentActionKey::COMMENT,
         );
@@ -39,7 +38,7 @@ final class CreditNoteCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPublicFlag(): void
     {
-        $options = new CreditNoteCommentCreateOptions(creditNoteId: 1, comment: 'x', public: false);
+        $options = new CreditNoteCommentCreateOptions(comment: 'x', public: false);
 
         self::assertFalse($options->toArray()['public']);
     }

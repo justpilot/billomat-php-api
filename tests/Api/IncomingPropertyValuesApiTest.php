@@ -73,8 +73,7 @@ final class IncomingPropertyValuesApiTest extends TestCase
         self::assertCount(1, $values);
         self::assertSame('Büro', $values[0]->value);
 
-        $created = $api->create(new IncomingPropertyValueCreateOptions(
-            incomingId: 42,
+        $created = $api->create(42, new IncomingPropertyValueCreateOptions(
             incomingPropertyId: 7,
             value: 'IT',
         ));

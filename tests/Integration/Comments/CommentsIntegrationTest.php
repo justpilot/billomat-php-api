@@ -93,7 +93,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoice = $billomat->invoices->create($invOpts);
 
         try {
-            $comment = $billomat->invoices->comments->create(new InvoiceCommentCreateOptions($invoice->id, 'IT-Comment-'.date('His')));
+            $comment = $billomat->invoices->comments->create($invoice->id, new InvoiceCommentCreateOptions('IT-Comment-'.date('His')));
             self::assertNotNull($comment->id);
 
             $comments = $billomat->invoices->comments->list($invoice->id);
@@ -115,7 +115,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $offer = $billomat->offers->create(new OfferCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $comment = $billomat->offers->comments->create(new OfferCommentCreateOptions($offer->id, 'IT-OffComment-'.date('His')));
+            $comment = $billomat->offers->comments->create($offer->id, new OfferCommentCreateOptions('IT-OffComment-'.date('His')));
             self::assertNotNull($comment->id);
 
             $comments = $billomat->offers->comments->list($offer->id);
@@ -137,7 +137,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $conf = $billomat->confirmations->create(new ConfirmationCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $comment = $billomat->confirmations->comments->create(new ConfirmationCommentCreateOptions($conf->id, 'IT-ConfComment-'.date('His')));
+            $comment = $billomat->confirmations->comments->create($conf->id, new ConfirmationCommentCreateOptions('IT-ConfComment-'.date('His')));
             self::assertNotNull($comment->id);
 
             $comments = $billomat->confirmations->comments->list($conf->id);
@@ -158,7 +158,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $note = $billomat->creditNotes->create(new CreditNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $comment = $billomat->creditNotes->comments->create(new CreditNoteCommentCreateOptions($note->id, 'IT-GsComment-'.date('His')));
+            $comment = $billomat->creditNotes->comments->create($note->id, new CreditNoteCommentCreateOptions('IT-GsComment-'.date('His')));
             self::assertNotNull($comment->id);
 
             $comments = $billomat->creditNotes->comments->list($note->id);
@@ -179,7 +179,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $note = $billomat->deliveryNotes->create(new DeliveryNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $comment = $billomat->deliveryNotes->comments->create(new DeliveryNoteCommentCreateOptions($note->id, 'IT-LsComment-'.date('His')));
+            $comment = $billomat->deliveryNotes->comments->create($note->id, new DeliveryNoteCommentCreateOptions('IT-LsComment-'.date('His')));
             self::assertNotNull($comment->id);
 
             $comments = $billomat->deliveryNotes->comments->list($note->id);
@@ -200,7 +200,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $letter = $billomat->letters->create(new LetterCreateOptions(clientId: $this->ensureClientId($billomat)));
 
         try {
-            $comment = $billomat->letters->comments->create(new LetterCommentCreateOptions($letter->id, 'IT-BrComment-'.date('His')));
+            $comment = $billomat->letters->comments->create($letter->id, new LetterCommentCreateOptions('IT-BrComment-'.date('His')));
             self::assertNotNull($comment->id);
 
             $comments = $billomat->letters->comments->list($letter->id);
@@ -225,7 +225,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $incoming = $billomat->incomings->create($incomingOpts);
 
         try {
-            $comment = $billomat->incomings->comments->create(new IncomingCommentCreateOptions($incoming->id, 'IT-InComment-'.date('His')));
+            $comment = $billomat->incomings->comments->create($incoming->id, new IncomingCommentCreateOptions('IT-InComment-'.date('His')));
             self::assertNotNull($comment->id);
 
             $comments = $billomat->incomings->comments->list($incoming->id);

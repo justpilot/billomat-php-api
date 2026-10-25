@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Closure;
+use Generator;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -51,12 +53,40 @@ final class TagsApi extends AbstractSubResourceApi
     /**
      * Listet die Schlagworte eines Datensatzes.
      *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters Sortierung, Seite, …
+     *
      * @return list<TTag>
      */
     #[NoDiscard]
-    public function list(int $parentId): array
+    public function list(int $parentId, SubResourceFilter|array $filters = []): array
     {
-        return $this->listWhere([$this->parentKey => $parentId]);
+        return $this->listFor($parentId, $filters);
+    }
+
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<TTag>
+     */
+    #[NoDiscard]
+    public function listPage(int $parentId, SubResourceFilter|array $filters = []): Page
+    {
+        return $this->pageFor($parentId, $filters);
+    }
+
+    /**
+     * Iteriert lazy durch alle Schlagworte eines Datensatzes und yieldet sie einzeln.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
+     *
+     * @return Generator<int, TTag>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateFor($parentId, $filters, $pageSize);
     }
 
     /**
@@ -73,15 +103,17 @@ final class TagsApi extends AbstractSubResourceApi
     }
 
     /**
+     * Hängt ein Schlagwort an einen Datensatz.
+     *
      * @param TCreate $options
      *
      * @return TTag
      */
-    public function create(WriteOptions $options): object
+    public function create(int $parentId, WriteOptions $options): object
     {
         $this->assertOptions($options, $this->optionsClass);
 
-        return $this->createFrom($options->toArray());
+        return $this->createFor($parentId, $options);
     }
 
     public function delete(int $id): void

@@ -47,13 +47,15 @@ DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEAR
 | `unclear($id)` | PUT | `/confirmations/{id}/unclear` |
 | `email($id, $options?)` | POST | `/confirmations/{id}/email` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/confirmations/{id}/upload-signature` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/confirmations/{id}/pdf` |
+| `pdf($id, $type?)` | GET | `/confirmations/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/confirmations/{id}/pdf?format=pdf` |
 
 ### `/confirmation-items`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($confirmationId, $query?)` | GET | `/confirmation-items?confirmation_id={id}` |
+| `list($confirmationId, $filters?)` | GET | `/confirmation-items?confirmation_id={id}` |
+| `listPage($confirmationId, $filters?)` / `iterateAll($confirmationId, $filters?, $pageSize?)` | GET | `/confirmation-items?confirmation_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/confirmation-items/{id}` |
 | `create($confirmationId, $options)` | POST | `/confirmation-items` |
 | `update($id, $options)` | PUT | `/confirmation-items/{id}` |
@@ -63,19 +65,21 @@ DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEAR
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($confirmationId, $actionKeys?)` | GET | `/confirmation-comments?confirmation_id={id}` |
+| `list($confirmationId, $actionKeys?, $filters?)` | GET | `/confirmation-comments?confirmation_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/confirmation-comments?confirmation_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/confirmation-comments/{id}` |
-| `create($options)` | POST | `/confirmation-comments` |
+| `create($confirmationId, $options)` | POST | `/confirmation-comments` |
 | `delete($id)` | DELETE | `/confirmation-comments/{id}` |
 
 ### `/confirmation-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($confirmationId)` | GET | `/confirmation-tags?confirmation_id={id}` |
+| `list($confirmationId, $filters?)` | GET | `/confirmation-tags?confirmation_id={id}` |
+| `listPage($confirmationId, $filters?)` / `iterateAll($confirmationId, $filters?, $pageSize?)` | GET | `/confirmation-tags?confirmation_id={id}` (paginated) |
 | `cloud()` | GET | `/confirmation-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/confirmation-tags/{id}` |
-| `create($options)` | POST | `/confirmation-tags` |
+| `create($confirmationId, $options)` | POST | `/confirmation-tags` |
 | `delete($id)` | DELETE | `/confirmation-tags/{id}` |
 
 ## Methods
@@ -165,9 +169,9 @@ $billomat->confirmations->email($conf->id, $email);
 
 Uploads a signed PDF version. `$base64Pdf` is the plain base64-encoded PDF content.
 
-#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string`
+#### `pdf(int $id, ?PdfType $type = null): ConfirmationPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-Returns a `ConfirmationPdf` model with base64 content; with `$rawPdf = true` the method skips JSON and returns the raw bytes.
+`pdf()` returns a `ConfirmationPdf` model with base64 content; `pdfContent()` skips JSON and returns the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 $pdf = $billomat->confirmations->pdf($conf->id);
@@ -202,8 +206,8 @@ $comments = $billomat->confirmations->comments->list(
 );
 
 $billomat->confirmations->comments->create(
+    $conf->id,
     new ConfirmationCommentCreateOptions(
-        confirmationId: $conf->id,
         comment: 'Order confirmed on June 2.',
     ),
 );
@@ -215,7 +219,8 @@ $billomat->confirmations->comments->create(
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 
 $tag = $billomat->confirmations->tags->create(
-    new ConfirmationTagCreateOptions(confirmationId: $conf->id, name: 'order-2026'),
+    $conf->id,
+    new ConfirmationTagCreateOptions(name: 'order-2026'),
 );
 
 $tags  = $billomat->confirmations->tags->list($conf->id);
@@ -284,17 +289,19 @@ For `ItemsApi::update()` there is `ConfirmationItemUpdateOptions`: every field i
 
 ## Write model: `ConfirmationCommentCreateOptions`
 
+The confirmation ID isn't part of the options: pass it as the first argument of `create()`, which adds `confirmation_id` to the payload.
+
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `confirmationId` | `confirmation_id` | `int` | required (constructor) |
 | `comment` | `comment` | `string` | required (constructor) |
 | `actionkey` | `actionkey` | `?ConfirmationCommentActionKey` | usually only for system actions |
 
 ## Write model: `ConfirmationTagCreateOptions`
 
+The confirmation ID isn't part of the options: pass it as the first argument of `create()`, which adds `confirmation_id` to the payload.
+
 | Property | Billomat field | Type |
 |---|---|---|
-| `confirmationId` | `confirmation_id` | `int` (required) |
 | `name` | `name` | `string` (required) |
 
 ## Write model: `EmailOptions`
@@ -412,7 +419,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 - **Simpler lifecycle than offers.** There is no `win()`/`lose()`: a confirmation is either marked as done (`clear()`, reverted by `unclear()`) or canceled (`cancel()`, reverted by `uncancel()`). Calling `win()` out of habit means looking for the wrong endpoint.
 - **`update()` doesn't change line items.** Billomat ignores embedded `confirmation-items` on PUT. Always use `$billomat->confirmations->items`.
-- **`delete()` only in `DRAFT`.** After `complete()`, only `cancel()` is possible.
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes confirmations in any status. After `complete()`, prefer `cancel()`: the confirmation is numbered, and deleting it leaves a gap in the number sequence.
 - **Item updates are partial.** `ConfirmationItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `confirmation` as an object; the SDK wraps it in a list.
 - **The `offerId` link is informational.** The confirmation is not synchronized with the offer status automatically; set `OfferStatus::WON` separately via `$billomat->offers->win()`.
@@ -466,7 +473,8 @@ printf("Confirmation #%d created (DRAFT)\n", $conf->id);
 
 // 2) Add a tag
 $billomat->confirmations->tags->create(
-    new ConfirmationTagCreateOptions(confirmationId: $conf->id, name: 'order-2026'),
+    $conf->id,
+    new ConfirmationTagCreateOptions(name: 'order-2026'),
 );
 
 // 3) Complete: the number is assigned
@@ -484,8 +492,8 @@ $billomat->confirmations->email($conf->id, $email);
 
 // 5) Add an internal note
 $billomat->confirmations->comments->create(
+    $conf->id,
     new ConfirmationCommentCreateOptions(
-        confirmationId: $conf->id,
         comment: 'Order processed, ready for invoicing.',
     ),
 );

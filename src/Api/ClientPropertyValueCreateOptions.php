@@ -17,13 +17,6 @@ final readonly class ClientPropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: client_id
-         * Typ: INT
-         */
-        public int $clientId,
-        /**
          * ID der Eigenschaft.
          *
          * Billomat-Feld: client_property_id
@@ -38,12 +31,6 @@ final readonly class ClientPropertyValueCreateOptions implements WriteOptions
          */
         public mixed $value,
     ) {
-    }
-
-    /** Kopie mit geändertem `clientId`. */
-    public function withClientId(int $clientId): self
-    {
-        return clone($this, ['clientId' => $clientId]);
     }
 
     /** Kopie mit geändertem `clientPropertyId`. */
@@ -66,7 +53,6 @@ final readonly class ClientPropertyValueCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'client_id' => $this->clientId,
             'client_property_id' => $this->clientPropertyId,
             'value' => $this->value,
         ];

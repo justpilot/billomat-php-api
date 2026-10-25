@@ -14,12 +14,12 @@ use PHPUnit\Framework\TestCase;
 final class InvoiceCommentCreateOptionsTest extends TestCase
 {
     #[Test]
-    public function minimalPayloadHasInvoiceIdAndComment(): void
+    public function minimalPayloadHasOnlyTheComment(): void
     {
-        $options = new InvoiceCommentCreateOptions(invoiceId: 17, comment: 'Anruf vom Kunden.');
+        $options = new InvoiceCommentCreateOptions(comment: 'Anruf vom Kunden.');
 
         self::assertSame(
-            ['invoice_id' => 17, 'comment' => 'Anruf vom Kunden.'],
+            ['comment' => 'Anruf vom Kunden.'],
             $options->toArray(),
         );
     }
@@ -28,7 +28,6 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
     public function itSerializesActionkeyAsApiString(): void
     {
         $options = new InvoiceCommentCreateOptions(
-            invoiceId: 1,
             comment: 'x',
             actionkey: InvoiceCommentActionKey::COMMENT,
         );
@@ -41,7 +40,7 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itOmitsActionkeyWhenNull(): void
     {
-        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x');
+        $options = new InvoiceCommentCreateOptions(comment: 'x');
 
         self::assertArrayNotHasKey('actionkey', $options->toArray());
     }
@@ -49,7 +48,7 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPublicFlag(): void
     {
-        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x', public: true);
+        $options = new InvoiceCommentCreateOptions(comment: 'x', public: true);
 
         self::assertTrue($options->toArray()['public']);
     }
@@ -57,7 +56,7 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itOmitsPublicWhenNull(): void
     {
-        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x');
+        $options = new InvoiceCommentCreateOptions(comment: 'x');
 
         self::assertArrayNotHasKey('public', $options->toArray());
     }

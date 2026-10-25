@@ -79,7 +79,7 @@ final class IncomingCommentsApiTest extends TestCase
         self::assertCount(1, $comments);
         self::assertSame(IncomingCommentActionKey::CREATE, $comments[0]->actionkey);
 
-        $created = $api->create(new IncomingCommentCreateOptions(incomingId: 42, comment: 'Hallo'));
+        $created = $api->create(42, new IncomingCommentCreateOptions(comment: 'Hallo'));
         self::assertSame(99, $created->id);
 
         $api->delete(99);

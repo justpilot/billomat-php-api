@@ -139,7 +139,7 @@ For PDFs, use `AbstractApi::getPdf()` instead: it works like `getRaw()` but thro
 
 ### Pattern B: endpoints with a mode switch
 
-Used by `InvoicesApi::pdf(int $id, ?PdfType $type = null, bool $rawPdf = false)`, because the same endpoint returns either JSON or binary data depending on `format=pdf`. With `rawPdf: true` the method sets `format=pdf` and calls `getPdf(...)`; otherwise it calls `getJson(...)` and returns an `InvoicePdf` model with the Base64 content.
+Used by `InvoicesApi::pdfContent(int $id, ?PdfType $type = null)`: the endpoint returns either JSON or binary data depending on `format=pdf`. `pdfContent()` sets `format=pdf` and calls `getPdf(...)`; `pdf()` calls `getJson(...)` and returns an `InvoicePdf` model with the Base64 content.
 
 When writing your own resources, follow these two patterns; there is no generic helper for "endpoint with content switch" (yet).
 

@@ -50,14 +50,13 @@ $recurringId = $recurring->id;
 printf("Abo #%d angelegt, nächster Lauf: %s\n", $recurringId, $recurring->nextCreationDate?->format('Y-m-d') ?? 'offen');
 
 // 2) E-Mail-Empfänger hinterlegen, sonst scheitert action=EMAIL
-$billomat->recurrings->emailReceivers->create(new RecurringEmailReceiverCreateOptions(
-    recurringId: $recurringId,
+$billomat->recurrings->emailReceivers->create($recurringId, new RecurringEmailReceiverCreateOptions(
     type: RecurringEmailReceiverType::TO,
     address: 'kunde@example.com',
 ));
 
 // 3) Schlagwort setzen
-$billomat->recurrings->tags->create(new RecurringTagCreateOptions(recurringId: $recurringId, name: 'hosting'));
+$billomat->recurrings->tags->create($recurringId, new RecurringTagCreateOptions(name: 'hosting'));
 
 // 4) Preis der Positionen anheben: nur der Preis wird gesendet, die übrigen Felder bleiben
 $newPrice = Money::of('24.90');

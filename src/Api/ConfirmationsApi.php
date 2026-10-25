@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationComment;
@@ -224,27 +225,27 @@ final class ConfirmationsApi extends AbstractApi
     }
 
     /**
-     * Ruft das PDF einer Auftragsbestätigung ab.
+     * Ruft das PDF einer Auftragsbestätigung als JSON ab (Metadaten und base64-kodierter Inhalt).
      *
-     * @return ConfirmationPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Entspricht GET /confirmations/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string
+    public function pdf(int $id, ?PdfType $type = null): ConfirmationPdf
     {
-        $query = [];
-
-        if ($type instanceof PdfType) {
-            $query['type'] = $type->value;
-        }
-
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
-
-            return $this->getPdf("/confirmations/{$id}/pdf", $query);
-        }
-
-        $data = $this->getJson("/confirmations/{$id}/pdf", $query);
+        $data = $this->getJson("/confirmations/{$id}/pdf", self::pdfQuery($type));
 
         return ConfirmationPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching confirmation PDF'));
+    }
+
+    /**
+     * Ruft das PDF einer Auftragsbestätigung als binären Inhalt ab (GET /confirmations/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/confirmations/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
 }

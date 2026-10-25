@@ -116,7 +116,7 @@ final class ConfirmationTagsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->tags;
 
-        $tag = $api->create(new ConfirmationTagCreateOptions(confirmationId: 42, name: 'neu'));
+        $tag = $api->create(42, new ConfirmationTagCreateOptions(name: 'neu'));
 
         self::assertSame(99, $tag->id);
         self::assertSame('POST', $captured->method);

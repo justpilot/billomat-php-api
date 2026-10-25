@@ -53,10 +53,10 @@ final class SuppliersApi extends AbstractApi
     /**
      * Attributwerte, siehe {@see PropertyValuesApi}.
      *
-     * @var PropertyValuesApi<SupplierPropertyValue, SupplierPropertyValueCreateOptions>
+     * @var PropertyValuesApi<SupplierPropertyValue, SupplierPropertyValueCreateOptions, SupplierPropertyValueFilter>
      */
     public private(set) PropertyValuesApi $propertyValues {
-        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'supplier', SupplierPropertyValue::fromArray(...), SupplierPropertyValueCreateOptions::class);
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'supplier', SupplierPropertyValue::fromArray(...), SupplierPropertyValueCreateOptions::class, SupplierPropertyValueFilter::class);
     }
 
     /**

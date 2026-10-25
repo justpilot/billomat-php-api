@@ -21,12 +21,6 @@ final readonly class ConfirmationCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: confirmation_id
-         */
-        public int $confirmationId,
-        /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
@@ -42,12 +36,6 @@ final readonly class ConfirmationCommentCreateOptions implements WriteOptions
          */
         public ?ConfirmationCommentActionKey $actionkey = null,
     ) {
-    }
-
-    /** Kopie mit geändertem `confirmationId`. */
-    public function withConfirmationId(int $confirmationId): self
-    {
-        return clone($this, ['confirmationId' => $confirmationId]);
     }
 
     /** Kopie mit geändertem `comment`. */
@@ -70,7 +58,6 @@ final readonly class ConfirmationCommentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'confirmation_id' => $this->confirmationId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
         ], static fn (mixed $v): bool => null !== $v);

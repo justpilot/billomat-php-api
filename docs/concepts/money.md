@@ -143,7 +143,7 @@ use Justpilot\Billomat\Model\Money;
 
 $item = new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: Money::of('49.90'));
 
-$payment = new InvoicePaymentCreateOptions(invoiceId: 98765, amount: Money::of('100'))
+$payment = new InvoicePaymentCreateOptions(amount: Money::of('100'))
     ->withAmount(Money::of('119')); // options are immutable: with*() returns a copy
 
 // Update options accept Money|Clear|null

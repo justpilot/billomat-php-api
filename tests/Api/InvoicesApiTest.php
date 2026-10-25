@@ -492,7 +492,6 @@ final class InvoicesApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(InvoicePdf::class, $pdf);
         self::assertSame(4882, $pdf->id);
         self::assertSame(240, $pdf->invoiceId);
         self::assertSame('invoice_123.pdf', $pdf->filename);
@@ -591,10 +590,7 @@ final class InvoicesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
-        $result = $api->pdf(
-            id: 777,
-            rawPdf: true
-        );
+        $result = $api->pdfContent(id: 777);
 
         self::assertIsString($result);
         self::assertStringStartsWith('%PDF-1.4', $result);

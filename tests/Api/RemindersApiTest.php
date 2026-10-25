@@ -251,7 +251,6 @@ final class RemindersApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(ReminderPdf::class, $pdf);
         self::assertSame(240, $pdf->reminderId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
     }
@@ -272,7 +271,7 @@ final class RemindersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
+        $result = $api->pdfContent(777, PdfType::PRINT);
 
         self::assertIsString($result);
         self::assertStringContainsString('format=pdf', $captured->url);

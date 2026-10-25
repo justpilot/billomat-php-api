@@ -238,7 +238,6 @@ final class LettersApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(LetterPdf::class, $pdf);
         self::assertSame(240, $pdf->letterId);
     }
 
@@ -258,7 +257,7 @@ final class LettersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
+        $result = $api->pdfContent(777, PdfType::PRINT);
 
         self::assertIsString($result);
         self::assertStringContainsString('format=pdf', $captured->url);

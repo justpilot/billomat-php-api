@@ -88,7 +88,7 @@ final class ClientTagsApiTest extends TestCase
         self::assertCount(1, $cloud);
         self::assertContainsOnlyInstancesOf(ClientTagCloudEntry::class, $cloud);
 
-        $tag = $api->create(new ClientTagCreateOptions(clientId: 42, name: 'neu'));
+        $tag = $api->create(42, new ClientTagCreateOptions(name: 'neu'));
         self::assertSame(99, $tag->id);
 
         $api->delete(99);

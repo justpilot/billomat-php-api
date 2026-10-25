@@ -23,20 +23,23 @@ For each invoice, Billomat records a stream of comments: some are system-generat
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($invoiceId, $actionKeys?)` | GET | `/invoice-comments?invoice_id={id}` |
+| `list($invoiceId, $actionKeys?, $filters?)` | GET | `/invoice-comments?invoice_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/invoice-comments?invoice_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-comments/{id}` |
-| `create($options)` | POST | `/invoice-comments` |
+| `create($invoiceId, $options)` | POST | `/invoice-comments` |
 | `delete($id)` | DELETE | `/invoice-comments/{id}` |
 
 There is intentionally no `list()` without `invoice_id`; Billomat requires the filter.
 
 ## Methods
 
-### `list(int $invoiceId, ?array $actionKeys = null): list<InvoiceComment>`
+### `list(int $invoiceId, ?array $actionKeys = null, SubResourceFilter|array $filters = []): list<InvoiceComment>`
 
 Lists all comments of an invoice. You can optionally filter by `InvoiceCommentActionKey` values; the list is sent to Billomat comma-separated. Passing a different enum throws an `InvalidArgumentException`.
 
 ```php
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SubResourceFilter;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 
 // All comments
@@ -47,20 +50,28 @@ $financial = $billomat->invoices->comments->list(
     98765,
     [InvoiceCommentActionKey::PAYMENT, InvoiceCommentActionKey::DUNNING],
 );
+
+// Newest first, 20 per page
+$latest = $billomat->invoices->comments->list(
+    98765,
+    filters: new SubResourceFilter(orderBy: OrderBy::desc('created'), perPage: 20),
+);
 ```
+
+`SubResourceFilter` (`orderBy`, `page`, `perPage`, `extra`) sorts and paginates. `listPage()` and `iterateAll()` take the same arguments (`iterateAll()` additionally `$pageSize`); see [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?InvoiceComment` / `getOrFail(int $id): InvoiceComment`
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
-### `create(InvoiceCommentCreateOptions $options): InvoiceComment`
+### `create(int $invoiceId, InvoiceCommentCreateOptions $options): InvoiceComment`
 
 ```php
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 
 $comment = $billomat->invoices->comments->create(
+    98765,
     new InvoiceCommentCreateOptions(
-        invoiceId: 98765,
         comment: 'Client called for clarification; call back scheduled for 2026-06-05.',
     ),
 );
@@ -74,11 +85,10 @@ Deletes a comment. Errors are thrown as exceptions.
 
 ## Write model: `InvoiceCommentCreateOptions`
 
-Constructor: `new InvoiceCommentCreateOptions(int $invoiceId, string $comment, …)`. The object is immutable (`final readonly`) and has a `with*()` method per field.
+Constructor: `new InvoiceCommentCreateOptions(string $comment, …)`. The object is immutable (`final readonly`) and has a `with*()` method per field. The invoice ID is the first argument of `create()`, which adds it to the payload as `invoice_id`.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `invoiceId` | `invoice_id` | `int` | Required (constructor) |
 | `comment` | `comment` | `string` | Required (constructor) |
 | `actionkey` | `actionkey` | `?InvoiceCommentActionKey` | Rarely set manually |
 | `public` | `public` | `?bool` | Visible in the client's activity list (Billomat default: `false`) |
@@ -154,8 +164,8 @@ $invoiceId = 98765;
 
 // 1) Add a manual comment
 $billomat->invoices->comments->create(
+    $invoiceId,
     new InvoiceCommentCreateOptions(
-        invoiceId: $invoiceId,
         comment: 'Client asks for a 14-day extension.',
     ),
 );

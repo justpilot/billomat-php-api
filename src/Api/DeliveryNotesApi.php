@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNoteComment;
@@ -196,25 +197,27 @@ final class DeliveryNotesApi extends AbstractApi
     }
 
     /**
-     * @return DeliveryNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Ruft das PDF eines Lieferscheins als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /delivery-notes/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string
+    public function pdf(int $id, ?PdfType $type = null): DeliveryNotePdf
     {
-        $query = [];
-
-        if ($type instanceof PdfType) {
-            $query['type'] = $type->value;
-        }
-
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
-
-            return $this->getPdf("/delivery-notes/{$id}/pdf", $query);
-        }
-
-        $data = $this->getJson("/delivery-notes/{$id}/pdf", $query);
+        $data = $this->getJson("/delivery-notes/{$id}/pdf", self::pdfQuery($type));
 
         return DeliveryNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching delivery note PDF'));
+    }
+
+    /**
+     * Ruft das PDF eines Lieferscheins als binären Inhalt ab (GET /delivery-notes/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/delivery-notes/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
 }

@@ -16,17 +16,19 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesNamespace;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 /**
- * Alle `pdf()`-Methoden prüfen im Raw-Modus, dass Billomat wirklich ein PDF geliefert hat.
+ * Alle `pdfContent()`-Methoden prüfen, dass Billomat wirklich ein PDF geliefert hat.
  */
 #[CoversClass(AbstractApi::class)]
 #[CoversClass(ConfirmationsApi::class)]
@@ -39,6 +41,8 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(RetryPolicy::class)]
+#[UsesNamespace('Justpilot\\Billomat\\Model')]
+#[UsesNamespace('Justpilot\\Billomat\\Internal')]
 final class PdfResponseTest extends TestCase
 {
     /**
@@ -55,8 +59,32 @@ final class PdfResponseTest extends TestCase
             return new MockResponse("%PDF-1.7\n…", ['response_headers' => ['Content-Type' => 'application/pdf']]);
         }));
 
-        self::assertSame("%PDF-1.7\n…", $api->pdf(5, rawPdf: true));
+        self::assertSame("%PDF-1.7\n…", $api->pdfContent(5));
         self::assertSame('https://mycompany.billomat.net/api/'.$path.'/5/pdf?format=pdf', $url);
+
+        (void) $api->pdfContent(5, PdfType::SIGNED);
+        self::assertSame('https://mycompany.billomat.net/api/'.$path.'/5/pdf?type=signed&format=pdf', $url);
+    }
+
+    /**
+     * @param class-string<InvoicesApi|OffersApi|ConfirmationsApi|CreditNotesApi|DeliveryNotesApi|LettersApi|RemindersApi> $class
+     */
+    #[Test]
+    #[DataProvider('apis')]
+    public function pdfReturnsTheJsonModel(string $class, string $path): void
+    {
+        $url = null;
+        $api = new $class($this->http(static function (string $method, string $requested) use (&$url): MockResponse {
+            $url = $requested;
+
+            return new MockResponse('{"pdf":{"id":"9","filename":"x.pdf","mimetype":"application/pdf","base64file":"JVBERi0="}}');
+        }));
+
+        $pdf = $api->pdf(5, PdfType::PRINT);
+
+        self::assertSame(9, $pdf->id);
+        self::assertSame('JVBERi0=', $pdf->base64file);
+        self::assertSame('https://mycompany.billomat.net/api/'.$path.'/5/pdf?type=print', $url);
     }
 
     /**
@@ -71,7 +99,7 @@ final class PdfResponseTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessageIsOrContains('Unexpected response from Billomat for GET /'.$path.'/5/pdf: '.$reason.'.');
 
-        (void) $api->pdf(5, rawPdf: true);
+        (void) $api->pdfContent(5);
     }
 
     /**

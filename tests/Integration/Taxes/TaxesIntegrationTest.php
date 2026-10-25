@@ -48,6 +48,7 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // 1) neuen Steuersatz anlegen
         $name = 'SDK Integration Test Tax '.$faker->numberBetween(1000, 9999);
         $rate = $faker->randomElement([7.0, 9.5, 21.0]);
+        self::assertIsFloat($rate);
         $isDefault = false;
 
         $options = new TaxRateCreateOptions(

@@ -19,6 +19,7 @@ use Justpilot\Billomat\Model\Enum\LetterStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterPdf;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -101,10 +102,10 @@ final class LettersApiTest extends TestCase
     #[Test]
     public function itCreatesLetterViaPost(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'letter' => ['id' => 777, 'client_id' => 123, 'status' => 'DRAFT', 'subject' => 'Info'],
@@ -128,22 +129,17 @@ final class LettersApiTest extends TestCase
 
         self::assertSame(777, $letter->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(123, $payload['letter']['client_id']);
-        self::assertSame('Info', $payload['letter']['subject']);
+        self::assertSame(123, $captured->jsonAt('letter', 'client_id'));
+        self::assertSame('Info', $captured->jsonAt('letter', 'subject'));
     }
 
     #[Test]
     public function itUpdatesLetter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'letter' => ['id' => 777, 'client_id' => 123, 'subject' => 'Geändert'],
@@ -162,7 +158,7 @@ final class LettersApiTest extends TestCase
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->subject);
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
@@ -170,8 +166,8 @@ final class LettersApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -187,20 +183,20 @@ final class LettersApiTest extends TestCase
         $api->undo(4);
         $api->delete(5);
 
-        self::assertSame('https://mycompany.billomat.net/api/letters/1/complete', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/2/cancel', $captured[1]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/3/clear', $captured[2]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/4/undo', $captured[3]['url']);
-        self::assertSame('DELETE', $captured[4]['method']);
+        self::assertSame('https://mycompany.billomat.net/api/letters/1/complete', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/letters/2/cancel', $captured[1]->url);
+        self::assertSame('https://mycompany.billomat.net/api/letters/3/clear', $captured[2]->url);
+        self::assertSame('https://mycompany.billomat.net/api/letters/4/undo', $captured[3]->url);
+        self::assertSame('DELETE', $captured[4]->method);
     }
 
     #[Test]
     public function itEmailsLetter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
@@ -214,21 +210,16 @@ final class LettersApiTest extends TestCase
 
         $api->email(42, $opts);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
+        self::assertSame(['kunde@example.com'], $captured->jsonAt('email', 'recipients', 'to'));
     }
 
     #[Test]
     public function itFetchesLetterPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'pdf' => [
@@ -258,10 +249,10 @@ final class LettersApiTest extends TestCase
     #[Test]
     public function itFetchesRawPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             return new MockResponse('%PDF-1.4 RAW%', ['http_code' => 200]);
         });
@@ -274,7 +265,7 @@ final class LettersApiTest extends TestCase
         $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
 
         self::assertIsString($result);
-        self::assertStringContainsString('format=pdf', $captured['url']);
+        self::assertStringContainsString('format=pdf', $captured->url);
     }
 
     #[Test]
@@ -282,8 +273,8 @@ final class LettersApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url, $options);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -298,8 +289,8 @@ final class LettersApiTest extends TestCase
         $api->upload(100, $b64);
         $api->uploadSignature(200, $b64);
 
-        self::assertSame('https://mycompany.billomat.net/api/letters/100/upload', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/200/upload-signature', $captured[1]['url']);
+        self::assertSame('https://mycompany.billomat.net/api/letters/100/upload', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/letters/200/upload-signature', $captured[1]->url);
     }
 
     #[Test]

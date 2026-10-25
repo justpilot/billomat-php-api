@@ -51,7 +51,8 @@ final class GetOrFailTest extends TestCase
             }
             // Sub-Ressourcen hängen als Property-Hooks an der Eltern-API.
             foreach (new ReflectionObject($api)->getProperties(ReflectionProperty::IS_PUBLIC) as $sub) {
-                if ($sub->hasHooks() && method_exists($sub->getValue($api), 'getOrFail')) {
+                $subApi = $sub->getValue($api);
+                if ($sub->hasHooks() && \is_object($subApi) && method_exists($subApi, 'getOrFail')) {
                     yield $property->name.'->'.$sub->name => [$property->name, $sub->name];
                 }
             }

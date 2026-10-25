@@ -10,6 +10,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\User;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -56,10 +57,10 @@ final class UsersApiTest extends TestCase
     #[Test]
     public function itGetsMyself(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'user' => ['id' => 42, 'email' => 'me@example.com'],
@@ -76,6 +77,6 @@ final class UsersApiTest extends TestCase
         $user = $api->getMyself();
         self::assertInstanceOf(User::class, $user);
         self::assertSame(42, $user->id);
-        self::assertSame('https://mycompany.billomat.net/api/users/myself', $captured['url']);
+        self::assertSame('https://mycompany.billomat.net/api/users/myself', $captured->url);
     }
 }

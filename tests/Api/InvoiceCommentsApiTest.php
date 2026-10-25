@@ -15,7 +15,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\InvoiceComment;
-use Justpilot\Billomat\Tests\Support\JsonPayload;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -41,12 +41,12 @@ final class InvoiceCommentsApiTest extends TestCase
     #[Test]
     public function itListsCommentsByInvoiceIdAndPassesActionkeyFilter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'invoice-comments' => [
@@ -69,7 +69,7 @@ final class InvoiceCommentsApiTest extends TestCase
         self::assertContainsOnlyInstancesOf(InvoiceComment::class, $comments);
         self::assertSame(InvoiceCommentActionKey::CREATE, $comments[0]->actionkey);
 
-        $parts = parse_url($captured['url']);
+        $parts = parse_url($captured->url);
         self::assertSame('/api/invoice-comments', $parts['path'] ?? null);
         $query = [];
         parse_str($parts['query'] ?? '', $query);
@@ -117,10 +117,10 @@ final class InvoiceCommentsApiTest extends TestCase
     #[Test]
     public function createPostsCommentAndHydratesResponse(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'invoice-comment' => [
@@ -140,22 +140,22 @@ final class InvoiceCommentsApiTest extends TestCase
 
         self::assertSame(99, $comment->id);
         self::assertSame(100, $comment->invoiceId);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/invoice-comments', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/invoice-comments', $captured->url);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
+        $payload = $captured->json();
         self::assertIsArray($payload);
-        self::assertSame(100, $payload['invoice-comment']['invoice_id']);
-        self::assertSame('Anruf vom Kunden.', $payload['invoice-comment']['comment']);
+        self::assertSame(100, $captured->jsonAt('invoice-comment', 'invoice_id'));
+        self::assertSame('Anruf vom Kunden.', $captured->jsonAt('invoice-comment', 'comment'));
     }
 
     #[Test]
     public function deleteSendsDeleteRequest(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -164,7 +164,7 @@ final class InvoiceCommentsApiTest extends TestCase
         $api = new InvoicesApi($http)->comments;
 
         $api->delete(42);
-        self::assertSame('DELETE', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/invoice-comments/42', $captured['url']);
+        self::assertSame('DELETE', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/invoice-comments/42', $captured->url);
     }
 }

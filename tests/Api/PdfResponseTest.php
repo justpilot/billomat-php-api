@@ -75,7 +75,7 @@ final class PdfResponseTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{class-string, string}>
+     * @return iterable<string, array{class-string<InvoicesApi|OffersApi|ConfirmationsApi|CreditNotesApi|DeliveryNotesApi|LettersApi|RemindersApi>, string}>
      */
     public static function apis(): iterable
     {
@@ -89,7 +89,7 @@ final class PdfResponseTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{class-string, string, string, string}>
+     * @return iterable<string, array{class-string<InvoicesApi|OffersApi|ConfirmationsApi|CreditNotesApi|DeliveryNotesApi|LettersApi|RemindersApi>, string, string, string}>
      */
     public static function invalidBodies(): iterable
     {

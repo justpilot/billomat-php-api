@@ -130,6 +130,7 @@ final class GeneratedOptionsTest extends TestCase
         $items = new ReflectionProperty($class, 'items');
 
         $copy = new ReflectionMethod($class, 'withItem')->invoke($options, ...$second);
+        self::assertIsObject($copy);
 
         self::assertSame([...$first, ...$second], $items->getValue($copy));
         self::assertSame($first, $items->getValue($options));
@@ -252,7 +253,7 @@ final class GeneratedOptionsTest extends TestCase
             'string' === $name, 'mixed' === $name => 'wert-'.$parameter->name,
             // Gegenteil des Defaults, damit der Wert sichtbar wird.
             'bool' === $name => !$parameter->isDefaultValueAvailable() || true !== $parameter->getDefaultValue(),
-            'array' === $name => $this->sampleItems($parameter->getDeclaringClass()?->getName() ?? '', $parameter->name),
+            'array' === $name => $this->sampleItems($parameter->getDeclaringClass()?->getName() ?? self::fail('Parameter '.$parameter->name.' gehört zu keiner Klasse.'), $parameter->name),
             DateTimeImmutable::class === $name => new DateTimeImmutable('2026-01-01')->modify('+'.$n.' days'),
             Money::class === $name => Money::of($n.'.25'),
             is_subclass_of($name, BackedEnum::class) => array_last($name::cases()),
@@ -262,6 +263,8 @@ final class GeneratedOptionsTest extends TestCase
 
     /**
      * Positionen bzw. Enum-Listen (z. B. Zahlarten) laut `@var list<…>`.
+     *
+     * @param class-string $class
      *
      * @return list<WriteOptions>|list<BackedEnum>
      */
@@ -293,12 +296,12 @@ final class GeneratedOptionsTest extends TestCase
             $value instanceof BackedEnum => $value->value,
             $value instanceof DateTimeImmutable => $value->format('Y-m-d'),
             \is_array($value) && [] !== $value && $value[0] instanceof BackedEnum => implode(',', array_map(
-                static fn (BackedEnum $case): string => (string) $case->value,
+                static fn (mixed $case): string => $case instanceof BackedEnum ? (string) $case->value : self::fail('Enum-Liste enthält einen Nicht-Enum.'),
                 $value,
             )),
             \is_array($value) && [] !== $value && $value[0] instanceof WriteOptions => [
                 $this->kebab(substr(new ReflectionClass($value[0])->getShortName(), 0, -\strlen('CreateOptions'))) => array_map(
-                    static fn (WriteOptions $item): array => $item->toArray(),
+                    static fn (mixed $item): array => $item instanceof WriteOptions ? $item->toArray() : self::fail('Positionsliste enthält eine Nicht-Option.'),
                     $value,
                 ),
             ],

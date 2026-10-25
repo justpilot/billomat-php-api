@@ -201,6 +201,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             self::markTestSkipped('No reminders in sandbox – cannot probe reminder items.');
         }
 
+        self::assertNotNull($reminders[0]->id);
         $items = $billomat->reminders->items->list($reminders[0]->id);
 
         self::assertIsArray($items);

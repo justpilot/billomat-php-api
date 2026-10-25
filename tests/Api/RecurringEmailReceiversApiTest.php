@@ -14,7 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
 use Justpilot\Billomat\Model\RecurringEmailReceiver;
-use Justpilot\Billomat\Tests\Support\JsonPayload;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -40,10 +40,10 @@ final class RecurringEmailReceiversApiTest extends TestCase
     #[Test]
     public function listByRecurringReturnsTypedReceivers(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'recurring-email-receivers' => [
@@ -67,7 +67,7 @@ final class RecurringEmailReceiversApiTest extends TestCase
         self::assertSame(RecurringEmailReceiverType::TO, $receivers[0]->type);
         self::assertSame(RecurringEmailReceiverType::CC, $receivers[1]->type);
 
-        $parts = parse_url($captured['url']);
+        $parts = parse_url($captured->url);
         $query = [];
         parse_str($parts['query'] ?? '', $query);
         self::assertSame('42', $query['recurring_id'] ?? null);
@@ -76,10 +76,10 @@ final class RecurringEmailReceiversApiTest extends TestCase
     #[Test]
     public function createPostsReceiverAndHydratesResponse(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'recurring-email-receiver' => ['id' => 10, 'recurring_id' => 42, 'type' => 'Bcc', 'address' => 'log@example.com'],
@@ -99,11 +99,11 @@ final class RecurringEmailReceiversApiTest extends TestCase
 
         self::assertSame(10, $receiver->id);
         self::assertSame(RecurringEmailReceiverType::BCC, $receiver->type);
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
+        $payload = $captured->json();
         self::assertIsArray($payload);
-        self::assertSame('Bcc', $payload['recurring-email-receiver']['type']);
+        self::assertSame('Bcc', $captured->jsonAt('recurring-email-receiver', 'type'));
     }
 
     #[Test]

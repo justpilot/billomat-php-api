@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api\Options;
 
 use Justpilot\Billomat\Api\EmailOptions;
+use Justpilot\Billomat\Tests\Support\Payload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -48,9 +49,9 @@ final class EmailOptionsTest extends TestCase
 
         $payload = $options->toArray();
 
-        self::assertArrayHasKey('to', $payload['recipients']);
-        self::assertArrayNotHasKey('cc', $payload['recipients']);
-        self::assertArrayNotHasKey('bcc', $payload['recipients']);
+        self::assertArrayHasKey('to', Payload::arrayAt($payload, 'recipients'));
+        self::assertArrayNotHasKey('cc', Payload::arrayAt($payload, 'recipients'));
+        self::assertArrayNotHasKey('bcc', Payload::arrayAt($payload, 'recipients'));
     }
 
     #[Test]
@@ -78,10 +79,10 @@ final class EmailOptionsTest extends TestCase
         $payload = $options->toArray();
 
         self::assertArrayHasKey('attachments', $payload);
-        self::assertCount(2, $payload['attachments']['attachment']);
-        self::assertSame('agb.pdf', $payload['attachments']['attachment'][0]['filename']);
-        self::assertSame('application/pdf', $payload['attachments']['attachment'][0]['mimetype']);
-        self::assertSame('QUJD', $payload['attachments']['attachment'][0]['base64file']);
+        self::assertCount(2, Payload::arrayAt($payload, 'attachments', 'attachment'));
+        self::assertSame('agb.pdf', Payload::at($payload, 'attachments', 'attachment', 0, 'filename'));
+        self::assertSame('application/pdf', Payload::at($payload, 'attachments', 'attachment', 0, 'mimetype'));
+        self::assertSame('QUJD', Payload::at($payload, 'attachments', 'attachment', 0, 'base64file'));
     }
 
     #[Test]

@@ -12,6 +12,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Supplier;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -94,10 +95,10 @@ final class SuppliersApiTest extends TestCase
     #[Test]
     public function itCreatesSupplier(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'supplier' => ['id' => 777, 'name' => 'Neu', 'country_code' => 'DE'],
@@ -117,23 +118,18 @@ final class SuppliersApiTest extends TestCase
 
         self::assertSame(777, $created->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame('Neu', $payload['supplier']['name']);
-        self::assertSame('DE', $payload['supplier']['country_code']);
-        self::assertSame('kontakt@example.com', $payload['supplier']['email']);
+        self::assertSame('Neu', $captured->jsonAt('supplier', 'name'));
+        self::assertSame('DE', $captured->jsonAt('supplier', 'country_code'));
+        self::assertSame('kontakt@example.com', $captured->jsonAt('supplier', 'email'));
     }
 
     #[Test]
     public function itUpdatesSupplier(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'supplier' => ['id' => 777, 'name' => 'Geändert'],
@@ -152,16 +148,16 @@ final class SuppliersApiTest extends TestCase
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->name);
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
     public function itDeletesSupplier(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -172,6 +168,6 @@ final class SuppliersApiTest extends TestCase
         ));
 
         $api->delete(777);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

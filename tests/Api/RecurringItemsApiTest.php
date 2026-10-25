@@ -15,7 +15,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\RecurringItem;
-use Justpilot\Billomat\Tests\Support\JsonPayload;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -41,10 +41,10 @@ final class RecurringItemsApiTest extends TestCase
     #[Test]
     public function listByRecurringSendsRecurringIdFilter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'recurring-items' => [
@@ -67,7 +67,7 @@ final class RecurringItemsApiTest extends TestCase
         self::assertContainsOnlyInstancesOf(RecurringItem::class, $items);
         self::assertSame(42, $items[0]->recurringId);
 
-        $parts = parse_url($captured['url']);
+        $parts = parse_url($captured->url);
         $query = [];
         parse_str($parts['query'] ?? '', $query);
         self::assertSame('42', $query['recurring_id'] ?? null);
@@ -76,10 +76,10 @@ final class RecurringItemsApiTest extends TestCase
     #[Test]
     public function createPostsItemWithRecurringIdInjected(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'recurring-item' => [
@@ -111,20 +111,20 @@ final class RecurringItemsApiTest extends TestCase
         self::assertSame(42, $item->recurringId);
         self::assertSame(ItemType::SERVICE, $item->type);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
+        $payload = $captured->json();
         self::assertIsArray($payload);
-        self::assertSame(42, $payload['recurring-item']['recurring_id']);
-        self::assertSame('Setup', $payload['recurring-item']['title']);
-        self::assertSame('SERVICE', $payload['recurring-item']['type']);
+        self::assertSame(42, $captured->jsonAt('recurring-item', 'recurring_id'));
+        self::assertSame('Setup', $captured->jsonAt('recurring-item', 'title'));
+        self::assertSame('SERVICE', $captured->jsonAt('recurring-item', 'type'));
     }
 
     #[Test]
     public function updateSendsPutToItemEndpoint(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'recurring-item' => ['id' => 100, 'recurring_id' => 42, 'quantity' => 2.0, 'unit_price' => '75'],
@@ -141,17 +141,17 @@ final class RecurringItemsApiTest extends TestCase
         $item = $api->update(100, $opts);
 
         self::assertSame(2.0, $item->quantity);
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/recurring-items/100', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/recurring-items/100', $captured->url);
     }
 
     #[Test]
     public function deleteSendsDeleteRequest(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -160,6 +160,6 @@ final class RecurringItemsApiTest extends TestCase
         $api = new RecurringsApi($http)->items;
 
         $api->delete(100);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

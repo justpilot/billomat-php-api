@@ -12,6 +12,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\ReminderItem;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -35,10 +36,10 @@ final class ReminderItemsApiTest extends TestCase
     #[Test]
     public function itListsItemsByReminder(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'reminder-items' => [
@@ -60,7 +61,7 @@ final class ReminderItemsApiTest extends TestCase
 
         self::assertCount(1, $items);
         self::assertSame('100', $items[0]->unitPrice->toString());
-        self::assertStringContainsString('reminder_id=42', $captured['url']);
+        self::assertStringContainsString('reminder_id=42', $captured->url);
     }
 
     #[Test]

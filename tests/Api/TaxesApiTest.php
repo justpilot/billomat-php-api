@@ -12,6 +12,7 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\TaxRate;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -35,12 +36,12 @@ final class TaxesApiTest extends TestCase
     #[Test]
     public function itListsTaxRates(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'taxes' => [
@@ -83,10 +84,10 @@ final class TaxesApiTest extends TestCase
         self::assertSame(19.0, $result[0]->rate);
         self::assertTrue($result[0]->isDefault);
 
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes?page=1&per_page=50',
-            $captured['url']
+            $captured->url
         );
     }
 
@@ -146,12 +147,12 @@ final class TaxesApiTest extends TestCase
     #[Test]
     public function itCreatesTaxRate(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'tax' => [
@@ -187,36 +188,29 @@ final class TaxesApiTest extends TestCase
         self::assertSame(7.0, $created->rate);
         self::assertFalse($created->isDefault);
 
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes',
-            $captured['url']
+            $captured->url
         );
 
         // Payload ermitteln: bevorzugt "json", Fallback auf "body"
-        $optionsArray = $captured['options'] ?? [];
-        $payload = $optionsArray['json'] ?? null;
-
-        if (null === $payload && isset($optionsArray['body']) && \is_string($optionsArray['body'])) {
-            $payload = json_decode($optionsArray['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertIsArray($payload);
+        $payload = $captured->json();
         self::assertArrayHasKey('tax', $payload);
-        self::assertSame('USt 7%', $payload['tax']['name']);
-        self::assertSame(7.0, $payload['tax']['rate']);
-        self::assertSame(0, $payload['tax']['is_default']);
+        self::assertSame('USt 7%', $captured->jsonAt('tax', 'name'));
+        self::assertSame(7.0, $captured->jsonAt('tax', 'rate'));
+        self::assertSame(0, $captured->jsonAt('tax', 'is_default'));
     }
 
     #[Test]
     public function itUpdatesTaxRate(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'tax' => [
@@ -252,22 +246,22 @@ final class TaxesApiTest extends TestCase
         self::assertSame(7.0, $updated->rate);
         self::assertTrue($updated->isDefault);
 
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes/10',
-            $captured['url']
+            $captured->url
         );
     }
 
     #[Test]
     public function itDeletesTaxRate(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -281,10 +275,10 @@ final class TaxesApiTest extends TestCase
         $api = new TaxesApi($http);
 
         $api->delete(10);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes/10',
-            $captured['url']
+            $captured->url
         );
     }
 

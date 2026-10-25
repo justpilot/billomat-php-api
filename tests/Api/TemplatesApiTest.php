@@ -16,7 +16,7 @@ use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Enum\TemplateType;
 use Justpilot\Billomat\Model\Template;
-use Justpilot\Billomat\Tests\Support\JsonPayload;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -110,10 +110,10 @@ final class TemplatesApiTest extends TestCase
     #[Test]
     public function itCreatesTemplateViaPostAndSendsWrapperPayload(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse(json_encode([
                 'template' => [
@@ -135,26 +135,25 @@ final class TemplatesApiTest extends TestCase
 
         self::assertSame(99, $created->id);
 
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/templates', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/templates', $captured->url);
 
-        $options = $captured['options'] ?? [];
-        $payload = JsonPayload::fromOptions($options);
+        $payload = $captured->json();
 
         self::assertArrayHasKey('template', $payload);
         self::assertIsArray($payload['template']);
 
-        self::assertSame('INVOICE', $payload['template']['type'] ?? null);
-        self::assertSame('Neu', $payload['template']['name'] ?? null);
+        self::assertSame('INVOICE', $captured->jsonAt('template', 'type'));
+        self::assertSame('Neu', $captured->jsonAt('template', 'name'));
     }
 
     #[Test]
     public function itUpdatesTemplateViaPut(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse(json_encode([
                 'template' => [
@@ -178,17 +177,16 @@ final class TemplatesApiTest extends TestCase
         self::assertSame('Umbenannt', $updated->name);
         self::assertTrue($updated->isDefault);
 
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/templates/12', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/templates/12', $captured->url);
 
-        $options = $captured['options'] ?? [];
-        $payload = JsonPayload::fromOptions($options);
+        $payload = $captured->json();
 
         self::assertArrayHasKey('template', $payload);
         self::assertIsArray($payload['template']);
 
-        self::assertSame('Umbenannt', $payload['template']['name'] ?? null);
-        self::assertSame(1, $payload['template']['is_default'] ?? null);
+        self::assertSame('Umbenannt', $captured->jsonAt('template', 'name'));
+        self::assertSame(1, $captured->jsonAt('template', 'is_default'));
     }
 
     #[Test]
@@ -209,10 +207,10 @@ final class TemplatesApiTest extends TestCase
     #[Test]
     public function itFetchesThumbAsRawBinary(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('PNGDATA', [
                 'http_code' => 200,
@@ -228,8 +226,8 @@ final class TemplatesApiTest extends TestCase
         $raw = $api->thumb(7, TemplateThumbFormat::PNG);
 
         self::assertSame('PNGDATA', $raw);
-        self::assertSame('GET', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/templates/7/thumb?format=png', $captured['url']);
+        self::assertSame('GET', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/templates/7/thumb?format=png', $captured->url);
     }
 
     #[Test]

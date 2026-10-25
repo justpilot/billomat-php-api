@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ArticleTag;
 use Justpilot\Billomat\Model\ArticleTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,10 +40,10 @@ final class ArticleTagsApiTest extends TestCase
     #[Test]
     public function itListsTagsByArticle(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'article-tags' => [
@@ -61,7 +62,7 @@ final class ArticleTagsApiTest extends TestCase
         $tags = $api->list(42);
         self::assertCount(1, $tags);
         self::assertSame('bestseller', $tags[0]->name);
-        self::assertStringContainsString('article_id=42', $captured['url']);
+        self::assertStringContainsString('article_id=42', $captured->url);
     }
 
     #[Test]
@@ -92,7 +93,7 @@ final class ArticleTagsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if ('POST' === $method) {
                 return new MockResponse(

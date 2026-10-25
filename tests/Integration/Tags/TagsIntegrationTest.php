@@ -302,6 +302,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
             self::markTestSkipped('No OVERDUE invoice in sandbox – reminder creation requires one.');
         }
 
+        self::assertNotNull($overdue[0]->id);
         $reminder = $billomat->reminders->create(new ReminderCreateOptions(invoiceId: $overdue[0]->id));
         self::assertNotNull($reminder->id);
 

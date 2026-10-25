@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\OfferTag;
 use Justpilot\Billomat\Model\OfferTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,10 +40,10 @@ final class OfferTagsApiTest extends TestCase
     #[Test]
     public function itListsTagsByOffer(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'offer-tags' => [
@@ -65,7 +66,7 @@ final class OfferTagsApiTest extends TestCase
 
         self::assertCount(2, $tags);
         self::assertSame('wichtig', $tags[0]->name);
-        self::assertStringContainsString('offer_id=42', $captured['url']);
+        self::assertStringContainsString('offer_id=42', $captured->url);
     }
 
     #[Test]
@@ -100,10 +101,10 @@ final class OfferTagsApiTest extends TestCase
     #[Test]
     public function itCreatesTag(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'offer-tag' => ['id' => 99, 'offer_id' => 42, 'name' => 'neu'],
@@ -121,17 +122,17 @@ final class OfferTagsApiTest extends TestCase
         $tag = $api->create($opts);
 
         self::assertSame(99, $tag->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/offer-tags', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/offer-tags', $captured->url);
     }
 
     #[Test]
     public function itDeletesTag(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -142,7 +143,7 @@ final class OfferTagsApiTest extends TestCase
         ))->tags;
 
         $api->delete(99);
-        self::assertSame('DELETE', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/offer-tags/99', $captured['url']);
+        self::assertSame('DELETE', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/offer-tags/99', $captured->url);
     }
 }

@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ConfirmationComment;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,10 +40,10 @@ final class ConfirmationCommentsApiTest extends TestCase
     #[Test]
     public function itListsCommentsByConfirmation(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'confirmation-comments' => [
@@ -64,16 +65,16 @@ final class ConfirmationCommentsApiTest extends TestCase
 
         self::assertCount(1, $comments);
         self::assertSame(ConfirmationCommentActionKey::CREATE, $comments[0]->actionkey);
-        self::assertStringContainsString('confirmation_id=42', $captured['url']);
+        self::assertStringContainsString('confirmation_id=42', $captured->url);
     }
 
     #[Test]
     public function itCreatesComment(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'confirmation-comment' => ['id' => 99, 'confirmation_id' => 42, 'comment' => 'Hallo'],
@@ -90,17 +91,17 @@ final class ConfirmationCommentsApiTest extends TestCase
         $created = $api->create(new ConfirmationCommentCreateOptions(confirmationId: 42, comment: 'Hallo'));
 
         self::assertSame(99, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmation-comments', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmation-comments', $captured->url);
     }
 
     #[Test]
     public function itDeletesComment(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -111,6 +112,6 @@ final class ConfirmationCommentsApiTest extends TestCase
         ))->comments;
 
         $api->delete(99);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

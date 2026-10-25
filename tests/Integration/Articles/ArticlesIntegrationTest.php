@@ -82,6 +82,7 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
             unit: 'Stück',
         );
         $article = $billomat->articles->create($articleOpts);
+        self::assertNotNull($article->id);
 
         try {
             // Tag erstellen

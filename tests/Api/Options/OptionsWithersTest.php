@@ -87,6 +87,7 @@ use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionType;
 use ReflectionUnionType;
+use RuntimeException;
 use UnitEnum;
 
 /**
@@ -165,6 +166,9 @@ use UnitEnum;
 #[UsesClass(Money::class)]
 final class OptionsWithersTest extends TestCase
 {
+    /**
+     * @param class-string<WriteOptions> $class
+     */
     #[Test]
     #[DataProvider('withers')]
     public function witherReturnsChangedCopyAndKeepsOriginal(string $class, string $method, string $property): void
@@ -191,7 +195,12 @@ final class OptionsWithersTest extends TestCase
      */
     public static function withers(): iterable
     {
-        foreach ((array) glob(__DIR__.'/../../../src/Api/*Options.php') as $file) {
+        $files = glob(__DIR__.'/../../../src/Api/*Options.php');
+        if (false === $files) {
+            throw new RuntimeException('src/Api konnte nicht durchsucht werden.');
+        }
+
+        foreach ($files as $file) {
             /** @var class-string<WriteOptions> $class */
             $class = 'Justpilot\\Billomat\\Api\\'.basename($file, '.php');
             foreach (new ReflectionClass($class)->getMethods() as $method) {

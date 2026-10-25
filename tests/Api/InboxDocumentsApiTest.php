@@ -11,6 +11,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\InboxDocument;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -85,10 +86,10 @@ final class InboxDocumentsApiTest extends TestCase
     #[Test]
     public function itUploadsDocument(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'inbox-document' => [
@@ -115,24 +116,19 @@ final class InboxDocumentsApiTest extends TestCase
 
         $created = $api->create($opts);
         self::assertSame(777, $created->id);
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame('beleg.pdf', $payload['inbox-document']['filename']);
-        self::assertSame('application/pdf', $payload['inbox-document']['mimetype']);
+        self::assertSame('beleg.pdf', $captured->jsonAt('inbox-document', 'filename'));
+        self::assertSame('application/pdf', $captured->jsonAt('inbox-document', 'mimetype'));
     }
 
     #[Test]
     public function itDeletesDocument(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -143,6 +139,6 @@ final class InboxDocumentsApiTest extends TestCase
         ));
 
         $api->delete(99);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

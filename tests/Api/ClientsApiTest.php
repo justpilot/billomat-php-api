@@ -24,6 +24,7 @@ use Justpilot\Billomat\Model\Enum\ValueType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -55,12 +56,12 @@ final class ClientsApiTest extends TestCase
     #[Test]
     public function itFetchesOwnAccountViaClientsMyself(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'client' => [
@@ -92,22 +93,22 @@ final class ClientsApiTest extends TestCase
         self::assertSame('info@example.com', $me->email);
         self::assertSame('DE', $me->countryCode);
 
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/myself',
-            $captured['url']
+            $captured->url
         );
     }
 
     #[Test]
     public function itListsClientsAndPassesFilters(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'clients' => [
@@ -167,9 +168,9 @@ final class ClientsApiTest extends TestCase
         self::assertSame(4711, $first->debitorAccountNumber);
 
         // Request prüfen
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
 
-        $url = $captured['url'];
+        $url = $captured->url;
         $parts = parse_url($url);
 
         self::assertSame('/api/clients', $parts['path'] ?? null);
@@ -208,12 +209,12 @@ final class ClientsApiTest extends TestCase
     #[Test]
     public function itGetsSingleClientById(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'client' => [
@@ -249,22 +250,22 @@ final class ClientsApiTest extends TestCase
         self::assertSame('erika@example.com', $client->email);
         self::assertSame(9001, $client->debitorAccountNumber);
 
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/123',
-            $captured['url']
+            $captured->url
         );
     }
 
     #[Test]
     public function itCreatesANewClientViaPost(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             // Server-Response mit gesetzter ID und zurückgespiegelten Daten
             $body = json_encode([
@@ -316,23 +317,16 @@ final class ClientsApiTest extends TestCase
         self::assertSame(4711, $created->debitorAccountNumber);
 
         // Request prüfen
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/clients',
-            $captured['url']
+            $captured->url
         );
 
-        $options = $captured['options'] ?? [];
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body'])) {
-            $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertIsArray($payload);
+        $payload = $captured->json();
         self::assertArrayHasKey('client', $payload);
 
-        $clientPayload = $payload['client'];
+        $clientPayload = $captured->jsonArray('client');
 
         self::assertSame('New Client GmbH', $clientPayload['name'] ?? null);
         self::assertSame('Max', $clientPayload['first_name'] ?? null);
@@ -350,12 +344,12 @@ final class ClientsApiTest extends TestCase
     #[Test]
     public function itUpdatesClientViaPutAndSendsWrapperPayload(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'client' => [
@@ -382,26 +376,17 @@ final class ClientsApiTest extends TestCase
         self::assertSame(123, $updated->id);
         self::assertSame('Die super Musterfirma', $updated->name);
 
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/123',
-            $captured['url']
+            $captured->url
         );
 
-        $options = $captured['options'] ?? [];
-
-        // Payload robust lesen: options['json'] oder options['body']
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertIsArray($payload, 'Expected JSON payload array (options[json] or decoded options[body]).');
+        $payload = $captured->json();
         self::assertArrayHasKey('client', $payload);
         self::assertIsArray($payload['client']);
 
-        self::assertSame('Die super Musterfirma', $payload['client']['name'] ?? null);
+        self::assertSame('Die super Musterfirma', $captured->jsonAt('client', 'name'));
     }
 
     #[Test]
@@ -534,12 +519,12 @@ final class ClientsApiTest extends TestCase
     #[Test]
     public function itDeletesClientViaDelete(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -548,10 +533,10 @@ final class ClientsApiTest extends TestCase
         $api = new ClientsApi($http);
 
         $api->delete(42);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/42',
-            $captured['url']
+            $captured->url
         );
     }
 
@@ -579,13 +564,13 @@ final class ClientsApiTest extends TestCase
     #[Test]
     public function itFetchesAvatarBinary(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $pngBytes = "\x89PNG\r\n\x1a\nFAKE";
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured, $pngBytes): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured, $pngBytes): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             return new MockResponse($pngBytes, [
                 'http_code' => 200,
@@ -602,9 +587,9 @@ final class ClientsApiTest extends TestCase
 
         self::assertSame($pngBytes, $binary);
 
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
 
-        $url = $captured['url'];
+        $url = $captured->url;
         $parts = parse_url($url);
 
         self::assertSame('/api/clients/42/avatar', $parts['path'] ?? null);
@@ -620,10 +605,10 @@ final class ClientsApiTest extends TestCase
     #[Test]
     public function avatarOmitsSizeQueryWhenNotProvided(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             return new MockResponse('PNG', [
                 'http_code' => 200,
@@ -638,7 +623,7 @@ final class ClientsApiTest extends TestCase
 
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/7/avatar',
-            $captured['url']
+            $captured->url
         );
     }
 

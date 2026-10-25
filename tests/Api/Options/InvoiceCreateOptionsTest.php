@@ -11,6 +11,7 @@ use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\Payload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -107,10 +108,10 @@ final class InvoiceCreateOptionsTest extends TestCase
         $payload = $options->toArray();
 
         self::assertArrayHasKey('invoice-items', $payload);
-        self::assertArrayHasKey('invoice-item', $payload['invoice-items']);
-        self::assertCount(1, $payload['invoice-items']['invoice-item']);
+        self::assertArrayHasKey('invoice-item', Payload::arrayAt($payload, 'invoice-items'));
+        self::assertCount(1, Payload::arrayAt($payload, 'invoice-items', 'invoice-item'));
 
-        $serialised = $payload['invoice-items']['invoice-item'][0];
+        $serialised = Payload::arrayAt($payload, 'invoice-items', 'invoice-item', 0);
         self::assertSame('Beratung', $serialised['title']);
         self::assertSame(3.0, $serialised['quantity']);
         self::assertSame('49.9', $serialised['unit_price']);

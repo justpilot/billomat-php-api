@@ -20,6 +20,9 @@ final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegration
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
+        $salutation = $faker->randomElement(['Herr', 'Frau']);
+        self::assertIsString($salutation);
+
         $options = new ClientCreateOptions(
             name: $faker->company(),
             street: $faker->streetName(),
@@ -28,7 +31,7 @@ final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegration
             countryCode: 'DE',
             firstName: $faker->firstName(),
             lastName: $faker->lastName(),
-            salutation: $faker->randomElement(['Herr', 'Frau']),
+            salutation: $salutation,
             email: $faker->unique()->safeEmail(),
             phone: $faker->phoneNumber(),
             debitorAccountNumber: $faker->numberBetween(10000, 99999),

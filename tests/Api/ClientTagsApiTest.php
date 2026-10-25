@@ -15,6 +15,7 @@ use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientTag;
 use Justpilot\Billomat\Model\ClientTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -44,7 +45,7 @@ final class ClientTagsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if (str_contains($url, '/client-tags?client_id=42')) {
                 return new MockResponse(

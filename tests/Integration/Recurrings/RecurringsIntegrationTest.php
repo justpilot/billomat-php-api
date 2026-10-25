@@ -133,6 +133,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
         $billomat = $this->createBillomatClientOrSkip();
 
         $recurring = $billomat->recurrings->create($this->buildSafeDraft($billomat));
+        self::assertNotNull($recurring->id);
 
         try {
             // Zusätzliche Position über die ItemsApi anlegen
@@ -176,6 +177,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
         $billomat = $this->createBillomatClientOrSkip();
 
         $recurring = $billomat->recurrings->create($this->buildSafeDraft($billomat));
+        self::assertNotNull($recurring->id);
 
         try {
             $tagOpts = new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'IT-Tag-'.date('His'));
@@ -210,6 +212,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
             ->withEmailMessage('Auto-Test');
 
         $recurring = $billomat->recurrings->create($opts);
+        self::assertNotNull($recurring->id);
 
         try {
             $receiverOpts = new RecurringEmailReceiverCreateOptions(

@@ -627,6 +627,28 @@ $receiver->type->value; // 'To' even if Billomat sent something unknown
 $receiver->type?->value; // null for unknown values
 ```
 
+### Role permissions are `AccessLevel` enums
+
+`Role::$permissions` is `array<string, AccessLevel>` instead of `array<string, ?string>`. Areas without
+access (Billomat sends `""`) and unknown values are no longer in the map instead of being `null`.
+`Role::toArray()` puts the permissions back as top-level fields (`'articles' => 'DELETE'`), like Billomat
+sends them, instead of nesting them under `permissions`. The areas the SDK knows are in `Role::AREAS`.
+
+```php
+// 3.x
+$canDelete = ($role->permissions['invoices'] ?? null) === 'DELETE';
+$noAccess = null === $role->permissions['banking'];
+$role->toArray()['permissions']['articles']; // 'DELETE'
+
+// 4.0
+$canDelete = ($role->permissions['invoices'] ?? null) === AccessLevel::DELETE;
+$canEdit = ($role->permissions['invoices'] ?? null)?->allows(AccessLevel::UPDATE) ?? false; // UPDATE or DELETE
+$noAccess = !isset($role->permissions['banking']);
+$role->toArray()['articles']; // 'DELETE'
+```
+
+`User::$rights` is new and uses the same type.
+
 ### `InvoiceMailOptions::$paperWeight` is an `int`
 
 ```php

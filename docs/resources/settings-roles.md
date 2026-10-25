@@ -57,29 +57,34 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 |---|---|---|
 | `id` | `id` | `?int` |
 | `name` | `name` | `?string` |
-| `permissions` | (several fields, see below) | `array<string,?string>` |
+| `permissions` | (several fields, see below) | `array<string, AccessLevel>` |
+| `created`, `updated` | `created`, `updated` | `?\DateTimeImmutable` |
+
+`toArray()` exports the permissions as top-level fields, like Billomat sends them (`'articles' => 'DELETE'`).
 
 ### Permission values
 
-Each permission field holds one of four values:
+Each permission is a `Justpilot\Billomat\Model\Enum\AccessLevel`:
 
 | Value | Meaning |
 |---|---|
-| `READ` | Read |
-| `UPDATE` | Edit (implies `READ`) |
-| `DELETE` | Full access (implies `UPDATE` + `READ`) |
-| `null` | No access (Billomat sends an empty string; `ScalarCaster` normalizes it to `null`) |
+| `AccessLevel::READ` | Read |
+| `AccessLevel::UPDATE` | Edit (implies `READ`) |
+| `AccessLevel::DELETE` | Full access (implies `UPDATE` + `READ`) |
+| missing | No access (Billomat sends an empty string) |
+
+`allows()` checks the hierarchy: `AccessLevel::DELETE->allows(AccessLevel::UPDATE)` is `true`. `label()` gives the German UI label (`Lesen`, `Bearbeiten`, `Löschen`). Users carry the same map in `User::$rights` (see [users.md](users.md)).
 
 ### Known permission keys
 
 `articles`, `clients`, `suppliers`, `offers`, `confirmations`, `invoices`, `credit_notes`, `delivery_notes`, `reminders`, `incomings`, `letters`, `banking`, `net_income_statement`, `accounting_export`, `settings_my_account`, `settings_documents`, `settings_configuration`, `settings_administration`, `settings_addons`, `settings_my_addons`.
 
-`fromArray()` also accepts any key starting with `settings_`, so new settings permissions end up in `permissions` automatically if Billomat adds them.
+They are in `Role::AREAS`. `fromArray()` also accepts any key starting with `settings_`, so new settings permissions end up in `permissions` automatically if Billomat adds them.
 
 ## Pitfalls
 
 - **The master role can't be deleted.** The system role `Master` (usually `id=1`) can't be removed, not even in the UI.
-- **Empty string → null.** To check whether a role lacks a permission, compare `$role->permissions['articles'] === null`, not `=== ''`.
+- **No access → no entry.** Areas without access, and values the SDK doesn't know, are not in `permissions`; check with `$role->permissions['articles'] ?? null`, or `($role->permissions['articles'] ?? null)?->allows(AccessLevel::UPDATE) ?? false` for a minimum level.
 - **Single-item list quirk.** With only one role Billomat returns an object instead of a list; `listResource()` normalizes this.
 
 ## End-to-end example
@@ -92,6 +97,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -101,10 +107,7 @@ $billomat = BillomatClient::create(
 foreach ($billomat->roles->list() as $role) {
     printf("Role %s (#%d):\n", $role->name ?? '?', $role->id ?? 0);
     foreach ($role->permissions as $resource => $access) {
-        if (null === $access) {
-            continue;
-        }
-        printf("  %-25s %s\n", $resource, $access);
+        printf("  %-25s %s%s\n", $resource, $access->label(), $access->allows(AccessLevel::DELETE) ? ' (full access)' : '');
     }
 }
 ```

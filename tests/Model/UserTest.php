@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
 use Justpilot\Billomat\Model\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -13,6 +15,8 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(User::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(ListCaster::class)]
+#[UsesClass(AccessLevel::class)]
 final class UserTest extends TestCase
 {
     #[Test]
@@ -73,5 +77,19 @@ final class UserTest extends TestCase
         self::assertSame('Alice', $array['first_name']);
         self::assertSame(2, $array['role_id']);
         self::assertSame('admin@example.com', $array['email']);
+    }
+
+    #[Test]
+    public function itMapsRightsToAccessLevels(): void
+    {
+        $user = User::fromArray([
+            'id' => '1',
+            'email' => 'a@b.de',
+            'rights' => ['articles' => 'DELETE', 'banking' => 'UPDATE', 'letters' => ''],
+        ]);
+
+        self::assertSame(['articles' => AccessLevel::DELETE, 'banking' => AccessLevel::UPDATE], $user->rights);
+        self::assertSame([], $user->extra);
+        self::assertSame(['articles' => 'DELETE', 'banking' => 'UPDATE'], $user->toArray()['rights']);
     }
 }

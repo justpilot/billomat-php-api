@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Internal;
 
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -90,5 +91,33 @@ final class ListCasterTest extends TestCase
     public function toEnumListSplitsCommaSeparatedValues(mixed $value, array $expected): void
     {
         self::assertSame($expected, ListCaster::toEnumList($value, PaymentType::class));
+    }
+
+    /**
+     * @return iterable<string, array{mixed, array<string, AccessLevel>}>
+     */
+    public static function enumMapCases(): iterable
+    {
+        yield 'null' => [null, []];
+        yield 'leerer String statt Objekt' => ['', []];
+        yield 'Werte in Billomat-Reihenfolge' => [
+            ['banking' => 'UPDATE', 'articles' => 'DELETE'],
+            ['banking' => AccessLevel::UPDATE, 'articles' => AccessLevel::DELETE],
+        ];
+        yield 'leere und unbekannte Werte fallen heraus' => [
+            ['articles' => 'READ', 'banking' => '', 'clients' => 'ADMIN', 'letters' => null, 'offers' => ['READ']],
+            ['articles' => AccessLevel::READ],
+        ];
+        yield 'Nicht-String-Schlüssel fallen heraus' => [['READ', 'clients' => 'READ'], ['clients' => AccessLevel::READ]];
+    }
+
+    /**
+     * @param array<string, AccessLevel> $expected
+     */
+    #[Test]
+    #[DataProvider('enumMapCases')]
+    public function toEnumMapKeepsKnownValuesPerKey(mixed $value, array $expected): void
+    {
+        self::assertSame($expected, ListCaster::toEnumMap($value, AccessLevel::class));
     }
 }

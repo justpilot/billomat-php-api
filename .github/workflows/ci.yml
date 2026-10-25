@@ -127,7 +127,7 @@ jobs:
           extensions: bcmath
           coverage: xdebug
           tools: composer:v2
-          ini-values: memory_limit=512M
+          ini-values: memory_limit=1G
 
       - name: Install dependencies
         uses: ramsey/composer-install@v4

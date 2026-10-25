@@ -204,7 +204,7 @@ final class ModelRoundTripTest extends TestCase
             && class_exists($itemClass = 'Justpilot\\Billomat\\Model\\'.$match[1])) {
             return [$this->sample($itemClass, empty: false)];
         }
-        // Enum-Listen (z. B. `list<InvoicePaymentType> $paymentTypes`): zwei Werte, damit die Kommatrennung geprüft wird.
+        // Enum-Listen (z. B. `list<PaymentType> $paymentTypes`): zwei Werte, damit die Kommatrennung geprüft wird.
         if (1 === preg_match('/@param\s+list<(\w+)>\s+\$'.$parameter->name.'\b/', $docComment, $match)
             && is_subclass_of($enumClass = 'Justpilot\\Billomat\\Model\\Enum\\'.$match[1], BackedEnum::class)) {
             return [array_first($enumClass::cases()), array_last($enumClass::cases())];

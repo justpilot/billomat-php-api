@@ -17,8 +17,8 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\TaxRule;
 use Justpilot\Billomat\Model\Enum\ValueType;
 use Justpilot\Billomat\Model\Money;
@@ -435,7 +435,7 @@ final class ClientsApiTest extends TestCase
             bankIban: 'DE89370400440532013000',
             sepaMandate: 'MD-001',
             sepaMandateDate: '2026-01-15',
-            defaultPaymentTypes: [InvoicePaymentType::CASH, InvoicePaymentType::BANK_TRANSFER],
+            defaultPaymentTypes: [PaymentType::CASH, PaymentType::BANK_TRANSFER],
         );
 
         $payload = $opts->toArray();
@@ -520,7 +520,7 @@ final class ClientsApiTest extends TestCase
         self::assertSame('MD-001', $c->sepaMandate);
         self::assertNotNull($c->sepaMandateDate);
         self::assertSame('2026-01-10', $c->sepaMandateDate->format('Y-m-d'));
-        self::assertSame([InvoicePaymentType::CASH, InvoicePaymentType::BANK_TRANSFER], $c->defaultPaymentTypes);
+        self::assertSame([PaymentType::CASH, PaymentType::BANK_TRANSFER], $c->defaultPaymentTypes);
         self::assertTrue($c->enableCustomerportal);
         self::assertSame('11900.5', $c->revenueGross?->toString());
         self::assertSame('10000.42', $c->revenueNet?->toString());

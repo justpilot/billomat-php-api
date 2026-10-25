@@ -70,7 +70,7 @@ Aus einem Recurring entstehen mit der Zeit „echte“ Rechnungen — diese refe
 
 Filter laut Billomat-Doku: `client_id`, `contact_id`, `name`, `payment_type`, `cycle_number`, `cycle`, `label`, `intro`, `note`, `tags`, `article_id`.
 
-Empfohlen ist der typisierte Filter `RecurringFilter` mit den camelCase-Feldern `clientId`, `contactId`, `name`, `paymentType` (`list<InvoicePaymentType>`), `cycle` (`RecurringCycle`), `label`, `intro`, `note` und `tags`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `cycle_number`, `article_id`). Ein einfaches Array funktioniert weiterhin. Array-Werte werden dort als `key[]=…` codiert.
+Empfohlen ist der typisierte Filter `RecurringFilter` mit den camelCase-Feldern `clientId`, `contactId`, `name`, `paymentType` (`list<PaymentType>`), `cycle` (`RecurringCycle`), `label`, `intro`, `note` und `tags`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `cycle_number`, `article_id`). Ein einfaches Array funktioniert weiterhin. Array-Werte werden dort als `key[]=…` codiert.
 
 ```php
 use Justpilot\Billomat\Api\OrderBy;
@@ -139,7 +139,7 @@ Konstruktor: `new RecurringCreateOptions(int $clientId, …)` — `clientId` ist
 | `currencyCode` | `currency_code` | `?string` |
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` |
-| `paymentTypes` | `payment_types` | `list<InvoicePaymentType>` (Billomat: kommasepariert) |
+| `paymentTypes` | `payment_types` | `list<PaymentType>` (Billomat: kommasepariert) |
 | `freeTextId` | `free_text_id` | `?int` |
 | `templateId` | `template_id` | `?int` |
 
@@ -204,7 +204,7 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `dueDays`, `discountRate`, `discountDays` | `?int`, `?float`, `?int` |
 | `name`, `title`, `label`, `intro`, `note`, `reduction` | `?string` |
 | `currencyCode` | `?string` |
-| `paymentTypes` | `list<InvoicePaymentType>` (unbekannte Werte fallen heraus) |
+| `paymentTypes` | `list<PaymentType>` (unbekannte Werte fallen heraus) |
 | `netGross` | `?NetGross` |
 | `quote` | `?float` |
 | `action`, `cycle` | `?RecurringAction`, `?RecurringCycle` |
@@ -262,7 +262,7 @@ Konstruktor: `new RecurringItemCreateOptions(float $quantity, Money $unitPrice)`
 |---|---|---|
 | `quantity` | `quantity` | `float` (Pflicht) |
 | `unitPrice` | `unit_price` | `Money` (Pflicht) |
-| `type` | `type` | `?InvoiceItemType` |
+| `type` | `type` | `?ItemType` |
 | `articleId` | `article_id` | `?int` |
 | `title`, `description`, `unit` | analog | `?string` |
 | `taxName`, `taxRate`, `taxChangedManually` | analog | `?string`, `?float`, `?bool` |

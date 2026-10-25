@@ -16,7 +16,7 @@ use Justpilot\Billomat\Model\CreditNotePdf;
 use Justpilot\Billomat\Model\CreditNoteTag;
 use Justpilot\Billomat\Model\CreditNoteTagCloudEntry;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -209,11 +209,11 @@ final class CreditNotesApi extends AbstractApi
      * @return CreditNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
     #[NoDiscard]
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): CreditNotePdf|string
+    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): CreditNotePdf|string
     {
         $query = [];
 
-        if ($type instanceof InvoicePdfType) {
+        if ($type instanceof PdfType) {
             $query['type'] = $type->value;
         }
 

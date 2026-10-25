@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 
 /**
  * Typisierter Filter für GET /api/invoices.
@@ -55,7 +55,7 @@ final readonly class InvoiceFilter implements ListFilter
          *
          * Billomat-Filter: payment_type
          *
-         * @var list<InvoicePaymentType>
+         * @var list<PaymentType>
          */
         public array $paymentType = [],
         /**
@@ -150,7 +150,7 @@ final readonly class InvoiceFilter implements ListFilter
     }
 
     /** Kopie mit geändertem `paymentType`. */
-    public function withPaymentType(InvoicePaymentType ...$paymentType): self
+    public function withPaymentType(PaymentType ...$paymentType): self
     {
         return clone($this, ['paymentType' => array_values($paymentType)]);
     }
@@ -233,7 +233,7 @@ final readonly class InvoiceFilter implements ListFilter
                 'contact_id' => $this->contactId,
                 'invoice_number' => $this->invoiceNumber,
                 'status' => [] === $this->status ? null : implode(',', array_map(static fn (InvoiceStatus $v): string => $v->value, $this->status)),
-                'payment_type' => [] === $this->paymentType ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentType)),
+                'payment_type' => [] === $this->paymentType ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentType)),
                 'from' => $this->from?->format('Y-m-d'),
                 'to' => $this->to?->format('Y-m-d'),
                 'label' => $this->label,

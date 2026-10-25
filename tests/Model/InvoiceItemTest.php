@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -54,7 +54,7 @@ final class InvoiceItemTest extends TestCase
         self::assertSame(19.0, $item->taxRate);
         self::assertTrue($item->taxChangedManually);
         self::assertSame('10%', $item->reduction);
-        self::assertSame(InvoiceItemType::SERVICE, $item->type);
+        self::assertSame(ItemType::SERVICE, $item->type);
         self::assertSame('208.05', $item->totalGross?->toString());
         self::assertSame('174.83', $item->totalNet?->toString());
     }

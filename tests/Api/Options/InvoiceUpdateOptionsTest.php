@@ -6,8 +6,8 @@ namespace Justpilot\Billomat\Tests\Api\Options;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -61,7 +61,7 @@ final class InvoiceUpdateOptionsTest extends TestCase
             clientId: 7,
             title: 'Korrektur',
             quote: 1.1234,
-            paymentTypes: [InvoicePaymentType::BANK_TRANSFER, InvoicePaymentType::CASH],
+            paymentTypes: [PaymentType::BANK_TRANSFER, PaymentType::CASH],
             templateId: 4,
         );
 

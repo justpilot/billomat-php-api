@@ -12,7 +12,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\OfferItem;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -72,7 +72,7 @@ final class OfferItemsApiTest extends TestCase
 
         self::assertCount(1, $items);
         self::assertContainsOnlyInstancesOf(OfferItem::class, $items);
-        self::assertSame(InvoiceItemType::SERVICE, $items[0]->type);
+        self::assertSame(ItemType::SERVICE, $items[0]->type);
         self::assertStringContainsString('offer_id=123', $captured['url']);
     }
 
@@ -102,7 +102,7 @@ final class OfferItemsApiTest extends TestCase
 
         self::assertInstanceOf(OfferItem::class, $item);
         self::assertSame(10, $item->id);
-        self::assertSame(InvoiceItemType::PRODUCT, $item->type);
+        self::assertSame(ItemType::PRODUCT, $item->type);
     }
 
     #[Test]

@@ -52,7 +52,7 @@ CI runs via `.github/workflows/ci.yml` on PHP 8.5 (required) and 8.6 (experiment
 $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: '…');
 $billomat->clients->list();
 $billomat->invoices->create($options);
-$billomat->invoices->pdf($id, InvoicePdfType::SIGNED);
+$billomat->invoices->pdf($id, PdfType::SIGNED);
 $billomat->invoices->comments->list($invoiceId);
 ```
 

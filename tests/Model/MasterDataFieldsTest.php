@@ -25,10 +25,10 @@ use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\FreeTextType;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateType;
@@ -81,7 +81,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(DeliveryNoteCommentActionKey::class)]
 #[UsesClass(IncomingStatus::class)]
 #[UsesClass(InvoiceCommentActionKey::class)]
-#[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(PaymentType::class)]
 #[UsesClass(LetterCommentActionKey::class)]
 #[UsesClass(NetGross::class)]
 #[UsesClass(OfferCommentActionKey::class)]

@@ -66,7 +66,7 @@ return [
         'class' => 'RecurringFilter',
         'endpoint' => 'GET /api/recurrings',
         'fields' => [
-            'payment_type' => ['enum' => 'InvoicePaymentType'],
+            'payment_type' => ['enum' => 'PaymentType'],
             'cycle' => ['enum' => 'RecurringCycle'],
         ],
     ],
@@ -95,7 +95,7 @@ return [
         'payment_types' => [
             'doc' => 'Akzeptierte Zahlungsarten.',
             'details' => ['Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".'],
-            'enum' => 'InvoicePaymentType',
+            'enum' => 'PaymentType',
             'enumList' => true,
         ],
         'action' => ['enum' => 'RecurringAction', 'doc' => 'Aktion, die bei jedem Lauf ausgeführt wird.'],

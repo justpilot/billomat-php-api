@@ -16,7 +16,7 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Enum\ReminderStatus;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderPdf;
@@ -278,7 +278,7 @@ final class RemindersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, InvoicePdfType::PRINT, rawPdf: true);
+        $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
 
         self::assertIsString($result);
         self::assertStringContainsString('format=pdf', $captured['url']);

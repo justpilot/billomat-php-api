@@ -6,7 +6,7 @@ namespace Justpilot\Billomat\Tests\Api\Options;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -58,7 +58,7 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
         $options = new InvoicePaymentCreateOptions(
             invoiceId: 1,
             amount: Money::of('1'),
-            type: InvoicePaymentType::BANK_TRANSFER,
+            type: PaymentType::BANK_TRANSFER,
         );
 
         $payload = $options->toArray();

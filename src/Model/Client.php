@@ -7,8 +7,8 @@ namespace Justpilot\Billomat\Model;
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\TaxRule;
 use Justpilot\Billomat\Model\Enum\ValueType;
 
@@ -28,7 +28,7 @@ use const DATE_ATOM;
  */
 final readonly class Client
 {
-    /** @param list<InvoicePaymentType> $defaultPaymentTypes */
+    /** @param list<PaymentType> $defaultPaymentTypes */
     public function __construct(
         /** Interne Billomat-ID des Kunden. */
         public ?int $id,
@@ -285,7 +285,7 @@ final readonly class Client
             bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
             sepaMandate: ScalarCaster::toStringOrNull($data['sepa_mandate'] ?? null),
             sepaMandateDate: ScalarCaster::toDateTimeOrNull($data['sepa_mandate_date'] ?? null),
-            defaultPaymentTypes: ListCaster::toEnumList($data['default_payment_types'] ?? null, InvoicePaymentType::class),
+            defaultPaymentTypes: ListCaster::toEnumList($data['default_payment_types'] ?? null, PaymentType::class),
             enableCustomerportal: ScalarCaster::toBoolOrNull($data['enable_customerportal'] ?? null),
             revenueGross: ScalarCaster::toMoneyOrNull($data['revenue_gross'] ?? null),
             revenueNet: ScalarCaster::toMoneyOrNull($data['revenue_net'] ?? null),
@@ -358,7 +358,7 @@ final readonly class Client
             'bank_iban' => $this->bankIban,
             'sepa_mandate' => $this->sepaMandate,
             'sepa_mandate_date' => $this->sepaMandateDate?->format('Y-m-d'),
-            'default_payment_types' => [] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->defaultPaymentTypes)),
+            'default_payment_types' => [] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->defaultPaymentTypes)),
             'enable_customerportal' => $this->enableCustomerportal,
             'revenue_gross' => $this->revenueGross?->toString(),
             'revenue_net' => $this->revenueNet?->toString(),

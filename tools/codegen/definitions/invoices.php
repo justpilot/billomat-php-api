@@ -70,7 +70,7 @@ return [
         'endpoint' => 'GET /api/invoices',
         'fields' => [
             'status' => ['enum' => 'InvoiceStatus'],
-            'payment_type' => ['enum' => 'InvoicePaymentType'],
+            'payment_type' => ['enum' => 'PaymentType'],
         ],
     ],
 
@@ -117,7 +117,7 @@ return [
         'payment_types' => [
             'doc' => 'Akzeptierte Zahlungsarten.',
             'details' => ['Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".'],
-            'enum' => 'InvoicePaymentType',
+            'enum' => 'PaymentType',
             'enumList' => true,
         ],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Rechnung abgeschlossen wird.'],

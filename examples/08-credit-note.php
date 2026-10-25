@@ -21,8 +21,8 @@ use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 
 $billomatId = getenv('BILLOMAT_ID') ?: null;
 $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
@@ -49,7 +49,7 @@ try {
     $item = new CreditNoteItemCreateOptions(
         quantity: 1.0, unitPrice: Money::of('75'),
         title: 'Rückerstattung Versand',
-        type: InvoiceItemType::PRODUCT,
+        type: ItemType::PRODUCT,
         unit: 'Pauschal',
     );
     $opts = $opts->withItem($item);
@@ -69,7 +69,7 @@ try {
         creditNoteId: $creditNote->id,
             amount: $creditNote->totalGross ?? 75.0,
         date: new DateTimeImmutable('today'),
-        type: InvoicePaymentType::BANK_TRANSFER,
+        type: PaymentType::BANK_TRANSFER,
         markCreditNoteAsPaid: true,
         comment: 'Erstattung per SEPA-Überweisung',
     );

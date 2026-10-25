@@ -7,8 +7,8 @@ namespace Justpilot\Billomat\Model;
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
@@ -30,9 +30,9 @@ use const DATE_ATOM;
 final readonly class Recurring
 {
     /**
-     * @param list<InvoicePaymentType> $paymentTypes
-     * @param list<TaxSummary>         $taxes
-     * @param list<RecurringItem>      $items
+     * @param list<PaymentType>   $paymentTypes
+     * @param list<TaxSummary>    $taxes
+     * @param list<RecurringItem> $items
      */
     public function __construct(
         /** Interne Billomat-ID der Abo-Rechnung. */
@@ -184,7 +184,7 @@ final readonly class Recurring
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
-            paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, InvoicePaymentType::class),
+            paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, PaymentType::class),
             action: RecurringAction::tryFrom(ScalarCaster::toStringOrNull($data['action'] ?? null) ?? ''),
             cycleNumber: ScalarCaster::toIntOrNull($data['cycle_number'] ?? null),
             cycle: RecurringCycle::tryFrom(ScalarCaster::toStringOrNull($data['cycle'] ?? null) ?? ''),
@@ -253,7 +253,7 @@ final readonly class Recurring
             'currency_code' => $this->currencyCode,
             'net_gross' => $this->netGross?->value,
             'quote' => $this->quote,
-            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes)),
+            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes)),
             'action' => $this->action?->value,
             'cycle_number' => $this->cycleNumber,
             'cycle' => $this->cycle?->value,

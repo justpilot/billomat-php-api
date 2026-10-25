@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model\Enum;
 
-enum InvoicePdfType: string
+/**
+ * PDF-Variante für `pdf()` aller Dokument-Ressourcen (Rechnungen, Angebote, Gutschriften, …).
+ */
+enum PdfType: string
 {
     /** Signiertes PDF */
     case SIGNED = 'signed';

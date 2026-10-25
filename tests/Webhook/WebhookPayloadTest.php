@@ -6,8 +6,8 @@ namespace Justpilot\Billomat\Tests\Webhook;
 
 use JsonException;
 use Justpilot\Billomat\Exception\InvalidWebhookException;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoicePayment;
 use Justpilot\Billomat\Webhook\WebhookEvent;
@@ -56,7 +56,7 @@ final class WebhookPayloadTest extends TestCase
         self::assertSame(5005, $payload->id());
         self::assertSame(1001, $payload->int('invoice_id'));
         self::assertSame(1001, $payment->invoiceId);
-        self::assertSame(InvoicePaymentType::BANK_CARD, $payment->type);
+        self::assertSame(PaymentType::BANK_CARD, $payment->type);
         self::assertSame('2026-10-20', $payment->date?->format('Y-m-d'));
     }
 

@@ -790,13 +790,13 @@ parameters:
 			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
 			identifier: ternary.condNotBoolean
 			count: 1
-			path: src/Model/Enum/InvoiceItemType.php
+			path: src/Model/Enum/ItemType.php
 
 		-
 			message: '#^Only booleans are allowed in a ternary operator condition, string\|null given\.$#'
 			identifier: ternary.condNotBoolean
 			count: 1
-			path: src/Model/Enum/InvoicePdfType.php
+			path: src/Model/Enum/PdfType.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'

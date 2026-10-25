@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\TaxRule;
 use Justpilot\Billomat\Model\Enum\ValueType;
 
@@ -397,7 +397,7 @@ final readonly class ClientCreateOptions implements WriteOptions
          * Billomat-Feld: default_payment_types
          * Typ: ALNUM
          *
-         * @var list<InvoicePaymentType>
+         * @var list<PaymentType>
          */
         public array $defaultPaymentTypes = [],
     ) {
@@ -694,7 +694,7 @@ final readonly class ClientCreateOptions implements WriteOptions
     /**
      * Kopie mit geändertem `defaultPaymentTypes`.
      *
-     * @param list<InvoicePaymentType> $defaultPaymentTypes
+     * @param list<PaymentType> $defaultPaymentTypes
      */
     public function withDefaultPaymentTypes(array $defaultPaymentTypes): self
     {
@@ -757,7 +757,7 @@ final readonly class ClientCreateOptions implements WriteOptions
             'bank_iban' => $this->bankIban,
             'sepa_mandate' => $this->sepaMandate,
             'sepa_mandate_date' => $this->sepaMandateDate,
-            'default_payment_types' => [] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->defaultPaymentTypes)),
+            'default_payment_types' => [] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->defaultPaymentTypes)),
         ], static fn (mixed $v): bool => null !== $v);
     }
 }

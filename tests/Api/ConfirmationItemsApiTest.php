@@ -13,7 +13,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ConfirmationItem;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -64,7 +64,7 @@ final class ConfirmationItemsApiTest extends TestCase
         $items = $api->list(123);
 
         self::assertCount(1, $items);
-        self::assertSame(InvoiceItemType::SERVICE, $items[0]->type);
+        self::assertSame(ItemType::SERVICE, $items[0]->type);
         self::assertStringContainsString('confirmation_id=123', $captured['url']);
     }
 

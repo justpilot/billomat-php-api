@@ -12,7 +12,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\RecurringItem;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -101,14 +101,14 @@ final class RecurringItemsApiTest extends TestCase
             quantity: 1.5,
             unitPrice: Money::of('99'),
             title: 'Setup',
-            type: InvoiceItemType::SERVICE,
+            type: ItemType::SERVICE,
         );
 
         $item = $api->create(42, $opts);
 
         self::assertSame(200, $item->id);
         self::assertSame(42, $item->recurringId);
-        self::assertSame(InvoiceItemType::SERVICE, $item->type);
+        self::assertSame(ItemType::SERVICE, $item->type);
 
         $payload = $this->extractJsonPayload($captured['options']);
         self::assertIsArray($payload);

@@ -133,7 +133,7 @@ $mail = new EmailOptions(to: ['kunde@example.com'], subject: 'Erinnerung: offene
 $billomat->reminders->email($reminder->id, $mail);
 ```
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ReminderPdf|string`
+#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): ReminderPdf|string`
 
 Per Default ein `ReminderPdf`-Modell (Metadaten + base64-Body). Mit `$rawPdf = true` wird `?format=pdf` gehängt und der binäre PDF-Inhalt direkt zurückgegeben.
 
@@ -308,7 +308,7 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 ## Verwendete Enums
 
 - [`ReminderStatus`](../../src/Model/Enum/ReminderStatus.php): `DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`. Beachte: `OVERDUE` setzt Billomat automatisch, sobald das `dueDate` überschritten ist — niemals manuell mitsenden.
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): wiederverwendet für die PDF-Varianten in `pdf()`.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): wiederverwendet für die PDF-Varianten in `pdf()`.
 
 Es gibt **keinen** eigenen Comment-ActionKey-Enum für Reminders — Mahnungen besitzen schlicht keine `/reminder-comments`-Ressource. Aktivitäten werden über die Comments der zugrunde liegenden Rechnung gepflegt.
 

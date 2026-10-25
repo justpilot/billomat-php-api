@@ -161,7 +161,7 @@ return [
         'default_payment_types' => [
             'doc' => 'Standard-Zahlarten.',
             'details' => ['Billomat überträgt sie kommasepariert, z. B. "CASH,BANK_TRANSFER".'],
-            'enum' => 'InvoicePaymentType',
+            'enum' => 'PaymentType',
             'enumList' => true,
         ],
         'enable_customerportal' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Kundenportal aktiviert?'],

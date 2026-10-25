@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 
 /**
  * Repräsentiert eine Gutschriftsposition aus der Billomat-API.
@@ -56,7 +56,7 @@ final readonly class CreditNoteItem
         /** Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction,
         /** Typ der Position (Produkt/Dienstleistung). */
-        public ?InvoiceItemType $type,
+        public ?ItemType $type,
         /** Gesamtbetrag brutto. */
         public ?Money $totalGross,
         /** Gesamtbetrag netto. */
@@ -93,7 +93,7 @@ final readonly class CreditNoteItem
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
-            type: InvoiceItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),

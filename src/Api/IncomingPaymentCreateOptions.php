@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
 
 /**
@@ -53,7 +53,7 @@ final readonly class IncomingPaymentCreateOptions implements WriteOptions
          * Billomat-Feld: type
          * Typ: ALNUM („CREDIT_NOTE“, „BANK_CARD“, „BANK_TRANSFER“, „DEBIT“, „CASH“, „CHECK“, „PAYPAL“, „CREDIT_CARD“, „COUPON“, „MISC“)
          */
-        public ?InvoicePaymentType $type = null,
+        public ?PaymentType $type = null,
         /**
          * Kommentar zur Zahlung.
          *
@@ -97,7 +97,7 @@ final readonly class IncomingPaymentCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `type`. */
-    public function withType(?InvoicePaymentType $type): self
+    public function withType(?PaymentType $type): self
     {
         return clone($this, ['type' => $type]);
     }

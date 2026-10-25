@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
 /**
@@ -223,7 +223,7 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
          * Billomat-Feld: payment_types
          * Typ: ALNUM
          *
-         * @var list<InvoicePaymentType>|Clear
+         * @var list<PaymentType>|Clear
          */
         public array|Clear $paymentTypes = [],
         /**
@@ -402,7 +402,7 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
     /**
      * Kopie mit geändertem `paymentTypes`.
      *
-     * @param list<InvoicePaymentType>|Clear $paymentTypes
+     * @param list<PaymentType>|Clear $paymentTypes
      */
     public function withPaymentTypes(array|Clear $paymentTypes): self
     {
@@ -455,7 +455,7 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
                 'net_gross' => $this->netGross instanceof NetGross ? $this->netGross->value : $this->netGross,
                 'currency_code' => $this->currencyCode,
                 'quote' => $this->quote,
-                'payment_types' => $this->paymentTypes instanceof Clear ? $this->paymentTypes : ([] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes))),
+                'payment_types' => $this->paymentTypes instanceof Clear ? $this->paymentTypes : ([] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes))),
                 'invoice_id' => $this->invoiceId,
                 'offer_id' => $this->offerId,
                 'confirmation_id' => $this->confirmationId,

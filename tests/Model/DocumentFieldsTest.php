@@ -18,8 +18,8 @@ use Justpilot\Billomat\Model\DeliveryNoteItem;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
@@ -60,7 +60,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(ConfirmationStatus::class)]
 #[UsesClass(CreditNoteStatus::class)]
 #[UsesClass(DeliveryNoteStatus::class)]
-#[UsesClass(InvoiceItemType::class)]
+#[UsesClass(ItemType::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(LetterStatus::class)]
 #[UsesClass(NetGross::class)]

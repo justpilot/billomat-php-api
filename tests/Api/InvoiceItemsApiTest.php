@@ -13,7 +13,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -133,7 +133,7 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertSame('Position A', $first->title);
         self::assertSame('Beschreibung A', $first->description);
         self::assertSame('10%', $first->reduction);
-        self::assertSame(InvoiceItemType::SERVICE, $first->type);
+        self::assertSame(ItemType::SERVICE, $first->type);
         self::assertSame('119', $first->totalGross?->toString());
         self::assertSame('100', $first->totalNet?->toString());
         self::assertSame('130', $first->totalGrossUnreduced?->toString());
@@ -141,7 +141,7 @@ final class InvoiceItemsApiTest extends TestCase
 
         $second = $items[1];
         self::assertSame(2, $second->id);
-        self::assertSame(InvoiceItemType::PRODUCT, $second->type);
+        self::assertSame(ItemType::PRODUCT, $second->type);
         self::assertTrue($second->taxChangedManually);
 
         // Request prüfen
@@ -204,7 +204,7 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertInstanceOf(InvoiceItem::class, $item);
         self::assertSame(10, $item->id);
         self::assertSame(999, $item->invoiceId);
-        self::assertSame(InvoiceItemType::SERVICE, $item->type);
+        self::assertSame(ItemType::SERVICE, $item->type);
 
         self::assertSame('GET', $captured['method']);
         self::assertSame(
@@ -298,7 +298,7 @@ final class InvoiceItemsApiTest extends TestCase
             taxRate: 19.0,
             title: 'Neue Position',
             description: 'Aus Tests',
-            type: InvoiceItemType::SERVICE,
+            type: ItemType::SERVICE,
         );
 
         $created = $api->create(123, $options);
@@ -306,7 +306,7 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertSame(77, $created->id);
         self::assertSame(123, $created->invoiceId);
         self::assertSame('Neue Position', $created->title);
-        self::assertSame(InvoiceItemType::SERVICE, $created->type);
+        self::assertSame(ItemType::SERVICE, $created->type);
 
         self::assertSame('POST', $captured['method']);
         self::assertSame(
@@ -381,13 +381,13 @@ final class InvoiceItemsApiTest extends TestCase
             title: 'Geänderter Titel',
             description: 'Geänderte Beschreibung',
             reduction: '5%',
-            type: InvoiceItemType::PRODUCT,
+            type: ItemType::PRODUCT,
         );
 
         $updated = $api->update(77, $options);
 
         self::assertSame(77, $updated->id);
-        self::assertSame(InvoiceItemType::PRODUCT, $updated->type);
+        self::assertSame(ItemType::PRODUCT, $updated->type);
         self::assertTrue($updated->taxChangedManually);
         self::assertSame('Geänderter Titel', $updated->title);
         self::assertSame('5%', $updated->reduction);

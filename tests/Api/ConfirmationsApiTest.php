@@ -20,7 +20,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -349,7 +349,7 @@ final class ConfirmationsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, InvoicePdfType::PRINT, rawPdf: true);
+        $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
 
         self::assertIsString($result);
         self::assertStringStartsWith('%PDF-1.4', $result);

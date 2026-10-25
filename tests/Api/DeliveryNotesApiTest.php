@@ -20,7 +20,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -313,7 +313,7 @@ final class DeliveryNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, InvoicePdfType::PRINT, rawPdf: true);
+        $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
 
         self::assertIsString($result);
         self::assertStringContainsString('format=pdf', $captured['url']);

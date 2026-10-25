@@ -540,10 +540,32 @@ new ClientCreateOptions(name: 'ACME', taxRule: TaxRule::NO_TAX, dueDaysType: Val
 if ($client->netGross === NetGross::GROSS) { … }
 ```
 
-### Payment types are a list of `InvoicePaymentType`
+### `InvoicePaymentType`, `InvoicePdfType` and `InvoiceItemType` are renamed
+
+The three enums are used by every document resource, not just invoices. Their cases are unchanged.
+
+| 3.x | 4.0 |
+|---|---|
+| `Model\Enum\InvoicePaymentType` | `Model\Enum\PaymentType` |
+| `Model\Enum\InvoicePdfType` | `Model\Enum\PdfType` |
+| `Model\Enum\InvoiceItemType` | `Model\Enum\ItemType` |
+
+```php
+// 3.x
+use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+$pdf = $billomat->offers->pdf($id, InvoicePdfType::PRINT);
+
+// 4.0
+use Justpilot\Billomat\Model\Enum\PdfType;
+$pdf = $billomat->offers->pdf($id, PdfType::PRINT);
+```
+
+A search and replace of the three class names is enough.
+
+### Payment types are a list of `PaymentType`
 
 `Invoice::$paymentTypes`, `Recurring::$paymentTypes`, `Client::$defaultPaymentTypes` and the matching
-`*CreateOptions`/`*UpdateOptions` are `list<InvoicePaymentType>` instead of a comma-separated string.
+`*CreateOptions`/`*UpdateOptions` are `list<PaymentType>` instead of a comma-separated string.
 The SDK still sends and exports the comma-separated string.
 
 ```php
@@ -552,8 +574,8 @@ new InvoiceCreateOptions(clientId: $id, paymentTypes: 'BANK_TRANSFER,PAYPAL');
 $acceptsPaypal = str_contains($invoice->paymentTypes ?? '', 'PAYPAL');
 
 // 4.0
-new InvoiceCreateOptions(clientId: $id, paymentTypes: [InvoicePaymentType::BANK_TRANSFER, InvoicePaymentType::PAYPAL]);
-$acceptsPaypal = in_array(InvoicePaymentType::PAYPAL, $invoice->paymentTypes, true);
+new InvoiceCreateOptions(clientId: $id, paymentTypes: [PaymentType::BANK_TRANSFER, PaymentType::PAYPAL]);
+$acceptsPaypal = in_array(PaymentType::PAYPAL, $invoice->paymentTypes, true);
 ```
 
 An empty list (the default) is not sent. In update options, `Clear::Field` empties the field. Values

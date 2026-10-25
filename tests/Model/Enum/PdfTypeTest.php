@@ -4,35 +4,35 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model\Enum;
 
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(InvoicePdfType::class)]
-final class InvoicePdfTypeTest extends TestCase
+#[CoversClass(PdfType::class)]
+final class PdfTypeTest extends TestCase
 {
     #[Test]
     public function itExposesExpectedLowercaseApiValues(): void
     {
         // Billomat erwartet hier kleinbuchstaben: ?type=signed
-        self::assertSame('signed', InvoicePdfType::SIGNED->value);
-        self::assertSame('print', InvoicePdfType::PRINT->value);
+        self::assertSame('signed', PdfType::SIGNED->value);
+        self::assertSame('print', PdfType::PRINT->value);
     }
 
     #[Test]
     public function fromApiHandlesNullEmptyAndUnknown(): void
     {
-        self::assertNull(InvoicePdfType::fromApi(null));
-        self::assertNull(InvoicePdfType::fromApi(''));
-        self::assertNull(InvoicePdfType::fromApi('BOGUS'));
-        self::assertSame(InvoicePdfType::SIGNED, InvoicePdfType::fromApi('signed'));
+        self::assertNull(PdfType::fromApi(null));
+        self::assertNull(PdfType::fromApi(''));
+        self::assertNull(PdfType::fromApi('BOGUS'));
+        self::assertSame(PdfType::SIGNED, PdfType::fromApi('signed'));
     }
 
     #[Test]
     public function eachCaseHasNonEmptyLabel(): void
     {
-        foreach (InvoicePdfType::cases() as $case) {
+        foreach (PdfType::cases() as $case) {
             self::assertNotSame('', $case->label());
         }
     }

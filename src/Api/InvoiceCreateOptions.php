@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
 /**
@@ -239,7 +239,7 @@ final readonly class InvoiceCreateOptions implements WriteOptions
          * Typ: ALNUM
          * Default: Wert aus den Einstellungen
          *
-         * @var list<InvoicePaymentType>
+         * @var list<PaymentType>
          */
         public array $paymentTypes = [],
         /**
@@ -425,7 +425,7 @@ final readonly class InvoiceCreateOptions implements WriteOptions
     /**
      * Kopie mit geändertem `paymentTypes`.
      *
-     * @param list<InvoicePaymentType> $paymentTypes
+     * @param list<PaymentType> $paymentTypes
      */
     public function withPaymentTypes(array $paymentTypes): self
     {
@@ -480,7 +480,7 @@ final readonly class InvoiceCreateOptions implements WriteOptions
             'currency_code' => $this->currencyCode,
             'net_gross' => $this->netGross?->value,
             'quote' => $this->quote,
-            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes)),
+            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes)),
             'invoice_id' => $this->invoiceId,
             'offer_id' => $this->offerId,
             'confirmation_id' => $this->confirmationId,

@@ -157,7 +157,7 @@ $billomat->confirmations->email($conf->id, $email);
 
 Lädt eine unterschriebene PDF-Version hoch. `$base64Pdf` ist der reine Base64-codierte PDF-Inhalt.
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string`
+#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string`
 
 Liefert ein `ConfirmationPdf`-Model mit Base64-Inhalt; mit `$rawPdf = true` umgeht die Methode JSON und gibt die rohen Bytes zurück.
 
@@ -263,7 +263,7 @@ Konstruktor: `new ConfirmationItemCreateOptions(float $quantity, Money $unitPric
 |---|---|---|---|
 | `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
 | `unitPrice` | `unit_price` | `Money` | Pflicht (Konstruktor) |
-| `type` | `type` | `?InvoiceItemType` | |
+| `type` | `type` | `?ItemType` | |
 | `articleId` | `article_id` | `?int` | |
 | `title`, `description`, `unit` | analog | `?string` | |
 | `taxName`, `taxRate`, `taxChangedManually` | analog | `?string`/`?float`/`?bool` | |
@@ -340,7 +340,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `taxRate` | `?float` |
 | `taxChangedManually` | `?bool` |
 | `title`, `description`, `reduction` | `?string` |
-| `type` | `?InvoiceItemType` |
+| `type` | `?ItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -391,8 +391,8 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 
 - [`ConfirmationStatus`](../../src/Model/Enum/ConfirmationStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Hat `label()` für deutsche Bezeichnung. Beachten: **kein** `WON`/`LOST` wie beim Angebot.
 - [`ConfirmationCommentActionKey`](../../src/Model/Enum/ConfirmationCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT` — schlanker als bei Offers (`WIN`/`LOSE` fehlen).
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 
 ## Stolpersteine
@@ -422,7 +422,7 @@ use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -443,7 +443,7 @@ $item = new ConfirmationItemCreateOptions(
     quantity: 12.0, unitPrice: Money::of('19.90'),
     title: 'Hosting Basic (12 Monate)',
     unit: 'Monat',
-    type: InvoiceItemType::SERVICE,
+    type: ItemType::SERVICE,
 );
 $opts = $opts->withItem($item);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 
 /**
@@ -46,7 +46,7 @@ final readonly class RecurringFilter implements ListFilter
          *
          * Billomat-Filter: payment_type
          *
-         * @var list<InvoicePaymentType>
+         * @var list<PaymentType>
          */
         public array $paymentType = [],
         /**
@@ -123,7 +123,7 @@ final readonly class RecurringFilter implements ListFilter
     }
 
     /** Kopie mit geändertem `paymentType`. */
-    public function withPaymentType(InvoicePaymentType ...$paymentType): self
+    public function withPaymentType(PaymentType ...$paymentType): self
     {
         return clone($this, ['paymentType' => array_values($paymentType)]);
     }
@@ -193,7 +193,7 @@ final readonly class RecurringFilter implements ListFilter
                 'client_id' => $this->clientId,
                 'contact_id' => $this->contactId,
                 'name' => $this->name,
-                'payment_type' => [] === $this->paymentType ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentType)),
+                'payment_type' => [] === $this->paymentType ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentType)),
                 'cycle' => $this->cycle?->value,
                 'label' => $this->label,
                 'intro' => $this->intro,

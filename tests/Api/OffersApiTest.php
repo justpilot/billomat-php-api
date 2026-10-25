@@ -17,8 +17,8 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferPdf;
@@ -455,7 +455,7 @@ final class OffersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(id: 777, type: InvoicePdfType::PRINT, rawPdf: true);
+        $result = $api->pdf(id: 777, type: PdfType::PRINT, rawPdf: true);
 
         self::assertIsString($result);
         self::assertStringStartsWith('%PDF-1.4', $result);

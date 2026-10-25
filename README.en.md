@@ -100,6 +100,7 @@ Full runnable examples live under [examples/](examples/).
 - Auto-pagination via an `iterateAll()` generator and `listPage()` with metadata.
 - Typed list filters (`InvoiceFilter`, `ClientFilter`, …) with enums, `DateTimeImmutable` and `OrderBy`; plain arrays still work.
 - Monetary amounts as an exact `Money` value object (BcMath, decimal strings just like Billomat) instead of `float` — no rounding errors, with comparison, sums and locale-style formatting; see [docs/concepts/money.md](docs/concepts/money.md) (German).
+- Receiving webhooks: `WebhookHeaders`, `WebhookPayload` and `WebhookEvent` (all 83 events) parse incoming requests and hydrate the matching model ([docs/concepts/webhooks.md](docs/concepts/webhooks.md), German). Webhooks themselves are set up in the Billomat UI only.
 - Structured exception hierarchy with mapping to HTTP status codes (401/403, 404, 400/422, 429) and a dedicated `TransportException` for network failures.
 
 ## Resources

@@ -108,6 +108,10 @@ A 2xx response whose body isn't a JSON object, or doesn't match the expected env
 
 For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`), use `AbstractApi::getRaw($path, $query)` instead of `getJson()`; for PDFs use `getPdf()`, which throws `UnexpectedResponseException` on an empty body or a missing `%PDF-` header. Pattern is in `InvoicesApi::pdf()`.
 
+### Webhooks
+
+Billomat has no REST endpoint for webhook subscriptions (UI only) — never add a `WebhooksApi`. `src/Webhook/` only parses incoming requests: `WebhookEvent` (83 cases from the catalog in `docs/concepts/webhooks.md`; `modelClass()` maps the resource to its read model), `WebhookHeaders`, `WebhookPayload` (unwraps the REST-style envelope, key = resource with `-`) and `InvalidWebhookException`. Payloads are JSON with string values and often stale; the docs tell users to reload via `get()`. Fixtures in `tests/Fixtures/Webhook/<event>.json` are anonymized real bodies.
+
 ## Conventions
 
 - PHP 8.5+ only. Use `final readonly` for read models, `readonly` properties on `BillomatClient`, named arguments, enums (`src/Model/Enum/`), and constructor property promotion.

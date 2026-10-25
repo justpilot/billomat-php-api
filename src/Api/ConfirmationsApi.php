@@ -189,7 +189,7 @@ final class ConfirmationsApi extends AbstractApi
         $this->putVoid("/confirmations/{$id}/undo");
     }
 
-    public function email(int $id, ?ConfirmationEmailOptions $options = null): void
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 

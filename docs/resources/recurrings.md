@@ -83,7 +83,7 @@ Liefert `null` bei 404. Die Response enthält eingebettete `recurring-items` und
 
 ### `create(RecurringCreateOptions $options): Recurring`
 
-Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen unter `recurring-items.recurring-item` im Payload.
+Positionen können direkt im `create()`-Call über `items: […]` oder `withItem()` mitgegeben werden — sie landen unter `recurring-items.recurring-item` im Payload.
 
 ```php
 use Justpilot\Billomat\Api\RecurringCreateOptions;
@@ -91,29 +91,30 @@ use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 
-$opts = new RecurringCreateOptions(clientId: 12345);
-$opts->name = 'Hosting Basic';
-$opts->cycle = RecurringCycle::MONTHLY;
-$opts->cycleNumber = 1;
-$opts->action = RecurringAction::EMAIL;
-$opts->startDate = new DateTimeImmutable('2026-07-01');
+$opts = new RecurringCreateOptions(
+    clientId: 12345,
+    name: 'Hosting Basic',
+    cycle: RecurringCycle::MONTHLY,
+    cycleNumber: 1,
+    action: RecurringAction::EMAIL,
+    startDate: new DateTimeImmutable('2026-07-01'),
+);
 
-$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90);
-$item->title = 'Webhosting Basic';
-$opts->addItem($item);
+$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90, title: 'Webhosting Basic');
+$opts = $opts->withItem($item);
 
 $recurring = $billomat->recurrings->create($opts);
 ```
 
 ### `update(int $id, RecurringUpdateOptions $options): Recurring`
 
-Schmaler Subset für Partial-Updates. Positionen sind hier laut Billomat-Doku **nicht** veränderbar — dafür die `$billomat->recurrings->items` nutzen. Die Klasse bietet daher kein `addItem()`.
+Schmaler Subset für Partial-Updates. Positionen sind hier laut Billomat-Doku **nicht** veränderbar — dafür die `$billomat->recurrings->items` nutzen. Die Klasse hat daher kein `items`-Feld.
 
 ### `delete(int $id): void`
 
 ## Write-Modell: `RecurringCreateOptions`
 
-Konstruktor: `new RecurringCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+Konstruktor: `new RecurringCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
 
 ### Identifikation & Stamm
 
@@ -168,17 +169,17 @@ Konstruktor: `new RecurringCreateOptions(int $clientId)` — `clientId` ist Pfli
 
 ### Positionen
 
-Positionen werden nicht über eine Property, sondern über `addItem()` angehängt:
+Positionen werden über den Konstruktor-Parameter `items` (`list<RecurringItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
 
 ```php
-$opts->addItem(new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90));
+$opts = $opts->withItem(new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90));
 ```
 
-`getItems(): list<RecurringItemCreateOptions>` listet die hinzugefügten Positionen. `toArray()` rendert sie in `recurring-items.recurring-item`.
+`toArray()` rendert sie in `recurring-items.recurring-item`.
 
 ## Write-Modell: `RecurringUpdateOptions`
 
-Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls Umhängen auf einen anderen Kunden gewünscht) und ohne Items-Helper. Felder, die nicht gesetzt werden, bleiben unberührt.
+Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls Umhängen auf einen anderen Kunden gewünscht) und ohne `items`. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new RecurringUpdateOptions(note: Clear::Field)`.
 
 ## Read-Modell: `Recurring`
 
@@ -357,18 +358,19 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Abo anlegen — monatlich, automatischer E-Mail-Versand
-$opts = new RecurringCreateOptions(clientId: 12345);
-$opts->name = 'Hosting Basic';
-$opts->title = 'Webhosting-Abo';
-$opts->cycle = RecurringCycle::MONTHLY;
-$opts->cycleNumber = 1;
-$opts->action = RecurringAction::EMAIL;
-$opts->startDate = new DateTimeImmutable('2026-07-01');
-$opts->dueDays = 14;
+$opts = new RecurringCreateOptions(
+    clientId: 12345,
+    name: 'Hosting Basic',
+    title: 'Webhosting-Abo',
+    cycle: RecurringCycle::MONTHLY,
+    cycleNumber: 1,
+    action: RecurringAction::EMAIL,
+    startDate: new DateTimeImmutable('2026-07-01'),
+    dueDays: 14,
+);
 
-$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90);
-$item->title = 'Webhosting Basic';
-$opts->addItem($item);
+$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90, title: 'Webhosting Basic');
+$opts = $opts->withItem($item);
 
 $recurring = $billomat->recurrings->create($opts);
 printf("Abo #%d angelegt, nächster Lauf: %s\n",
@@ -400,8 +402,7 @@ $billomat->recurrings->tags->create(
 
 // 4) Position später anpassen — Preis-Update
 foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
-    $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 24.90);
-    $update->title = $current->title;
+    $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 24.90, title: $current->title);
     $billomat->recurrings->items->update($current->id, $update);
 }
 ```

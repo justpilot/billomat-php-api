@@ -113,10 +113,12 @@ final class IncomingsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new IncomingCreateOptions(supplierId: 42);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->totalGross = 119.0;
-        $opts->totalNet = 100.0;
+        $opts = new IncomingCreateOptions(
+            supplierId: 42,
+            date: new DateTimeImmutable('2026-03-01'),
+            totalGross: 119.0,
+            totalNet: 100.0,
+        );
 
         $created = $api->create($opts);
         self::assertSame(777, $created->id);
@@ -150,8 +152,7 @@ final class IncomingsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new IncomingUpdateOptions();
-        $opts->label = 'Geändert';
+        $opts = new IncomingUpdateOptions(label: 'Geändert');
 
         $updated = $api->update(777, $opts);
         self::assertSame('Geändert', $updated->label);

@@ -63,7 +63,7 @@ Construction wires `BillomatHttpClient` into every `*Api` instance. The transpor
 Every Billomat resource follows the same triad:
 
 1. **`src/Api/{Resource}Api.php`** — extends `AbstractApi`, exposes verbs (`list`, `get`, `create`, `update`, `delete`, plus resource-specific actions like `complete`, `cancel`, `pdf`). Always wraps/unwraps the Billomat response envelope (`{ "clients": { "client": [...] } }` or `{ "client": {...} }`). When listing, Billomat returns either a single object or a list under the inner key — code must normalize via `array_is_list()` check (see `ClientsApi::list`).
-2. **`src/Api/{Resource}CreateOptions.php` / `{Resource}UpdateOptions.php`** — typed write models. Public nullable properties; `toArray()` snake-cases keys to Billomat's wire format and strips nulls with `array_filter`.
+2. **`src/Api/{Resource}CreateOptions.php` / `{Resource}UpdateOptions.php`** — typed write models, `final readonly` with every field as a promoted constructor parameter (named arguments) and a `with*()` wither per field (`clone($this, [...])`). `toArray()` snake-cases keys to Billomat's wire format and strips nulls with `array_filter`; in update options `Clear::Field` is sent as `null` to empty a field. Document positions are the `items:` parameter plus `withItem()`.
 3. **`src/Model/{Resource}.php`** — `final readonly` read model with `fromArray()` hydration and `toArray()` for debug/log output. Snake_case ↔ camelCase mapping lives in `fromArray`/`toArray`.
 
 When adding a new resource, register it as a public readonly property on `BillomatClient` and instantiate it in the constructor.
@@ -113,7 +113,7 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 - `declare(strict_types=1);` at the top of every file.
 - Public `*Api` methods without side effects (`get`, `list*`, `iterateAll`, `pdf`, …) carry `#[NoDiscard]`; write methods don't. In tests, cast intentionally ignored results to `(void)`.
 - Methods without a meaningful result (`delete`, `complete`, `cancel`, `email`, …) return `void`, never an always-`true` bool. Errors are exceptions.
-- Generated `*CreateOptions`/`*UpdateOptions` implement `WriteOptions`.
+- All write options implement `WriteOptions` and are immutable: no property assignment, use named arguments or `with*()`. PHP-CS-Fixer is configured to write `clone($this, [...])` without a space.
 - `new Foo()->bar` needs no parentheses (PHP 8.4+); don't write `(new Foo())->bar`.
 - All API classes are `final`; models are `final readonly`.
 - PSR-4: `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.

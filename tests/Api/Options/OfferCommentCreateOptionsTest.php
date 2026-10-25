@@ -27,8 +27,11 @@ final class OfferCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesActionkeyAsApiString(): void
     {
-        $options = new OfferCommentCreateOptions(offerId: 1, comment: 'x');
-        $options->actionkey = OfferCommentActionKey::COMMENT;
+        $options = new OfferCommentCreateOptions(
+            offerId: 1,
+            comment: 'x',
+            actionkey: OfferCommentActionKey::COMMENT,
+        );
 
         self::assertSame('COMMENT', $options->toArray()['actionkey']);
     }
@@ -36,8 +39,7 @@ final class OfferCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPublicFlag(): void
     {
-        $options = new OfferCommentCreateOptions(offerId: 1, comment: 'x');
-        $options->public = true;
+        $options = new OfferCommentCreateOptions(offerId: 1, comment: 'x', public: true);
 
         self::assertTrue($options->toArray()['public']);
     }

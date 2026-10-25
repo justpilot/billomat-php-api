@@ -111,9 +111,7 @@ final class SuppliersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new SupplierCreateOptions(name: 'Neu');
-        $opts->countryCode = 'DE';
-        $opts->email = 'kontakt@example.com';
+        $opts = new SupplierCreateOptions(name: 'Neu', countryCode: 'DE', email: 'kontakt@example.com');
 
         $created = $api->create($opts);
 
@@ -149,8 +147,7 @@ final class SuppliersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new SupplierUpdateOptions();
-        $opts->name = 'Geändert';
+        $opts = new SupplierUpdateOptions(name: 'Geändert');
 
         $updated = $api->update(777, $opts);
 

@@ -34,10 +34,11 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $faker = $this->faker();
 
         // 1) Wegwerf-Kunden anlegen
-        $options = new ClientCreateOptions();
-        $options->name = 'IntegrationDelete '.$faker->unique()->bothify('##??##');
-        $options->email = $faker->unique()->safeEmail();
-        $options->countryCode = 'DE';
+        $options = new ClientCreateOptions(
+            name: 'IntegrationDelete '.$faker->unique()->bothify('##??##'),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($options);
 

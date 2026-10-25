@@ -94,18 +94,21 @@ Liefert `null` bei 404. Eingebettete `delivery-note-items` und `taxes` werden au
 
 #### `create(DeliveryNoteCreateOptions $options): DeliveryNote`
 
-Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen als `delivery-note-items.delivery-note-item` im Payload. Über `invoiceId` und/oder `confirmationId` lässt sich der Lieferschein an Vorgänger-Dokumente anhängen.
+Positionen können direkt im `create()`-Call über `items: […]` oder `withItem()` mitgegeben werden — sie landen als `delivery-note-items.delivery-note-item` im Payload. Über `invoiceId` und/oder `confirmationId` lässt sich der Lieferschein an Vorgänger-Dokumente anhängen.
 
 ```php
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 
-$opts = new DeliveryNoteCreateOptions(clientId: 12345);
-$opts->invoiceId = 999;
-$opts->date = new DateTimeImmutable('today');
-$opts->title = 'Lieferschein';
-
-$opts->addItem(new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 49.90));
+$opts = new DeliveryNoteCreateOptions(
+    clientId: 12345,
+    invoiceId: 999,
+    date: new DateTimeImmutable('today'),
+    title: 'Lieferschein',
+    items: [
+        new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 49.90),
+    ],
+);
 
 $note = $billomat->deliveryNotes->create($opts);
 ```
@@ -132,7 +135,7 @@ $billomat->deliveryNotes->undo($note->id);     // {clear,cancel} → OPEN
 
 Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge → `ValidationException` (422).
 
-#### `email(int $id, ?DeliveryNoteEmailOptions $options = null): void`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
 Versendet den Lieferschein per E-Mail. Ohne Options nutzt Billomat die Defaults aus dem Account; das PDF wird automatisch angehängt.
 
@@ -201,7 +204,7 @@ $cloud = $billomat->deliveryNotes->tags->cloud();
 
 ## Write-Modell: `DeliveryNoteCreateOptions`
 
-Konstruktor: `new DeliveryNoteCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+Konstruktor: `new DeliveryNoteCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -223,11 +226,11 @@ Anders als bei `OfferCreateOptions`/`ConfirmationCreateOptions` gibt es hier **k
 
 ### Positionen
 
-`addItem(DeliveryNoteItemCreateOptions $item): self` und `getItems(): list<DeliveryNoteItemCreateOptions>`. `toArray()` rendert sie als `delivery-note-items.delivery-note-item`.
+Positionen werden als Liste über den Konstruktor-Parameter `items` übergeben (`items: [new DeliveryNoteItemCreateOptions(…), …]`) und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position. `toArray()` rendert sie als `delivery-note-items.delivery-note-item`.
 
 ## Write-Modell: `DeliveryNoteUpdateOptions`
 
-Spiegelt `DeliveryNoteCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne Items-Helper. Felder, die nicht gesetzt werden, bleiben unberührt.
+Spiegelt `DeliveryNoteCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne `items`. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new DeliveryNoteUpdateOptions(note: Clear::Field)`.
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
@@ -270,9 +273,9 @@ Konstruktor: `new DeliveryNoteItemCreateOptions(float $quantity, float $unitPric
 | `deliveryNoteId` | `delivery_note_id` | `int` (Pflicht) |
 | `name` | `name` | `string` (Pflicht) |
 
-## Write-Modell: `DeliveryNoteEmailOptions`
+## Write-Modell: `EmailOptions`
 
-Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine Pflichtfelder.
+Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions). Keine Pflichtfelder.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -396,7 +399,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
-use Justpilot\Billomat\Api\DeliveryNoteEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -409,17 +412,21 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Lieferschein zu einer bestehenden Rechnung anlegen
-$opts = new DeliveryNoteCreateOptions(clientId: 12345);
-$opts->invoiceId = 999;
-$opts->date = new DateTimeImmutable('today');
-$opts->title = 'Lieferschein';
-$opts->intro = 'Bitte bei Empfang gegenzeichnen.';
+$opts = new DeliveryNoteCreateOptions(
+    clientId: 12345,
+    invoiceId: 999,
+    date: new DateTimeImmutable('today'),
+    title: 'Lieferschein',
+    intro: 'Bitte bei Empfang gegenzeichnen.',
+);
 
-$item = new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 49.90);
-$item->title = 'Hardware-Paket';
-$item->type = InvoiceItemType::PRODUCT;
-$item->unit = 'Stück';
-$opts->addItem($item);
+$item = new DeliveryNoteItemCreateOptions(
+    quantity: 3.0, unitPrice: 49.90,
+    title: 'Hardware-Paket',
+    type: InvoiceItemType::PRODUCT,
+    unit: 'Stück',
+);
+$opts = $opts->withItem($item);
 
 $note = $billomat->deliveryNotes->create($opts);
 printf("Lieferschein #%d angelegt (DRAFT)\n", $note->id);
@@ -439,9 +446,7 @@ printf("Status: %s, Lieferscheinnummer: %s\n",
 );
 
 // 4) PDF an Spedition mailen
-$email = new DeliveryNoteEmailOptions();
-$email->to = ['spedition@example.com'];
-$email->subject = 'Lieferschein {NUMBER}';
+$email = new EmailOptions(to: ['spedition@example.com'], subject: 'Lieferschein {NUMBER}');
 $billomat->deliveryNotes->email($note->id, $email);
 
 // 5) Unterschriebene Empfangsbestätigung hochladen (z. B. vom Mobil-Workflow)

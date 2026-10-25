@@ -154,19 +154,17 @@ $id = $result['id'];
 // After
 use Justpilot\Billomat\Api\ClientCreateOptions;
 
-$options = new ClientCreateOptions();
-$options->name = 'Acme Inc.';
-$options->number = 424242;
-$options->countryCode = 'DE';
+$options = new ClientCreateOptions(name: 'Acme Inc.', number: 424242, countryCode: 'DE');
 
 $client = $billomat->clients->create($options);
 $id = $client->id;
 ```
 
-Some `*CreateOptions` classes (e.g. `InvoiceCreateOptions`, `InvoiceItemCreateOptions`)
-do take required arguments via the constructor — see [README](../README.en.md#quickstart)
+All `*CreateOptions` / `*UpdateOptions` classes are immutable (`final readonly`) and built
+with named constructor arguments; required fields (e.g. `clientId` on `InvoiceCreateOptions`)
+come first. `with*()` methods return a modified copy — see [README](../README.en.md#quickstart)
 and the [examples/](../examples/) folder for the per-resource form. `ClientCreateOptions`
-is the property-only variant because Billomat treats every client field as optional.
+has no required argument because Billomat treats every client field as optional.
 
 ### Update
 
@@ -182,8 +180,7 @@ $billomat->updateClient([
 // After
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 
-$options = new ClientUpdateOptions();
-$options->name = 'Acme GmbH';
+$options = new ClientUpdateOptions(name: 'Acme GmbH');
 
 $billomat->clients->update(12345, $options);
 ```

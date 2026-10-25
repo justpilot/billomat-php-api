@@ -29,10 +29,11 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
 
         $faker = $this->faker();
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
 
@@ -61,15 +62,20 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
         $clientId = $this->ensureClientId();
         $faker = $this->faker();
 
-        $opts = new DeliveryNoteCreateOptions(clientId: $clientId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->title = 'Integrationstest-LS '.date('d.m.Y H:i:s');
+        $opts = new DeliveryNoteCreateOptions(
+            clientId: $clientId,
+            date: new DateTimeImmutable('today'),
+            title: 'Integrationstest-LS '.date('d.m.Y H:i:s'),
+        );
 
-        $item = new DeliveryNoteItemCreateOptions(1.0, $faker->randomFloat(2, 5, 50));
-        $item->title = 'Lieferposition';
-        $item->unit = 'Stück';
+        $item = new DeliveryNoteItemCreateOptions(
+            1.0,
+            $faker->randomFloat(2, 5, 50),
+            unit: 'Stück',
+            title: 'Lieferposition',
+        );
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $note = $billomat->deliveryNotes->create($opts);
 

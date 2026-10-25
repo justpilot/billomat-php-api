@@ -85,8 +85,7 @@ final class DeliveryNoteItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: 0.0);
-        $opts->title = 'Neu';
+        $opts = new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: 0.0, title: 'Neu');
 
         $created = $api->create(123, $opts);
 

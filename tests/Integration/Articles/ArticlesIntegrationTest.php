@@ -37,11 +37,13 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
-        $opts = new ArticleCreateOptions(title: 'Integrationstest-Artikel '.date('His'));
-        $opts->description = 'Auto-Test';
-        $opts->salesPrice = $faker->randomFloat(2, 5, 250);
-        $opts->currencyCode = 'EUR';
-        $opts->unit = 'Stück';
+        $opts = new ArticleCreateOptions(
+            title: 'Integrationstest-Artikel '.date('His'),
+            description: 'Auto-Test',
+            salesPrice: $faker->randomFloat(2, 5, 250),
+            currencyCode: 'EUR',
+            unit: 'Stück',
+        );
 
         $article = $billomat->articles->create($opts);
 
@@ -49,8 +51,7 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($article->title);
 
         // Update
-        $update = new ArticleUpdateOptions();
-        $update->title = $article->title.' (geändert)';
+        $update = new ArticleUpdateOptions(title: $article->title.' (geändert)');
         $updated = $billomat->articles->update($article->id, $update);
 
         self::assertSame($article->id, $updated->id);
@@ -74,9 +75,11 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         // Artikel anlegen
-        $articleOpts = new ArticleCreateOptions(title: 'Tag-Test-Artikel '.date('His'));
-        $articleOpts->salesPrice = 9.99;
-        $articleOpts->unit = 'Stück';
+        $articleOpts = new ArticleCreateOptions(
+            title: 'Tag-Test-Artikel '.date('His'),
+            salesPrice: 9.99,
+            unit: 'Stück',
+        );
         $article = $billomat->articles->create($articleOpts);
 
         try {

@@ -33,9 +33,9 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         if ([] === $clients) {
             $clientOptions = new ClientCreateOptions(
                 name: $faker->company(),
+                countryCode: 'DE',
+                email: $faker->unique()->safeEmail(),
             );
-            $clientOptions->email = $faker->unique()->safeEmail();
-            $clientOptions->countryCode = 'DE';
 
             $createdClient = $billomat->clients->create($clientOptions);
             $clientId = $createdClient->id;
@@ -46,21 +46,23 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         self::assertNotNull($clientId);
 
         // 2) Draft-Rechnung erstellen
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Payment-Integrationstest '.date('d.m.Y H:i:s');
-        $invoiceOpts->label = 'SDK Invoice Payment Test';
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $clientId,
+            title: 'Payment-Integrationstest '.date('d.m.Y H:i:s'),
+            label: 'SDK Invoice Payment Test',
+            currencyCode: 'EUR',
+        );
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
             unitPrice: $faker->randomFloat(2, 20, 200),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Zahlungstest-Position',
+            description: 'Position für Payment-Flow',
         );
-        $item->title = 'Zahlungstest-Position';
-        $item->description = 'Position für Payment-Flow';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
@@ -81,12 +83,12 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         $paymentOpts = new InvoicePaymentCreateOptions(
             invoiceId: $invoiceId,
             amount: $amount,
+            date: new DateTimeImmutable('today'),
+            type: InvoicePaymentType::BANK_TRANSFER,
+            comment: 'Integrationstest Zahlung',
+            transactionPurpose: 'Testzahlung für Invoice #'.$invoiceId,
+            markInvoiceAsPaid: true,
         );
-        $paymentOpts->date = new DateTimeImmutable('today');
-        $paymentOpts->type = InvoicePaymentType::BANK_TRANSFER;
-        $paymentOpts->comment = 'Integrationstest Zahlung';
-        $paymentOpts->transactionPurpose = 'Testzahlung für Invoice #'.$invoiceId;
-        $paymentOpts->markInvoiceAsPaid = true;
 
         $payment = $billomat->invoices->payments->create($paymentOpts);
 

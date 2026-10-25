@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api\Options;
 
-use Justpilot\Billomat\Api\InvoiceEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(InvoiceEmailOptions::class)]
-final class InvoiceEmailOptionsTest extends TestCase
+#[CoversClass(EmailOptions::class)]
+final class EmailOptionsTest extends TestCase
 {
     #[Test]
     public function emptyOptionsProduceEmptyEnvelope(): void
     {
-        $options = new InvoiceEmailOptions();
+        $options = new EmailOptions();
 
         self::assertSame([], $options->toArray());
     }
@@ -23,10 +23,11 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itWrapsRecipientsInToCcBccBlocks(): void
     {
-        $options = new InvoiceEmailOptions();
-        $options->to = ['kunde@example.com'];
-        $options->cc = ['cc1@example.com', 'cc2@example.com'];
-        $options->bcc = ['archive@example.com'];
+        $options = new EmailOptions(
+            to: ['kunde@example.com'],
+            cc: ['cc1@example.com', 'cc2@example.com'],
+            bcc: ['archive@example.com'],
+        );
 
         $payload = $options->toArray();
 
@@ -43,8 +44,7 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itOmitsEmptyRecipientGroups(): void
     {
-        $options = new InvoiceEmailOptions();
-        $options->to = ['kunde@example.com'];
+        $options = new EmailOptions(to: ['kunde@example.com']);
 
         $payload = $options->toArray();
 
@@ -56,9 +56,7 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itOmitsRecipientsWhenAllGroupsAreEmpty(): void
     {
-        $options = new InvoiceEmailOptions();
-        $options->from = 'info@example.com';
-        $options->subject = 'Test';
+        $options = new EmailOptions(from: 'info@example.com', subject: 'Test');
 
         $payload = $options->toArray();
 
@@ -70,11 +68,12 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itWrapsAttachmentsInAttachmentEnvelope(): void
     {
-        $options = new InvoiceEmailOptions();
-        $options->attachments = [
-            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
-            ['filename' => 'flyer.png', 'mimetype' => 'image/png', 'base64file' => 'WFla'],
-        ];
+        $options = new EmailOptions(
+            attachments: [
+                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+                ['filename' => 'flyer.png', 'mimetype' => 'image/png', 'base64file' => 'WFla'],
+            ],
+        );
 
         $payload = $options->toArray();
 
@@ -88,7 +87,7 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itOmitsAttachmentsKeyWhenEmpty(): void
     {
-        $options = new InvoiceEmailOptions();
+        $options = new EmailOptions();
 
         self::assertArrayNotHasKey('attachments', $options->toArray());
     }
@@ -96,11 +95,12 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itPassesScalarFieldsThrough(): void
     {
-        $options = new InvoiceEmailOptions();
-        $options->from = 'info@example.com';
-        $options->subject = 'Ihre Rechnung';
-        $options->body = 'Anbei die Rechnung.';
-        $options->filename = 'rechnung-001';
+        $options = new EmailOptions(
+            from: 'info@example.com',
+            subject: 'Ihre Rechnung',
+            body: 'Anbei die Rechnung.',
+            filename: 'rechnung-001',
+        );
 
         $payload = $options->toArray();
 
@@ -113,8 +113,7 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itPassesEmailTemplateIdThrough(): void
     {
-        $options = new InvoiceEmailOptions();
-        $options->emailTemplateId = 42;
+        $options = new EmailOptions(emailTemplateId: 42);
 
         $payload = $options->toArray();
 
@@ -124,8 +123,7 @@ final class InvoiceEmailOptionsTest extends TestCase
     #[Test]
     public function itOmitsEmailTemplateIdWhenNull(): void
     {
-        $options = new InvoiceEmailOptions();
-        $options->subject = 'Test';
+        $options = new EmailOptions(subject: 'Test');
 
         self::assertArrayNotHasKey('email_template_id', $options->toArray());
     }

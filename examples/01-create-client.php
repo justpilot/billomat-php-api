@@ -28,14 +28,15 @@ if (!$billomatId || !$apiKey) {
 
 $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
-$opts = new ClientCreateOptions();
-$opts->name = sprintf('Beispiel GmbH %s', date('Ymd-His'));
-$opts->countryCode = 'DE';
-$opts->email = 'kontakt@beispiel.example';
-$opts->salutation = 'Herr';
-$opts->firstName = 'Max';
-$opts->lastName = 'Mustermann';
-$opts->note = 'Angelegt durch examples/01-create-client.php';
+$opts = new ClientCreateOptions(
+    name: sprintf('Beispiel GmbH %s', date('Ymd-His')),
+    countryCode: 'DE',
+    email: 'kontakt@beispiel.example',
+    salutation: 'Herr',
+    firstName: 'Max',
+    lastName: 'Mustermann',
+    note: 'Angelegt durch examples/01-create-client.php',
+);
 
 try {
     $client = $billomat->clients->create($opts);

@@ -42,8 +42,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
             return $existing;
         }
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-PV '.date('His'));
-        $opts->countryCode = 'DE';
+        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-PV '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
         $id = $created->id;
         self::assertNotNull($id);
@@ -57,14 +56,15 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $propOpts = new PropertyCreateOptions(name: 'IT-ArtProp-'.date('His'));
-        $propOpts->type = PropertyType::TEXTFIELD;
+        $propOpts = new PropertyCreateOptions(name: 'IT-ArtProp-'.date('His'), type: PropertyType::TEXTFIELD);
         $prop = $billomat->articles->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
-        $articleOpts = new ArticleCreateOptions(title: 'IT-PV-Artikel '.date('His'));
-        $articleOpts->salesPrice = 9.99;
-        $articleOpts->unit = 'Stück';
+        $articleOpts = new ArticleCreateOptions(
+            title: 'IT-PV-Artikel '.date('His'),
+            salesPrice: 9.99,
+            unit: 'Stück',
+        );
         $article = $billomat->articles->create($articleOpts);
         self::assertNotNull($article->id);
 
@@ -91,13 +91,11 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $propOpts = new PropertyCreateOptions(name: 'IT-CliProp-'.date('His'));
-        $propOpts->type = PropertyType::TEXTFIELD;
+        $propOpts = new PropertyCreateOptions(name: 'IT-CliProp-'.date('His'), type: PropertyType::TEXTFIELD);
         $prop = $billomat->clients->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
-        $clientOpts = new ClientCreateOptions();
-        $clientOpts->name = 'IT-PV-Kunde '.date('His');
+        $clientOpts = new ClientCreateOptions(name: 'IT-PV-Kunde '.date('His'));
         $client = $billomat->clients->create($clientOpts);
         self::assertNotNull($client->id);
 
@@ -125,8 +123,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $propOpts = new PropertyCreateOptions(name: 'IT-SupProp-'.date('His'));
-        $propOpts->type = PropertyType::TEXTFIELD;
+        $propOpts = new PropertyCreateOptions(name: 'IT-SupProp-'.date('His'), type: PropertyType::TEXTFIELD);
         $prop = $billomat->suppliers->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
@@ -154,13 +151,14 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $propOpts = new PropertyCreateOptions(name: 'IT-IncProp-'.date('His'));
-        $propOpts->type = PropertyType::TEXTFIELD;
+        $propOpts = new PropertyCreateOptions(name: 'IT-IncProp-'.date('His'), type: PropertyType::TEXTFIELD);
         $prop = $billomat->incomings->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
-        $incomingOpts = new IncomingCreateOptions(supplierId: $this->ensureSupplierId($billomat));
-        $incomingOpts->incomingNumber = 'IT-IN-PV-'.date('His');
+        $incomingOpts = new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId($billomat),
+            incomingNumber: 'IT-IN-PV-'.date('His'),
+        );
         $incoming = $billomat->incomings->create($incomingOpts);
         self::assertNotNull($incoming->id);
 

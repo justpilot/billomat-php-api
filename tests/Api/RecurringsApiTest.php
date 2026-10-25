@@ -193,13 +193,17 @@ final class RecurringsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
-        $opts = new RecurringCreateOptions(clientId: 5);
-        $opts->name = 'Hosting';
-        $opts->cycle = RecurringCycle::MONTHLY;
-        $opts->cycleNumber = 1;
-        $opts->action = RecurringAction::EMAIL;
-        $opts->startDate = new DateTimeImmutable('2026-07-01');
-        $opts->addItem(new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 100.0));
+        $opts = new RecurringCreateOptions(
+            clientId: 5,
+            name: 'Hosting',
+            action: RecurringAction::EMAIL,
+            cycleNumber: 1,
+            cycle: RecurringCycle::MONTHLY,
+            startDate: new DateTimeImmutable('2026-07-01'),
+            items: [
+                new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 100.0),
+            ],
+        );
 
         $recurring = $api->create($opts);
 
@@ -242,8 +246,7 @@ final class RecurringsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
-        $opts = new RecurringUpdateOptions();
-        $opts->name = 'Hosting Updated';
+        $opts = new RecurringUpdateOptions(name: 'Hosting Updated');
 
         $recurring = $api->update(42, $opts);
 

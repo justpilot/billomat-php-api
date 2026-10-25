@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/article-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ArticleTagCreateOptions implements WriteOptions
+final readonly class ArticleTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -31,6 +31,18 @@ final class ArticleTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
+    }
+
+    /** Kopie mit geändertem `articleId`. */
+    public function withArticleId(int $articleId): self
+    {
+        return clone($this, ['articleId' => $articleId]);
+    }
+
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
     }
 
     /**

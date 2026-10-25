@@ -14,36 +14,50 @@ namespace Justpilot\Billomat\Api;
  * Hinweise:
  * - Diese Aktion ist kostenpflichtig (Pixelletter-Versand).
  */
-final class InvoiceMailOptions
+final readonly class InvoiceMailOptions implements WriteOptions
 {
     /**
-     * Farbiger Druck?
-     *
-     * Billomat-Feld: color
+     * @param bool|null                                                           $color       farbiger Druck? (`color`)
+     * @param bool|null                                                           $duplex      doppelseitiger Druck? (`duplex`)
+     * @param string|null                                                         $paperWeight Papiergewicht in g/m² (z. B. "80", "90"; `paper_weight`)
+     * @param list<array{filename: string, mimetype: string, base64file: string}> $attachments zusätzliche PDF-Anhänge,
+     *                                                                                         die mit ausgedruckt werden
      */
-    public ?bool $color = null;
+    public function __construct(
+        public ?bool $color = null,
+        public ?bool $duplex = null,
+        public ?string $paperWeight = null,
+        public array $attachments = [],
+    ) {
+    }
+
+    /** Kopie mit geändertem `color`. */
+    public function withColor(?bool $color): self
+    {
+        return clone($this, ['color' => $color]);
+    }
+
+    /** Kopie mit geändertem `duplex`. */
+    public function withDuplex(?bool $duplex): self
+    {
+        return clone($this, ['duplex' => $duplex]);
+    }
+
+    /** Kopie mit geändertem `paperWeight`. */
+    public function withPaperWeight(?string $paperWeight): self
+    {
+        return clone($this, ['paperWeight' => $paperWeight]);
+    }
 
     /**
-     * Doppelseitiger Druck?
+     * Kopie mit geänderten Anhängen.
      *
-     * Billomat-Feld: duplex
+     * @param list<array{filename: string, mimetype: string, base64file: string}> $attachments
      */
-    public ?bool $duplex = null;
-
-    /**
-     * Papiergewicht in g/m² (z. B. "80", "90").
-     *
-     * Billomat-Feld: paper_weight
-     */
-    public ?string $paperWeight = null;
-
-    /**
-     * Zusätzliche PDF-Anhänge, die mit ausgedruckt werden. Jeder Eintrag muss
-     * die Schlüssel `filename`, `mimetype` und `base64file` enthalten.
-     *
-     * @var list<array{filename: string, mimetype: string, base64file: string}>
-     */
-    public array $attachments = [];
+    public function withAttachments(array $attachments): self
+    {
+        return clone($this, ['attachments' => $attachments]);
+    }
 
     /**
      * @return array<string,mixed>

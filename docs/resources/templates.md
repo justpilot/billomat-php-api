@@ -51,17 +51,21 @@ use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Enum\TemplateFormat;
 
 // DEFINED (Editor-Vorlage)
-$defined = new TemplateCreateOptions(TemplateDocumentType::INVOICE);
-$defined->name = 'Standard-Rechnung';
-$defined->isDefault = true;
+$defined = new TemplateCreateOptions(
+    TemplateDocumentType::INVOICE,
+    name: 'Standard-Rechnung',
+    isDefault: true,
+);
 
 $billomat->templates->create($defined);
 
 // UPLOADED (eigene DOCX-Datei)
-$uploaded = new TemplateCreateOptions(TemplateDocumentType::OFFER);
-$uploaded->name = 'Angebot 2026';
-$uploaded->format = TemplateFormat::DOCX;
-$uploaded->base64file = base64_encode(file_get_contents('/path/to/template.docx'));
+$uploaded = new TemplateCreateOptions(
+    TemplateDocumentType::OFFER,
+    name: 'Angebot 2026',
+    format: TemplateFormat::DOCX,
+    base64file: base64_encode(file_get_contents('/path/to/template.docx')),
+);
 
 $billomat->templates->create($uploaded);
 ```
@@ -87,7 +91,7 @@ file_put_contents('preview.png', $png);
 
 ## Write-Modell: `TemplateCreateOptions`
 
-Konstruktor: `new TemplateCreateOptions(TemplateDocumentType $type)`.
+Konstruktor: `new TemplateCreateOptions(TemplateDocumentType $type, …)` — `type` ist Pflicht und erster Parameter, alle weiteren Felder sind benannte Argumente. Das Objekt ist `final readonly`; `with*()`-Methoden (z. B. `$opts->withName('Neu')`) liefern eine geänderte Kopie.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -100,6 +104,8 @@ Konstruktor: `new TemplateCreateOptions(TemplateDocumentType $type)`.
 `toArray()` filtert `null` heraus.
 
 ## Write-Modell: `TemplateUpdateOptions`
+
+`null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert.
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
@@ -170,16 +176,17 @@ foreach ($billomat->templates->list() as $tpl) {
 }
 
 // Eigene DOCX-Vorlage hochladen
-$opts = new TemplateCreateOptions(TemplateDocumentType::INVOICE);
-$opts->name = 'Mein Briefkopf 2026';
-$opts->format = TemplateFormat::DOCX;
-$opts->base64file = base64_encode(file_get_contents('/path/to/invoice-template.docx'));
+$opts = new TemplateCreateOptions(
+    TemplateDocumentType::INVOICE,
+    name: 'Mein Briefkopf 2026',
+    format: TemplateFormat::DOCX,
+    base64file: base64_encode(file_get_contents('/path/to/invoice-template.docx')),
+);
 
 $created = $billomat->templates->create($opts);
 
 // Als Default markieren
-$update = new TemplateUpdateOptions();
-$update->isDefault = true;
+$update = new TemplateUpdateOptions(isDefault: true);
 $billomat->templates->update($created->id, $update);
 
 // Vorschaubild speichern

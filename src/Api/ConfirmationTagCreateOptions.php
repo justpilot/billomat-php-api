@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/confirmation-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ConfirmationTagCreateOptions implements WriteOptions
+final readonly class ConfirmationTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -29,6 +29,18 @@ final class ConfirmationTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
+    }
+
+    /** Kopie mit geändertem `confirmationId`. */
+    public function withConfirmationId(int $confirmationId): self
+    {
+        return clone($this, ['confirmationId' => $confirmationId]);
+    }
+
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
     }
 
     /**

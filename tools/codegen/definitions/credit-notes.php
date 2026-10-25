@@ -30,7 +30,7 @@ return [
             'Typisierter Payload für POST /credit-notes.',
             '',
             'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.',
-            'Positionen lassen sich beim Anlegen über addItem() direkt mitsenden.',
+            'Positionen lassen sich beim Anlegen über `items:` bzw. withItem() direkt mitsenden.',
         ],
     ],
 

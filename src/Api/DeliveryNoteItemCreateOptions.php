@@ -18,7 +18,7 @@ use Justpilot\Billomat\Model\Enum\InvoiceItemType;
  * Generiert aus tools/codegen/definitions/delivery-note-items.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class DeliveryNoteItemCreateOptions implements WriteOptions
+final readonly class DeliveryNoteItemCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -33,82 +33,144 @@ final class DeliveryNoteItemCreateOptions implements WriteOptions
          * Billomat-Feld: unit_price
          */
         public float $unitPrice,
+        /**
+         * ID des Artikels (falls verknüpft).
+         *
+         * Billomat-Feld: article_id
+         */
+        public ?int $articleId = null,
+        /**
+         * Laufende Positionsnummer innerhalb des Dokuments.
+         *
+         * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
+         *
+         * Billomat-Feld: position
+         */
+        public ?int $position = null,
+        /**
+         * Einheit (z. B. "Stück", "Stunde").
+         *
+         * Billomat-Feld: unit
+         */
+        public ?string $unit = null,
+        /**
+         * Steuerbezeichnung (z. B. "MwSt").
+         *
+         * Billomat-Feld: tax_name
+         */
+        public ?string $taxName = null,
+        /**
+         * Steuerrate in Prozent.
+         *
+         * Billomat-Feld: tax_rate
+         */
+        public ?float $taxRate = null,
+        /**
+         * Flag, ob die Steuerrate manuell geändert wurde.
+         *
+         * Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz angewendet werden soll.
+         *
+         * Billomat-Feld: tax_changed_manually
+         */
+        public ?bool $taxChangedManually = null,
+        /**
+         * Titel der Position.
+         *
+         * Billomat-Feld: title
+         */
+        public ?string $title = null,
+        /**
+         * Beschreibung der Position.
+         *
+         * Billomat-Feld: description
+         */
+        public ?string $description = null,
+        /**
+         * Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
+         *
+         * Billomat-Feld: reduction
+         */
+        public ?string $reduction = null,
+        /**
+         * Typ der Position (Produkt/Dienstleistung).
+         *
+         * Billomat-Feld: type
+         */
+        public ?InvoiceItemType $type = null,
     ) {
     }
 
-    /**
-     * ID des Artikels (falls verknüpft).
-     *
-     * Billomat-Feld: article_id
-     */
-    public ?int $articleId = null;
+    /** Kopie mit geändertem `quantity`. */
+    public function withQuantity(float $quantity): self
+    {
+        return clone($this, ['quantity' => $quantity]);
+    }
 
-    /**
-     * Laufende Positionsnummer innerhalb des Dokuments.
-     *
-     * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
-     *
-     * Billomat-Feld: position
-     */
-    public ?int $position = null;
+    /** Kopie mit geändertem `unitPrice`. */
+    public function withUnitPrice(float $unitPrice): self
+    {
+        return clone($this, ['unitPrice' => $unitPrice]);
+    }
 
-    /**
-     * Einheit (z. B. "Stück", "Stunde").
-     *
-     * Billomat-Feld: unit
-     */
-    public ?string $unit = null;
+    /** Kopie mit geändertem `articleId`. */
+    public function withArticleId(?int $articleId): self
+    {
+        return clone($this, ['articleId' => $articleId]);
+    }
 
-    /**
-     * Steuerbezeichnung (z. B. "MwSt").
-     *
-     * Billomat-Feld: tax_name
-     */
-    public ?string $taxName = null;
+    /** Kopie mit geändertem `position`. */
+    public function withPosition(?int $position): self
+    {
+        return clone($this, ['position' => $position]);
+    }
 
-    /**
-     * Steuerrate in Prozent.
-     *
-     * Billomat-Feld: tax_rate
-     */
-    public ?float $taxRate = null;
+    /** Kopie mit geändertem `unit`. */
+    public function withUnit(?string $unit): self
+    {
+        return clone($this, ['unit' => $unit]);
+    }
 
-    /**
-     * Flag, ob die Steuerrate manuell geändert wurde.
-     *
-     * Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz angewendet werden soll.
-     *
-     * Billomat-Feld: tax_changed_manually
-     */
-    public ?bool $taxChangedManually = null;
+    /** Kopie mit geändertem `taxName`. */
+    public function withTaxName(?string $taxName): self
+    {
+        return clone($this, ['taxName' => $taxName]);
+    }
 
-    /**
-     * Titel der Position.
-     *
-     * Billomat-Feld: title
-     */
-    public ?string $title = null;
+    /** Kopie mit geändertem `taxRate`. */
+    public function withTaxRate(?float $taxRate): self
+    {
+        return clone($this, ['taxRate' => $taxRate]);
+    }
 
-    /**
-     * Beschreibung der Position.
-     *
-     * Billomat-Feld: description
-     */
-    public ?string $description = null;
+    /** Kopie mit geändertem `taxChangedManually`. */
+    public function withTaxChangedManually(?bool $taxChangedManually): self
+    {
+        return clone($this, ['taxChangedManually' => $taxChangedManually]);
+    }
 
-    /**
-     * Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
-     *
-     * Billomat-Feld: reduction
-     */
-    public ?string $reduction = null;
+    /** Kopie mit geändertem `title`. */
+    public function withTitle(?string $title): self
+    {
+        return clone($this, ['title' => $title]);
+    }
 
-    /**
-     * Typ der Position (Produkt/Dienstleistung).
-     *
-     * Billomat-Feld: type
-     */
-    public ?InvoiceItemType $type = null;
+    /** Kopie mit geändertem `description`. */
+    public function withDescription(?string $description): self
+    {
+        return clone($this, ['description' => $description]);
+    }
+
+    /** Kopie mit geändertem `reduction`. */
+    public function withReduction(?string $reduction): self
+    {
+        return clone($this, ['reduction' => $reduction]);
+    }
+
+    /** Kopie mit geändertem `type`. */
+    public function withType(?InvoiceItemType $type): self
+    {
+        return clone($this, ['type' => $type]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -117,7 +179,7 @@ final class DeliveryNoteItemCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        $data = [
+        return array_filter([
             'type' => $this->type?->value,
             'article_id' => $this->articleId,
             'title' => $this->title,
@@ -130,9 +192,6 @@ final class DeliveryNoteItemCreateOptions implements WriteOptions
             'tax_changed_manually' => $this->taxChangedManually,
             'reduction' => $this->reduction,
             'position' => $this->position,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

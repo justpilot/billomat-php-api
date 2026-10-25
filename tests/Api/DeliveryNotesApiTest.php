@@ -6,10 +6,10 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
-use Justpilot\Billomat\Api\DeliveryNoteEmailOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\DeliveryNoteUpdateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -34,7 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(DeliveryNotesApi::class)]
 #[CoversClass(DeliveryNoteCreateOptions::class)]
 #[CoversClass(DeliveryNoteUpdateOptions::class)]
-#[CoversClass(DeliveryNoteEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(DeliveryNote::class)]
 #[CoversClass(DeliveryNotePdf::class)]
 #[CoversClass(DeliveryNoteStatus::class)]
@@ -156,13 +156,14 @@ final class DeliveryNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new DeliveryNoteCreateOptions(clientId: 123);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->invoiceId = 99;
+        $opts = new DeliveryNoteCreateOptions(
+            clientId: 123,
+            date: new DateTimeImmutable('2026-03-01'),
+            invoiceId: 99,
+        );
 
-        $item = new DeliveryNoteItemCreateOptions(quantity: 5.0, unitPrice: 0.0);
-        $item->title = 'Lieferung';
-        $opts->addItem($item);
+        $item = new DeliveryNoteItemCreateOptions(quantity: 5.0, unitPrice: 0.0, title: 'Lieferung');
+        $opts = $opts->withItem($item);
 
         $created = $api->create($opts);
 
@@ -196,8 +197,7 @@ final class DeliveryNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new DeliveryNoteUpdateOptions();
-        $opts->title = 'Geändert';
+        $opts = new DeliveryNoteUpdateOptions(title: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
@@ -252,9 +252,7 @@ final class DeliveryNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new DeliveryNoteEmailOptions();
-        $opts->from = 'me@example.com';
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(from: 'me@example.com', to: ['kunde@example.com']);
 
         $api->email(42, $opts);
 

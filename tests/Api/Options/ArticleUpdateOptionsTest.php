@@ -17,9 +17,10 @@ final class ArticleUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesTypeAndPurchasePriceNetGross(): void
     {
-        $options = new ArticleUpdateOptions();
-        $options->type = ArticleType::PRODUCT;
-        $options->purchasePriceNetGross = NetGross::GROSS;
+        $options = new ArticleUpdateOptions(
+            type: ArticleType::PRODUCT,
+            purchasePriceNetGross: NetGross::GROSS,
+        );
 
         $payload = $options->toArray();
 

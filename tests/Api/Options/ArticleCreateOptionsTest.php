@@ -17,9 +17,11 @@ final class ArticleCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesTypeAndPurchasePriceNetGrossAsApiStrings(): void
     {
-        $options = new ArticleCreateOptions(title: 'Beratung');
-        $options->type = ArticleType::SERVICE;
-        $options->purchasePriceNetGross = NetGross::NET;
+        $options = new ArticleCreateOptions(
+            title: 'Beratung',
+            type: ArticleType::SERVICE,
+            purchasePriceNetGross: NetGross::NET,
+        );
 
         $payload = $options->toArray();
 

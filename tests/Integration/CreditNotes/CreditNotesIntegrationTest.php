@@ -29,10 +29,11 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
 
         $faker = $this->faker();
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
 
@@ -61,14 +62,19 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
         $clientId = $this->ensureClientId();
         $faker = $this->faker();
 
-        $opts = new CreditNoteCreateOptions(clientId: $clientId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->title = 'Integrationstest-Gutschrift '.date('d.m.Y H:i:s');
+        $opts = new CreditNoteCreateOptions(
+            clientId: $clientId,
+            date: new DateTimeImmutable('today'),
+            title: 'Integrationstest-Gutschrift '.date('d.m.Y H:i:s'),
+        );
 
-        $item = new CreditNoteItemCreateOptions(1.0, $faker->randomFloat(2, 5, 50));
-        $item->title = 'Korrekturposition';
+        $item = new CreditNoteItemCreateOptions(
+            1.0,
+            $faker->randomFloat(2, 5, 50),
+            title: 'Korrekturposition',
+        );
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $note = $billomat->creditNotes->create($opts);
 

@@ -152,10 +152,12 @@ final class PropertyDefinitionsApiTest extends TestCase
 
         $api = new ClientsApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Neues Feld');
-        $opts->type = PropertyType::TEXTAREA;
-        $opts->position = 5;
-        $opts->isNvl = true;
+        $opts = new PropertyCreateOptions(
+            name: 'Neues Feld',
+            type: PropertyType::TEXTAREA,
+            position: 5,
+            isNvl: true,
+        );
 
         $created = $api->create($opts);
 
@@ -185,8 +187,7 @@ final class PropertyDefinitionsApiTest extends TestCase
 
         $api = new ClientsApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Geändert');
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'Geändert', type: PropertyType::TEXTFIELD);
 
         $updated = $api->update(42, $opts);
 
@@ -252,8 +253,7 @@ final class PropertyDefinitionsApiTest extends TestCase
 
         $api = new IncomingsApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Projekt');
-        $opts->type = PropertyType::CHECKBOX;
+        $opts = new PropertyCreateOptions(name: 'Projekt', type: PropertyType::CHECKBOX);
 
         $created = $api->create($opts);
 
@@ -362,8 +362,7 @@ final class PropertyDefinitionsApiTest extends TestCase
 
         $api = new SuppliersApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'IBAN-Country');
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'IBAN-Country', type: PropertyType::TEXTFIELD);
 
         $created = $api->create($opts);
 

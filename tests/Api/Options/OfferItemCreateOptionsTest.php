@@ -15,8 +15,7 @@ final class OfferItemCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesOptionalFlag(): void
     {
-        $options = new OfferItemCreateOptions(quantity: 1.0, unitPrice: 100.0);
-        $options->optional = 1;
+        $options = new OfferItemCreateOptions(quantity: 1.0, unitPrice: 100.0, optional: 1);
 
         self::assertSame(1, $options->toArray()['optional']);
     }

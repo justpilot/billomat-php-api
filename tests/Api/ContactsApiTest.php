@@ -111,10 +111,12 @@ final class ContactsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ContactCreateOptions(clientId: 42);
-        $opts->firstName = 'Anna';
-        $opts->lastName = 'Beispiel';
-        $opts->email = 'anna@example.com';
+        $opts = new ContactCreateOptions(
+            clientId: 42,
+            firstName: 'Anna',
+            lastName: 'Beispiel',
+            email: 'anna@example.com',
+        );
 
         $created = $api->create($opts);
 
@@ -150,8 +152,7 @@ final class ContactsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ContactUpdateOptions();
-        $opts->label = 'Geändert';
+        $opts = new ContactUpdateOptions(label: 'Geändert');
 
         $updated = $api->update(777, $opts);
 

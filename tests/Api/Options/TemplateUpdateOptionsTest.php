@@ -21,13 +21,11 @@ final class TemplateUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesNameAndIsDefault(): void
     {
-        $options = new TemplateUpdateOptions();
-        $options->name = 'Custom';
-        $options->isDefault = true;
+        $options = new TemplateUpdateOptions(name: 'Custom', isDefault: true);
 
         self::assertSame(['name' => 'Custom', 'is_default' => 1], $options->toArray());
 
-        $options->isDefault = false;
+        $options = $options->withIsDefault(false);
         self::assertSame(['name' => 'Custom', 'is_default' => 0], $options->toArray());
     }
 }

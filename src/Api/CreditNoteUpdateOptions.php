@@ -19,183 +19,279 @@ use Justpilot\Billomat\Model\Enum\NetGross;
  * Generiert aus tools/codegen/definitions/credit-notes.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class CreditNoteUpdateOptions implements WriteOptions
+final readonly class CreditNoteUpdateOptions implements WriteOptions
 {
-    /**
-     * ID des Kunden.
-     *
-     * Billomat-Feld: client_id
-     * Typ: INT
-     */
-    public ?int $clientId = null;
+    public function __construct(
+        /**
+         * ID des Kunden.
+         *
+         * Billomat-Feld: client_id
+         * Typ: INT
+         */
+        public int|Clear|null $clientId = null,
+        /**
+         * ID des Kontakts.
+         *
+         * Billomat-Feld: contact_id
+         * Typ: INT
+         */
+        public int|Clear|null $contactId = null,
+        /**
+         * Laufende Nummer (ohne Präfix).
+         *
+         * Billomat-Feld: number
+         * Typ: INT
+         */
+        public int|Clear|null $number = null,
+        /**
+         * Präfix der Gutschriftsnummer.
+         *
+         * Billomat-Feld: number_pre
+         * Typ: ALNUM
+         */
+        public string|Clear|null $numberPre = null,
+        /**
+         * Mindestlänge der Gutschriftsnummer (wird mit führenden Nullen aufgefüllt).
+         *
+         * Billomat-Feld: number_length
+         * Typ: INT
+         */
+        public int|Clear|null $numberLength = null,
+        /**
+         * Gutschriftsdatum.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: date
+         * Typ: DATE
+         */
+        public DateTimeImmutable|Clear|null $date = null,
+        /**
+         * Komplette Adresse.
+         *
+         * Billomat-Feld: address
+         * Typ: ALNUM
+         */
+        public string|Clear|null $address = null,
+        /**
+         * Dokumentenüberschrift.
+         *
+         * Billomat-Feld: title
+         * Typ: ALNUM
+         */
+        public string|Clear|null $title = null,
+        /**
+         * Bezeichnung.
+         *
+         * Billomat-Feld: label
+         * Typ: ALNUM
+         */
+        public string|Clear|null $label = null,
+        /**
+         * Einleitungstext.
+         *
+         * Billomat-Feld: intro
+         * Typ: ALNUM
+         */
+        public string|Clear|null $intro = null,
+        /**
+         * Anmerkungstext.
+         *
+         * Billomat-Feld: note
+         * Typ: ALNUM
+         */
+        public string|Clear|null $note = null,
+        /**
+         * Preisbasis (Brutto- oder Netto-Preise).
+         *
+         * Billomat-Feld: net_gross
+         * Typ: ALNUM („NET“, „GROSS“)
+         */
+        public NetGross|Clear|null $netGross = null,
+        /**
+         * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
+         *
+         * Billomat-Feld: reduction
+         * Typ: ALNUM
+         */
+        public string|Clear|null $reduction = null,
+        /**
+         * Währung (ISO-Währungscode).
+         *
+         * Billomat-Feld: currency_code
+         * Typ: ISO-Währungscode
+         */
+        public string|Clear|null $currencyCode = null,
+        /**
+         * Währungskurs (für Umrechnung in die Standard-Währung).
+         *
+         * Billomat-Feld: quote
+         * Typ: FLOAT
+         */
+        public float|Clear|null $quote = null,
+        /**
+         * ID der Quell-Rechnung (Korrekturgutschrift).
+         *
+         * Billomat-Feld: invoice_id
+         * Typ: INT
+         */
+        public int|Clear|null $invoiceId = null,
+        /**
+         * ID des Freitextes zur Belegung von title, label, intro und note.
+         *
+         * Billomat-Feld: free_text_id
+         * Typ: INT
+         */
+        public int|Clear|null $freeTextId = null,
+        /**
+         * ID der Vorlage, mit der die Gutschrift abgeschlossen wird.
+         *
+         * Billomat-Feld: template_id
+         * Typ: INT
+         */
+        public int|Clear|null $templateId = null,
+    ) {
+    }
 
-    /**
-     * ID des Kontakts.
-     *
-     * Billomat-Feld: contact_id
-     * Typ: INT
-     */
-    public ?int $contactId = null;
+    /** Kopie mit geändertem `clientId`. */
+    public function withClientId(int|Clear|null $clientId): self
+    {
+        return clone($this, ['clientId' => $clientId]);
+    }
 
-    /**
-     * Laufende Nummer (ohne Präfix).
-     *
-     * Billomat-Feld: number
-     * Typ: INT
-     */
-    public ?int $number = null;
+    /** Kopie mit geändertem `contactId`. */
+    public function withContactId(int|Clear|null $contactId): self
+    {
+        return clone($this, ['contactId' => $contactId]);
+    }
 
-    /**
-     * Präfix der Gutschriftsnummer.
-     *
-     * Billomat-Feld: number_pre
-     * Typ: ALNUM
-     */
-    public ?string $numberPre = null;
+    /** Kopie mit geändertem `number`. */
+    public function withNumber(int|Clear|null $number): self
+    {
+        return clone($this, ['number' => $number]);
+    }
 
-    /**
-     * Mindestlänge der Gutschriftsnummer (wird mit führenden Nullen aufgefüllt).
-     *
-     * Billomat-Feld: number_length
-     * Typ: INT
-     */
-    public ?int $numberLength = null;
+    /** Kopie mit geändertem `numberPre`. */
+    public function withNumberPre(string|Clear|null $numberPre): self
+    {
+        return clone($this, ['numberPre' => $numberPre]);
+    }
 
-    /**
-     * Gutschriftsdatum.
-     *
-     * Format: YYYY-MM-DD
-     *
-     * Billomat-Feld: date
-     * Typ: DATE
-     */
-    public ?DateTimeImmutable $date = null;
+    /** Kopie mit geändertem `numberLength`. */
+    public function withNumberLength(int|Clear|null $numberLength): self
+    {
+        return clone($this, ['numberLength' => $numberLength]);
+    }
 
-    /**
-     * Komplette Adresse.
-     *
-     * Billomat-Feld: address
-     * Typ: ALNUM
-     */
-    public ?string $address = null;
+    /** Kopie mit geändertem `date`. */
+    public function withDate(DateTimeImmutable|Clear|null $date): self
+    {
+        return clone($this, ['date' => $date]);
+    }
 
-    /**
-     * Dokumentenüberschrift.
-     *
-     * Billomat-Feld: title
-     * Typ: ALNUM
-     */
-    public ?string $title = null;
+    /** Kopie mit geändertem `address`. */
+    public function withAddress(string|Clear|null $address): self
+    {
+        return clone($this, ['address' => $address]);
+    }
 
-    /**
-     * Bezeichnung.
-     *
-     * Billomat-Feld: label
-     * Typ: ALNUM
-     */
-    public ?string $label = null;
+    /** Kopie mit geändertem `title`. */
+    public function withTitle(string|Clear|null $title): self
+    {
+        return clone($this, ['title' => $title]);
+    }
 
-    /**
-     * Einleitungstext.
-     *
-     * Billomat-Feld: intro
-     * Typ: ALNUM
-     */
-    public ?string $intro = null;
+    /** Kopie mit geändertem `label`. */
+    public function withLabel(string|Clear|null $label): self
+    {
+        return clone($this, ['label' => $label]);
+    }
 
-    /**
-     * Anmerkungstext.
-     *
-     * Billomat-Feld: note
-     * Typ: ALNUM
-     */
-    public ?string $note = null;
+    /** Kopie mit geändertem `intro`. */
+    public function withIntro(string|Clear|null $intro): self
+    {
+        return clone($this, ['intro' => $intro]);
+    }
 
-    /**
-     * Preisbasis (Brutto- oder Netto-Preise).
-     *
-     * Billomat-Feld: net_gross
-     * Typ: ALNUM („NET“, „GROSS“)
-     */
-    public ?NetGross $netGross = null;
+    /** Kopie mit geändertem `note`. */
+    public function withNote(string|Clear|null $note): self
+    {
+        return clone($this, ['note' => $note]);
+    }
 
-    /**
-     * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
-     *
-     * Billomat-Feld: reduction
-     * Typ: ALNUM
-     */
-    public ?string $reduction = null;
+    /** Kopie mit geändertem `netGross`. */
+    public function withNetGross(NetGross|Clear|null $netGross): self
+    {
+        return clone($this, ['netGross' => $netGross]);
+    }
 
-    /**
-     * Währung (ISO-Währungscode).
-     *
-     * Billomat-Feld: currency_code
-     * Typ: ISO-Währungscode
-     */
-    public ?string $currencyCode = null;
+    /** Kopie mit geändertem `reduction`. */
+    public function withReduction(string|Clear|null $reduction): self
+    {
+        return clone($this, ['reduction' => $reduction]);
+    }
 
-    /**
-     * Währungskurs (für Umrechnung in die Standard-Währung).
-     *
-     * Billomat-Feld: quote
-     * Typ: FLOAT
-     */
-    public ?float $quote = null;
+    /** Kopie mit geändertem `currencyCode`. */
+    public function withCurrencyCode(string|Clear|null $currencyCode): self
+    {
+        return clone($this, ['currencyCode' => $currencyCode]);
+    }
 
-    /**
-     * ID der Quell-Rechnung (Korrekturgutschrift).
-     *
-     * Billomat-Feld: invoice_id
-     * Typ: INT
-     */
-    public ?int $invoiceId = null;
+    /** Kopie mit geändertem `quote`. */
+    public function withQuote(float|Clear|null $quote): self
+    {
+        return clone($this, ['quote' => $quote]);
+    }
 
-    /**
-     * ID des Freitextes zur Belegung von title, label, intro und note.
-     *
-     * Billomat-Feld: free_text_id
-     * Typ: INT
-     */
-    public ?int $freeTextId = null;
+    /** Kopie mit geändertem `invoiceId`. */
+    public function withInvoiceId(int|Clear|null $invoiceId): self
+    {
+        return clone($this, ['invoiceId' => $invoiceId]);
+    }
 
-    /**
-     * ID der Vorlage, mit der die Gutschrift abgeschlossen wird.
-     *
-     * Billomat-Feld: template_id
-     * Typ: INT
-     */
-    public ?int $templateId = null;
+    /** Kopie mit geändertem `freeTextId`. */
+    public function withFreeTextId(int|Clear|null $freeTextId): self
+    {
+        return clone($this, ['freeTextId' => $freeTextId]);
+    }
+
+    /** Kopie mit geändertem `templateId`. */
+    public function withTemplateId(int|Clear|null $templateId): self
+    {
+        return clone($this, ['templateId' => $templateId]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
+     *
+     * Nicht gesetzte Felder (null) fehlen im Payload, {@see Clear::Field} wird als null gesendet und leert das Feld.
      *
      * @return array<string,mixed>
      */
     public function toArray(): array
     {
-        $data = [
-            'client_id' => $this->clientId,
-            'contact_id' => $this->contactId,
-            'address' => $this->address,
-            'number_pre' => $this->numberPre,
-            'number' => $this->number,
-            'number_length' => $this->numberLength,
-            'date' => $this->date?->format('Y-m-d'),
-            'title' => $this->title,
-            'label' => $this->label,
-            'intro' => $this->intro,
-            'note' => $this->note,
-            'reduction' => $this->reduction,
-            'net_gross' => $this->netGross?->value,
-            'currency_code' => $this->currencyCode,
-            'quote' => $this->quote,
-            'invoice_id' => $this->invoiceId,
-            'free_text_id' => $this->freeTextId,
-            'template_id' => $this->templateId,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        return array_map(
+            static fn (mixed $v): mixed => $v instanceof Clear ? null : $v,
+            array_filter([
+                'client_id' => $this->clientId,
+                'contact_id' => $this->contactId,
+                'address' => $this->address,
+                'number_pre' => $this->numberPre,
+                'number' => $this->number,
+                'number_length' => $this->numberLength,
+                'date' => $this->date instanceof DateTimeImmutable ? $this->date->format('Y-m-d') : $this->date,
+                'title' => $this->title,
+                'label' => $this->label,
+                'intro' => $this->intro,
+                'note' => $this->note,
+                'reduction' => $this->reduction,
+                'net_gross' => $this->netGross instanceof NetGross ? $this->netGross->value : $this->netGross,
+                'currency_code' => $this->currencyCode,
+                'quote' => $this->quote,
+                'invoice_id' => $this->invoiceId,
+                'free_text_id' => $this->freeTextId,
+                'template_id' => $this->templateId,
+            ], static fn (mixed $v): bool => null !== $v),
+        );
     }
 }

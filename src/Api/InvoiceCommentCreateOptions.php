@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
  * Generiert aus tools/codegen/definitions/invoice-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class InvoiceCommentCreateOptions implements WriteOptions
+final readonly class InvoiceCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -34,27 +34,49 @@ final class InvoiceCommentCreateOptions implements WriteOptions
          * Typ: ALNUM
          */
         public string $comment,
+        /**
+         * ActionKey als Enum, sofern bekannt.
+         *
+         * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
+         * bei system-getriebenen Kommentaren selbst.
+         *
+         * Billomat-Feld: actionkey
+         */
+        public ?InvoiceCommentActionKey $actionkey = null,
+        /**
+         * Sichtbarkeit für die Aktivitäten-Liste des Kunden.
+         *
+         * Billomat-Feld: public
+         * Typ: BOOL
+         * Default: 0
+         */
+        public ?bool $public = null,
     ) {
     }
 
-    /**
-     * ActionKey als Enum, sofern bekannt.
-     *
-     * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
-     * bei system-getriebenen Kommentaren selbst.
-     *
-     * Billomat-Feld: actionkey
-     */
-    public ?InvoiceCommentActionKey $actionkey = null;
+    /** Kopie mit geändertem `invoiceId`. */
+    public function withInvoiceId(int $invoiceId): self
+    {
+        return clone($this, ['invoiceId' => $invoiceId]);
+    }
 
-    /**
-     * Sichtbarkeit für die Aktivitäten-Liste des Kunden.
-     *
-     * Billomat-Feld: public
-     * Typ: BOOL
-     * Default: 0
-     */
-    public ?bool $public = null;
+    /** Kopie mit geändertem `comment`. */
+    public function withComment(string $comment): self
+    {
+        return clone($this, ['comment' => $comment]);
+    }
+
+    /** Kopie mit geändertem `actionkey`. */
+    public function withActionkey(?InvoiceCommentActionKey $actionkey): self
+    {
+        return clone($this, ['actionkey' => $actionkey]);
+    }
+
+    /** Kopie mit geändertem `public`. */
+    public function withPublic(?bool $public): self
+    {
+        return clone($this, ['public' => $public]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -63,14 +85,11 @@ final class InvoiceCommentCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        $data = [
+        return array_filter([
             'invoice_id' => $this->invoiceId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
             'public' => $this->public,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

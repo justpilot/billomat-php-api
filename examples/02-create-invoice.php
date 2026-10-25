@@ -34,23 +34,29 @@ $clientId = (int)$clientIdRaw;
 
 $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
-$opts = new InvoiceCreateOptions(clientId: $clientId);
-$opts->title = 'Beispiel-Rechnung ' . date('Y-m-d');
-$opts->date = new DateTimeImmutable('today');
-$opts->dueDays = 14;
-$opts->intro = 'vielen Dank für Ihren Auftrag.';
+$opts = new InvoiceCreateOptions(
+    clientId: $clientId,
+    title: 'Beispiel-Rechnung ' . date('Y-m-d'),
+    date: new DateTimeImmutable('today'),
+    dueDays: 14,
+    intro: 'vielen Dank für Ihren Auftrag.',
+);
 
-$item1 = new InvoiceItemCreateOptions(quantity: 5.0, unitPrice: 19.90);
-$item1->title = 'Demo-Artikel A';
-$item1->type = InvoiceItemType::PRODUCT;
-$item1->unit = 'Stück';
-$opts->addItem($item1);
+$item1 = new InvoiceItemCreateOptions(
+    quantity: 5.0, unitPrice: 19.90,
+    title: 'Demo-Artikel A',
+    type: InvoiceItemType::PRODUCT,
+    unit: 'Stück',
+);
+$opts = $opts->withItem($item1);
 
-$item2 = new InvoiceItemCreateOptions(quantity: 1.5, unitPrice: 95.00);
-$item2->title = 'Demo-Dienstleistung';
-$item2->type = InvoiceItemType::SERVICE;
-$item2->unit = 'Stunde';
-$opts->addItem($item2);
+$item2 = new InvoiceItemCreateOptions(
+    quantity: 1.5, unitPrice: 95.00,
+    title: 'Demo-Dienstleistung',
+    type: InvoiceItemType::SERVICE,
+    unit: 'Stunde',
+);
+$opts = $opts->withItem($item2);
 
 try {
     $invoice = $billomat->invoices->create($opts);

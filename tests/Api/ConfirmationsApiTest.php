@@ -6,10 +6,10 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
-use Justpilot\Billomat\Api\ConfirmationEmailOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ConfirmationUpdateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -34,7 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ConfirmationsApi::class)]
 #[CoversClass(ConfirmationCreateOptions::class)]
 #[CoversClass(ConfirmationUpdateOptions::class)]
-#[CoversClass(ConfirmationEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(Confirmation::class)]
 #[CoversClass(ConfirmationPdf::class)]
 #[CoversClass(ConfirmationStatus::class)]
@@ -160,14 +160,15 @@ final class ConfirmationsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ConfirmationCreateOptions(clientId: 123);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->offerId = 99;
-        $opts->title = 'Bestätigung März';
+        $opts = new ConfirmationCreateOptions(
+            clientId: 123,
+            date: new DateTimeImmutable('2026-03-01'),
+            title: 'Bestätigung März',
+            offerId: 99,
+        );
 
-        $item = new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: 50.0);
-        $item->title = 'Beratung';
-        $opts->addItem($item);
+        $item = new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: 50.0, title: 'Beratung');
+        $opts = $opts->withItem($item);
 
         $created = $api->create($opts);
 
@@ -206,8 +207,7 @@ final class ConfirmationsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ConfirmationUpdateOptions();
-        $opts->title = 'Geändert';
+        $opts = new ConfirmationUpdateOptions(title: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
@@ -287,9 +287,7 @@ final class ConfirmationsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ConfirmationEmailOptions();
-        $opts->from = 'me@example.com';
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(from: 'me@example.com', to: ['kunde@example.com']);
 
         $api->email(42, $opts);
 

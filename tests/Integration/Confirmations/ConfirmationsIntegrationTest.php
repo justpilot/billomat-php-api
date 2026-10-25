@@ -29,10 +29,11 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
 
         $faker = $this->faker();
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
 
@@ -61,17 +62,22 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
         $clientId = $this->ensureClientId();
         $faker = $this->faker();
 
-        $opts = new ConfirmationCreateOptions(clientId: $clientId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'Integrationstest-AB '.date('d.m.Y H:i:s');
+        $opts = new ConfirmationCreateOptions(
+            clientId: $clientId,
+            date: new DateTimeImmutable('today'),
+            title: 'Integrationstest-AB '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        );
 
-        $item = new ConfirmationItemCreateOptions(1.0, $faker->randomFloat(2, 10, 100));
-        $item->title = 'Testposition';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
+        $item = new ConfirmationItemCreateOptions(
+            1.0,
+            $faker->randomFloat(2, 10, 100),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition',
+        );
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $confirmation = $billomat->confirmations->create($opts);
 

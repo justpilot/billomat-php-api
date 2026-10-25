@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
-use Justpilot\Billomat\Api\InvoiceEmailOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
@@ -40,7 +40,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Invoice::class)]
 #[CoversClass(InvoiceGroup::class)]
 #[CoversClass(InvoiceGroupBy::class)]
-#[UsesClass(InvoiceEmailOptions::class)]
+#[UsesClass(EmailOptions::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
 #[UsesClass(InvoiceMailOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -232,25 +232,24 @@ final class InvoicesApiTest extends TestCase
         // --- Build invoice create options ---
         $opts = new InvoiceCreateOptions(
             clientId: 123,
+            date: new DateTimeImmutable('2025-03-01'),
+            title: 'Rechnung März',
+            label: 'Leistungen März 2025',
+            note: 'Vielen Dank für Ihren Auftrag.',
+            currencyCode: 'EUR',
         );
-
-        $opts->date = new DateTimeImmutable('2025-03-01');
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'Rechnung März';
-        $opts->label = 'Leistungen März 2025';
-        $opts->note = 'Vielen Dank für Ihren Auftrag.';
 
         // --- Add a single invoice item ---
         $item = new InvoiceItemCreateOptions(
             quantity: 2.0,
             unitPrice: 100.0,
+            unit: 'Stunde',
+            taxRate: 19.0,
+            title: 'Beratung',
+            description: 'Leistungspaket März',
         );
-        $item->title = 'Beratung';
-        $item->description = 'Leistungspaket März';
-        $item->unit = 'Stunde';
-        $item->taxRate = 19.0;
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         // --- Execute ---
         $created = $api->create($opts);
@@ -657,8 +656,7 @@ final class InvoicesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
-        $opts = new InvoiceUpdateOptions();
-        $opts->date = new DateTimeImmutable('2025-03-10');
+        $opts = new InvoiceUpdateOptions(date: new DateTimeImmutable('2025-03-10'));
 
         $updated = $api->update(777, $opts);
 
@@ -727,17 +725,18 @@ final class InvoicesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new InvoiceEmailOptions();
-        $opts->from = 'me@example.com';
-        $opts->to = ['kunde@example.com'];
-        $opts->cc = ['buchhaltung@example.com'];
-        $opts->bcc = ['archiv@example.com'];
-        $opts->subject = 'Ihre Rechnung';
-        $opts->body = 'Anbei …';
-        $opts->filename = 'rechnung-2026-001';
-        $opts->attachments = [
-            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
-        ];
+        $opts = new EmailOptions(
+            from: 'me@example.com',
+            to: ['kunde@example.com'],
+            cc: ['buchhaltung@example.com'],
+            bcc: ['archiv@example.com'],
+            subject: 'Ihre Rechnung',
+            body: 'Anbei …',
+            filename: 'rechnung-2026-001',
+            attachments: [
+                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+            ],
+        );
 
         $api->email(777, $opts);
         self::assertSame('POST', $captured['method']);
@@ -807,13 +806,14 @@ final class InvoicesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new InvoiceMailOptions();
-        $opts->color = true;
-        $opts->duplex = false;
-        $opts->paperWeight = '90';
-        $opts->attachments = [
-            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
-        ];
+        $opts = new InvoiceMailOptions(
+            color: true,
+            duplex: false,
+            paperWeight: '90',
+            attachments: [
+                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+            ],
+        );
 
         $api->mail(888, $opts);
         self::assertSame('POST', $captured['method']);
@@ -886,23 +886,23 @@ final class InvoicesApiTest extends TestCase
     #[Test]
     public function updateOptionsSerializesAllNewFields(): void
     {
-        $opts = new InvoiceUpdateOptions();
-
-        $opts->clientId = 42;
-        $opts->contactId = 17;
-        $opts->address = "Beispiel GmbH\nMusterstr. 1\n12345 Berlin";
-        $opts->numberPre = 'RE-';
-        $opts->number = 9001;
-        $opts->numberLength = 5;
-        $opts->discountRate = 2.0;
-        $opts->discountDays = 7;
-        $opts->discountDate = new DateTimeImmutable('2026-01-22');
-        $opts->offerId = 1001;
-        $opts->confirmationId = 2002;
-        $opts->recurringId = 3003;
-        $opts->invoiceId = 4004;
-        $opts->freeTextId = 5005;
-        $opts->templateId = 6006;
+        $opts = new InvoiceUpdateOptions(
+            clientId: 42,
+            contactId: 17,
+            number: 9001,
+            numberPre: 'RE-',
+            numberLength: 5,
+            address: "Beispiel GmbH\nMusterstr. 1\n12345 Berlin",
+            discountRate: 2.0,
+            discountDate: new DateTimeImmutable('2026-01-22'),
+            discountDays: 7,
+            invoiceId: 4004,
+            offerId: 1001,
+            confirmationId: 2002,
+            recurringId: 3003,
+            templateId: 6006,
+            freeTextId: 5005,
+        );
 
         $payload = $opts->toArray();
 

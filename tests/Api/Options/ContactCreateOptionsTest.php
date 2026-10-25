@@ -15,9 +15,7 @@ final class ContactCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesNameAndWww(): void
     {
-        $options = new ContactCreateOptions(clientId: 42);
-        $options->name = 'Buchhaltung GmbH';
-        $options->www = 'example.com';
+        $options = new ContactCreateOptions(clientId: 42, name: 'Buchhaltung GmbH', www: 'example.com');
 
         $payload = $options->toArray();
 

@@ -125,8 +125,7 @@ final class UserPropertiesApiTest extends TestCase
 
         $api = new UsersApi($this->client($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Geburtstag');
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'Geburtstag', type: PropertyType::TEXTFIELD);
 
         $created = $api->create($opts);
 
@@ -156,8 +155,7 @@ final class UserPropertiesApiTest extends TestCase
 
         $api = new UsersApi($this->client($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'private Anschrift');
-        $opts->type = PropertyType::TEXTAREA;
+        $opts = new PropertyCreateOptions(name: 'private Anschrift', type: PropertyType::TEXTAREA);
 
         $updated = $api->update(11, $opts);
 

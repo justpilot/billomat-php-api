@@ -1201,12 +1201,6 @@ parameters:
 			path: tests/Integration/Clients/ClientsActionsIntegrationTest.php
 
 		-
-			message: '#^Property Justpilot\\Billomat\\Api\\ClientCreateOptions\:\:\$salutation \(string\|null\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: tests/Integration/Clients/ClientsCreateIntegrationTestCase.php
-
-		-
 			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
 			identifier: staticMethod.dynamicCall
 			count: 2
@@ -1243,12 +1237,6 @@ parameters:
 			path: tests/Integration/Incomings/IncomingsIntegrationTest.php
 
 		-
-			message: '#^Class Justpilot\\Billomat\\Api\\ClientCreateOptions does not have a constructor and must be instantiated without any parameters\.$#'
-			identifier: new.noConstructor
-			count: 1
-			path: tests/Integration/InvoicePayments/InvoicePaymentsIntegrationTest.php
-
-		-
 			message: '#^Dynamic call to static method PHPUnit\\Framework\\Assert\:\:markTestSkipped\(\)\.$#'
 			identifier: staticMethod.dynamicCall
 			count: 5
@@ -1269,12 +1257,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$date on Justpilot\\Billomat\\Model\\Invoice\|null\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
-
-		-
-			message: '#^Class Justpilot\\Billomat\\Api\\ClientCreateOptions does not have a constructor and must be instantiated without any parameters\.$#'
-			identifier: new.noConstructor
 			count: 1
 			path: tests/Integration/Invoices/InvoicesIntegrationTest.php
 

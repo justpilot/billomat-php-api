@@ -15,9 +15,7 @@ final class ContactUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesNameAndWww(): void
     {
-        $options = new ContactUpdateOptions();
-        $options->name = 'Buchhaltung GmbH';
-        $options->www = 'example.com';
+        $options = new ContactUpdateOptions(name: 'Buchhaltung GmbH', www: 'example.com');
 
         $payload = $options->toArray();
 

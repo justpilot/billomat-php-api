@@ -178,7 +178,7 @@ final class LettersApi extends AbstractApi
         $this->putVoid("/letters/{$id}/undo");
     }
 
-    public function email(int $id, ?LetterEmailOptions $options = null): void
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 

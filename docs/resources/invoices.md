@@ -112,19 +112,16 @@ Liefert `null` bei 404.
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 
-$opts = new InvoiceCreateOptions(clientId: 12345);
-$opts->title = 'Webentwicklung Mai 2026';
-$opts->dueDays = 14;
+$opts = new InvoiceCreateOptions(clientId: 12345, title: 'Webentwicklung Mai 2026', dueDays: 14);
 
-$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.0);
-$item->title = 'Konzeption';
-$opts->addItem($item);
+$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.0, title: 'Konzeption');
+$opts = $opts->withItem($item);
 
 $invoice = $billomat->invoices->create($opts);
 // $invoice->status === InvoiceStatus::DRAFT
 ```
 
-Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen unter `invoice-items.invoice-item` im Payload. Alternativ: leere Rechnung anlegen und Positionen separat via `$billomat->invoices->items->create($invoiceId, …)` ergänzen, siehe [Invoice Items](invoice-items.md).
+Positionen können direkt im `create()`-Call über `items: […]` oder `withItem()` mitgegeben werden — sie landen unter `invoice-items.invoice-item` im Payload. Alternativ: leere Rechnung anlegen und Positionen separat via `$billomat->invoices->items->create($invoiceId, …)` ergänzen, siehe [Invoice Items](invoice-items.md).
 
 ### `update(int $id, InvoiceUpdateOptions $options): Invoice`
 
@@ -155,24 +152,25 @@ Nur für `DRAFT`. Anderenfalls antwortet Billomat mit 422 → `ValidationExcepti
 
 Storniert eine bereits abgeschlossene Rechnung oder macht die Stornierung rückgängig.
 
-### `email(int $id, ?InvoiceEmailOptions $options = null): void`
+### `email(int $id, ?EmailOptions $options = null): void`
 
 Versendet die Rechnung als PDF-Anhang per E-Mail. Ohne `$options` zieht Billomat alle Defaults aus dem Account (Absender, Empfänger aus den Kunden-Stammdaten, Betreff/Body aus der Default-Vorlage).
 
 ```php
-use Justpilot\Billomat\Api\InvoiceEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
 // 1) Minimal: Defaults verwenden
 $billomat->invoices->email($invoice->id);
 
 // 2) Mit eigenen Empfängern und individuellem Text
-$opts = new InvoiceEmailOptions();
-$opts->from = 'rechnungen@meinefirma.de';
-$opts->to = ['kunde@example.com'];
-$opts->bcc = ['buchhaltung@meinefirma.de'];
-$opts->subject = 'Ihre Rechnung vom Juni';
-$opts->body = "Sehr geehrte Damen und Herren,\n\nim Anhang Ihre Rechnung.\n";
-$opts->filename = 'rechnung-2026-0042';
+$opts = new EmailOptions(
+    from: 'rechnungen@meinefirma.de',
+    to: ['kunde@example.com'],
+    bcc: ['buchhaltung@meinefirma.de'],
+    subject: 'Ihre Rechnung vom Juni',
+    body: "Sehr geehrte Damen und Herren,\n\nim Anhang Ihre Rechnung.\n",
+    filename: 'rechnung-2026-0042',
+);
 
 $billomat->invoices->email($invoice->id, $opts);
 ```
@@ -189,10 +187,7 @@ Verschickt die Rechnung postalisch über den Pixelletter-Service. **Kostenpflich
 ```php
 use Justpilot\Billomat\Api\InvoiceMailOptions;
 
-$opts = new InvoiceMailOptions();
-$opts->color = true;
-$opts->duplex = true;
-$opts->paperWeight = '90';
+$opts = new InvoiceMailOptions(color: true, duplex: true, paperWeight: '90');
 
 $billomat->invoices->mail($invoice->id, $opts);
 ```
@@ -242,7 +237,7 @@ Ohne `type` liefert Billomat das Standard-PDF.
 
 ## Write-Modell: `InvoiceCreateOptions`
 
-Konstruktor: `new InvoiceCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+Konstruktor: `new InvoiceCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
 
 ### Identifikation & Nummerierung
 
@@ -305,17 +300,17 @@ Konstruktor: `new InvoiceCreateOptions(int $clientId)` — `clientId` ist Pflich
 
 ### Positionen
 
-Positionen werden nicht über eine Property, sondern über `addItem()` angehängt:
+Positionen werden über den Konstruktor-Parameter `items` (`list<InvoiceItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
 
 ```php
-$opts->addItem(new InvoiceItemCreateOptions(quantity: 5.0, unitPrice: 25.0));
+$opts = $opts->withItem(new InvoiceItemCreateOptions(quantity: 5.0, unitPrice: 25.0));
 ```
 
-`getItems(): list<InvoiceItemCreateOptions>` listet die hinzugefügten Positionen. `toArray()` rendert sie in `invoice-items.invoice-item`. Details: [Invoice Items](invoice-items.md).
+`toArray()` rendert sie in `invoice-items.invoice-item`. Details: [Invoice Items](invoice-items.md).
 
 ## Write-Modell: `InvoiceUpdateOptions`
 
-Schmaler Subset für Partial-Updates. Felder, die nicht gesetzt werden, bleiben unberührt. Positionen lassen sich hier **nicht** ändern.
+Schmaler Subset für Partial-Updates, aufgebaut wie `InvoiceCreateOptions` (benannte Konstruktor-Argumente, `with*()`-Methoden). `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new InvoiceUpdateOptions(note: Clear::Field)`. Positionen lassen sich hier **nicht** ändern.
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
@@ -329,9 +324,9 @@ Schmaler Subset für Partial-Updates. Felder, die nicht gesetzt werden, bleiben 
 | `quote` | `quote` | `?float` |
 | `paymentTypes` | `payment_types` | `?string` |
 
-## Write-Modell: `InvoiceEmailOptions`
+## Write-Modell: `EmailOptions`
 
-Payload für `email()`. Alle Felder sind optional — Billomat füllt fehlende Werte aus der gewählten Vorlage oder den Account-Defaults.
+Payload für `email()`. Eine gemeinsame Klasse für alle Dokumenttypen — Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen und Briefe nutzen dieselben Felder. Alle Felder sind optional — Billomat füllt fehlende Werte aus der gewählten Vorlage oder den Account-Defaults.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -349,7 +344,7 @@ Payload für `email()`. Alle Felder sind optional — Billomat füllt fehlende W
 
 ## Write-Modell: `InvoiceMailOptions`
 
-Payload für `mail()` (Pixelletter). Empfängeradresse kommt fix aus der Rechnungsadresse — daher kein `to`-Feld.
+Payload für `mail()` (Pixelletter), wie die übrigen Options `final readonly` mit benannten Konstruktor-Argumenten. Empfängeradresse kommt fix aus der Rechnungsadresse — daher kein `to`-Feld.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -413,7 +408,7 @@ Payload für `mail()` (Pixelletter). Empfängeradresse kommt fix aus der Rechnun
 - **`pdf(rawPdf: true)` umgeht das `getJson()`-Dispatching.** Wenn du den Aufruf in einem Mock-Test einbaust, achte darauf, dass der Mock auch `application/pdf` zurückgibt — der HTTP-Status wird trotzdem auf Fehler geprüft.
 - **`email()` setzt `complete()` voraus.** Bei `DRAFT`-Rechnungen existiert noch kein PDF; Billomat antwortet je nach Konto mit `ValidationException` oder schickt eine leere Mail.
 - **`mail()` ist kostenpflichtig.** Pixelletter rechnet pro Brief ab — Tests besser nur in der Sandbox laufen lassen.
-- **`InvoiceEmailOptions::$from`** muss eine im Billomat-Account verifizierte Absenderadresse sein. Sonst kommt 422 zurück.
+- **`EmailOptions::$from`** muss eine im Billomat-Account verifizierte Absenderadresse sein. Sonst kommt 422 zurück.
 
 ## End-to-End-Beispiel
 
@@ -435,18 +430,18 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Entwurf anlegen
-$opts = new InvoiceCreateOptions(clientId: 12345);
-$opts->title = 'Beratung Juni 2026';
-$opts->date = new DateTimeImmutable('today');
-$opts->dueDays = 14;
+$opts = new InvoiceCreateOptions(
+    clientId: 12345,
+    title: 'Beratung Juni 2026',
+    date: new DateTimeImmutable('today'),
+    dueDays: 14,
+);
 
-$item1 = new InvoiceItemCreateOptions(quantity: 4.0, unitPrice: 120.0);
-$item1->title = 'Workshop';
-$opts->addItem($item1);
+$item1 = new InvoiceItemCreateOptions(quantity: 4.0, unitPrice: 120.0, title: 'Workshop');
+$opts = $opts->withItem($item1);
 
-$item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 85.0);
-$item2->title = 'Nachgespräch';
-$opts->addItem($item2);
+$item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 85.0, title: 'Nachgespräch');
+$opts = $opts->withItem($item2);
 
 $invoice = $billomat->invoices->create($opts);
 printf("Entwurf #%d angelegt, Status %s\n", $invoice->id, $invoice->status?->label());

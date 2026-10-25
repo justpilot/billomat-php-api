@@ -30,10 +30,11 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $faker = $this->faker();
 
-        $clientOptions = new ClientCreateOptions();
-        $clientOptions->name = $faker->company();
-        $clientOptions->email = $faker->unique()->safeEmail();
-        $clientOptions->countryCode = 'DE';
+        $clientOptions = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($clientOptions);
 
@@ -71,22 +72,24 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $today = new DateTimeImmutable('today');
 
-        $opts = new OfferCreateOptions(clientId: $clientId);
-        $opts->date = $today;
-        $opts->validityDays = 14;
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'Integrationstest-Angebot '.date('d.m.Y H:i:s');
-        $opts->label = 'Leistungen Integrationstest';
+        $opts = new OfferCreateOptions(
+            clientId: $clientId,
+            date: $today,
+            validityDays: 14,
+            title: 'Integrationstest-Angebot '.date('d.m.Y H:i:s'),
+            label: 'Leistungen Integrationstest',
+            currencyCode: 'EUR',
+        );
 
         $item = new OfferItemCreateOptions(
             quantity: 1.0,
             unitPrice: $faker->randomFloat(2, 20, 100),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition',
         );
-        $item->title = 'Testposition';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $offer = $billomat->offers->create($opts);
 
@@ -107,22 +110,25 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $faker = $this->faker();
 
         // Create draft
-        $opts = new OfferCreateOptions(clientId: $clientId);
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'Update-Test '.date('d.m.Y H:i:s');
+        $opts = new OfferCreateOptions(
+            clientId: $clientId,
+            title: 'Update-Test '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        );
 
-        $item = new OfferItemCreateOptions(1.0, $faker->randomFloat(2, 10, 50));
-        $item->title = 'Update Test Position';
-        $opts->addItem($item);
+        $item = new OfferItemCreateOptions(
+            1.0,
+            $faker->randomFloat(2, 10, 50),
+            title: 'Update Test Position',
+        );
+        $opts = $opts->withItem($item);
 
         $draft = $billomat->offers->create($opts);
 
         self::assertNotNull($draft->id);
 
         // Update title via PUT
-        $update = new OfferUpdateOptions();
-        $update->title = 'Geänderter Titel';
-        $update->date = new DateTimeImmutable('today');
+        $update = new OfferUpdateOptions(date: new DateTimeImmutable('today'), title: 'Geänderter Titel');
 
         $updated = $billomat->offers->update($draft->id, $update);
 

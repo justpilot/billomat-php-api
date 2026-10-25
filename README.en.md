@@ -74,12 +74,9 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Create a draft invoice
-$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.00);
-$item->title = 'Conception';
+$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.00, title: 'Conception');
 
-$options = new InvoiceCreateOptions(clientId: 12345);
-$options->title = 'Web development May 2026';
-$options->addItem($item);
+$options = new InvoiceCreateOptions(clientId: 12345, title: 'Web development May 2026', items: [$item]);
 
 $invoice = $billomat->invoices->create($options);
 

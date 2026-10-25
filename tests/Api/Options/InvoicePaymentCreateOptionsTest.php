@@ -28,8 +28,7 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function markInvoiceAsPaidIsSerializedAsOneOrZero(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->markInvoiceAsPaid = true;
+        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0, markInvoiceAsPaid: true);
 
         $payload = $options->toArray();
 
@@ -39,8 +38,11 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function itFormatsDateAsIsoLocalDate(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->date = new DateTimeImmutable('2024-06-01T12:34:56');
+        $options = new InvoicePaymentCreateOptions(
+            invoiceId: 1,
+            amount: 1.0,
+            date: new DateTimeImmutable('2024-06-01T12:34:56'),
+        );
 
         $payload = $options->toArray();
 
@@ -50,8 +52,11 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPaymentTypeEnumAsStringValue(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->type = InvoicePaymentType::BANK_TRANSFER;
+        $options = new InvoicePaymentCreateOptions(
+            invoiceId: 1,
+            amount: 1.0,
+            type: InvoicePaymentType::BANK_TRANSFER,
+        );
 
         $payload = $options->toArray();
 
@@ -61,8 +66,7 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function itStripsAllOtherNullFields(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->comment = 'manuell';
+        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0, comment: 'manuell');
 
         $payload = $options->toArray();
 

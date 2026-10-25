@@ -37,23 +37,24 @@ Wirft eine `UnexpectedResponseException`, wenn die API ein unerwartetes Response
 
 ### `update(SettingsUpdateOptions $options): Settings`
 
-Partial-Update. Nur Felder, die in `SettingsUpdateOptions` gesetzt sind, werden gesendet.
+Partial-Update. Nur Felder, die in `SettingsUpdateOptions` nicht `null` sind, werden gesendet.
 
 ```php
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
 use Justpilot\Billomat\Model\Enum\NetGross;
 
-$opts = new SettingsUpdateOptions();
-$opts->dueDays = 21;
-$opts->netGross = NetGross::NET;
-$opts->defaultEmailSender = 'rechnungen@meinefirma.de';
+$opts = new SettingsUpdateOptions(
+    dueDays: 21,
+    netGross: NetGross::NET,
+    defaultEmailSender: 'rechnungen@meinefirma.de',
+);
 
 $updated = $billomat->settings->update($opts);
 ```
 
 ## Write-Modell: `SettingsUpdateOptions`
 
-Nur die wirklich änderbaren Felder sind hier abgebildet — Read-only-Felder wie `*_number_next` fehlen bewusst.
+Nur die wirklich änderbaren Felder sind hier abgebildet — Read-only-Felder wie `*_number_next` fehlen bewusst. Wie alle Write-Modelle ist die Klasse `final readonly`: Felder werden als benannte Konstruktor-Argumente übergeben, `with*()`-Methoden liefern eine geänderte Kopie. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new SettingsUpdateOptions(defaultEmailSender: Clear::Field)`.
 
 ### Kundenportal & Branding
 
@@ -215,11 +216,12 @@ printf("Aktuelle Standard-Fälligkeit: %d Tage\n", $current->dueDays ?? 0);
 printf("Nummernkreismodus: %s\n", $current->numberRangeMode?->value ?? 'unbekannt');
 
 // Ändern
-$opts = new SettingsUpdateOptions();
-$opts->dueDays = 21;
-$opts->netGross = NetGross::NET;
-$opts->numberRangeMode = NumberRangeMode::CONSIDER_PREFIX;
-$opts->defaultEmailSender = 'rechnungen@meinefirma.de';
+$opts = new SettingsUpdateOptions(
+    dueDays: 21,
+    netGross: NetGross::NET,
+    numberRangeMode: NumberRangeMode::CONSIDER_PREFIX,
+    defaultEmailSender: 'rechnungen@meinefirma.de',
+);
 
 $updated = $billomat->settings->update($opts);
 printf("Neue Fälligkeit gespeichert: %d Tage\n", $updated->dueDays ?? 0);

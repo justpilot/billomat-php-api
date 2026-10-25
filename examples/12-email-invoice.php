@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Justpilot\Billomat\Api\InvoiceEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
@@ -57,14 +57,13 @@ try {
     }
 
     // 2) E-Mail-Optionen zusammenstellen
-    $opts = new InvoiceEmailOptions();
-    $opts->to = [$emailTo];
-    if ($emailFrom !== null) {
-        $opts->from = $emailFrom;
-    }
-    $opts->subject = sprintf('Ihre Rechnung %s%d', $invoice->numberPre ?? '', $invoice->number ?? 0);
-    $opts->body = "Sehr geehrte Damen und Herren,\n\nim Anhang Ihre Rechnung. Bei Rückfragen melden Sie sich gerne.\n\nMit freundlichen Grüssen\n";
-    $opts->filename = sprintf('rechnung-%s%d', $invoice->numberPre ?? '', $invoice->number ?? 0);
+    $opts = new EmailOptions(
+        from: $emailFrom,
+        to: [$emailTo],
+        subject: sprintf('Ihre Rechnung %s%d', $invoice->numberPre ?? '', $invoice->number ?? 0),
+        body: "Sehr geehrte Damen und Herren,\n\nim Anhang Ihre Rechnung. Bei Rückfragen melden Sie sich gerne.\n\nMit freundlichen Grüßen\n",
+        filename: sprintf('rechnung-%s%d', $invoice->numberPre ?? '', $invoice->number ?? 0),
+    );
 
     $billomat->invoices->email($invoiceId, $opts);
     printf("E-Mail an %s versendet.\n", $emailTo);

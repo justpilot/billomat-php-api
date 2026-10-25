@@ -46,9 +46,11 @@ final class InvoiceCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesEnumsAsTheirStringValue(): void
     {
-        $options = new InvoiceCreateOptions(clientId: 1);
-        $options->netGross = NetGross::NET;
-        $options->supplyDateType = SupplyDateType::SUPPLY_DATE;
+        $options = new InvoiceCreateOptions(
+            clientId: 1,
+            supplyDateType: SupplyDateType::SUPPLY_DATE,
+            netGross: NetGross::NET,
+        );
 
         $payload = $options->toArray();
 
@@ -59,11 +61,13 @@ final class InvoiceCreateOptionsTest extends TestCase
     #[Test]
     public function itFormatsDatesAsIsoLocalDate(): void
     {
-        $options = new InvoiceCreateOptions(clientId: 1);
-        $options->date = new DateTimeImmutable('2024-05-30T15:42:00');
-        $options->supplyDate = new DateTimeImmutable('2024-05-25');
-        $options->dueDate = new DateTimeImmutable('2024-06-14');
-        $options->discountDate = new DateTimeImmutable('2024-06-07');
+        $options = new InvoiceCreateOptions(
+            clientId: 1,
+            date: new DateTimeImmutable('2024-05-30T15:42:00'),
+            supplyDate: new DateTimeImmutable('2024-05-25'),
+            dueDate: new DateTimeImmutable('2024-06-14'),
+            discountDate: new DateTimeImmutable('2024-06-07'),
+        );
 
         $payload = $options->toArray();
 
@@ -74,25 +78,29 @@ final class InvoiceCreateOptionsTest extends TestCase
     }
 
     #[Test]
-    public function addItemAppendsItemsAndGetItemsReturnsThem(): void
+    public function withItemReturnsCopyWithAppendedItem(): void
     {
         $options = new InvoiceCreateOptions(clientId: 1);
         $item1 = new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: 10.0);
         $item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 20.0);
 
-        $options->addItem($item1)->addItem($item2);
+        $withItems = $options->withItem($item1)->withItem($item2);
 
-        self::assertSame([$item1, $item2], $options->getItems());
+        self::assertSame([$item1, $item2], $withItems->items);
+        self::assertSame([], $options->items);
     }
 
     #[Test]
     public function itEmbedsItemsUnderInvoiceItemsInvoiceItemKey(): void
     {
         $options = new InvoiceCreateOptions(clientId: 1);
-        $item = new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: 49.90);
-        $item->title = 'Beratung';
-        $item->type = InvoiceItemType::SERVICE;
-        $options->addItem($item);
+        $item = new InvoiceItemCreateOptions(
+            quantity: 3.0,
+            unitPrice: 49.90,
+            title: 'Beratung',
+            type: InvoiceItemType::SERVICE,
+        );
+        $options = $options->withItem($item);
 
         $payload = $options->toArray();
 

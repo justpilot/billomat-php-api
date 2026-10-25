@@ -27,8 +27,11 @@ final class CreditNoteCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesActionkeyAsApiString(): void
     {
-        $options = new CreditNoteCommentCreateOptions(creditNoteId: 1, comment: 'x');
-        $options->actionkey = CreditNoteCommentActionKey::COMMENT;
+        $options = new CreditNoteCommentCreateOptions(
+            creditNoteId: 1,
+            comment: 'x',
+            actionkey: CreditNoteCommentActionKey::COMMENT,
+        );
 
         self::assertSame('COMMENT', $options->toArray()['actionkey']);
     }
@@ -36,8 +39,7 @@ final class CreditNoteCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPublicFlag(): void
     {
-        $options = new CreditNoteCommentCreateOptions(creditNoteId: 1, comment: 'x');
-        $options->public = false;
+        $options = new CreditNoteCommentCreateOptions(creditNoteId: 1, comment: 'x', public: false);
 
         self::assertFalse($options->toArray()['public']);
     }

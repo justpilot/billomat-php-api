@@ -86,10 +86,12 @@ Legt eine neue Property-Definition an. Pflicht ist nur `name`.
 use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 
-$opts = new PropertyCreateOptions(name: 'Lieferzeit');
-$opts->type = PropertyType::TEXTFIELD;
-$opts->defaultValue = '3 Werktage';
-$opts->position = 10;
+$opts = new PropertyCreateOptions(
+    name: 'Lieferzeit',
+    type: PropertyType::TEXTFIELD,
+    defaultValue: '3 Werktage',
+    position: 10,
+);
 
 $prop = $billomat->articles->properties->create($opts);
 ```
@@ -99,8 +101,7 @@ $prop = $billomat->articles->properties->create($opts);
 Aktualisiert eine bestehende Definition. Die Options-Klasse ist identisch mit `create()` — gesetzte Felder werden überschrieben, nicht gesetzte (`null`) bleiben unberührt.
 
 ```php
-$opts = new PropertyCreateOptions(name: 'Lieferzeit');
-$opts->defaultValue = '5 Werktage';
+$opts = new PropertyCreateOptions(name: 'Lieferzeit', defaultValue: '5 Werktage');
 
 $billomat->articles->properties->update(42, $opts);
 ```
@@ -115,7 +116,7 @@ $billomat->incomings->properties->delete(42);
 
 ## Write-Modell: `PropertyCreateOptions`
 
-Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch für `update()`. Konstruktor: `new PropertyCreateOptions(string $name)` — `name` ist Pflicht.
+Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch für `update()`. Konstruktor: `new PropertyCreateOptions(string $name, …)` — `name` ist Pflicht und erster Parameter, alle weiteren Felder sind benannte Argumente. Das Objekt ist `final readonly`; `with*()`-Methoden (z. B. `$opts->withName('Neu')`) liefern eine geänderte Kopie.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -212,10 +213,12 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Custom-Field-Definition für Artikel anlegen
-$opts = new PropertyCreateOptions(name: 'Lieferzeit');
-$opts->type = PropertyType::TEXTFIELD;
-$opts->defaultValue = '3 Werktage';
-$opts->position = 10;
+$opts = new PropertyCreateOptions(
+    name: 'Lieferzeit',
+    type: PropertyType::TEXTFIELD,
+    defaultValue: '3 Werktage',
+    position: 10,
+);
 
 $leadTimeDef = $billomat->articles->properties->create($opts);
 printf("Definition #%d angelegt: %s\n", $leadTimeDef->id, $leadTimeDef->name);
@@ -232,16 +235,13 @@ foreach ($billomat->articles->properties->list(['per_page' => 100]) as $def) {
 }
 
 // 3) Default-Wert nachträglich erhöhen
-$update = new PropertyCreateOptions(name: 'Lieferzeit');
-$update->defaultValue = '5 Werktage';
+$update = new PropertyCreateOptions(name: 'Lieferzeit', defaultValue: '5 Werktage');
 $billomat->articles->properties->update($leadTimeDef->id, $update);
 
 // 4) Parallele Definition für Kunden — selbe API-Form, andere Ressource
 $vipFlag = $billomat->clients->properties->create(
     (function (): PropertyCreateOptions {
-        $o = new PropertyCreateOptions(name: 'VIP');
-        $o->type = PropertyType::CHECKBOX;
-        $o->defaultValue = '0';
+        $o = new PropertyCreateOptions(name: 'VIP', type: PropertyType::CHECKBOX, defaultValue: '0');
 
         return $o;
     })(),

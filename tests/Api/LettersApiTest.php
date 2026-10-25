@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\LetterCreateOptions;
-use Justpilot\Billomat\Api\LetterEmailOptions;
 use Justpilot\Billomat\Api\LettersApi;
 use Justpilot\Billomat\Api\LetterUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -32,7 +32,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(LettersApi::class)]
 #[CoversClass(LetterCreateOptions::class)]
 #[CoversClass(LetterUpdateOptions::class)]
-#[CoversClass(LetterEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(Letter::class)]
 #[CoversClass(LetterPdf::class)]
 #[CoversClass(LetterStatus::class)]
@@ -118,9 +118,11 @@ final class LettersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new LetterCreateOptions(clientId: 123);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->subject = 'Info';
+        $opts = new LetterCreateOptions(
+            clientId: 123,
+            date: new DateTimeImmutable('2026-03-01'),
+            subject: 'Info',
+        );
 
         $letter = $api->create($opts);
 
@@ -155,8 +157,7 @@ final class LettersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new LetterUpdateOptions();
-        $opts->subject = 'Geändert';
+        $opts = new LetterUpdateOptions(subject: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
@@ -209,8 +210,7 @@ final class LettersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new LetterEmailOptions();
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(to: ['kunde@example.com']);
 
         $api->email(42, $opts);
 

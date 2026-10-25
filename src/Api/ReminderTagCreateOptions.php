@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/reminder-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ReminderTagCreateOptions implements WriteOptions
+final readonly class ReminderTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -31,6 +31,18 @@ final class ReminderTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
+    }
+
+    /** Kopie mit geändertem `reminderId`. */
+    public function withReminderId(int $reminderId): self
+    {
+        return clone($this, ['reminderId' => $reminderId]);
+    }
+
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
     }
 
     /**

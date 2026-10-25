@@ -25,9 +25,11 @@ final class TemplateCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesFormatEnumAsStringValue(): void
     {
-        $options = new TemplateCreateOptions(TemplateDocumentType::OFFER);
-        $options->format = TemplateFormat::DOCX;
-        $options->base64file = 'BASE64==';
+        $options = new TemplateCreateOptions(
+            TemplateDocumentType::OFFER,
+            format: TemplateFormat::DOCX,
+            base64file: 'BASE64==',
+        );
 
         $payload = $options->toArray();
 
@@ -44,10 +46,10 @@ final class TemplateCreateOptionsTest extends TestCase
         // null → weggelassen
         self::assertArrayNotHasKey('is_default', $options->toArray());
 
-        $options->isDefault = true;
+        $options = $options->withIsDefault(true);
         self::assertSame(1, $options->toArray()['is_default']);
 
-        $options->isDefault = false;
+        $options = $options->withIsDefault(false);
         self::assertSame(0, $options->toArray()['is_default']);
     }
 }

@@ -13,21 +13,18 @@ use PHPUnit\Framework\TestCase;
 final class ClientCreateOptionsTest extends TestCase
 {
     #[Test]
-    public function defaultPayloadContainsOnlyDunningRun(): void
+    public function defaultPayloadIsEmpty(): void
     {
-        // Alle anderen Felder sind null → werden weggefiltert.
-        // dunning_run hat den Default false und bleibt drin.
+        // Alle Felder sind null → werden weggefiltert, auch dunning_run (Billomat-Default greift).
         $options = new ClientCreateOptions();
 
-        self::assertSame(['dunning_run' => false], $options->toArray());
+        self::assertSame([], $options->toArray());
     }
 
     #[Test]
     public function itStripsAllNullFields(): void
     {
-        $options = new ClientCreateOptions();
-        $options->name = 'Acme';
-        $options->email = 'info@example.com';
+        $options = new ClientCreateOptions(name: 'Acme', email: 'info@example.com');
 
         $payload = $options->toArray();
 
@@ -42,8 +39,7 @@ final class ClientCreateOptionsTest extends TestCase
     #[Test]
     public function itKeepsBooleanArchivedFlagEvenWhenFalse(): void
     {
-        $options = new ClientCreateOptions();
-        $options->archived = false;
+        $options = new ClientCreateOptions(archived: false);
 
         self::assertFalse($options->toArray()['archived']);
     }
@@ -51,31 +47,32 @@ final class ClientCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesAllSupportedFields(): void
     {
-        $options = new ClientCreateOptions();
-        $options->name = 'Acme';
-        $options->archived = true;
-        $options->numberPre = 'K-';
-        $options->number = 1;
-        $options->numberLength = 3;
-        $options->street = 'Musterstr. 1';
-        $options->zip = '12345';
-        $options->city = 'Berlin';
-        $options->countryCode = 'DE';
-        $options->clientNumber = 'K-001';
-        $options->firstName = 'Max';
-        $options->lastName = 'Mustermann';
-        $options->email = 'max@example.com';
-        $options->taxRule = 'TAX';
-        $options->netGross = 'NET';
-        $options->currencyCode = 'EUR';
-        $options->bankIban = 'DE89370400440532013000';
-        $options->bankSwift = 'COBADEFFXXX';
-        $options->sepaMandate = 'M-001';
-        $options->sepaMandateDate = '2024-01-01';
-        $options->defaultPaymentTypes = 'BANK_TRANSFER,CASH';
-        $options->reduction = 5.0;
-        $options->dueDays = 14;
-        $options->dunningRun = true;
+        $options = new ClientCreateOptions(
+            name: 'Acme',
+            clientNumber: 'K-001',
+            number: 1,
+            numberPre: 'K-',
+            numberLength: 3,
+            street: 'Musterstr. 1',
+            zip: '12345',
+            city: 'Berlin',
+            countryCode: 'DE',
+            firstName: 'Max',
+            lastName: 'Mustermann',
+            email: 'max@example.com',
+            taxRule: 'TAX',
+            netGross: 'NET',
+            currencyCode: 'EUR',
+            archived: true,
+            dunningRun: true,
+            reduction: 5.0,
+            dueDays: 14,
+            bankSwift: 'COBADEFFXXX',
+            bankIban: 'DE89370400440532013000',
+            sepaMandate: 'M-001',
+            sepaMandateDate: '2024-01-01',
+            defaultPaymentTypes: 'BANK_TRANSFER,CASH',
+        );
 
         $payload = $options->toArray();
 

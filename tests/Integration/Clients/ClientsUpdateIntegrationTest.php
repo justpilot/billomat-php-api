@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\Clients;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\Clear;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -44,8 +45,7 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
         // 3) Update durchführen (minimal-invasiv: note ändern)
         $newNote = \sprintf('SDK integration test update %s', new DateTimeImmutable()->format('c'));
 
-        $opts = new ClientUpdateOptions();
-        $opts->note = $newNote;
+        $opts = new ClientUpdateOptions(note: $newNote);
 
         $updated = $billomat->clients->update($id, $opts);
 
@@ -62,13 +62,8 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
         self::assertSame($newNote, $fetched->note);
 
         // 5) Cleanup: note zurücksetzen (damit wir die Sandbox nicht "zumüllen")
-        $reset = new ClientUpdateOptions();
-        $reset->note = $originalNote;
-
-        // Wenn originalNote null war, setzen wir leer-string, um den Effekt zu demonstrieren.
-        if (null === $originalNote) {
-            $reset->note = '';
-        }
+        // War die Notiz vorher leer, wird sie per Clear::Field wieder geleert.
+        $reset = new ClientUpdateOptions(note: $originalNote ?? Clear::Field);
 
         $afterReset = $billomat->clients->update($id, $reset);
         self::assertSame($id, $afterReset->id);

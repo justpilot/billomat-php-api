@@ -65,10 +65,11 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $this->faker()->company();
-        $opts->email = $this->faker()->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $this->faker()->company(),
+            countryCode: 'DE',
+            email: $this->faker()->unique()->safeEmail(),
+        );
 
         $client = $billomat->clients->create($opts);
         $id = $client->id;
@@ -87,8 +88,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-TagTest '.date('His'));
-        $opts->countryCode = 'DE';
+        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-TagTest '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
         $id = $created->id;
         self::assertNotNull($id);
@@ -98,13 +98,13 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
     private function createDraftInvoiceId(BillomatClient $billomat): int
     {
-        $opts = new InvoiceCreateOptions(clientId: $this->ensureClientId($billomat));
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'IT-TagTest '.date('His');
-        $item = new InvoiceItemCreateOptions(1.0, 10.0);
-        $item->title = 'Pos';
-        $item->unit = 'Stück';
-        $opts->addItem($item);
+        $opts = new InvoiceCreateOptions(
+            clientId: $this->ensureClientId($billomat),
+            title: 'IT-TagTest '.date('His'),
+            currencyCode: 'EUR',
+        );
+        $item = new InvoiceItemCreateOptions(1.0, 10.0, unit: 'Stück', title: 'Pos');
+        $opts = $opts->withItem($item);
 
         $invoice = $billomat->invoices->create($opts);
         self::assertNotNull($invoice->id);
@@ -266,8 +266,10 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $incomingOpts = new IncomingCreateOptions(supplierId: $this->ensureSupplierId($billomat));
-        $incomingOpts->incomingNumber = 'IT-IN-Tag-'.date('His');
+        $incomingOpts = new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId($billomat),
+            incomingNumber: 'IT-IN-Tag-'.date('His'),
+        );
         $incoming = $billomat->incomings->create($incomingOpts);
         self::assertNotNull($incoming->id);
 

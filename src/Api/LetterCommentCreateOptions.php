@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
  * Generiert aus tools/codegen/definitions/letter-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class LetterCommentCreateOptions implements WriteOptions
+final readonly class LetterCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -32,18 +32,35 @@ final class LetterCommentCreateOptions implements WriteOptions
          * Billomat-Feld: comment
          */
         public string $comment,
+        /**
+         * ActionKey als Enum, sofern bekannt.
+         *
+         * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
+         * bei system-getriebenen Kommentaren selbst.
+         *
+         * Billomat-Feld: actionkey
+         */
+        public ?LetterCommentActionKey $actionkey = null,
     ) {
     }
 
-    /**
-     * ActionKey als Enum, sofern bekannt.
-     *
-     * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
-     * bei system-getriebenen Kommentaren selbst.
-     *
-     * Billomat-Feld: actionkey
-     */
-    public ?LetterCommentActionKey $actionkey = null;
+    /** Kopie mit geändertem `letterId`. */
+    public function withLetterId(int $letterId): self
+    {
+        return clone($this, ['letterId' => $letterId]);
+    }
+
+    /** Kopie mit geändertem `comment`. */
+    public function withComment(string $comment): self
+    {
+        return clone($this, ['comment' => $comment]);
+    }
+
+    /** Kopie mit geändertem `actionkey`. */
+    public function withActionkey(?LetterCommentActionKey $actionkey): self
+    {
+        return clone($this, ['actionkey' => $actionkey]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -52,13 +69,10 @@ final class LetterCommentCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        $data = [
+        return array_filter([
             'letter_id' => $this->letterId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

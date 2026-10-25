@@ -86,8 +86,7 @@ final class ConfirmationItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: 50.0);
-        $opts->title = 'Neu';
+        $opts = new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: 50.0, title: 'Neu');
 
         $created = $api->create(123, $opts);
 

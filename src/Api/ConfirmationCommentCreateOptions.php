@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
  * Generiert aus tools/codegen/definitions/confirmation-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ConfirmationCommentCreateOptions implements WriteOptions
+final readonly class ConfirmationCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -32,18 +32,35 @@ final class ConfirmationCommentCreateOptions implements WriteOptions
          * Billomat-Feld: comment
          */
         public string $comment,
+        /**
+         * ActionKey als Enum, sofern bekannt.
+         *
+         * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
+         * bei system-getriebenen Kommentaren selbst.
+         *
+         * Billomat-Feld: actionkey
+         */
+        public ?ConfirmationCommentActionKey $actionkey = null,
     ) {
     }
 
-    /**
-     * ActionKey als Enum, sofern bekannt.
-     *
-     * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
-     * bei system-getriebenen Kommentaren selbst.
-     *
-     * Billomat-Feld: actionkey
-     */
-    public ?ConfirmationCommentActionKey $actionkey = null;
+    /** Kopie mit geändertem `confirmationId`. */
+    public function withConfirmationId(int $confirmationId): self
+    {
+        return clone($this, ['confirmationId' => $confirmationId]);
+    }
+
+    /** Kopie mit geändertem `comment`. */
+    public function withComment(string $comment): self
+    {
+        return clone($this, ['comment' => $comment]);
+    }
+
+    /** Kopie mit geändertem `actionkey`. */
+    public function withActionkey(?ConfirmationCommentActionKey $actionkey): self
+    {
+        return clone($this, ['actionkey' => $actionkey]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -52,13 +69,10 @@ final class ConfirmationCommentCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        $data = [
+        return array_filter([
             'confirmation_id' => $this->confirmationId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

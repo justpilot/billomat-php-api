@@ -26,10 +26,11 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         }
 
         $faker = $this->faker();
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
         self::assertNotNull($created->id);
@@ -58,20 +59,21 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clientId = $this->ensureClientId();
         $faker = $this->faker();
 
-        $opts = new ContactCreateOptions(clientId: $clientId);
-        $opts->firstName = $faker->firstName();
-        $opts->lastName = $faker->lastName();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->phone = $faker->phoneNumber();
-        $opts->countryCode = 'DE';
+        $opts = new ContactCreateOptions(
+            clientId: $clientId,
+            firstName: $faker->firstName(),
+            lastName: $faker->lastName(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+            phone: $faker->phoneNumber(),
+        );
 
         $contact = $billomat->contacts->create($opts);
 
         self::assertNotNull($contact->id);
 
         // Update
-        $update = new ContactUpdateOptions();
-        $update->city = 'Berlin';
+        $update = new ContactUpdateOptions(city: 'Berlin');
         $updated = $billomat->contacts->update($contact->id, $update);
 
         self::assertSame($contact->id, $updated->id);

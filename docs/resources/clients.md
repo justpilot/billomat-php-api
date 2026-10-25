@@ -69,12 +69,13 @@ Legt einen neuen Kunden an. Der Payload wird mit dem Wrapper `{ "client": { … 
 ```php
 use Justpilot\Billomat\Api\ClientCreateOptions;
 
-$opts = new ClientCreateOptions();
-$opts->name = 'Acme GmbH';
-$opts->firstName = 'Max';
-$opts->lastName = 'Mustermann';
-$opts->email = 'max@acme.example';
-$opts->countryCode = 'DE';
+$opts = new ClientCreateOptions(
+    name: 'Acme GmbH',
+    firstName: 'Max',
+    lastName: 'Mustermann',
+    email: 'max@acme.example',
+    countryCode: 'DE',
+);
 
 $client = $billomat->clients->create($opts);
 echo $client->id;
@@ -86,14 +87,12 @@ echo $client->id;
 
 Partial-Update auf einem bestehenden Kunden. Nur Felder, die in `ClientUpdateOptions` gesetzt sind, werden an Billomat geschickt; alle anderen Felder bleiben unangetastet.
 
-Einschränkung laut Billomat: Ein archivierter Kunde lässt sich nicht aktualisieren. Setze ggf. zuerst `archived = false`.
+Einschränkung laut Billomat: Ein archivierter Kunde lässt sich nicht aktualisieren. Setze ggf. zuerst `archived: false`.
 
 ```php
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 
-$opts = new ClientUpdateOptions();
-$opts->name = 'Acme GmbH & Co. KG';
-$opts->email = 'rechnungen@acme.example';
+$opts = new ClientUpdateOptions(name: 'Acme GmbH & Co. KG', email: 'rechnungen@acme.example');
 
 $updated = $billomat->clients->update(12345, $opts);
 ```
@@ -113,7 +112,7 @@ echo 'Eingeloggt als: ' . $me->name;
 
 ## Write-Modell: `ClientCreateOptions`
 
-Public, nullable Properties. `toArray()` filtert `null`-Werte heraus, damit Billomat Defaults aus den Account-Einstellungen ziehen kann.
+Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withName('Neu')`). `toArray()` filtert `null`-Werte heraus, damit Billomat Defaults aus den Account-Einstellungen ziehen kann.
 
 ### Stammdaten
 
@@ -202,11 +201,11 @@ Public, nullable Properties. `toArray()` filtert `null`-Werte heraus, damit Bill
 | `reminderDueDays` | `reminder_due_days` | `?int` |
 | `offerValidityDaysType` | `offer_validity_days_type` | `?string` |
 | `offerValidityDays` | `offer_validity_days` | `?int` |
-| `dunningRun` | `dunning_run` | `bool` (Default `false`) |
+| `dunningRun` | `dunning_run` | `?bool` (nur gesendet, wenn gesetzt; sonst gilt der Billomat-Default) |
 
 ## Write-Modell: `ClientUpdateOptions`
 
-Schmaler Subset für Partial-Updates. Nur Felder, die hier vorhanden und gesetzt sind, fließen in den PUT-Request. Boolean `archived` wird zu `1`/`0` serialisiert.
+Schmaler Subset für Partial-Updates, aufgebaut wie `ClientCreateOptions`. Nur Felder, die hier vorhanden und nicht `null` sind, fließen in den PUT-Request. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird ein Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new ClientUpdateOptions(note: Clear::Field)`. Boolean `archived` wird zu `1`/`0` serialisiert.
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
@@ -332,10 +331,7 @@ $billomat = BillomatClient::create(
 );
 
 // Anlegen
-$create = new ClientCreateOptions();
-$create->name = 'Beispiel GmbH';
-$create->countryCode = 'DE';
-$create->email = 'rechnungen@beispiel.de';
+$create = new ClientCreateOptions(name: 'Beispiel GmbH', countryCode: 'DE', email: 'rechnungen@beispiel.de');
 
 try {
     $client = $billomat->clients->create($create);
@@ -351,8 +347,7 @@ $reloaded = $billomat->clients->get($client->id);
 var_dump($reloaded?->email);
 
 // Aktualisieren
-$update = new ClientUpdateOptions();
-$update->note = 'Erstkontakt: ' . date('Y-m-d');
+$update = new ClientUpdateOptions(note: 'Erstkontakt: ' . date('Y-m-d'));
 $billomat->clients->update($client->id, $update);
 
 // Listen (z. B. nach Anlage)

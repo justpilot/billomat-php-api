@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/taxes.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class TaxRateCreateOptions implements WriteOptions
+final readonly class TaxRateCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -43,6 +43,24 @@ final class TaxRateCreateOptions implements WriteOptions
          */
         public bool $isDefault = false,
     ) {
+    }
+
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
+
+    /** Kopie mit geändertem `rate`. */
+    public function withRate(float $rate): self
+    {
+        return clone($this, ['rate' => $rate]);
+    }
+
+    /** Kopie mit geändertem `isDefault`. */
+    public function withIsDefault(bool $isDefault): self
+    {
+        return clone($this, ['isDefault' => $isDefault]);
     }
 
     /**

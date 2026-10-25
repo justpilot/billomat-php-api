@@ -104,20 +104,24 @@ Liefert `null` bei 404. Eingebettete `credit-note-items` und `taxes` werden auto
 
 #### `create(CreditNoteCreateOptions $options): CreditNote`
 
-Items können direkt im `create()`-Call per `addItem()` mitgegeben werden — sie landen unter `credit-note-items.credit-note-item` im Payload.
+Items können direkt im `create()`-Call über `items: […]` oder `withItem()` mitgegeben werden — sie landen unter `credit-note-items.credit-note-item` im Payload.
 
 ```php
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 
-$opts = new CreditNoteCreateOptions(clientId: 12345);
-$opts->title = 'Korrektur Rechnung 2026-0042';
-$opts->invoiceId = 9876;
-$opts->date = new DateTimeImmutable('2026-06-02');
+$opts = new CreditNoteCreateOptions(
+    clientId: 12345,
+    title: 'Korrektur Rechnung 2026-0042',
+    invoiceId: 9876,
+    date: new DateTimeImmutable('2026-06-02'),
+);
 
-$item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: -19.90);
-$item->title = 'Rückerstattung Hosting (Mai)';
-$opts->addItem($item);
+$item = new CreditNoteItemCreateOptions(
+    quantity: 1.0, unitPrice: -19.90,
+    title: 'Rückerstattung Hosting (Mai)',
+);
+$opts = $opts->withItem($item);
 
 $creditNote = $billomat->creditNotes->create($opts);
 ```
@@ -134,18 +138,19 @@ Status `DRAFT → OPEN`. Optional kann eine konkrete `templateId` für das PDF m
 
 `cancel()` setzt den Status auf `CANCELED`; `uncancel()` kehrt das zurück nach `OPEN`. Beides ist nur an abgeschlossenen Gutschriften sinnvoll.
 
-#### `email(int $id, ?CreditNoteEmailOptions $options = null): void`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
 Ohne Optionen verwendet Billomat alle Default-Werte des Kunden bzw. der hinterlegten E-Mail-Vorlage. Wirft bei fehlender Empfänger-Konfiguration `ValidationException`.
 
 ```php
-use Justpilot\Billomat\Api\CreditNoteEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-$mail = new CreditNoteEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->bcc = ['buchhaltung@meinefirma.de'];
-$mail->subject = 'Ihre Gutschrift';
-$mail->body = 'Anbei die Gutschrift zur Rechnung 2026-0042.';
+$mail = new EmailOptions(
+    to: ['kunde@example.com'],
+    bcc: ['buchhaltung@meinefirma.de'],
+    subject: 'Ihre Gutschrift',
+    body: 'Anbei die Gutschrift zur Rechnung 2026-0042.',
+);
 
 $billomat->creditNotes->email($creditNote->id, $mail);
 ```
@@ -229,11 +234,11 @@ use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 
 $payment = new CreditNotePaymentCreateOptions(
     creditNoteId: $creditNote->id,
-    amount: 19.90,
+        amount: 19.90,
+    type: InvoicePaymentType::BANK_TRANSFER,
+    date: new DateTimeImmutable('2026-06-05'),
+    markCreditNoteAsPaid: true,
 );
-$payment->type = InvoicePaymentType::BANK_TRANSFER;
-$payment->date = new DateTimeImmutable('2026-06-05');
-$payment->markCreditNoteAsPaid = true;
 
 $billomat->creditNotes->payments->create($payment);
 ```
@@ -242,7 +247,7 @@ Erst beim Anlegen einer Auszahlung mit `markCreditNoteAsPaid = true` (Wire-Wert 
 
 ## Write-Modell: `CreditNoteCreateOptions`
 
-Konstruktor: `new CreditNoteCreateOptions(int $clientId)`.
+Konstruktor: `new CreditNoteCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -265,11 +270,11 @@ Konstruktor: `new CreditNoteCreateOptions(int $clientId)`.
 | `freeTextId` | `free_text_id` | `?int` | |
 | `templateId` | `template_id` | `?int` | |
 
-Items werden über `addItem(CreditNoteItemCreateOptions)` angehängt; `getItems()` listet sie auf. `toArray()` rendert sie unter `credit-note-items.credit-note-item`.
+Positionen werden als Liste über den Konstruktor-Parameter `items` übergeben (`items: [new CreditNoteItemCreateOptions(…), …]`) und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position. `toArray()` rendert sie als `credit-note-items.credit-note-item`.
 
 ## Write-Modell: `CreditNoteUpdateOptions`
 
-Spiegelt `CreditNoteCreateOptions` ohne `clientId`-Pflicht (jetzt nullable) und ohne Items-Helper. Felder, die `null` bleiben, werden aus dem Payload gestrippt und damit serverseitig nicht angefasst.
+Spiegelt `CreditNoteCreateOptions` ohne `clientId`-Pflicht (jetzt nullable) und ohne `items`. Felder, die `null` bleiben, werden aus dem Payload gestrippt und damit serverseitig nicht angefasst. Mit `Clear::Field` wird ein Feld dagegen als JSON-`null` gesendet und von Billomat geleert, z. B. `new CreditNoteUpdateOptions(note: Clear::Field)`.
 
 ## Write-Modell: `CreditNoteItemCreateOptions`
 
@@ -321,7 +326,9 @@ Konstruktor: `new CreditNotePaymentCreateOptions(int $creditNoteId, float $amoun
 | `type` | `type` | `?InvoicePaymentType` | dieselbe Enum wie bei Rechnungs-Zahlungen |
 | `markCreditNoteAsPaid` | `mark_credit_note_as_paid` | `bool` | wird **immer** mitgesendet, als `1` oder `0` |
 
-## Write-Modell: `CreditNoteEmailOptions`
+## Write-Modell: `EmailOptions`
+
+Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -465,7 +472,7 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 ## Stolpersteine
 
 - **`update()` nur im DRAFT.** Sobald die Gutschrift abgeschlossen ist, ignoriert Billomat die meisten Felder oder antwortet mit 422. Vor dem Editieren stets `cancel()` → `update()` → `complete()` in Erwägung ziehen.
-- **Items im Update-Payload werden ignoriert.** `CreditNoteUpdateOptions` hat bewusst kein `addItem()`. Positionsänderungen laufen über die `$billomat->creditNotes->items`.
+- **Items im Update-Payload werden ignoriert.** `CreditNoteUpdateOptions` hat bewusst kein `items`-Feld. Positionsänderungen laufen über die `$billomat->creditNotes->items`.
 - **`markCreditNoteAsPaid` ist immer im Payload.** Anders als die anderen Felder wird `mark_credit_note_as_paid` nicht weggefiltert — der Default `false` wird als `0` mitgesendet. Beim Setzen auf `true` flippt der Status auf `PAID`, sobald die Summe der Payments den Bruttobetrag erreicht.
 - **`quantity` und `unitPrice` bleiben im Payload, auch wenn sie `0` sind.** `CreditNoteItemCreateOptions::toArray()` whitelistet sie explizit gegen den `array_filter`.
 - **Negative Beträge bei Items.** Eine Gutschrift gleicht eine Rechnung aus — die Praxis ist, im `unitPrice` einen negativen Wert anzugeben (z. B. `-19.90`). Billomat akzeptiert das ohne Umweg.
@@ -484,7 +491,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
-use Justpilot\Billomat\Api\CreditNoteEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
@@ -497,15 +504,19 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Korrekturgutschrift zur Rechnung 9876 anlegen
-$opts = new CreditNoteCreateOptions(clientId: 12345);
-$opts->invoiceId = 9876;
-$opts->title = 'Korrektur Rechnung 2026-0042';
-$opts->date = new DateTimeImmutable('2026-06-02');
-$opts->intro = 'Wir erstatten Ihnen den anteiligen Hosting-Betrag für Mai.';
+$opts = new CreditNoteCreateOptions(
+    clientId: 12345,
+    invoiceId: 9876,
+    title: 'Korrektur Rechnung 2026-0042',
+    date: new DateTimeImmutable('2026-06-02'),
+    intro: 'Wir erstatten Ihnen den anteiligen Hosting-Betrag für Mai.',
+);
 
-$item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: -19.90);
-$item->title = 'Rückerstattung Webhosting Basic (Mai)';
-$opts->addItem($item);
+$item = new CreditNoteItemCreateOptions(
+    quantity: 1.0, unitPrice: -19.90,
+    title: 'Rückerstattung Webhosting Basic (Mai)',
+);
+$opts = $opts->withItem($item);
 
 $creditNote = $billomat->creditNotes->create($opts);
 printf("Gutschrift #%d angelegt (Status: %s)\n",
@@ -522,22 +533,23 @@ $billomat->creditNotes->tags->create(
 );
 
 // 4) Per E-Mail versenden
-$mail = new CreditNoteEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->bcc = ['buchhaltung@meinefirma.de'];
-$mail->subject = 'Ihre Gutschrift zur Rechnung 2026-0042';
-$mail->body = "Guten Tag,\n\nanbei die Gutschrift.\n\nViele Grüße";
+$mail = new EmailOptions(
+    to: ['kunde@example.com'],
+    bcc: ['buchhaltung@meinefirma.de'],
+    subject: 'Ihre Gutschrift zur Rechnung 2026-0042',
+    body: "Guten Tag,\n\nanbei die Gutschrift.\n\nViele Grüße",
+);
 $billomat->creditNotes->email($creditNote->id, $mail);
 
 // 5) Auszahlung verbuchen — OPEN → PAID
 $payment = new CreditNotePaymentCreateOptions(
     creditNoteId: $creditNote->id,
-    amount: 19.90,
+        amount: 19.90,
+    type: InvoicePaymentType::BANK_TRANSFER,
+    date: new DateTimeImmutable('2026-06-05'),
+    transactionPurpose: 'Erstattung Hosting Mai',
+    markCreditNoteAsPaid: true,
 );
-$payment->type = InvoicePaymentType::BANK_TRANSFER;
-$payment->date = new DateTimeImmutable('2026-06-05');
-$payment->transactionPurpose = 'Erstattung Hosting Mai';
-$payment->markCreditNoteAsPaid = true;
 
 $billomat->creditNotes->payments->create($payment);
 

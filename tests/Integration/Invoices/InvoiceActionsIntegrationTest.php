@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\Invoices;
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
-use Justpilot\Billomat\Api\InvoiceEmailOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -47,28 +47,31 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     {
         $faker = $this->faker();
 
-        $clientOpts = new ClientCreateOptions();
-        $clientOpts->name = 'IntegrationActions '.$faker->unique()->bothify('##??##');
-        $clientOpts->email = $faker->unique()->safeEmail();
-        $clientOpts->countryCode = 'DE';
+        $clientOpts = new ClientCreateOptions(
+            name: 'IntegrationActions '.$faker->unique()->bothify('##??##'),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $client = $billomat->clients->create($clientOpts);
         self::assertNotNull($client->id);
 
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $client->id);
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Action-Integration '.date('d.m.Y H:i:s');
-        $invoiceOpts->label = 'Integrationstest Invoice Action';
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $client->id,
+            title: 'Action-Integration '.date('d.m.Y H:i:s'),
+            label: 'Integrationstest Invoice Action',
+            currencyCode: 'EUR',
+        );
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
             unitPrice: $faker->randomFloat(2, 20, 100),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition Action',
         );
-        $item->title = 'Testposition Action';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
         self::assertNotNull($draft->id);
@@ -104,11 +107,12 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $billomat = $this->createBillomatClientOrSkip();
         $invoiceId = $this->createCompletedInvoice($billomat);
 
-        $opts = new InvoiceEmailOptions();
-        $opts->to = [$recipient];
-        $opts->subject = 'SDK-Integrationstest – Bitte ignorieren';
-        $opts->body = "Automatisierter Integrationstest des justpilot/billomat-php-api SDK.\n\n"
-            .'Diese Mail wurde aus der Sandbox geschickt. Du kannst sie löschen.';
+        $opts = new EmailOptions(
+            to: [$recipient],
+            subject: 'SDK-Integrationstest – Bitte ignorieren',
+            body: "Automatisierter Integrationstest des justpilot/billomat-php-api SDK.\n\n"
+                .'Diese Mail wurde aus der Sandbox geschickt. Du kannst sie löschen.',
+        );
 
         $billomat->invoices->email($invoiceId, $opts);
     }
@@ -163,10 +167,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $billomat = $this->createBillomatClientOrSkip();
         $invoiceId = $this->createCompletedInvoice($billomat);
 
-        $opts = new InvoiceMailOptions();
-        $opts->color = false;
-        $opts->duplex = true;
-        $opts->paperWeight = '80';
+        $opts = new InvoiceMailOptions(color: false, duplex: true, paperWeight: '80');
 
         $billomat->invoices->mail($invoiceId, $opts);
     }

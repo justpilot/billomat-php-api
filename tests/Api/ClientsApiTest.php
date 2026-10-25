@@ -257,15 +257,16 @@ final class ClientsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
-        $opts = new ClientCreateOptions();
-        $opts->name = 'New Client GmbH';
-        $opts->firstName = 'Max';
-        $opts->lastName = 'Mustermann';
-        $opts->salutation = 'Herr';
-        $opts->clientNumber = 'C-100';
-        $opts->email = 'new@example.com';
-        $opts->countryCode = 'DE';
-        $opts->debitorAccountNumber = 4711;
+        $opts = new ClientCreateOptions(
+            name: 'New Client GmbH',
+            clientNumber: 'C-100',
+            countryCode: 'DE',
+            firstName: 'Max',
+            lastName: 'Mustermann',
+            salutation: 'Herr',
+            email: 'new@example.com',
+            debitorAccountNumber: 4711,
+        );
 
         $created = $api->create($opts);
 
@@ -339,8 +340,7 @@ final class ClientsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
-        $opts = new ClientUpdateOptions();
-        $opts->name = 'Die super Musterfirma';
+        $opts = new ClientUpdateOptions(name: 'Die super Musterfirma');
 
         $updated = $api->update(123, $opts);
 
@@ -372,39 +372,36 @@ final class ClientsApiTest extends TestCase
     #[Test]
     public function updateOptionsSerializesAllNewWritableFields(): void
     {
-        $opts = new ClientUpdateOptions();
-
-        $opts->name = 'Beispiel GmbH';
-        $opts->locale = 'de_DE';
-        $opts->taxRule = 'COUNTRY';
-        $opts->netGross = 'NET';
-        $opts->currencyCode = 'EUR';
-        $opts->priceGroup = 2;
-        $opts->dunningRun = true;
-        $opts->clientNumber = 'C-9001';
-        $opts->numberPre = 'KU-';
-        $opts->number = 9001;
-        $opts->numberLength = 5;
-
-        $opts->bankIban = 'DE89370400440532013000';
-        $opts->bankSwift = 'COBADEFFXXX';
-        $opts->bankAccountOwner = 'Max Mustermann';
-
-        $opts->sepaMandate = 'MD-001';
-        $opts->sepaMandateDate = '2026-01-15';
-
-        $opts->defaultPaymentTypes = 'CASH,BANK_TRANSFER';
-        $opts->reduction = 5.0;
-        $opts->discountRateType = 'ABSOLUTE';
-        $opts->discountRate = 2.5;
-        $opts->discountDaysType = 'ABSOLUTE';
-        $opts->discountDays = 7.0;
-        $opts->dueDaysType = 'ABSOLUTE';
-        $opts->dueDays = 14;
-        $opts->reminderDueDaysType = 'SETTINGS';
-        $opts->reminderDueDays = 10;
-        $opts->offerValidityDaysType = 'SETTINGS';
-        $opts->offerValidityDays = 30;
+        $opts = new ClientUpdateOptions(
+            name: 'Beispiel GmbH',
+            clientNumber: 'C-9001',
+            number: 9001,
+            numberPre: 'KU-',
+            numberLength: 5,
+            locale: 'de_DE',
+            taxRule: 'COUNTRY',
+            netGross: 'NET',
+            currencyCode: 'EUR',
+            priceGroup: 2,
+            dunningRun: true,
+            reduction: 5.0,
+            discountRateType: 'ABSOLUTE',
+            discountRate: 2.5,
+            discountDaysType: 'ABSOLUTE',
+            discountDays: 7.0,
+            dueDaysType: 'ABSOLUTE',
+            dueDays: 14,
+            reminderDueDaysType: 'SETTINGS',
+            reminderDueDays: 10,
+            offerValidityDaysType: 'SETTINGS',
+            offerValidityDays: 30,
+            bankAccountOwner: 'Max Mustermann',
+            bankSwift: 'COBADEFFXXX',
+            bankIban: 'DE89370400440532013000',
+            sepaMandate: 'MD-001',
+            sepaMandateDate: '2026-01-15',
+            defaultPaymentTypes: 'CASH,BANK_TRANSFER',
+        );
 
         $payload = $opts->toArray();
 

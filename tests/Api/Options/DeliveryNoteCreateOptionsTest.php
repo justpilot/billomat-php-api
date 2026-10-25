@@ -15,10 +15,12 @@ final class DeliveryNoteCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesOfferIdAlongsideInvoiceAndConfirmation(): void
     {
-        $options = new DeliveryNoteCreateOptions(clientId: 7);
-        $options->offerId = 1001;
-        $options->invoiceId = 2002;
-        $options->confirmationId = 3003;
+        $options = new DeliveryNoteCreateOptions(
+            clientId: 7,
+            invoiceId: 2002,
+            confirmationId: 3003,
+            offerId: 1001,
+        );
 
         $payload = $options->toArray();
 

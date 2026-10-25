@@ -15,11 +15,12 @@ final class IncomingUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesNewSpecFields(): void
     {
-        $options = new IncomingUpdateOptions();
-        $options->number = 'RE-2026-001';
-        $options->category = 'Hosting';
-        $options->clientNumber = 'AC-42';
-        $options->expenseAccountNumber = 4980;
+        $options = new IncomingUpdateOptions(
+            number: 'RE-2026-001',
+            clientNumber: 'AC-42',
+            expenseAccountNumber: 4980,
+            category: 'Hosting',
+        );
 
         $payload = $options->toArray();
 

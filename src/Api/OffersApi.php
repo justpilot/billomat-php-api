@@ -227,7 +227,7 @@ final class OffersApi extends AbstractApi
     }
 
     /** Versendet ein Angebot per E-Mail. */
-    public function email(int $id, ?OfferEmailOptions $options = null): void
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 

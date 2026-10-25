@@ -191,7 +191,7 @@ final class CreditNotesApi extends AbstractApi
         $this->putVoid("/credit-notes/{$id}/uncancel");
     }
 
-    public function email(int $id, ?CreditNoteEmailOptions $options = null): void
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 

@@ -27,8 +27,11 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesActionkeyAsApiString(): void
     {
-        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x');
-        $options->actionkey = InvoiceCommentActionKey::COMMENT;
+        $options = new InvoiceCommentCreateOptions(
+            invoiceId: 1,
+            comment: 'x',
+            actionkey: InvoiceCommentActionKey::COMMENT,
+        );
 
         $payload = $options->toArray();
 
@@ -46,8 +49,7 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPublicFlag(): void
     {
-        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x');
-        $options->public = true;
+        $options = new InvoiceCommentCreateOptions(invoiceId: 1, comment: 'x', public: true);
 
         self::assertTrue($options->toArray()['public']);
     }

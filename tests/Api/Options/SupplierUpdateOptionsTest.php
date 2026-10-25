@@ -15,10 +15,11 @@ final class SupplierUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesBankSwiftClientNumberAndCreditorIdentifier(): void
     {
-        $options = new SupplierUpdateOptions();
-        $options->bankSwift = 'COBADEFFXXX';
-        $options->clientNumber = 'LIEF-001';
-        $options->creditorIdentifier = 'DE98ZZZ09999999999';
+        $options = new SupplierUpdateOptions(
+            clientNumber: 'LIEF-001',
+            bankSwift: 'COBADEFFXXX',
+            creditorIdentifier: 'DE98ZZZ09999999999',
+        );
 
         $payload = $options->toArray();
 

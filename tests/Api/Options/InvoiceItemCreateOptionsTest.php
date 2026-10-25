@@ -30,8 +30,11 @@ final class InvoiceItemCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesTypeEnumAsStringValue(): void
     {
-        $options = new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: 10.0);
-        $options->type = InvoiceItemType::PRODUCT;
+        $options = new InvoiceItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: 10.0,
+            type: InvoiceItemType::PRODUCT,
+        );
 
         $payload = $options->toArray();
 
@@ -41,9 +44,12 @@ final class InvoiceItemCreateOptionsTest extends TestCase
     #[Test]
     public function itStripsAllOtherNullFields(): void
     {
-        $options = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 5.5);
-        $options->title = 'Beratung';
-        $options->position = 3;
+        $options = new InvoiceItemCreateOptions(
+            quantity: 2.0,
+            unitPrice: 5.5,
+            position: 3,
+            title: 'Beratung',
+        );
 
         $payload = $options->toArray();
 
@@ -56,17 +62,20 @@ final class InvoiceItemCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesAllOptionalFields(): void
     {
-        $options = new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: 99.0);
-        $options->type = InvoiceItemType::SERVICE;
-        $options->articleId = 7;
-        $options->title = 'Workshop';
-        $options->description = 'Tagesworkshop';
-        $options->unit = 'Stunde';
-        $options->taxName = 'MwSt';
-        $options->taxRate = 19.0;
-        $options->taxChangedManually = true;
-        $options->reduction = '10%';
-        $options->position = 1;
+        $options = new InvoiceItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: 99.0,
+            articleId: 7,
+            position: 1,
+            unit: 'Stunde',
+            taxName: 'MwSt',
+            taxRate: 19.0,
+            taxChangedManually: true,
+            title: 'Workshop',
+            description: 'Tagesworkshop',
+            reduction: '10%',
+            type: InvoiceItemType::SERVICE,
+        );
 
         $payload = $options->toArray();
 

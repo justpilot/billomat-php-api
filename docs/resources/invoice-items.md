@@ -46,10 +46,12 @@ Hängt eine Position an eine bestehende Rechnung. `invoice_id` wird vom SDK in d
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 
-$item = new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: 49.90);
-$item->title = 'Premium-Support (3 Monate)';
-$item->type = InvoiceItemType::SERVICE;
-$item->unit = 'Monat';
+$item = new InvoiceItemCreateOptions(
+    quantity: 3.0, unitPrice: 49.90,
+    title: 'Premium-Support (3 Monate)',
+    type: InvoiceItemType::SERVICE,
+    unit: 'Monat',
+);
 
 $created = $billomat->invoices->items->create($invoiceId, $item);
 ```
@@ -116,7 +118,7 @@ Konstruktor: `new InvoiceItemCreateOptions(float $quantity, float $unitPrice)`.
 - **Kein separater `UpdateOptions`-Typ.** `update()` verwendet dieselbe Klasse wie `create()`. Praktisch heißt das: der Konstruktor verlangt `quantity` und `unitPrice`, auch wenn du sie nicht ändern willst. Du musst sie also entweder neu setzen oder die alten Werte aus dem Read-Modell übernehmen.
 - **Steuersatz manuell ändern.** Wenn die Position vom Default-Steuersatz des Kunden/Artikels abweichen soll, setze `taxRate` **und** `taxChangedManually = true`. Lässt du das Flag weg, ignoriert Billomat oft den manuellen `taxRate`.
 - **Reihenfolge.** Beim Anlegen ist `position` typischerweise irrelevant — Billomat hängt die Position ans Ende. Beim Update kannst du `position` setzen, um umzusortieren. Andere Positionen werden dabei nicht automatisch verschoben.
-- **Positionen im `create()`-Call der Rechnung.** Wenn du eine Rechnung mit `addItem()` direkt anlegst, sind die Positionen Teil derselben POST-Anfrage — kein zweiter Call nötig. Siehe [Invoices](invoices.md).
+- **Positionen im `create()`-Call der Rechnung.** Wenn du eine Rechnung direkt mit `items: […]` anlegst, sind die Positionen Teil derselben POST-Anfrage — kein zweiter Call nötig. Siehe [Invoices](invoices.md).
 
 ## End-to-End-Beispiel
 
@@ -141,18 +143,22 @@ $billomat = BillomatClient::create(
 $invoice = $billomat->invoices->create(new InvoiceCreateOptions(clientId: 12345));
 
 // Erste Position via Items-API ergänzen
-$first = new InvoiceItemCreateOptions(quantity: 10.0, unitPrice: 12.5);
-$first->title = 'Lizenzgebühr Modul A';
-$first->type = InvoiceItemType::PRODUCT;
-$first->unit = 'Lizenz';
+$first = new InvoiceItemCreateOptions(
+    quantity: 10.0, unitPrice: 12.5,
+    title: 'Lizenzgebühr Modul A',
+    type: InvoiceItemType::PRODUCT,
+    unit: 'Lizenz',
+);
 
 $created = $billomat->invoices->items->create($invoice->id, $first);
 
 // Zweite Position
-$second = new InvoiceItemCreateOptions(quantity: 2.5, unitPrice: 110.0);
-$second->title = 'Anpassung & Support';
-$second->type = InvoiceItemType::SERVICE;
-$second->unit = 'Stunde';
+$second = new InvoiceItemCreateOptions(
+    quantity: 2.5, unitPrice: 110.0,
+    title: 'Anpassung & Support',
+    type: InvoiceItemType::SERVICE,
+    unit: 'Stunde',
+);
 
 $billomat->invoices->items->create($invoice->id, $second);
 
@@ -162,7 +168,6 @@ foreach ($billomat->invoices->items->list($invoice->id) as $item) {
 }
 
 // Erste Position aktualisieren (Preis senken) — quantity bleibt gleich
-$update = new InvoiceItemCreateOptions(quantity: $created->quantity, unitPrice: 9.99);
-$update->title = $created->title;
+$update = new InvoiceItemCreateOptions(quantity: $created->quantity, unitPrice: 9.99, title: $created->title);
 $billomat->invoices->items->update($created->id, $update);
 ```

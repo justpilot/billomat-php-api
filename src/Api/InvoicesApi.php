@@ -276,7 +276,7 @@ final class InvoicesApi extends AbstractApi
      * (Absender aus den Settings, Empfänger aus den Kunden-Stammdaten,
      * Default-Subject/Body, PDF als Anhang).
      */
-    public function email(int $id, ?InvoiceEmailOptions $options = null): void
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 

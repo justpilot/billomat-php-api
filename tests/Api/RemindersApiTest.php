@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
-use Justpilot\Billomat\Api\ReminderEmailOptions;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -33,7 +33,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(RemindersApi::class)]
 #[CoversClass(ReminderCreateOptions::class)]
 #[CoversClass(ReminderUpdateOptions::class)]
-#[CoversClass(ReminderEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(Reminder::class)]
 #[CoversClass(ReminderPdf::class)]
 #[CoversClass(ReminderStatus::class)]
@@ -126,10 +126,12 @@ final class RemindersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ReminderCreateOptions(invoiceId: 42);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->dueDays = 7;
-        $opts->subject = '1. Mahnung';
+        $opts = new ReminderCreateOptions(
+            invoiceId: 42,
+            date: new DateTimeImmutable('2026-03-01'),
+            dueDays: 7,
+            subject: '1. Mahnung',
+        );
 
         $reminder = $api->create($opts);
 
@@ -165,8 +167,7 @@ final class RemindersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ReminderUpdateOptions();
-        $opts->subject = 'Geändert';
+        $opts = new ReminderUpdateOptions(subject: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
@@ -215,8 +216,7 @@ final class RemindersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ReminderEmailOptions();
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(to: ['kunde@example.com']);
 
         $api->email(42, $opts);
 

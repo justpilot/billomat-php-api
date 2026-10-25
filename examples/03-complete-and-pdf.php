@@ -5,7 +5,7 @@
  *
  * Voraussetzungen:
  *  - BILLOMAT_ID und BILLOMAT_API_KEY gesetzt.
- *  - BILLOMAT_INVOICE_ID gesetzt (ID einer DRAFT-Rechnung; siehe Beispiel 02).
+ *  - BILLOMAT_INVOICE_ID gesetzt (ID einer DRAFT-Rechnung, siehe Beispiel 02).
  *
  * Aufruf:
  *  BILLOMAT_INVOICE_ID=98765 php examples/03-complete-and-pdf.php
@@ -13,52 +13,27 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/bootstrap.php';
 
-use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Model\Enum\PdfType;
 
-$billomatId = getenv('BILLOMAT_ID') ?: null;
-$apiKey = getenv('BILLOMAT_API_KEY') ?: null;
-$invoiceIdRaw = getenv('BILLOMAT_INVOICE_ID') ?: null;
+$invoiceId = envId('BILLOMAT_INVOICE_ID');
+$billomat = billomat();
 
-if (!$billomatId || !$apiKey || !$invoiceIdRaw) {
-    fwrite(STDERR, "BILLOMAT_ID, BILLOMAT_API_KEY und BILLOMAT_INVOICE_ID müssen gesetzt sein.\n");
-    exit(1);
-}
+// Abschließen vergibt die Rechnungsnummer, der Status wechselt auf OPEN
+$billomat->invoices->complete($invoiceId);
+$invoice = $billomat->invoices->getOrFail($invoiceId);
 
-$invoiceId = (int)$invoiceIdRaw;
+printf("Abgeschlossen: %s, Status %s\n", $invoice->invoiceNumber ?? '?', $invoice->status?->label() ?? '?');
 
-$billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
-
-try {
-    $billomat->invoices->complete($invoiceId);
-
-    $invoice = $billomat->invoices->get($invoiceId);
-    if ($invoice === null) {
-        fwrite(STDERR, "Rechnung nach complete() nicht mehr auffindbar.\n");
-        exit(1);
-    }
-
-    printf(
-        "Abgeschlossen: %s%s — Status %s\n",
-        $invoice->numberPre ?? '',
-        $invoice->number ?? '?',
-        $invoice->status?->label() ?? '?',
-    );
-
-    $pdfBinary = $billomat->invoices->pdf($invoiceId, PdfType::SIGNED, rawPdf: true);
-} catch (BillomatException $e) {
-    fwrite(STDERR, sprintf("Fehler: %s\n", $e->getMessage()));
-    exit(1);
-}
+// rawPdf: true liefert den binären PDF-Inhalt statt des JSON-Modells
+$pdf = $billomat->invoices->pdf($invoiceId, PdfType::SIGNED, rawPdf: true);
 
 $outputFile = sprintf('rechnung-%d.pdf', $invoiceId);
-$bytes = file_put_contents($outputFile, $pdfBinary);
+$bytes = file_put_contents($outputFile, $pdf);
 
-if ($bytes === false) {
-    fwrite(STDERR, "Konnte PDF nicht schreiben.\n");
+if (false === $bytes) {
+    fwrite(\STDERR, "Konnte PDF nicht schreiben.\n");
     exit(1);
 }
 

@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Beispiel 12: Rechnung abschliessen und per E-Mail an den Kunden versenden.
+ * Beispiel 12: Rechnung abschließen und per E-Mail an den Kunden versenden.
  *
  * Voraussetzungen:
- *  - BILLOMAT_ID, BILLOMAT_API_KEY gesetzt.
+ *  - BILLOMAT_ID und BILLOMAT_API_KEY gesetzt.
  *  - BILLOMAT_INVOICE_ID gesetzt (ID einer DRAFT- oder OPEN-Rechnung).
- *  - BILLOMAT_EMAIL_TO gesetzt (Ziel-Empfänger der Test-Mail).
+ *  - BILLOMAT_EMAIL_TO gesetzt (Empfänger der Test-Mail).
  *  - Optional BILLOMAT_EMAIL_FROM (im Account verifizierte Absenderadresse).
  *
  * Aufruf:
@@ -16,58 +16,33 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/bootstrap.php';
 
 use Justpilot\Billomat\Api\EmailOptions;
-use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 
-$billomatId = getenv('BILLOMAT_ID') ?: null;
-$apiKey = getenv('BILLOMAT_API_KEY') ?: null;
-$invoiceIdRaw = getenv('BILLOMAT_INVOICE_ID') ?: null;
-$emailTo = getenv('BILLOMAT_EMAIL_TO') ?: null;
-$emailFrom = getenv('BILLOMAT_EMAIL_FROM') ?: null;
+$invoiceId = envId('BILLOMAT_INVOICE_ID');
+$emailTo = env('BILLOMAT_EMAIL_TO');
+$billomat = billomat();
 
-if (!$billomatId || !$apiKey || !$invoiceIdRaw || !$emailTo) {
-    fwrite(STDERR, "BILLOMAT_ID, BILLOMAT_API_KEY, BILLOMAT_INVOICE_ID und BILLOMAT_EMAIL_TO müssen gesetzt sein.\n");
-    exit(1);
+// 1) Einen Entwurf erst abschließen, sonst gibt es keine Nummer und kein PDF
+$invoice = $billomat->invoices->getOrFail($invoiceId);
+
+if (InvoiceStatus::DRAFT === $invoice->status) {
+    $billomat->invoices->complete($invoiceId);
+    $invoice = $billomat->invoices->getOrFail($invoiceId);
+    printf("Rechnung abgeschlossen: %s\n", $invoice->invoiceNumber ?? '?');
 }
 
-$invoiceId = (int)$invoiceIdRaw;
+$number = $invoice->invoiceNumber ?? (string) $invoiceId;
 
-$billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
+// 2) E-Mail versenden; nicht gesetzte Felder übernimmt Billomat aus der E-Mail-Vorlage
+$billomat->invoices->email($invoiceId, new EmailOptions(
+    from: optionalEnv('BILLOMAT_EMAIL_FROM'),
+    to: [$emailTo],
+    subject: sprintf('Ihre Rechnung %s', $number),
+    body: "Sehr geehrte Damen und Herren,\n\nim Anhang finden Sie Ihre Rechnung. Bei Rückfragen melden Sie sich gerne.\n\nMit freundlichen Grüßen\n",
+    filename: sprintf('rechnung-%s', $number),
+));
 
-try {
-    // 1) Falls die Rechnung noch DRAFT ist, abschliessen — sonst gibt es kein PDF
-    $invoice = $billomat->invoices->get($invoiceId);
-    if ($invoice === null) {
-        fwrite(STDERR, sprintf("Rechnung #%d nicht gefunden.\n", $invoiceId));
-        exit(1);
-    }
-
-    if ($invoice->status === InvoiceStatus::DRAFT) {
-        $billomat->invoices->complete($invoiceId);
-        $invoice = $billomat->invoices->get($invoiceId);
-        printf("Rechnung abgeschlossen: %s%d, Status %s\n",
-            $invoice->numberPre ?? '',
-            $invoice->number ?? 0,
-            $invoice->status?->label() ?? '?',
-        );
-    }
-
-    // 2) E-Mail-Optionen zusammenstellen
-    $opts = new EmailOptions(
-        from: $emailFrom,
-        to: [$emailTo],
-        subject: sprintf('Ihre Rechnung %s%d', $invoice->numberPre ?? '', $invoice->number ?? 0),
-        body: "Sehr geehrte Damen und Herren,\n\nim Anhang Ihre Rechnung. Bei Rückfragen melden Sie sich gerne.\n\nMit freundlichen Grüßen\n",
-        filename: sprintf('rechnung-%s%d', $invoice->numberPre ?? '', $invoice->number ?? 0),
-    );
-
-    $billomat->invoices->email($invoiceId, $opts);
-    printf("E-Mail an %s versendet.\n", $emailTo);
-} catch (BillomatException $e) {
-    fwrite(STDERR, sprintf("Fehler: %s\n", $e->getMessage()));
-    exit(1);
-}
+printf("E-Mail an %s versendet.\n", $emailTo);

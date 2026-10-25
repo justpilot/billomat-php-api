@@ -13,64 +13,42 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/bootstrap.php';
 
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
-use Justpilot\Billomat\Model\Money;
-use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Exception\BillomatException;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\Money;
 
-$billomatId = getenv('BILLOMAT_ID') ?: null;
-$apiKey = getenv('BILLOMAT_API_KEY') ?: null;
-$invoiceIdRaw = getenv('BILLOMAT_INVOICE_ID') ?: null;
+$invoiceId = envId('BILLOMAT_INVOICE_ID');
+$payments = billomat()->invoices->payments;
 
-if (!$billomatId || !$apiKey || !$invoiceIdRaw) {
-    fwrite(STDERR, "BILLOMAT_ID, BILLOMAT_API_KEY und BILLOMAT_INVOICE_ID müssen gesetzt sein.\n");
-    exit(1);
+// 1) Zahlung anlegen
+$payment = $payments->create(new InvoicePaymentCreateOptions(
+    invoiceId: $invoiceId,
+    amount: Money::of('1.00'),
+    date: new DateTimeImmutable('today'),
+    type: PaymentType::BANK_TRANSFER,
+    comment: 'Test-Zahlung aus examples/04-payments.php',
+));
+$paymentId = requireId($payment->id);
+
+printf("Zahlung #%d angelegt: %s via %s\n", $paymentId, $payment->amount->format(2, ',', '.'), $payment->type?->label() ?? '?');
+
+// 2) Alle Zahlungen der Rechnung listen, neueste zuerst
+$all = $payments->list($invoiceId, ['order_by' => OrderBy::desc('date')->toQuery()]);
+
+printf("Zahlungen insgesamt: %d\n", count($all));
+foreach ($all as $p) {
+    printf(
+        "  - #%d  %s  %s  %s\n",
+        $p->id ?? 0,
+        $p->date?->format('Y-m-d') ?? '?',
+        $p->amount->format(2, ',', '.'),
+        $p->type?->label() ?? '?',
+    );
 }
 
-$invoiceId = (int)$invoiceIdRaw;
-
-$billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
-
-try {
-    // Zahlung anlegen
-    $opts = new InvoicePaymentCreateOptions(
-        invoiceId: $invoiceId, amount: Money::of('1'),
-        date: new DateTimeImmutable('today'),
-        type: PaymentType::BANK_TRANSFER,
-        comment: 'Test-Zahlung aus examples/04-payments.php',
-    );
-
-    $payment = $billomat->invoices->payments->create($opts);
-    printf("Zahlung #%d angelegt: %.2f EUR via %s\n",
-        $payment->id,
-        $payment->amount,
-        $payment->type?->label() ?? '?',
-    );
-
-    // Alle Zahlungen zur Rechnung listen
-    $all = $billomat->invoices->payments->list($invoiceId, [
-        'order_by' => 'date+DESC',
-    ]);
-    printf("Zahlungen insgesamt: %d\n", count($all));
-    foreach ($all as $p) {
-        printf("  - #%d  %s  %.2f EUR  %s\n",
-            $p->id,
-            $p->date?->format('Y-m-d') ?? '?',
-            $p->amount,
-            $p->type?->label() ?? '?',
-        );
-    }
-
-    // Die eben angelegte Test-Zahlung wieder entfernen
-    $billomat->invoices->payments->delete($payment->id);
-    printf("Test-Zahlung #%d wieder gelöscht.\n", $payment->id);
-} catch (BillomatException $e) {
-    fwrite(STDERR, sprintf("Fehler: %s (HTTP %s)\n",
-        $e->getMessage(),
-        method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 'n/a',
-    ));
-    exit(1);
-}
+// 3) Test-Zahlung wieder entfernen
+$payments->delete($paymentId);
+printf("Test-Zahlung #%d wieder gelöscht.\n", $paymentId);

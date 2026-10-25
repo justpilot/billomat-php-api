@@ -39,7 +39,7 @@ vendor/bin/phpunit --filter it_lists_clients_and_passes_filters
 
 Integration tests under `tests/Integration/` hit the real Billomat sandbox. They `markTestSkipped` unless `BILLOMAT_ID` and `BILLOMAT_API_KEY` are set — put real credentials in `.env.test.local` (gitignored); `.env.test` is the placeholder template. Bootstrap (`tests/bootstrap.php`) loads both via `symfony/dotenv` with `usePutenv()`, so `getenv()` works in tests.
 
-Branches: `4.x` collects the work for 4.0.0 (BC breaks allowed; feature branches target `4.x`). `main` only gets 3.x fixes until 4.0 is released and is merged into `4.x` regularly.
+Branches: `4.x` collects the work for 4.0.0 (BC breaks allowed; feature branches target `4.x`). `main` only gets 3.x fixes until 4.0 is released and is merged into `4.x` regularly. Every BC break on `4.x` needs a CHANGELOG entry and a before/after section in `UPGRADE-4.0.md` (English).
 
 CI runs via `.github/workflows/ci.yml` on PHP 8.5 (required) and 8.6 (experimental). Three jobs: tests, quality (lint + PHPStan + Rector + audit), and mutation testing on PRs.
 

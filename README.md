@@ -260,7 +260,7 @@ Hinweise zum Umgang mit API-Keys und zur verantwortlichen Meldung von Sicherheit
 
 ## Changelog
 
-Versionshistorie und Release-Notes nach [Keep a Changelog](https://keepachangelog.com/) in [CHANGELOG.md](CHANGELOG.md). Das Projekt folgt [Semantic Versioning](https://semver.org/).
+Versionshistorie und Release-Notes nach [Keep a Changelog](https://keepachangelog.com/) in [CHANGELOG.md](CHANGELOG.md). Das Projekt folgt [Semantic Versioning](https://semver.org/). Upgrade von 3.x auf 4.0: [UPGRADE-4.0.md](UPGRADE-4.0.md).
 
 ## Lizenz
 

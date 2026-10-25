@@ -1,0 +1,34 @@
+/* Die Navigation rückt um --vp-layout-top-height nach unten, die Leiste füllt genau diesen Platz. */
+:root {
+  --vp-layout-top-height: 36px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --vp-layout-top-height: 56px;
+  }
+}
+
+.version-banner {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: var(--vp-z-index-layout-top);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--vp-layout-top-height);
+  padding: 0 16px;
+  background: var(--vp-c-warning-soft);
+  color: var(--vp-c-text-1);
+  font-size: 13px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.version-banner a {
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+  text-decoration: underline;
+}

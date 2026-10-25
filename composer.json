@@ -27,7 +27,8 @@
   ],
   "support": {
     "issues": "https://github.com/justpilot/billomat-php-api/issues",
-    "source": "https://github.com/justpilot/billomat-php-api"
+    "source": "https://github.com/justpilot/billomat-php-api",
+    "docs": "https://billomat-php.justpilot.io"
   },
   "require": {
     "php": "^8.5",

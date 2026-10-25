@@ -45,8 +45,6 @@ final class InboxDocumentsIntegrationTest extends AbstractBillomatIntegrationTes
 
         $doc = $billomat->inboxDocuments->create($opts);
 
-        self::assertNotNull($doc->id);
-
         $billomat->inboxDocuments->delete($doc->id);
         self::assertNull($billomat->inboxDocuments->get($doc->id));
     }

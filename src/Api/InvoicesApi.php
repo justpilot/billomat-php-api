@@ -35,10 +35,10 @@ final class InvoicesApi extends AbstractApi
     /**
      * Positionen, siehe {@see ItemsApi}.
      *
-     * @var ItemsApi<InvoiceItem, InvoiceItemCreateOptions>
+     * @var ItemsApi<InvoiceItem, InvoiceItemCreateOptions, InvoiceItemUpdateOptions>
      */
     public private(set) ItemsApi $items {
-        get => $this->items ??= new ItemsApi($this->http, 'invoice', InvoiceItem::fromArray(...), InvoiceItemCreateOptions::class);
+        get => $this->items ??= new ItemsApi($this->http, 'invoice', InvoiceItem::fromArray(...), InvoiceItemCreateOptions::class, InvoiceItemUpdateOptions::class);
     }
 
     /**

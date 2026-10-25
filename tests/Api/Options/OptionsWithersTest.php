@@ -18,6 +18,7 @@ use Justpilot\Billomat\Api\ClientUpdateOptions;
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
+use Justpilot\Billomat\Api\ConfirmationItemUpdateOptions;
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationUpdateOptions;
 use Justpilot\Billomat\Api\ContactCreateOptions;
@@ -25,12 +26,14 @@ use Justpilot\Billomat\Api\ContactUpdateOptions;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
+use Justpilot\Billomat\Api\CreditNoteItemUpdateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteUpdateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
+use Justpilot\Billomat\Api\DeliveryNoteItemUpdateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteUpdateOptions;
 use Justpilot\Billomat\Api\EmailOptions;
@@ -44,6 +47,7 @@ use Justpilot\Billomat\Api\IncomingUpdateOptions;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Api\InvoiceItemUpdateOptions;
 use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
@@ -55,12 +59,14 @@ use Justpilot\Billomat\Api\LetterUpdateOptions;
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Api\OfferCreateOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
+use Justpilot\Billomat\Api\OfferItemUpdateOptions;
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
+use Justpilot\Billomat\Api\RecurringItemUpdateOptions;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 use Justpilot\Billomat\Api\RecurringUpdateOptions;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
@@ -107,6 +113,7 @@ use UnitEnum;
 #[CoversClass(ConfirmationCommentCreateOptions::class)]
 #[CoversClass(ConfirmationCreateOptions::class)]
 #[CoversClass(ConfirmationItemCreateOptions::class)]
+#[CoversClass(ConfirmationItemUpdateOptions::class)]
 #[CoversClass(ConfirmationTagCreateOptions::class)]
 #[CoversClass(ConfirmationUpdateOptions::class)]
 #[CoversClass(ContactCreateOptions::class)]
@@ -114,12 +121,14 @@ use UnitEnum;
 #[CoversClass(CreditNoteCommentCreateOptions::class)]
 #[CoversClass(CreditNoteCreateOptions::class)]
 #[CoversClass(CreditNoteItemCreateOptions::class)]
+#[CoversClass(CreditNoteItemUpdateOptions::class)]
 #[CoversClass(CreditNotePaymentCreateOptions::class)]
 #[CoversClass(CreditNoteTagCreateOptions::class)]
 #[CoversClass(CreditNoteUpdateOptions::class)]
 #[CoversClass(DeliveryNoteCommentCreateOptions::class)]
 #[CoversClass(DeliveryNoteCreateOptions::class)]
 #[CoversClass(DeliveryNoteItemCreateOptions::class)]
+#[CoversClass(DeliveryNoteItemUpdateOptions::class)]
 #[CoversClass(DeliveryNoteTagCreateOptions::class)]
 #[CoversClass(DeliveryNoteUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
@@ -133,6 +142,7 @@ use UnitEnum;
 #[CoversClass(InvoiceCommentCreateOptions::class)]
 #[CoversClass(InvoiceCreateOptions::class)]
 #[CoversClass(InvoiceItemCreateOptions::class)]
+#[CoversClass(InvoiceItemUpdateOptions::class)]
 #[CoversClass(InvoiceMailOptions::class)]
 #[CoversClass(InvoicePaymentCreateOptions::class)]
 #[CoversClass(InvoiceTagCreateOptions::class)]
@@ -144,12 +154,14 @@ use UnitEnum;
 #[CoversClass(OfferCommentCreateOptions::class)]
 #[CoversClass(OfferCreateOptions::class)]
 #[CoversClass(OfferItemCreateOptions::class)]
+#[CoversClass(OfferItemUpdateOptions::class)]
 #[CoversClass(OfferTagCreateOptions::class)]
 #[CoversClass(OfferUpdateOptions::class)]
 #[CoversClass(PropertyCreateOptions::class)]
 #[CoversClass(RecurringCreateOptions::class)]
 #[CoversClass(RecurringEmailReceiverCreateOptions::class)]
 #[CoversClass(RecurringItemCreateOptions::class)]
+#[CoversClass(RecurringItemUpdateOptions::class)]
 #[CoversClass(RecurringTagCreateOptions::class)]
 #[CoversClass(RecurringUpdateOptions::class)]
 #[CoversClass(ReminderCreateOptions::class)]

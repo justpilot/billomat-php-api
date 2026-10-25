@@ -45,10 +45,10 @@ final class ConfirmationsApi extends AbstractApi
     /**
      * Positionen, siehe {@see ItemsApi}.
      *
-     * @var ItemsApi<ConfirmationItem, ConfirmationItemCreateOptions>
+     * @var ItemsApi<ConfirmationItem, ConfirmationItemCreateOptions, ConfirmationItemUpdateOptions>
      */
     public private(set) ItemsApi $items {
-        get => $this->items ??= new ItemsApi($this->http, 'confirmation', ConfirmationItem::fromArray(...), ConfirmationItemCreateOptions::class);
+        get => $this->items ??= new ItemsApi($this->http, 'confirmation', ConfirmationItem::fromArray(...), ConfirmationItemCreateOptions::class, ConfirmationItemUpdateOptions::class);
     }
 
     /**

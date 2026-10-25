@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Internal;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -18,8 +19,26 @@ use const DATE_ATOM;
 
 #[CoversClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 final class ScalarCasterTest extends TestCase
 {
+    #[Test]
+    public function requiredPassesValuesThrough(): void
+    {
+        self::assertSame(0, ScalarCaster::required(0, Money::class, 'id'));
+        self::assertSame('', ScalarCaster::required('', Money::class, 'id'));
+        self::assertFalse(ScalarCaster::required(false, Money::class, 'id'));
+    }
+
+    #[Test]
+    public function requiredRejectsNullWithModelAndField(): void
+    {
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('Unexpected response from Billomat: Money without a valid "unit_price" field.');
+
+        ScalarCaster::required(null, Money::class, 'unit_price');
+    }
+
     /**
      * @return iterable<string, array{mixed, ?int}>
      */

@@ -64,9 +64,3 @@ function billomat(): BillomatClient
         appSecret: optionalEnv('BILLOMAT_APP_SECRET'),
     );
 }
-
-/** Die Read-Models führen die ID als ?int; in einer create()-Antwort ist sie immer gesetzt. */
-function requireId(?int $id): int
-{
-    return $id ?? throw new UnexpectedValueException('Billomat hat keine ID geliefert.');
-}

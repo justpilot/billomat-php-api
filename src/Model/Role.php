@@ -42,7 +42,7 @@ final readonly class Role
      * @param array<string, AccessLevel> $permissions Bereich (z. B. `articles`) → Zugriffsstufe
      */
     public function __construct(
-        public ?int $id,
+        public int $id,
         public ?string $name = null,
         public array $permissions = [],
         /** Erstellungszeitpunkt der Rolle. */
@@ -64,7 +64,7 @@ final readonly class Role
         );
 
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             permissions: ListCaster::toEnumMap($areas, AccessLevel::class),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

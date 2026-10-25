@@ -40,9 +40,9 @@ final readonly class FreeText
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Freitexts. */
-        public ?int $id,
+        public int $id,
         /** Überschrift bzw. Betreff. */
-        public ?string $title,
+        public ?string $title = null,
         /** Bezeichnung. */
         public ?string $label = null,
         /** Einleitungstext bzw. Brieftext. */
@@ -80,7 +80,7 @@ final readonly class FreeText
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),

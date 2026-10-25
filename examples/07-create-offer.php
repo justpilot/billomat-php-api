@@ -46,7 +46,7 @@ $offer = $billomat->offers->create(
             type: ItemType::SERVICE,
         )),
 );
-$offerId = requireId($offer->id);
+$offerId = $offer->id;
 
 printf(
     "Entwurf angelegt: #%d, Status %s, Brutto %s %s\n",

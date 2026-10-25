@@ -29,7 +29,7 @@ final readonly class Currency
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** ISO-Währungscode (z. B. "EUR"). */
-        public string $code,
+        public string $code = '',
         /** Name der Währung. */
         public ?string $name = null,
         /** Währungssymbol (z. B. "€"). */

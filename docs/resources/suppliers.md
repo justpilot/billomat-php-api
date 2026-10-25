@@ -167,7 +167,7 @@ Mirrors `SupplierCreateOptions`, but `name` is no longer required and every fiel
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `created` | `?\DateTimeImmutable` |
 | `name` | `string` |
 | `clientNumber` | `?int` |
@@ -220,7 +220,7 @@ There is no `update()`: delete the tag and create a new one.
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `supplierId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
@@ -271,7 +271,7 @@ All three values are required and set via the constructor:
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `supplierId` | `int` |
 | `supplierPropertyId` | `int` |
 | `type` | `?PropertyType` (`TEXTFIELD`, `TEXTAREA`, `CHECKBOX`) |

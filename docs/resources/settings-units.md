@@ -63,7 +63,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `id` | `id` | `?int` |
+| `id` | `id` | `int` |
 | `name` | `name` | `string` |
 | `created`, `updated` | `created`, `updated` | `?\DateTimeImmutable` |
 | `customfield` | `customfield` | `?string` — free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |

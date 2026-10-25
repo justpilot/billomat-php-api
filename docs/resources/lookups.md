@@ -100,7 +100,7 @@ $piece = $billomat->units->get(42);
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `string` |
 | `created`, `updated` | `?\DateTimeImmutable` |
 | `customfield` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
@@ -121,7 +121,7 @@ $all = $billomat->users->list();
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `email` | `?string` |
 | `firstName` | `?string` |
 | `lastName` | `?string` |
@@ -152,7 +152,7 @@ $default = array_find(
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `?string` |
 | `subject` | `?string` |
 | `body` | `?string` |
@@ -176,7 +176,7 @@ $blocks = $billomat->freeTexts->list();
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `title` | `?string` |
 | `label` | `?string` |
 | `intro` | `?string` |
@@ -202,7 +202,7 @@ $texts = $billomat->reminderTexts->list(['order_by' => OrderBy::asc('sorting')->
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `?string` |
 | `subject` | `?string` |
 | `header` | `?string` |
@@ -230,7 +230,7 @@ $canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === AccessLevel
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `?string` |
 | `permissions` | `array<string, AccessLevel>` |
 
@@ -248,7 +248,7 @@ $taxFree = array_map(static fn ($c) => $c->countryCode, $billomat->countryTaxes-
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `countryCode` | `?string` |
 
 ### `incomingCategories`

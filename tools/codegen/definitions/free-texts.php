@@ -28,7 +28,7 @@ return [
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Freitexts.'],
-        'title' => ['model' => ['required' => true], 'doc' => 'Überschrift bzw. Betreff.'],
+        'title' => ['doc' => 'Überschrift bzw. Betreff.'],
         'label' => ['doc' => 'Bezeichnung.'],
         'intro' => ['doc' => 'Einleitungstext bzw. Brieftext.'],
         'note' => ['doc' => 'Anmerkungen.'],

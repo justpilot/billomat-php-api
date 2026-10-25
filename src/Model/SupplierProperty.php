@@ -34,15 +34,15 @@ final readonly class SupplierProperty
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Attributs. */
-        public ?int $id,
+        public int $id,
         /** Name des Attributs. */
-        public string $name,
+        public string $name = '',
         /**
          * Typ des Attributs.
          *
          * TEXTFIELD = einzeiliges Textfeld, TEXTAREA = mehrzeiliges Textfeld, CHECKBOX = Checkbox
          */
-        public ?PropertyType $type,
+        public ?PropertyType $type = null,
         /** Standardwert. */
         public ?string $defaultValue = null,
         /** Standardwert verwenden, wenn kein anderer Wert gesetzt ist? */
@@ -66,7 +66,7 @@ final readonly class SupplierProperty
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),

@@ -57,7 +57,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Eingangsrechnung.'],
-        'supplier_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Lieferanten.'],
+        'supplier_id' => ['create' => ['constructor' => true], 'doc' => 'ID des Lieferanten.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Eingangsrechnung.'],
         'date' => ['doc' => 'Rechnungsdatum.'],
         'supply_date' => ['type' => 'date', 'writable' => true, 'doc' => 'Liefer-/Leistungsdatum.', 'optionsOnly' => true],

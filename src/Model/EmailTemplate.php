@@ -44,9 +44,9 @@ final readonly class EmailTemplate
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Vorlage. */
-        public ?int $id,
+        public int $id,
         /** Name der Vorlage. */
-        public ?string $name,
+        public ?string $name = null,
         /** Betreff. */
         public ?string $subject = null,
         /** Nachrichtentext. */
@@ -88,7 +88,7 @@ final readonly class EmailTemplate
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
             body: ScalarCaster::toStringOrNull($data['text'] ?? $data['body'] ?? null),

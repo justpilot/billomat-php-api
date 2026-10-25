@@ -202,11 +202,11 @@ $items = $billomat->offers->items->list($offer->id);
 $opts = new OfferItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90'));
 $item = $billomat->offers->items->create($offer->id, $opts);
 
-$billomat->offers->items->update($item->id, $opts->withQuantity(3.0));
+$billomat->offers->items->update($item->id, new OfferItemUpdateOptions(quantity: 3.0));
 $billomat->offers->items->delete($item->id);
 ```
 
-`create()` injects `offer_id` into the payload automatically; `OfferItemCreateOptions` itself has no such field. `update()` uses the same class as `create()`.
+`create()` injects `offer_id` into the payload automatically; `OfferItemCreateOptions` itself has no such field. `update()` takes `OfferItemUpdateOptions` and only sends the fields you set.
 
 ### Offer comments
 
@@ -320,7 +320,7 @@ Constructor: `new OfferItemCreateOptions(float $quantity, Money $unitPrice, …)
 | `position` | `position` | `?int` | |
 | `optional` | `optional` | `?int` | Optional item, not included in the total (`1`/`0`) |
 
-`ItemsApi::update()` uses the same class; there is no separate update type. This means the constructor requires `quantity` and `unitPrice` even if you don't want to change them.
+For `ItemsApi::update()` there is `OfferItemUpdateOptions`: every field is optional (`X|Clear|null`) with a `with*()` method, only the fields you set are sent, and `Clear::Field` empties a field. Billomat keeps all other fields of the item.
 
 ## Write model: `OfferCommentCreateOptions`
 
@@ -364,7 +364,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
@@ -414,7 +414,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `offerId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -465,7 +465,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 - **Status transitions are strict.** `win()` only works from `OPEN`, `clear()` only from `WON` (not from `OPEN`). Trying them in the wrong status gets you a 400 → `ValidationException`. Order: first `complete()`, then `win()`, then `clear()`.
 - **`update()` doesn't change items.** Billomat ignores embedded `offer-items` on a PUT to `/offers/{id}`. Always use `$billomat->offers->items`.
 - **`delete()` only as a `DRAFT`.** Once `complete()` has run, the offer is numbered and can't be deleted; only `cancel()` is possible.
-- **`OfferItemCreateOptions` is also the update type.** There is no separate `OfferItemUpdateOptions`. The constructor always requires `quantity` and `unitPrice`, even if you only want to change the title. Copy the values from the existing `OfferItem` if needed.
+- **Item updates are partial.** `OfferItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
 - **`array_is_list` normalization in `list()`.** With exactly one match, Billomat returns `offer` as an object instead of a list; the method detects this and wraps the single result in an array.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat ignores the explicitly set tax rate and uses the article's/client's default.
 - **`pdf()` with `$rawPdf = true` bypasses JSON entirely.** The body is read as a binary string and must start with `%PDF-`, otherwise an `UnexpectedResponseException` is thrown. HTTP errors still arrive as SDK exceptions (`NotFoundException`, `AuthenticationException`, …) because `BillomatHttpClient` throws them during the request.

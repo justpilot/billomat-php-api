@@ -20,7 +20,6 @@ final class ClientsSelfTest extends AbstractBillomatIntegrationTestCase
 
         $me = $billomat->clients->getMyself();
 
-        self::assertNotNull($me->id);
         self::assertGreaterThan(0, $me->id);
         self::assertNotSame('', trim($me->name));
     }

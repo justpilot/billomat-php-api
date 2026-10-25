@@ -31,7 +31,7 @@ $payment = $payments->create(new InvoicePaymentCreateOptions(
     type: PaymentType::BANK_TRANSFER,
     comment: 'Test-Zahlung aus examples/04-payments.php',
 ));
-$paymentId = requireId($payment->id);
+$paymentId = $payment->id;
 
 printf("Zahlung #%d angelegt: %s via %s\n", $paymentId, $payment->amount->format(2, ',', '.'), $payment->type?->label() ?? '?');
 
@@ -42,7 +42,7 @@ printf("Zahlungen insgesamt: %d\n", count($all));
 foreach ($all as $p) {
     printf(
         "  - #%d  %s  %s  %s\n",
-        $p->id ?? 0,
+        $p->id,
         $p->date?->format('Y-m-d') ?? '?',
         $p->amount->format(2, ',', '.'),
         $p->type?->label() ?? '?',

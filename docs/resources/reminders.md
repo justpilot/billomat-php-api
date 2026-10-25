@@ -240,7 +240,7 @@ There is **no** `ReminderItemCreateOptions` and no `ReminderItemUpdateOptions`. 
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `invoiceId` | `?int` |
@@ -269,7 +269,7 @@ There is **no** `ReminderItemCreateOptions` and no `ReminderItemUpdateOptions`. 
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `reminderId` | `?int` |
 | `articleId` | `?int` |
 | `position` | `?int` |
@@ -285,7 +285,7 @@ There is **no** `ReminderItemCreateOptions` and no `ReminderItemUpdateOptions`. 
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `reminderId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |

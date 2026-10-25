@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(InvoiceItem::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 final class InvoiceItemTest extends TestCase
 {
     #[Test]
@@ -60,12 +62,21 @@ final class InvoiceItemTest extends TestCase
     }
 
     #[Test]
-    public function itDefaultsRequiredQuantityAndPriceToZero(): void
+    public function itDefaultsMissingQuantityToZero(): void
     {
-        $item = InvoiceItem::fromArray([]);
+        $item = InvoiceItem::fromArray(['id' => 1, 'unit_price' => '9.5']);
 
         self::assertSame(0.0, $item->quantity);
-        self::assertSame('0', $item->unitPrice->toString());
+        self::assertSame('9.5', $item->unitPrice->toString());
+    }
+
+    #[Test]
+    public function itRejectsItemWithoutUnitPrice(): void
+    {
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('InvoiceItem without a valid "unit_price" field');
+
+        InvoiceItem::fromArray(['id' => 1]);
     }
 
     #[Test]
@@ -73,6 +84,7 @@ final class InvoiceItemTest extends TestCase
     {
         // article_id ist optional und wird teils als "" geliefert
         $item = InvoiceItem::fromArray([
+            'id' => 1,
             'quantity' => 1,
             'unit_price' => 10,
             'article_id' => '',
@@ -86,6 +98,7 @@ final class InvoiceItemTest extends TestCase
     {
         // Billomat-Doku lässt zwei Werte zu (SERVICE/PRODUCT); andere Eingaben dürfen nicht aufgespielt werden
         $item = InvoiceItem::fromArray([
+            'id' => 1,
             'quantity' => 1,
             'unit_price' => 1,
             'type' => 'WHATEVER',
@@ -98,6 +111,7 @@ final class InvoiceItemTest extends TestCase
     public function toArraySerializesEnumValue(): void
     {
         $item = InvoiceItem::fromArray([
+            'id' => 1,
             'quantity' => 1,
             'unit_price' => 1,
             'type' => 'PRODUCT',

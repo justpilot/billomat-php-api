@@ -58,7 +58,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Lieferscheins.'],
-        'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['model' => ['nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Lieferscheins.'],
         'delivery_note_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Lieferscheinnummer (wird beim Abschließen vergeben).'],

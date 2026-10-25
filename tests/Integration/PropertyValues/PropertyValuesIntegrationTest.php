@@ -45,10 +45,8 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
 
         $opts = new SupplierCreateOptions(name: 'IT-Lieferant-PV '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
-        $id = $created->id;
-        self::assertNotNull($id);
 
-        return $id;
+        return $created->id;
     }
 
     #[Group('integration')]
@@ -67,7 +65,6 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
             unit: 'Stück',
         );
         $article = $billomat->articles->create($articleOpts);
-        self::assertNotNull($article->id);
 
         try {
             $value = $billomat->articles->propertyValues->create(new ArticlePropertyValueCreateOptions(
@@ -98,7 +95,6 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
 
         $clientOpts = new ClientCreateOptions(name: 'IT-PV-Kunde '.date('His'));
         $client = $billomat->clients->create($clientOpts);
-        self::assertNotNull($client->id);
 
         try {
             $value = $billomat->clients->propertyValues->create(new ClientPropertyValueCreateOptions(
@@ -161,7 +157,6 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
             incomingNumber: 'IT-IN-PV-'.date('His'),
         );
         $incoming = $billomat->incomings->create($incomingOpts);
-        self::assertNotNull($incoming->id);
 
         try {
             $value = $billomat->incomings->propertyValues->create(new IncomingPropertyValueCreateOptions(

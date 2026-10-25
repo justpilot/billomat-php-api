@@ -60,9 +60,9 @@ final readonly class Reminder
      */
     public function __construct(
         /** Interne Billomat-ID der Mahnung. */
-        public ?int $id,
+        public int $id,
         /** ID des Kunden. */
-        public int $clientId,
+        public int $clientId = 0,
         /** ID des Kontakts. */
         public ?int $contactId = null,
         /** ID der überfälligen Rechnung. */
@@ -132,7 +132,7 @@ final readonly class Reminder
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),

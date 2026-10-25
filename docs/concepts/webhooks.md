@@ -132,7 +132,7 @@ The SDK deliberately ships no controller — routing, auth (Basic), idempotency 
 | `WebhookEvent` | Backed enum with all 83 events (`WebhookEvent::INVOICE_PAYMENT_CREATE` = `'invoice_payment.create'`); `resource()`, `action()` (`WebhookAction::CREATE` …), `envelopeKey()` (`'invoice-payment'`), `modelClass()` (`InvoicePayment::class`) |
 | `WebhookHeaders` | `fromServerRequest()` (PSR-7) or `fromArray()` (`$_SERVER`, Symfony `HeaderBag::all()`, stored headers) → `event`, `requestId` (int), `webhookId` |
 | `WebhookPayload` | `fromJson()` / `fromArray()` unwraps the envelope; `data` (raw data), `id()`, `int('invoice_id')`, `model()` hydrates the matching model |
-| `InvalidWebhookException` (`Justpilot\Billomat\Exception`) | unknown event, missing header, no JSON, wrong envelope — respond with `4xx` |
+| `InvalidWebhookException` (`Justpilot\Billomat\Exception`) | unknown event, missing header, no JSON, wrong envelope, `model()` on a record without `id` — respond with `4xx` |
 
 The classes also work with stored requests, so the controller only accepts the request and a worker processes it later. Only the JSON format is supported.
 

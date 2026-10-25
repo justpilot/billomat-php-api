@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
+use Justpilot\Billomat\Api\CreditNoteItemUpdateOptions;
 use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -29,6 +30,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(AbstractSubResourceApi::class)]
 #[UsesClass(CreditNotesApi::class)]
 #[CoversClass(CreditNoteItemCreateOptions::class)]
+#[CoversClass(CreditNoteItemUpdateOptions::class)]
 #[CoversClass(CreditNoteItem::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -91,7 +93,7 @@ final class CreditNoteItemsApiTest extends TestCase
 
         $opts = new CreditNoteItemCreateOptions(quantity: 2.0, unitPrice: Money::of('50'));
         self::assertSame(77, $api->create(123, $opts)->id);
-        self::assertSame(77, $api->update(77, $opts)->id);
+        self::assertSame(77, $api->update(77, new CreditNoteItemUpdateOptions(unitPrice: Money::of('60')))->id);
         $api->delete(77);
 
         self::assertSame('POST', $captured[0]->method);

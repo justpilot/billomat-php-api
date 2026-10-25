@@ -39,17 +39,17 @@ final readonly class IncomingPropertyValue
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Eigenschaftswerts. */
-        public ?int $id,
+        public int $id,
         /** ID des Datensatzes, zu dem der Wert gehört. */
-        public int $incomingId,
+        public int $incomingId = 0,
         /** ID der Eigenschaft. */
-        public int $incomingPropertyId,
+        public int $incomingPropertyId = 0,
         /** Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX). */
-        public ?PropertyType $type,
+        public ?PropertyType $type = null,
         /** Name der Eigenschaft. */
-        public ?string $name,
+        public ?string $name = null,
         /** Wert der Eigenschaft. */
-        public mixed $value,
+        public mixed $value = null,
         /** Erstellungszeitpunkt. */
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
@@ -73,7 +73,7 @@ final readonly class IncomingPropertyValue
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             incomingPropertyId: ScalarCaster::toIntOrNull($data['incoming_property_id'] ?? null) ?? 0,
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),

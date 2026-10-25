@@ -62,17 +62,17 @@ return static function (string $prefix, string $label, string $parentField, stri
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne ID der Zahlung.'],
             $parentField => [
                 'doc' => 'ID des Dokuments, zu dem die Zahlung gehört.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['nonNull' => true],
                 'create' => ['constructor' => true],
             ],
-            'date' => ['doc' => 'Zahlungsdatum.', 'model' => ['required' => true]],
+            'date' => ['doc' => 'Zahlungsdatum.'],
             'amount' => [
                 'doc' => 'Zahlungsbetrag.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
-            'type' => ['enum' => 'PaymentType', 'doc' => 'Zahlungsart.', 'model' => ['required' => true]],
-            'comment' => ['doc' => 'Kommentar zur Zahlung.', 'model' => ['required' => true]],
+            'type' => ['enum' => 'PaymentType', 'doc' => 'Zahlungsart.'],
+            'comment' => ['doc' => 'Kommentar zur Zahlung.'],
             'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Zahlung.'],
             'user_id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'ID des Users, der die Zahlung erfasst hat.'],
             // Billomat dokumentiert `transaction_purpose` nicht beim Anlegen, nimmt ihn aber an.

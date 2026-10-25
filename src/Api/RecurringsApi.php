@@ -30,10 +30,10 @@ final class RecurringsApi extends AbstractApi
     /**
      * Positionen, siehe {@see ItemsApi}.
      *
-     * @var ItemsApi<RecurringItem, RecurringItemCreateOptions>
+     * @var ItemsApi<RecurringItem, RecurringItemCreateOptions, RecurringItemUpdateOptions>
      */
     public private(set) ItemsApi $items {
-        get => $this->items ??= new ItemsApi($this->http, 'recurring', RecurringItem::fromArray(...), RecurringItemCreateOptions::class);
+        get => $this->items ??= new ItemsApi($this->http, 'recurring', RecurringItem::fromArray(...), RecurringItemCreateOptions::class, RecurringItemUpdateOptions::class);
     }
 
     /**

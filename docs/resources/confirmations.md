@@ -184,11 +184,11 @@ $item = $billomat->confirmations->items->create(
     new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
-$billomat->confirmations->items->update($item->id, $opts);
+$billomat->confirmations->items->update($item->id, new ConfirmationItemUpdateOptions(quantity: 3.0));
 $billomat->confirmations->items->delete($item->id);
 ```
 
-`create()` adds `confirmation_id` automatically; the options class itself has no such field. `update()` uses the same class as `create()`.
+`create()` adds `confirmation_id` automatically; the options class itself has no such field. `update()` takes `ConfirmationItemUpdateOptions` and only sends the fields you set.
 
 ### Confirmation comments
 
@@ -280,7 +280,7 @@ Constructor: `new ConfirmationItemCreateOptions(float $quantity, Money $unitPric
 | `reduction` | `reduction` | `?string` | |
 | `position` | `position` | `?int` | |
 
-`ItemsApi::update()` uses the same class; there is no separate update type.
+For `ItemsApi::update()` there is `ConfirmationItemUpdateOptions`: every field is optional (`X|Clear|null`) with a `with*()` method, only the fields you set are sent, and `Clear::Field` empties a field. Billomat keeps all other fields of the item.
 
 ## Write model: `ConfirmationCommentCreateOptions`
 
@@ -315,7 +315,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
@@ -362,7 +362,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `confirmationId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -413,7 +413,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 - **Simpler lifecycle than offers.** There is no `win()`/`lose()`: a confirmation is either marked as done (`clear()`, reverted by `unclear()`) or canceled (`cancel()`, reverted by `uncancel()`). Calling `win()` out of habit means looking for the wrong endpoint.
 - **`update()` doesn't change line items.** Billomat ignores embedded `confirmation-items` on PUT. Always use `$billomat->confirmations->items`.
 - **`delete()` only in `DRAFT`.** After `complete()`, only `cancel()` is possible.
-- **`ConfirmationItemCreateOptions` is also the update type.** The constructor requires `quantity` and `unitPrice` even for updates where these values aren't supposed to change.
+- **Item updates are partial.** `ConfirmationItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `confirmation` as an object; the SDK wraps it in a list.
 - **The `offerId` link is informational.** The confirmation is not synchronized with the offer status automatically; set `OfferStatus::WON` separately via `$billomat->offers->win()`.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.

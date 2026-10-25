@@ -114,7 +114,7 @@ echo $me?->email;
 
 | Property | Type | Mapping |
 |---|---|---|
-| `id` | `?int` | `id` |
+| `id` | `int` | `id` |
 | `email` | `?string` | `email` |
 | `firstName` | `?string` | `first_name` |
 | `lastName` | `?string` | `last_name` |

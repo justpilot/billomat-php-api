@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
+use Justpilot\Billomat\Api\DeliveryNoteItemUpdateOptions;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -29,6 +30,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(AbstractSubResourceApi::class)]
 #[UsesClass(DeliveryNotesApi::class)]
 #[CoversClass(DeliveryNoteItemCreateOptions::class)]
+#[CoversClass(DeliveryNoteItemUpdateOptions::class)]
 #[CoversClass(DeliveryNoteItem::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -121,7 +123,7 @@ final class DeliveryNoteItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: Money::of('0'));
+        $opts = new DeliveryNoteItemUpdateOptions(quantity: 3.0);
         self::assertSame(77, $api->update(77, $opts)->id);
         $api->delete(77);
 

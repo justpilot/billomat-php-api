@@ -94,7 +94,7 @@ Constructor: `new ClientTagCreateOptions(int $clientId, string $name)`. Both val
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |

@@ -135,7 +135,7 @@ Constructor: `new TemplateCreateOptions(TemplateDocumentType $type, …)` — `t
 
 | Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | |
+| `id` | `int` | |
 | `created` | `?\DateTimeImmutable` | |
 | `type` | `?TemplateDocumentType` | INVOICE, OFFER, … |
 | `templateType` | `?TemplateType` | DEFINED or UPLOADED |

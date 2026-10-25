@@ -94,7 +94,7 @@ Constructor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount, …
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `invoiceId` | `int` |
 | `created` | `?\DateTimeImmutable` |
 | `date` | `?\DateTimeImmutable` |

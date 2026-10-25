@@ -311,7 +311,7 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `supplierId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
 | `date`, `dueDate` | `?\DateTimeImmutable` |
@@ -335,7 +335,7 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `incomingId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -351,7 +351,7 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `incomingId` | `int` |
 | `date` | `?\DateTimeImmutable` |
 | `amount` | `Money` |
@@ -373,7 +373,7 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `incomingId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
@@ -392,7 +392,7 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `incomingId` | `int` |
 | `incomingPropertyId` | `int` |
 | `type` | `?PropertyType` |
@@ -408,7 +408,7 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |

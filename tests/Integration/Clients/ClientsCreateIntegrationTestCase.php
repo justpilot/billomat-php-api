@@ -39,7 +39,6 @@ final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegration
 
         $created = $billomat->clients->create($options);
 
-        self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
         self::assertSame($options->name, $created->name);
 

@@ -92,7 +92,7 @@ Constructor: `new InvoiceTagCreateOptions(int $invoiceId, string $name)`. Both v
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `invoiceId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |

@@ -41,8 +41,6 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
 
         $created = $billomat->clients->create($opts);
 
-        self::assertNotNull($created->id);
-
         return $created->id;
     }
 
@@ -83,7 +81,6 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
 
         $note = $billomat->deliveryNotes->create($opts);
 
-        self::assertNotNull($note->id);
         self::assertSame(DeliveryNoteStatus::DRAFT, $note->status);
 
         $billomat->deliveryNotes->delete($note->id);

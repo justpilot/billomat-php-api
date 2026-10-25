@@ -46,49 +46,49 @@ final readonly class RecurringItem
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Position. */
-        public ?int $id,
+        public int $id,
+        /** Einzelpreis. */
+        public Money $unitPrice,
         /** ID des zugehörigen Dokuments. */
-        public ?int $recurringId,
+        public ?int $recurringId = null,
         /** ID des Artikels (falls verknüpft). */
-        public ?int $articleId,
+        public ?int $articleId = null,
         /**
          * Laufende Positionsnummer innerhalb des Dokuments.
          *
          * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
          */
-        public ?int $position,
+        public ?int $position = null,
         /** Einheit (z. B. "Stück", "Stunde"). */
-        public ?string $unit,
+        public ?string $unit = null,
         /** Menge. */
-        public float $quantity,
-        /** Einzelpreis. */
-        public Money $unitPrice,
+        public float $quantity = 0.0,
         /** Steuerbezeichnung (z. B. "MwSt"). */
-        public ?string $taxName,
+        public ?string $taxName = null,
         /** Steuerrate in Prozent. */
-        public ?float $taxRate,
+        public ?float $taxRate = null,
         /**
          * Flag, ob die Steuerrate manuell geändert wurde.
          *
          * Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz angewendet werden soll.
          */
-        public ?bool $taxChangedManually,
+        public ?bool $taxChangedManually = null,
         /** Titel der Position. */
-        public ?string $title,
+        public ?string $title = null,
         /** Beschreibung der Position. */
-        public ?string $description,
+        public ?string $description = null,
         /** Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
-        public ?string $reduction,
+        public ?string $reduction = null,
         /** Typ der Position (Produkt/Dienstleistung). */
-        public ?ItemType $type,
+        public ?ItemType $type = null,
         /** Gesamtbetrag brutto. */
-        public ?Money $totalGross,
+        public ?Money $totalGross = null,
         /** Gesamtbetrag netto. */
-        public ?Money $totalNet,
+        public ?Money $totalNet = null,
         /** Unreduzierter Gesamtbetrag brutto. */
-        public ?Money $totalGrossUnreduced,
+        public ?Money $totalGrossUnreduced = null,
         /** Unreduzierter Gesamtbetrag netto. */
-        public ?Money $totalNetUnreduced,
+        public ?Money $totalNetUnreduced = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /**
@@ -108,13 +108,13 @@ final readonly class RecurringItem
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            unitPrice: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null), self::class, 'unit_price'),
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
             quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
-            unitPrice: ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null) ?? Money::zero(),
             taxName: ScalarCaster::toStringOrNull($data['tax_name'] ?? null),
             taxRate: ScalarCaster::toFloatOrNull($data['tax_rate'] ?? null),
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),

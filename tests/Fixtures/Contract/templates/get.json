@@ -1,0 +1,13 @@
+{
+    "template": {
+        "id": "971608",
+        "created": "2025-12-24T22:59:58+01:00",
+        "updated": "2025-12-29T10:43:03+01:00",
+        "type": "INVOICE",
+        "template_type": "DEFINED",
+        "name": "Name 8",
+        "is_background_available": "0",
+        "is_default": "1",
+        "customfield": ""
+    }
+}

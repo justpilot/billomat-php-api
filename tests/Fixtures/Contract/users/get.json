@@ -1,0 +1,38 @@
+{
+    "user": {
+        "id": "136536",
+        "created": "2025-12-24T22:59:57+01:00",
+        "updated": "2026-10-25T13:43:59+01:00",
+        "salutation": "MR",
+        "first_name": "Vorname4",
+        "last_name": "Nachname3",
+        "email": "kontakt4@example.com",
+        "locale": "de_DE",
+        "timezone": "Europe/Berlin",
+        "is_account_owner": "1",
+        "role_id": "1",
+        "rights": {
+            "articles": "DELETE",
+            "clients": "DELETE",
+            "suppliers": "DELETE",
+            "invoices": "DELETE",
+            "offers": "DELETE",
+            "reminders": "DELETE",
+            "incomings": "DELETE",
+            "credit_notes": "DELETE",
+            "confirmations": "DELETE",
+            "delivery_notes": "DELETE",
+            "letters": "DELETE",
+            "banking": "UPDATE",
+            "net_income_statement": "DELETE",
+            "accounting_export": "UPDATE",
+            "settings_my_account": "UPDATE",
+            "settings_documents": "UPDATE",
+            "settings_configuration": "UPDATE",
+            "settings_administration": "UPDATE",
+            "settings_addons": "UPDATE",
+            "settings_my_addons": "UPDATE"
+        },
+        "customfield": ""
+    }
+}

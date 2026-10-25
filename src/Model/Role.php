@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Model;
 
+use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+
+use const DATE_ATOM;
 
 /**
  * Mitarbeiter-Rolle samt zugeordneter Zugriffsrechte.
@@ -26,6 +29,10 @@ final readonly class Role
         public ?int $id,
         public ?string $name = null,
         public array $permissions = [],
+        /** Erstellungszeitpunkt der Rolle. */
+        public ?DateTimeImmutable $created = null,
+        /** Zeitpunkt der letzten Änderung. */
+        public ?DateTimeImmutable $updated = null,
     ) {
     }
 
@@ -59,6 +66,8 @@ final readonly class Role
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             permissions: $permissions,
+            created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
+            updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
         );
     }
 
@@ -71,6 +80,8 @@ final readonly class Role
             'id' => $this->id,
             'name' => $this->name,
             'permissions' => $this->permissions,
+            'created' => $this->created?->format(DATE_ATOM),
+            'updated' => $this->updated?->format(DATE_ATOM),
         ];
     }
 }

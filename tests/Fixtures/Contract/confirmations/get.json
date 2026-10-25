@@ -1,0 +1,47 @@
+{
+    "confirmation": {
+        "id": "550206",
+        "created": "2026-10-25T14:50:00+01:00",
+        "updated": "2026-10-25T14:50:00+01:00",
+        "client_id": "9340866",
+        "contact_id": "",
+        "confirmation_number": "",
+        "number": "",
+        "number_pre": "AB",
+        "number_length": "0",
+        "title": "Text 16",
+        "date": "2026-10-25",
+        "address": "Firma 1 GmbH\nMusterstraße 1\n10001 Musterstadt 1",
+        "status": "DRAFT",
+        "label": "",
+        "intro": "Text 17",
+        "note": "Text 18",
+        "total_net": "68.39",
+        "total_gross": "81.39",
+        "reduction": "",
+        "total_reduction": "0",
+        "total_net_unreduced": "68.4",
+        "total_gross_unreduced": "81.39",
+        "currency_code": "EUR",
+        "quote": "1",
+        "net_gross": "GROSS",
+        "taxes": {
+            "tax": {
+                "name": "Name 7",
+                "rate": "19",
+                "amount": "13",
+                "amount_plain": "13",
+                "amount_rounded": "13",
+                "amount_net": "68.395",
+                "amount_net_plain": "68.395",
+                "amount_net_rounded": "68.4",
+                "amount_gross": "81.39",
+                "amount_gross_plain": "81.39",
+                "amount_gross_rounded": "81.39"
+            }
+        },
+        "offer_id": "",
+        "template_id": "971612",
+        "customfield": ""
+    }
+}

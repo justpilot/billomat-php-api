@@ -1,0 +1,39 @@
+{
+    "taxes": {
+        "tax": [
+            {
+                "id": "271923",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-24T22:59:58+01:00",
+                "name": "Name 7",
+                "rate": "0",
+                "is_default": "0",
+                "can_delete": "0",
+                "customfield": ""
+            },
+            {
+                "id": "271924",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-24T22:59:58+01:00",
+                "name": "Name 7",
+                "rate": "7",
+                "is_default": "0",
+                "can_delete": "1",
+                "customfield": ""
+            },
+            {
+                "id": "271925",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-24T22:59:58+01:00",
+                "name": "Name 7",
+                "rate": "19",
+                "is_default": "1",
+                "can_delete": "1",
+                "customfield": ""
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "3"
+    }
+}

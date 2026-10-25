@@ -1,0 +1,20 @@
+{
+    "delivery-note-comments": {
+        "delivery-note-comment": {
+            "id": "1976646",
+            "created": "2026-10-20T20:37:38+02:00",
+            "comment": "Text 25",
+            "actionkey": "CREATE",
+            "public": "0",
+            "by_client": "0",
+            "user_id": "136536",
+            "email_id": "",
+            "client_id": "",
+            "delivery_note_id": "889201",
+            "customfield": ""
+        },
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "1"
+    }
+}

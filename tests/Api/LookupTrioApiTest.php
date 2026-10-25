@@ -24,6 +24,7 @@ use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const DATE_ATOM;
 use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(IncomingCategoriesApi::class)]
@@ -166,6 +167,8 @@ final class LookupTrioApiTest extends TestCase
                 'role' => [
                     'id' => 42,
                     'name' => 'Azubi',
+                    'created' => '2013-09-27T10:49:44+02:00',
+                    'updated' => '2014-01-02T08:00:00+01:00',
                     'articles' => 'READ',
                     'offers' => '',
                 ],
@@ -179,6 +182,16 @@ final class LookupTrioApiTest extends TestCase
         self::assertSame(42, $role->id);
         self::assertSame('READ', $role->permissions['articles']);
         self::assertNull($role->permissions['offers']);
+        self::assertArrayNotHasKey('created', $role->permissions);
+        self::assertSame('2013-09-27T10:49:44+02:00', $role->created?->format(DATE_ATOM));
+        self::assertSame('2014-01-02T08:00:00+01:00', $role->updated?->format(DATE_ATOM));
+        self::assertSame([
+            'id' => 42,
+            'name' => 'Azubi',
+            'permissions' => ['articles' => 'READ', 'offers' => null],
+            'created' => '2013-09-27T10:49:44+02:00',
+            'updated' => '2014-01-02T08:00:00+01:00',
+        ], $role->toArray());
     }
 
     #[Test]

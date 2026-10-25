@@ -90,11 +90,13 @@ final readonly class Client
         'facturx_identifier' => true,
         'seller_identifier' => true,
         'dig_exclude' => true,
+        'client-property-values' => true,
     ];
 
     /**
-     * @param list<PaymentType>    $defaultPaymentTypes
-     * @param array<string, mixed> $extra
+     * @param list<PaymentType>         $defaultPaymentTypes
+     * @param list<ClientPropertyValue> $propertyValues
+     * @param array<string, mixed>      $extra
      */
     public function __construct(
         /** Interne Billomat-ID des Kunden. */
@@ -291,6 +293,12 @@ final readonly class Client
         /** Von Billomat geliefert, aber nicht dokumentiert. */
         public ?bool $digExclude = null,
         /**
+         * Attributwerte des Kunden.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert (leer: "").
+         */
+        public array $propertyValues = [],
+        /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
          * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
@@ -367,6 +375,7 @@ final readonly class Client
             facturxIdentifier: ScalarCaster::toStringOrNull($data['facturx_identifier'] ?? null),
             sellerIdentifier: ScalarCaster::toStringOrNull($data['seller_identifier'] ?? null),
             digExclude: ScalarCaster::toBoolOrNull($data['dig_exclude'] ?? null),
+            propertyValues: ListCaster::toNestedList($data['client-property-values'] ?? null, 'client-property-value', 'id', ClientPropertyValue::fromArray(...)),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -380,7 +389,7 @@ final readonly class Client
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
@@ -443,5 +452,13 @@ final readonly class Client
             'seller_identifier' => $this->sellerIdentifier,
             'dig_exclude' => $this->digExclude,
         ];
+
+        if ([] !== $this->propertyValues) {
+            $data['client-property-values'] = [
+                'client-property-value' => array_map(static fn (ClientPropertyValue $item): array => $item->toArray(), $this->propertyValues),
+            ];
+        }
+
+        return $data;
     }
 }

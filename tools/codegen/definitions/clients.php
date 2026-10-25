@@ -173,5 +173,13 @@ return [
         'facturx_identifier' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Kennung für E-Rechnungen (ZUGFeRD/Factur-X).', 'details' => ['Von Billomat geliefert, aber nicht dokumentiert.']],
         'seller_identifier' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Verkäufer-Kennung für E-Rechnungen (ZUGFeRD/Factur-X).', 'details' => ['Von Billomat geliefert, aber nicht dokumentiert.']],
         'dig_exclude' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Von Billomat geliefert, aber nicht dokumentiert.'],
+        'client-property-values' => [
+            'type' => 'list',
+            'readOnly' => true,
+            'list' => ['class' => 'ClientPropertyValue', 'item' => 'client-property-value'],
+            'model' => ['property' => 'propertyValues'],
+            'doc' => 'Attributwerte des Kunden.',
+            'details' => ['Von Billomat geliefert, aber nicht dokumentiert (leer: "").'],
+        ],
     ],
 ];

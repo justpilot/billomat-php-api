@@ -1,0 +1,42 @@
+{
+    "templates": {
+        "template": [
+            {
+                "id": "971608",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-29T10:43:03+01:00",
+                "type": "INVOICE",
+                "template_type": "DEFINED",
+                "name": "Name 8",
+                "is_background_available": "0",
+                "is_default": "1",
+                "customfield": ""
+            },
+            {
+                "id": "971609",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-29T10:43:03+01:00",
+                "type": "OFFER",
+                "template_type": "DEFINED",
+                "name": "Name 8",
+                "is_background_available": "0",
+                "is_default": "1",
+                "customfield": ""
+            },
+            {
+                "id": "971610",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-29T10:43:04+01:00",
+                "type": "REMINDER",
+                "template_type": "DEFINED",
+                "name": "Name 8",
+                "is_background_available": "0",
+                "is_default": "1",
+                "customfield": ""
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "11"
+    }
+}

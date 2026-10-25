@@ -103,5 +103,13 @@ return [
         'creditor_identifier' => ['doc' => 'SEPA-Gläubiger-ID.'],
         'costs_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Brutto-Kosten (read-only Auswertungsfeld).'],
         'costs_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Netto-Kosten (read-only Auswertungsfeld).'],
+        'supplier-property-values' => [
+            'type' => 'list',
+            'readOnly' => true,
+            'list' => ['class' => 'SupplierPropertyValue', 'item' => 'supplier-property-value'],
+            'model' => ['property' => 'propertyValues'],
+            'doc' => 'Attributwerte des Lieferanten.',
+            'details' => ['Von Billomat geliefert, aber nicht dokumentiert (leer: "").'],
+        ],
     ],
 ];

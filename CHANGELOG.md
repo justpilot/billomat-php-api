@@ -27,6 +27,8 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 - `BillomatConfig::$language` (and `BillomatClient::create(language: …)`) sets the `Accept-Language` header, e.g. `'en-gb'`; default stays `'de-de'`, `null` omits the header.
 - Exception messages include the method, the path and Billomat's error text, e.g. `Billomat responded with HTTP 422 to POST /clients. Name is missing`.
 - `OffersApi::uncancel()`/`unclear()`, `ConfirmationsApi::uncancel()`/`unclear()` and `RemindersApi::uncancel()` for the `/uncancel` and `/unclear` endpoints (checked in the sandbox).
+- **Contract fixtures:** anonymized sandbox responses under `tests/Fixtures/Contract/` and `ContractFixturesTest` catch drift between the Billomat API and the models in CI without credentials; `composer fixtures:record` re-records them (read-only GETs, see `docs/testing.md`).
+- `Client::$propertyValues`, `Supplier::$propertyValues` (the `client-property-values`/`supplier-property-values` Billomat returns with every client and supplier) and `Role::$created`/`$updated`, found by the contract fixtures.
 
 ### Changed
 - Development: PHPStan runs with the bleeding-edge ruleset and without `ignoreErrors` for the tests; the tests capture the outgoing `MockHttpClient` request as a typed `CapturedRequest` (method, URL, query, headers, decoded JSON body) instead of nested `mixed` arrays. No change to the public API.

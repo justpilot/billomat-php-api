@@ -130,6 +130,44 @@ final class MyIntegrationTest extends AbstractBillomatIntegrationTestCase
 - **No production keys.** Use a separate sandbox account only; see [SECURITY.md](../SECURITY.md).
 - **Keep the `markTestSkipped()` branch working.** A test that is meaningless without credentials must skip gracefully, otherwise the suite breaks elsewhere.
 
+## Contract fixtures
+
+`tests/Contract/ContractFixturesTest.php` (part of the unit suite, no network) checks the models against recorded, anonymized responses from the Billomat sandbox in `tests/Fixtures/Contract/<resource>/<list|get>.json`. Every fixture goes through the real `*Api` method (`MockHttpClient` + `Psr18Client`), and the test fails when
+
+- hydration fails or returns fewer records than the response contains,
+- the response has a field the model doesn't know (a non-empty `$extra` on generated models, also in nested models such as positions; for handwritten models, a field `toArray()` doesn't export),
+- a non-empty value gets lost while hydrating, e.g. an enum value the SDK doesn't know, an unparsable date or an unknown entry in `payment_types`.
+
+The failure names the resource and the field, e.g. `invoices/get: 'Invoice.new_field' => 'unbekanntes Feld'`. Fix real drift in the codegen definition (`tools/codegen/definitions/`) and run `composer generate`. Differences that are accepted on purpose go into `KNOWN_DRIFT` in the test with a reason; an entry that no longer occurs fails the test, so the list doesn't go stale.
+
+### Re-recording
+
+```bash
+composer fixtures:record                          # needs BILLOMAT_ID and BILLOMAT_API_KEY in .env.test.local
+composer fixtures:record -- --cache=/tmp/billomat # keep raw responses outside the repo and reuse them on the next run
+```
+
+`tools/record-fixtures.php` only sends GET requests: one list per resource (`per_page=3`) and, if the sandbox has data, one single-object GET of the first entry, plus the sub-resources (items, comments, tags, email receivers, contacts) of that entry. A full run takes about 75 requests and stops at 150, well below the sandbox limit of 1000 requests per 15 minutes. It never creates, updates or deletes anything and skips `/clients/myself` and the account endpoint. Resources without data in the sandbox get only a `list.json`; the test picks up new fixtures automatically, a new resource needs an entry in `ContractFixturesTest::calls()`.
+
+With `--cache`, a cached response is used instead of a request, so you can tune the anonymization without hitting the API again. The cache holds unanonymized data: keep it outside the repository and delete it afterwards.
+
+### Anonymization
+
+Before writing, the recorder replaces personal data with deterministic placeholders in the same format (the same original value always gets the same placeholder, so re-recording gives stable diffs):
+
+- names, first/last names, company names, account owners → `Name 1`, `Vorname1`, `Nachname1`, `Firma 1 GmbH`
+- e-mail addresses (also inside other strings and comma-separated lists) → `kontakt1@example.com`, senders → `Firma 1 GmbH <absender1@example.com>`
+- phone, fax and mobile numbers → `+49 30 0000001`
+- street, zip, city, state and the composed `address` → `Musterstraße 1`, `10001`, `Musterstadt 1`
+- IBAN (also inside other strings), BIC, bank name, account and bank numbers, creditor ID → `DE00000000000000000001`, `TESTDEFFXXX`, `Testbank 1`
+- tax and VAT numbers → `000/000/00001`, `DE000000001`
+- URLs → `https://www.example.com/1`
+- free texts (`note`, `intro`, `description`, `comment`, `title`, `label`, `subject`, `text`, settings like `invoice_intro`, …) → `Text 1`
+- file names and Base64 file contents → `dokument-1.pdf` and a tiny placeholder PDF
+- the Billomat ID anywhere in a string → `mycompany`
+
+Types, formats, enum values, amounts, dates, IDs, numbering and the presence of fields stay unchanged; empty strings stay empty. Before committing new fixtures, check them for anything that still looks personal, e.g. `grep -rn '@' tests/Fixtures/Contract | grep -v example.com`, a grep for your Billomat ID, and a look at phone-like numbers. Add new field names to `FIELD_KINDS`/`FIELD_SUFFIX_KINDS` in the recorder when Billomat adds personal fields.
+
 ## Coverage
 
 ```bash

@@ -1,0 +1,20 @@
+{
+    "invoice-payment": {
+        "id": "16378259",
+        "created": "2025-12-31T15:00:34+01:00",
+        "invoice_id": "22808964",
+        "user_id": "136536",
+        "date": "2025-12-31",
+        "amount": "-40",
+        "comment": "",
+        "transaction_purpose": "",
+        "currency_code": "EUR",
+        "quote": "1",
+        "payment_group": "455c7515-c131-44ee-9eed-6b3c29d77afd",
+        "finapi_transaction_id": "",
+        "finapi_transaction_amount": "",
+        "type": "",
+        "document_title": "Korrekturrechnung zur Rechnung RE352500001",
+        "customfield": ""
+    }
+}

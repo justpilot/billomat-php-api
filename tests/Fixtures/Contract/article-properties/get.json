@@ -1,0 +1,10 @@
+{
+    "article-property": {
+        "id": "6031",
+        "name": "Name 5",
+        "default_value": "",
+        "is_nvl": "",
+        "type": "TEXTFIELD",
+        "customfield": ""
+    }
+}

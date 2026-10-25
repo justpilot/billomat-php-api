@@ -1,0 +1,25 @@
+{
+    "article-properties": {
+        "article-property": [
+            {
+                "id": "6031",
+                "name": "Name 5",
+                "default_value": "",
+                "is_nvl": "",
+                "type": "TEXTFIELD",
+                "customfield": ""
+            },
+            {
+                "id": "6033",
+                "name": "Name 6",
+                "default_value": "",
+                "is_nvl": "",
+                "type": "TEXTFIELD",
+                "customfield": ""
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "2"
+    }
+}

@@ -1,48 +1,48 @@
-# Sicherheit
+# Security
 
-## Umgang mit API-Zugangsdaten
+## Handling API credentials
 
-Der Billomat-API-Schlüssel hat denselben Lese- und Schreibzugriff wie der angemeldete User. Behandle ihn entsprechend wie ein Passwort.
+A Billomat API key has the same read and write access as the user it belongs to. Treat it like a password.
 
-- **Niemals committen.** Lege Credentials nicht in `composer.json`, README, Tests oder anderen versionierten Dateien ab. Für lokale Tests verwendet das SDK `.env.test.local`, das bereits in `.gitignore` steht.
-- **Aus der Umgebung laden.** Empfohlen ist das Lesen aus Umgebungsvariablen (`getenv('BILLOMAT_API_KEY')`) oder einem Secret-Manager (Vault, AWS Secrets Manager, Doppler, etc.). Beispiele unter `examples/` zeigen das Muster.
-- **Pro Umgebung trennen.** Verwende getrennte Keys für Sandbox, Staging und Produktion. Rotiere Keys nach personellen Wechseln.
-- **`X-AppId` / `X-AppSecret` nur bei Bedarf.** Diese Header sind ausschließlich für eingetragene Drittanbieter-Apps relevant. Ein normaler Billomat-Account benötigt nur den API-Key (`X-BillomatApiKey`). Das SDK sendet App-Header nur, wenn beide Werte gesetzt sind.
+- **Never commit it.** Keep credentials out of `composer.json`, the README, tests and any other versioned file. For local tests the SDK uses `.env.test.local`, which is already in `.gitignore`.
+- **Load it from the environment** (`getenv('BILLOMAT_API_KEY')`) or a secret manager (Vault, AWS Secrets Manager, Doppler, …). The scripts under `examples/` show the pattern.
+- **Separate keys per environment** (sandbox, staging, production) and rotate them when people leave.
+- **`X-AppId` / `X-AppSecret` only if you need them.** These headers are for registered third-party apps. A regular Billomat account only needs the API key (`X-BillomatApiKey`). The SDK sends the app headers only when both values are set.
 
-## Logging und Fehler-Output
+## Logging and error output
 
-`HttpException` (und die Subklassen `AuthenticationException`, `NotFoundException`, `ValidationException`) speichern den unveränderten Antwort-Body der Billomat-API in `getResponseBody()`. Er ist beim Debuggen wertvoll, kann aber je nach Antwort sensible Kundendaten enthalten. Achte beim Loggen darauf:
+- `HttpException` and its subclasses keep Billomat's raw response body in `getResponseBody()`. It helps with debugging but can contain customer data, so don't write it unfiltered to shared logs.
+- The SDK's own PSR-3 logging (`logger:` on `BillomatClient`) never logs headers, query strings or bodies, only method, path, status, attempt and timing.
+- The PSR-14 events (`events:`) carry the full PSR-7 request, **including the `X-BillomatApiKey` header**. Mask it before you log requests from event listeners.
+- The SDK sends the API key only as a header, never in URLs.
 
-- den Response-Body nicht ungefiltert in öffentliche Logs zu schreiben,
-- den API-Key nicht versehentlich in Stack-Traces oder Request-Dumps auftauchen zu lassen — das SDK schreibt ihn nur in den `X-BillomatApiKey`-Header, nicht in URLs.
+## Supported versions
 
-## Unterstützte Versionen
-
-Aktuell wird ausschließlich die `2.x`-Linie aktiv gepflegt. Sicherheitsrelevante Fixes erscheinen als Patch-Releases gegen die jüngste Minor-Version.
-
-| Version | Unterstützt |
+| Version | Supported |
 |---|---|
-| 2.x | Ja |
-| 1.x | Nein |
-| < 1.0 | Nein |
+| 4.x | Yes (in development, pre-releases) |
+| 3.x | Security fixes until 4.0.0 is released |
+| < 3.0 | No |
 
-## Sicherheitslücken melden
+Security fixes are released as patch releases of the latest minor version.
 
-Bitte **kein** öffentliches GitHub-Issue für sicherheitsrelevante Findings. Stattdessen per E-Mail an den Maintainer:
+## Reporting a vulnerability
 
-- **E-Mail:** `dimitri@justpilot.io`
-- **Betreff:** `[Security] billomat-php-api: <kurze Beschreibung>`
+Please **don't** open a public GitHub issue for security findings. Email the maintainer instead:
 
-Beschreibe:
+- **Email:** `dimitri@justpilot.io`
+- **Subject:** `[Security] billomat-php-api: <short description>`
 
-- den betroffenen Codepfad (Datei + Funktion),
-- ein minimales Reproduktionsbeispiel,
-- die mögliche Auswirkung,
-- ggf. einen Vorschlag zur Behebung.
+Please include:
 
-Antwortzeiten variieren, aber wir bestätigen den Eingang in der Regel innerhalb weniger Werktage und koordinieren danach Fix und Veröffentlichungszeitpunkt mit dir.
+- the affected code path (file and function),
+- a minimal reproduction,
+- the possible impact,
+- a suggested fix, if you have one.
 
-## Was nicht in den Scope fällt
+We usually confirm receipt within a few working days and then coordinate the fix and the disclosure date with you.
 
-- Schwachstellen in der Billomat-API selbst — bitte direkt an [Billomat](https://www.billomat.com/) melden.
-- Schwachstellen in transitiven Abhängigkeiten (`symfony/http-client` etc.) — bitte beim jeweiligen Upstream-Projekt melden. Wir aktualisieren die Constraints nach, sobald der Fix verfügbar ist.
+## Out of scope
+
+- Vulnerabilities in the Billomat API itself: please report them to [Billomat](https://www.billomat.com/).
+- Vulnerabilities in dependencies (PSR-18 clients, `php-http/discovery`, …): please report them upstream. We raise our constraints once a fix is available.

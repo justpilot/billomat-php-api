@@ -111,9 +111,9 @@ final class BillomatConfigTest extends TestCase
     public function itRejectsInvalidLanguages(string $language): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid language "'.$language.'"');
+        $this->expectExceptionMessageIsOrContains('Invalid language "'.$language.'"');
 
-        (void) new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: $language);
+        new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: $language);
     }
 
     #[Test]

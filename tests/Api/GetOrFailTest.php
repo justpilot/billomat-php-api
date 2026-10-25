@@ -125,7 +125,7 @@ final class GetOrFailTest extends TestCase
         $billomat = self::client(new MockResponse('', ['http_code' => 404]));
 
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage('Billomat responded with HTTP 404 to GET /invoice-comments/3.');
+        $this->expectExceptionMessageIsOrContains('Billomat responded with HTTP 404 to GET /invoice-comments/3.');
 
         (void) $billomat->invoices->comments->getOrFail(3);
     }

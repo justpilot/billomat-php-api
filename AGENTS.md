@@ -42,6 +42,10 @@ Branches: `4.x` collects the work for 4.0.0 (BC breaks allowed; feature branches
 
 CI runs via `.github/workflows/ci.yml` on PHP 8.5 (required) and 8.6 (experimental). Three jobs: tests, quality (lint + PHPStan + Rector + audit), and mutation testing (changed lines on PRs with 90 %, all code on pushes to `main`/`4.x` with `minMsi`/`minCoveredMsi` 95 from `infection.json5`).
 
+### Documentation website
+
+`docs/` is also a VitePress site (`docs/.vitepress/config.mts`, `docs/package.json`, `cd docs && npm ci && npm run build`), deployed by `.github/workflows/docs.yml` to https://billomat-php.justpilot.io (`docs/public/CNAME`). The sidebar is built from the first `# ` heading of each page; `docs/spec/`, `docs/audit.md` and `docs/roadmap-v4.md` are excluded. Relative links to files outside `docs/` are rewritten to GitHub. Dead links fail the build.
+
 ## Architecture
 
 ### Entry point: `BillomatClient`

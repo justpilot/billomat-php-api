@@ -1,0 +1,28 @@
+{
+    "role": {
+        "id": "1",
+        "created": "2013-09-27T10:49:44+02:00",
+        "updated": "2013-09-27T10:49:44+02:00",
+        "name": "Name 15",
+        "articles": "DELETE",
+        "clients": "DELETE",
+        "suppliers": "DELETE",
+        "invoices": "DELETE",
+        "offers": "DELETE",
+        "reminders": "DELETE",
+        "incomings": "DELETE",
+        "credit_notes": "DELETE",
+        "confirmations": "DELETE",
+        "delivery_notes": "DELETE",
+        "letters": "DELETE",
+        "banking": "UPDATE",
+        "net_income_statement": "DELETE",
+        "accounting_export": "UPDATE",
+        "settings_my_account": "UPDATE",
+        "settings_documents": "UPDATE",
+        "settings_configuration": "UPDATE",
+        "settings_administration": "UPDATE",
+        "settings_addons": "UPDATE",
+        "settings_my_addons": "UPDATE"
+    }
+}

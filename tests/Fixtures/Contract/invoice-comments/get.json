@@ -1,0 +1,15 @@
+{
+    "invoice-comment": {
+        "id": "92445240",
+        "created": "2025-12-31T14:48:32+01:00",
+        "comment": "Text 13",
+        "actionkey": "CREATE",
+        "public": "0",
+        "by_client": "0",
+        "user_id": "136536",
+        "email_id": "",
+        "client_id": "",
+        "invoice_id": "22808888",
+        "customfield": ""
+    }
+}

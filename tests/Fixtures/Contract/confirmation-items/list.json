@@ -1,0 +1,28 @@
+{
+    "confirmation-items": {
+        "confirmation-item": {
+            "id": "2235610",
+            "article_id": "",
+            "confirmation_id": "550206",
+            "position": "1",
+            "unit": "Stück",
+            "quantity": "1",
+            "type": "",
+            "unit_price": "81.39",
+            "tax_name": "USt",
+            "tax_rate": "19",
+            "title": "Text 19",
+            "description": "",
+            "total_net": "68.395",
+            "total_gross": "81.39",
+            "reduction": "",
+            "total_net_unreduced": "68.395",
+            "total_gross_unreduced": "81.39",
+            "tax_changed_manually": "0",
+            "customfield": ""
+        },
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "1"
+    }
+}

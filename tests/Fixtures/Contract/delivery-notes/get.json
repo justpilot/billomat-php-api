@@ -1,0 +1,25 @@
+{
+    "delivery-note": {
+        "id": "889201",
+        "created": "2026-10-20T20:37:38+02:00",
+        "updated": "2026-10-20T20:37:38+02:00",
+        "client_id": "9340866",
+        "contact_id": "",
+        "delivery_note_number": "",
+        "number": "",
+        "number_pre": "LS",
+        "number_length": "0",
+        "title": "Text 21",
+        "date": "",
+        "address": "Firma 1 GmbH\nMusterstraße 1\n10001 Musterstadt 1",
+        "status": "DRAFT",
+        "label": "",
+        "intro": "Text 22",
+        "note": "Text 23",
+        "offer_id": "",
+        "confirmation_id": "",
+        "invoice_id": "",
+        "template_id": "971613",
+        "customfield": ""
+    }
+}

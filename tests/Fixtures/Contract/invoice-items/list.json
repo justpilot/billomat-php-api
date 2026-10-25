@@ -1,0 +1,28 @@
+{
+    "invoice-items": {
+        "invoice-item": {
+            "id": "59565129",
+            "article_id": "",
+            "invoice_id": "22808888",
+            "position": "1",
+            "unit": "",
+            "quantity": "1",
+            "type": "SERVICE",
+            "unit_price": "40",
+            "tax_name": "USt",
+            "tax_rate": "19",
+            "title": "Text 11",
+            "description": "Text 12",
+            "total_net": "33.6134",
+            "total_gross": "40",
+            "reduction": "",
+            "total_net_unreduced": "33.6134",
+            "total_gross_unreduced": "40",
+            "tax_changed_manually": "0",
+            "customfield": ""
+        },
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "1"
+    }
+}

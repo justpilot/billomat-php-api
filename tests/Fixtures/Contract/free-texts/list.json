@@ -1,0 +1,45 @@
+{
+    "free-texts": {
+        "free-text": [
+            {
+                "id": "489335",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-24T22:59:58+01:00",
+                "type": "INVOICE",
+                "name": "Name 8",
+                "title": "",
+                "label": "",
+                "intro": "Text 32",
+                "note": "Text 33",
+                "is_default": "1"
+            },
+            {
+                "id": "489336",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-24T22:59:58+01:00",
+                "type": "OFFER",
+                "name": "Name 8",
+                "title": "",
+                "label": "",
+                "intro": "Text 34",
+                "note": "Text 35",
+                "is_default": "1"
+            },
+            {
+                "id": "489337",
+                "created": "2025-12-24T22:59:58+01:00",
+                "updated": "2025-12-24T22:59:58+01:00",
+                "type": "CREDIT_NOTE",
+                "name": "Name 8",
+                "title": "",
+                "label": "",
+                "intro": "Text 36",
+                "note": "Text 37",
+                "is_default": "1"
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "7"
+    }
+}

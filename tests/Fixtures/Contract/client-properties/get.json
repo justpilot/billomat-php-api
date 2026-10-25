@@ -1,0 +1,10 @@
+{
+    "client-property": {
+        "id": "19196",
+        "name": "Name 2",
+        "default_value": "",
+        "is_nvl": "",
+        "type": "TEXTFIELD",
+        "customfield": ""
+    }
+}

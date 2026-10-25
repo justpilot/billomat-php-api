@@ -1,0 +1,63 @@
+{
+    "invoice-payments": {
+        "invoice-payment": [
+            {
+                "id": "16378259",
+                "created": "2025-12-31T15:00:34+01:00",
+                "invoice_id": "22808964",
+                "user_id": "136536",
+                "date": "2025-12-31",
+                "amount": "-40",
+                "comment": "",
+                "transaction_purpose": "",
+                "currency_code": "EUR",
+                "quote": "1",
+                "payment_group": "455c7515-c131-44ee-9eed-6b3c29d77afd",
+                "finapi_transaction_id": "",
+                "finapi_transaction_amount": "",
+                "type": "",
+                "document_title": "Korrekturrechnung zur Rechnung RE352500001",
+                "customfield": ""
+            },
+            {
+                "id": "16378260",
+                "created": "2025-12-31T15:00:35+01:00",
+                "invoice_id": "22808888",
+                "user_id": "136536",
+                "date": "2025-12-31",
+                "amount": "40",
+                "comment": "",
+                "transaction_purpose": "",
+                "currency_code": "EUR",
+                "quote": "1",
+                "payment_group": "64192d73-210c-47ae-8064-42e0e50afb86",
+                "finapi_transaction_id": "",
+                "finapi_transaction_amount": "",
+                "type": "INVOICE_CORRECTION",
+                "document_title": "Rechnung RE352500001",
+                "customfield": ""
+            },
+            {
+                "id": "16378309",
+                "created": "2025-12-31T15:04:26+01:00",
+                "invoice_id": "22808947",
+                "user_id": "136536",
+                "date": "2025-12-31",
+                "amount": "50",
+                "comment": "",
+                "transaction_purpose": "",
+                "currency_code": "EUR",
+                "quote": "1",
+                "payment_group": "2df0a18c-f2db-4ec9-9c9a-6c961cbe76fa",
+                "finapi_transaction_id": "",
+                "finapi_transaction_amount": "",
+                "type": "CASH",
+                "document_title": "Rechnung RE362500002",
+                "customfield": ""
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "156"
+    }
+}

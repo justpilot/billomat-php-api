@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
@@ -62,9 +63,13 @@ final readonly class Supplier
         'creditor_identifier' => true,
         'costs_gross' => true,
         'costs_net' => true,
+        'supplier-property-values' => true,
     ];
 
-    /** @param array<string, mixed> $extra */
+    /**
+     * @param list<SupplierPropertyValue> $propertyValues
+     * @param array<string, mixed>        $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Lieferanten. */
         public ?int $id,
@@ -159,6 +164,12 @@ final readonly class Supplier
         /** Netto-Kosten (read-only Auswertungsfeld). */
         public ?Money $costsNet = null,
         /**
+         * Attributwerte des Lieferanten.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert (leer: "").
+         */
+        public array $propertyValues = [],
+        /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
          * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
@@ -211,6 +222,7 @@ final readonly class Supplier
             creditorIdentifier: ScalarCaster::toStringOrNull($data['creditor_identifier'] ?? null),
             costsGross: ScalarCaster::toMoneyOrNull($data['costs_gross'] ?? null),
             costsNet: ScalarCaster::toMoneyOrNull($data['costs_net'] ?? null),
+            propertyValues: ListCaster::toNestedList($data['supplier-property-values'] ?? null, 'supplier-property-value', 'id', SupplierPropertyValue::fromArray(...)),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -224,7 +236,7 @@ final readonly class Supplier
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
@@ -263,5 +275,13 @@ final readonly class Supplier
             'costs_gross' => $this->costsGross?->toString(),
             'costs_net' => $this->costsNet?->toString(),
         ];
+
+        if ([] !== $this->propertyValues) {
+            $data['supplier-property-values'] = [
+                'supplier-property-value' => array_map(static fn (SupplierPropertyValue $item): array => $item->toArray(), $this->propertyValues),
+            ];
+        }
+
+        return $data;
     }
 }

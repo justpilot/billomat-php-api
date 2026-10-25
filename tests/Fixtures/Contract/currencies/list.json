@@ -1,0 +1,24 @@
+{
+    "currencies": {
+        "currency": [
+            {
+                "id": "1",
+                "code": "EUR",
+                "symbol": "€",
+                "name": "Name 12"
+            },
+            {
+                "id": "2",
+                "code": "USD",
+                "symbol": "$",
+                "name": "Name 13"
+            },
+            {
+                "id": "3",
+                "code": "CHF",
+                "symbol": "CHF",
+                "name": "Name 14"
+            }
+        ]
+    }
+}

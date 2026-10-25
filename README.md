@@ -238,6 +238,8 @@ Beispiele und Patterns: [docs/error-handling.md](docs/error-handling.md), Hinter
 
 ## Logging & HTTP-Client
 
+Mit `logger:` (PSR-3) loggt das SDK Antworten (`debug`), Retries (`warning`) und Fehler (`notice`/`error`) – ohne Header, Query und Body. Mit `events:` (PSR-14) bekommst du `RequestStarted`, `ResponseReceived`, `RetryScheduled` und `RequestFailed` aus `Justpilot\Billomat\Event`, etwa für Metriken oder Tracing. Details: [docs/configuration.md](docs/configuration.md#beispiel-request-response-logging).
+
 `httpClient` nimmt jeden PSR-18-Client (`Psr\Http\Client\ClientInterface`) entgegen. Ohne Angabe nutzt das SDK Symfonys `Psr18Client` mit dem konfigurierten Timeout, falls `symfony/http-client` installiert ist, sonst den per `php-http/discovery` gefundenen Client. Ein eigener Client konfiguriert seinen Timeout selbst. Einen Symfony-`HttpClientInterface` — etwa mit Logging oder Tracing dekoriert — wickelst du in `Psr18Client` ein:
 
 ```php

@@ -9,10 +9,14 @@ use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
+use Justpilot\Billomat\Event\RequestStarted;
+use Justpilot\Billomat\Event\ResponseReceived;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Tests\Support\RecordingEventDispatcher;
+use Justpilot\Billomat\Tests\Support\RecordingLogger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -29,6 +33,8 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
+#[UsesClass(RequestStarted::class)]
+#[UsesClass(ResponseReceived::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Client::class)]
 #[UsesClass(ListCaster::class)]
@@ -91,6 +97,25 @@ final class BillomatClientTest extends TestCase
         self::assertContainsOnlyInstancesOf(Client::class, $clients);
 
         // zusätzliche Sicherstellung: weitere APIs sind verdrahtet
+    }
+
+    #[Test]
+    public function createPassesLoggerAndEventDispatcher(): void
+    {
+        $dispatcher = new RecordingEventDispatcher();
+        $logger = new RecordingLogger();
+
+        $client = BillomatClient::create(
+            billomatId: 'mycompany',
+            apiKey: 'k',
+            httpClient: new Psr18Client(new MockHttpClient(new MockResponse('{}'))),
+            logger: $logger,
+            events: $dispatcher,
+        );
+        $client->getHttpClient()->request('GET', '/clients');
+
+        self::assertSame([RequestStarted::class, ResponseReceived::class], $dispatcher->classes());
+        self::assertSame(['debug'], $logger->levels());
     }
 
     #[Test]

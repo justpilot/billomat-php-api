@@ -38,9 +38,11 @@ use Justpilot\Billomat\Api\UsersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
 
@@ -87,21 +89,27 @@ final readonly class BillomatClient
     public SearchApi $search;
 
     /**
-     * @param ClientInterface|null         $httpClient     beliebiger PSR-18-Client; ohne Angabe sucht das SDK einen per php-http/discovery
-     * @param RequestFactoryInterface|null $requestFactory PSR-17-Factory; ohne Angabe per php-http/discovery
-     * @param StreamFactoryInterface|null  $streamFactory  PSR-17-Factory; ohne Angabe per php-http/discovery
+     * @param ClientInterface|null          $httpClient     beliebiger PSR-18-Client; ohne Angabe sucht das SDK einen per php-http/discovery
+     * @param RequestFactoryInterface|null  $requestFactory PSR-17-Factory; ohne Angabe per php-http/discovery
+     * @param StreamFactoryInterface|null   $streamFactory  PSR-17-Factory; ohne Angabe per php-http/discovery
+     * @param LoggerInterface|null          $logger         PSR-3-Logger für Antworten, Retries und Fehler (ohne Header und Bodies)
+     * @param EventDispatcherInterface|null $events         PSR-14-Dispatcher für die Events aus `Justpilot\Billomat\Event`
      */
     public function __construct(
         BillomatConfig $config,
         ?ClientInterface $httpClient = null,
         ?RequestFactoryInterface $requestFactory = null,
         ?StreamFactoryInterface $streamFactory = null,
+        ?LoggerInterface $logger = null,
+        ?EventDispatcherInterface $events = null,
     ) {
         $this->http = new BillomatHttpClient(
             $httpClient ?? $this->discoverHttpClient($config),
             $config,
             $requestFactory,
             $streamFactory,
+            logger: $logger,
+            events: $events,
         );
 
         // APIs
@@ -147,6 +155,8 @@ final readonly class BillomatClient
         ?ClientInterface $httpClient = null,
         RetryPolicy $retry = new RetryPolicy(),
         ?string $language = 'de-de',
+        ?LoggerInterface $logger = null,
+        ?EventDispatcherInterface $events = null,
     ): self {
         $config = new BillomatConfig(
             billomatId: $billomatId,
@@ -158,7 +168,7 @@ final readonly class BillomatClient
             language: $language,
         );
 
-        return new self($config, $httpClient);
+        return new self($config, $httpClient, logger: $logger, events: $events);
     }
 
     public function getHttpClient(): BillomatHttpClient

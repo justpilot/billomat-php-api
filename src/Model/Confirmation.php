@@ -181,7 +181,9 @@ final readonly class Confirmation
         ];
 
         if ([] !== $this->taxes) {
-            $data['taxes'] = ['tax' => $this->taxes];
+            $data['taxes'] = [
+                'tax' => array_map(static fn (array $tax): array => [...$tax, 'amount' => $tax['amount']->toString()], $this->taxes),
+            ];
         }
 
         if ([] !== $this->items) {

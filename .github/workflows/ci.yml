@@ -113,10 +113,12 @@ jobs:
     name: Mutation Testing
     runs-on: ubuntu-latest
     needs: tests
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # PRs mutieren nur die geänderten Zeilen und brauchen dafür den Basis-Branch.
+          fetch-depth: 0
 
       - name: Setup PHP 8.5
         uses: shivammathur/setup-php@v2
@@ -125,12 +127,17 @@ jobs:
           extensions: bcmath
           coverage: xdebug
           tools: composer:v2
-          ini-values: memory_limit=512M
+          ini-values: memory_limit=1G
 
       - name: Install dependencies
         uses: ramsey/composer-install@v4
 
-      - name: Run Infection
+      - name: Run Infection on changed lines
+        if: github.event_name == 'pull_request'
+        run: composer mutate -- --logger-github --git-diff-lines --git-diff-base=origin/${{ github.base_ref }} --min-msi=90 --min-covered-msi=90
+
+      - name: Run Infection on all code
+        if: github.event_name == 'push'
         run: composer mutate -- --logger-github
         env:
           INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}

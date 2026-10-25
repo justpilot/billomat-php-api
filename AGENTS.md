@@ -23,7 +23,7 @@ composer analyse                # PHPStan level max (uses phpstan-baseline.neon)
 composer analyse:baseline       # Regenerate the PHPStan baseline
 composer refactor               # Apply Rector
 composer refactor:dry           # Show Rector suggestions
-composer mutate                 # Infection mutation testing (slow)
+composer mutate                 # Infection mutation testing (~3 min, all of src/)
 composer audit                  # Security audit of dependencies
 composer generate               # Regenerate models/options from docs/spec/billomat.json + tools/codegen/definitions/
 composer generate:check         # Fail if generated files under src/ are out of date
@@ -41,7 +41,7 @@ Integration tests under `tests/Integration/` hit the real Billomat sandbox. They
 
 Branches: `4.x` collects the work for 4.0.0 (BC breaks allowed; feature branches target `4.x`). `main` only gets 3.x fixes until 4.0 is released and is merged into `4.x` regularly. Every BC break on `4.x` needs a CHANGELOG entry and a before/after section in `UPGRADE-4.0.md` (English).
 
-CI runs via `.github/workflows/ci.yml` on PHP 8.5 (required) and 8.6 (experimental). Three jobs: tests, quality (lint + PHPStan + Rector + audit), and mutation testing on PRs.
+CI runs via `.github/workflows/ci.yml` on PHP 8.5 (required) and 8.6 (experimental). Three jobs: tests, quality (lint + PHPStan + Rector + audit), and mutation testing (changed lines on PRs with 90 %, all code on pushes to `main`/`4.x` with `minMsi`/`minCoveredMsi` 95 from `infection.json5`).
 
 ## Architecture
 
@@ -120,5 +120,6 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 - All API classes are `final`; models are `final readonly`.
 - PSR-4: `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.
 - Unit tests use `Symfony\Component\HttpClient\MockHttpClient` + `MockResponse`, wrapped in `Psr18Client` (`new BillomatHttpClient(new Psr18Client($mock), $config)`), to capture the outgoing request and assert URL/method/headers/body (`$options['body']` is the JSON string). Don't mock `BillomatHttpClient` itself. Retry tests pass a `sleep:` closure instead of waiting.
+- Generated code needs no per-class tests for its field mapping: `tests/Model/ModelRoundTripTest.php` and `tests/Api/Options/GeneratedOptionsTest.php` cover every model with `fromArray()`/`toArray()` and every generated `*Options` class via reflection (wire names from the `Billomat-Feld:` docblock line). New field types need a sample value there. Infection runs with strict coverage: a test touching a class outside its `CoversClass`/`UsesClass` is risky and aborts the run, so add the attribute (or `UsesNamespace`).
 - Test methods use PHPUnit 13 attributes: `#[Test]` on each method (no `test_` prefix), `#[CoversClass]` on unit-test classes, `#[CoversNothing]` on integration tests, `#[DataProvider]` for providers. Assertions are called statically (`self::assertX()`).
 - Comments are in German throughout. Match the existing language when editing existing files; new files can follow the same style.

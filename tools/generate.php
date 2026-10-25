@@ -340,7 +340,8 @@ function renderModel(array $definition, array $fields, string $source): string
     foreach ($listFields as $field) {
         $value = '$this->' . $field['property'];
         if ('taxes' === $field['type']) {
-            $entry = "['tax' => {$value}]";
+            // Beträge wie bei den übrigen Feldern als String exportieren.
+            $entry = "[\n                'tax' => array_map(static fn (array \$tax): array => [...\$tax, 'amount' => \$tax['amount']->toString()], {$value}),\n            ]";
         } else {
             $class = $field['list']['class'];
             $entry = "[\n                '{$field['list']['item']}' => array_map(static fn ({$class} \$item): array => \$item->toArray(), {$value}),\n            ]";

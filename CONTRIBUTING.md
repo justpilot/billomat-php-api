@@ -70,11 +70,13 @@ composer analyse        # PHPStan Level max (mit phpstan-baseline.neon)
 composer analyse:baseline   # Baseline regenerieren
 composer refactor:dry   # Rector Vorschläge
 composer refactor       # Rector anwenden
-composer mutate         # Infection Mutation Testing
+composer mutate         # Infection Mutation Testing (~3 Minuten, ganzes src/)
 composer audit          # Sicherheits-Audit der Abhängigkeiten
 ```
 
 **PHPStan-Baseline:** `phpstan-baseline.neon` friert bestehende Findings ein. Neue Findings führen zu CI-Fail. Wer bestehende Findings behebt, regeneriert die Baseline mit `composer analyse:baseline` und committet das Ergebnis.
+
+**Infection:** Im PR mutiert die CI nur die geänderten Zeilen und verlangt dort 90 % MSI; lokal geht das mit `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x`. Der volle Lauf auf `main`/`4.x` prüft die Schwellen aus `infection.json5` (95 %).
 
 **Rector + CS-Fixer Konflikte:** Sollte CS-Fixer eine Rector-Änderung wieder zurückdrehen oder umgekehrt, ist das ein Konfigurationsfehler. Bitte als Issue melden statt Workarounds einzuchecken.
 

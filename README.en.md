@@ -12,6 +12,9 @@ Modern, fully typed PHP 8.4+ SDK for the [Billomat API](https://www.billomat.com
 
 > Unofficial SDK. This project is not affiliated with Billomat GmbH and is developed and maintained independently.
 
+> [!NOTE]
+> **4.0 is out as a pre-release** ([`v4.0.0-alpha.1`](https://github.com/justpilot/billomat-php-api/releases/tag/v4.0.0-alpha.1)): PHP 8.5, any PSR-18 client, exact amounts instead of `float`. The 4.0 documentation is at [billomat-php.justpilot.io](https://billomat-php.justpilot.io), the migration guide in [UPGRADE-4.0.md](https://github.com/justpilot/billomat-php-api/blob/4.x/UPGRADE-4.0.md). This README still describes 3.x.
+
 ## Contents
 
 - [Requirements](#requirements)

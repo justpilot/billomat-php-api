@@ -22,6 +22,7 @@ use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferPdf;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -208,7 +209,7 @@ final class OffersApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offers', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertArrayHasKey('offer', $payload);
         self::assertSame(123, $payload['offer']['client_id']);
@@ -255,7 +256,7 @@ final class OffersApiTest extends TestCase
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offers/777', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame(['offer' => ['date' => '2026-03-10']], $payload);
     }
 
@@ -279,7 +280,7 @@ final class OffersApiTest extends TestCase
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offers/777/complete', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame(['offer' => ['template_id' => 5]], $payload);
     }
 
@@ -369,7 +370,7 @@ final class OffersApiTest extends TestCase
         $api->email(42);
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offers/42/email', $captured['url']);
-        self::assertSame(['email' => []], $this->extractJsonPayload($captured['options']));
+        self::assertSame(['email' => []], JsonPayload::fromOptions($captured['options']));
     }
 
     #[Test]
@@ -392,7 +393,7 @@ final class OffersApiTest extends TestCase
 
         $api->email(42, $opts);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame('me@example.com', $payload['email']['from'] ?? null);
         self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
         self::assertSame('Ihr Angebot', $payload['email']['subject'] ?? null);
@@ -484,27 +485,7 @@ final class OffersApiTest extends TestCase
 
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offers/555/upload-signature', $captured['url']);
-        self::assertSame(['upload' => ['base64file' => $base64]], $this->extractJsonPayload($captured['options']));
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
+        self::assertSame(['upload' => ['base64file' => $base64]], JsonPayload::fromOptions($captured['options']));
     }
 
     #[Test]

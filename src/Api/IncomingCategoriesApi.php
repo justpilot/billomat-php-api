@@ -21,7 +21,7 @@ use NoDiscard;
 final class IncomingCategoriesApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<IncomingCategory>
      */
@@ -38,7 +38,7 @@ final class IncomingCategoriesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<IncomingCategory>
      */
@@ -55,7 +55,7 @@ final class IncomingCategoriesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, IncomingCategory>
      */
@@ -82,7 +82,7 @@ final class IncomingCategoriesApi extends AbstractApi
         }
 
         $row = $data['incoming-category'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

@@ -72,8 +72,8 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
     }
 
     /**
-     * @param array<string, scalar|array|null> $query
-     * @param array<string, mixed>|null        $json
+     * @param array<string, scalar|array<scalar|null>|null> $query
+     * @param array<string, mixed>|null                     $json
      */
     public function request(
         string $method,
@@ -325,7 +325,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
      * - Werte werden RFC-konform encoded, ABER:
      *   - "+" bleibt ein Literal (z. B. "date+DESC"), weil Billomat "%2B" nicht versteht.
      *
-     * @param array<string, scalar|array|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      */
     private function buildBillomatQuery(array $query): string
     {

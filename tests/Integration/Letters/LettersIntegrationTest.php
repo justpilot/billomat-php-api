@@ -24,7 +24,10 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] !== $clients) {
-            return $clients[0]->id;
+            $id = $clients[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         $faker = $this->faker();

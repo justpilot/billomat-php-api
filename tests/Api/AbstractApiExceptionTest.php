@@ -29,7 +29,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 final class TestApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      *
      * @return array<string,mixed>
      */

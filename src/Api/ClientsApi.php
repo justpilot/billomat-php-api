@@ -72,7 +72,7 @@ final class ClientsApi extends AbstractApi
      *
      * Entspricht GET /clients
      *
-     * @param ClientFilter|array<string, scalar|array|null> $filters
+     * @param ClientFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Client>
      */
@@ -89,7 +89,7 @@ final class ClientsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param ClientFilter|array<string, scalar|array|null> $filters
+     * @param ClientFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Client>
      */
@@ -107,7 +107,7 @@ final class ClientsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param ClientFilter|array<string, scalar|array|null> $filters
+     * @param ClientFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Client>
      */
@@ -133,7 +133,7 @@ final class ClientsApi extends AbstractApi
 
         $clientData = $data['client'] ?? null;
 
-        if (!\is_array($clientData)) {
+        if (!self::isRecord($clientData)) {
             return null;
         }
 

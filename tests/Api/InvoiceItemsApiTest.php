@@ -146,12 +146,13 @@ final class InvoiceItemsApiTest extends TestCase
 
         // Request prüfen
         self::assertSame('GET', $captured['method']);
+        self::assertIsString($captured['url']);
         self::assertStringStartsWith(
             'https://mycompany.billomat.net/api/invoice-items',
             $captured['url']
         );
-        self::assertStringContainsString('invoice_id=123', (string) $captured['url']);
-        self::assertStringContainsString('per_page=50', (string) $captured['url']);
+        self::assertStringContainsString('invoice_id=123', $captured['url']);
+        self::assertStringContainsString('per_page=50', $captured['url']);
     }
 
     #[Test]
@@ -238,7 +239,7 @@ final class InvoiceItemsApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured): MockResponse {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -250,10 +251,10 @@ final class InvoiceItemsApiTest extends TestCase
                 $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
             }
 
-            $this->assertIsArray($payload);
-            $this->assertArrayHasKey('invoice-item', $payload);
-            $this->assertSame(123, $payload['invoice-item']['invoice_id'] ?? null);
-            $this->assertSame('Neue Position', $payload['invoice-item']['title'] ?? null);
+            self::assertIsArray($payload);
+            self::assertArrayHasKey('invoice-item', $payload);
+            self::assertSame(123, $payload['invoice-item']['invoice_id'] ?? null);
+            self::assertSame('Neue Position', $payload['invoice-item']['title'] ?? null);
 
             $body = json_encode([
                 'invoice-item' => [
@@ -320,7 +321,7 @@ final class InvoiceItemsApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured): MockResponse {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured['method'] = $method;
             $captured['url'] = $url;
             $captured['options'] = $options;
@@ -332,9 +333,9 @@ final class InvoiceItemsApiTest extends TestCase
                 $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
             }
 
-            $this->assertIsArray($payload);
-            $this->assertArrayHasKey('invoice-item', $payload);
-            $this->assertSame('Geänderter Titel', $payload['invoice-item']['title'] ?? null);
+            self::assertIsArray($payload);
+            self::assertArrayHasKey('invoice-item', $payload);
+            self::assertSame('Geänderter Titel', $payload['invoice-item']['title'] ?? null);
 
             $body = json_encode([
                 'invoice-item' => [

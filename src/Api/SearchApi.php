@@ -23,7 +23,7 @@ final class SearchApi extends AbstractApi
      *
      * Entspricht GET /search?query={query}.
      *
-     * @param array<string, scalar|array|null> $extraFilters zusätzliche Query-Parameter neben `query`
+     * @param array<string, scalar|array<scalar|null>|null> $extraFilters zusätzliche Query-Parameter neben `query`
      *
      * @return list<SearchResult>
      */

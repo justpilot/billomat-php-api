@@ -44,6 +44,31 @@ final class ListCasterTest extends TestCase
     }
 
     /**
+     * @return iterable<string, array{mixed, list<?int>}>
+     */
+    public static function nestedListCases(): iterable
+    {
+        yield 'null' => [null, []];
+        yield 'leerer String statt Wrapper' => ['', []];
+        yield 'Wrapper ohne Liste' => [['other' => [['id' => '5']]], []];
+        yield 'einzelnes Objekt' => [['tax' => ['id' => '5']], [5]];
+        yield 'Liste' => [['tax' => [['id' => '5'], ['id' => '6']]], [5, 6]];
+        yield 'leere Liste' => [['tax' => []], []];
+    }
+
+    /**
+     * @param list<?int> $expected
+     */
+    #[Test]
+    #[DataProvider('nestedListCases')]
+    public function toNestedListReadsTheListFromItsWrapper(mixed $wrapper, array $expected): void
+    {
+        $ids = ListCaster::toNestedList($wrapper, 'tax', 'id', static fn (array $row): ?int => ScalarCaster::toIntOrNull($row['id'] ?? null));
+
+        self::assertSame($expected, $ids);
+    }
+
+    /**
      * @return iterable<string, array{mixed, list<PaymentType>}>
      */
     public static function enumListCases(): iterable

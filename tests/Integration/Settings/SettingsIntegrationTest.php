@@ -44,7 +44,7 @@ final class SettingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         // Sicherheitsbremse: PUT nur wenn explizit aktiviert
         $enabled = getenv('BILLOMAT_SETTINGS_PUT');
         if ('1' !== $enabled) {
-            $this->markTestSkipped('Set BILLOMAT_SETTINGS_PUT=1 to enable PUT /settings integration test.');
+            self::markTestSkipped('Set BILLOMAT_SETTINGS_PUT=1 to enable PUT /settings integration test.');
         }
 
         $billomat = $this->createBillomatClientOrSkip();

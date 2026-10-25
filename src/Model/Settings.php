@@ -178,7 +178,7 @@ final readonly class Settings
         // price_group2..n
         $priceGroups = [];
         foreach ($data as $k => $v) {
-            if (\is_string($k) && preg_match('/^price_group(\d+)$/', $k, $m) && \is_string($v)) {
+            if (\is_string($k) && 1 === preg_match('/^price_group(\d+)$/', $k, $m) && \is_string($v)) {
                 $priceGroups[(int) $m[1]] = $v;
             }
         }
@@ -197,10 +197,10 @@ final readonly class Settings
             if (\is_string($tmp)) {
                 $bcc = [$tmp];
             } elseif (\is_array($tmp)) {
-                $bcc = array_values(array_filter(array_map(
-                    static fn ($x): ?string => \is_string($x) ? $x : null,
-                    $tmp
-                )));
+                $bcc = array_values(array_filter(
+                    $tmp,
+                    static fn (mixed $x): bool => \is_string($x) && '' !== $x,
+                ));
             }
         }
 

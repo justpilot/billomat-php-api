@@ -88,7 +88,7 @@ abstract class AbstractSubResourceApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TModel>
      */

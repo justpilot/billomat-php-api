@@ -100,7 +100,7 @@ final class InvoicePaymentsApiTest extends TestCase
         self::assertSame(100, $first->invoiceId);
         self::assertSame('119', $first->amount->toString());
         self::assertInstanceOf(DateTimeImmutable::class, $first->date);
-        self::assertSame('2025-01-01', $first->date?->format('Y-m-d'));
+        self::assertSame('2025-01-01', $first->date->format('Y-m-d'));
         self::assertSame(PaymentType::BANK_TRANSFER, $first->type);
         self::assertSame('Testzahlung 1', $first->comment);
 

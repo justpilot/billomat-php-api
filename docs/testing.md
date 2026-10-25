@@ -153,11 +153,7 @@ composer mutate      # Infection Mutation-Testing (~3 Minuten)
 composer ci          # Lint + Analyse + Refactor-Dry + alle Tests
 ```
 
-PHPStan nutzt eine Baseline (`phpstan-baseline.neon`), die bestehende Findings einfriert. Neue Findings führen zu CI-Fail. Beim Beheben Baseline neu generieren:
-
-```bash
-composer analyse:baseline
-```
+PHPStan läuft ohne Baseline: Jedes Finding führt zu CI-Fail und wird im Code behoben.
 
 ## Continuous Integration
 

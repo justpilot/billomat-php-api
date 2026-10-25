@@ -28,7 +28,7 @@ use NoDiscard;
 final class ContactsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array<mixed>|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      *
      * @return list<Contact>
      */
@@ -51,7 +51,7 @@ final class ContactsApi extends AbstractApi
 
         $row = $data['contact'] ?? null;
 
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

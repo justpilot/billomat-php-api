@@ -51,7 +51,7 @@ final class PropertyValuesApi extends AbstractSubResourceApi
      *
      * Weitere Filter laut Doku: `{parent}_property_id`, `value`.
      *
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TValue>
      */
@@ -64,7 +64,7 @@ final class PropertyValuesApi extends AbstractSubResourceApi
     /**
      * Liefert eine einzelne Seite samt Pagination-Metadaten.
      *
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<TValue>
      */
@@ -77,7 +77,7 @@ final class PropertyValuesApi extends AbstractSubResourceApi
     /**
      * Iteriert lazy durch alle Attributwerte und yieldet sie einzeln.
      *
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, TValue>
      */
@@ -102,9 +102,9 @@ final class PropertyValuesApi extends AbstractSubResourceApi
     }
 
     /**
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
-     * @return array<string, scalar|array<mixed>|null>
+     * @return array<string, scalar|array<scalar|null>|null>
      */
     private function withParent(?int $parentId, array $filters): array
     {

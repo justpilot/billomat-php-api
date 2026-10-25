@@ -24,7 +24,7 @@ final class ActivitiesApi extends AbstractApi
      *
      * Entspricht GET /activity-feed.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Activity>
      */
@@ -37,7 +37,7 @@ final class ActivitiesApi extends AbstractApi
     /**
      * Eine einzelne Seite samt Pagination-Metadaten.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Activity>
      */
@@ -50,7 +50,7 @@ final class ActivitiesApi extends AbstractApi
     /**
      * Iteriert lazy durch den vollständigen Feed.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Activity>
      */

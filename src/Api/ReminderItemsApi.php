@@ -34,7 +34,7 @@ final class ReminderItemsApi extends AbstractSubResourceApi
     /**
      * Listet die Positionen einer Mahnung.
      *
-     * @param array<string, scalar|array<mixed>|null> $query zusätzliche Filter (page, per_page, …)
+     * @param array<string, scalar|array<scalar|null>|null> $query zusätzliche Filter (page, per_page, …)
      *
      * @return list<ReminderItem>
      */

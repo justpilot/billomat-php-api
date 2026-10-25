@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Http;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -23,13 +24,13 @@ final class BillomatHttpClientTest extends TestCase
     #[Test]
     public function itSendsRequestsWithExpectedHeadersAndUrl(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
             // capture info for later assertions
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             return new MockResponse('{"ok": true}', [
                 'http_code' => 200,
@@ -50,28 +51,14 @@ final class BillomatHttpClientTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
 
         // Assert method + URL
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/clients',
-            $captured['url']
+            $captured->url
         );
 
-        // Normalise headers from options (can be associative or list of "Name: value" strings)
-        $rawHeaders = $captured['options']['headers'] ?? [];
-        $normalized = [];
-
-        foreach ($rawHeaders as $key => $value) {
-            if (\is_int($key)) {
-                // "Header-Name: value" style
-                if (\is_string($value) && str_contains($value, ':')) {
-                    [$name, $val] = explode(':', $value, 2);
-                    $normalized[strtolower(trim($name))] = trim($val);
-                }
-            } else {
-                // "Header-Name" => "value" style
-                $normalized[strtolower((string) $key)] = \is_array($value) ? implode(', ', $value) : $value;
-            }
-        }
+        // Header aus den Optionen (assoziativ oder als Liste von "Name: value"-Zeilen)
+        $normalized = $captured->headers();
 
         self::assertSame('secret-key', $normalized['x-billomatapikey'] ?? null);
         self::assertSame('app-id', $normalized['x-appid'] ?? null);

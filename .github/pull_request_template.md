@@ -29,7 +29,7 @@ Closes #
 - [ ] New resources: docs under `docs/resources/` and an entry in its README
 - [ ] `CHANGELOG.md` updated under `[Unreleased]`
 - [ ] Code comments in German (ä/ö/ü/ß, not ae/oe/ue/ss), identifiers in English
-- [ ] No new PHPStan baseline entries
+- [ ] `composer analyse` passes without new ignores
 
 ## Notes
 

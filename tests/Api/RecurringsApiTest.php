@@ -21,6 +21,7 @@ use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Model\RecurringItem;
 use Justpilot\Billomat\Model\TaxSummary;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -94,7 +95,7 @@ final class RecurringsApiTest extends TestCase
         self::assertSame(RecurringCycle::MONTHLY, $recurrings[0]->cycle);
         self::assertSame(RecurringAction::EMAIL, $recurrings[0]->action);
 
-        $parts = parse_url((string) $captured['url']);
+        $parts = parse_url($captured['url']);
         self::assertSame('/api/recurrings', $parts['path'] ?? null);
     }
 
@@ -215,7 +216,7 @@ final class RecurringsApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/recurrings', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         $inner = $payload['recurring'];
         self::assertSame(5, $inner['client_id']);
@@ -258,7 +259,7 @@ final class RecurringsApiTest extends TestCase
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/recurrings/42', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertArrayNotHasKey('recurring-items', $payload['recurring']);
         self::assertSame('Hosting Updated', $payload['recurring']['name']);
@@ -281,25 +282,5 @@ final class RecurringsApiTest extends TestCase
         $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/recurrings/99', $captured['url']);
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
     }
 }

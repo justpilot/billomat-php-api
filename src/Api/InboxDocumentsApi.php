@@ -24,7 +24,7 @@ use NoDiscard;
 final class InboxDocumentsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<InboxDocument>
      */
@@ -41,7 +41,7 @@ final class InboxDocumentsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<InboxDocument>
      */
@@ -59,7 +59,7 @@ final class InboxDocumentsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, InboxDocument>
      */
@@ -80,7 +80,7 @@ final class InboxDocumentsApi extends AbstractApi
 
         $row = $data['inbox-document'] ?? null;
 
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

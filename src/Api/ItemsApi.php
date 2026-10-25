@@ -49,7 +49,7 @@ final class ItemsApi extends AbstractSubResourceApi
     /**
      * Listet die Positionen eines Dokuments.
      *
-     * @param array<string, scalar|array<mixed>|null> $query zusätzliche Filter (page, per_page, …)
+     * @param array<string, scalar|array<scalar|null>|null> $query zusätzliche Filter (page, per_page, …)
      *
      * @return list<TItem>
      */

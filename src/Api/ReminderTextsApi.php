@@ -16,7 +16,7 @@ use NoDiscard;
 final class ReminderTextsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<ReminderText>
      */
@@ -36,7 +36,7 @@ final class ReminderTextsApi extends AbstractApi
         }
 
         $row = $data['reminder-text'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

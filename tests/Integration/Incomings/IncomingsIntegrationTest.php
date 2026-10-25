@@ -24,7 +24,10 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $suppliers = $billomat->suppliers->list(['per_page' => 1]);
 
         if ([] !== $suppliers) {
-            return $suppliers[0]->id;
+            $id = $suppliers[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         $opts = new SupplierCreateOptions(name: 'IT-Lieferant Incoming '.date('His'), countryCode: 'DE');

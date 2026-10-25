@@ -82,10 +82,10 @@ final class InvoiceTest extends TestCase
         self::assertSame('100', $invoice->totalNet?->toString());
 
         self::assertInstanceOf(DateTimeImmutable::class, $invoice->date);
-        self::assertSame('2025-03-01', $invoice->date?->format('Y-m-d'));
+        self::assertSame('2025-03-01', $invoice->date->format('Y-m-d'));
 
         self::assertInstanceOf(DateTimeImmutable::class, $invoice->dueDate);
-        self::assertSame('2025-03-15', $invoice->dueDate?->format('Y-m-d'));
+        self::assertSame('2025-03-15', $invoice->dueDate->format('Y-m-d'));
 
         self::assertInstanceOf(InvoiceStatus::class, $invoice->status);
         self::assertSame(InvoiceStatus::OPEN, $invoice->status);

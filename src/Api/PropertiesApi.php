@@ -32,7 +32,7 @@ final class PropertiesApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'property';
 
     /**
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TProperty>
      */
@@ -45,7 +45,7 @@ final class PropertiesApi extends AbstractSubResourceApi
     /**
      * Liefert eine einzelne Seite samt Pagination-Metadaten.
      *
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<TProperty>
      */
@@ -58,7 +58,7 @@ final class PropertiesApi extends AbstractSubResourceApi
     /**
      * Iteriert lazy durch alle Attribut-Definitionen und yieldet sie einzeln.
      *
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, TProperty>
      */

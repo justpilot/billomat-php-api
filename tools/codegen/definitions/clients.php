@@ -25,6 +25,8 @@ declare(strict_types=1);
  *   enum        Name eines Enums aus src/Model/Enum/ (z. B. 'NetGross') als Typ in Model und Options.
  *               Pflicht, wenn die Spec eine feste Wertemenge nennt; false = bewusst String.
  *   enumList    true = kommaseparierte Werte (z. B. Zahlarten) als list<Enum>.
+ *               Typ `map` mit 'enum': Objekt Schlüssel → Enum-Wert als array<string, Enum>
+ *               (read-only; leere und unbekannte Werte fallen heraus).
  *   model       ['required' => true]  → Konstruktor-Parameter ohne Default
  *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
  *                                       (nicht für Enums: unbekannte Werte werden immer zu null)

@@ -138,7 +138,7 @@ final class MyIntegrationTest extends AbstractBillomatIntegrationTestCase
 - the response has a field the model doesn't know (a non-empty `$extra` on generated models, also in nested models such as positions; for handwritten models, a field `toArray()` doesn't export),
 - a non-empty value gets lost while hydrating, e.g. an enum value the SDK doesn't know, an unparsable date or an unknown entry in `payment_types`.
 
-The failure names the resource and the field, e.g. `invoices/get: 'Invoice.new_field' => 'unbekanntes Feld'`. Fix real drift in the codegen definition (`tools/codegen/definitions/`) and run `composer generate`. Differences that are accepted on purpose go into `KNOWN_DRIFT` in the test with a reason; an entry that no longer occurs fails the test, so the list doesn't go stale.
+The failure names the resource and the field, e.g. `invoices/get: 'Invoice.new_field' => 'unbekanntes Feld'`. Fix real drift in the codegen definition (`tools/codegen/definitions/`) and run `composer generate`. Differences that are accepted on purpose go into `knownDrift()` in the test with a reason; an entry that no longer occurs fails the test, so the list doesn't go stale.
 
 ### Re-recording
 

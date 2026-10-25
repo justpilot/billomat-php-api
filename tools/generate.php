@@ -202,6 +202,10 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
         if (!empty($field['enumList']) && empty($field['enum'])) {
             throw new RuntimeException("Feld '{$name}' mit 'enumList' braucht eine Enum-Klasse in 'enum' ({$source}).");
         }
+        // `map`: Objekt Schlüssel → Enum-Wert (z. B. Benutzerrechte), nur im Read-Model.
+        if ('map' === $type && (empty($field['enum']) || empty($field['readOnly']))) {
+            throw new RuntimeException("Map-Feld '{$name}' braucht 'enum' und muss 'readOnly' sein ({$source}).");
+        }
         $enum = $specField['enum'] ?? null;
         // Feste Wertemenge in der Spec: Enum-Klasse angeben oder bewusst mit `'enum' => false` beim String bleiben.
         if (null !== $enum && !\array_key_exists('enum', $field)) {
@@ -270,7 +274,7 @@ function renderModel(array $definition, array $fields, string $source): string
     if ($usesDate) {
         $imports[] = 'DateTimeImmutable';
     }
-    $typedLists = array_values(array_filter($fields, static fn (array $f): bool => isListField($f) || $f['enumList']));
+    $typedLists = array_values(array_filter($fields, static fn (array $f): bool => isListField($f) || $f['enumList'] || isEnumMap($f)));
     if ([] !== $typedLists) {
         $imports[] = 'Justpilot\\Billomat\\Internal\\ListCaster';
     }
@@ -326,7 +330,7 @@ function renderModel(array $definition, array $fields, string $source): string
 
         $out .= docBlock($lines, '        ');
         $out .= '        public ' . modelTypeHint($field) . ' $' . $field['property'];
-        if (isListField($field) || $field['enumList']) {
+        if (isListField($field) || $field['enumList'] || isEnumMap($field)) {
             $out .= ' = []';
         } elseif (empty($field['model']['required'])) {
             $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : nonNullFallback(modelType($field)));
@@ -365,6 +369,7 @@ function renderModel(array $definition, array $fields, string $source): string
         $value = '$this->' . $field['property'];
         $value = match (true) {
             $field['enumList'] => enumListExpression($field, $value),
+            isEnumMap($field) => "array_map(static fn ({$field['enumClass']} \$v): string => \$v->value, {$value})",
             null !== $field['enumClass'] => $value . (empty($field['model']['nonNull']) ? '?->value' : '->value'),
             'date' === modelType($field) => $value . "?->format('Y-m-d')",
             'datetime' === modelType($field) => $value . '?->format(DATE_ATOM)',
@@ -406,12 +411,23 @@ function isListField(array $field): bool
 }
 
 /**
+ * Objekt Schlüssel → Enum-Wert im Read-Model (Typ `map`), z. B. `rights` der Benutzer.
+ *
+ * @param array<string, mixed> $field
+ */
+function isEnumMap(array $field): bool
+{
+    return 'map' === $field['type'];
+}
+
+/**
  * @param array<string, mixed> $field
  */
 function listTypeHint(array $field): string
 {
     return match (true) {
         $field['enumList'] => 'list<' . $field['enumClass'] . '>',
+        isEnumMap($field) => 'array<string, ' . $field['enumClass'] . '>',
         'taxes' === $field['type'] => 'list<TaxSummary>',
         default => 'list<' . $field['list']['class'] . '>',
     };
@@ -456,7 +472,7 @@ function nonNullFallback(string $type): string
  */
 function modelTypeHint(array $field): string
 {
-    if ($field['enumList']) {
+    if ($field['enumList'] || isEnumMap($field)) {
         return 'array';
     }
     if (null !== $field['enumClass']) {
@@ -514,6 +530,10 @@ function hydrateExpression(array $field): string
     // Unbekannte Werte fallen aus der Liste heraus.
     if ($field['enumList']) {
         return "ListCaster::toEnumList({$lookup} ?? null, {$field['enumClass']}::class)";
+    }
+    // Leere und unbekannte Werte fallen aus der Map heraus (leer = kein Zugriff).
+    if (isEnumMap($field)) {
+        return "ListCaster::toEnumMap({$lookup} ?? null, {$field['enumClass']}::class)";
     }
     // `model.fromApi`: Enum mit eigener Toleranz (z. B. Groß-/Kleinschreibung) über fromApi() hydrieren.
     if (null !== $field['enumClass'] && !empty($field['model']['fromApi'])) {

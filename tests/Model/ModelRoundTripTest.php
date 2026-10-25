@@ -213,7 +213,7 @@ final class ModelRoundTripTest extends TestCase
     }
 
     /**
-     * @return list<mixed>
+     * @return array<mixed>
      */
     private function sampleList(ReflectionParameter $parameter, string $docComment): array
     {
@@ -226,6 +226,11 @@ final class ModelRoundTripTest extends TestCase
         if (1 === preg_match('/@param\s+list<(\w+)>\s+\$'.$parameter->name.'\b/', $docComment, $match)
             && is_subclass_of($enumClass = 'Justpilot\\Billomat\\Model\\Enum\\'.$match[1], BackedEnum::class)) {
             return [array_first($enumClass::cases()), array_last($enumClass::cases())];
+        }
+        // Enum-Maps (z. B. `array<string, AccessLevel> $rights`): echte Bereichsnamen, damit auch Role sie erkennt.
+        if (1 === preg_match('/@param\s+array<string,\s*(\w+)>\s+\$'.$parameter->name.'\b/', $docComment, $match)
+            && is_subclass_of($enumClass = 'Justpilot\\Billomat\\Model\\Enum\\'.$match[1], BackedEnum::class)) {
+            return ['articles' => array_first($enumClass::cases()), 'settings_addons' => array_last($enumClass::cases())];
         }
 
         return [];

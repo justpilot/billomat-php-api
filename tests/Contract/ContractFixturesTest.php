@@ -41,25 +41,13 @@ final class ContractFixturesTest extends TestCase
 {
     private const string FIXTURE_DIR = __DIR__.'/../Fixtures/Contract';
 
-    /**
-     * Bekannte Abweichungen, die der Test bewusst hinnimmt: Model-Pfad.Feld => Begründung.
-     *
-     * Ein Eintrag, der nicht mehr auftritt, lässt den Test fehlschlagen – dann bitte entfernen.
-     *
-     * @var array<string, string>
-     */
-    private const array KNOWN_DRIFT = [
-        // Map Bereich → READ/UPDATE/DELETE wie bei Role::$permissions; der Generator kennt noch keinen Map-Typ.
-        'User.rights' => 'Rechte des Benutzers, landen vorerst in User::$extra',
-    ];
-
     #[Test]
     #[DataProvider('fixtures')]
     public function fixtureMatchesModel(string $resource, string $kind): void
     {
         $unexpected = array_filter(
             $this->problems($resource, $kind),
-            static fn (string $path): bool => !\array_key_exists(self::withoutIndex($path), self::KNOWN_DRIFT),
+            static fn (string $path): bool => !\array_key_exists(self::withoutIndex($path), self::knownDrift()),
             ARRAY_FILTER_USE_KEY,
         );
 
@@ -76,9 +64,22 @@ final class ContractFixturesTest extends TestCase
             }
         }
 
-        $stale = array_values(array_diff(array_keys(self::KNOWN_DRIFT), array_keys($seen)));
+        $stale = array_values(array_diff(array_keys(self::knownDrift()), array_keys($seen)));
 
-        self::assertSame([], $stale, 'KNOWN_DRIFT-Einträge treten nicht mehr auf und können entfernt werden');
+        self::assertSame([], $stale, 'knownDrift()-Einträge treten nicht mehr auf und können entfernt werden');
+    }
+
+    /**
+     * Bekannte Abweichungen, die der Test bewusst hinnimmt: Model-Pfad.Feld => Begründung.
+     *
+     * Ein Eintrag, der nicht mehr auftritt, lässt den Test fehlschlagen – dann bitte entfernen.
+     * Aktuell gibt es keine; als Methode, damit PHPStan die leere Liste nicht als `array{}` festschreibt.
+     *
+     * @return array<string, string>
+     */
+    private static function knownDrift(): array
+    {
+        return [];
     }
 
     /**
@@ -127,7 +128,7 @@ final class ContractFixturesTest extends TestCase
     }
 
     /**
-     * `Invoice.items[0].foo` → `Invoice.items.foo` für den Abgleich mit KNOWN_DRIFT.
+     * `Invoice.items[0].foo` → `Invoice.items.foo` für den Abgleich mit knownDrift().
      */
     private static function withoutIndex(string $path): string
     {
@@ -331,12 +332,9 @@ final class ContractFixturesTest extends TestCase
      */
     private static function wireView(object $model): array
     {
-        // Handgeschriebene Models, die Feldgruppen als Map bündeln, wieder auf Billomat-Felder auffächern.
+        // Bereiche ohne Rechte (leerer String) fehlen in Role::$permissions, sind aber bekannte Felder.
         if ($model instanceof Role) {
-            $view = $model->toArray();
-            unset($view['permissions']);
-
-            return [...$view, ...$model->permissions];
+            return [...array_fill_keys(Role::AREAS, null), ...$model->toArray()];
         }
 
         if (method_exists($model, 'toArray')) {

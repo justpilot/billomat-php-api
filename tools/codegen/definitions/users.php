@@ -41,5 +41,12 @@ return [
         'locale' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Sprache der Oberfläche (z. B. "de_DE").'],
         'timezone' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Zeitzone (z. B. "Europe/Berlin").'],
         'is_account_owner' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Ist der Benutzer Inhaber des Accounts?'],
+        'rights' => [
+            'type' => 'map',
+            'enum' => 'AccessLevel',
+            'readOnly' => true,
+            'doc' => 'Zugriffsrechte des Benutzers je Bereich (z. B. "articles", "banking").',
+            'details' => ['Bereiche ohne Zugriff (bei Billomat ein leerer String) fehlen in der Map.'],
+        ],
     ],
 ];

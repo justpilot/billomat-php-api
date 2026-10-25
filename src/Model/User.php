@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
 
 use const DATE_ATOM;
 
@@ -34,9 +36,13 @@ final readonly class User
         'locale' => true,
         'timezone' => true,
         'is_account_owner' => true,
+        'rights' => true,
     ];
 
-    /** @param array<string, mixed> $extra */
+    /**
+     * @param array<string, AccessLevel> $rights
+     * @param array<string, mixed>       $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Benutzers. */
         public ?int $id,
@@ -62,6 +68,12 @@ final readonly class User
         public ?string $timezone = null,
         /** Ist der Benutzer Inhaber des Accounts? */
         public ?bool $isAccountOwner = null,
+        /**
+         * Zugriffsrechte des Benutzers je Bereich (z. B. "articles", "banking").
+         *
+         * Bereiche ohne Zugriff (bei Billomat ein leerer String) fehlen in der Map.
+         */
+        public array $rights = [],
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -91,6 +103,7 @@ final readonly class User
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             timezone: ScalarCaster::toStringOrNull($data['timezone'] ?? null),
             isAccountOwner: ScalarCaster::toBoolOrNull($data['is_account_owner'] ?? null),
+            rights: ListCaster::toEnumMap($data['rights'] ?? null, AccessLevel::class),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -118,6 +131,7 @@ final readonly class User
             'locale' => $this->locale,
             'timezone' => $this->timezone,
             'is_account_owner' => $this->isAccountOwner,
+            'rights' => array_map(static fn (AccessLevel $v): string => $v->value, $this->rights),
         ];
     }
 }

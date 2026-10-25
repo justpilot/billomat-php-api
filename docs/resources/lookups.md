@@ -218,8 +218,10 @@ $texts = $billomat->reminderTexts->list(['order_by' => OrderBy::asc('sorting')->
 Endpoint: `/roles`. User roles with their access rights. Details: [settings-roles.md](settings-roles.md).
 
 ```php
+use Justpilot\Billomat\Model\Enum\AccessLevel;
+
 $master = $billomat->roles->get(1);
-$canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === 'DELETE';
+$canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === AccessLevel::DELETE;
 ```
 
 #### Read model: `Role`
@@ -230,7 +232,7 @@ $canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === 'DELETE';
 |---|---|
 | `id` | `?int` |
 | `name` | `?string` |
-| `permissions` | `array<string,?string>` |
+| `permissions` | `array<string, AccessLevel>` |
 
 ### `countryTaxes`
 

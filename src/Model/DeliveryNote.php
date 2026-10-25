@@ -133,7 +133,7 @@ final readonly class DeliveryNote
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),
             numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
             numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
-            status: DeliveryNoteStatus::fromApi(ScalarCaster::toStringOrNull($data['status'] ?? null)),
+            status: DeliveryNoteStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),

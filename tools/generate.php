@@ -515,9 +515,13 @@ function hydrateExpression(array $field): string
     if ($field['enumList']) {
         return "ListCaster::toEnumList({$lookup} ?? null, {$field['enumClass']}::class)";
     }
-    // Unbekannte oder leere Werte werden über fromApi() zu null statt eine Exception zu werfen.
-    if (null !== $field['enumClass']) {
+    // `model.fromApi`: Enum mit eigener Toleranz (z. B. Groß-/Kleinschreibung) über fromApi() hydrieren.
+    if (null !== $field['enumClass'] && !empty($field['model']['fromApi'])) {
         return $field['enumClass'] . "::fromApi(ScalarCaster::toStringOrNull({$lookup} ?? null))";
+    }
+    // Unbekannte oder leere Werte werden zu null statt eine Exception zu werfen.
+    if (null !== $field['enumClass']) {
+        return $field['enumClass'] . "::tryFrom(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
     }
 
     return empty($field['model']['nonNull']) ? $expression : $expression . ' ?? ' . nonNullFallback(modelType($field));

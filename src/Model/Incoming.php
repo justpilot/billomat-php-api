@@ -119,7 +119,7 @@ final readonly class Incoming
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
-            status: IncomingStatus::fromApi(ScalarCaster::toStringOrNull($data['status'] ?? null)),
+            status: IncomingStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             incomingNumber: ScalarCaster::toStringOrNull($data['number'] ?? $data['incoming_number'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),

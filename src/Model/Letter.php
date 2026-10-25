@@ -98,7 +98,7 @@ final readonly class Letter
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            status: LetterStatus::fromApi(ScalarCaster::toStringOrNull($data['status'] ?? null)),
+            status: LetterStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),

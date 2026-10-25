@@ -97,7 +97,7 @@ final readonly class InvoiceComment
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
-            actionkey: InvoiceCommentActionKey::fromApi(ScalarCaster::toStringOrNull($data['actionkey'] ?? null)),
+            actionkey: InvoiceCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
             actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             public: ScalarCaster::toBoolOrNull($data['public'] ?? null),

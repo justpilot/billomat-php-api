@@ -76,7 +76,7 @@ final readonly class ClientPropertyValue
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             clientPropertyId: ScalarCaster::toIntOrNull($data['client_property_id'] ?? null) ?? 0,
-            type: PropertyType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
+            type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

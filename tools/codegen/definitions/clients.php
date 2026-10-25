@@ -29,6 +29,7 @@ declare(strict_types=1);
  *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
  *                                       (nicht für Enums: unbekannte Werte werden immer zu null)
  *               ['type' => 'int']     → abweichender Typ im Read-Model
+ *               ['fromApi' => true]   → Enum über Enum::fromApi() statt tryFrom() hydrieren (eigene Toleranz)
  *               ['sources' => [...]]  → Billomat-Felder, die beim Hydrieren der Reihe nach probiert werden
  *               ['property' => 'x']   → abweichender Property-Name im Read-Model
  *               ['key' => 'x']        → abweichender Schlüssel in toArray() des Read-Models

@@ -76,7 +76,7 @@ final readonly class SupplierPropertyValue
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null) ?? 0,
             supplierPropertyId: ScalarCaster::toIntOrNull($data['supplier_property_id'] ?? null) ?? 0,
-            type: PropertyType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
+            type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

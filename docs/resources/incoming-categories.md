@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/eingangsrechnungen/kategorien/ -->
+<!-- Source: https://www.billomat.com/api/eingangsrechnungen/kategorien/ -->
 
 # Incoming Categories (Eingangsrechnungs-Kategorien)
 
-API-Wrapper für die read-only Liste der Eingangsrechnungs-Kategorien unter `/incoming-categories`. Kategorien sind Billomat-vordefinierte Buckets wie *Waren*, *Dienstleistungen* oder *Bewirtungskosten* und werden auf Eingangsrechnungen referenziert.
+API wrapper for the read-only list of incoming invoice categories under `/incoming-categories`. Categories are buckets predefined by Billomat, such as *goods*, *services* or *entertainment expenses*, and are referenced on incoming invoices.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->incomingCategories
@@ -12,18 +12,18 @@ $billomat->incomingCategories
 
 `Justpilot\Billomat\Api\IncomingCategoriesApi`.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/incoming-categories` |
-| `listPage($filters?)` | GET | `/incoming-categories` |
-| `iterateAll($filters?, $pageSize?)` | GET | `/incoming-categories` (mehrseitig) |
-| `get($id)` | GET | `/incoming-categories/{id}` |
+| `listPage($filters?)` | GET | `/incoming-categories` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/incoming-categories` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/incoming-categories/{id}` |
 
-> Read-only. Billomat dokumentiert keine Mutations-Endpunkte für diese Ressource.
+> Read-only. Billomat documents no write endpoints for this resource.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<IncomingCategory>`
 
@@ -33,28 +33,29 @@ foreach ($billomat->incomingCategories->list() as $cat) {
 }
 ```
 
-Pagination via `page`/`per_page`; siehe [Konzept](../concepts/pagination-and-filtering.md).
+Pagination via `page`/`per_page`; see [Pagination and filtering](../concepts/pagination-and-filtering.md). `listPage()` additionally returns the pagination metadata, `iterateAll(array $filters = [], int $pageSize = 100)` walks through all pages lazily.
 
 ### `get(string $id): ?IncomingCategory`
 
-Beachte: Die ID ist ein **String**-Slug (z.B. `goods`, `services`), kein numerischer Schlüssel. Liefert `null` bei 404.
+Note: the ID is a **string** slug (e.g. `goods`, `services`), not a numeric key. Returns `null` on 404. `getOrFail(string $id): IncomingCategory` throws a `NotFoundException` instead.
 
-## Read-Modell: `IncomingCategory`
+## Read model: `IncomingCategory`
 
 `final readonly class IncomingCategory`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `id` | `id` | `string` |
 | `title` | `title` | `?string` |
 | `description` | `description` | `?string` |
+| `extra` | — | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
-## Stolpersteine
+## Pitfalls
 
-- **String-ID.** Anders als die meisten Billomat-Ressourcen identifiziert Billomat Kategorien per Slug (`goods`, `services`, …) statt per Integer.
-- **Single-Item-List-Quirk.** Bei nur einer Kategorie liefert Billomat ein Objekt statt einer Liste — `listResource()` normalisiert.
+- **String ID.** Unlike most Billomat resources, categories are identified by a slug (`goods`, `services`, …) instead of an integer.
+- **Single-item list quirk.** With only one category, Billomat returns an object instead of a list; the SDK normalizes this.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -73,7 +74,7 @@ $billomat = BillomatClient::create(
 foreach ($billomat->incomingCategories->iterateAll() as $cat) {
     printf("[%s] %s — %s\n",
         $cat->id,
-        $cat->title ?? '(ohne Titel)',
+        $cat->title ?? '(no title)',
         $cat->description ?? '',
     );
 }

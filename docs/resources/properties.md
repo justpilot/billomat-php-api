@@ -1,62 +1,66 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/artikel-attribute/ + https://www.billomat.com/api/einstellungen/kunden-attribute/ + https://www.billomat.com/api/einstellungen/lieferanten-attribute/ + https://www.billomat.com/api/einstellungen/eingangsrechnung-attribute/ + https://www.billomat.com/api/einstellungen/benutzer-attribute/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/artikel-attribute/ + https://www.billomat.com/api/einstellungen/kunden-attribute/ + https://www.billomat.com/api/einstellungen/lieferanten-attribute/ + https://www.billomat.com/api/einstellungen/eingangsrechnung-attribute/ + https://www.billomat.com/api/einstellungen/benutzer-attribute/ -->
 
-# Properties (Custom-Field-Definitionen)
+# Properties (custom field definitions)
 
-API-Wrapper für die fünf Property-Definition-Endpoints unter `/article-properties`, `/client-properties`, `/supplier-properties`, `/incoming-properties` und `/user-properties`.
+API wrapper for the five property definition endpoints `/article-properties`, `/client-properties`, `/supplier-properties`, `/incoming-properties` and `/user-properties`.
 
-## Zugriff
+## Access
 
 ```php
-$billomat->articles->properties   // Definitionen für Artikel-Custom-Fields
-$billomat->clients->properties    // Definitionen für Kunden-Custom-Fields
-$billomat->suppliers->properties  // Definitionen für Lieferanten-Custom-Fields
-$billomat->incomings->properties  // Definitionen für Eingangsbeleg-Custom-Fields
-$billomat->users->properties      // Definitionen für Benutzer-Custom-Fields
+$billomat->articles->properties   // definitions of article custom fields
+$billomat->clients->properties    // definitions of client custom fields
+$billomat->suppliers->properties  // definitions of supplier custom fields
+$billomat->incomings->properties  // definitions of incoming invoice custom fields
+$billomat->users->properties      // definitions of user custom fields
 ```
 
-## Modell
+All five are instances of the generic `Justpilot\Billomat\Api\PropertiesApi`.
 
-Eine *Property* ist ein benutzerdefiniertes Feld (Custom Field) auf einer der fünf Hauptressourcen. Diese APIs verwalten ausschliesslich die **Definitionen** — also Name, Typ und optionalen Default-Wert eines solchen Feldes.
+## Model
 
-Die konkreten **Werte** an einer Instanz werden über separate Sub-Ressourcen gepflegt — mit einer Ausnahme für User:
+A *property* is a custom field on one of the five main resources. These APIs manage only the **definitions**: name, type and optional default value of such a field.
 
-- Werte an einem Artikel: `articlePropertyValues` (siehe [Articles](articles.md))
-- Werte an einem Kunden: `clientPropertyValues` (siehe [Clients](clients.md))
-- Werte an einem Lieferanten: `supplierPropertyValues` (siehe [Suppliers](suppliers.md))
-- Werte an einer Eingangsrechnung: `incomingPropertyValues` (siehe [Incomings](incomings.md))
-- Werte an einem Benutzer: **kein dedizierter Values-Endpoint**; Billomat pflegt User-Property-Werte direkt am Benutzer-Datensatz.
+The actual **values** on a record are managed through separate sub-resources, with one exception for users:
 
-Die fünf Property-Definition-APIs sind strukturell identisch (gleiche Verben, gleiche Payload-Struktur). Sie unterscheiden sich nur im Endpoint-Pfad und im Read-Modell. Die Write-Klasse `PropertyCreateOptions` wird von allen fünf APIs geteilt.
+- Values on an article: `$billomat->articles->propertyValues` (see [Articles](articles.md))
+- Values on a client: `$billomat->clients->propertyValues` (see [Clients](clients.md))
+- Values on a supplier: `$billomat->suppliers->propertyValues` (see [Suppliers](suppliers.md))
+- Values on an incoming invoice: `$billomat->incomings->propertyValues` (see [Incomings](incomings.md))
+- Values on a user: **no dedicated values endpoint**; Billomat stores user property values directly on the user record.
 
-## Endpunkt-Übersicht
+The five property definition APIs are structurally identical (same verbs, same payload structure). They differ only in the endpoint path and the read model. The write class `PropertyCreateOptions` is shared by all five.
 
-Alle fünf APIs bieten dieselben Verben mit derselben Signatur. Pfad und Read-Modell variieren:
+## Endpoint overview
 
-| Property-Klient | Endpoint-Basis | Read-Modell |
+All five APIs offer the same verbs with the same signatures. Path and read model vary:
+
+| Access | Endpoint base | Read model |
 |---|---|---|
-| `articleProperties` | `/article-properties` | `ArticleProperty` |
-| `clientProperties` | `/client-properties` | `ClientProperty` |
-| `supplierProperties` | `/supplier-properties` | `SupplierProperty` |
-| `incomingProperties` | `/incoming-properties` | `IncomingProperty` |
-| `userProperties` | `/user-properties` | `UserProperty` |
+| `$billomat->articles->properties` | `/article-properties` | `ArticleProperty` |
+| `$billomat->clients->properties` | `/client-properties` | `ClientProperty` |
+| `$billomat->suppliers->properties` | `/supplier-properties` | `SupplierProperty` |
+| `$billomat->incomings->properties` | `/incoming-properties` | `IncomingProperty` |
+| `$billomat->users->properties` | `/user-properties` | `UserProperty` |
 
-### Verben (für jede der fünf APIs)
+### Verbs (for each of the five APIs)
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `list($filters?)` | GET | `/{basis}` |
-| `get($id)` | GET | `/{basis}/{id}` |
-| `create($options)` | POST | `/{basis}` |
-| `update($id, $options)` | PUT | `/{basis}/{id}` |
-| `delete($id)` | DELETE | `/{basis}/{id}` |
+| `list($filters?)` | GET | `/{base}` |
+| `listPage($filters?)` | GET | `/{base}` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/{base}` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/{base}/{id}` |
+| `create($options)` | POST | `/{base}` |
+| `update($id, $options)` | PUT | `/{base}/{id}` |
+| `delete($id)` | DELETE | `/{base}/{id}` |
 
-## Methoden
+## Methods
 
-Beispiele anhand von `articleProperties` — `clientProperties`, `supplierProperties`, `incomingProperties` und `userProperties` verhalten sich exakt analog.
+The examples mostly use the article properties; the other four behave exactly the same.
 
 ### `list(array $filters = []): list<TProperty>`
 
-Listet alle Property-Definitionen. Filter werden 1:1 als Query-Parameter weitergereicht; Array-Werte werden als `key[]=…` codiert.
+Lists all property definitions. Filters are passed through 1:1 as query parameters; array values are encoded as `key[]=…`.
 
 ```php
 $all = $billomat->articles->properties->list();
@@ -67,29 +71,31 @@ $paged = $billomat->clients->properties->list([
 ]);
 ```
 
+`listPage(array $filters = [])` additionally returns the pagination metadata; `iterateAll(array $filters = [], int $pageSize = 100)` walks through all pages lazily. See [Pagination](../advanced/pagination.md).
+
 ### `get(int $id): ?TProperty`
 
-Liefert `null` bei 404.
+Returns `null` on 404. `getOrFail(int $id)` throws a `NotFoundException` instead.
 
 ```php
 $prop = $billomat->suppliers->properties->get(42);
 if (null === $prop) {
-    // Property gibt es nicht (mehr)
+    // the property doesn't exist (anymore)
 }
 ```
 
 ### `create(PropertyCreateOptions $options): TProperty`
 
-Legt eine neue Property-Definition an. Pflicht ist nur `name`.
+Creates a property definition. Only `name` is required.
 
 ```php
 use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 
 $opts = new PropertyCreateOptions(
-    name: 'Lieferzeit',
+    name: 'Lead time',
     type: PropertyType::TEXTFIELD,
-    defaultValue: '3 Werktage',
+    defaultValue: '3 business days',
     position: 10,
 );
 
@@ -98,103 +104,65 @@ $prop = $billomat->articles->properties->create($opts);
 
 ### `update(int $id, PropertyCreateOptions $options): TProperty`
 
-Aktualisiert eine bestehende Definition. Die Options-Klasse ist identisch mit `create()` — gesetzte Felder werden überschrieben, nicht gesetzte (`null`) bleiben unberührt.
+Updates an existing definition. The options class is the same as for `create()`: set fields are overwritten, unset (`null`) fields stay unchanged.
 
 ```php
-$opts = new PropertyCreateOptions(name: 'Lieferzeit', defaultValue: '5 Werktage');
+$opts = new PropertyCreateOptions(name: 'Lead time', defaultValue: '5 business days');
 
 $billomat->articles->properties->update(42, $opts);
 ```
 
 ### `delete(int $id): void`
 
-Löscht die Definition. Bestehende Werte an Instanzen werden ebenfalls invalide.
+Deletes the definition. Existing values on records become invalid as well.
 
 ```php
 $billomat->incomings->properties->delete(42);
 ```
 
-## Write-Modell: `PropertyCreateOptions`
+## Write model: `PropertyCreateOptions`
 
-Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch für `update()`. Konstruktor: `new PropertyCreateOptions(string $name, …)` — `name` ist Pflicht und erster Parameter, alle weiteren Felder sind benannte Argumente. Das Objekt ist `final readonly`; `with*()`-Methoden (z. B. `$opts->withName('Neu')`) liefern eine geänderte Kopie.
+Shared options class for all five APIs, used for both `create()` and `update()`. Constructor: `new PropertyCreateOptions(string $name, …)`. `name` is required and the first parameter; all other fields are named arguments. The object is `final readonly`; `with*()` methods (e.g. `$opts->withName('New')`) return a modified copy.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `name` | `name` | `string` | Pflicht, Konstruktor-Argument |
+| `name` | `name` | `string` | Required, constructor argument |
 | `type` | `type` | `?PropertyType` | `TEXTFIELD`, `TEXTAREA`, `CHECKBOX` |
-| `defaultValue` | `default_value` | `?string` | Default-Wert für neue Instanzen |
-| `position` | `position` | `?int` | Sortierung in der Billomat-UI |
-| `isNvl` | `is_nvl` | `?bool` | Standardwert verwenden, wenn kein anderer Wert gesetzt ist (als `0`/`1` gesendet) |
+| `defaultValue` | `default_value` | `?string` | Default value for new records |
+| `position` | `position` | `?int` | Sort order in the Billomat UI |
+| `isNvl` | `is_nvl` | `?bool` | Use the default value when no other value is set (sent as `0`/`1`) |
 
-`toArray()` entfernt `null`-Felder per `array_filter`. `name` wird stets mitgeschickt.
+`toArray()` removes `null` fields via `array_filter`. `name` is always sent.
 
-## Read-Modell: `ArticleProperty`
+## Read models: `ArticleProperty`, `ClientProperty`, `SupplierProperty`, `IncomingProperty`, `UserProperty`
 
-`final readonly class ArticleProperty`.
+All five are `final readonly` classes with the same structure:
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
 | `isNvl` | `?bool` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
-## Read-Modell: `ClientProperty`
+## Enums used
 
-`final readonly class ClientProperty`. Strukturell identisch zu `ArticleProperty`.
+- [`PropertyType`](../../src/Model/Enum/PropertyType.php): `TEXTFIELD`, `TEXTAREA`, `CHECKBOX`. Wire values are upper case (`TEXTFIELD`, not `textfield`).
 
-| Property | Typ |
-|---|---|
-| `id` | `?int` |
-| `name` | `string` |
-| `type` | `?PropertyType` |
-| `defaultValue` | `?string` |
-| `isNvl` | `?bool` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+## Pitfalls
 
-## Read-Modell: `SupplierProperty`
+- **Don't confuse definitions and values.** `$billomat->articles->properties` only defines the schema ("there is a field called *Lead time*"). To assign the value `5 business days` to a specific article, use `$billomat->articles->propertyValues`.
+- **One options class for all five APIs.** `PropertyCreateOptions` lives in the `Justpilot\Billomat\Api` namespace and is reused. Don't duplicate it per resource when refactoring.
+- **User properties have no values endpoint.** Unlike the other four parents, Billomat stores user property values directly on the user record, not through a separate sub-resource.
+- **`type` is optional.** If `type` is omitted, Billomat treats the field as free text. For `CHECKBOX` fields, `defaultValue` is a string; typical wire values are `"0"` and `"1"`.
+- **Billomat doesn't return `position` on read.** You can set the field via `PropertyCreateOptions`, but it's missing from the read models; it's not a uniqueness constraint.
+- **Deleting is destructive.** Deleting a definition also loses the values stored for it on records. There's no API way to "just hide" a field; your application has to model that itself.
+- **`update()` takes the same class as `create()`.** There's no separate `PropertyUpdateOptions` type. A PUT without `type` keeps the previous type.
 
-`final readonly class SupplierProperty`. Strukturell identisch zu `ArticleProperty`.
-
-| Property | Typ |
-|---|---|
-| `id` | `?int` |
-| `name` | `string` |
-| `type` | `?PropertyType` |
-| `defaultValue` | `?string` |
-| `isNvl` | `?bool` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-## Read-Modell: `IncomingProperty`
-
-`final readonly class IncomingProperty`. Strukturell identisch zu `ArticleProperty`.
-
-| Property | Typ |
-|---|---|
-| `id` | `?int` |
-| `name` | `string` |
-| `type` | `?PropertyType` |
-| `defaultValue` | `?string` |
-| `isNvl` | `?bool` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-## Verwendete Enums
-
-- [`PropertyType`](../../src/Model/Enum/PropertyType.php): `TEXTFIELD`, `TEXTAREA`, `CHECKBOX` — Wire-Werte sind grossgeschrieben (`TEXTFIELD`, nicht `textfield`).
-
-## Stolpersteine
-
-- **Definitionen vs. Werte nicht verwechseln.** `articleProperties` definiert nur das Schema („Es gibt ein Feld namens *Lieferzeit*"). Um einem konkreten Artikel den Wert `5 Werktage` zuzuweisen, ist `articlePropertyValues` zuständig.
-- **Eine Options-Klasse für alle fünf APIs.** `PropertyCreateOptions` lebt im Namespace `Justpilot\Billomat\Api` und wird mehrfach verwendet. Beim Refactoring nicht versehentlich pro Ressource duplizieren.
-- **`userProperties` hat keinen Values-Endpoint.** Anders als die vier anderen Parents pflegt Billomat User-Property-Werte direkt am Benutzer-Datensatz, nicht über eine separate Sub-Ressource.
-- **`type` ist optional.** Wird `type` weggelassen, behandelt Billomat das Feld als Freitext. Für `CHECKBOX`-Felder ist `defaultValue` ein String — typische Wire-Werte sind `"0"` und `"1"`.
-- **`position` liefert Billomat beim Lesen nicht mit.** Das Feld lässt sich über `PropertyCreateOptions` setzen, fehlt aber in den Read-Modellen; es ist kein Eindeutigkeits-Constraint.
-- **Löschen ist destruktiv.** Wer eine Definition löscht, verliert auch die bisher daran gespeicherten Werte an den Instanzen. Für „nur ausblenden" gibt es keinen API-Weg — die Anwendungsebene muss das selbst modellieren.
-- **`update()` nimmt dieselbe Klasse wie `create()`.** Es gibt keinen separaten `PropertyUpdateOptions`-Typ. Bei einem PUT ohne `type` lässt Billomat den bisherigen Typ stehen.
-
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -212,18 +180,18 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Custom-Field-Definition für Artikel anlegen
+// 1) Create a custom field definition for articles
 $opts = new PropertyCreateOptions(
-    name: 'Lieferzeit',
+    name: 'Lead time',
     type: PropertyType::TEXTFIELD,
-    defaultValue: '3 Werktage',
+    defaultValue: '3 business days',
     position: 10,
 );
 
 $leadTimeDef = $billomat->articles->properties->create($opts);
-printf("Definition #%d angelegt: %s\n", $leadTimeDef->id, $leadTimeDef->name);
+printf("Definition #%d created: %s\n", $leadTimeDef->id, $leadTimeDef->name);
 
-// 2) Bestand inspizieren
+// 2) Inspect the existing definitions
 foreach ($billomat->articles->properties->list(['per_page' => 100]) as $def) {
     printf(
         "#%d %-20s [%s] default=%s\n",
@@ -234,20 +202,18 @@ foreach ($billomat->articles->properties->list(['per_page' => 100]) as $def) {
     );
 }
 
-// 3) Default-Wert nachträglich erhöhen
-$update = new PropertyCreateOptions(name: 'Lieferzeit', defaultValue: '5 Werktage');
-$billomat->articles->properties->update($leadTimeDef->id, $update);
-
-// 4) Parallele Definition für Kunden — selbe API-Form, andere Ressource
-$vipFlag = $billomat->clients->properties->create(
-    (function (): PropertyCreateOptions {
-        $o = new PropertyCreateOptions(name: 'VIP', type: PropertyType::CHECKBOX, defaultValue: '0');
-
-        return $o;
-    })(),
+// 3) Raise the default value later
+$billomat->articles->properties->update(
+    $leadTimeDef->id,
+    $opts->withDefaultValue('5 business days'),
 );
 
-// 5) Werte (nicht Definitionen!) pflegt eine andere API:
+// 4) Parallel definition for clients: same API shape, different resource
+$vipFlag = $billomat->clients->properties->create(
+    new PropertyCreateOptions(name: 'VIP', type: PropertyType::CHECKBOX, defaultValue: '0'),
+);
+
+// 5) Values (not definitions!) are handled by a different API:
 //    $billomat->articles->propertyValues->create(...)
 //    $billomat->clients->propertyValues->create(...)
 ```

@@ -1,39 +1,45 @@
-<!-- Quelle: https://www.billomat.com/api/kunden/ -->
+<!-- Source: https://www.billomat.com/api/kunden/ -->
 
 # Clients (Kunden)
 
-API-Wrapper für die Billomat-Ressource „Kunden“ — entspricht den Endpunkten unter `/clients`.
+API wrapper for the Billomat "clients" resource, covering the endpoints under `/clients`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->clients
-$billomat->clients->propertyValues  // Werte benutzerdefinierter Kunden-Eigenschaften
+$billomat->clients->tags            // tags on a client, see client-tags.md
+$billomat->clients->properties      // custom property definitions, see properties.md
+$billomat->clients->propertyValues  // custom property values on a client
 ```
 
-`Justpilot\Billomat\Api\ClientsApi`, intern angelegt in `BillomatClient::__construct()`.
+`Justpilot\Billomat\Api\ClientsApi`, created lazily by `BillomatClient`.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `list()` | GET | `/clients` |
-| `get($id)` | GET | `/clients/{id}` |
+| `list($filters?)` | GET | `/clients` |
+| `listPage($filters?)` | GET | `/clients` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/clients` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/clients/{id}` |
+| `getMyself()` | GET | `/clients/myself` |
 | `create($options)` | POST | `/clients` |
 | `update($id, $options)` | PUT | `/clients/{id}` |
-| `getMyself()` | GET | `/clients/myself` |
+| `delete($id)` | DELETE | `/clients/{id}` |
+| `avatar($id, $size?)` | GET | `/clients/{id}/avatar` |
 
-## Methoden
+## Methods
 
 ### `list(ClientFilter|array $filters = []): list<Client>`
 
-Listet Kunden mit optionalen Filtern.
+Lists clients, optionally filtered.
 
 ```php
 public function list(ClientFilter|array $filters = []): array
 ```
 
-Empfohlen ist der typisierte Filter `ClientFilter` (alle Felder optionale benannte Argumente, dazu `with*()`-Wither). Ein einfaches Array mit Billomat-Parametern funktioniert weiterhin, z. B. für Parameter, die der Filter nicht abdeckt; Array-Werte werden dort als `key[]=…` serialisiert.
+Use the typed filter `ClientFilter` (every field is an optional named argument, plus a `with*()` wither per field). A plain array of Billomat parameters still works, e.g. for parameters the filter doesn't cover; array values are serialized as `key[]=…`.
 
 ```php
 use Justpilot\Billomat\Api\ClientFilter;
@@ -49,7 +55,7 @@ foreach ($clients as $client) {
 }
 ```
 
-| Billomat-Filter | `ClientFilter`-Feld |
+| Billomat filter | `ClientFilter` field |
 |---|---|
 | `name` | `name` |
 | `client_number` | `clientNumber` |
@@ -57,32 +63,50 @@ foreach ($clients as $client) {
 | `first_name` / `last_name` | `firstName` / `lastName` |
 | `country_code` | `countryCode` |
 | `note` | `note` |
-| `invoice_id` | `invoiceId` (Liste, kommasepariert) |
-| `tags` | `tags` (Liste, kommasepariert) |
+| `invoice_id` | `invoiceId` (list, sent comma-separated) |
+| `tags` | `tags` (list, sent comma-separated) |
 | `order_by` | `orderBy` (`OrderBy::asc('name')->thenDesc('id')`) |
 | `page` / `per_page` | `page` / `perPage` |
 
-Weitere Query-Parameter (z. B. Filter auf benutzerdefinierte Attribute) gehen über `extra: [...]`; sie überschreiben gleichnamige Felder.
+Other query parameters (e.g. filters on custom properties) go into `extra: [...]`; they override fields with the same name.
 
 **Exceptions:** `AuthenticationException`, `HttpException`.
 
+### `listPage(ClientFilter|array $filters = []): Page<Client>`
+
+Same as `list()`, but also returns the pagination metadata (`@page`, `@per_page`, `@total`) from the response envelope. See [Pagination](../advanced/pagination.md).
+
+### `iterateAll(ClientFilter|array $filters = [], int $pageSize = 100): Generator<int, Client>`
+
+Lazily walks through all pages and yields one client at a time. `page` and `per_page` in the filter are overwritten.
+
+```php
+foreach ($billomat->clients->iterateAll(new ClientFilter(countryCode: 'DE')) as $client) {
+    // …
+}
+```
+
 ### `get(int $id): ?Client`
 
-Holt einen Kunden anhand seiner ID. Liefert `null`, wenn Billomat 404 zurückgibt.
+Fetches a client by ID. Returns `null` when Billomat responds with 404.
 
 ```php
 $client = $billomat->clients->get(12345);
 
 if ($client === null) {
-    throw new RuntimeException('Kunde 12345 existiert nicht.');
+    throw new RuntimeException('Client 12345 does not exist.');
 }
 ```
 
-**Exceptions:** `AuthenticationException`, `HttpException` (kein `NotFoundException`).
+**Exceptions:** `AuthenticationException`, `HttpException` (no `NotFoundException`).
+
+### `getOrFail(int $id): Client`
+
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
 ### `create(ClientCreateOptions $options): Client`
 
-Legt einen neuen Kunden an. Der Payload wird mit dem Wrapper `{ "client": { … } }` gesendet.
+Creates a client. The payload is sent wrapped as `{ "client": { … } }`.
 
 ```php
 use Justpilot\Billomat\Api\ClientCreateOptions;
@@ -99,63 +123,75 @@ $client = $billomat->clients->create($opts);
 echo $client->id;
 ```
 
-**Exceptions:** `ValidationException` (Pflichtfeld fehlt, Wert ungültig), `AuthenticationException`, `HttpException`.
+**Exceptions:** `ValidationException` (required field missing, invalid value), `AuthenticationException`, `HttpException`.
 
 ### `update(int $id, ClientUpdateOptions $options): Client`
 
-Partial-Update auf einem bestehenden Kunden. Nur Felder, die in `ClientUpdateOptions` gesetzt sind, werden an Billomat geschickt; alle anderen Felder bleiben unangetastet.
+Partial update of an existing client. Only fields set in `ClientUpdateOptions` are sent to Billomat; all other fields stay unchanged.
 
-Einschränkung laut Billomat: Ein archivierter Kunde lässt sich nicht aktualisieren. Setze ggf. zuerst `archived: false`.
+Billomat restriction: an archived client can't be updated. Set `archived: false` first if necessary.
 
 ```php
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 
-$opts = new ClientUpdateOptions(name: 'Acme GmbH & Co. KG', email: 'rechnungen@acme.example');
+$opts = new ClientUpdateOptions(name: 'Acme GmbH & Co. KG', email: 'invoices@acme.example');
 
 $updated = $billomat->clients->update(12345, $opts);
 ```
 
 **Exceptions:** `ValidationException`, `AuthenticationException`, `NotFoundException`, `HttpException`.
 
+### `delete(int $id): void`
+
+Deletes a client. Clients that already have documents (invoices, offers, …) can't be deleted, only archived; Billomat then responds with 400/422 and the SDK throws a `ValidationException`.
+
 ### `getMyself(): Client`
 
-Liefert das eigene Account-Profil als `Client`. Praktisch für Health-Checks („sind meine Credentials gültig?“) und zum Auslesen der eigenen Stammdaten.
+Returns your own account profile as a `Client`. Useful for health checks ("are my credentials valid?") and for reading your own master data.
 
 ```php
 $me = $billomat->clients->getMyself();
-echo 'Eingeloggt als: ' . $me->name;
+echo 'Logged in as: ' . $me->name;
 ```
 
 **Exceptions:** `AuthenticationException`, `HttpException`.
 
-## Write-Modell: `ClientCreateOptions`
+### `avatar(int $id, ?int $size = null): string`
 
-Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withName('Neu')`). `toArray()` filtert `null`-Werte heraus, damit Billomat Defaults aus den Account-Einstellungen ziehen kann.
+Downloads the client's avatar. Billomat returns the image itself (usually PNG), not JSON; the method returns the raw body. `$size` is the optional edge length in pixels.
 
-### Stammdaten
+```php
+file_put_contents('/tmp/avatar.png', $billomat->clients->avatar(12345, size: 128));
+```
 
-| Property | Billomat-Feld | Typ | Beschreibung |
+## Write model: `ClientCreateOptions`
+
+Every field is a constructor parameter with a default and is passed as a named argument. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withName('New')`). `toArray()` drops `null` values so Billomat can fill in defaults from the account settings.
+
+### Master data
+
+| Property | Billomat field | Type | Description |
 |---|---|---|---|
-| `name` | `name` | `?string` | Firmenname (laut Billomat-Doku Pflicht für Firmen). |
-| `archived` | `archived` | `?bool` | `1` = archiviert, `0` = aktiv. |
-| `numberPre` | `number_pre` | `?string` | Präfix der Kundennummer (Default aus Einstellungen). |
-| `number` | `number` | `?int` | Laufende Kundennummer (Default nächste freie). |
-| `numberLength` | `number_length` | `?int` | Mindestlänge der Kundennummer. |
-| `clientNumber` | `client_number` | `?string` | Frei vergebbare Kundennummer. |
+| `name` | `name` | `?string` | Company name (required for companies according to the Billomat docs). |
+| `archived` | `archived` | `?bool` | `true` = archived, `false` = active. |
+| `numberPre` | `number_pre` | `?string` | Client number prefix (default from settings). |
+| `number` | `number` | `?int` | Sequential client number (default: next free number). |
+| `numberLength` | `number_length` | `?int` | Minimum length of the client number. |
+| `clientNumber` | `client_number` | `?string` | Free-form client number. |
 
-### Adresse
+### Address
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `street` | `street` | `?string` |
 | `zip` | `zip` | `?string` |
 | `city` | `city` | `?string` |
 | `state` | `state` | `?string` |
-| `countryCode` | `country_code` | `?string` (ISO 3166-1 Alpha-2, z. B. `DE`, `AT`, `CH`) |
+| `countryCode` | `country_code` | `?string` (ISO 3166-1 alpha-2, e.g. `DE`, `AT`, `CH`) |
 
-### Ansprechpartner & Kontakt
+### Contact person and contact details
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `firstName` | `first_name` | `?string` |
 | `lastName` | `last_name` | `?string` |
@@ -164,30 +200,30 @@ Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argum
 | `phone` | `phone` | `?string` |
 | `fax` | `fax` | `?string` |
 | `mobile` | `mobile` | `?string` |
-| `www` | `www` | `?string` (URL ohne Schema) |
+| `www` | `www` | `?string` (URL without scheme) |
 | `note` | `note` | `?string` |
-| `locale` | `locale` | `?string` (z. B. `de_DE`) |
+| `locale` | `locale` | `?string` (e.g. `de_DE`) |
 
-### Steuer & Preisbasis
+### Tax and price basis
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `taxNumber` | `tax_number` | `?string` |
 | `vatNumber` | `vat_number` | `?string` |
 | `taxRule` | `tax_rule` | `?TaxRule` (`TAX`, `NO_TAX`, `COUNTRY`) |
 | `netGross` | `net_gross` | `?NetGross` (`NET`, `GROSS`, `SETTINGS`) |
-| `currencyCode` | `currency_code` | `?string` (ISO-Währungscode) |
+| `currencyCode` | `currency_code` | `?string` (ISO currency code) |
 
-### Debitor & Preisgruppe
+### Debtor account and price group
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `debitorAccountNumber` | `debitor_account_number` | `?int` |
 | `priceGroup` | `price_group` | `?int` |
 
-### Bankdaten
+### Bank details
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `bankAccountNumber` | `bank_account_number` | `?string` |
 | `bankAccountOwner` | `bank_account_owner` | `?string` |
@@ -198,17 +234,17 @@ Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argum
 
 ### SEPA
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `sepaMandate` | `sepa_mandate` | `?string` |
 | `sepaMandateDate` | `sepa_mandate_date` | `?string` (`YYYY-MM-DD`) |
 
-### Zahlungsbedingungen
+### Payment terms
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
-| `defaultPaymentTypes` | `default_payment_types` | `list<PaymentType>` (Billomat: kommasepariert, z. B. `CASH,BANK_TRANSFER`) |
-| `reduction` | `reduction` | `?float` (Rabatt in %) |
+| `defaultPaymentTypes` | `default_payment_types` | `list<PaymentType>` (sent comma-separated, e.g. `CASH,BANK_TRANSFER`) |
+| `reduction` | `reduction` | `?float` (discount in %) |
 | `discountRateType` | `discount_rate_type` | `?ValueType` (`SETTINGS`, `ABSOLUTE`, `RELATIVE`) |
 | `discountRate` | `discount_rate` | `?float` |
 | `discountDaysType` | `discount_days_type` | `?ValueType` |
@@ -219,119 +255,137 @@ Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argum
 | `reminderDueDays` | `reminder_due_days` | `?int` |
 | `offerValidityDaysType` | `offer_validity_days_type` | `?ValueType` |
 | `offerValidityDays` | `offer_validity_days` | `?int` |
-| `dunningRun` | `dunning_run` | `?bool` (nur gesendet, wenn gesetzt; sonst gilt der Billomat-Default) |
+| `dunningRun` | `dunning_run` | `?bool` (only sent when set; otherwise Billomat's default applies) |
 
-## Write-Modell: `ClientUpdateOptions`
+```php
+use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\Enum\TaxRule;
+use Justpilot\Billomat\Model\Enum\ValueType;
 
-Schmaler Subset für Partial-Updates, aufgebaut wie `ClientCreateOptions`. Nur Felder, die hier vorhanden und nicht `null` sind, fließen in den PUT-Request. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird ein Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new ClientUpdateOptions(note: Clear::Field)`. Boolean `archived` wird zu `1`/`0` serialisiert.
+$opts = new ClientCreateOptions(
+    name: 'Acme GmbH',
+    taxRule: TaxRule::COUNTRY,
+    dueDaysType: ValueType::ABSOLUTE,
+    dueDays: 14,
+    defaultPaymentTypes: [PaymentType::BANK_TRANSFER, PaymentType::PAYPAL],
+);
+```
 
-| Property | Billomat-Feld | Typ |
+## Write model: `ClientUpdateOptions`
+
+Same fields as `ClientCreateOptions`, all optional. Only fields that are not `null` go into the PUT request. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends a field as JSON `null` so Billomat empties it, e.g. `new ClientUpdateOptions(note: Clear::Field)`. The boolean `archived` is serialized as `1`/`0`.
+
+| Property | Billomat field | Type |
 |---|---|---|
-| `archived` | `archived` | `?bool` |
-| `name` | `name` | `?string` |
-| `street`, `zip`, `city`, `state`, `countryCode` | analog | `?string` |
-| `firstName`, `lastName`, `salutation` | analog | `?string` |
-| `phone`, `fax`, `mobile`, `email`, `www` | analog | `?string` |
-| `taxNumber`, `vatNumber` | `tax_number`, `vat_number` | `?string` |
-| `note` | `note` | `?string` |
-| `reduction` | `reduction` | `?float` |
-| `debitorAccountNumber` | `debitor_account_number` | `?int` |
+| all fields of `ClientCreateOptions` | same | same type, additionally `\|Clear` |
+| `defaultPaymentTypes` | `default_payment_types` | `list<PaymentType>\|Clear` (empty list = don't send) |
 
-## Read-Modell: `Client`
+## Read model: `Client`
 
-`final readonly class Client`. Properties (Auswahl der wichtigsten):
+`final readonly class Client`. Properties:
 
-| Property | Typ | Notes |
+| Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | Billomat-interne ID. Nullable, weil ein frisch konstruiertes Objekt theoretisch keine haben könnte. |
-| `name` | `string` | Pflicht — nicht nullable. |
+| `id` | `?int` | Billomat's internal ID. Nullable because a freshly constructed object might not have one. |
+| `name` | `string` | Required, not nullable. |
+| `created`, `updated` | `?\DateTimeImmutable` | |
 | `clientNumber` | `?string` | |
+| `number`, `numberLength` | `?int` | |
+| `numberPre` | `?string` | |
 | `street`, `zip`, `city`, `state`, `countryCode` | `?string` | |
+| `address` | `?string` | Full address assembled by Billomat (read-only) |
 | `firstName`, `lastName`, `salutation` | `?string` | |
 | `email`, `phone`, `fax`, `mobile`, `www` | `?string` | |
 | `note`, `locale` | `?string` | |
-| `facturxIdentifier`, `sellerIdentifier` | `?string` | E-Rechnung (ZUGFeRD/Factur-X), siehe Stolpersteine |
 | `taxNumber`, `vatNumber` | `?string` | |
 | `taxRule` | `?TaxRule` | |
 | `netGross` | `?NetGross` | |
 | `currencyCode` | `?string` | |
 | `debitorAccountNumber`, `priceGroup` | `?int` | |
-| `archived`, `dunningRun` | `?bool` | |
+| `archived`, `dunningRun`, `enableCustomerportal`, `digExclude` | `?bool` | |
 | `reduction`, `discountRate`, `discountDays` | `?float` | |
 | `dueDays`, `reminderDueDays`, `offerValidityDays` | `?int` | |
-| `updated` | `?\DateTimeImmutable` |  |
-| `digExclude` | `?bool` |  |
-| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+| `discountRateType`, `discountDaysType`, `dueDaysType`, `reminderDueDaysType`, `offerValidityDaysType` | `?ValueType` | |
+| `bankAccountOwner`, `bankNumber`, `bankName`, `bankAccountNumber`, `bankSwift`, `bankIban` | `?string` | |
+| `sepaMandate` | `?string` | |
+| `sepaMandateDate` | `?\DateTimeImmutable` | |
+| `defaultPaymentTypes` | `list<PaymentType>` | |
+| `revenueGross`, `revenueNet` | `?Money` | Revenue with this client (read-only), see [Money](../concepts/money.md) |
+| `facturxIdentifier`, `sellerIdentifier` | `?string` | E-invoicing (ZUGFeRD/Factur-X), see Pitfalls |
+| `customfield` | `?string` | Free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `extra` | `array<string, mixed>` | Fields Billomat returns that the SDK doesn't map (yet), see [Models](../concepts/models.md) |
 
-`Client::fromArray(array $data): self` hydriert ein Modell aus dem `client`-Knoten der API-Response. `toArray()` rendert das Modell zurück in Billomat-Feldnamen (snake_case) — gedacht für Debugging und Logging, **nicht** für Update-Calls.
+`Client::fromArray(array $data): self` hydrates a model from the `client` node of the API response. `toArray()` renders the model back with Billomat field names (snake_case). It's meant for debugging and logging, **not** for update calls.
 
-## Client Property Values
+## Client property values
 
-Speichert die Werte für die in [`properties.md`](properties.md) definierten Kunden-Eigenschaften (`clientProperties`). Eine Property-Definition (`ClientProperty`) ist das Schema (Name + `PropertyType`), ein `ClientPropertyValue` ist die konkrete Belegung an einem Kunden.
+Stores the values for the client properties defined in [`properties.md`](properties.md) (`$billomat->clients->properties`). A property definition (`ClientProperty`) is the schema (name + `PropertyType`); a `ClientPropertyValue` is the actual value on one client.
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `list($parentId?, $filters?)` | GET | `/client-property-values` |
-| `listPage($parentId?, $filters?)` | GET | `/client-property-values` |
-| `iterateAll($filters?, $pageSize?)` | GET | `/client-property-values` (mehrseitig) |
-| `get($id)` | GET | `/client-property-values/{id}` |
+| `list($clientId?, $filters?)` | GET | `/client-property-values` |
+| `listPage($clientId?, $filters?)` | GET | `/client-property-values` |
+| `iterateAll($clientId?, $filters?, $pageSize?)` | GET | `/client-property-values` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/client-property-values/{id}` |
 | `create($options)` | POST | `/client-property-values` |
 
 ```php
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
 
-// Werte für einen Kunden auflisten
+// List the values of one client
 $values = $billomat->clients->propertyValues->list($client->id);
 
-// Wert für die Property "Branche" (id = 12) setzen
+// Set the value of the property "Industry" (id = 12)
 $value = $billomat->clients->propertyValues->create(
     new ClientPropertyValueCreateOptions(
         clientId: $client->id,
         clientPropertyId: 12,
-        value: 'Logistik',
+        value: 'Logistics',
     ),
 );
 ```
 
-Ein erneuter `create()`-Call mit derselben `clientPropertyId` überschreibt den bestehenden Wert.
+Calling `create()` again with the same `clientPropertyId` overwrites the existing value. There is no `update()` or `delete()`.
 
-### Write-Modell: `ClientPropertyValueCreateOptions`
+### Write model: `ClientPropertyValueCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` (Pflicht) | — |
-| `clientPropertyId` | `client_property_id` | `int` (Pflicht) | ID der Property-Definition |
-| `value` | `value` | `mixed` (Pflicht) | Bei `CHECKBOX` werden `0`/`1` erwartet |
+| `clientId` | `client_id` | `int` (required) | — |
+| `clientPropertyId` | `client_property_id` | `int` (required) | ID of the property definition |
+| `value` | `value` | `mixed` (required) | `CHECKBOX` expects `0`/`1` |
 
-### Read-Modell: `ClientPropertyValue`
+### Read model: `ClientPropertyValue`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `clientId` | `int` |
 | `clientPropertyId` | `int` |
-| `type` | `?string` (rohes API-Feld, z. B. `TEXTFIELD`) |
-| `name` | `?string` (Name aus der Property-Definition) |
+| `type` | `?PropertyType` (`TEXTFIELD`, `TEXTAREA`, `CHECKBOX`) |
+| `name` | `?string` (name from the property definition) |
 | `value` | `mixed` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Verwendete Enums
+## Enums used
 
-Diese Enums tauchen als String-Werte in den Properties auf (Billomat liefert sie roh als String). Eine echte Enum-Typisierung gibt es bei diesem Modell aktuell nur indirekt.
+- [`TaxRule`](../../src/Model/Enum/TaxRule.php): `TAX`, `NO_TAX`, `COUNTRY` (`taxRule`)
+- [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS` (`netGross`)
+- [`ValueType`](../../src/Model/Enum/ValueType.php): `SETTINGS`, `ABSOLUTE`, `RELATIVE` (the `*Type` fields)
+- [`PaymentType`](../../src/Model/Enum/PaymentType.php): `INVOICE_CORRECTION`, `CREDIT_NOTE`, `BANK_CARD`, `BANK_TRANSFER`, `DEBIT`, `CASH`, `CHECK`, `PAYPAL`, `CREDIT_CARD`, `COUPON`, `MISC` (`defaultPaymentTypes`)
+- [`PropertyType`](../../src/Model/Enum/PropertyType.php): `TEXTFIELD`, `TEXTAREA`, `CHECKBOX` (`ClientPropertyValue::$type`)
 
-- [`TaxRule`](../../src/Model/Enum/TaxRule.php): `TAX`, `NO_TAX`, `COUNTRY`
-- [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`
-- [`ValueType`](../../src/Model/Enum/ValueType.php) (für `*Type`-Felder): `SETTINGS`, `ABSOLUTE`, `RELATIVE`
+## Pitfalls
 
-## Stolpersteine
+- **E-invoicing (undocumented).** Billomat returns `facturx_identifier` and `seller_identifier` in API responses but doesn't describe them in the API docs. The SDK only reads them (types derived from observed values); writing isn't supported for lack of a specification.
+- **Single-item list quirk.** When a list contains only one client, Billomat sometimes sends it as an object instead of a list. `ClientsApi::list()` normalizes this, so you always get a `list<Client>`.
+- **Archived clients can't be updated.** Send `archived: false` in a first `ClientUpdateOptions` request, then the remaining changes in a second one.
+- **`number_length` shorter than the actual length.** If `number` already has more digits, Billomat's validation fails and you get a `ValidationException`.
+- **Clients with documents can't be deleted.** `delete()` throws a `ValidationException`; archive them via `update()` instead.
 
-- **E-Rechnung (undokumentiert).** `facturx_identifier` und `seller_identifier` liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
-- **Single-Item-List-Quirk:** Wenn Billomat in der Liste nur einen Kunden zurückliefert, schickt es ihn manchmal als Objekt statt in einer Liste. Das normalisiert `ClientsApi::list()` automatisch — du bekommst immer eine `list<Client>`.
-- **Archivierte Kunden lassen sich nicht updaten.** Setze in `ClientUpdateOptions` zuerst `archived = false`, dann den Rest in einem zweiten Update-Request.
-- **`number_length` < tatsächliche Länge.** Wenn `number` schon vorhandene Stellen hat, schlägt das Validierungs-Check auf Billomat-Seite fehl — `ValidationException` ist die Folge.
-
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -352,27 +406,27 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Anlegen
-$create = new ClientCreateOptions(name: 'Beispiel GmbH', countryCode: 'DE', email: 'rechnungen@beispiel.de');
+// Create
+$create = new ClientCreateOptions(name: 'Example GmbH', countryCode: 'DE', email: 'invoices@example.de');
 
 try {
     $client = $billomat->clients->create($create);
 } catch (ValidationException $e) {
-    fwrite(STDERR, "Anlage abgelehnt: " . $e->getResponseBody() . PHP_EOL);
+    fwrite(STDERR, 'Creation rejected: ' . $e->getResponseBody() . PHP_EOL);
     exit(1);
 }
 
-printf("Angelegt: #%d %s\n", $client->id, $client->name);
+printf("Created: #%d %s\n", $client->id, $client->name);
 
-// Lesen
-$reloaded = $billomat->clients->get($client->id);
-var_dump($reloaded?->email);
+// Read
+$reloaded = $billomat->clients->getOrFail($client->id);
+var_dump($reloaded->email);
 
-// Aktualisieren
-$update = new ClientUpdateOptions(note: 'Erstkontakt: ' . date('Y-m-d'));
+// Update
+$update = new ClientUpdateOptions(note: 'First contact: ' . date('Y-m-d'));
 $billomat->clients->update($client->id, $update);
 
-// Listen (z. B. nach Anlage)
+// List (e.g. the most recently created)
 $recent = $billomat->clients->list(new ClientFilter(
     orderBy: OrderBy::desc('id'),
     perPage: 5,

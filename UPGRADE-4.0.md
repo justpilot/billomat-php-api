@@ -8,7 +8,74 @@ Recommended order:
 1. Upgrade to the latest 3.x release and fix all deprecation notices first.
    Everything that was deprecated in 3.x is removed in 4.0.
 2. Switch to PHP 8.5.
-3. Work through the sections below.
+3. Run the Rector set (next section) for the mechanical changes.
+4. Work through the sections below for the rest.
+
+## Automated upgrade with Rector
+
+The package ships a [Rector](https://getrector.com) set, `rector/upgrade-4.0.php`, that rewrites the
+mechanical parts of the upgrade. Install Rector if your project doesn't have it, update the SDK, then
+run the set **before** you change anything by hand:
+
+```bash
+composer require --dev rector/rector
+composer require justpilot/billomat-php-api:^4.0
+
+vendor/bin/rector process src tests --config vendor/justpilot/billomat-php-api/rector/upgrade-4.0.php --dry-run
+vendor/bin/rector process src tests --config vendor/justpilot/billomat-php-api/rector/upgrade-4.0.php
+```
+
+Run with `--config` like this, Rector writes new class names fully qualified and leaves the old `use`
+statements behind. To get imports instead, put the set into a `rector.php` of your own:
+
+```php
+use Rector\Config\RectorConfig;
+
+return RectorConfig::configure()
+    ->withPaths([__DIR__ . '/src', __DIR__ . '/tests'])
+    ->withSets([__DIR__ . '/vendor/justpilot/billomat-php-api/rector/upgrade-4.0.php'])
+    ->withImportNames(importShortClasses: false, removeUnusedImports: true);
+```
+
+Run your code style fixer afterwards; Rector does not sort imports.
+
+### What the set changes
+
+| 3.x | 4.0 |
+|---|---|
+| `$billomat->invoiceComments`, `$billomat->clientTags`, … (all 39 flat sub-resources) | `$billomat->invoices->comments`, `$billomat->clients->tags`, … |
+| `$billomat->dunningLevels`, `DunningLevelsApi`, `DunningLevel` | `$billomat->reminderTexts`, `ReminderTextsApi`, `ReminderText` |
+| `listByInvoice($id)`, `listByOffer($id)`, … on sub-resources, `ContactsApi::listByClient()` | `list($id)` |
+| Named arguments `invoiceId:`, `offerId:`, … on comments, tags and items | `parentId:` |
+| `list($filters)`, `listPage($filters)`, `iterateAll($filters, $size)` on payments and property values | `list(filters: $filters)`, … |
+| `new InvoiceCommentsApi($http)` and the other removed sub-resource classes | `new InvoicesApi($http)->comments` |
+| Type hints on `InvoiceCommentsApi`, `ClientTagsApi`, … | `CommentsApi`, `TagsApi`, … |
+| `InvoiceEmailOptions`, `OfferEmailOptions`, … | `EmailOptions` |
+| `InvoicePaymentType`, `InvoicePdfType`, `InvoiceItemType`, `ArticleType` | `PaymentType`, `PdfType`, `ItemType` |
+| `OfferStatus::ACCEPTED`, `OfferStatus::REJECTED` | `OfferStatus::WON`, `OfferStatus::LOST` |
+| `$options->getItems()` on document create options | `$options->items` |
+| `$this->putEmptyResponse()` in `AbstractApi` subclasses | `$this->putVoid()` |
+
+The set only touches calls it can attribute to the SDK: `$billomat->invoiceComments` is rewritten when
+Rector (via PHPStan) knows that `$billomat` is a `BillomatClient`. Untyped variables, values from a
+service container without a type and `mixed` stay as they are. Check the diff and search for the
+remaining 3.x names afterwards.
+
+### What stays manual
+
+These changes need a decision and are not automated. The sections below describe each one.
+
+- Amounts are `Money` instead of `float`, tax rows are `TaxSummary` objects.
+- Options are immutable: property assignments and `addItem()` become named arguments or `with*()`.
+- Enums instead of strings (`taxRule: 'NO_TAX'` → `TaxRule::NO_TAX`), payment types as `list<PaymentType>`,
+  `InvoiceMailOptions::$paperWeight` as `int`.
+- Methods that returned `true` return `void`: rewrite `if ($api->complete($id))` and similar.
+- Removed read-model properties, including the fields of `DunningLevel` that `ReminderText` doesn't have
+  (`$position`, `$dueDays`, `$charge`, `$interest`).
+- `@template` types for the generic sub-resource classes (`CommentsApi<InvoiceComment, …>`) in your PHPDoc.
+- The parent filter of payments and property values: `list(filters: ['invoice_id' => $id])` keeps
+  working, `list($id)` is the 4.0 way.
+- PSR-18 setup, `MockHttpClient` in tests, exception handling, `#[\NoDiscard]`, `BillomatConfig` validation.
 
 ## PHP 8.5 is required
 

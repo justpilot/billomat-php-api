@@ -77,7 +77,7 @@ More runnable scripts in [examples/](examples/).
 | Read models, money, webhooks | [docs/concepts/models.md](docs/concepts/models.md), [money.md](docs/concepts/money.md), [webhooks.md](docs/concepts/webhooks.md) |
 | Resources (invoices, offers, clients, …) | [docs/resources/](docs/resources/README.md) |
 | Testing your integration | [docs/testing.md](docs/testing.md) |
-| Upgrading from 3.x | [UPGRADE-4.0.md](UPGRADE-4.0.md) |
+| Upgrading from 3.x | [UPGRADE-4.0.md](UPGRADE-4.0.md), with a [Rector set](UPGRADE-4.0.md#automated-upgrade-with-rector) for the mechanical changes |
 | Coming from `phobetor/billomat` | [docs/migration-from-phobetor.md](docs/migration-from-phobetor.md) |
 
 The full documentation is also published at [billomat-php.justpilot.io](https://billomat-php.justpilot.io).

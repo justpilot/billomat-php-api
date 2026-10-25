@@ -26,7 +26,7 @@ Closes #
 - [ ] `composer ci` passes locally (lint, PHPStan, Rector, `generate:check`, tests)
 - [ ] Unit tests for new code (`#[Test]`, `#[CoversClass]`)
 - [ ] Generated files changed only via definitions + `composer generate`
-- [ ] New resources: docs under `docs/resources/` and a README entry
+- [ ] New resources: docs under `docs/resources/` and an entry in its README
 - [ ] `CHANGELOG.md` updated under `[Unreleased]`
 - [ ] Code comments in German (ä/ö/ü/ß, not ae/oe/ue/ss), identifiers in English
 - [ ] No new PHPStan baseline entries

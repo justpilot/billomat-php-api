@@ -43,7 +43,7 @@ Every Billomat resource follows the same pattern; look at `ClientsApi`, `ClientC
 2. Write the `*Api` class by hand and add it as a lazy property hook on `BillomatClient` (same pattern as the other APIs).
 3. New enums go into `src/Model/Enum/` (`enum X: string { use FromApi; case … }`, optionally `label()`).
 4. Add unit tests in `tests/Api/{Resource}ApiTest.php` (see below) and optionally an integration test under `tests/Integration/{Resource}/`.
-5. Add a documentation page under `docs/resources/<resource-name>.md` and link it from the README.
+5. Add a documentation page under `docs/resources/<resource-name>.md` and add it to the table in `docs/resources/README.md`.
 
 ## Tests
 
@@ -99,7 +99,7 @@ Add notable changes to the `[Unreleased]` section of `CHANGELOG.md`, grouped by 
 - [ ] `composer ci` passes locally
 - [ ] Unit tests for new code (`#[Test]`, `#[CoversClass]`)
 - [ ] Generated files changed only via definitions + `composer generate`
-- [ ] New resources: docs under `docs/resources/` and a README entry
+- [ ] New resources: docs under `docs/resources/` and an entry in its README
 - [ ] `CHANGELOG.md` updated (and `UPGRADE-4.0.md` for breaking changes)
 - [ ] Code comments in German, identifiers in English
 - [ ] No new PHPStan baseline entries

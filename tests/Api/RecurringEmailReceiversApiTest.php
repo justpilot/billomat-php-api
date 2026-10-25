@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiversApi;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -24,6 +25,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(RecurringEmailReceiversApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
 #[CoversClass(RecurringEmailReceiver::class)]
 #[CoversClass(RecurringEmailReceiverCreateOptions::class)]
 #[CoversClass(RecurringEmailReceiverType::class)]
@@ -57,7 +59,7 @@ final class RecurringEmailReceiversApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringEmailReceiversApi($http);
 
-        $receivers = $api->listByRecurring(42);
+        $receivers = $api->list(42);
 
         self::assertCount(2, $receivers);
         self::assertContainsOnlyInstancesOf(RecurringEmailReceiver::class, $receivers);
@@ -115,7 +117,7 @@ final class RecurringEmailReceiversApiTest extends TestCase
         $api = new RecurringEmailReceiversApi($http);
 
         self::assertNull($api->get(999));
-        self::assertTrue($api->delete(10));
+        $api->delete(10);
     }
 
     /**

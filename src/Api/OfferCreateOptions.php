@@ -19,7 +19,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
  * Generiert aus tools/codegen/definitions/offers.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class OfferCreateOptions
+final class OfferCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

@@ -69,8 +69,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         $invoiceId = $draft->id;
 
         // 3) Rechnung abschließen (damit sie zahlbar ist)
-        $completedResult = $billomat->invoices->complete($invoiceId);
-        self::assertTrue($completedResult);
+        $billomat->invoices->complete($invoiceId);
 
         $completed = $billomat->invoices->get($invoiceId);
         self::assertInstanceOf(Invoice::class, $completed);
@@ -89,7 +88,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         $paymentOpts->transactionPurpose = 'Testzahlung für Invoice #'.$invoiceId;
         $paymentOpts->markInvoiceAsPaid = true;
 
-        $payment = $billomat->invoicePayments->create($paymentOpts);
+        $payment = $billomat->invoices->payments->create($paymentOpts);
 
         self::assertNotNull($payment->id);
         self::assertSame($invoiceId, $payment->invoiceId);

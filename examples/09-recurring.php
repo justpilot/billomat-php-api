@@ -61,7 +61,7 @@ try {
     );
 
     // 2) E-Mail-Empfänger pflegen — Pflicht, damit action=EMAIL nicht scheitert
-    $billomat->recurringEmailReceivers->create(
+    $billomat->recurrings->emailReceivers->create(
         new RecurringEmailReceiverCreateOptions(
             recurringId: $recurring->id,
             type: RecurringEmailReceiverType::TO,
@@ -70,16 +70,16 @@ try {
     );
 
     // 3) Schlagwort setzen
-    $billomat->recurringTags->create(
+    $billomat->recurrings->tags->create(
         new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'hosting'),
     );
 
     // 4) Preis-Update für die einzige Position
-    foreach ($billomat->recurringItems->listByRecurring($recurring->id) as $current) {
+    foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
         $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 24.9);
         $update->title = $current->title;
         $update->unit = $current->unit;
-        $billomat->recurringItems->update($current->id, $update);
+        $billomat->recurrings->items->update($current->id, $update);
         printf("Position #%d auf %.2f angepasst.\n", $current->id, 24.9);
     }
 } catch (BillomatException $e) {

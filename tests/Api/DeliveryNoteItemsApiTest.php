@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
-use Justpilot\Billomat\Api\DeliveryNoteItemsApi;
+use Justpilot\Billomat\Api\DeliveryNotesApi;
+use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -21,7 +23,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(DeliveryNoteItemsApi::class)]
+#[CoversClass(ItemsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(DeliveryNotesApi::class)]
 #[CoversClass(DeliveryNoteItemCreateOptions::class)]
 #[CoversClass(DeliveryNoteItem::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -49,12 +53,12 @@ final class DeliveryNoteItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new DeliveryNoteItemsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
-        $items = $api->listByDeliveryNote(123);
+        $items = $api->list(123);
 
         self::assertCount(1, $items);
         self::assertSame(5.0, $items[0]->quantity);
@@ -76,10 +80,10 @@ final class DeliveryNoteItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new DeliveryNoteItemsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
         $opts = new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: 0.0);
         $opts->title = 'Neu';
@@ -110,14 +114,14 @@ final class DeliveryNoteItemsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new DeliveryNoteItemsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
         $opts = new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 0.0);
         self::assertSame(77, $api->update(77, $opts)->id);
-        self::assertTrue($api->delete(77));
+        $api->delete(77);
 
         self::assertSame('PUT', $captured[0]['method']);
         self::assertSame('DELETE', $captured[1]['method']);

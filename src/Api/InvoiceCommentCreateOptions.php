@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
  * Generiert aus tools/codegen/definitions/invoice-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class InvoiceCommentCreateOptions
+final class InvoiceCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

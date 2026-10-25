@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
-use Justpilot\Billomat\Api\InvoicePaymentsApi;
+use Justpilot\Billomat\Api\InvoicesApi;
+use Justpilot\Billomat\Api\PaymentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -23,7 +25,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(InvoicePaymentsApi::class)]
+#[CoversClass(PaymentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(InvoicesApi::class)]
 #[CoversClass(InvoicePayment::class)]
 #[UsesClass(InvoicePaymentCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -78,9 +82,9 @@ final class InvoicePaymentsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoicePaymentsApi($http);
+        $api = new InvoicesApi($http)->payments;
 
-        $payments = $api->list([
+        $payments = $api->list(filters: [
             'invoice_id' => 100,
             'from' => '2025-01-01',
         ]);
@@ -128,7 +132,7 @@ final class InvoicePaymentsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoicePaymentsApi($http);
+        $api = new InvoicesApi($http)->payments;
 
         $payment = $api->get(5);
 
@@ -172,7 +176,7 @@ final class InvoicePaymentsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoicePaymentsApi($http);
+        $api = new InvoicesApi($http)->payments;
 
         $opts = new InvoicePaymentCreateOptions(
             invoiceId: 300,
@@ -238,11 +242,9 @@ final class InvoicePaymentsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoicePaymentsApi($http);
+        $api = new InvoicesApi($http)->payments;
 
-        $result = $api->delete(42);
-
-        self::assertTrue($result);
+        $api->delete(42);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/invoice-payments/42',

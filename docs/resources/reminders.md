@@ -8,8 +8,8 @@ API-Wrapper für Mahnungen unter `/reminders` und ihre zwei Sub-Ressourcen (`/re
 
 ```php
 $billomat->reminders      // Mahnungen selbst
-$billomat->reminderItems  // Positionen einer Mahnung (read-only)
-$billomat->reminderTags   // Schlagworte
+$billomat->reminders->items  // Positionen einer Mahnung (read-only)
+$billomat->reminders->tags   // Schlagworte
 ```
 
 Die zugehörigen, frei wählbaren Mahn-Textbausteine liegen in einer eigenen Ressource: `$billomat->reminderTexts` (siehe `ReminderTextsApi`).
@@ -52,7 +52,7 @@ Aus einer offenen Mahnung können weitere Mahnstufen entstehen — Billomat zäh
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByReminder($reminderId, $query?)` | GET | `/reminder-items?reminder_id={id}` |
+| `list($reminderId, $query?)` | GET | `/reminder-items?reminder_id={id}` |
 | `get($id)` | GET | `/reminder-items/{id}` |
 
 Read-only — es gibt **kein** `create`/`update`/`delete` und keine `ReminderItemCreateOptions`-Klasse. Items werden vom System aus der Rechnung erzeugt.
@@ -61,7 +61,7 @@ Read-only — es gibt **kein** `create`/`update`/`delete` und keine `ReminderIte
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByReminder($reminderId)` | GET | `/reminder-tags?reminder_id={id}` |
+| `list($reminderId)` | GET | `/reminder-tags?reminder_id={id}` |
 | `cloud()` | GET | `/reminder-tags` |
 | `get($id)` | GET | `/reminder-tags/{id}` |
 | `create($options)` | POST | `/reminder-tags` |
@@ -105,15 +105,15 @@ $reminder = $billomat->reminders->create($opts);
 
 Nur im Status `DRAFT` ratsam. Die `invoiceId` ist hier nicht mehr änderbar — die Bindung an die Rechnung steht fest.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
 Status `DRAFT → OPEN`. Mit optionaler `templateId` lässt sich ein konkretes Layout-Template forcieren.
 
-#### `cancel(int $id): bool`
+#### `cancel(int $id): void`
 
 Setzt den Status auf `CANCELED`. Eine `uncancel()`-Methode existiert für Mahnungen **nicht** — eine stornierte Mahnung muss ggf. neu angelegt werden.
 
-#### `email(int $id, ?ReminderEmailOptions $options = null): bool`
+#### `email(int $id, ?ReminderEmailOptions $options = null): void`
 
 Ohne Optionen verwendet Billomat alle Default-Werte aus der hinterlegten E-Mail-Vorlage.
 
@@ -136,19 +136,19 @@ $pdf = $billomat->reminders->pdf($reminder->id);                 // Model
 $raw = $billomat->reminders->pdf($reminder->id, rawPdf: true);   // string (PDF binary)
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
+#### `uploadSignature(int $id, string $base64Pdf): void`
 
 Hängt eine vom Kunden unterschriebene PDF-Variante an die Mahnung.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
 Funktioniert ausschließlich an Mahnungen im Status `DRAFT`.
 
 ### Reminder Items (read-only)
 
 ```php
-$items = $billomat->reminderItems->listByReminder($reminder->id);
-$item = $billomat->reminderItems->get($itemId);
+$items = $billomat->reminders->items->list($reminder->id);
+$item = $billomat->reminders->items->get($itemId);
 ```
 
 Es gibt **kein** `ReminderItemCreateOptions` und keine schreibenden Endpunkte. Items zeigen Original-Rechnungsbetrag und Verzugskosten, generiert aus dem hinterlegten Mahntext-Baustein.
@@ -158,12 +158,12 @@ Es gibt **kein** `ReminderItemCreateOptions` und keine schreibenden Endpunkte. I
 ```php
 use Justpilot\Billomat\Api\ReminderTagCreateOptions;
 
-$billomat->reminderTags->create(
+$billomat->reminders->tags->create(
     new ReminderTagCreateOptions(reminderId: $reminder->id, name: 'mahnstufe-2'),
 );
 
-$tags = $billomat->reminderTags->listByReminder($reminder->id);
-$cloud = $billomat->reminderTags->cloud(); // aggregiert, mit count
+$tags = $billomat->reminders->tags->list($reminder->id);
+$cloud = $billomat->reminders->tags->cloud(); // aggregiert, mit count
 ```
 
 Ein Update existiert nicht — zum Umbenennen wird gelöscht und neu angelegt.
@@ -314,7 +314,7 @@ Es gibt **keinen** eigenen Comment-ActionKey-Enum für Reminders — Mahnungen b
 - **`reminderTextId` ohne Eintrag in `/reminder-texts` führt zu 422.** Vor dem `create()` sicherstellen, dass der Mahntext-Baustein wirklich existiert (per `$billomat->reminderTexts->list()`).
 - **Status `OVERDUE` ist read-only.** Er entsteht serverseitig — ein `update()` mit `status = OVERDUE` wirkt nicht, das Feld kommt im Write-Payload gar nicht vor.
 - **Mehrere Mahnstufen für dieselbe Rechnung sind möglich.** Eine zweite Mahnung zur selben Rechnung erzeugt automatisch die nächsthöhere Mahnstufe gemäß den in `reminderTexts` (`ReminderTextsApi`) konfigurierten Mahnstufen.
-- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /reminder-tags` ohne `reminder_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `reminder_id` die konkreten Tags (`reminder-tag`-Wrapper). Der SDK trennt das in `cloud()` und `listByReminder()`.
+- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /reminder-tags` ohne `reminder_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `reminder_id` die konkreten Tags (`reminder-tag`-Wrapper). Der SDK trennt das in `cloud()` und `list()`.
 
 ## End-to-End-Beispiel
 
@@ -365,7 +365,7 @@ printf("Mahnung #%d angelegt (Status: %s)\n",
 );
 
 // 4) Tag setzen (z. B. Mahnstufe), bevor abgeschlossen wird
-$billomat->reminderTags->create(
+$billomat->reminders->tags->create(
     new ReminderTagCreateOptions(reminderId: $reminder->id, name: 'mahnstufe-1'),
 );
 
@@ -384,7 +384,7 @@ $pdfBinary = $billomat->reminders->pdf($reminder->id, rawPdf: true);
 file_put_contents("mahnung-{$reminder->id}.pdf", $pdfBinary);
 
 // 8) Generierte Reminder-Items inspizieren (read-only)
-foreach ($billomat->reminderItems->listByReminder($reminder->id) as $item) {
+foreach ($billomat->reminders->items->list($reminder->id) as $item) {
     printf("- %s: %.2f\n", $item->title ?? 'Position', $item->total ?? 0.0);
 }
 ```

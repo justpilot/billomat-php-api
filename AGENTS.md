@@ -53,6 +53,7 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: '…');
 $billomat->clients->list();
 $billomat->invoices->create($options);
 $billomat->invoices->pdf($id, InvoicePdfType::SIGNED);
+$billomat->invoices->comments->list($invoiceId);
 ```
 
 Construction wires `BillomatHttpClient` into every `*Api` instance. The transport is PSR-18: any `Psr\Http\Client\ClientInterface` can be injected; without one, `BillomatClient` uses Symfony's `Psr18Client` (with `BillomatConfig::$timeout`) if `symfony/http-client` is installed, otherwise `php-http/discovery`. PSR-17 factories come from discovery unless passed in.
@@ -66,6 +67,11 @@ Every Billomat resource follows the same triad:
 3. **`src/Model/{Resource}.php`** — `final readonly` read model with `fromArray()` hydration and `toArray()` for debug/log output. Snake_case ↔ camelCase mapping lives in `fromArray`/`toArray`.
 
 When adding a new resource, register it as a public readonly property on `BillomatClient` and instantiate it in the constructor.
+
+### Sub-resources
+
+Items, payments, comments, tags, properties and property values hang off their parent `*Api` as lazy property hooks (`public private(set) CommentsApi $comments { get => $this->comments ??= new CommentsApi(...); }`), not on `BillomatClient`. They use one generic class per kind — `CommentsApi`, `TagsApi`, `ItemsApi`, `PaymentsApi`, `PropertiesApi`, `PropertyValuesApi` — extending `AbstractSubResourceApi`, which derives path, envelope keys and parent filter from the parent slug (`'credit-note'` → `/credit-note-comments`, `credit-note-comment`, `credit_note_id`). The property's `@var` carries the `@template` types; the constructor gets the hydrator, the expected `*CreateOptions` class (checked at runtime, the native type is only `WriteOptions`) and for comments the `*CommentActionKey` enum. Methods are uniform: `list(int $parentId, …)` (payments/property values: `list(?int $parentId = null, array $filters = [])`), `get()`, `create()`, `update()`, `delete(): void`. Sub-resources that don't fit (`ReminderItemsApi`, read-only; `RecurringEmailReceiversApi`) are small classes on the same base.
+
 
 ### Generated code
 
@@ -106,6 +112,9 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 - Runtime dependencies are PSR interfaces only (`psr/http-client`, `psr/http-factory`, `psr/http-message`) plus `php-http/discovery`; never add a concrete HTTP client or framework package to `require`. Symfony packages are dev-only, **Symfony 8 only** — currently `^8.1` on every `symfony/*` package; don't add `symfony/http-foundation` just for status-code constants. Raise the lower bound when a security fix requires it or an older minor leaves maintenance. CI exercises the floor (Symfony 8.1 pinned via `extra.symfony.require` + Flex) and the ceiling (latest Symfony 8.x).
 - `declare(strict_types=1);` at the top of every file.
 - Public `*Api` methods without side effects (`get`, `list*`, `iterateAll`, `pdf`, …) carry `#[NoDiscard]`; write methods don't. In tests, cast intentionally ignored results to `(void)`.
+- Methods without a meaningful result (`delete`, `complete`, `cancel`, `email`, …) return `void`, never an always-`true` bool. Errors are exceptions.
+- Generated `*CreateOptions`/`*UpdateOptions` implement `WriteOptions`.
+- `new Foo()->bar` needs no parentheses (PHP 8.4+); don't write `(new Foo())->bar`.
 - All API classes are `final`; models are `final readonly`.
 - PSR-4: `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.
 - Unit tests use `Symfony\Component\HttpClient\MockHttpClient` + `MockResponse`, wrapped in `Psr18Client` (`new BillomatHttpClient(new Psr18Client($mock), $config)`), to capture the outgoing request and assert URL/method/headers/body (`$options['body']` is the JSON string). Don't mock `BillomatHttpClient` itself. Retry tests pass a `sleep:` closure instead of waiting.

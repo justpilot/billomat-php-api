@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
-use Justpilot\Billomat\Api\OfferTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(OfferTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(OffersApi::class)]
 #[CoversClass(OfferTagCreateOptions::class)]
 #[CoversClass(OfferTag::class)]
 #[CoversClass(OfferTagCloudEntry::class)]
@@ -52,12 +56,12 @@ final class OfferTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new OfferTagsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        $tags = $api->listByOffer(42);
+        $tags = $api->list(42);
 
         self::assertCount(2, $tags);
         self::assertSame('wichtig', $tags[0]->name);
@@ -80,10 +84,10 @@ final class OfferTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new OfferTagsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $cloud = $api->cloud();
 
@@ -108,10 +112,10 @@ final class OfferTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new OfferTagsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $opts = new OfferTagCreateOptions(offerId: 42, name: 'neu');
         $tag = $api->create($opts);
@@ -132,12 +136,12 @@ final class OfferTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new OfferTagsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offer-tags/99', $captured['url']);
     }

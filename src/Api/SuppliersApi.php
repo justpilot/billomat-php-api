@@ -10,6 +10,10 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Supplier;
+use Justpilot\Billomat\Model\SupplierProperty;
+use Justpilot\Billomat\Model\SupplierPropertyValue;
+use Justpilot\Billomat\Model\SupplierTag;
+use Justpilot\Billomat\Model\SupplierTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -27,6 +31,33 @@ use NoDiscard;
  */
 final class SuppliersApi extends AbstractApi
 {
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<SupplierTag, SupplierTagCloudEntry, SupplierTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'supplier', SupplierTag::fromArray(...), SupplierTagCloudEntry::fromArray(...), SupplierTagCreateOptions::class);
+    }
+
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<SupplierProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'supplier', SupplierProperty::fromArray(...));
+    }
+
+    /**
+     * Attributwerte, siehe {@see PropertyValuesApi}.
+     *
+     * @var PropertyValuesApi<SupplierPropertyValue, SupplierPropertyValueCreateOptions>
+     */
+    public private(set) PropertyValuesApi $propertyValues {
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'supplier', SupplierPropertyValue::fromArray(...), SupplierPropertyValueCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -147,10 +178,8 @@ final class SuppliersApi extends AbstractApi
         return Supplier::fromArray($row);
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/suppliers/{$id}");
-
-        return true;
     }
 }

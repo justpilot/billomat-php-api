@@ -224,7 +224,9 @@ final class TemplatesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
-        self::assertTrue($api->delete(10));
+        $api->delete(10);
+
+        self::assertSame(1, $mock->getRequestsCount());
     }
 
     #[Test]

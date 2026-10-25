@@ -19,7 +19,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
  * Generiert aus tools/codegen/definitions/delivery-notes.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class DeliveryNoteCreateOptions
+final class DeliveryNoteCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

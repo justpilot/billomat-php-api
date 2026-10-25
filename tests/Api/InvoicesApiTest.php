@@ -336,10 +336,9 @@ final class InvoicesApiTest extends TestCase
 
         $templateId = 5;
 
-        $result = $api->complete(777, $templateId);
+        $api->complete(777, $templateId);
 
         // complete() gibt nur true zurück, wenn kein HTTP-Fehler kam
-        self::assertTrue($result);
 
         // Request prüfen
         self::assertSame('PUT', $captured['method']);
@@ -388,9 +387,7 @@ final class InvoicesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http);
 
-        $result = $api->delete(777);
-
-        self::assertTrue($result);
+        $api->delete(777);
 
         self::assertSame('DELETE', $captured['method']);
         self::assertSame(
@@ -442,9 +439,7 @@ final class InvoicesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->cancel(999);
-
-        self::assertTrue($result);
+        $api->cancel(999);
 
         self::assertSame('PUT', $captured['method']);
         self::assertSame(
@@ -469,9 +464,7 @@ final class InvoicesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->uncancel(999);
-
-        self::assertTrue($result);
+        $api->uncancel(999);
 
         self::assertSame('PUT', $captured['method']);
         self::assertSame(
@@ -746,9 +739,7 @@ final class InvoicesApiTest extends TestCase
             ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
         ];
 
-        $result = $api->email(777, $opts);
-
-        self::assertTrue($result);
+        $api->email(777, $opts);
         self::assertSame('POST', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/invoices/777/email',
@@ -791,9 +782,7 @@ final class InvoicesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->email(123);
-
-        self::assertTrue($result);
+        $api->email(123);
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoices/123/email', $captured['url']);
 
@@ -826,9 +815,7 @@ final class InvoicesApiTest extends TestCase
             ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
         ];
 
-        $result = $api->mail(888, $opts);
-
-        self::assertTrue($result);
+        $api->mail(888, $opts);
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoices/888/mail', $captured['url']);
 
@@ -860,9 +847,7 @@ final class InvoicesApiTest extends TestCase
         ));
 
         $base64 = base64_encode('PDF-FAKE-CONTENT');
-        $result = $api->uploadSignature(555, $base64);
-
-        self::assertTrue($result);
+        $api->uploadSignature(555, $base64);
         self::assertSame('PUT', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/invoices/555/upload-signature',
@@ -890,9 +875,7 @@ final class InvoicesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->encash(101);
-
-        self::assertTrue($result);
+        $api->encash(101);
         self::assertSame('PUT', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/invoices/101/encash',

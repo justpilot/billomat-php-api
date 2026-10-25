@@ -9,7 +9,12 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\DeliveryNote;
+use Justpilot\Billomat\Model\DeliveryNoteComment;
+use Justpilot\Billomat\Model\DeliveryNoteItem;
 use Justpilot\Billomat\Model\DeliveryNotePdf;
+use Justpilot\Billomat\Model\DeliveryNoteTag;
+use Justpilot\Billomat\Model\DeliveryNoteTagCloudEntry;
+use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
@@ -35,6 +40,33 @@ use NoDiscard;
  */
 final class DeliveryNotesApi extends AbstractApi
 {
+    /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<DeliveryNoteItem, DeliveryNoteItemCreateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'delivery-note', DeliveryNoteItem::fromArray(...), DeliveryNoteItemCreateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<DeliveryNoteComment, DeliveryNoteCommentCreateOptions, DeliveryNoteCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'delivery-note', DeliveryNoteComment::fromArray(...), DeliveryNoteCommentCreateOptions::class, DeliveryNoteCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<DeliveryNoteTag, DeliveryNoteTagCloudEntry, DeliveryNoteTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'delivery-note', DeliveryNoteTag::fromArray(...), DeliveryNoteTagCloudEntry::fromArray(...), DeliveryNoteTagCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -122,7 +154,7 @@ final class DeliveryNotesApi extends AbstractApi
         return DeliveryNote::fromArray($this->unwrapEnvelope($data, 'delivery-note', 'updating delivery note'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -133,54 +165,40 @@ final class DeliveryNotesApi extends AbstractApi
         $payload = ['delivery-note' => $body];
 
         $this->putVoid("/delivery-notes/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/delivery-notes/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/delivery-notes/{$id}/cancel");
-
-        return true;
     }
 
-    public function clear(int $id): bool
+    public function clear(int $id): void
     {
         $this->putVoid("/delivery-notes/{$id}/clear");
-
-        return true;
     }
 
-    public function undo(int $id): bool
+    public function undo(int $id): void
     {
         $this->putVoid("/delivery-notes/{$id}/undo");
-
-        return true;
     }
 
-    public function email(int $id, ?DeliveryNoteEmailOptions $options = null): bool
+    public function email(int $id, ?DeliveryNoteEmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postJson("/delivery-notes/{$id}/email", $payload);
-
-        return true;
     }
 
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/delivery-notes/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**

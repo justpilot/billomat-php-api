@@ -130,7 +130,7 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame('Geänderter Titel', $updated->title);
 
         // Delete
-        self::assertTrue($billomat->offers->delete($draft->id));
+        $billomat->offers->delete($draft->id);
         self::assertNull($billomat->offers->get($draft->id));
     }
 }

@@ -8,8 +8,8 @@ API-Wrapper für freie Korrespondenz unter `/letters` und ihre zwei Sub-Ressourc
 
 ```php
 $billomat->letters         // Briefe selbst
-$billomat->letterComments  // Aktivitäts-Log / freie Kommentare
-$billomat->letterTags      // Schlagworte
+$billomat->letters->comments  // Aktivitäts-Log / freie Kommentare
+$billomat->letters->tags      // Schlagworte
 ```
 
 ## Modell
@@ -53,7 +53,7 @@ DRAFT  ── complete() ──▶  OPEN  ── clear() ──▶  CLEARED   (e
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByLetter($letterId, $actionKeys?)` | GET | `/letter-comments?letter_id={id}` |
+| `list($letterId, $actionKeys?)` | GET | `/letter-comments?letter_id={id}` |
 | `get($id)` | GET | `/letter-comments/{id}` |
 | `create($options)` | POST | `/letter-comments` |
 | `delete($id)` | DELETE | `/letter-comments/{id}` |
@@ -62,7 +62,7 @@ DRAFT  ── complete() ──▶  OPEN  ── clear() ──▶  CLEARED   (e
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByLetter($letterId)` | GET | `/letter-tags?letter_id={id}` |
+| `list($letterId)` | GET | `/letter-tags?letter_id={id}` |
 | `cloud()` | GET | `/letter-tags` |
 | `get($id)` | GET | `/letter-tags/{id}` |
 | `create($options)` | POST | `/letter-tags` |
@@ -107,17 +107,17 @@ $letter = $billomat->letters->create($opts);
 
 Nur im Status `DRAFT` ratsam. Felder, die `null` bleiben, werden serverseitig nicht angefasst.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
 Status `DRAFT → COMPLETED`. Optional kann ein konkretes Layout-Template forciert werden.
 
-#### `cancel(int $id): bool` / `clear(int $id): bool` / `undo(int $id): bool`
+#### `cancel(int $id): void` / `clear(int $id): void` / `undo(int $id): void`
 
 - `cancel()` → Status `CANCELED` (terminal aus Workflow-Sicht).
 - `clear()` → Status `CLEARED` („erledigt“, etwa wenn der Brief bearbeitet/abgehakt ist).
 - `undo()` → setzt einen `OPEN`-Brief zurück nach `DRAFT`, sodass er wieder editierbar wird.
 
-#### `email(int $id, ?LetterEmailOptions $options = null): bool`
+#### `email(int $id, ?LetterEmailOptions $options = null): void`
 
 Versendet den Brief per E-Mail. Ohne Optionen greifen die Defaults aus der hinterlegten Vorlage.
 
@@ -141,15 +141,15 @@ $pdf = $billomat->letters->pdf($letter->id);                 // Model
 $raw = $billomat->letters->pdf($letter->id, rawPdf: true);   // string (PDF binary)
 ```
 
-#### `upload(int $id, string $base64Pdf): bool`
+#### `upload(int $id, string $base64Pdf): void`
 
 **Letter-spezifisch**: lädt ein komplett extern erzeugtes Brief-PDF in den Slot des Briefs. Praktisch, wenn das Layout nicht über Billomat-Templates läuft (z. B. fertige Word/InDesign-Exporte). Diese Methode hat **keine** Entsprechung bei Invoices/CreditNotes/Reminders.
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
+#### `uploadSignature(int $id, string $base64Pdf): void`
 
 Hängt eine vom Empfänger unterschriebene Variante an.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
 Funktioniert ausschließlich an Briefen im Status `DRAFT`.
 
@@ -159,7 +159,7 @@ Funktioniert ausschließlich an Briefen im Status `DRAFT`.
 use Justpilot\Billomat\Api\LetterCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 
-$comment = $billomat->letterComments->create(
+$comment = $billomat->letters->comments->create(
     new LetterCommentCreateOptions(
         letterId: $letter->id,
         comment: 'Brief postalisch versendet am 03.06.2026.',
@@ -167,7 +167,7 @@ $comment = $billomat->letterComments->create(
 );
 
 // Nur EMAIL- und UPLOAD-Einträge anzeigen
-$entries = $billomat->letterComments->listByLetter(
+$entries = $billomat->letters->comments->list(
     $letter->id,
     [LetterCommentActionKey::EMAIL, LetterCommentActionKey::UPLOAD],
 );
@@ -180,12 +180,12 @@ Wie bei Credit Notes mischt der Endpunkt freie User-Kommentare mit System-Audit-
 ```php
 use Justpilot\Billomat\Api\LetterTagCreateOptions;
 
-$billomat->letterTags->create(
+$billomat->letters->tags->create(
     new LetterTagCreateOptions(letterId: $letter->id, name: 'dsgvo'),
 );
 
-$tags = $billomat->letterTags->listByLetter($letter->id);
-$cloud = $billomat->letterTags->cloud(); // aggregiert, mit count
+$tags = $billomat->letters->tags->list($letter->id);
+$cloud = $billomat->letters->tags->cloud(); // aggregiert, mit count
 ```
 
 Kein Update — zum Umbenennen wird gelöscht und neu angelegt.
@@ -327,8 +327,8 @@ Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurü
 - **`clear()` ist nicht `cancel()`.** `clear()` markiert den Brief als „erledigt“ (`CLEARED`), z. B. wenn die intern angestoßene Aktion abgeschlossen ist — `cancel()` markiert ihn als „ungültig“.
 - **`update()` nur im DRAFT.** Sobald der Brief auf `OPEN` steht, ignoriert Billomat die meisten Felder. Erst `undo()` aufrufen, dann editieren, dann `complete()`.
 - **`number` manuell setzen kollidiert mit Auto-Numbering.** Wenn der Account auf automatische Nummern konfiguriert ist, schlägt `complete()` mit `ValidationException` fehl.
-- **`actionkey` im Comment-Filter ist CSV, kein Array.** `listByLetter($id, [...])` übergibt mehrere ActionKeys als komma-separierten String, nicht als `actionkey[]=…`.
-- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /letter-tags` ohne `letter_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `letter_id` die konkreten Tags (`letter-tag`-Wrapper). Der SDK trennt das in `cloud()` und `listByLetter()`.
+- **`actionkey` im Comment-Filter ist CSV, kein Array.** `list($id, [...])` übergibt mehrere ActionKeys als komma-separierten String, nicht als `actionkey[]=…`.
+- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /letter-tags` ohne `letter_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `letter_id` die konkreten Tags (`letter-tag`-Wrapper). Der SDK trennt das in `cloud()` und `list()`.
 
 ## End-to-End-Beispiel
 
@@ -370,7 +370,7 @@ printf("Brief #%d angelegt (Status: %s)\n",
 );
 
 // 2) Tag setzen
-$billomat->letterTags->create(
+$billomat->letters->tags->create(
     new LetterTagCreateOptions(letterId: $letter->id, name: 'dsgvo'),
 );
 
@@ -385,10 +385,10 @@ $mail->body = 'Anbei finden Sie unser Schreiben als PDF.';
 $billomat->letters->email($letter->id, $mail);
 
 // 5) Audit-Notiz anhängen
-$billomat->letterComments->create(
+$billomat->letters->comments->create(
     new LetterCommentCreateOptions(
         letterId: $letter->id,
-        comment: 'Versand am ' . (new DateTimeImmutable())->format('d.m.Y') . ' an Hauptkontakt.',
+        comment: 'Versand am ' . new DateTimeImmutable()->format('d.m.Y') . ' an Hauptkontakt.',
     ),
 );
 

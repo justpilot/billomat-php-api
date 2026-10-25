@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
-use Justpilot\Billomat\Api\RecurringItemsApi;
+use Justpilot\Billomat\Api\RecurringsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(RecurringItemsApi::class)]
+#[CoversClass(ItemsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(RecurringsApi::class)]
 #[CoversClass(RecurringItem::class)]
 #[CoversClass(RecurringItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -52,9 +56,9 @@ final class RecurringItemsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringItemsApi($http);
+        $api = new RecurringsApi($http)->items;
 
-        $items = $api->listByRecurring(42);
+        $items = $api->list(42);
 
         self::assertCount(2, $items);
         self::assertContainsOnlyInstancesOf(RecurringItem::class, $items);
@@ -89,7 +93,7 @@ final class RecurringItemsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringItemsApi($http);
+        $api = new RecurringsApi($http)->items;
 
         $opts = new RecurringItemCreateOptions(quantity: 1.5, unitPrice: 99.0);
         $opts->title = 'Setup';
@@ -124,7 +128,7 @@ final class RecurringItemsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringItemsApi($http);
+        $api = new RecurringsApi($http)->items;
 
         $opts = new RecurringItemCreateOptions(quantity: 2.0, unitPrice: 75.0);
 
@@ -147,9 +151,9 @@ final class RecurringItemsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringItemsApi($http);
+        $api = new RecurringsApi($http)->items;
 
-        self::assertTrue($api->delete(100));
+        $api->delete(100);
         self::assertSame('DELETE', $captured['method']);
     }
 

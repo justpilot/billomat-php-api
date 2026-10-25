@@ -60,7 +60,7 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame('München', $fetched->city);
 
         // Cleanup
-        self::assertTrue($billomat->suppliers->delete($supplier->id));
+        $billomat->suppliers->delete($supplier->id);
         self::assertNull($billomat->suppliers->get($supplier->id));
     }
 
@@ -75,18 +75,18 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         try {
             $tagOpts = new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'IT-SupTag-'.date('His'));
-            $tag = $billomat->supplierTags->create($tagOpts);
+            $tag = $billomat->suppliers->tags->create($tagOpts);
 
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->supplierTags->listBySupplier($supplier->id);
+            $tags = $billomat->suppliers->tags->list($supplier->id);
             self::assertContainsOnlyInstancesOf(SupplierTag::class, $tags);
             self::assertGreaterThanOrEqual(1, \count($tags));
 
-            $cloud = $billomat->supplierTags->cloud();
+            $cloud = $billomat->suppliers->tags->cloud();
             self::assertContainsOnlyInstancesOf(SupplierTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->supplierTags->delete($tag->id));
+            $billomat->suppliers->tags->delete($tag->id);
         } finally {
             $billomat->suppliers->delete($supplier->id);
         }

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
-use Justpilot\Billomat\Api\OfferItemsApi;
+use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(OfferItemsApi::class)]
+#[CoversClass(ItemsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(OffersApi::class)]
 #[CoversClass(OfferItemCreateOptions::class)]
 #[CoversClass(OfferItem::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -57,12 +61,12 @@ final class OfferItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new OfferItemsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
-        $items = $api->listByOffer(123);
+        $items = $api->list(123);
 
         self::assertCount(1, $items);
         self::assertContainsOnlyInstancesOf(OfferItem::class, $items);
@@ -87,10 +91,10 @@ final class OfferItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new OfferItemsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
         $item = $api->get(10);
 
@@ -120,10 +124,10 @@ final class OfferItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new OfferItemsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
         $opts = new OfferItemCreateOptions(quantity: 2.0, unitPrice: 50.0);
         $opts->title = 'Neue Position';
@@ -164,10 +168,10 @@ final class OfferItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new OfferItemsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
         $opts = new OfferItemCreateOptions(quantity: 3.0, unitPrice: 75.0);
         $updated = $api->update(77, $opts);
@@ -188,12 +192,12 @@ final class OfferItemsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new OfferItemsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
-        self::assertTrue($api->delete(77));
+        $api->delete(77);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offer-items/77', $captured['url']);
     }

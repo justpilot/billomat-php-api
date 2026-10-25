@@ -8,7 +8,7 @@ API-Wrapper für die Billomat-Ressource „Kunden“ — entspricht den Endpunkt
 
 ```php
 $billomat->clients
-$billomat->clientPropertyValues  // Werte benutzerdefinierter Kunden-Eigenschaften
+$billomat->clients->propertyValues  // Werte benutzerdefinierter Kunden-Eigenschaften
 ```
 
 `Justpilot\Billomat\Api\ClientsApi`, intern angelegt in `BillomatClient::__construct()`.
@@ -252,8 +252,8 @@ Speichert die Werte für die in [`properties.md`](properties.md) definierten Kun
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `list($filters?)` | GET | `/client-property-values` |
-| `listPage($filters?)` | GET | `/client-property-values` |
+| `list($parentId?, $filters?)` | GET | `/client-property-values` |
+| `listPage($parentId?, $filters?)` | GET | `/client-property-values` |
 | `iterateAll($filters?, $pageSize?)` | GET | `/client-property-values` (mehrseitig) |
 | `get($id)` | GET | `/client-property-values/{id}` |
 | `create($options)` | POST | `/client-property-values` |
@@ -262,12 +262,10 @@ Speichert die Werte für die in [`properties.md`](properties.md) definierten Kun
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
 
 // Werte für einen Kunden auflisten
-$values = $billomat->clientPropertyValues->list([
-    'client_id' => $client->id,
-]);
+$values = $billomat->clients->propertyValues->list($client->id);
 
 // Wert für die Property "Branche" (id = 12) setzen
-$value = $billomat->clientPropertyValues->create(
+$value = $billomat->clients->propertyValues->create(
     new ClientPropertyValueCreateOptions(
         clientId: $client->id,
         clientPropertyId: 12,

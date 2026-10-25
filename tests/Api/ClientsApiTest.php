@@ -515,9 +515,7 @@ final class ClientsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
         $api = new ClientsApi($http);
 
-        $result = $api->delete(42);
-
-        self::assertTrue($result);
+        $api->delete(42);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/42',

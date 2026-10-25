@@ -7,11 +7,11 @@ API-Wrapper für die fünf Property-Definition-Endpoints unter `/article-propert
 ## Zugriff
 
 ```php
-$billomat->articleProperties   // Definitionen für Artikel-Custom-Fields
-$billomat->clientProperties    // Definitionen für Kunden-Custom-Fields
-$billomat->supplierProperties  // Definitionen für Lieferanten-Custom-Fields
-$billomat->incomingProperties  // Definitionen für Eingangsbeleg-Custom-Fields
-$billomat->userProperties      // Definitionen für Benutzer-Custom-Fields
+$billomat->articles->properties   // Definitionen für Artikel-Custom-Fields
+$billomat->clients->properties    // Definitionen für Kunden-Custom-Fields
+$billomat->suppliers->properties  // Definitionen für Lieferanten-Custom-Fields
+$billomat->incomings->properties  // Definitionen für Eingangsbeleg-Custom-Fields
+$billomat->users->properties      // Definitionen für Benutzer-Custom-Fields
 ```
 
 ## Modell
@@ -59,9 +59,9 @@ Beispiele anhand von `articleProperties` — `clientProperties`, `supplierProper
 Listet alle Property-Definitionen. Filter werden 1:1 als Query-Parameter weitergereicht; Array-Werte werden als `key[]=…` codiert.
 
 ```php
-$all = $billomat->articleProperties->list();
+$all = $billomat->articles->properties->list();
 
-$paged = $billomat->clientProperties->list([
+$paged = $billomat->clients->properties->list([
     'per_page' => 100,
     'order_by' => 'position+ASC',
 ]);
@@ -72,7 +72,7 @@ $paged = $billomat->clientProperties->list([
 Liefert `null` bei 404.
 
 ```php
-$prop = $billomat->supplierProperties->get(42);
+$prop = $billomat->suppliers->properties->get(42);
 if (null === $prop) {
     // Property gibt es nicht (mehr)
 }
@@ -91,7 +91,7 @@ $opts->type = PropertyType::TEXTFIELD;
 $opts->defaultValue = '3 Werktage';
 $opts->position = 10;
 
-$prop = $billomat->articleProperties->create($opts);
+$prop = $billomat->articles->properties->create($opts);
 ```
 
 ### `update(int $id, PropertyCreateOptions $options): TProperty`
@@ -102,15 +102,15 @@ Aktualisiert eine bestehende Definition. Die Options-Klasse ist identisch mit `c
 $opts = new PropertyCreateOptions(name: 'Lieferzeit');
 $opts->defaultValue = '5 Werktage';
 
-$billomat->articleProperties->update(42, $opts);
+$billomat->articles->properties->update(42, $opts);
 ```
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 Löscht die Definition. Bestehende Werte an Instanzen werden ebenfalls invalide.
 
 ```php
-$billomat->incomingProperties->delete(42);
+$billomat->incomings->properties->delete(42);
 ```
 
 ## Write-Modell: `PropertyCreateOptions`
@@ -217,11 +217,11 @@ $opts->type = PropertyType::TEXTFIELD;
 $opts->defaultValue = '3 Werktage';
 $opts->position = 10;
 
-$leadTimeDef = $billomat->articleProperties->create($opts);
+$leadTimeDef = $billomat->articles->properties->create($opts);
 printf("Definition #%d angelegt: %s\n", $leadTimeDef->id, $leadTimeDef->name);
 
 // 2) Bestand inspizieren
-foreach ($billomat->articleProperties->list(['per_page' => 100]) as $def) {
+foreach ($billomat->articles->properties->list(['per_page' => 100]) as $def) {
     printf(
         "#%d %-20s [%s] default=%s\n",
         $def->id,
@@ -234,10 +234,10 @@ foreach ($billomat->articleProperties->list(['per_page' => 100]) as $def) {
 // 3) Default-Wert nachträglich erhöhen
 $update = new PropertyCreateOptions(name: 'Lieferzeit');
 $update->defaultValue = '5 Werktage';
-$billomat->articleProperties->update($leadTimeDef->id, $update);
+$billomat->articles->properties->update($leadTimeDef->id, $update);
 
 // 4) Parallele Definition für Kunden — selbe API-Form, andere Ressource
-$vipFlag = $billomat->clientProperties->create(
+$vipFlag = $billomat->clients->properties->create(
     (function (): PropertyCreateOptions {
         $o = new PropertyCreateOptions(name: 'VIP');
         $o->type = PropertyType::CHECKBOX;
@@ -248,6 +248,6 @@ $vipFlag = $billomat->clientProperties->create(
 );
 
 // 5) Werte (nicht Definitionen!) pflegt eine andere API:
-//    $billomat->articlePropertyValues->create(...)
-//    $billomat->clientPropertyValues->create(...)
+//    $billomat->articles->propertyValues->create(...)
+//    $billomat->clients->propertyValues->create(...)
 ```

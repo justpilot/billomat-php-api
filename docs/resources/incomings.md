@@ -2,17 +2,17 @@
 
 # Incomings (Eingangsbelege)
 
-API-Wrapper für Eingangsrechnungen unter `/incomings` und ihre vier Sub-Ressourcen (`/incoming-comments`, `/incoming-payments`, `/incoming-tags`, `/incoming-property-values`). Definitionen der Custom-Properties liegen unter `/incoming-properties` (siehe `IncomingPropertiesApi`, hier nur am Rand dokumentiert).
+API-Wrapper für Eingangsrechnungen unter `/incomings` und ihre vier Sub-Ressourcen (`/incoming-comments`, `/incoming-payments`, `/incoming-tags`, `/incoming-property-values`). Definitionen der Custom-Properties liegen unter `/incoming-properties` (siehe `$billomat->incomings->properties`, hier nur am Rand dokumentiert).
 
 ## Zugriff
 
 ```php
 $billomat->incomings              // Eingangsrechnungen selbst
-$billomat->incomingComments       // Kommentar-Historie pro Beleg
-$billomat->incomingPayments       // gezahlte Beträge
-$billomat->incomingTags           // Schlagworte
-$billomat->incomingPropertyValues // Werte für Custom-Properties
-$billomat->incomingProperties     // Definitionen der Custom-Properties
+$billomat->incomings->comments       // Kommentar-Historie pro Beleg
+$billomat->incomings->payments       // gezahlte Beträge
+$billomat->incomings->tags           // Schlagworte
+$billomat->incomings->propertyValues // Werte für Custom-Properties
+$billomat->incomings->properties     // Definitionen der Custom-Properties
 ```
 
 ## Modell
@@ -46,7 +46,7 @@ Lifecycle in der Praxis: `create()` legt einen Beleg im Status `OPEN` (oder `DRA
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByIncoming($incomingId, $actionKeys?)` | GET | `/incoming-comments?incoming_id={id}` |
+| `list($incomingId, $actionKeys?)` | GET | `/incoming-comments?incoming_id={id}` |
 | `get($id)` | GET | `/incoming-comments/{id}` |
 | `create($options)` | POST | `/incoming-comments` |
 | `delete($id)` | DELETE | `/incoming-comments/{id}` |
@@ -64,7 +64,7 @@ Lifecycle in der Praxis: `create()` legt einen Beleg im Status `OPEN` (oder `DRA
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByIncoming($incomingId)` | GET | `/incoming-tags?incoming_id={id}` |
+| `list($incomingId)` | GET | `/incoming-tags?incoming_id={id}` |
 | `cloud()` | GET | `/incoming-tags` |
 | `get($id)` | GET | `/incoming-tags/{id}` |
 | `create($options)` | POST | `/incoming-tags` |
@@ -74,7 +74,7 @@ Lifecycle in der Praxis: `create()` legt einen Beleg im Status `OPEN` (oder `DRA
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `list($filters?)` | GET | `/incoming-property-values` |
+| `list($parentId?, $filters?)` | GET | `/incoming-property-values` |
 | `get($id)` | GET | `/incoming-property-values/{id}` |
 | `create($options)` | POST | `/incoming-property-values` |
 
@@ -117,17 +117,17 @@ $incoming = $billomat->incomings->create($opts);
 
 Partial-Update — nur gesetzte Felder werden übertragen.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
-#### `cancel(int $id): bool`
+#### `cancel(int $id): void`
 
-Setzt den Status auf `CANCELED`. Liefert `true` bei HTTP 200.
+Setzt den Status auf `CANCELED`. Fehler kommen als Exception.
 
-#### `uncancel(int $id): bool`
+#### `uncancel(int $id): void`
 
 Rollt eine Stornierung zurück.
 
-#### `upload(int $id, string $base64Pdf): bool`
+#### `upload(int $id, string $base64Pdf): void`
 
 Hängt ein PDF an den Beleg. Erwartet den **schon Base64-codierten** Inhalt; die Methode codiert nicht selbst.
 
@@ -144,7 +144,7 @@ $billomat->incomings->upload(
 use Justpilot\Billomat\Api\IncomingCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 
-$billomat->incomingComments->create(
+$billomat->incomings->comments->create(
     new IncomingCommentCreateOptions(
         incomingId: $incoming->id,
         comment: 'Mahnung versendet',
@@ -152,13 +152,13 @@ $billomat->incomingComments->create(
 );
 
 // Filterung der Historie nach actionkey
-$paymentEvents = $billomat->incomingComments->listByIncoming(
+$paymentEvents = $billomat->incomings->comments->list(
     $incoming->id,
     [IncomingCommentActionKey::PAYMENT],
 );
 ```
 
-`listByIncoming()` reicht die `actionkey`-Liste als CSV (`actionkey=PAYMENT,UPLOAD`) an Billomat weiter.
+`list()` reicht die `actionkey`-Liste als CSV (`actionkey=PAYMENT,UPLOAD`) an Billomat weiter.
 
 ### Incoming Payments
 
@@ -174,7 +174,7 @@ $payment->date = new DateTimeImmutable('2026-06-15');
 $payment->type = InvoicePaymentType::BANK_TRANSFER;
 $payment->markIncomingAsPaid = true;
 
-$billomat->incomingPayments->create($payment);
+$billomat->incomings->payments->create($payment);
 ```
 
 `list()` filtert serverseitig u. a. nach `incoming_id`, `from`, `to`, `type`.
@@ -184,12 +184,12 @@ $billomat->incomingPayments->create($payment);
 ```php
 use Justpilot\Billomat\Api\IncomingTagCreateOptions;
 
-$billomat->incomingTags->create(
+$billomat->incomings->tags->create(
     new IncomingTagCreateOptions(incomingId: $incoming->id, name: 'miete'),
 );
 
-$tags = $billomat->incomingTags->listByIncoming($incoming->id);
-$cloud = $billomat->incomingTags->cloud(); // aggregiert, mit count pro Tag
+$tags = $billomat->incomings->tags->list($incoming->id);
+$cloud = $billomat->incomings->tags->cloud(); // aggregiert, mit count pro Tag
 ```
 
 `cloud()` liest den `tag`-Knoten (nicht `incoming-tag`!) und gibt `IncomingTagCloudEntry`-Objekte zurück.
@@ -199,7 +199,7 @@ $cloud = $billomat->incomingTags->cloud(); // aggregiert, mit count pro Tag
 ```php
 use Justpilot\Billomat\Api\IncomingPropertyValueCreateOptions;
 
-$billomat->incomingPropertyValues->create(
+$billomat->incomings->propertyValues->create(
     new IncomingPropertyValueCreateOptions(
         incomingId: $incoming->id,
         incomingPropertyId: 42,
@@ -398,11 +398,11 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 - **`upload()` codiert nicht selbst.** Der String muss bereits Base64-codiert sein; `file_get_contents()` direkt zu übergeben liefert beim Server kaputte PDFs. Immer `base64_encode(file_get_contents(...))`.
 - **Status ist read-only.** `IncomingStatus` lässt sich nicht über `IncomingCreateOptions`/`IncomingUpdateOptions` setzen — Billomat leitet ihn aus Fälligkeit, Stornierung und Zahlungssumme ab. Statuswechsel laufen ausschließlich über `cancel()`/`uncancel()` und das Setzen von `markIncomingAsPaid` bei Zahlungen.
 - **`markIncomingAsPaid` wird immer übertragen.** Anders als die übrigen optionalen Felder filtert `IncomingPaymentCreateOptions::toArray()` den Wert nicht heraus — `false` landet als `mark_incoming_as_paid=0` im Payload. Für Teilzahlungen also nicht setzen.
-- **`tag`-Knoten in `cloud()`**. Bei `GET /incoming-tags` ohne `incoming_id` liefert Billomat den Wurzelknoten `tag` (mit `count`), nicht `incoming-tag`. Die `IncomingTagsApi` unterscheidet beide Pfade intern — die Cloud-Einträge sind nicht dieselbe Form wie Einzel-Tags und werden in ein separates Read-Modell hydriert.
+- **`tag`-Knoten in `cloud()`**. Bei `GET /incoming-tags` ohne `incoming_id` liefert Billomat den Wurzelknoten `tag` (mit `count`), nicht `incoming-tag`. Die `$billomat->incomings->tags` unterscheidet beide Pfade intern — die Cloud-Einträge sind nicht dieselbe Form wie Einzel-Tags und werden in ein separates Read-Modell hydriert.
 - **Keine Positionen.** Im Gegensatz zu `Invoice` gibt es keine `IncomingItem`-Ressource — Beträge werden ausschließlich als `totalGross`/`totalNet` summarisch gepflegt.
 - **`actionkey` bei Kommentaren ist meist server-getrieben.** Wer einen Kommentar manuell anlegt, sollte `actionkey` weglassen — Billomat setzt dann `COMMENT`. Selbst gesetzte Werte wie `PAYMENT` werden zwar akzeptiert, die zugehörigen Effekte (z. B. Statusänderung) bleiben aber aus.
-- **`IncomingPropertyValuesApi` ohne `update()`/`delete()`.** Werte werden per `create()` upgesertet; ein expliziter `update()`-Endpoint existiert in der API nicht.
-- **`IncomingPropertiesApi::create()` nutzt `PropertyCreateOptions`** (geteilt mit Article/Client/Supplier-Properties), nicht eine eigene Klasse.
+- **`$billomat->incomings->propertyValues` ohne `update()`/`delete()`.** Werte werden per `create()` upgesertet; ein expliziter `update()`-Endpoint existiert in der API nicht.
+- **`PropertiesApi::create()` nutzt `PropertyCreateOptions`** (geteilt mit Article/Client/Supplier-Properties), nicht eine eigene Klasse.
 
 ## End-to-End-Beispiel
 
@@ -445,12 +445,12 @@ $billomat->incomings->upload(
 );
 
 // 3) Tag setzen, damit Filtern leichter fällt
-$billomat->incomingTags->create(
+$billomat->incomings->tags->create(
     new IncomingTagCreateOptions(incomingId: $incoming->id, name: 'hosting'),
 );
 
 // 4) Zahlung verbuchen — markiert den Beleg als bezahlt
-$billomat->incomingPayments->create(
+$billomat->incomings->payments->create(
     (function () use ($incoming): IncomingPaymentCreateOptions {
         $p = new IncomingPaymentCreateOptions(
             incomingId: $incoming->id,
@@ -466,7 +466,7 @@ $billomat->incomingPayments->create(
 );
 
 // 5) Eigenen Kommentar nachschieben
-$billomat->incomingComments->create(
+$billomat->incomings->comments->create(
     new IncomingCommentCreateOptions(
         incomingId: $incoming->id,
         comment: 'Im DATEV-Export berücksichtigt.',
@@ -474,7 +474,7 @@ $billomat->incomingComments->create(
 );
 
 // 6) Historie inspizieren — nur Zahlungs-Events
-$paymentLog = $billomat->incomingComments->listByIncoming(
+$paymentLog = $billomat->incomings->comments->list(
     $incoming->id,
     [IncomingCommentActionKey::PAYMENT, IncomingCommentActionKey::CHANGE_STATUS],
 );

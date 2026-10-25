@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
  * Generiert aus tools/codegen/definitions/delivery-note-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class DeliveryNoteCommentCreateOptions
+final class DeliveryNoteCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

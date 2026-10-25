@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/credit-note-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class CreditNoteTagCreateOptions
+final class CreditNoteTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

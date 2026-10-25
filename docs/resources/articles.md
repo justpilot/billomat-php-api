@@ -8,11 +8,11 @@ API-Wrapper für Artikel unter `/articles` und ihre zwei Sub-Ressourcen (`/artic
 
 ```php
 $billomat->articles               // Artikel selbst
-$billomat->articleTags            // Schlagworte an einem Artikel
-$billomat->articlePropertyValues  // Werte benutzerdefinierter Artikel-Eigenschaften
+$billomat->articles->tags            // Schlagworte an einem Artikel
+$billomat->articles->propertyValues  // Werte benutzerdefinierter Artikel-Eigenschaften
 ```
 
-Die Definitionen der Eigenschaften (Property-Schemata) liegen separat unter `$billomat->articleProperties` — siehe [Property-Definitionen](properties.md). Hier geht es ausschließlich um die Werte, die ein konkreter Artikel für diese Definitionen trägt.
+Die Definitionen der Eigenschaften (Property-Schemata) liegen separat unter `$billomat->articles->properties` — siehe [Property-Definitionen](properties.md). Hier geht es ausschließlich um die Werte, die ein konkreter Artikel für diese Definitionen trägt.
 
 ## Modell
 
@@ -39,7 +39,7 @@ Ein Artikel ist ein wiederverwendbarer Posten, der in Rechnungen, Angeboten und 
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByArticle($articleId)` | GET | `/article-tags?article_id={id}` |
+| `list($articleId)` | GET | `/article-tags?article_id={id}` |
 | `cloud()` | GET | `/article-tags` |
 | `get($id)` | GET | `/article-tags/{id}` |
 | `create($options)` | POST | `/article-tags` |
@@ -49,7 +49,7 @@ Ein Artikel ist ein wiederverwendbarer Posten, der in Rechnungen, Angeboten und 
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `list($filters?)` | GET | `/article-property-values` |
+| `list($parentId?, $filters?)` | GET | `/article-property-values` |
 | `get($id)` | GET | `/article-property-values/{id}` |
 | `create($options)` | POST | `/article-property-values` |
 
@@ -89,7 +89,7 @@ $article = $billomat->articles->create($opts);
 
 Partial-Update — nicht gesetzte Properties bleiben unangetastet.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 ## Write-Modell: `ArticleCreateOptions`
 
@@ -170,13 +170,13 @@ Funktional identisch zu [Invoice Tags](invoice-tags.md), bezogen auf einen Artik
 ```php
 use Justpilot\Billomat\Api\ArticleTagCreateOptions;
 
-$tag = $billomat->articleTags->create(
+$tag = $billomat->articles->tags->create(
     new ArticleTagCreateOptions(articleId: $article->id, name: 'hosting'),
 );
 
-$tags  = $billomat->articleTags->listByArticle($article->id);
-$cloud = $billomat->articleTags->cloud(); // aggregiert, mit count
-$billomat->articleTags->delete($tag->id);
+$tags  = $billomat->articles->tags->list($article->id);
+$cloud = $billomat->articles->tags->cloud(); // aggregiert, mit count
+$billomat->articles->tags->delete($tag->id);
 ```
 
 Ein `update()` gibt es nicht — Tags werden gelöscht und neu angelegt.
@@ -215,12 +215,10 @@ Speichert die Werte für die in [`properties.md`](properties.md) definierten Art
 use Justpilot\Billomat\Api\ArticlePropertyValueCreateOptions;
 
 // Werte für einen Artikel auflisten
-$values = $billomat->articlePropertyValues->list([
-    'article_id' => $article->id,
-]);
+$values = $billomat->articles->propertyValues->list($article->id);
 
 // Wert für die Property "Lieferzeit" (id = 42) setzen
-$value = $billomat->articlePropertyValues->create(
+$value = $billomat->articles->propertyValues->create(
     new ArticlePropertyValueCreateOptions(
         articleId: $article->id,
         articlePropertyId: 42,
@@ -301,15 +299,15 @@ $article = $billomat->articles->create($opts);
 printf("Artikel #%d (%s) angelegt\n", $article->id, $article->articleNumber);
 
 // 2) Tags vergeben — für spätere Filterung
-$billomat->articleTags->create(
+$billomat->articles->tags->create(
     new ArticleTagCreateOptions(articleId: $article->id, name: 'hosting'),
 );
-$billomat->articleTags->create(
+$billomat->articles->tags->create(
     new ArticleTagCreateOptions(articleId: $article->id, name: 'subscription'),
 );
 
 // 3) Custom-Property pflegen ("Lieferzeit" = ArticleProperty #42)
-$billomat->articlePropertyValues->create(
+$billomat->articles->propertyValues->create(
     new ArticlePropertyValueCreateOptions(
         articleId: $article->id,
         articlePropertyId: 42,
@@ -323,7 +321,7 @@ $update->salesPrice = 24.90;
 $billomat->articles->update($article->id, $update);
 
 // 5) Cloud-Übersicht aller Artikel-Tags
-foreach ($billomat->articleTags->cloud() as $entry) {
+foreach ($billomat->articles->tags->cloud() as $entry) {
     printf("%s (%d)\n", $entry->name, $entry->count);
 }
 ```

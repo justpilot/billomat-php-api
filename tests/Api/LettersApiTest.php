@@ -180,11 +180,11 @@ final class LettersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->complete(1));
-        self::assertTrue($api->cancel(2));
-        self::assertTrue($api->clear(3));
-        self::assertTrue($api->undo(4));
-        self::assertTrue($api->delete(5));
+        $api->complete(1);
+        $api->cancel(2);
+        $api->clear(3);
+        $api->undo(4);
+        $api->delete(5);
 
         self::assertSame('https://mycompany.billomat.net/api/letters/1/complete', $captured[0]['url']);
         self::assertSame('https://mycompany.billomat.net/api/letters/2/cancel', $captured[1]['url']);
@@ -212,7 +212,7 @@ final class LettersApiTest extends TestCase
         $opts = new LetterEmailOptions();
         $opts->to = ['kunde@example.com'];
 
-        self::assertTrue($api->email(42, $opts));
+        $api->email(42, $opts);
 
         $payload = $captured['options']['json'] ?? null;
         if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
@@ -295,8 +295,8 @@ final class LettersApiTest extends TestCase
 
         $b64 = base64_encode('PDF');
 
-        self::assertTrue($api->upload(100, $b64));
-        self::assertTrue($api->uploadSignature(200, $b64));
+        $api->upload(100, $b64);
+        $api->uploadSignature(200, $b64);
 
         self::assertSame('https://mycompany.billomat.net/api/letters/100/upload', $captured[0]['url']);
         self::assertSame('https://mycompany.billomat.net/api/letters/200/upload-signature', $captured[1]['url']);

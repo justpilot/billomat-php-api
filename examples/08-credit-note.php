@@ -69,7 +69,7 @@ try {
     $payment->markCreditNoteAsPaid = true;
     $payment->comment = 'Erstattung per SEPA-Überweisung';
 
-    $created = $billomat->creditNotePayments->create($payment);
+    $created = $billomat->creditNotes->payments->create($payment);
     printf("Auszahlung #%d verbucht: %.2f via %s\n",
         $created->id,
         $created->amount,

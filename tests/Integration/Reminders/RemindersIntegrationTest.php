@@ -77,7 +77,7 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($reminder->id, $updated->id);
 
         // Cleanup
-        self::assertTrue($billomat->reminders->delete($reminder->id));
+        $billomat->reminders->delete($reminder->id);
         self::assertNull($billomat->reminders->get($reminder->id));
     }
 }

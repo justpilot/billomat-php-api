@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
-use Justpilot\Billomat\Api\CreditNotePaymentsApi;
+use Justpilot\Billomat\Api\CreditNotesApi;
+use Justpilot\Billomat\Api\PaymentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -23,7 +25,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(CreditNotePaymentsApi::class)]
+#[CoversClass(PaymentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(CreditNotesApi::class)]
 #[CoversClass(CreditNotePaymentCreateOptions::class)]
 #[CoversClass(CreditNotePayment::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -58,12 +62,12 @@ final class CreditNotePaymentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new CreditNotePaymentsApi(new BillomatHttpClient(
+        $api = new CreditNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->payments;
 
-        $payments = $api->list(['credit_note_id' => 42]);
+        $payments = $api->list(filters: ['credit_note_id' => 42]);
 
         self::assertCount(1, $payments);
         self::assertSame(100.0, $payments[0]->amount);
@@ -88,10 +92,10 @@ final class CreditNotePaymentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new CreditNotePaymentsApi(new BillomatHttpClient(
+        $api = new CreditNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->payments;
 
         $payment = $api->get(1);
 
@@ -119,10 +123,10 @@ final class CreditNotePaymentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new CreditNotePaymentsApi(new BillomatHttpClient(
+        $api = new CreditNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->payments;
 
         $opts = new CreditNotePaymentCreateOptions(creditNoteId: 42, amount: 100.0);
         $opts->date = new DateTimeImmutable('2026-02-01');
@@ -155,12 +159,12 @@ final class CreditNotePaymentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new CreditNotePaymentsApi(new BillomatHttpClient(
+        $api = new CreditNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->payments;
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/credit-note-payments/99', $captured['url']);
     }

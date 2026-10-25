@@ -17,7 +17,7 @@ use DateTimeImmutable;
  * Generiert aus tools/codegen/definitions/reminders.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ReminderCreateOptions
+final class ReminderCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

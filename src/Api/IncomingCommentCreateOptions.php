@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
  * Generiert aus tools/codegen/definitions/incoming-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class IncomingCommentCreateOptions
+final class IncomingCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

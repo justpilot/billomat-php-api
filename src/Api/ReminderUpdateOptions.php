@@ -17,7 +17,7 @@ use DateTimeImmutable;
  * Generiert aus tools/codegen/definitions/reminders.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ReminderUpdateOptions
+final class ReminderUpdateOptions implements WriteOptions
 {
     /**
      * ID des Kontakts.

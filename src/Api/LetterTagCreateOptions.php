@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/letter-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class LetterTagCreateOptions
+final class LetterTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

@@ -18,7 +18,7 @@ use Justpilot\Billomat\Model\Enum\InvoiceItemType;
  * Generiert aus tools/codegen/definitions/invoice-items.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class InvoiceItemCreateOptions
+final class InvoiceItemCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

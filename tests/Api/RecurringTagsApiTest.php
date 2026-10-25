@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\RecurringsApi;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
-use Justpilot\Billomat\Api\RecurringTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -23,7 +25,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(RecurringTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(RecurringsApi::class)]
 #[CoversClass(RecurringTag::class)]
 #[CoversClass(RecurringTagCloudEntry::class)]
 #[CoversClass(RecurringTagCreateOptions::class)]
@@ -55,9 +59,9 @@ final class RecurringTagsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringTagsApi($http);
+        $api = new RecurringsApi($http)->tags;
 
-        $tags = $api->listByRecurring(42);
+        $tags = $api->list(42);
 
         self::assertCount(2, $tags);
         self::assertContainsOnlyInstancesOf(RecurringTag::class, $tags);
@@ -82,7 +86,7 @@ final class RecurringTagsApiTest extends TestCase
         ]);
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringTagsApi($http);
+        $api = new RecurringsApi($http)->tags;
 
         $cloud = $api->cloud();
 
@@ -102,12 +106,12 @@ final class RecurringTagsApiTest extends TestCase
         ]);
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringTagsApi($http);
+        $api = new RecurringsApi($http)->tags;
 
         $tag = $api->create(new RecurringTagCreateOptions(recurringId: 42, name: 'wichtig'));
         self::assertSame(17, $tag->id);
 
-        self::assertTrue($api->delete(17));
+        $api->delete(17);
     }
 
     #[Test]
@@ -116,7 +120,7 @@ final class RecurringTagsApiTest extends TestCase
         $mock = new MockHttpClient([new MockResponse('', ['http_code' => 404])]);
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new RecurringTagsApi($http);
+        $api = new RecurringsApi($http)->tags;
 
         self::assertNull($api->get(999));
     }

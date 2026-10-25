@@ -145,7 +145,7 @@ Billomat verpackt Antworten konsistent in eine Hülle:
 - Liste: `{ "clients": { "client": [ {…}, {…} ] } }`
 - Einzelobjekt: `{ "client": { … } }`
 
-Eigenheit: Bei genau **einem** Listeneintrag liefert Billomat manchmal ein einzelnes Objekt statt einer einelementigen Liste. Jede `*Api::list()`-Implementierung normalisiert das per `array_is_list()`-Check (bzw. `isset($node['id'])`-Heuristik bei verschachtelten Strukturen wie Invoice Items). Wenn du eine neue Ressource hinzufügst, übernimm dieses Muster — siehe `ClientsApi::list()`, `InvoicesApi::list()`, `InvoiceItemsApi::listByInvoice()`.
+Eigenheit: Bei genau **einem** Listeneintrag liefert Billomat manchmal ein einzelnes Objekt statt einer einelementigen Liste. Jede `*Api::list()`-Implementierung normalisiert das per `array_is_list()`-Check (bzw. `isset($node['id'])`-Heuristik bei verschachtelten Strukturen wie Invoice Items). Wenn du eine neue Ressource hinzufügst, übernimm dieses Muster — siehe `ClientsApi::list()`, `InvoicesApi::list()`, `ItemsApi::list()`.
 
 ## Was die Schicht **nicht** macht
 

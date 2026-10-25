@@ -15,7 +15,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/suppliers.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class SupplierUpdateOptions
+final class SupplierUpdateOptions implements WriteOptions
 {
     /**
      * Firmenname des Lieferanten.

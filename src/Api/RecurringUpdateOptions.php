@@ -14,7 +14,7 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
  * Typisierter Payload für PUT /recurrings/{id}.
  *
  * Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update).
- * Positionen lassen sich hier nicht bearbeiten, dafür ist RecurringItemsApi zuständig.
+ * Positionen lassen sich hier nicht bearbeiten, dafür ist $billomat->recurrings->items zuständig.
  *
  * Doku:
  * https://www.billomat.com/api/abo-rechnungen/
@@ -22,7 +22,7 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
  * Generiert aus tools/codegen/definitions/recurrings.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class RecurringUpdateOptions
+final class RecurringUpdateOptions implements WriteOptions
 {
     /**
      * ID des Kunden.

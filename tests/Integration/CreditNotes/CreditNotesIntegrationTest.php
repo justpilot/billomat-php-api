@@ -75,7 +75,7 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
         self::assertNotNull($note->id);
         self::assertSame(CreditNoteStatus::DRAFT, $note->status);
 
-        self::assertTrue($billomat->creditNotes->delete($note->id));
+        $billomat->creditNotes->delete($note->id);
         self::assertNull($billomat->creditNotes->get($note->id));
     }
 }

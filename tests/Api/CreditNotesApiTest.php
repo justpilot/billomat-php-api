@@ -214,10 +214,10 @@ final class CreditNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->complete(1, 5));
-        self::assertTrue($api->cancel(2));
-        self::assertTrue($api->uncancel(3));
-        self::assertTrue($api->delete(4));
+        $api->complete(1, 5);
+        $api->cancel(2);
+        $api->uncancel(3);
+        $api->delete(4);
 
         self::assertSame('https://mycompany.billomat.net/api/credit-notes/1/complete', $captured[0]['url']);
         self::assertSame('https://mycompany.billomat.net/api/credit-notes/2/cancel', $captured[1]['url']);
@@ -245,7 +245,7 @@ final class CreditNotesApiTest extends TestCase
         $opts->from = 'me@example.com';
         $opts->to = ['kunde@example.com'];
 
-        self::assertTrue($api->email(42, $opts));
+        $api->email(42, $opts);
 
         $payload = $this->extractJsonPayload($captured['options']);
         self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
@@ -326,7 +326,7 @@ final class CreditNotesApiTest extends TestCase
         ));
 
         $base64 = base64_encode('PDF-FAKE');
-        self::assertTrue($api->uploadSignature(555, $base64));
+        $api->uploadSignature(555, $base64);
         self::assertSame('PUT', $captured['method']);
     }
 

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
-use Justpilot\Billomat\Api\ConfirmationTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ConfirmationTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ConfirmationsApi::class)]
 #[CoversClass(ConfirmationTagCreateOptions::class)]
 #[CoversClass(ConfirmationTag::class)]
 #[CoversClass(ConfirmationTagCloudEntry::class)]
@@ -51,12 +55,12 @@ final class ConfirmationTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ConfirmationTagsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        $tags = $api->listByConfirmation(42);
+        $tags = $api->list(42);
 
         self::assertCount(1, $tags);
         self::assertSame('wichtig', $tags[0]->name);
@@ -78,10 +82,10 @@ final class ConfirmationTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ConfirmationTagsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $cloud = $api->cloud();
 
@@ -106,10 +110,10 @@ final class ConfirmationTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new ConfirmationTagsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $tag = $api->create(new ConfirmationTagCreateOptions(confirmationId: 42, name: 'neu'));
 
@@ -128,12 +132,12 @@ final class ConfirmationTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new ConfirmationTagsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
     }
 }

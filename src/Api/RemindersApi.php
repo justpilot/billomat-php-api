@@ -11,6 +11,8 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderPdf;
+use Justpilot\Billomat\Model\ReminderTag;
+use Justpilot\Billomat\Model\ReminderTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -33,6 +35,22 @@ use NoDiscard;
  */
 final class RemindersApi extends AbstractApi
 {
+    /**
+     * Positionen (read-only), siehe {@see ReminderItemsApi}.
+     */
+    public private(set) ReminderItemsApi $items {
+        get => $this->items ??= new ReminderItemsApi($this->http);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ReminderTag, ReminderTagCloudEntry, ReminderTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'reminder', ReminderTag::fromArray(...), ReminderTagCloudEntry::fromArray(...), ReminderTagCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -120,7 +138,7 @@ final class RemindersApi extends AbstractApi
         return Reminder::fromArray($this->unwrapEnvelope($data, 'reminder', 'updating reminder'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -131,40 +149,30 @@ final class RemindersApi extends AbstractApi
         $payload = ['reminder' => $body];
 
         $this->putVoid("/reminders/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/reminders/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/reminders/{$id}/cancel");
-
-        return true;
     }
 
-    public function email(int $id, ?ReminderEmailOptions $options = null): bool
+    public function email(int $id, ?ReminderEmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postJson("/reminders/{$id}/email", $payload);
-
-        return true;
     }
 
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/reminders/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**

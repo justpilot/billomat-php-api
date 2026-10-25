@@ -58,16 +58,16 @@ Pro Ressource gibt es zwei API-Schichten:
 
 SDK-Klassen:
 
-- `ClientPropertiesApi` + `ClientPropertyValuesApi`
-- `ArticlePropertiesApi` + `ArticlePropertyValuesApi`
-- `SupplierPropertiesApi` + `SupplierPropertyValuesApi`
-- `IncomingPropertiesApi` + `IncomingPropertyValuesApi`
+- `$billomat->clients->properties` + `$billomat->clients->propertyValues`
+- `$billomat->articles->properties` + `$billomat->articles->propertyValues`
+- `$billomat->suppliers->properties` + `$billomat->suppliers->propertyValues`
+- `$billomat->incomings->properties` + `$billomat->incomings->propertyValues`
 
 Siehe [`docs/resources/properties.md`](../resources/properties.md) für die geteilte Doku der Properties-Familie.
 
 ### Werte abfragen
 
-`ArticlePropertyValuesApi::list([…])` & Co. liefern eine flache Liste aller Wert-Zuordnungen — gefiltert nach `article_id` oder `article_property_id`.
+`PropertyValuesApi::list([…])` & Co. liefern eine flache Liste aller Wert-Zuordnungen — gefiltert nach `article_id` oder `article_property_id`.
 
 ### Werte filtern in der Eltern-Liste
 

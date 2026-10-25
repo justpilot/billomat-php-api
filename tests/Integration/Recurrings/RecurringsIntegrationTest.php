@@ -114,7 +114,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
             self::assertInstanceOf(Recurring::class, $fetched);
             self::assertSame($created->id, $fetched->id);
         } finally {
-            self::assertTrue($billomat->recurrings->delete($created->id));
+            $billomat->recurrings->delete($created->id);
         }
 
         self::assertNull($billomat->recurrings->get($created->id));
@@ -135,23 +135,23 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
             $newItem->unit = 'Stück';
             $newItem->taxRate = 19.0;
 
-            $created = $billomat->recurringItems->create($recurring->id, $newItem);
+            $created = $billomat->recurrings->items->create($recurring->id, $newItem);
             self::assertNotNull($created->id);
             self::assertSame(2.0, $created->quantity);
 
             // Update der Position
             $updateItem = new RecurringItemCreateOptions(quantity: 3.0, unitPrice: 25.0);
             $updateItem->title = 'Zusatz-Position (geändert)';
-            $updated = $billomat->recurringItems->update($created->id, $updateItem);
+            $updated = $billomat->recurrings->items->update($created->id, $updateItem);
             self::assertSame(3.0, $updated->quantity);
 
             // List
-            $items = $billomat->recurringItems->listByRecurring($recurring->id);
+            $items = $billomat->recurrings->items->list($recurring->id);
             self::assertContainsOnlyInstancesOf(RecurringItem::class, $items);
             self::assertGreaterThanOrEqual(2, \count($items));
 
             // Cleanup item
-            self::assertTrue($billomat->recurringItems->delete($created->id));
+            $billomat->recurrings->items->delete($created->id);
         } finally {
             $billomat->recurrings->delete($recurring->id);
         }
@@ -167,17 +167,17 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
 
         try {
             $tagOpts = new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'IT-Tag-'.date('His'));
-            $tag = $billomat->recurringTags->create($tagOpts);
+            $tag = $billomat->recurrings->tags->create($tagOpts);
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->recurringTags->listByRecurring($recurring->id);
+            $tags = $billomat->recurrings->tags->list($recurring->id);
             self::assertContainsOnlyInstancesOf(RecurringTag::class, $tags);
             self::assertGreaterThanOrEqual(1, \count($tags));
 
-            $cloud = $billomat->recurringTags->cloud();
+            $cloud = $billomat->recurrings->tags->cloud();
             self::assertContainsOnlyInstancesOf(RecurringTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->recurringTags->delete($tag->id));
+            $billomat->recurrings->tags->delete($tag->id);
         } finally {
             $billomat->recurrings->delete($recurring->id);
         }
@@ -205,15 +205,15 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
                 type: RecurringEmailReceiverType::CC,
                 address: 'integration-test-'.date('His').'@example.com',
             );
-            $receiver = $billomat->recurringEmailReceivers->create($receiverOpts);
+            $receiver = $billomat->recurrings->emailReceivers->create($receiverOpts);
             self::assertNotNull($receiver->id);
             self::assertSame(RecurringEmailReceiverType::CC, $receiver->type);
 
-            $receivers = $billomat->recurringEmailReceivers->listByRecurring($recurring->id);
+            $receivers = $billomat->recurrings->emailReceivers->list($recurring->id);
             self::assertContainsOnlyInstancesOf(RecurringEmailReceiver::class, $receivers);
             self::assertGreaterThanOrEqual(1, \count($receivers));
 
-            self::assertTrue($billomat->recurringEmailReceivers->delete($receiver->id));
+            $billomat->recurrings->emailReceivers->delete($receiver->id);
         } finally {
             $billomat->recurrings->delete($recurring->id);
         }

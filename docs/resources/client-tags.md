@@ -7,10 +7,10 @@ API-Wrapper für Schlagworte an Kunden unter `/client-tags`. Konzeptionell ident
 ## Zugriff
 
 ```php
-$billomat->clientTags
+$billomat->clients->tags
 ```
 
-`Justpilot\Billomat\Api\ClientTagsApi`.
+`Justpilot\Billomat\Api\TagsApi` (`$billomat->clients->tags`).
 
 ## Überblick
 
@@ -25,7 +25,7 @@ Die zwei Sichten werden auf zwei Methoden mit zwei separaten Read-Modellen abgeb
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByClient($clientId)` | GET | `/client-tags?client_id={id}` |
+| `list($clientId)` | GET | `/client-tags?client_id={id}` |
 | `cloud()` | GET | `/client-tags` |
 | `get($id)` | GET | `/client-tags/{id}` |
 | `create($options)` | POST | `/client-tags` |
@@ -35,12 +35,12 @@ Es gibt keine `update()`-Methode — ein Tag wird gelöscht und neu angelegt.
 
 ## Methoden
 
-### `listByClient(int $clientId): list<ClientTag>`
+### `list(int $clientId): list<ClientTag>`
 
 Listet die Schlagworte eines einzelnen Kunden.
 
 ```php
-$tags = $billomat->clientTags->listByClient(98765);
+$tags = $billomat->clients->tags->list(98765);
 
 foreach ($tags as $tag) {
     echo $tag->name . "\n";
@@ -52,7 +52,7 @@ foreach ($tags as $tag) {
 Aggregierte Liste aller Kunden-Tags im Account mit `count`-Häufigkeit. Nützlich für Autovervollständigung im UI oder eine Tag-Cloud-Anzeige.
 
 ```php
-foreach ($billomat->clientTags->cloud() as $entry) {
+foreach ($billomat->clients->tags->cloud() as $entry) {
     printf("%s (%d Kunden)\n", $entry->name, $entry->count);
 }
 ```
@@ -66,14 +66,14 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\ClientTagCreateOptions;
 
-$tag = $billomat->clientTags->create(
+$tag = $billomat->clients->tags->create(
     new ClientTagCreateOptions(clientId: 98765, name: 'A-Kunde'),
 );
 ```
 
 Mehrere Tags für denselben Kunden → mehrere `create()`-Aufrufe.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 Entfernt die Verknüpfung zwischen Kunde und Tag. Wird das Schlagwort an keinem Kunden mehr verwendet, verschwindet es automatisch aus der Tag-Cloud.
 
@@ -115,8 +115,8 @@ Keine. `name` ist freitextlich.
 
 ## Stolpersteine
 
-- **Zwei Sichten, zwei Modelle.** `listByClient()` liefert `ClientTag`, `cloud()` liefert `ClientTagCloudEntry`. Verwechslung führt zu „warum hat das Ding kein `clientId`?“-Momenten.
-- **Inkonsistente Response-Keys.** `listByClient()` parst `client-tags.client-tag`, `cloud()` parst `client-tags.tag` — derselbe Endpunkt, zwei verschiedene innere Keys, je nach Vorhandensein des `client_id`-Filters. Das SDK kapselt das, beim Debuggen der Roh-Response aber wichtig zu wissen.
+- **Zwei Sichten, zwei Modelle.** `list()` liefert `ClientTag`, `cloud()` liefert `ClientTagCloudEntry`. Verwechslung führt zu „warum hat das Ding kein `clientId`?“-Momenten.
+- **Inkonsistente Response-Keys.** `list()` parst `client-tags.client-tag`, `cloud()` parst `client-tags.tag` — derselbe Endpunkt, zwei verschiedene innere Keys, je nach Vorhandensein des `client_id`-Filters. Das SDK kapselt das, beim Debuggen der Roh-Response aber wichtig zu wissen.
 - **Single-Item-List-Quirk.** Hat ein Kunde nur ein Tag (bzw. enthält die Cloud nur einen Eintrag), liefert Billomat ein einzelnes Objekt statt einer Liste. Beide Methoden normalisieren das via `isset($rows['id'])`- bzw. `isset($rows['name'])`-Check.
 - **Kein PUT.** Umbenennen geht nicht — alte Verknüpfung löschen, neue anlegen.
 - **`name` ist case-sensitive.** `a-kunde` und `A-Kunde` sind aus Billomats Sicht zwei verschiedene Tags und erscheinen separat in der Tag-Cloud.
@@ -142,20 +142,20 @@ $clientId = 98765;
 
 // 1) Tags an einen Kunden anhängen
 foreach (['A-Kunde', 'Stammkunde', '2026-Q2'] as $name) {
-    $billomat->clientTags->create(
+    $billomat->clients->tags->create(
         new ClientTagCreateOptions(clientId: $clientId, name: $name),
     );
 }
 
 // 2) Tags des Kunden listen
-$tags = $billomat->clientTags->listByClient($clientId);
+$tags = $billomat->clients->tags->list($clientId);
 printf("Tags an Kunde #%d: %s\n", $clientId, implode(', ', array_map(
     static fn ($t) => $t->name,
     $tags,
 )));
 
 // 3) Tag-Cloud — die 5 meistverwendeten Schlagworte
-$cloud = $billomat->clientTags->cloud();
+$cloud = $billomat->clients->tags->cloud();
 usort($cloud, static fn ($a, $b) => $b->count <=> $a->count);
 foreach (array_slice($cloud, 0, 5) as $entry) {
     printf("%-20s %d\n", $entry->name, $entry->count);

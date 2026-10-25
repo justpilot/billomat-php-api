@@ -76,7 +76,7 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
         self::assertNotNull($note->id);
         self::assertSame(DeliveryNoteStatus::DRAFT, $note->status);
 
-        self::assertTrue($billomat->deliveryNotes->delete($note->id));
+        $billomat->deliveryNotes->delete($note->id);
         self::assertNull($billomat->deliveryNotes->get($note->id));
     }
 }

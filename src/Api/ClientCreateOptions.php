@@ -15,7 +15,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/clients.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ClientCreateOptions
+final class ClientCreateOptions implements WriteOptions
 {
     /**
      * Firmenname des Kunden.

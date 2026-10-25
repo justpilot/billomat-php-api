@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\PropertyValuesApi;
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
-use Justpilot\Billomat\Api\SupplierPropertyValuesApi;
+use Justpilot\Billomat\Api\SuppliersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -21,7 +23,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(SupplierPropertyValuesApi::class)]
+#[CoversClass(PropertyValuesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(SuppliersApi::class)]
 #[CoversClass(SupplierPropertyValueCreateOptions::class)]
 #[CoversClass(SupplierPropertyValue::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -49,12 +53,12 @@ final class SupplierPropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new SupplierPropertyValuesApi(new BillomatHttpClient(
+        $api = new SuppliersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
-        $values = $api->list(['supplier_id' => 42]);
+        $values = $api->list(filters: ['supplier_id' => 42]);
 
         self::assertCount(1, $values);
         self::assertSame('Branche', $values[0]->name);
@@ -77,10 +81,10 @@ final class SupplierPropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new SupplierPropertyValuesApi(new BillomatHttpClient(
+        $api = new SuppliersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
         $value = $api->create(new SupplierPropertyValueCreateOptions(
             supplierId: 42,

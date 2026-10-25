@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\SuppliersApi;
 use Justpilot\Billomat\Api\SupplierTagCreateOptions;
-use Justpilot\Billomat\Api\SupplierTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(SupplierTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(SuppliersApi::class)]
 #[CoversClass(SupplierTagCreateOptions::class)]
 #[CoversClass(SupplierTag::class)]
 #[CoversClass(SupplierTagCloudEntry::class)]
@@ -49,12 +53,12 @@ final class SupplierTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new SupplierTagsApi(new BillomatHttpClient(
+        $api = new SuppliersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        $tags = $api->listBySupplier(42);
+        $tags = $api->list(42);
         self::assertCount(1, $tags);
         self::assertSame('IT', $tags[0]->name);
         self::assertStringContainsString('supplier_id=42', $captured['url']);
@@ -71,10 +75,10 @@ final class SupplierTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new SupplierTagsApi(new BillomatHttpClient(
+        $api = new SuppliersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $cloud = $api->cloud();
         self::assertCount(1, $cloud);
@@ -101,13 +105,13 @@ final class SupplierTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new SupplierTagsApi(new BillomatHttpClient(
+        $api = new SuppliersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $tag = $api->create(new SupplierTagCreateOptions(supplierId: 42, name: 'neu'));
         self::assertSame(99, $tag->id);
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 }

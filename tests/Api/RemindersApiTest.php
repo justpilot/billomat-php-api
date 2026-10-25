@@ -190,9 +190,9 @@ final class RemindersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->complete(1));
-        self::assertTrue($api->cancel(2));
-        self::assertTrue($api->delete(3));
+        $api->complete(1);
+        $api->cancel(2);
+        $api->delete(3);
 
         self::assertSame('https://mycompany.billomat.net/api/reminders/1/complete', $captured[0]['url']);
         self::assertSame('https://mycompany.billomat.net/api/reminders/2/cancel', $captured[1]['url']);
@@ -218,7 +218,7 @@ final class RemindersApiTest extends TestCase
         $opts = new ReminderEmailOptions();
         $opts->to = ['kunde@example.com'];
 
-        self::assertTrue($api->email(42, $opts));
+        $api->email(42, $opts);
 
         $payload = $captured['options']['json'] ?? null;
         if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
@@ -301,7 +301,7 @@ final class RemindersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->uploadSignature(555, base64_encode('PDF')));
+        $api->uploadSignature(555, base64_encode('PDF'));
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/reminders/555/upload-signature', $captured['url']);
     }

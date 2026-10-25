@@ -72,7 +72,7 @@ Wird `format` + `base64file` gesetzt, ist Billomat das Signal, die Vorlage als `
 
 Aktualisiert ausschließlich `name` und `isDefault`. Vorlagen-Inhalte (DOCX/RTF) lassen sich nicht via PUT überschreiben — dafür müsste die Vorlage gelöscht und neu hochgeladen werden.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 ### `thumb(int $id, TemplateThumbFormat $format = TemplateThumbFormat::PNG): string`
 

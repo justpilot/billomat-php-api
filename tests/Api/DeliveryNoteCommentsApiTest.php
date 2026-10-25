@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
-use Justpilot\Billomat\Api\DeliveryNoteCommentsApi;
+use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(DeliveryNoteCommentsApi::class)]
+#[CoversClass(CommentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(DeliveryNotesApi::class)]
 #[CoversClass(DeliveryNoteCommentCreateOptions::class)]
 #[CoversClass(DeliveryNoteComment::class)]
 #[CoversClass(DeliveryNoteCommentActionKey::class)]
@@ -51,12 +55,12 @@ final class DeliveryNoteCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new DeliveryNoteCommentsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $comments = $api->listByDeliveryNote(42, [DeliveryNoteCommentActionKey::CREATE]);
+        $comments = $api->list(42, [DeliveryNoteCommentActionKey::CREATE]);
 
         self::assertCount(1, $comments);
         self::assertSame(DeliveryNoteCommentActionKey::CREATE, $comments[0]->actionkey);
@@ -82,15 +86,15 @@ final class DeliveryNoteCommentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new DeliveryNoteCommentsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
         $created = $api->create(new DeliveryNoteCommentCreateOptions(deliveryNoteId: 42, comment: 'Hallo'));
 
         self::assertSame(99, $created->id);
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
 
         self::assertSame('POST', $captured[0]['method']);
         self::assertSame('DELETE', $captured[1]['method']);

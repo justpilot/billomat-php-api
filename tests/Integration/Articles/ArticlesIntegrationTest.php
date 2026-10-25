@@ -63,7 +63,7 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($article->id, $fetched->id);
 
         // Cleanup
-        self::assertTrue($billomat->articles->delete($article->id));
+        $billomat->articles->delete($article->id);
         self::assertNull($billomat->articles->get($article->id));
     }
 
@@ -82,21 +82,21 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         try {
             // Tag erstellen
             $tagOpts = new ArticleTagCreateOptions(articleId: $article->id, name: 'IT-Tag-'.date('His'));
-            $tag = $billomat->articleTags->create($tagOpts);
+            $tag = $billomat->articles->tags->create($tagOpts);
 
             self::assertNotNull($tag->id);
 
             // List by article
-            $tags = $billomat->articleTags->listByArticle($article->id);
+            $tags = $billomat->articles->tags->list($article->id);
             self::assertContainsOnlyInstancesOf(ArticleTag::class, $tags);
             self::assertGreaterThanOrEqual(1, \count($tags));
 
             // Cloud
-            $cloud = $billomat->articleTags->cloud();
+            $cloud = $billomat->articles->tags->cloud();
             self::assertContainsOnlyInstancesOf(ArticleTagCloudEntry::class, $cloud);
 
             // Cleanup tag
-            self::assertTrue($billomat->articleTags->delete($tag->id));
+            $billomat->articles->tags->delete($tag->id);
         } finally {
             $billomat->articles->delete($article->id);
         }

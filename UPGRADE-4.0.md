@@ -178,7 +178,7 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry:
 
 ## Read-only methods are `#[\NoDiscard]`
 
-`get()`, `getMyself()`, `list()`, `listPage()`, `listBy*()`, `listGrouped()`, `iterateAll()`, `cloud()`,
+`get()`, `getMyself()`, `list()`, `listPage()`, `listGrouped()`, `iterateAll()`, `cloud()`,
 `pdf()`, `thumb()`, `avatar()` and `SearchApi::query()` carry `#[\NoDiscard]`. PHP 8.5 emits a warning
 when their result is ignored. This is not a hard break, but test suites that turn warnings into failures
 will notice it. If you call such a method only for its exception (for example to check that a resource
@@ -186,4 +186,123 @@ exists), cast the result to `(void)`:
 
 ```php
 (void) $billomat->clients->get($id);
+```
+
+## Sub-resources hang off their parent
+
+Items, payments, comments, tags, properties, property values and recurring e-mail receivers are no
+longer properties of `BillomatClient`. They are reached through their parent resource and created on
+first access:
+
+```php
+// 3.x
+$billomat->invoiceComments->listByInvoice($invoiceId);
+$billomat->clientTags->create($options);
+
+// 4.0
+$billomat->invoices->comments->list($invoiceId);
+$billomat->clients->tags->create($options);
+```
+
+| 3.x | 4.0 |
+|---|---|
+| `$billomat->invoiceItems` | `$billomat->invoices->items` |
+| `$billomat->invoicePayments` | `$billomat->invoices->payments` |
+| `$billomat->invoiceComments` | `$billomat->invoices->comments` |
+| `$billomat->invoiceTags` | `$billomat->invoices->tags` |
+| `$billomat->offerItems` | `$billomat->offers->items` |
+| `$billomat->offerComments` | `$billomat->offers->comments` |
+| `$billomat->offerTags` | `$billomat->offers->tags` |
+| `$billomat->confirmationItems` | `$billomat->confirmations->items` |
+| `$billomat->confirmationComments` | `$billomat->confirmations->comments` |
+| `$billomat->confirmationTags` | `$billomat->confirmations->tags` |
+| `$billomat->creditNoteItems` | `$billomat->creditNotes->items` |
+| `$billomat->creditNotePayments` | `$billomat->creditNotes->payments` |
+| `$billomat->creditNoteComments` | `$billomat->creditNotes->comments` |
+| `$billomat->creditNoteTags` | `$billomat->creditNotes->tags` |
+| `$billomat->deliveryNoteItems` | `$billomat->deliveryNotes->items` |
+| `$billomat->deliveryNoteComments` | `$billomat->deliveryNotes->comments` |
+| `$billomat->deliveryNoteTags` | `$billomat->deliveryNotes->tags` |
+| `$billomat->recurringItems` | `$billomat->recurrings->items` |
+| `$billomat->recurringTags` | `$billomat->recurrings->tags` |
+| `$billomat->recurringEmailReceivers` | `$billomat->recurrings->emailReceivers` |
+| `$billomat->reminderItems` | `$billomat->reminders->items` |
+| `$billomat->reminderTags` | `$billomat->reminders->tags` |
+| `$billomat->letterComments` | `$billomat->letters->comments` |
+| `$billomat->letterTags` | `$billomat->letters->tags` |
+| `$billomat->incomingComments` | `$billomat->incomings->comments` |
+| `$billomat->incomingPayments` | `$billomat->incomings->payments` |
+| `$billomat->incomingTags` | `$billomat->incomings->tags` |
+| `$billomat->incomingProperties` | `$billomat->incomings->properties` |
+| `$billomat->incomingPropertyValues` | `$billomat->incomings->propertyValues` |
+| `$billomat->articleTags` | `$billomat->articles->tags` |
+| `$billomat->articleProperties` | `$billomat->articles->properties` |
+| `$billomat->articlePropertyValues` | `$billomat->articles->propertyValues` |
+| `$billomat->clientTags` | `$billomat->clients->tags` |
+| `$billomat->clientProperties` | `$billomat->clients->properties` |
+| `$billomat->clientPropertyValues` | `$billomat->clients->propertyValues` |
+| `$billomat->supplierTags` | `$billomat->suppliers->tags` |
+| `$billomat->supplierProperties` | `$billomat->suppliers->properties` |
+| `$billomat->supplierPropertyValues` | `$billomat->suppliers->propertyValues` |
+| `$billomat->userProperties` | `$billomat->users->properties` |
+
+### One generic class per kind of sub-resource
+
+The 39 classes like `InvoiceCommentsApi` or `ClientTagsApi` are replaced by `CommentsApi`, `TagsApi`,
+`ItemsApi`, `PaymentsApi`, `PropertiesApi` and `PropertyValuesApi`. Type hints on the old classes have to
+change:
+
+```php
+// 3.x
+public function __construct(private InvoiceCommentsApi $comments) {}
+
+// 4.0
+/** @param CommentsApi<InvoiceComment, InvoiceCommentCreateOptions, InvoiceCommentActionKey> $comments */
+public function __construct(private CommentsApi $comments) {}
+```
+
+The `@template` types tell PHPStan and IDEs which model `get()`/`list()` return. At runtime, `create()`
+and `update()` throw an `InvalidArgumentException` if they get the options of another resource, and
+`CommentsApi::list()` does the same for another resource's `*CommentActionKey`. Code that constructed
+the old classes directly (`new InvoiceCommentsApi($http)`) uses the parent instead:
+`new InvoicesApi($http)->comments`. `ReminderItemsApi` and `RecurringEmailReceiversApi` keep their names.
+
+### `listBy{Parent}()` is `list()`
+
+```php
+// 3.x
+$billomat->invoiceItems->listByInvoice($invoiceId, ['per_page' => 50]);
+$billomat->contacts->listByClient($clientId);
+
+// 4.0
+$billomat->invoices->items->list($invoiceId, ['per_page' => 50]);
+$billomat->contacts->list($clientId);
+```
+
+Payments and property values can be listed without a parent, so the parent ID is the optional first
+argument there:
+
+```php
+// 3.x
+$billomat->invoicePayments->list(['invoice_id' => $invoiceId, 'order_by' => 'date+DESC']);
+
+// 4.0
+$billomat->invoices->payments->list($invoiceId, ['order_by' => 'date+DESC']);
+$billomat->invoices->payments->list(filters: ['from' => '2026-01-01']);
+```
+
+## Methods that always returned `true` return `void`
+
+`delete()`, `complete()`, `cancel()`, `uncancel()`, `clear()`, `undo()`, `win()`, `lose()`, `email()`,
+`mail()`, `encash()`, `upload()` and `uploadSignature()` never returned `false`; errors were always
+exceptions. They now return `void`:
+
+```php
+// 3.x
+if ($billomat->invoices->complete($id)) {
+    // …
+}
+
+// 4.0
+$billomat->invoices->complete($id); // throws on failure
 ```

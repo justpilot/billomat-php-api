@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/recurring-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class RecurringTagCreateOptions
+final class RecurringTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

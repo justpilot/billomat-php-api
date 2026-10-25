@@ -19,7 +19,7 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  * Generiert aus tools/codegen/definitions/client-properties.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class PropertyCreateOptions
+final class PropertyCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

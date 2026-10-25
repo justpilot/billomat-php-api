@@ -174,7 +174,7 @@ final class SuppliersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->delete(777));
+        $api->delete(777);
         self::assertSame('DELETE', $captured['method']);
     }
 }

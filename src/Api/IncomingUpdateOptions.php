@@ -17,7 +17,7 @@ use DateTimeImmutable;
  * Generiert aus tools/codegen/definitions/incomings.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class IncomingUpdateOptions
+final class IncomingUpdateOptions implements WriteOptions
 {
     /**
      * ID des Lieferanten.

@@ -18,7 +18,7 @@ use Justpilot\Billomat\Model\Enum\InvoiceItemType;
  * Generiert aus tools/codegen/definitions/credit-note-items.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class CreditNoteItemCreateOptions
+final class CreditNoteItemCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

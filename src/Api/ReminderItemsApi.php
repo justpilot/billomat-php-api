@@ -4,42 +4,43 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Model\ReminderItem;
 use NoDiscard;
 
 /**
- * API-Wrapper für Reminder-Items (read-only — Mahnungspositionen werden vom System generiert).
+ * Positionen einer Mahnung (read-only – Mahnungspositionen erzeugt Billomat selbst).
+ *
+ * Erreichbar über `$billomat->reminders->items`.
  *
  * Endpoints:
- *  - GET    /reminder-items?reminder_id={id}
- *  - GET    /reminder-items/{id}
+ *  - GET /reminder-items?reminder_id={id}
+ *  - GET /reminder-items/{id}
  *
  * Doku: https://www.billomat.com/en/api/reminders/items/
+ *
+ * @extends AbstractSubResourceApi<ReminderItem>
  */
-final class ReminderItemsApi extends AbstractApi
+final class ReminderItemsApi extends AbstractSubResourceApi
 {
+    protected const string PLURAL = 'items';
+    protected const string SINGULAR = 'item';
+
+    public function __construct(BillomatHttpClientInterface $http)
+    {
+        parent::__construct($http, 'reminder', ReminderItem::fromArray(...));
+    }
+
     /**
-     * @param array<string, scalar|array|null> $query
+     * Listet die Positionen einer Mahnung.
+     *
+     * @param array<string, scalar|array<mixed>|null> $query zusätzliche Filter (page, per_page, …)
      *
      * @return list<ReminderItem>
      */
     #[NoDiscard]
-    public function listByReminder(int $reminderId, array $query = []): array
+    public function list(int $reminderId, array $query = []): array
     {
-        $params = array_merge(['reminder_id' => $reminderId], $query);
-
-        return $this->listResource('/reminder-items', 'reminder-items', 'reminder-item', ReminderItem::fromArray(...), $params);
-    }
-
-    #[NoDiscard]
-    public function get(int $id): ?ReminderItem
-    {
-        $data = $this->getJsonOrNull("/reminder-items/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        return ReminderItem::fromArray($this->unwrapEnvelope($data, 'reminder-item', 'fetching reminder item'));
+        return $this->listWhere(['reminder_id' => $reminderId, ...$query]);
     }
 }

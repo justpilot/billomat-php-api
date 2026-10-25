@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
-use Justpilot\Billomat\Api\ConfirmationCommentsApi;
+use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ConfirmationCommentsApi::class)]
+#[CoversClass(CommentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ConfirmationsApi::class)]
 #[CoversClass(ConfirmationCommentCreateOptions::class)]
 #[CoversClass(ConfirmationComment::class)]
 #[CoversClass(ConfirmationCommentActionKey::class)]
@@ -51,12 +55,12 @@ final class ConfirmationCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ConfirmationCommentsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $comments = $api->listByConfirmation(42, [ConfirmationCommentActionKey::CREATE]);
+        $comments = $api->list(42, [ConfirmationCommentActionKey::CREATE]);
 
         self::assertCount(1, $comments);
         self::assertSame(ConfirmationCommentActionKey::CREATE, $comments[0]->actionkey);
@@ -78,10 +82,10 @@ final class ConfirmationCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new ConfirmationCommentsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
         $created = $api->create(new ConfirmationCommentCreateOptions(confirmationId: 42, comment: 'Hallo'));
 
@@ -101,12 +105,12 @@ final class ConfirmationCommentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new ConfirmationCommentsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
     }
 }

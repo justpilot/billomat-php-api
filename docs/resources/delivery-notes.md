@@ -8,9 +8,9 @@ API-Wrapper für Lieferscheine unter `/delivery-notes` und ihre drei Sub-Ressour
 
 ```php
 $billomat->deliveryNotes          // Lieferscheine selbst
-$billomat->deliveryNoteItems      // Positionen
-$billomat->deliveryNoteComments   // Kommentare / Audit-Trail
-$billomat->deliveryNoteTags       // Schlagworte
+$billomat->deliveryNotes->items      // Positionen
+$billomat->deliveryNotes->comments   // Kommentare / Audit-Trail
+$billomat->deliveryNotes->tags       // Schlagworte
 ```
 
 ## Modell
@@ -48,7 +48,7 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByDeliveryNote($deliveryNoteId, $query?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
+| `list($deliveryNoteId, $query?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
 | `get($id)` | GET | `/delivery-note-items/{id}` |
 | `create($deliveryNoteId, $options)` | POST | `/delivery-note-items` |
 | `update($id, $options)` | PUT | `/delivery-note-items/{id}` |
@@ -58,7 +58,7 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByDeliveryNote($deliveryNoteId, $actionKeys?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
+| `list($deliveryNoteId, $actionKeys?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
 | `get($id)` | GET | `/delivery-note-comments/{id}` |
 | `create($options)` | POST | `/delivery-note-comments` |
 | `delete($id)` | DELETE | `/delivery-note-comments/{id}` |
@@ -67,7 +67,7 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByDeliveryNote($deliveryNoteId)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
+| `list($deliveryNoteId)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
 | `cloud()` | GET | `/delivery-note-tags` |
 | `get($id)` | GET | `/delivery-note-tags/{id}` |
 | `create($options)` | POST | `/delivery-note-tags` |
@@ -112,13 +112,13 @@ $note = $billomat->deliveryNotes->create($opts);
 
 #### `update(int $id, DeliveryNoteUpdateOptions $options): DeliveryNote`
 
-Schmaler Subset, voll editierbar nur im `DRAFT`. Positionen sind hier nicht änderbar — dafür die `DeliveryNoteItemsApi` nutzen.
+Schmaler Subset, voll editierbar nur im `DRAFT`. Positionen sind hier nicht änderbar — dafür die `$billomat->deliveryNotes->items` nutzen.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
 DRAFT → OPEN. Vergibt die endgültige `delivery_note_number` und erzeugt das PDF.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
 Nur im `DRAFT` erlaubt — danach `cancel()`.
 
@@ -132,11 +132,11 @@ $billomat->deliveryNotes->undo($note->id);     // {clear,cancel} → OPEN
 
 Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge → `ValidationException` (422).
 
-#### `email(int $id, ?DeliveryNoteEmailOptions $options = null): bool`
+#### `email(int $id, ?DeliveryNoteEmailOptions $options = null): void`
 
 Versendet den Lieferschein per E-Mail. Ohne Options nutzt Billomat die Defaults aus dem Account; das PDF wird automatisch angehängt.
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
+#### `uploadSignature(int $id, string $base64Pdf): void`
 
 Lädt eine unterschriebene PDF-Version hoch — typischer Use Case: der Fahrer fotografiert die unterschriebene Empfangsbestätigung, das PDF wird Base64-encodiert hochgeladen.
 
@@ -154,15 +154,15 @@ file_put_contents('lieferschein.pdf', $pdf->getBinary());
 ### Delivery Note Items
 
 ```php
-$items = $billomat->deliveryNoteItems->listByDeliveryNote($note->id);
+$items = $billomat->deliveryNotes->items->list($note->id);
 
-$item = $billomat->deliveryNoteItems->create(
+$item = $billomat->deliveryNotes->items->create(
     $note->id,
     new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
 );
 
-$billomat->deliveryNoteItems->update($item->id, $opts);
-$billomat->deliveryNoteItems->delete($item->id);
+$billomat->deliveryNotes->items->update($item->id, $opts);
+$billomat->deliveryNotes->items->delete($item->id);
 ```
 
 `create()` injiziert `delivery_note_id` automatisch — die Options-Klasse selbst hat dieses Feld nicht. `update()` verwendet dieselbe Klasse wie `create()`.
@@ -173,12 +173,12 @@ $billomat->deliveryNoteItems->delete($item->id);
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 
-$comments = $billomat->deliveryNoteComments->listByDeliveryNote(
+$comments = $billomat->deliveryNotes->comments->list(
     $note->id,
     actionKeys: [DeliveryNoteCommentActionKey::COMPLETE, DeliveryNoteCommentActionKey::EMAIL],
 );
 
-$billomat->deliveryNoteComments->create(
+$billomat->deliveryNotes->comments->create(
     new DeliveryNoteCommentCreateOptions(
         deliveryNoteId: $note->id,
         comment: 'Übergeben an Lager Süd.',
@@ -191,12 +191,12 @@ $billomat->deliveryNoteComments->create(
 ```php
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 
-$tag = $billomat->deliveryNoteTags->create(
+$tag = $billomat->deliveryNotes->tags->create(
     new DeliveryNoteTagCreateOptions(deliveryNoteId: $note->id, name: 'speditionsversand'),
 );
 
-$tags  = $billomat->deliveryNoteTags->listByDeliveryNote($note->id);
-$cloud = $billomat->deliveryNoteTags->cloud();
+$tags  = $billomat->deliveryNotes->tags->list($note->id);
+$cloud = $billomat->deliveryNotes->tags->cloud();
 ```
 
 ## Write-Modell: `DeliveryNoteCreateOptions`
@@ -253,7 +253,7 @@ Konstruktor: `new DeliveryNoteItemCreateOptions(float $quantity, float $unitPric
 | `reduction` | `reduction` | `?string` | |
 | `position` | `position` | `?int` | |
 
-`DeliveryNoteItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ.
+`ItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ.
 
 ## Write-Modell: `DeliveryNoteCommentCreateOptions`
 
@@ -376,7 +376,7 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 
 - **Lieferschein ist wert-arm.** Billomat liefert im Read-Modell keine Summen- oder Preisfelder, und das Dokument löst keine Forderung aus. Wer eine Zahlung erwartet, ist hier falsch — `InvoicesApi` oder `IncomingsApi` ist gemeint.
 - **Kein `discount`/`validity`.** Anders als `OfferCreateOptions`/`ConfirmationCreateOptions` hat `DeliveryNoteCreateOptions` keine `discountRate`/`discountDays`/`discountDate`/`validityDays`-Felder. Wer aus Copy-Paste-Reflex sucht, findet sie nicht.
-- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `delivery-note-items` beim PUT. Stets die `DeliveryNoteItemsApi` verwenden.
+- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `delivery-note-items` beim PUT. Stets die `$billomat->deliveryNotes->items` verwenden.
 - **`delete()` nur im `DRAFT`.** Nach `complete()` ist nur noch `cancel()` möglich.
 - **`DeliveryNoteItemCreateOptions` ist auch der Update-Typ.** Der Konstruktor verlangt `quantity` und `unitPrice`, selbst wenn du nur den Titel ändern willst.
 - **`array_is_list`-Normalisierung in `list()`.** Bei genau einem Treffer liefert Billomat `delivery-note` als Objekt — das SDK packt das selbst in eine Liste.
@@ -425,7 +425,7 @@ $note = $billomat->deliveryNotes->create($opts);
 printf("Lieferschein #%d angelegt (DRAFT)\n", $note->id);
 
 // 2) Tag setzen
-$billomat->deliveryNoteTags->create(
+$billomat->deliveryNotes->tags->create(
     new DeliveryNoteTagCreateOptions(deliveryNoteId: $note->id, name: 'speditionsversand'),
 );
 
@@ -451,7 +451,7 @@ if (false !== $signed) {
 }
 
 // 6) Vermerk und als erledigt markieren
-$billomat->deliveryNoteComments->create(
+$billomat->deliveryNotes->comments->create(
     new DeliveryNoteCommentCreateOptions(
         deliveryNoteId: $note->id,
         comment: 'Empfang quittiert durch Lager Süd am 02.06.',

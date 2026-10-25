@@ -9,8 +9,12 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\Letter;
+use Justpilot\Billomat\Model\LetterComment;
 use Justpilot\Billomat\Model\LetterPdf;
+use Justpilot\Billomat\Model\LetterTag;
+use Justpilot\Billomat\Model\LetterTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -36,6 +40,24 @@ use NoDiscard;
  */
 final class LettersApi extends AbstractApi
 {
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<LetterComment, LetterCommentCreateOptions, LetterCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'letter', LetterComment::fromArray(...), LetterCommentCreateOptions::class, LetterCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<LetterTag, LetterTagCloudEntry, LetterTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'letter', LetterTag::fromArray(...), LetterTagCloudEntry::fromArray(...), LetterTagCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -123,7 +145,7 @@ final class LettersApi extends AbstractApi
         return Letter::fromArray($this->unwrapEnvelope($data, 'letter', 'updating letter'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -134,45 +156,33 @@ final class LettersApi extends AbstractApi
         $payload = ['letter' => $body];
 
         $this->putVoid("/letters/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/letters/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/letters/{$id}/cancel");
-
-        return true;
     }
 
-    public function clear(int $id): bool
+    public function clear(int $id): void
     {
         $this->putVoid("/letters/{$id}/clear");
-
-        return true;
     }
 
-    public function undo(int $id): bool
+    public function undo(int $id): void
     {
         $this->putVoid("/letters/{$id}/undo");
-
-        return true;
     }
 
-    public function email(int $id, ?LetterEmailOptions $options = null): bool
+    public function email(int $id, ?LetterEmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postJson("/letters/{$id}/email", $payload);
-
-        return true;
     }
 
     /**
@@ -180,23 +190,19 @@ final class LettersApi extends AbstractApi
      *
      * Entspricht PUT /letters/{id}/upload.
      */
-    public function upload(int $id, string $base64Pdf): bool
+    public function upload(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/letters/{$id}/upload", $payload);
-
-        return true;
     }
 
     /** Lädt eine unterschriebene PDF-Version des Briefs hoch. */
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/letters/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**

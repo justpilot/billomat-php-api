@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
-use Justpilot\Billomat\Api\CreditNoteCommentsApi;
+use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(CreditNoteCommentsApi::class)]
+#[CoversClass(CommentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(CreditNotesApi::class)]
 #[CoversClass(CreditNoteCommentCreateOptions::class)]
 #[CoversClass(CreditNoteComment::class)]
 #[CoversClass(CreditNoteCommentActionKey::class)]
@@ -51,12 +55,12 @@ final class CreditNoteCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new CreditNoteCommentsApi(new BillomatHttpClient(
+        $api = new CreditNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $comments = $api->listByCreditNote(42, [CreditNoteCommentActionKey::CREATE]);
+        $comments = $api->list(42, [CreditNoteCommentActionKey::CREATE]);
 
         self::assertCount(1, $comments);
         self::assertSame(CreditNoteCommentActionKey::CREATE, $comments[0]->actionkey);
@@ -83,14 +87,14 @@ final class CreditNoteCommentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new CreditNoteCommentsApi(new BillomatHttpClient(
+        $api = new CreditNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
         $created = $api->create(new CreditNoteCommentCreateOptions(creditNoteId: 42, comment: 'Hallo'));
 
         self::assertSame(99, $created->id);
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 }

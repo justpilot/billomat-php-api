@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
-use Justpilot\Billomat\Api\ConfirmationItemsApi;
+use Justpilot\Billomat\Api\ConfirmationsApi;
+use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ConfirmationItemsApi::class)]
+#[CoversClass(ItemsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ConfirmationsApi::class)]
 #[CoversClass(ConfirmationItemCreateOptions::class)]
 #[CoversClass(ConfirmationItem::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -50,12 +54,12 @@ final class ConfirmationItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ConfirmationItemsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
-        $items = $api->listByConfirmation(123);
+        $items = $api->list(123);
 
         self::assertCount(1, $items);
         self::assertSame(InvoiceItemType::SERVICE, $items[0]->type);
@@ -77,10 +81,10 @@ final class ConfirmationItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new ConfirmationItemsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
         $opts = new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: 50.0);
         $opts->title = 'Neu';
@@ -107,10 +111,10 @@ final class ConfirmationItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ConfirmationItemsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
         $opts = new ConfirmationItemCreateOptions(quantity: 3.0, unitPrice: 75.0);
         self::assertSame(77, $api->update(77, $opts)->id);
@@ -129,12 +133,12 @@ final class ConfirmationItemsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new ConfirmationItemsApi(new BillomatHttpClient(
+        $api = new ConfirmationsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
-        self::assertTrue($api->delete(77));
+        $api->delete(77);
         self::assertSame('DELETE', $captured['method']);
     }
 }

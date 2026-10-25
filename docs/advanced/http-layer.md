@@ -1,24 +1,24 @@
-# HTTP-Layer
+# HTTP layer
 
-Die HTTP-Schicht des SDK ist absichtlich dünn. Sie setzt auf PSR-18 (HTTP-Client) und PSR-17 (Request-/Stream-Factories) und kapselt fünf Aufgaben: Authentifizierungs-Header setzen, URL und Query-String bauen, JSON-Body serialisieren, 4xx/5xx in SDK-Exceptions übersetzen und Requests gemäß `RetryPolicy` wiederholen. Dieses Dokument beschreibt die wenigen, aber wichtigen Eigenheiten — und wie du eingreifen kannst.
+The SDK's HTTP layer is deliberately thin. It builds on PSR-18 (HTTP client) and PSR-17 (request/stream factories) and handles five tasks: setting authentication headers, building the URL and query string, serializing the JSON body, translating 4xx/5xx into SDK exceptions, and retrying requests according to the `RetryPolicy`. This page describes the few but important quirks — and how you can hook in.
 
-## Klassen und Verantwortlichkeiten
+## Classes and responsibilities
 
-| Klasse | Aufgabe | Datei |
+| Class | Responsibility | File |
 |---|---|---|
-| `BillomatHttpClientInterface` | Vertrag: `request(method, path, query, json): ResponseInterface` (PSR-7). Die Response hat immer einen Status unter 400; Fehler kommen als Exception. | `src/Http/BillomatHttpClientInterface.php` |
-| `BillomatHttpClient` | Konkrete Implementierung. Bekommt einen PSR-18-`ClientInterface` + `BillomatConfig` injiziert, optional PSR-17-Factories (sonst per `php-http/discovery`). Übernimmt Fehler-Mapping und Retries. | `src/Http/BillomatHttpClient.php` |
-| `AbstractApi` | Wrapper über `BillomatHttpClientInterface` mit JSON-Decoding und Hüllen-Entpackung. | `src/Api/AbstractApi.php` |
+| `BillomatHttpClientInterface` | Contract: `request(method, path, query, json): ResponseInterface` (PSR-7). The response always has a status below 400; errors are thrown as exceptions. | `src/Http/BillomatHttpClientInterface.php` |
+| `BillomatHttpClient` | Concrete implementation. Gets a PSR-18 `ClientInterface` and `BillomatConfig` injected, optionally PSR-17 factories (otherwise via `php-http/discovery`), a PSR-3 logger and a PSR-14 event dispatcher. Handles error mapping and retries. | `src/Http/BillomatHttpClient.php` |
+| `AbstractApi` | Wrapper around `BillomatHttpClientInterface` with JSON decoding, envelope unwrapping and list/pagination helpers. | `src/Api/AbstractApi.php` |
 
-`BillomatClient` instanziiert intern ein `BillomatHttpClient` und reicht es an alle `*Api`-Klassen weiter. Eine eigene Implementierung von `BillomatHttpClientInterface` lässt sich nicht in `BillomatClient` einhängen — der Hebel ist der darunterliegende PSR-18-Client (siehe nächster Abschnitt).
+`BillomatClient` creates a `BillomatHttpClient` internally and passes it to every `*Api` class. You can't plug your own `BillomatHttpClientInterface` implementation into `BillomatClient` — the lever is the underlying PSR-18 client (see the next section).
 
-## PSR-18-Client austauschen
+## Replacing the PSR-18 client
 
-Der schnelle Hebel: nicht den `BillomatHttpClient` ersetzen, sondern den darunterliegenden PSR-18-Client. `BillomatClient::create()` und der Konstruktor akzeptieren jeden `Psr\Http\Client\ClientInterface`; der Konstruktor nimmt zusätzlich eigene PSR-17-`RequestFactoryInterface`/`StreamFactoryInterface` entgegen.
+The quick lever: don't replace `BillomatHttpClient`, replace the PSR-18 client underneath it. `BillomatClient::create()` and the constructor accept any `Psr\Http\Client\ClientInterface`; the constructor also takes your own PSR-17 `RequestFactoryInterface`/`StreamFactoryInterface`.
 
-Ohne Angabe nutzt das SDK Symfonys `Psr18Client` mit `BillomatConfig::$timeout`, falls `symfony/http-client` installiert ist, sonst den per `php-http/discovery` gefundenen Client (Guzzle, …). Ein eigener Client konfiguriert seinen Timeout selbst — `$timeout` gilt dann nicht.
+Without one, the SDK uses Symfony's `Psr18Client` with `BillomatConfig::$timeout` when `symfony/http-client` is installed, otherwise the client found by `php-http/discovery` (Guzzle, …). A custom client configures its own timeout — `$timeout` doesn't apply then.
 
-Einen Symfony-`HttpClientInterface` wickelst du in `Psr18Client` ein:
+Wrap a Symfony `HttpClientInterface` in `Psr18Client`:
 
 ```php
 use Justpilot\Billomat\BillomatClient;
@@ -38,20 +38,20 @@ $billomat = BillomatClient::create(
 );
 ```
 
-Mit Guzzle sieht es genauso aus: `httpClient: new GuzzleHttp\Client(['timeout' => 10.0])`. Mit diesem Pattern bekommst du Logging, Tracing, Auth-Decoration etc., ohne SDK-internen Code zu ändern. Retries übernimmt das SDK selbst (siehe unten); ein zusätzlicher Retry-Decorator würde Wiederholungen doppeln.
+Guzzle works the same way: `httpClient: new GuzzleHttp\Client(['timeout' => 10.0])`. This pattern gives you tracing, auth decoration etc. without changing SDK code. For logging and request events, the SDK has built-in PSR-3/PSR-14 support (`logger:`, `events:`, see [Configuration](../configuration.md#example-logging-requests-and-responses)). The SDK handles retries itself (see below); an extra retry decorator would double them.
 
-## Retries und Rate-Limits
+## Retries and rate limits
 
-`BillomatHttpClient` wiederholt Requests nach `BillomatConfig::$retry` (`RetryPolicy`, Default: `maxRetries: 2`, `baseDelayMs: 500`, `maxDelayMs: 10_000`):
+`BillomatHttpClient` retries requests according to `BillomatConfig::$retry` (`RetryPolicy`, default: `maxRetries: 2`, `baseDelayMs: 500`, `maxDelayMs: 10_000`):
 
-| Situation | Methoden | Verhalten |
+| Situation | Methods | Behavior |
 |---|---|---|
-| 429 Too Many Requests | alle | Wartet die von Billomat genannte Zeit (`Retry-After`, sonst `X-Rate-Limit-Reset`), aber nur wenn sie ≤ `maxDelayMs` ist — sonst sofort `RateLimitException`. Ohne Header: exponentielles Backoff. |
-| 502, 503, 504 | nur GET | Exponentielles Backoff mit Jitter (`baseDelayMs * 2^Versuch`, gedeckelt bei `maxDelayMs`). |
-| Netzwerkfehler (PSR-18 `NetworkExceptionInterface`) | nur GET | Wie 502–504. |
-| 500 und alle anderen Fehler | — | Kein Retry. |
+| 429 Too Many Requests | all | Waits for the time Billomat announces (`Retry-After`, otherwise `X-Rate-Limit-Reset`), but only if it is ≤ `maxDelayMs` — otherwise throws `RateLimitException` immediately. Without a header: exponential backoff. |
+| 502, 503, 504 | GET only | Exponential backoff with jitter (`baseDelayMs * 2^attempt`, capped at `maxDelayMs`). |
+| Network error (PSR-18 `NetworkExceptionInterface`) | GET only | Same as 502–504. |
+| 500 and all other errors | — | No retry. |
 
-POST/PUT/DELETE werden außer bei 429 nie wiederholt, weil sie bei Billomat nicht idempotent sind (z. B. `PUT /invoices/{id}/complete`). Bei 429 hat Billomat den Request nicht verarbeitet, daher ist die Wiederholung dort sicher.
+POST/PUT/DELETE are never retried except on 429, because Billomat's write endpoints aren't idempotent (e.g. `PUT /invoices/{id}/complete`). On 429 Billomat didn't process the request, so retrying is safe there. The request is rebuilt for every attempt.
 
 ```php
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -61,27 +61,27 @@ $config = new BillomatConfig(
     billomatId: 'mycompany',
     apiKey: '…',
     retry: new RetryPolicy(maxRetries: 4, maxDelayMs: 30_000),
-    // retry: RetryPolicy::none(), // Wiederholungen abschalten
+    // retry: RetryPolicy::none(), // disable retries
 );
 ```
 
-Sind alle Versuche verbraucht, wirft der Client die Exception der letzten Antwort (siehe [Fehlerbehandlung](../error-handling.md)); Netzwerkfehler kommen als `TransportException` mit der PSR-18-Exception als `getPrevious()`.
+Once all attempts are used up, the client throws the exception for the last response (see [Error handling](../error-handling.md)); network errors surface as `TransportException` with the PSR-18 exception as `getPrevious()`.
 
-## Eigenheit 1: `+` bleibt im Query-String literal
+## Quirk 1: `+` stays literal in the query string
 
-`http_build_query` (PHP-Standard) konvertiert `+` immer zu `%2B`. Billomat akzeptiert `%2B` aber nicht als Trennzeichen in zusammengesetzten Werten — typisches Beispiel: Sortierung mit `order_by=date+DESC`. Würde das SDK `%2B` schicken, würde Billomat den Filter ignorieren.
+`http_build_query` (standard PHP) always converts `+` to `%2B`. Billomat doesn't accept `%2B` as a separator in compound values — the typical example is sorting with `order_by=date+DESC`. If the SDK sent `%2B`, Billomat would ignore the parameter.
 
-Lösung: `BillomatHttpClient::buildBillomatQuery()` baut den Query-String von Hand. Werte werden mit `rawurlencode()` codiert, anschließend wird `%2B` wieder durch `+` ersetzt. Resultat:
+Solution: `BillomatHttpClient::buildBillomatQuery()` builds the query string by hand. Values are encoded with `rawurlencode()`, then `%2B` is turned back into `+`. Result:
 
 ```text
 ?order_by=date+DESC&per_page=50
 ```
 
-So funktionieren alle Filter, die auf der Billomat-Doku `<feld>+ASC` oder `<feld>+DESC` heißen, ohne Workaround.
+This way every sort parameter documented by Billomat as `<field>+ASC` or `<field>+DESC` works without a workaround. In SDK code, build the value with `OrderBy` (`OrderBy::desc('date')`) instead of writing the string by hand.
 
-## Eigenheit 2: Arrays als `key[]=v1&key[]=v2`
+## Quirk 2: arrays as `key[]=v1&key[]=v2`
 
-Wenn der Wert eines Filter-Schlüssels ein Array ist, serialisiert das SDK ihn als wiederholten `key[]`-Eintrag — nicht als `key=v1,v2` und nicht als `key[0]=v1`. Das ist das einzige Format, das Billomat akzeptiert.
+If the value of a filter key is an array, the SDK serializes it as repeated `key[]` entries — not as `key=v1,v2` and not as `key[0]=v1`:
 
 ```php
 $billomat->invoices->list([
@@ -89,39 +89,42 @@ $billomat->invoices->list([
 ]);
 ```
 
-Ergibt:
+Result:
 
 ```text
 ?status[]=OPEN&status[]=OVERDUE
 ```
 
-Auf der Leitung stehen die Klammern percent-kodiert (`?status%5B%5D=OPEN&status%5B%5D=OVERDUE`), weil die PSR-7-URI `[` und `]` im Query kodiert. Billomat dekodiert das wie `status[]`; in Tests auf die kodierte Form prüfen.
+On the wire the brackets are percent-encoded (`?status%5B%5D=OPEN&status%5B%5D=OVERDUE`), because the PSR-7 URI encodes `[` and `]` in the query. Billomat decodes this as `status[]`; in tests, assert against the encoded form.
 
-`null` als Wert (sowohl Top-Level als auch innerhalb eines Arrays) wird stillschweigend übersprungen — der Schlüssel landet nicht im Query-String.
+The typed filters (`InvoiceFilter`, `ClientFilter`, …) don't use this form: they send multi-value fields comma-separated (`status=OPEN,OVERDUE`), which Billomat treats as OR (see [Pagination and filtering](../concepts/pagination-and-filtering.md)).
 
-## Wertkonvertierung
+`null` values (top level as well as inside an array) are skipped silently — the key doesn't appear in the query string.
 
-`BillomatHttpClient::encodeBillomatQueryValue()` regelt das Casting der einzelnen Werte:
+## Value conversion
 
-| PHP-Typ | Wire-Repräsentation |
+`BillomatHttpClient::encodeBillomatQueryValue()` casts the individual values:
+
+| PHP type | Wire representation |
 |---|---|
 | `bool` | `1` / `0` |
 | `int`, `float` | `(string)` |
-| `string` | unverändert |
+| `string` | unchanged |
 
-Anschließend `rawurlencode`, danach die `%2B`-→-`+`-Korrektur.
+Then `rawurlencode`, followed by the `%2B` → `+` correction.
 
-Wenn du strukturierte Daten serialisieren willst (z. B. `DateTimeImmutable`), wandle sie vorher in einen String — sonst landet ein PHP-Object-Cast im Query-String.
+Other types (objects such as `DateTimeImmutable`, enums) are not accepted in raw array filters; convert them to a string first. The typed filters do this for you (`from`/`to` as `YYYY-MM-DD`, enums as their value).
 
-## Binäre Responses
+## Binary responses
 
-Manche Billomat-Endpunkte können binäre Daten zurückgeben — etwa PDFs oder Thumbnails. Zwei Patterns finden sich im SDK:
+Some Billomat endpoints return binary data — PDFs or thumbnails, for example. The SDK uses two patterns:
 
-### Pattern A: `AbstractApi::getRaw()` für rein lesende Binärabrufe
+### Pattern A: `AbstractApi::getRaw()` for read-only binary fetches
 
-Verwendet von `TemplatesApi::thumb()`:
+Used by `TemplatesApi::thumb()`:
 
 ```php
+#[NoDiscard]
 public function thumb(int $id, TemplateThumbFormat $format = TemplateThumbFormat::PNG): string
 {
     return $this->getRaw("/templates/{$id}/thumb", [
@@ -130,26 +133,28 @@ public function thumb(int $id, TemplateThumbFormat $format = TemplateThumbFormat
 }
 ```
 
-`getRaw()` macht den Request und gibt `(string) $response->getBody()` zurück. HTTP-Fehler hat zu diesem Zeitpunkt bereits `BillomatHttpClient::request()` als SDK-Exception geworfen. Rückgabe ist der Binär-String.
+`getRaw()` sends the request and returns `(string) $response->getBody()`. Any HTTP error has already been thrown as an SDK exception by `BillomatHttpClient::request()` at that point. The return value is the binary string.
 
-### Pattern B: Endpoints mit Modus-Schalter
+For PDFs, use `AbstractApi::getPdf()` instead: it works like `getRaw()` but throws an `UnexpectedResponseException` when the body is empty or doesn't start with `%PDF-` (Billomat occasionally answers 200 with an empty body or an HTML page).
 
-Verwendet von `InvoicesApi::pdf()`, weil derselbe Endpoint je nach `format=pdf` entweder JSON oder Binärdaten liefert. Die Methode ruft je nach Modus `getRaw(...)` (Binär) oder `getJson(...)` (für die strukturierte Variante) auf.
+### Pattern B: endpoints with a mode switch
 
-Beim Schreiben eigener Ressourcen orientiere dich an diesen zwei Patterns; ein generischer Helfer für „Endpoint mit Inhalt-Switch“ existiert (noch) nicht.
+Used by `InvoicesApi::pdf(int $id, ?PdfType $type = null, bool $rawPdf = false)`, because the same endpoint returns either JSON or binary data depending on `format=pdf`. With `rawPdf: true` the method sets `format=pdf` and calls `getPdf(...)`; otherwise it calls `getJson(...)` and returns an `InvoicePdf` model with the Base64 content.
 
-## Response-Hüllen entpacken
+When writing your own resources, follow these two patterns; there is no generic helper for "endpoint with content switch" (yet).
 
-Billomat verpackt Antworten konsistent in eine Hülle:
+## Unwrapping response envelopes
 
-- Liste: `{ "clients": { "client": [ {…}, {…} ] } }`
-- Einzelobjekt: `{ "client": { … } }`
+Billomat consistently wraps responses in an envelope:
 
-Eigenheit: Bei genau **einem** Listeneintrag liefert Billomat manchmal ein einzelnes Objekt statt einer einelementigen Liste. Jede `*Api::list()`-Implementierung normalisiert das per `array_is_list()`-Check (bzw. `isset($node['id'])`-Heuristik bei verschachtelten Strukturen wie Invoice Items). Wenn du eine neue Ressource hinzufügst, übernimm dieses Muster — siehe `ClientsApi::list()`, `InvoicesApi::list()`, `ItemsApi::list()`.
+- List: `{ "clients": { "client": [ {…}, {…} ] } }`
+- Single object: `{ "client": { … } }`
 
-## Was die Schicht **nicht** macht
+Quirk: when a list has exactly **one** entry, Billomat sometimes returns a single object instead of a one-element list. `AbstractApi::listResource()` (and `listResourcePage()`, which `iterateAll()` builds on) normalizes this with an `array_is_list()` check, so every `*Api::list()` that uses it gets the behavior for free — see `ClientsApi::list()`. Sub-resources (`ItemsApi`, `CommentsApi`, …) go through the same helper via `AbstractSubResourceApi`. Single objects are unwrapped with `AbstractApi::unwrapEnvelope()`, which throws an `UnexpectedResponseException` when the expected key is missing. When you add a new resource, use these helpers.
 
-- Kein proaktives Rate-Limiting: Das SDK drosselt nicht vorab anhand von `X-Rate-Limit-Remaining`, sondern reagiert erst auf 429.
-- Keine Wiederholung von POST/PUT/DELETE außer bei 429 und keine Wiederholung bei 500.
-- Kein Caching von GET-Responses.
-- Keine Validierung des Payloads, bevor er Billomat erreicht. Das SDK schickt, was du angibst — Validierungsfehler liefert Billomat als `ValidationException` zurück, siehe [docs/error-handling.md](../error-handling.md).
+## What the layer does **not** do
+
+- No proactive rate limiting: the SDK doesn't throttle ahead of time based on `X-Rate-Limit-Remaining`; it only reacts to 429.
+- No retries of POST/PUT/DELETE except on 429, and no retries on 500.
+- No caching of GET responses.
+- No payload validation before it reaches Billomat. The SDK sends what you give it — Billomat returns validation errors as `ValidationException`, see [docs/error-handling.md](../error-handling.md).

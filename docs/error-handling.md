@@ -1,8 +1,8 @@
-# Fehlerbehandlung
+# Error handling
 
-Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatException`. Die HTTP-Fehler von Billomat werden auf eine kleine, spezialisierte Hierarchie abgebildet, damit du gezielt auf einzelne Fehlerklassen reagieren kannst.
+Every error the SDK throws extends `Justpilot\Billomat\Exception\BillomatException`. Billomat's HTTP errors map to a small, specialized hierarchy so you can react to specific error classes.
 
-## Exception-Hierarchie
+## Exception hierarchy
 
 ```text
 \RuntimeException
@@ -13,25 +13,27 @@ Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatE
     │   ├── NotFoundException
     │   └── RateLimitException
     ├── TransportException
-    └── UnexpectedResponseException
+    ├── UnexpectedResponseException
+    └── InvalidWebhookException
 ```
 
-| Klasse | Datei | Bedeutung |
+| Class | File | Meaning |
 |---|---|---|
-| `BillomatException` | `src/Exception/BillomatException.php` | Basis-Klasse. Fängst du diese, fängst du alles vom SDK. `isTransient()` und `mayHaveBeenProcessed()` klassifizieren den Fehler (siehe [Fehler klassifizieren](concepts/errors-and-rate-limits.md#fehler-klassifizieren)). |
-| `HttpException` | `src/Exception/HttpException.php` | Generischer HTTP-Fehler. Hält Status-Code, Roh-Body und `getRetryAfter(): ?int` (bei 429 und 502/503/504). |
-| `AuthenticationException` | `src/Exception/AuthenticationException.php` | 401/403 — ungültiger oder fehlender API-Key, Berechtigung fehlt. |
-| `NotFoundException` | `src/Exception/NotFoundException.php` | 404 — Ressource existiert nicht. |
-| `ValidationException` | `src/Exception/ValidationException.php` | 400/422 — Payload abgelehnt, Pflichtfeld fehlt, Wert ungültig. |
-| `RateLimitException` | `src/Exception/RateLimitException.php` | 429 — Rate-Limit erschöpft und die Wartezeit liegt über `RetryPolicy::$maxDelayMs` (bzw. alle Versuche verbraucht). `getRetryAfter()` nennt die Sekunden bis zum nächsten Fenster. |
-| `TransportException` | `src/Exception/TransportException.php` | Keine Antwort von Billomat (DNS, Verbindungsabbruch, Timeout). Die Exception des PSR-18-Clients steckt in `getPrevious()`. |
-| `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, aber der Body passt nicht zur erwarteten Struktur (seit 3.2). |
+| `BillomatException` | `src/Exception/BillomatException.php` | Base class. Catching it catches everything the SDK throws. `isTransient()` and `mayHaveBeenProcessed()` classify the error (see [Classifying errors](concepts/errors-and-rate-limits.md#classifying-errors)). |
+| `HttpException` | `src/Exception/HttpException.php` | Generic HTTP error. Holds the status code, raw body and `getRetryAfter(): ?int` (for 429 and 502/503/504). |
+| `AuthenticationException` | `src/Exception/AuthenticationException.php` | 401/403 — invalid or missing API key, missing permission. |
+| `NotFoundException` | `src/Exception/NotFoundException.php` | 404 — the resource doesn't exist. |
+| `ValidationException` | `src/Exception/ValidationException.php` | 400/422 — payload rejected, required field missing, invalid value. |
+| `RateLimitException` | `src/Exception/RateLimitException.php` | 429 — rate limit exhausted and the announced wait exceeds `RetryPolicy::$maxDelayMs` (or all attempts are used up). `getRetryAfter()` returns the seconds until the next window. |
+| `TransportException` | `src/Exception/TransportException.php` | No response from Billomat (DNS, connection reset, timeout). The PSR-18 client's exception is available via `getPrevious()`. |
+| `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, but the body doesn't match the expected structure (since 3.2). |
+| `InvalidWebhookException` | `src/Exception/InvalidWebhookException.php` | An incoming webhook request couldn't be parsed (see [Webhooks](concepts/webhooks.md#receiving-webhooks-with-the-sdk)). |
 
-## Mapping HTTP-Status → Exception
+## Mapping HTTP status → exception
 
-`BillomatHttpClient::request()` (siehe `src/Http/BillomatHttpClient.php`) übersetzt jede Antwort mit Status ≥ 400 in eine SDK-Exception — erst nachdem die automatischen Wiederholungen (siehe [HTTP-Layer](advanced/http-layer.md#retries-und-rate-limits)) ausgeschöpft sind:
+`BillomatHttpClient::request()` (see `src/Http/BillomatHttpClient.php`) turns every response with status ≥ 400 into an SDK exception — only after the automatic retries (see [HTTP layer](advanced/http-layer.md#retries-and-rate-limits)) are exhausted:
 
-| HTTP-Status | Geworfene Exception |
+| HTTP status | Exception thrown |
 |---|---|
 | 401 Unauthorized | `AuthenticationException` |
 | 403 Forbidden | `AuthenticationException` |
@@ -39,75 +41,81 @@ Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatE
 | 400 Bad Request | `ValidationException` |
 | 422 Unprocessable Entity | `ValidationException` |
 | 429 Too Many Requests | `RateLimitException` |
-| sonstige 4xx, 5xx | `HttpException` |
-| keine Antwort (Netzwerkfehler) | `TransportException` |
+| other 4xx, 5xx | `HttpException` |
+| no response (network error) | `TransportException` |
 
-Jede `HttpException` (inkl. Subklassen) trägt:
+Every `HttpException` (including subclasses) carries:
 
-- `getMessage(): string` — z. B. `Billomat responded with HTTP 422 to POST /clients. <Fehlertext von Billomat>`. Den Fehlertext liest das SDK aus `{"errors": {"error": …}}` (JSON) bzw. `<error>…</error>` (XML); fehlt er, endet die Message nach dem Pfad,
-- `getStatusCode(): int` — den HTTP-Code von Billomat (identisch mit `getCode()`),
-- `getResponseBody(): ?string` — den unveränderten Antwort-Body. Hilfreich, weil Billomat Validierungsdetails als JSON-Struktur mitschickt.
+- `getMessage(): string` — e.g. `Billomat responded with HTTP 422 to POST /clients. <Billomat's error text>`. The SDK reads the error text from `{"errors": {"error": …}}` (JSON) or `<error>…</error>` (XML); without one, the message ends after the path.
+- `getStatusCode(): int` — Billomat's HTTP status (same as `getCode()`).
+- `getResponseBody(): ?string` — the unmodified response body. Useful because Billomat sends validation details in it.
 
-## Sonderfall: `get($id)` gibt `null` statt 404
+## Special case: `get($id)` returns `null` instead of throwing on 404
 
-Methoden wie `ClientsApi::get(int $id)`, `InvoicesApi::get(int $id)` etc. nutzen intern `AbstractApi::getJsonOrNull()`. Diese fängt eine 404-Antwort und gibt stattdessen `null` zurück. Du musst also bei „Datensatz existiert nicht“ **nicht** `try/catch` schreiben:
+Methods like `ClientsApi::get(int $id)` or `InvoicesApi::get(int $id)` use `AbstractApi::getJsonOrNull()` internally. It catches a 404 response and returns `null` instead. You don't need `try/catch` for "record doesn't exist":
 
 ```php
 $client = $billomat->clients->get(99999);
 
 if ($client === null) {
-    // Kunde existiert nicht — kein Fehler, einfach behandeln
-    echo "Kein Kunde mit ID 99999 vorhanden.\n";
+    // Client doesn't exist — not an error, just handle it
+    echo "No client with ID 99999.\n";
     return;
 }
 
 echo $client->name;
 ```
 
-Andere 4xx/5xx-Antworten (z. B. 401 bei abgelaufenem Key) werfen weiterhin wie gewohnt eine Exception.
+If a missing record is an error in your code, use `getOrFail()`. It returns the model or throws a `NotFoundException`:
+
+```php
+$client = $billomat->clients->getOrFail(99999); // NotFoundException on 404
+```
+
+Other 4xx/5xx responses (e.g. 401 for an expired key) still throw as usual.
 
 ## Patterns
 
-### Fehler differenziert behandeln
+### Handling errors by type
 
 ```php
+use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\RateLimitException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Api\ClientCreateOptions;
 
-$opts = new ClientCreateOptions(name: 'Beispiel GmbH');
-// (vergessen: email, falls Pflicht im Account)
+$opts = new ClientCreateOptions(name: 'Example GmbH');
+// (forgot: email, if the account requires it)
 
 try {
     $client = $billomat->clients->create($opts);
 } catch (AuthenticationException $e) {
-    // API-Key falsch, fehlend oder verfallen
-    error_log('Billomat-Auth fehlgeschlagen: ' . $e->getMessage());
+    // API key wrong, missing or expired
+    error_log('Billomat authentication failed: ' . $e->getMessage());
     throw $e;
 } catch (ValidationException $e) {
-    // Billomat hat den Payload abgelehnt — Details im Body
+    // Billomat rejected the payload — details are in the body
     error_log(sprintf(
-        'Validierung fehlgeschlagen (HTTP %d): %s',
+        'Validation failed (HTTP %d): %s',
         $e->getStatusCode(),
-        $e->getResponseBody() ?? '(kein Body)',
+        $e->getResponseBody() ?? '(no body)',
     ));
     throw $e;
 } catch (RateLimitException $e) {
-    // Limit erschöpft, SDK hat nicht länger gewartet
-    $wait = $e->getRetryAfter(); // Sekunden oder null
+    // Limit exhausted, the SDK didn't wait any longer
+    $wait = $e->getRetryAfter(); // seconds or null
     throw $e;
 } catch (HttpException $e) {
-    // Alles andere (500er, unbekannte 4xx)
-    error_log(sprintf('Billomat-HTTP-Fehler %d', $e->getStatusCode()));
+    // Everything else (5xx, unknown 4xx)
+    error_log(sprintf('Billomat HTTP error %d', $e->getStatusCode()));
     throw $e;
 }
 ```
 
-### Validierungsdetails extrahieren
+### Extracting validation details
 
-Billomat liefert bei 400/422 in der Regel JSON mit Details. Der Body ist roh als String verfügbar; du parst ihn nach Bedarf:
+On 400/422 Billomat usually returns JSON with details. The body is available as a raw string; parse it as needed:
 
 ```php
 use Justpilot\Billomat\Exception\ValidationException;
@@ -119,7 +127,7 @@ try {
 
     if ($body !== null) {
         $decoded = json_decode($body, true);
-        // Struktur hängt vom Endpoint ab; Billomat liefert oft
+        // The structure depends on the endpoint; Billomat often returns
         // { "errors": { "error": "Field X is missing" } }
         var_dump($decoded);
     }
@@ -128,9 +136,9 @@ try {
 }
 ```
 
-### Alles auf einmal abfangen
+### Catching everything at once
 
-Wenn du nur „irgendetwas mit Billomat ging schief“ behandeln willst:
+If you only want to handle "something went wrong with Billomat":
 
 ```php
 use Justpilot\Billomat\Exception\BillomatException;
@@ -138,16 +146,16 @@ use Justpilot\Billomat\Exception\BillomatException;
 try {
     $billomat->invoices->complete($id);
 } catch (BillomatException $e) {
-    // fängt jede SDK-Exception (HttpException + Subklassen, TransportException, …)
+    // catches every SDK exception (HttpException and subclasses, TransportException, …)
 }
 ```
 
-## Hinweise zu nicht-HTTP-Fehlern
+## Non-HTTP errors
 
-API-Methoden werfen eine `UnexpectedResponseException`, wenn Billomat zwar mit 2xx antwortet, der Antwort-Body aber nicht zur erwarteten Struktur passt — z. B. wenn das Wrapper-Element `client` oder `invoice` fehlt. Das ist defensiv und sollte in der Praxis nicht auftreten; falls doch, lohnt sich ein Issue mit dem Roh-Body.
+API methods throw an `UnexpectedResponseException` when Billomat responds with 2xx but the body doesn't match the expected structure — e.g. when the wrapper element `client` or `invoice` is missing. This is a defensive check and shouldn't happen in practice; if it does, please open an issue with the raw body.
 
-Bis einschließlich 3.1 war das eine einfache `\RuntimeException`. Da `UnexpectedResponseException` über `BillomatException` weiterhin von `\RuntimeException` erbt, greifen bestehende `catch (\RuntimeException)`-Blöcke unverändert.
+Up to and including 3.1 this was a plain `\RuntimeException`. Since `UnexpectedResponseException` still extends `\RuntimeException` through `BillomatException`, existing `catch (\RuntimeException)` blocks keep working.
 
-Auch ein 2xx-Body, der kein gültiges JSON oder kein JSON-Objekt ist, führt zu einer `UnexpectedResponseException` (die ursprüngliche `\JsonException` steckt in `getPrevious()`).
+A 2xx body that isn't valid JSON or isn't a JSON object also results in an `UnexpectedResponseException` (the original `\JsonException` is available via `getPrevious()`). PDF downloads (`pdf()` in raw mode) throw it too when the body is empty or doesn't start with `%PDF-`.
 
-Kommt gar keine Antwort zurück (DNS-Fehler, Verbindungsabbruch, Timeout), wirft das SDK eine `TransportException`. GET-Requests werden vorher gemäß `RetryPolicy` wiederholt, POST/PUT/DELETE nicht.
+If no response arrives at all (DNS error, connection reset, timeout), the SDK throws a `TransportException`. GET requests are retried first according to the `RetryPolicy`; POST/PUT/DELETE are not.

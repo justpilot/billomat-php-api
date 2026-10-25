@@ -1,41 +1,41 @@
 # Testing
 
-Das SDK wird vollständig mit **PHPUnit 13** getestet. Es gibt zwei Test-Arten:
+The SDK is tested with **PHPUnit 13**. There are two kinds of tests:
 
-- **Unit-Tests** unter `tests/` (außer `tests/Integration/`) — mocken die HTTP-Ebene mit Symfonys `MockHttpClient`, eingewickelt in `Psr18Client`. Benötigen keine Credentials, laufen in jedem Setup.
-- **Integrationstests** unter `tests/Integration/` — sprechen den realen Billomat-Sandbox an. Werden ohne Credentials automatisch übersprungen.
+- **Unit tests** under `tests/` (except `tests/Integration/`) — mock the HTTP layer with Symfony's `MockHttpClient`, wrapped in `Psr18Client`. They need no credentials and run in any setup.
+- **Integration tests** under `tests/Integration/` — talk to a real Billomat sandbox. They are skipped automatically without credentials.
 
-## Tests ausführen
+## Running tests
 
-Alle Workflows laufen über Composer-Skripte — `composer.json` ist die Single Source of Truth:
+All workflows run via Composer scripts — `composer.json` is the single source of truth:
 
 ```bash
 composer install
 
-composer test                                                # Unit-Tests (schnell, kein Netz)
-composer test:integration                                    # nur Integrationstests
-composer test:all                                            # alle Tests
-composer test:coverage                                       # mit HTML+Clover-Coverage in build/
+composer test                                                # unit tests (fast, no network)
+composer test:integration                                    # integration tests only
+composer test:all                                            # all tests
+composer test:coverage                                       # with HTML + Clover coverage in build/
 
-vendor/bin/phpunit tests/Api/ClientsApiTest.php              # einzelne Datei
-vendor/bin/phpunit --filter it_lists_clients_and_passes_filters  # einzelne Methode
+vendor/bin/phpunit tests/Api/ClientsApiTest.php              # single file
+vendor/bin/phpunit --filter it_lists_clients_and_passes_filters  # single method
 ```
 
-Die PHPUnit-Konfiguration steht in `phpunit.xml.dist`. Strikte Flags sind aktiv: `failOnWarning`, `failOnDeprecation`, `failOnNotice`, `failOnRisky`, `requireCoverageMetadata`, `beStrictAboutCoverageMetadata`. Jeder Test muss daher Coverage-Metadaten tragen (`#[CoversClass]` oder `#[CoversNothing]`).
+The PHPUnit configuration lives in `phpunit.xml.dist`. Strict flags are enabled: `failOnWarning`, `failOnDeprecation`, `failOnNotice`, `failOnRisky`, `requireCoverageMetadata`, `beStrictAboutCoverageMetadata`. Every test therefore needs coverage metadata (`#[CoversClass]` or `#[CoversNothing]`).
 
-## Bootstrap und Credentials
+## Bootstrap and credentials
 
-`tests/bootstrap.php` lädt zwei Dateien per `symfony/dotenv`:
+`tests/bootstrap.php` loads two files via `symfony/dotenv`:
 
-1. `.env.test` — eingechecktes Template mit leeren Werten und Inline-Kommentaren, die jede erwartete Umgebungsvariable dokumentieren (Pflicht vs. optional, Verwendung im HTTP-Header).
+1. `.env.test` — committed template with empty values and inline comments documenting every expected environment variable (required vs. optional, which HTTP header it ends up in).
 
-2. `.env.test.local` — überschreibt `.env.test` mit echten Sandbox-Credentials. Diese Datei ist in `.gitignore` aufgeführt und darf niemals committet werden.
+2. `.env.test.local` — overrides `.env.test` with real sandbox credentials. This file is listed in `.gitignore` and must never be committed.
 
-Der Bootstrap ruft `usePutenv()` auf — die Werte werden also via `getenv()` lesbar, nicht nur in `$_ENV`/`$_SERVER`. Das ist nötig, weil die Integrationstests die Credentials per `getenv('BILLOMAT_ID')` abholen.
+The bootstrap calls `usePutenv()`, so the values are readable via `getenv()`, not only via `$_ENV`/`$_SERVER`. The integration tests need this because they read the credentials with `getenv('BILLOMAT_ID')`.
 
-## Unit-Tests: Muster mit `MockHttpClient`
+## Unit tests: the `MockHttpClient` pattern
 
-Tests folgen dem **PHPUnit-12-Attribut-Stil**: `#[Test]` auf der Methode, `#[CoversClass]` auf der Klasse, statische Assertion-Aufrufe (`self::assertX()`):
+Tests use the **PHPUnit 13 attribute style**: `#[Test]` on the method, `#[CoversClass]` on the class, static assertion calls (`self::assertX()`):
 
 ```php
 use Justpilot\Billomat\Api\ClientsApi;
@@ -77,30 +77,30 @@ final class MyApiTest extends TestCase
 
         self::assertSame([], $result);
         self::assertSame('GET', $captured['method']);
-        // …weitere Assertions auf URL/Header/Payload
+        // …more assertions on URL/headers/payload
     }
 }
 ```
 
-Wichtige Punkte:
+Key points:
 
-- **`#[Test]` statt `test_`-Präfix.** Methodennamen lesen sich wie Sätze (`it_lists_clients_and_passes_filters`, `it_creates_a_new_client_via_post`).
-- **`#[CoversClass(Foo::class)]` ist Pflicht** — die strikte PHPUnit-Konfiguration erzwingt sie. Mehrere Klassen einfach mehrfach attributieren.
-- `BillomatHttpClient` wird **direkt** instanziiert und mit dem Mock verbunden. Der `MockHttpClient` ist ein Symfony-Client, kein PSR-18-Client — deshalb `new Psr18Client($mock)`. Nicht den `BillomatHttpClient` selbst mocken — er enthält Query-String-Builder, Fehler-Mapping und Retry-Logik, die unter Test bleiben sollen.
-- Der `$captured`-Trick aus dem Closure-Argument findet sich an vielen Stellen — er erlaubt Assertions über Methode, URL, Header und Payload. Weil der Request über PSR-18 läuft, enthält `$options['body']` den JSON-Body als String (mit `json_decode()` prüfen) und `$options['headers']` eine Liste von `"Name: value"`-Strings; einen `'json'`-Key gibt es nicht. Array-Filter stehen in der URL als `key%5B%5D=v`.
-- `MockResponse` kann auch HTTP-Fehler simulieren (`['http_code' => 404]`) — nützlich für Exception-Tests, siehe `tests/Api/AbstractApiExceptionTest.php` und `tests/Http/BillomatHttpClientErrorTest.php`.
-- Bei Retry-Tests (429, 502/503/504) dem `BillomatHttpClient` eine `sleep:`-Closure (`Closure(int $ms): void`) mitgeben, die die Wartezeit nur protokolliert — sonst wartet der Test wirklich. Alternativ `retry: RetryPolicy::none()` in der `BillomatConfig` setzen.
+- **`#[Test]` instead of a `test_` prefix.** Method names read like sentences (`it_lists_clients_and_passes_filters`, `it_creates_a_new_client_via_post`).
+- **`#[CoversClass(Foo::class)]` is required** — the strict PHPUnit configuration enforces it. Repeat the attribute for multiple classes.
+- `BillomatHttpClient` is instantiated **directly** and connected to the mock. `MockHttpClient` is a Symfony client, not a PSR-18 client — hence `new Psr18Client($mock)`. Don't mock `BillomatHttpClient` itself: it contains the query string builder, error mapping and retry logic, which should stay under test.
+- The `$captured` closure trick appears in many places — it allows assertions on method, URL, headers and payload. Because the request goes through PSR-18, `$options['body']` contains the JSON body as a string (check it with `json_decode()`) and `$options['headers']` is a list of `"Name: value"` strings; there is no `'json'` key. Array filters appear in the URL as `key%5B%5D=v`.
+- `MockResponse` can also simulate HTTP errors (`['http_code' => 404]`) — useful for exception tests, see `tests/Api/AbstractApiExceptionTest.php` and `tests/Http/BillomatHttpClientErrorTest.php`.
+- For retry tests (429, 502/503/504), pass `BillomatHttpClient` a `sleep:` closure (`Closure(int $ms): void`) that only records the delay — otherwise the test actually waits. Alternatively set `retry: RetryPolicy::none()` in the `BillomatConfig`.
 
-Eine reale, vollständig kommentierte Vorlage steht in `tests/Api/ClientsApiTest.php`.
+A real, fully commented template is `tests/Api/ClientsApiTest.php`.
 
-## Integrationstests
+## Integration tests
 
-Integrationstests erben von `Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase`. Diese Basisklasse stellt zwei Helfer bereit:
+Integration tests extend `Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase`. The base class provides two helpers:
 
-- `createBillomatClientOrSkip(): BillomatClient` — liest `BILLOMAT_ID` und `BILLOMAT_API_KEY` aus den Umgebungsvariablen, ruft `markTestSkipped()`, wenn etwas fehlt, und baut sonst einen voll konfigurierten `BillomatClient`.
-- `faker(): \Faker\Generator` — gemeinsamer Faker (de_DE) zur Erzeugung von Testdaten.
+- `createBillomatClientOrSkip(): BillomatClient` — reads `BILLOMAT_ID` and `BILLOMAT_API_KEY` from the environment, calls `markTestSkipped()` if either is missing, and otherwise builds a fully configured `BillomatClient`.
+- `faker(): \Faker\Generator` — shared Faker instance (de_DE) for generating test data.
 
-Integrationstests tragen `#[CoversNothing]` auf Klassenebene (sie testen den vollen Stack, nicht eine einzelne Klasse) und `#[Group('integration')]` auf der Methode:
+Integration tests carry `#[CoversNothing]` at class level (they test the full stack, not a single class) and `#[Group('integration')]` on the method:
 
 ```php
 namespace Justpilot\Billomat\Tests\Integration\MyResource;
@@ -118,17 +118,17 @@ final class MyIntegrationTest extends AbstractBillomatIntegrationTestCase
     public function can_do_thing_against_sandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();
-        // … reale API-Calls
+        // … real API calls
     }
 }
 ```
 
-### Schutzregeln
+### Ground rules
 
-- **`#[Group('integration')]` setzen.** Damit lässt sich die Suite per `vendor/bin/phpunit --exclude-group integration` rein offline laufen lassen.
-- **Daten nach dem Test wieder löschen.** Sandbox-Accounts müllen sonst schnell zu. Wer einen Datensatz anlegt, sollte ihn am Ende wieder entfernen (`delete()` auf der jeweiligen Ressource).
-- **Keine Produktiv-Keys.** Verwende ausschließlich einen separaten Sandbox-Account; siehe [SECURITY.md](../SECURITY.md).
-- **`markTestSkipped()`-Branch korrekt halten.** Wenn ein Test ohne Credentials nicht aussagekräftig ist, muss er gracefully geskippt werden, sonst bricht die Suite anderswo.
+- **Set `#[Group('integration')]`.** This lets you run the suite fully offline with `vendor/bin/phpunit --exclude-group integration`.
+- **Delete test data afterwards.** Sandbox accounts fill up quickly otherwise. If a test creates a record, it should remove it at the end (`delete()` on the resource).
+- **No production keys.** Use a separate sandbox account only; see [SECURITY.md](../SECURITY.md).
+- **Keep the `markTestSkipped()` branch working.** A test that is meaningless without credentials must skip gracefully, otherwise the suite breaks elsewhere.
 
 ## Coverage
 
@@ -136,31 +136,32 @@ final class MyIntegrationTest extends AbstractBillomatIntegrationTestCase
 composer test:coverage
 ```
 
-Erzeugt einen HTML-Report unter `build/coverage/` und einen Clover-Report (`build/coverage.xml`) für CI-Integrationen wie Codecov oder Coveralls. Setzt Xdebug oder pcov voraus — das Skript setzt `XDEBUG_MODE=coverage` automatisch.
+Creates an HTML report under `build/coverage/` and a Clover report (`build/coverage.xml`) for CI integrations such as Codecov or Coveralls. Requires Xdebug or pcov — the script sets `XDEBUG_MODE=coverage` automatically.
 
-## Statische Analyse und Code-Style
+## Static analysis and code style
 
-Neben Tests laufen vier weitere Qualitätswerkzeuge:
+Besides the tests, these quality tools are available:
 
 ```bash
-composer lint        # PHP-CS-Fixer (Dry-Run, zeigt Diff)
-composer lint:fix    # PHP-CS-Fixer automatisch anwenden
-composer analyse     # PHPStan Level max
-composer refactor:dry # Rector zeigt Vorschläge
-composer refactor    # Rector wendet Vorschläge an
-composer mutate      # Infection Mutation-Testing (~3 Minuten)
+composer lint            # PHP-CS-Fixer (dry run, shows the diff)
+composer lint:fix        # apply PHP-CS-Fixer
+composer analyse         # PHPStan level max
+composer refactor:dry    # show Rector suggestions
+composer refactor        # apply Rector suggestions
+composer mutate          # Infection mutation testing (~3 minutes)
+composer generate:check  # fail if generated files under src/ are out of date
 
-composer ci          # Lint + Analyse + Refactor-Dry + alle Tests
+composer ci              # lint + analyse + refactor:dry + generate:check + all tests
 ```
 
-PHPStan läuft ohne Baseline: Jedes Finding führt zu CI-Fail und wird im Code behoben.
+PHPStan runs without a baseline: every finding fails CI and is fixed in the code.
 
-## Continuous Integration
+## Continuous integration
 
-`.github/workflows/ci.yml` führt bei jedem Push/PR drei Jobs aus:
+`.github/workflows/ci.yml` runs three jobs on every push/PR:
 
-1. **Tests** auf PHP 8.5 (Pflicht) und 8.6 (experimentell, `continue-on-error`).
+1. **Tests** on PHP 8.5 (required) and 8.6 (experimental, `continue-on-error`).
 2. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer audit`.
-3. **Mutation Testing** — im PR nur die geänderten Zeilen (`--git-diff-lines`, 90 % MSI), auf `main`/`4.x` der volle Lauf mit den Schwellen aus `infection.json5`.
+3. **Mutation testing** — on PRs only the changed lines (`--git-diff-lines`, 90 % MSI); on `main`/`4.x` the full run with the thresholds from `infection.json5`.
 
-Integrationstests laufen in CI **nicht** automatisch, da keine Sandbox-Credentials hinterlegt sind. Bei Bedarf können `BILLOMAT_ID`/`BILLOMAT_API_KEY` als GitHub-Secrets eingerichtet und ein separater Workflow getriggert werden.
+Integration tests do **not** run automatically in CI, because no sandbox credentials are configured. If needed, `BILLOMAT_ID`/`BILLOMAT_API_KEY` can be set up as GitHub secrets and a separate workflow triggered.

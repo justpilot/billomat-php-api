@@ -1,23 +1,23 @@
-<!-- Quelle: https://www.billomat.com/api/grundlagen/fehler/ + https://www.billomat.com/api/grundlagen/zugriffsbegrenzung/ -->
+<!-- Source: https://www.billomat.com/api/grundlagen/fehler/ + https://www.billomat.com/api/grundlagen/zugriffsbegrenzung/ -->
 
-# Fehler und Rate-Limits
+# Errors and rate limits
 
-Billomat antwortet bei Problemen mit einem `4xx`/`5xx`-Statuscode und einer kurzen Klartext-Meldung im Body. Dieses SDK übersetzt das in eine kleine Hierarchie typisierter Exceptions; alle erben von `BillomatException`.
+When something goes wrong, Billomat responds with a `4xx`/`5xx` status code and a short plain-text message in the body. This SDK translates that into a small hierarchy of typed exceptions; all of them extend `BillomatException`.
 
-## Status-Code-Mapping
+## Status code mapping
 
-`BillomatHttpClient::request()` (siehe `src/Http/BillomatHttpClient.php`) übersetzt jede Antwort mit Status ≥ 400 — nach eventuellen automatischen Wiederholungen — in:
+`BillomatHttpClient::request()` (see `src/Http/BillomatHttpClient.php`) translates every response with status ≥ 400 — after any automatic retries — into:
 
-| Status | SDK-Exception |
+| Status | SDK exception |
 |---|---|
 | 401, 403 | `AuthenticationException` |
 | 404 | `NotFoundException` |
 | 400, 422 | `ValidationException` |
-| 429 | `RateLimitException` (erbt von `HttpException`) |
-| Sonstige `4xx`/`5xx` | `HttpException` |
-| keine Antwort (DNS, Timeout, Verbindungsabbruch) | `TransportException` (PSR-18-Exception in `getPrevious()`) |
+| 429 | `RateLimitException` (extends `HttpException`) |
+| other `4xx`/`5xx` | `HttpException` |
+| no response (DNS, timeout, connection reset) | `TransportException` (PSR-18 exception in `getPrevious()`) |
 
-Die Billomat-Fehlermeldung landet in der Exception-Message, z. B. `Billomat responded with HTTP 404 to GET /invoices/1. Resource not found`. Der rohe Response-Body bleibt zusätzlich erhalten (`getResponseBody()`):
+Billomat's error message ends up in the exception message, e.g. `Billomat responded with HTTP 404 to GET /invoices/1. Resource not found`. The raw response body is kept as well (`getResponseBody()`):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -26,21 +26,22 @@ Die Billomat-Fehlermeldung landet in der Exception-Message, z. B. `Billomat resp
 </errors>
 ```
 
-## Fehler klassifizieren
+## Classifying errors
 
-Jede `BillomatException` beantwortet die zwei Fragen, die ein Aufrufer meist stellt, ohne dass er Statuscodes oder `getPrevious()` auswerten muss:
+Every `BillomatException` answers the two questions a caller usually asks, without evaluating status codes or `getPrevious()`:
 
-| Fehler | `isTransient()` | `mayHaveBeenProcessed()` | `getRetryAfter()` |
+| Error | `isTransient()` | `mayHaveBeenProcessed()` | `getRetryAfter()` |
 |---|---|---|---|
-| 400, 401, 403, 404, 422, sonstige 4xx | `false` | `false` | `null` |
-| 429 | `true` | `false` | `Retry-After` bzw. `X-Rate-Limit-Reset` |
-| 502, 503, 504 | `true` | `true` | `Retry-After`, falls gesetzt |
-| 500 und sonstige 5xx | `false` | `true` | `null` |
-| `TransportException` (Netzwerkfehler, Timeout) | `true` | `true` | – |
-| `UnexpectedResponseException` (2xx mit unerwartetem Body) | `false` | `true` | – |
+| 400, 401, 403, 404, 422, other 4xx | `false` | `false` | `null` |
+| 429 | `true` | `false` | `Retry-After` or `X-Rate-Limit-Reset` |
+| 502, 503, 504 | `true` | `true` | `Retry-After`, if set |
+| 500 and other 5xx | `false` | `true` | `null` |
+| `TransportException` (network error, timeout) | `true` | `true` | – |
+| `TransportException` wrapping a PSR-18 `RequestExceptionInterface` (request rejected by the client, never sent) | `false` | `false` | – |
+| `UnexpectedResponseException` (2xx with an unexpected body) | `false` | `true` | – |
 
-- **`isTransient()`**: Ein späterer Versuch kann Erfolg haben. Die automatischen Retries des SDK sind dann schon ausgeschöpft; sinnvoll ist ein späterer Neuversuch, z. B. per Queue.
-- **`mayHaveBeenProcessed()`**: Billomat kann den Request trotz des Fehlers verarbeitet haben. Vor einem erneuten POST per `get()`/`list()` prüfen, ob die Rechnung schon existiert. Bei `false` (4xx) hat Billomat den Request sicher abgelehnt.
+- **`isTransient()`**: a later attempt may succeed. The SDK's automatic retries are already exhausted at this point; a later retry, e.g. via a queue, makes sense.
+- **`mayHaveBeenProcessed()`**: Billomat may have processed the request despite the error. Before sending the POST again, check via `get()`/`list()` whether the invoice already exists. With `false` (4xx), Billomat definitely rejected the request.
 
 ```php
 use Justpilot\Billomat\Exception\BillomatException;
@@ -50,7 +51,7 @@ try {
     $invoice = $billomat->invoices->create($options);
 } catch (BillomatException $e) {
     if ($e->mayHaveBeenProcessed()) {
-        // Erst nachsehen, ob die Rechnung schon angelegt wurde.
+        // Check first whether the invoice was already created.
     }
     if ($e->isTransient()) {
         $job->releaseIn($e instanceof HttpException ? $e->getRetryAfter() ?? 60 : 60);
@@ -58,39 +59,41 @@ try {
 }
 ```
 
-## `get($id)` mit 404
+## `get($id)` and 404
 
-`AbstractApi::getJsonOrNull()` schluckt `NotFoundException` und liefert `null` zurück. Praktisch:
+`AbstractApi::getJsonOrNull()` swallows `NotFoundException` and returns `null`. In practice:
 
 ```php
-$invoice = $billomat->invoices->get(999_999); // null statt Exception
-if ($invoice === null) { /* nicht vorhanden */ }
+$invoice = $billomat->invoices->get(999_999); // null instead of an exception
+if ($invoice === null) { /* doesn't exist */ }
+
+$invoice = $billomat->invoices->getOrFail(999_999); // NotFoundException instead of null
 ```
 
-Alle anderen 404 (z.B. unbekannter Endpunkt) fliegen weiter.
+A 404 from any other method (`list()`, `update()`, `complete()`, …) still throws a `NotFoundException`.
 
-## Rate-Limits
+## Rate limits
 
-Die API zählt Aufrufe in **15-Minuten-Fenstern**, festgelegt auf `XX:00–XX:14`, `XX:15–XX:29`, `XX:30–XX:44`, `XX:45–XX:59` (Server-Zeit, nicht Wall-Clock vom Client). Nicht verbrauchte Aufrufe verfallen am Fensterwechsel — Kontingent ist nicht ansparbar.
+The API counts calls in **15-minute windows**, fixed at `XX:00–XX:14`, `XX:15–XX:29`, `XX:30–XX:44`, `XX:45–XX:59` (server time, not the client's wall clock). Unused calls expire when the window changes — the quota can't be saved up.
 
-### Header bei jeder Antwort
+### Headers on every response
 
-| Header | Bedeutung |
+| Header | Meaning |
 |---|---|
-| `X-Rate-Limit-Remaining` | verbleibende Aufrufe im aktuellen Fenster |
-| `X-Rate-Limit-Reset` | Epoch-Sekunden des nächsten Fensterstarts |
+| `X-Rate-Limit-Remaining` | remaining calls in the current window |
+| `X-Rate-Limit-Reset` | Unix timestamp (seconds) of the next window start |
 
-Das SDK wertet `X-Rate-Limit-Reset` bei einer 429-Antwort aus (siehe unten). `X-Rate-Limit-Remaining` liest es nicht — wer vorab drosseln will, kann die Header mit einem Decorator um den PSR-18-Client herum mitlesen.
+The SDK evaluates `X-Rate-Limit-Reset` on a 429 response (see below). It doesn't read `X-Rate-Limit-Remaining` — if you want to throttle ahead of time, read the headers with a decorator around the PSR-18 client or a listener for the `ResponseReceived` event.
 
-### 429 — Limit überschritten
+### 429 — limit exceeded
 
-Wird das Kontingent im Fenster aufgebraucht, antwortet Billomat mit `429 Too Many Requests`. Die Fehlermeldung nennt eine Sekunden-Zahl bis zum Reset:
+When the window's quota is used up, Billomat responds with `429 Too Many Requests`. The error message states the number of seconds until the reset:
 
 ```xml
 <error>Maximum number of requests reached. Try again in 246 seconds.</error>
 ```
 
-Das SDK wartet dann selbst: Es nimmt die Wartezeit aus `Retry-After` (falls gesetzt) bzw. `X-Rate-Limit-Reset` und wiederholt den Request — bei 429 jede Methode, auch POST/PUT/DELETE, weil Billomat den Request nicht verarbeitet hat. Das passiert aber nur, wenn die Wartezeit höchstens `RetryPolicy::$maxDelayMs` (Default 10 s) beträgt und noch Versuche übrig sind. Sonst wirft das SDK sofort eine `RateLimitException`; kommt sie beim Aufrufer an, sind die Retries ausgeschöpft. `getRetryAfter()` nennt die Sekunden bis zum nächsten Fenster (oder `null`, wenn Billomat keine Angabe gemacht hat):
+The SDK then waits by itself: it takes the wait from `Retry-After` (if set) or `X-Rate-Limit-Reset` and repeats the request — for 429 with every method, including POST/PUT/DELETE, because Billomat didn't process the request. This only happens if the wait is at most `RetryPolicy::$maxDelayMs` (default 10 s) and attempts are left. Otherwise the SDK throws a `RateLimitException` immediately; when it reaches the caller, the retries are exhausted. `getRetryAfter()` returns the seconds until the next window (or `null` if Billomat didn't say):
 
 ```php
 use Justpilot\Billomat\Exception\RateLimitException;
@@ -98,32 +101,32 @@ use Justpilot\Billomat\Exception\RateLimitException;
 try {
     $billomat->invoices->list();
 } catch (RateLimitException $e) {
-    $job->releaseIn($e->getRetryAfter() ?? 60); // z. B. Queue-Job später erneut einplanen
+    $job->releaseIn($e->getRetryAfter() ?? 60); // e.g. reschedule a queue job
 }
 ```
 
-### Registrierte vs. unregistrierte App
+### Registered vs. unregistered app
 
-| Modus | Kontingent | App-Header nötig |
+| Mode | Quota | App headers required |
 |---|---|---|
-| **unregistriert** | tariflich zugesicherte Anzahl Aufrufe pro 15 Min — **geteilt** über alle nicht registrierten Dienste auf dem Account | nein |
-| **registriert** | volles Tarif-Kontingent **pro App pro Account** | `X-AppId` + `X-AppSecret` |
+| **unregistered** | the number of calls per 15 min guaranteed by the plan — **shared** across all unregistered services on the account | no |
+| **registered** | full plan quota **per app per account** | `X-AppId` + `X-AppSecret` |
 
-App-Registrierung erfolgt im Billomat-UI unter *Einstellungen → Administration → Apps*; das SDK reicht die Werte über `BillomatConfig` durch (siehe [Authentifizierung](authentication.md)).
+Apps are registered in the Billomat UI under *Settings → Administration → Apps*; the SDK passes the values through `BillomatConfig` (see [Authentication](authentication.md)).
 
-### Webhooks sparen Aufrufe
+### Webhooks save calls
 
-Webhooks zählen **nicht** auf das Rate-Limit. Statt regelmäßig Listen abzufragen lohnt sich ein Webhook-Empfänger pro relevantem Event (siehe [Webhooks](webhooks.md)).
+Webhooks do **not** count toward the rate limit. Instead of polling lists regularly, set up a webhook receiver for each relevant event (see [Webhooks](webhooks.md)).
 
-## Automatische Wiederholungen
+## Automatic retries
 
-`BillomatConfig::$retry` (`RetryPolicy`, Default: `maxRetries: 2`, `baseDelayMs: 500`, `maxDelayMs: 10_000`) legt fest, was das SDK wiederholt:
+`BillomatConfig::$retry` (`RetryPolicy`, default: `maxRetries: 2`, `baseDelayMs: 500`, `maxDelayMs: 10_000`) defines what the SDK retries:
 
-| Fall | Methoden | Wartezeit |
+| Case | Methods | Wait |
 |---|---|---|
-| 429 | alle | `Retry-After` bzw. `X-Rate-Limit-Reset`; länger als `maxDelayMs` → sofort `RateLimitException` |
-| 502, 503, 504 | nur GET | exponentielles Backoff mit Jitter |
-| Netzwerkfehler | nur GET | exponentielles Backoff mit Jitter |
-| 500, sonstige Fehler | — | kein Retry |
+| 429 | all | `Retry-After` or `X-Rate-Limit-Reset`; longer than `maxDelayMs` → `RateLimitException` immediately |
+| 502, 503, 504 | GET only | exponential backoff with jitter |
+| network error | GET only | exponential backoff with jitter |
+| 500, other errors | — | no retry |
 
-POST/PUT/DELETE werden außer bei 429 nie wiederholt, weil sie bei Billomat nicht idempotent sind. Wer eine eigene Strategie braucht (z. B. längeres Warten auf das nächste Fenster in einem Hintergrund-Job), schaltet die eingebauten Wiederholungen mit `RetryPolicy::none()` ab oder erhöht `maxDelayMs` — siehe [Konfiguration](../configuration.md#retries-retrypolicy).
+POST/PUT/DELETE are never retried except on 429, because Billomat's write endpoints aren't idempotent. If you need your own strategy (e.g. waiting longer for the next window in a background job), disable the built-in retries with `RetryPolicy::none()` or raise `maxDelayMs` — see [Configuration](../configuration.md#retries-retrypolicy).

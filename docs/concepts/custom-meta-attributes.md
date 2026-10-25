@@ -1,26 +1,26 @@
-<!-- Quelle: https://www.billomat.com/api/grundlagen/eigene-meta-daten/ + https://www.billomat.com/api/benutzerdefinierte-attribute-filtern/ -->
+<!-- Source: https://www.billomat.com/api/grundlagen/eigene-meta-daten/ + https://www.billomat.com/api/benutzerdefinierte-attribute-filtern/ -->
 
-# Eigene Meta-Daten
+# Custom metadata
 
-Billomat bietet **zwei** Wege, eigene Daten an Ressourcen zu hängen — beide werden hier oft verwechselt, weil sie ähnlich klingen, aber unterschiedlich funktionieren:
+Billomat offers **two** ways to attach your own data to resources. They are easy to confuse because they sound similar, but they work differently:
 
-| Mechanismus | Was | Wofür |
+| Mechanism | What | Use for |
 |---|---|---|
-| `customfield` | **ein** freier Text-Slot pro Datensatz | Schnelle 1:1-Verbindung zwischen Billomat-Datensatz und einem Fremd-System (z.B. eigene Primärschlüssel). |
-| Property / PropertyValue | **definierte**, mehrwertige Custom-Attribute mit Name, Typ und ggf. Vorgabewerten | Fachliche Erweiterungen wie „Lieblingsfarbe", „CRM-ID", „Vertragsnummer". |
+| `customfield` | **one** free text slot per record | A quick 1:1 link between a Billomat record and an external system (e.g. your own primary keys). |
+| Property / PropertyValue | **defined** custom attributes with name, type and optional default values | Domain extensions such as "favorite color", "CRM ID", "contract number". |
 
-## `customfield` — der freie Text-Slot
+## `customfield` — the free text slot
 
-Verfügbar pro Datensatz auf allen wichtigen Ressourcen (Kunden, Rechnungen, Eingangsrechnungen, Lieferanten, …).
+Available per record on all major resources (clients, invoices, incoming invoices, suppliers, …).
 
-### Lesen / Schreiben
+### Reading / writing
 
 ```
 GET  /api/clients/{id}/customfield
 PUT  /api/clients/{id}/customfield
 ```
 
-Body beim Schreiben:
+Request body for writing:
 
 ```xml
 <client>
@@ -28,67 +28,76 @@ Body beim Schreiben:
 </client>
 ```
 
-### Filtern
+### Filtering
 
-Listen-Endpunkte akzeptieren den Such-Parameter `customfield`:
+List endpoints accept the search parameter `customfield`:
 
 ```
-GET /api/clients?customfield={suche}
+GET /api/clients?customfield={search}
 ```
 
-### Im SDK
+### In the SDK
 
-Beim **Lesen** steht der Wert auf allen Read-Modellen, für die Billomat ihn mitliefert, als `?string $customfield` bereit (leerer String → `null`):
+When **reading**, the value is available as `?string $customfield` on every read model for which Billomat returns it (empty string → `null`):
 
 ```php
 $client = $billomat->clients->get(42);
 $crmId = $client?->customfield;
 ```
 
-Zum **Filtern** den Parameter in `list(['customfield' => '…'])` mitgeben. Eine dedizierte Methode zum **Schreiben** (`PUT /{resource}/{id}/customfield`) gibt es noch nicht; dafür den generischen `BillomatHttpClient` ansprechen.
+To **filter**, pass the parameter via `extra` on the typed filter or in the array: `list(new ClientFilter(extra: ['customfield' => '…']))` or `list(['customfield' => '…'])`. There is no dedicated method for **writing** (`PUT /{resource}/{id}/customfield`) yet; for that, create your own `BillomatHttpClient` with the same `BillomatConfig` and call `request('PUT', …)`.
 
-## Properties + PropertyValues — definierte Custom-Attribute
+## Properties and property values — defined custom attributes
 
-Pro Ressource gibt es zwei API-Schichten:
+Each resource has two API layers:
 
-| API | Zweck |
+| API | Purpose |
 |---|---|
-| `*PropertiesApi` | Die **Definitionen** (Name, Typ, Pflichtflag). Werden im UI unter *Einstellungen → …-Attribute* gepflegt. |
-| `*PropertyValuesApi` | Die **Werte** pro Datensatz — referenziert die Property per ID. |
+| `PropertiesApi` (`->properties`) | The **definitions** (name, type, required flag). Maintained in the UI under *Settings → … attributes*. |
+| `PropertyValuesApi` (`->propertyValues`) | The **values** per record — references the property by ID. |
 
-SDK-Klassen:
+In the SDK, both hang off their parent resource:
 
 - `$billomat->clients->properties` + `$billomat->clients->propertyValues`
 - `$billomat->articles->properties` + `$billomat->articles->propertyValues`
 - `$billomat->suppliers->properties` + `$billomat->suppliers->propertyValues`
 - `$billomat->incomings->properties` + `$billomat->incomings->propertyValues`
+- `$billomat->users->properties` (definitions only)
 
-Siehe [`docs/resources/properties.md`](../resources/properties.md) für die geteilte Doku der Properties-Familie.
+See [`docs/resources/properties.md`](../resources/properties.md) for the shared documentation of the properties family.
 
-### Werte abfragen
+### Querying values
 
-`PropertyValuesApi::list([…])` & Co. liefern eine flache Liste aller Wert-Zuordnungen — gefiltert nach `article_id` oder `article_property_id`.
+`propertyValues->list(?int $parentId = null, array $filters = [])` returns a flat list of value assignments, optionally limited to one record; `listPage()` and `iterateAll()` take the same arguments. Further filters are `{parent}_property_id` and `value`:
 
-### Werte filtern in der Eltern-Liste
+```php
+$values = $billomat->articles->propertyValues->list(42);                                  // all values of article 42
+$values = $billomat->articles->propertyValues->list(filters: ['article_property_id' => 7]); // all values of property 7
+```
 
-Listen-Endpunkte der Eltern-Ressource akzeptieren einen dynamisch benannten Parameter `property<id>`:
+### Filtering the parent list by value
+
+List endpoints of the parent resource accept a dynamically named parameter `property<id>`:
 
 ```
 GET /api/clients?property55=grau
 ```
 
-bedeutet: alle Kunden, deren Property mit der ID `55` (z.B. „Lieblingsfarbe") **exakt** den Wert `grau` hat. Der Filter ist case-sensitive und macht **keinen Teilstring-Match** — „graublau" wird nicht zurückgegeben.
+means: all clients whose property with ID `55` (e.g. "favorite color") has **exactly** the value `grau`. The filter is case-sensitive and does **no substring match** — "graublau" is not returned.
 
-Im SDK geht das über den generischen Filter:
+In the SDK, pass it via `extra` or as an array:
 
 ```php
+use Justpilot\Billomat\Api\ClientFilter;
+
+$billomat->clients->list(new ClientFilter(extra: ['property55' => 'grau']));
 $billomat->clients->list(['property55' => 'grau']);
 ```
 
-Unterstützt für die fünf Eltern-Ressourcen: **Users, Articles, Clients, Suppliers, Incomings**.
+Supported for the five parent resources: **users, articles, clients, suppliers, incoming invoices**.
 
-## Was wählen?
+## Which one to choose?
 
-- **`customfield`** für ein einzelnes, unstrukturiertes Stück Fremd-Information pro Datensatz. Kein UI-Setup nötig.
-- **Property + PropertyValue** für strukturierte, mehrfache, getypte Felder, die auch im Billomat-UI sichtbar sein sollen.
-- Beide Mechanismen sind unabhängig — derselbe Datensatz kann beides nutzen.
+- **`customfield`** for a single, unstructured piece of external information per record. No UI setup required.
+- **Property + property value** for structured, multiple, typed fields that should also be visible in the Billomat UI.
+- The two mechanisms are independent — the same record can use both.

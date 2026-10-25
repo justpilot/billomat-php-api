@@ -1,25 +1,26 @@
-<!-- Quelle: https://www.billomat.com/api/grundlagen/api-sicherheit/ -->
+<!-- Source: https://www.billomat.com/api/grundlagen/api-sicherheit/ -->
 
-# API-Sicherheit
+# API security
 
-Die Billomat-API ist über `https://{billomatId}.billomat.net/api/` erreichbar — **HTTPS** ist tarifunabhängig verfügbar und sollte für Produktionssysteme zwingend verwendet werden. Ein Klartext-Zugriff über HTTP würde Aufruf-Daten und API-Schlüssel im Netz lesbar machen.
+The Billomat API is available at `https://{billomatId}.billomat.net/api/`. **HTTPS** is available on every plan and should always be used for production systems. Plain HTTP would expose request data and the API key on the network.
 
-## Was dieses SDK garantiert
+## What this SDK guarantees
 
-- **Base-URI ist HTTPS** — `BillomatConfig::getBaseUri()` baut die URL fest als `https://`. Ein nachträglicher Downgrade auf HTTP ist nicht vorgesehen.
-- **API-Schlüssel als Header** — `X-BillomatApiKey` (und optional `X-AppId`/`X-AppSecret`) werden im Request-Header gesendet, nie in der URL. Damit landen Schlüssel **nicht** in Server-Access-Logs, Browser-History oder Referer-Headern (siehe [Authentifizierung](authentication.md)).
-- **PSR-18-Client** als Transport — TLS-Prüfung übernimmt der eingesetzte Client (Symfony `HttpClient`, Guzzle, …). Beide folgen per Default dem System-Trust-Store und prüfen Zertifikate. TLS-Verifikation lässt sich dort zwar abschalten, sollte aber nicht — wer einen eigenen Client übergibt, ist für dessen TLS-Konfiguration verantwortlich.
+- **HTTPS base URI** — the default `BillomatConfig::$baseUri` is `https://%s.billomat.net/api/`. You can only change it by passing your own `baseUri` explicitly (meant for local mock servers in tests); don't point it at plain HTTP in production.
+- **API key as a header** — `X-BillomatApiKey` (and optionally `X-AppId`/`X-AppSecret`) are sent as request headers, never in the URL. Keys therefore do **not** end up in server access logs, browser history or `Referer` headers (see [Authentication](authentication.md)).
+- **No secrets in SDK logs** — the PSR-3 log context contains no headers, query strings or bodies (see [Configuration](../configuration.md#example-logging-requests-and-responses)). PSR-14 events do carry the full request including the API key header; mask it before logging.
+- **PSR-18 client as transport** — TLS verification is handled by the client in use (Symfony `HttpClient`, Guzzle, …). Both use the system trust store and verify certificates by default. TLS verification can be disabled there, but shouldn't be — if you pass your own client, you are responsible for its TLS configuration.
 
-## Empfehlungen für den Aufrufer
+## Recommendations for callers
 
-- **API-Schlüssel** wie Passwörter behandeln: nicht im Code, nicht in Git, nicht in Logs. Lokal in `.env.test.local` (gitignored), produktiv in einem Secret-Store.
-- Pro Integration einen **eigenen Billomat-Benutzer** anlegen und nur die Rollen vergeben, die wirklich gebraucht werden. Der API-Schlüssel erbt die Rollen seines Benutzers.
-- Bei kompromittiertem Schlüssel: im Billomat-UI **revoken** (alten Schlüssel löschen und neuen generieren). Andere Schlüssel bleiben unberührt.
-- Webhook-Endpunkte zusätzlich mit **HTTP-Basic-Auth** schützen — Billomat unterstützt das pro Webhook-Konfiguration (siehe [Webhooks](webhooks.md)).
-- Bei Apps die App-Header `X-AppId`/`X-AppSecret` mitsenden — auch das ist eine Vertraulichkeits-Schicht (siehe [Errors & Rate-Limits](errors-and-rate-limits.md)).
+- Treat **API keys** like passwords: not in code, not in Git, not in logs. Locally in `.env.test.local` (gitignored), in production in a secret store.
+- Create a **dedicated Billomat user** per integration and grant only the roles it really needs. The API key inherits its user's roles.
+- If a key is compromised, **revoke** it in the Billomat UI (delete the old key and generate a new one). Other keys are not affected.
+- Additionally protect webhook endpoints with **HTTP Basic Auth** — Billomat supports this per webhook configuration (see [Webhooks](webhooks.md)).
+- For apps, send the app headers `X-AppId`/`X-AppSecret` — they identify your app and give it its own rate limit quota (see [Errors and rate limits](errors-and-rate-limits.md)).
 
-## Was die API **nicht** absichert
+## What the API does **not** protect
 
-- **Keine IP-Allowlist** — der Schlüssel allein authentisiert, egal von wo. Wer das einschränken will, terminiert TLS vorgelagert und filtert dort.
-- **Keine Scope-/Token-Trennung pro Use-Case** — der API-Schlüssel hat immer alle Rechte seines Benutzers. Trennung durch separate Benutzer mit unterschiedlichen Rollen.
-- **Keine Rotation** durch die API — Schlüssel werden nur manuell im UI ausgetauscht.
+- **No IP allowlist** — the key alone authenticates, no matter where the request comes from. If you want to restrict that, terminate TLS upstream and filter there.
+- **No scopes or per-use-case tokens** — the API key always has all permissions of its user. Separate access by using separate users with different roles.
+- **No rotation** via the API — keys can only be replaced manually in the UI.

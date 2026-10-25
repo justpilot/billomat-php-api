@@ -12,12 +12,14 @@ use Justpilot\Billomat\Model\Enum\OfferStatus;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferItem;
+use Justpilot\Billomat\Model\TaxSummary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Offer::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(OfferStatus::class)]

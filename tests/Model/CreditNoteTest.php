@@ -12,12 +12,14 @@ use Justpilot\Billomat\Model\CreditNoteItem;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Model\TaxSummary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(CreditNote::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(CreditNoteItem::class)]

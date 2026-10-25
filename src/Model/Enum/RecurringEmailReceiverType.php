@@ -26,6 +26,6 @@ enum RecurringEmailReceiverType: string
             return null;
         }
 
-        return self::tryFrom($value) ?? self::tryFrom(ucfirst(strtolower($value)));
+        return self::tryFrom(ucfirst(strtolower($value)));
     }
 }

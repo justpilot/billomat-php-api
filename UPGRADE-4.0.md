@@ -170,6 +170,31 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry:
 ### Exceptions
 
 - A 429 throws `RateLimitException` (a subclass of `HttpException`); `getRetryAfter()` returns the seconds until the next window.
+  A `RateLimitException` that reaches your code means the SDK's retries are exhausted or the wait exceeds `RetryPolicy::$maxDelayMs`.
+- `getRetryAfter()` lives on `HttpException` and is also set for 502/503/504 when Billomat sends `Retry-After`.
+  If you read `Retry-After` from the Symfony exception in `getPrevious()`, use `getRetryAfter()` instead – `getPrevious()` no longer carries the response.
+- Use `isTransient()` and `mayHaveBeenProcessed()` (on every `BillomatException`) instead of checking status codes or exception classes:
+
+  ```php
+  // Before (3.x)
+  } catch (HttpException $e) {
+      $previous = $e->getPrevious();
+      $retryAfter = $previous instanceof HttpExceptionInterface
+          ? $previous->getResponse()->getHeaders(false)['retry-after'][0] ?? null
+          : null;
+      $unavailable = \in_array($e->getStatusCode(), [429, 502, 503, 504], true);
+  }
+
+  // After (4.0)
+  } catch (BillomatException $e) {
+      if ($e->isTransient()) {
+          $job->releaseIn($e instanceof HttpException ? $e->getRetryAfter() ?? 60 : 60);
+      }
+      if ($e->mayHaveBeenProcessed()) {
+          // A 5xx or a timeout on POST: check with get()/list() before sending it again.
+      }
+  }
+  ```
 - Network failures throw `TransportException` (a subclass of `BillomatException`) instead of Symfony's `TransportExceptionInterface`.
   If you caught Symfony exceptions, catch `BillomatException` instead.
 - Exception messages changed to `Billomat responded with HTTP <status> to <METHOD> /<path>. <Billomat error text>`.

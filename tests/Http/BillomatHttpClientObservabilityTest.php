@@ -169,6 +169,58 @@ final class BillomatHttpClientObservabilityTest extends TestCase
     }
 
     #[Test]
+    public function networkRetriesBackOffExponentially(): void
+    {
+        $this->client([
+            new MockResponse('', ['error' => 'Connection reset']),
+            new MockResponse('', ['error' => 'Connection reset']),
+            new MockResponse('{}'),
+        ], retry: new RetryPolicy(maxRetries: 2, baseDelayMs: 1000, maxDelayMs: 100_000))->request('GET', '/clients');
+
+        self::assertCount(2, $this->sleeps);
+        self::assertGreaterThanOrEqual(500, $this->sleeps[0]);
+        self::assertLessThanOrEqual(1000, $this->sleeps[0]);
+        self::assertGreaterThanOrEqual(1000, $this->sleeps[1]);
+        self::assertLessThanOrEqual(2000, $this->sleeps[1]);
+        self::assertSame(2, $this->logger->logs[1]['context']['attempt']);
+    }
+
+    #[Test]
+    public function rateLimitRetriesWithoutRetryAfterBackOffExponentially(): void
+    {
+        $this->client([
+            new MockResponse('', ['http_code' => 429]),
+            new MockResponse('', ['http_code' => 429]),
+            new MockResponse('{}'),
+        ], retry: new RetryPolicy(maxRetries: 2, baseDelayMs: 1000, maxDelayMs: 100_000))->request('GET', '/clients');
+
+        self::assertCount(2, $this->sleeps);
+        self::assertGreaterThanOrEqual(500, $this->sleeps[0]);
+        self::assertLessThanOrEqual(1000, $this->sleeps[0]);
+        self::assertGreaterThanOrEqual(1000, $this->sleeps[1]);
+        self::assertLessThanOrEqual(2000, $this->sleeps[1]);
+    }
+
+    #[Test]
+    public function durationIsMeasuredInMilliseconds(): void
+    {
+        $mock = new MockHttpClient(static function (): MockResponse {
+            usleep(20_000);
+
+            return new MockResponse('{}');
+        });
+        $client = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key'), logger: $this->logger, events: $this->dispatcher);
+
+        $client->request('GET', '/clients');
+
+        $received = $this->dispatcher->events[1];
+        self::assertInstanceOf(ResponseReceived::class, $received);
+        self::assertGreaterThanOrEqual(20.0, $received->durationMs);
+        self::assertLessThan(2000.0, $received->durationMs);
+        self::assertSame($received->durationMs, $this->logger->logs[0]['context']['duration_ms']);
+    }
+
+    #[Test]
     public function clientErrorIsDispatchedAndLoggedAsNotice(): void
     {
         try {
@@ -184,6 +236,10 @@ final class BillomatHttpClientObservabilityTest extends TestCase
 
         self::assertSame(['notice'], $this->logger->levels());
         self::assertSame('Billomat {method} {path} failed: {message}', $this->logger->logs[0]['message']);
+        self::assertSame(['method', 'path', 'attempt', 'status', 'message', 'exception'], array_keys($this->logger->logs[0]['context']));
+        self::assertSame('GET', $this->logger->logs[0]['context']['method']);
+        self::assertSame('/api/clients/7', $this->logger->logs[0]['context']['path']);
+        self::assertSame(1, $this->logger->logs[0]['context']['attempt']);
         self::assertSame(404, $this->logger->logs[0]['context']['status']);
         self::assertSame($e->getMessage(), $this->logger->logs[0]['context']['message']);
         self::assertSame($e, $this->logger->logs[0]['context']['exception']);

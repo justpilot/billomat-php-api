@@ -94,7 +94,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
                 $response = $this->client->sendRequest($request);
             } catch (NetworkExceptionInterface $e) {
                 if ($mayRetry && 'GET' === $method) {
-                    $this->scheduleRetry($request, $attempt, $this->backoff($attempt - 1), error: $e);
+                    $this->scheduleRetry($request, $attempt, $this->backoff($attempt - 1), 'network error: '.$e->getMessage(), error: $e);
 
                     continue;
                 }
@@ -104,7 +104,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
                 throw $this->fail($request, $attempt, $this->transportException($method, $path, $e));
             }
 
-            $durationMs = (hrtime(true) - $start) / 1_000_000;
+            $durationMs = (hrtime(true) - $start) / 1e6;
             $this->events?->dispatch(new ResponseReceived($request, $response, $attempt, $durationMs));
             $status = $response->getStatusCode();
 
@@ -112,7 +112,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
                 $this->logger?->debug('Billomat {method} {path}: HTTP {status} in {duration_ms} ms', [
                     ...$this->logContext($request, $attempt),
                     'status' => $status,
-                    'duration_ms' => round($durationMs, 1),
+                    'duration_ms' => $durationMs,
                 ]);
 
                 return $response;
@@ -123,7 +123,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
                 $delay = null !== $retryAfter ? $retryAfter * 1000 : $this->backoff($attempt - 1);
 
                 if ($mayRetry && $delay <= $retry->maxDelayMs) {
-                    $this->scheduleRetry($request, $attempt, $delay, response: $response);
+                    $this->scheduleRetry($request, $attempt, $delay, 'HTTP 429', response: $response);
 
                     continue;
                 }
@@ -132,7 +132,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
             }
 
             if ($mayRetry && 'GET' === $method && \in_array($status, [502, 503, 504], true)) {
-                $this->scheduleRetry($request, $attempt, $this->backoff($attempt - 1), response: $response);
+                $this->scheduleRetry($request, $attempt, $this->backoff($attempt - 1), 'HTTP '.$status, response: $response);
 
                 continue;
             }
@@ -144,12 +144,12 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
     /**
      * Meldet den Retry (Event, Log) und wartet die Verzögerung ab.
      */
-    private function scheduleRetry(RequestInterface $request, int $attempt, int $delayMs, ?ResponseInterface $response = null, ?ClientExceptionInterface $error = null): void
+    private function scheduleRetry(RequestInterface $request, int $attempt, int $delayMs, string $reason, ?ResponseInterface $response = null, ?ClientExceptionInterface $error = null): void
     {
         $this->events?->dispatch(new RetryScheduled($request, $attempt, $delayMs, $response, $error));
         $this->logger?->warning('Billomat {method} {path}: {reason}, retrying in {delay_ms} ms (attempt {attempt})', [
             ...$this->logContext($request, $attempt),
-            'reason' => $response instanceof ResponseInterface ? 'HTTP '.$response->getStatusCode() : 'network error: '.$error?->getMessage(),
+            'reason' => $reason,
             'delay_ms' => $delayMs,
         ]);
 

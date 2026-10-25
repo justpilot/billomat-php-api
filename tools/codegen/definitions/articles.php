@@ -97,7 +97,7 @@ return [
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
         'archived' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Archivierungsstatus.', 'details' => ['true = archiviert, false = aktiv.']],
-        'type' => ['enum' => 'ArticleType', 'doc' => 'Artikeltyp: Produkt oder Dienstleistung.'],
+        'type' => ['enum' => 'ItemType', 'doc' => 'Artikeltyp: Produkt oder Dienstleistung.'],
         'revenue_account_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Erlöskonto.'],
         'cost_center' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Kostenstelle.'],
         'purchase_price_net_gross' => ['enum' => 'NetGross', 'doc' => 'Preisbasis des Einkaufspreises (netto oder brutto).'],

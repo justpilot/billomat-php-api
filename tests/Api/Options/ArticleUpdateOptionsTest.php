@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api\Options;
 
 use Justpilot\Billomat\Api\ArticleUpdateOptions;
-use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -18,7 +18,7 @@ final class ArticleUpdateOptionsTest extends TestCase
     public function itSerializesTypeAndPurchasePriceNetGross(): void
     {
         $options = new ArticleUpdateOptions(
-            type: ArticleType::PRODUCT,
+            type: ItemType::PRODUCT,
             purchasePriceNetGross: NetGross::GROSS,
         );
 

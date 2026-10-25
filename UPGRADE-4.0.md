@@ -543,12 +543,14 @@ if ($client->netGross === NetGross::GROSS) { … }
 ### `InvoicePaymentType`, `InvoicePdfType` and `InvoiceItemType` are renamed
 
 The three enums are used by every document resource, not just invoices. Their cases are unchanged.
+`ArticleType` had the same cases as `InvoiceItemType` and is merged into `ItemType`.
 
 | 3.x | 4.0 |
 |---|---|
 | `Model\Enum\InvoicePaymentType` | `Model\Enum\PaymentType` |
 | `Model\Enum\InvoicePdfType` | `Model\Enum\PdfType` |
 | `Model\Enum\InvoiceItemType` | `Model\Enum\ItemType` |
+| `Model\Enum\ArticleType` | `Model\Enum\ItemType` (merged, same cases) |
 
 ```php
 // 3.x
@@ -560,7 +562,7 @@ use Justpilot\Billomat\Model\Enum\PdfType;
 $pdf = $billomat->offers->pdf($id, PdfType::PRINT);
 ```
 
-A search and replace of the three class names is enough.
+A search and replace of the four class names is enough.
 
 ### Payment types are a list of `PaymentType`
 

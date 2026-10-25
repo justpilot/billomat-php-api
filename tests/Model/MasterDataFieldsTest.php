@@ -18,13 +18,13 @@ use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\CreditNotePayment;
 use Justpilot\Billomat\Model\Currency;
 use Justpilot\Billomat\Model\DeliveryNoteComment;
-use Justpilot\Billomat\Model\Enum\ArticleType;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\FreeTextType;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
@@ -75,7 +75,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TaxRate::class)]
 #[CoversClass(Template::class)]
 #[CoversClass(User::class)]
-#[UsesClass(ArticleType::class)]
+#[UsesClass(ItemType::class)]
 #[UsesClass(ConfirmationCommentActionKey::class)]
 #[UsesClass(CreditNoteCommentActionKey::class)]
 #[UsesClass(DeliveryNoteCommentActionKey::class)]
@@ -104,7 +104,7 @@ final class MasterDataFieldsTest extends TestCase
         yield 'Article' => [
             Article::fromArray(...),
             ['id' => '1', 'archived' => '1', 'type' => 'SERVICE', 'revenue_account_number' => 'Text', 'cost_center' => 'Text', 'purchase_price_net_gross' => 'NET'],
-            ['archived' => true, 'type' => ArticleType::SERVICE, 'revenueAccountNumber' => 'Text', 'costCenter' => 'Text', 'purchasePriceNetGross' => NetGross::NET],
+            ['archived' => true, 'type' => ItemType::SERVICE, 'revenueAccountNumber' => 'Text', 'costCenter' => 'Text', 'purchasePriceNetGross' => NetGross::NET],
         ];
         yield 'Client' => [
             Client::fromArray(...),

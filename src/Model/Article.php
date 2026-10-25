@@ -6,7 +6,7 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 
 use const DATE_ATOM;
@@ -93,7 +93,7 @@ final readonly class Article
          */
         public ?bool $archived = null,
         /** Artikeltyp: Produkt oder Dienstleistung. */
-        public ?ArticleType $type = null,
+        public ?ItemType $type = null,
         /** Erlöskonto. */
         public ?string $revenueAccountNumber = null,
         /** Kostenstelle. */
@@ -132,7 +132,7 @@ final readonly class Article
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
-            type: ArticleType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
             costCenter: ScalarCaster::toStringOrNull($data['cost_center'] ?? null),
             purchasePriceNetGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null) ?? ''),

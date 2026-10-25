@@ -32,7 +32,6 @@ use Justpilot\Billomat\Model\DeliveryNoteComment;
 use Justpilot\Billomat\Model\DeliveryNoteItem;
 use Justpilot\Billomat\Model\DeliveryNoteTag;
 use Justpilot\Billomat\Model\EmailTemplate;
-use Justpilot\Billomat\Model\Enum\ArticleType;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
@@ -167,7 +166,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Unit::class)]
 #[CoversClass(User::class)]
 #[CoversClass(UserProperty::class)]
-#[UsesClass(ArticleType::class)]
+#[UsesClass(ItemType::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(ConfirmationCommentActionKey::class)]
@@ -179,7 +178,6 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(IncomingCommentActionKey::class)]
 #[UsesClass(IncomingStatus::class)]
 #[UsesClass(InvoiceCommentActionKey::class)]
-#[UsesClass(ItemType::class)]
 #[UsesClass(PaymentType::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(LetterCommentActionKey::class)]

@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Tests\Model;
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
-use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Article::class)]
-#[UsesClass(ArticleType::class)]
+#[UsesClass(ItemType::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
 final class ArticleTest extends TestCase

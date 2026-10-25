@@ -18,7 +18,6 @@ use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use RuntimeException;
 
 #[CoversNothing]
 final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
@@ -48,7 +47,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         );
 
         $client = $billomat->clients->create($clientOptions);
-        self::assertNotNull($client->id);
         $clientId = $client->id;
 
         // 2) Draft-Rechnung anlegen
@@ -73,10 +71,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        if (null === $draft->id) {
-            throw new RuntimeException('Failed to create draft invoice for PDF integration test.');
-        }
-
         $draftId = $draft->id;
 
         // 3) Abschließen – hier wird in der Regel das PDF erzeugt
@@ -97,7 +91,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $invoices) {
             $first = $invoices[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
             self::assertInstanceOf(InvoiceStatus::class, $first->status);
         }
@@ -115,7 +108,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $invoices) {
             $first = $invoices[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
             self::assertInstanceOf(InvoiceStatus::class, $first->status);
         }
@@ -176,8 +168,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
             $createdClient = $billomat->clients->create($clientOptions);
 
-            self::assertNotNull($createdClient->id);
-
             $clientId = $createdClient->id;
         } else {
             $clientId = $clients[0]->id;
@@ -212,7 +202,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // 4) Rechnung in der Sandbox erstellen (Draft)
         $invoice = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($invoice->id);
         self::assertGreaterThan(0, $invoice->id);
         self::assertSame($clientId, $invoice->clientId);
 
@@ -287,7 +276,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($draft->id);
         self::assertGreaterThan(0, $draft->id);
 
         $draftId = $draft->id;
@@ -355,7 +343,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($draft->id);
         self::assertSame(InvoiceStatus::DRAFT, $draft->status);
 
         $draftId = $draft->id;
@@ -414,8 +401,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
-
-        self::assertNotNull($draft->id);
 
         $draftId = $draft->id;
 
@@ -485,8 +470,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($draft->id);
-
         $draftId = $draft->id;
 
         // 3) Abschließen
@@ -550,7 +533,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
                 email: $faker->unique()->safeEmail(),
             );
             $createdClient = $billomat->clients->create($clientOptions);
-            self::assertNotNull($createdClient->id);
             $clientId = $createdClient->id;
         } else {
             self::assertNotNull($clients[0]->id);
@@ -571,7 +553,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
-        self::assertNotNull($draft->id);
 
         // Draft bearbeiten: date ändern
         $newDate = new DateTimeImmutable('today');

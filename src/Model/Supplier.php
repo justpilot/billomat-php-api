@@ -72,11 +72,11 @@ final readonly class Supplier
      */
     public function __construct(
         /** Interne Billomat-ID des Lieferanten. */
-        public ?int $id,
+        public int $id,
         /** Erstellungszeitpunkt des Lieferanten. */
-        public ?DateTimeImmutable $created,
+        public ?DateTimeImmutable $created = null,
         /** Firmenname des Lieferanten. */
-        public string $name,
+        public string $name = '',
         /** Eigene Kundennummer beim Lieferanten. */
         public ?int $clientNumber = null,
         /** Anrede. */
@@ -186,7 +186,7 @@ final readonly class Supplier
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             clientNumber: ScalarCaster::toIntOrNull($data['client_number'] ?? null),

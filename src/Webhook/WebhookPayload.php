@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Webhook;
 
 use JsonException;
 use Justpilot\Billomat\Exception\InvalidWebhookException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\ArticleProperty;
 use Justpilot\Billomat\Model\ArticlePropertyValue;
@@ -125,9 +126,15 @@ final readonly class WebhookPayload
      * Datensatz als Model des Events, z. B. `Invoice` bei `invoice.*`, `InvoicePayment` bei `invoice_payment.*`.
      *
      * @return Article|ArticleProperty|ArticlePropertyValue|Client|ClientProperty|ClientPropertyValue|Confirmation|ConfirmationComment|Contact|CreditNote|CreditNoteComment|CreditNotePayment|DeliveryNote|DeliveryNoteComment|Incoming|IncomingComment|IncomingPayment|IncomingProperty|IncomingPropertyValue|Invoice|InvoiceComment|InvoicePayment|Offer|OfferComment|Recurring|Reminder|Supplier|SupplierProperty|SupplierPropertyValue
+     *
+     * @throws InvalidWebhookException wenn ein Pflichtfeld wie `id` fehlt
      */
     public function model(): object
     {
-        return $this->event->modelClass()::fromArray($this->data);
+        try {
+            return $this->event->modelClass()::fromArray($this->data);
+        } catch (UnexpectedResponseException $e) {
+            throw new InvalidWebhookException(\sprintf('Billomat webhook body for "%s" cannot be hydrated: %s', $this->event->value, $e->getMessage()), $e->getCode(), previous: $e);
+        }
     }
 }

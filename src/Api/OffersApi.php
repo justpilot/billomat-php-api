@@ -47,10 +47,10 @@ final class OffersApi extends AbstractApi
     /**
      * Positionen, siehe {@see ItemsApi}.
      *
-     * @var ItemsApi<OfferItem, OfferItemCreateOptions>
+     * @var ItemsApi<OfferItem, OfferItemCreateOptions, OfferItemUpdateOptions>
      */
     public private(set) ItemsApi $items {
-        get => $this->items ??= new ItemsApi($this->http, 'offer', OfferItem::fromArray(...), OfferItemCreateOptions::class);
+        get => $this->items ??= new ItemsApi($this->http, 'offer', OfferItem::fromArray(...), OfferItemCreateOptions::class, OfferItemUpdateOptions::class);
     }
 
     /**

@@ -49,7 +49,7 @@ return [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Kontakts.'],
         'client_id' => [
             'doc' => 'ID des Kunden, zu dem der Kontakt gehört.',
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['nonNull' => true],
             'create' => ['constructor' => true],
             'update' => ['skip' => true],
         ],

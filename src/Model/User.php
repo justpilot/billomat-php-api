@@ -45,9 +45,9 @@ final readonly class User
      */
     public function __construct(
         /** Interne Billomat-ID des Benutzers. */
-        public ?int $id,
+        public int $id,
         /** E-Mail-Adresse (Login). */
-        public ?string $email,
+        public ?string $email = null,
         /** Vorname. */
         public ?string $firstName = null,
         /** Nachname. */
@@ -91,7 +91,7 @@ final readonly class User
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             email: ScalarCaster::toStringOrNull($data['email'] ?? null),
             firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
             lastName: ScalarCaster::toStringOrNull($data['last_name'] ?? null),

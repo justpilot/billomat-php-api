@@ -30,11 +30,11 @@ final readonly class IncomingTag
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Schlagworts. */
-        public ?int $id,
+        public int $id,
         /** ID des Datensatzes, an dem das Schlagwort hängt. */
-        public int $incomingId,
+        public int $incomingId = 0,
         /** Name des Schlagworts. */
-        public string $name,
+        public string $name = '',
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /**
@@ -54,7 +54,7 @@ final readonly class IncomingTag
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),

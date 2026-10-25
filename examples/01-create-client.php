@@ -26,4 +26,4 @@ $client = billomat()->clients->create(new ClientCreateOptions(
     note: 'Angelegt durch examples/01-create-client.php',
 ));
 
-printf("Angelegt: #%d %s (E-Mail: %s)\n", requireId($client->id), $client->name, $client->email ?? '-');
+printf("Angelegt: #%d %s (E-Mail: %s)\n", $client->id, $client->name, $client->email ?? '-');

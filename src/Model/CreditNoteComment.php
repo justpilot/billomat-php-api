@@ -47,9 +47,9 @@ final readonly class CreditNoteComment
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne ID des Kommentars. */
-        public ?int $id,
+        public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $creditNoteId,
+        public int $creditNoteId = 0,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -92,7 +92,7 @@ final readonly class CreditNoteComment
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             creditNoteId: ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null) ?? 0,
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

@@ -36,7 +36,6 @@ final class ClientTagsIntegrationTest extends AbstractBillomatIntegrationTestCas
         );
 
         $created = $billomat->clients->create($opts);
-        self::assertNotNull($created->id);
 
         return $created->id;
     }

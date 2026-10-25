@@ -30,7 +30,7 @@ $billomat->roles
 
 ```php
 foreach ($billomat->roles->list() as $role) {
-    printf("#%d %s\n", $role->id ?? 0, $role->name ?? '');
+    printf("#%d %s\n", $role->id, $role->name ?? '');
 }
 ```
 
@@ -55,7 +55,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `id` | `id` | `?int` |
+| `id` | `id` | `int` |
 | `name` | `name` | `?string` |
 | `permissions` | (several fields, see below) | `array<string, AccessLevel>` |
 | `created`, `updated` | `created`, `updated` | `?\DateTimeImmutable` |
@@ -105,7 +105,7 @@ $billomat = BillomatClient::create(
 );
 
 foreach ($billomat->roles->list() as $role) {
-    printf("Role %s (#%d):\n", $role->name ?? '?', $role->id ?? 0);
+    printf("Role %s (#%d):\n", $role->name ?? '?', $role->id);
     foreach ($role->permissions as $resource => $access) {
         printf("  %-25s %s%s\n", $resource, $access->label(), $access->allows(AccessLevel::DELETE) ? ' (full access)' : '');
     }

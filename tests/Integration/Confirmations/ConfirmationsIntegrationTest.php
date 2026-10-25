@@ -41,8 +41,6 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
 
         $created = $billomat->clients->create($opts);
 
-        self::assertNotNull($created->id);
-
         return $created->id;
     }
 
@@ -85,7 +83,6 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
 
         $confirmation = $billomat->confirmations->create($opts);
 
-        self::assertNotNull($confirmation->id);
         self::assertSame(ConfirmationStatus::DRAFT, $confirmation->status);
 
         // Cleanup
@@ -107,7 +104,6 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
         )->withItem(new ConfirmationItemCreateOptions(1.0, Money::of('10.00'), title: 'Status-Test Position'));
 
         $confirmation = $billomat->confirmations->create($opts);
-        self::assertNotNull($confirmation->id);
         $id = $confirmation->id;
 
         try {

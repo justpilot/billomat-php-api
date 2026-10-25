@@ -36,7 +36,6 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         );
 
         $created = $billomat->clients->create($opts);
-        self::assertNotNull($created->id);
 
         return $created->id;
     }
@@ -72,8 +71,6 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         );
 
         $contact = $billomat->contacts->create($opts);
-
-        self::assertNotNull($contact->id);
 
         // Update
         $update = new ContactUpdateOptions(city: 'Berlin');

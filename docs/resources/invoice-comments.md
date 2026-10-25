@@ -91,7 +91,7 @@ Constructor: `new InvoiceCommentCreateOptions(int $invoiceId, string $comment, â
 
 | Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | |
+| `id` | `int` | |
 | `invoiceId` | `int` | |
 | `comment` | `?string` | |
 | `created` | `?\DateTimeImmutable` | |

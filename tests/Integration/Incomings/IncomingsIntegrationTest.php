@@ -32,7 +32,6 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $opts = new SupplierCreateOptions(name: 'IT-Lieferant Incoming '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
-        self::assertNotNull($created->id);
 
         return $created->id;
     }
@@ -69,7 +68,6 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $incoming = $billomat->incomings->create($opts);
 
-        self::assertNotNull($incoming->id);
         self::assertSame($supplierId, $incoming->supplierId);
 
         // Update

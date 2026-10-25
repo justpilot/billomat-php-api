@@ -43,9 +43,9 @@ final readonly class IncomingComment
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne ID des Kommentars. */
-        public ?int $id,
+        public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $incomingId,
+        public int $incomingId = 0,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -80,7 +80,7 @@ final readonly class IncomingComment
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

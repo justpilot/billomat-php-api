@@ -51,10 +51,10 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Lieferanten.'],
-        'created' => ['type' => 'datetime', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Erstellungszeitpunkt des Lieferanten.'],
+        'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Lieferanten.'],
         'name' => [
             'doc' => 'Firmenname des Lieferanten.',
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['nonNull' => true],
             'create' => ['constructor' => true],
         ],
         // BC: Das Read-Model führt die Kundennummer seit jeher als int, die Spec als ALNUM.

@@ -98,7 +98,7 @@ The three required fields are the first constructor parameters; `documentType` a
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `created` | `?\DateTimeImmutable` |
 | `filename` | `string` |
 | `mimeType` | `string` |

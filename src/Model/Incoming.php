@@ -52,9 +52,9 @@ final readonly class Incoming
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Eingangsrechnung. */
-        public ?int $id,
+        public int $id,
         /** ID des Lieferanten. */
-        public ?int $supplierId,
+        public ?int $supplierId = null,
         /** Erstellungszeitpunkt der Eingangsrechnung. */
         public ?DateTimeImmutable $created = null,
         /** Rechnungsdatum. */
@@ -114,7 +114,7 @@ final readonly class Incoming
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),

@@ -41,8 +41,6 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
 
         $created = $billomat->clients->create($opts);
 
-        self::assertNotNull($created->id);
-
         return $created->id;
     }
 
@@ -82,7 +80,6 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
 
         $note = $billomat->creditNotes->create($opts);
 
-        self::assertNotNull($note->id);
         self::assertSame(CreditNoteStatus::DRAFT, $note->status);
 
         $billomat->creditNotes->delete($note->id);

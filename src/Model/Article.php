@@ -57,9 +57,9 @@ final readonly class Article
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Artikels. */
-        public ?int $id,
+        public int $id,
         /** Erstellungszeitpunkt des Artikels. */
-        public ?DateTimeImmutable $created,
+        public ?DateTimeImmutable $created = null,
         /** Vollständige Artikelnummer (Präfix + laufende Nummer). */
         public ?string $articleNumber = null,
         /** Laufende Nummer (ohne Präfix). */
@@ -147,7 +147,7 @@ final readonly class Article
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             articleNumber: ScalarCaster::toStringOrNull($data['article_number'] ?? null),
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),

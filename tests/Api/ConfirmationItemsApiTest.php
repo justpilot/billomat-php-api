@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
+use Justpilot\Billomat\Api\ConfirmationItemUpdateOptions;
 use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -30,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(AbstractSubResourceApi::class)]
 #[UsesClass(ConfirmationsApi::class)]
 #[CoversClass(ConfirmationItemCreateOptions::class)]
+#[CoversClass(ConfirmationItemUpdateOptions::class)]
 #[CoversClass(ConfirmationItem::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -118,7 +120,7 @@ final class ConfirmationItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new ConfirmationItemCreateOptions(quantity: 3.0, unitPrice: Money::of('75'));
+        $opts = new ConfirmationItemUpdateOptions(quantity: 3.0, unitPrice: Money::of('75'));
         self::assertSame(77, $api->update(77, $opts)->id);
         self::assertSame('PUT', $captured->method);
         self::assertSame('https://mycompany.billomat.net/api/confirmation-items/77', $captured->url);

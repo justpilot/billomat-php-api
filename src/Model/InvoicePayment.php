@@ -46,17 +46,17 @@ final readonly class InvoicePayment
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne ID der Zahlung. */
-        public ?int $id,
-        /** ID des Dokuments, zu dem die Zahlung gehört. */
-        public int $invoiceId,
-        /** Zahlungsdatum. */
-        public ?DateTimeImmutable $date,
+        public int $id,
         /** Zahlungsbetrag. */
         public Money $amount,
+        /** ID des Dokuments, zu dem die Zahlung gehört. */
+        public int $invoiceId = 0,
+        /** Zahlungsdatum. */
+        public ?DateTimeImmutable $date = null,
         /** Zahlungsart. */
-        public ?PaymentType $type,
+        public ?PaymentType $type = null,
         /** Kommentar zur Zahlung. */
-        public ?string $comment,
+        public ?string $comment = null,
         /** Erstellungszeitpunkt der Zahlung. */
         public ?DateTimeImmutable $created = null,
         /** ID des Users, der die Zahlung erfasst hat. */
@@ -94,10 +94,10 @@ final readonly class InvoicePayment
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            amount: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['amount'] ?? null), self::class, 'amount'),
             invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null) ?? 0,
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
-            amount: ScalarCaster::toMoneyOrNull($data['amount'] ?? null) ?? Money::zero(),
             type: PaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

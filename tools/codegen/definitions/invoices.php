@@ -76,7 +76,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Rechnung.'],
-        'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['model' => ['nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Rechnung.'],
         'invoice_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Rechnungsnummer (kann bei DRAFT leer sein).'],

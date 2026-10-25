@@ -38,21 +38,21 @@ final readonly class TaxRate
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Steuersatzes. */
-        public ?int $id,
+        public int $id,
         /**
          * Name des Steuersatzes.
          *
          * Beispiel: "MwSt"
          */
-        public string $name,
+        public string $name = '',
         /**
          * Höhe des Steuersatzes in Prozent.
          *
          * Beispiel: 19.0
          */
-        public float $rate,
+        public float $rate = 0.0,
         /** Standard-Steuersatz? */
-        public bool $isDefault,
+        public bool $isDefault = false,
         /** Erstellungszeitpunkt des Steuersatzes. */
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
@@ -82,7 +82,7 @@ final readonly class TaxRate
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             rate: ScalarCaster::toFloatOrNull($data['rate'] ?? null) ?? 0.0,
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,

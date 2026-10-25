@@ -30,7 +30,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Benutzers.'],
-        'email' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'E-Mail-Adresse (Login).'],
+        'email' => ['type' => 'string', 'readOnly' => true, 'doc' => 'E-Mail-Adresse (Login).'],
         'first_name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Vorname.'],
         'last_name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Nachname.'],
         'salutation' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Anrede.'],

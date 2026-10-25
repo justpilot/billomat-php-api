@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Internal;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Money;
 use Throwable;
 
@@ -25,6 +26,30 @@ use Throwable;
  */
 final class ScalarCaster
 {
+    /**
+     * Pflichtfeld, das Billomat immer liefert (z. B. `id`): null heißt, es fehlt oder ist unbrauchbar.
+     *
+     * Statt auf 0 oder '' auszuweichen, wird die Antwort als unerwartet abgelehnt.
+     *
+     * @template T
+     *
+     * @param T|null       $value bereits gecasteter Wert, z. B. aus {@see toIntOrNull()}
+     * @param class-string $model Model, das hydriert wird (für die Fehlermeldung)
+     * @param string       $field Billomat-Feldname
+     *
+     * @return T
+     *
+     * @throws UnexpectedResponseException wenn der Wert null ist
+     */
+    public static function required(mixed $value, string $model, string $field): mixed
+    {
+        if (null === $value) {
+            throw new UnexpectedResponseException(\sprintf('Unexpected response from Billomat: %s without a valid "%s" field.', basename(str_replace('\\', '/', $model)), $field));
+        }
+
+        return $value;
+    }
+
     public static function toIntOrNull(mixed $value): ?int
     {
         if (null === $value || '' === $value) {

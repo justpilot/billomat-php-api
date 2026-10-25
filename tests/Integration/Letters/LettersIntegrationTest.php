@@ -39,8 +39,6 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $created = $billomat->clients->create($opts);
 
-        self::assertNotNull($created->id);
-
         return $created->id;
     }
 
@@ -74,7 +72,6 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $letter = $billomat->letters->create($opts);
 
-        self::assertNotNull($letter->id);
         self::assertSame($clientId, $letter->clientId);
         self::assertSame(LetterStatus::DRAFT, $letter->status);
 

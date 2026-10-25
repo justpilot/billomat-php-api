@@ -100,9 +100,9 @@ final readonly class Client
      */
     public function __construct(
         /** Interne Billomat-ID des Kunden. */
-        public ?int $id,
+        public int $id,
         /** Firmenname des Kunden. */
-        public string $name,
+        public string $name = '',
         /** Erstellungszeitpunkt des Kunden. */
         public ?DateTimeImmutable $created = null,
         /** Kundennummer (frei wählbar). */
@@ -315,7 +315,7 @@ final readonly class Client
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             clientNumber: ScalarCaster::toStringOrNull($data['client_number'] ?? null),

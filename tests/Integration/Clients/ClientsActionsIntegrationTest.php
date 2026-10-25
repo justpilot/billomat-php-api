@@ -42,8 +42,6 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
         $created = $billomat->clients->create($options);
 
-        self::assertNotNull($created->id);
-
         $clientId = $created->id;
 
         // 2) Löschen
@@ -141,17 +139,13 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         }
 
         foreach ($list as $candidate) {
-            if (null !== $candidate->id) {
-                $candidates[] = $candidate->id;
-            }
+            $candidates[] = $candidate->id;
         }
 
         if ([] === $candidates) {
             try {
                 $me = $billomat->clients->getMyself();
-                if (null !== $me->id) {
-                    $candidates[] = $me->id;
-                }
+                $candidates[] = $me->id;
             } catch (HttpException) {
                 // ignorieren
             }

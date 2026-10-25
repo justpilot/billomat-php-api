@@ -42,8 +42,6 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $created = $billomat->clients->create($clientOptions);
 
-        self::assertNotNull($created->id);
-
         return $created->id;
     }
 
@@ -60,7 +58,6 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $offers) {
             $first = $offers[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
             self::assertInstanceOf(OfferStatus::class, $first->status);
         }
@@ -97,7 +94,6 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $offer = $billomat->offers->create($opts);
 
-        self::assertNotNull($offer->id);
         self::assertSame($clientId, $offer->clientId);
         self::assertSame(OfferStatus::DRAFT, $offer->status);
 
@@ -129,8 +125,6 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $draft = $billomat->offers->create($opts);
 
-        self::assertNotNull($draft->id);
-
         // Update title via PUT
         $update = new OfferUpdateOptions(date: new DateTimeImmutable('today'), title: 'Geänderter Titel');
 
@@ -158,7 +152,6 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
         )->withItem(new OfferItemCreateOptions(1.0, Money::of('10.00'), title: 'Status-Test Position'));
 
         $offer = $billomat->offers->create($opts);
-        self::assertNotNull($offer->id);
         $id = $offer->id;
 
         try {

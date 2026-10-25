@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Webhook;
 
 use JsonException;
 use Justpilot\Billomat\Exception\InvalidWebhookException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Invoice;
@@ -24,6 +25,7 @@ use PHPUnit\Framework\TestCase;
  */
 #[CoversClass(WebhookPayload::class)]
 #[UsesClass(WebhookEvent::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 #[UsesNamespace('Justpilot\\Billomat\\Model')]
 #[UsesNamespace('Justpilot\\Billomat\\Internal')]
 final class WebhookPayloadTest extends TestCase
@@ -108,6 +110,20 @@ final class WebhookPayloadTest extends TestCase
 
         self::assertSame([], $payload->data);
         self::assertNull($payload->id());
+    }
+
+    #[Test]
+    public function modelRejectsARecordWithoutId(): void
+    {
+        $payload = WebhookPayload::fromArray(WebhookEvent::INVOICE_DELETE, ['invoice' => ['client_id' => '2']]);
+
+        try {
+            $payload->model();
+            self::fail('InvalidWebhookException erwartet.');
+        } catch (InvalidWebhookException $e) {
+            self::assertSame('Billomat webhook body for "invoice.delete" cannot be hydrated: Unexpected response from Billomat: Invoice without a valid "id" field.', $e->getMessage());
+            self::assertInstanceOf(UnexpectedResponseException::class, $e->getPrevious());
+        }
     }
 
     /**

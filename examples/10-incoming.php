@@ -34,7 +34,7 @@ $incoming = $billomat->incomings->create(new IncomingCreateOptions(
     totalGross: Money::of('119.00'),
     totalNet: Money::of('100.00'),
 ));
-$incomingId = requireId($incoming->id);
+$incomingId = $incoming->id;
 $amount = $incoming->totalGross ?? Money::of('119.00');
 
 printf("Eingangsbeleg #%d angelegt: Brutto %s %s\n", $incomingId, $amount->format(2, ',', '.'), $incoming->currencyCode ?? '');
@@ -52,4 +52,4 @@ $payment = $billomat->incomings->payments->create(new IncomingPaymentCreateOptio
     markIncomingAsPaid: true,
 ));
 
-printf("Zahlung #%d verbucht: %s via %s\n", requireId($payment->id), $payment->amount->format(2, ',', '.'), $payment->type?->label() ?? '?');
+printf("Zahlung #%d verbucht: %s via %s\n", $payment->id, $payment->amount->format(2, ',', '.'), $payment->type?->label() ?? '?');

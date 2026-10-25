@@ -160,11 +160,11 @@ $item = $billomat->deliveryNotes->items->create(
     new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
-$billomat->deliveryNotes->items->update($item->id, $opts);
+$billomat->deliveryNotes->items->update($item->id, new DeliveryNoteItemUpdateOptions(title: 'Packed separately'));
 $billomat->deliveryNotes->items->delete($item->id);
 ```
 
-`create()` adds `delivery_note_id` automatically; the options class itself has no such field. `update()` uses the same class as `create()`.
+`create()` adds `delivery_note_id` automatically; the options class itself has no such field. `update()` takes `DeliveryNoteItemUpdateOptions` and only sends the fields you set.
 
 ### Delivery note comments
 
@@ -255,7 +255,7 @@ Constructor: `new DeliveryNoteItemCreateOptions(float $quantity, Money $unitPric
 | `reduction` | `reduction` | `?string` | |
 | `position` | `position` | `?int` | |
 
-`ItemsApi::update()` uses the same class; there is no separate update type.
+For `ItemsApi::update()` there is `DeliveryNoteItemUpdateOptions`: every field is optional (`X|Clear|null`) with a `with*()` method, only the fields you set are sent, and `Clear::Field` empties a field. Billomat keeps all other fields of the item.
 
 ## Write model: `DeliveryNoteCommentCreateOptions`
 
@@ -290,7 +290,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
@@ -331,7 +331,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `deliveryNoteId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -383,7 +383,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 - **No `discount`/`validity`.** Unlike `OfferCreateOptions`/`ConfirmationCreateOptions`, `DeliveryNoteCreateOptions` has no `discountRate`/`discountDays`/`discountDate`/`validityDays` fields. Don't look for them out of copy-paste habit.
 - **`update()` doesn't change line items.** Billomat ignores embedded `delivery-note-items` on PUT. Always use `$billomat->deliveryNotes->items`.
 - **No status transitions after `complete()`.** The SDK has no `cancel()`, `clear()` or `undo()` for delivery notes because Billomat's API doesn't support them (400/404). Up to 3.x the SDK had these methods; they always failed.
-- **`DeliveryNoteItemCreateOptions` is also the update type.** The constructor requires `quantity` and `unitPrice` even if you only want to change the title.
+- **Item updates are partial.** `DeliveryNoteItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `delivery-note` as an object; the SDK wraps it in a list.
 - **Multiple source references are possible.** `invoiceId`, `confirmationId` and `offerId` can all be set at the same time, but Billomat does **not** synchronize the status of the linked documents automatically.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.

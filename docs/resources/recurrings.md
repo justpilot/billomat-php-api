@@ -213,7 +213,7 @@ Has the same fields as `RecurringCreateOptions`, but `clientId` is optional (for
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
@@ -266,11 +266,11 @@ $items = $billomat->recurrings->items->list($recurring->id);
 $opts = new RecurringItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90'));
 $item = $billomat->recurrings->items->create($recurring->id, $opts);
 
-$billomat->recurrings->items->update($item->id, $opts->withUnitPrice(Money::of('44.90')));
+$billomat->recurrings->items->update($item->id, new RecurringItemUpdateOptions(unitPrice: Money::of('44.90')));
 $billomat->recurrings->items->delete($item->id);
 ```
 
-`create()` injects `recurring_id` into the payload automatically; `RecurringItemCreateOptions` itself has no such field.
+`create()` injects `recurring_id` into the payload automatically; `RecurringItemCreateOptions` itself has no such field. `update()` takes `RecurringItemUpdateOptions`: every field is optional, only the fields you set are sent and Billomat keeps the others.
 
 ### Write model: `RecurringItemCreateOptions`
 
@@ -373,6 +373,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
+use Justpilot\Billomat\Api\RecurringItemUpdateOptions;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
@@ -428,9 +429,8 @@ $billomat->recurrings->tags->create(
     new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'hosting'),
 );
 
-// 4) Change an item later: price update
+// 4) Change an item later: only the price is sent, the other fields stay
 foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
-    $update = new RecurringItemCreateOptions(quantity: $current->quantity, unitPrice: Money::of('24.90'), title: $current->title);
-    $billomat->recurrings->items->update($current->id, $update);
+    $billomat->recurrings->items->update($current->id, new RecurringItemUpdateOptions(unitPrice: Money::of('24.90')));
 }
 ```

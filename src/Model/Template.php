@@ -46,7 +46,7 @@ final readonly class Template
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Vorlage. */
-        public ?int $id,
+        public int $id,
         /** Erstellungszeitpunkt der Vorlage. */
         public ?DateTimeImmutable $created = null,
         /** Dokumenttyp, für den die Vorlage gilt. */
@@ -96,7 +96,7 @@ final readonly class Template
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             type: TemplateDocumentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             templateType: TemplateType::tryFrom(ScalarCaster::toStringOrNull($data['template_type'] ?? null) ?? ''),

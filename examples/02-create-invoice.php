@@ -46,7 +46,7 @@ $invoice = billomat()->invoices->create($options);
 
 printf(
     "Entwurf angelegt: #%d, Status %s, Brutto %s %s\n",
-    requireId($invoice->id),
+    $invoice->id,
     $invoice->status?->label() ?? '?',
     $invoice->totalGross?->format(2, ',', '.') ?? '?',
     $invoice->currencyCode ?? '',

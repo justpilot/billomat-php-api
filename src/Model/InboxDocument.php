@@ -17,7 +17,7 @@ use const DATE_ATOM;
 final readonly class InboxDocument
 {
     public function __construct(
-        public ?int $id,
+        public int $id,
         public ?DateTimeImmutable $created,
         public string $filename,
         public string $mimeType,
@@ -40,7 +40,7 @@ final readonly class InboxDocument
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             filename: ScalarCaster::toStringOrNull($data['filename'] ?? null) ?? '',
             mimeType: ScalarCaster::toStringOrNull($data['mimetype'] ?? null) ?? 'application/octet-stream',

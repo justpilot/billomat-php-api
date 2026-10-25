@@ -31,7 +31,7 @@ return [
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Vorlage.'],
-        'name' => ['model' => ['required' => true], 'doc' => 'Name der Vorlage.'],
+        'name' => ['doc' => 'Name der Vorlage.'],
         'subject' => ['doc' => 'Betreff.'],
         // BC: Property und toArray()-Schlüssel heißen weiterhin `body`; `body` bleibt als Fallback.
         'text' => [

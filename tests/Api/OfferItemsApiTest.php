@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
+use Justpilot\Billomat\Api\OfferItemUpdateOptions;
 use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
@@ -30,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(AbstractSubResourceApi::class)]
 #[UsesClass(OffersApi::class)]
 #[CoversClass(OfferItemCreateOptions::class)]
+#[CoversClass(OfferItemUpdateOptions::class)]
 #[CoversClass(OfferItem::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -169,7 +171,7 @@ final class OfferItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new OfferItemCreateOptions(quantity: 3.0, unitPrice: Money::of('75'));
+        $opts = new OfferItemUpdateOptions(quantity: 3.0, unitPrice: Money::of('75'));
         $updated = $api->update(77, $opts);
 
         self::assertSame(77, $updated->id);

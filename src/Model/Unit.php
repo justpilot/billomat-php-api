@@ -34,9 +34,9 @@ final readonly class Unit
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Einheit. */
-        public ?int $id,
+        public int $id,
         /** Bezeichnung der Einheit. */
-        public string $name,
+        public string $name = '',
         /** Erstellungszeitpunkt der Einheit. */
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
@@ -60,7 +60,7 @@ final readonly class Unit
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),

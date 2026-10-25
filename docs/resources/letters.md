@@ -255,7 +255,7 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
@@ -272,7 +272,7 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `letterId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -290,7 +290,7 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `letterId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |

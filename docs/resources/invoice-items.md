@@ -10,7 +10,7 @@ API wrapper for the items (line items) of an invoice. Endpoints at `/invoice-ite
 $billomat->invoices->items
 ```
 
-The generic `Justpilot\Billomat\Api\ItemsApi`, typed for `InvoiceItem` and `InvoiceItemCreateOptions`.
+The generic `Justpilot\Billomat\Api\ItemsApi`, typed for `InvoiceItem`, `InvoiceItemCreateOptions` and `InvoiceItemUpdateOptions`.
 
 ## Endpoints
 
@@ -58,9 +58,15 @@ $item = new InvoiceItemCreateOptions(
 $created = $billomat->invoices->items->create($invoiceId, $item);
 ```
 
-### `update(int $id, InvoiceItemCreateOptions $options): InvoiceItem`
+### `update(int $id, InvoiceItemUpdateOptions $options): InvoiceItem`
 
-Updates an existing item. It uses the **same** options class as `create()`; there is no separate `UpdateOptions` class. `quantity` and `unitPrice` are always sent (they are required constructor parameters); all other `null` fields are left untouched.
+Updates an existing item. Only the fields you set are sent; Billomat keeps all other fields (checked against the sandbox). `Clear::Field` empties a field. Passing `InvoiceItemCreateOptions` throws an `InvalidArgumentException`.
+
+```php
+use Justpilot\Billomat\Api\InvoiceItemUpdateOptions;
+
+$updated = $billomat->invoices->items->update($created->id, new InvoiceItemUpdateOptions(unitPrice: Money::of('25')));
+```
 
 ### `delete(int $id): void`
 
@@ -87,13 +93,17 @@ Constructor: `new InvoiceItemCreateOptions(float $quantity, Money $unitPrice, â€
 
 `toArray()` drops `null` values. `quantity` and `unit_price` are never `null`, so they are always sent (`unit_price` as a string via `Money::toString()`).
 
+## Write model: `InvoiceItemUpdateOptions`
+
+Same fields as `InvoiceItemCreateOptions`, but all of them optional: `new InvoiceItemUpdateOptions(unitPrice: Money::of('25'))`. Each field is `X|Clear|null`; `null` (not set) is left out of the payload, `Clear::Field` is sent as `null` and empties the field. Every field has a `with*()` method.
+
 ## Read model: `InvoiceItem`
 
 `final readonly class InvoiceItem`.
 
 | Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | |
+| `id` | `int` | |
 | `invoiceId` | `?int` | |
 | `articleId` | `?int` | |
 | `position` | `?int` | Sort order within the invoice |
@@ -118,7 +128,6 @@ Constructor: `new InvoiceItemCreateOptions(float $quantity, Money $unitPrice, â€
 
 ## Pitfalls
 
-- **No separate `UpdateOptions` type.** `update()` uses the same class as `create()`. In practice the constructor requires `quantity` and `unitPrice` even if you don't want to change them, so either set them again or copy the old values from the read model.
 - **Changing the tax rate manually.** If the item should differ from the client's/article's default tax rate, set `taxRate` **and** `taxChangedManually: true`. Without the flag, Billomat often ignores the manual `taxRate`.
 - **Order.** On create, `position` is usually irrelevant; Billomat appends the item at the end. On update you can set `position` to reorder. Other items are not shifted automatically.
 - **Items in the invoice's `create()` call.** If you create an invoice directly with `items: [â€¦]`, the items are part of the same POST request; no second call is needed. See [Invoices](invoices.md).
@@ -134,6 +143,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Api\InvoiceItemUpdateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
@@ -173,7 +183,6 @@ foreach ($billomat->invoices->items->list($invoice->id) as $item) {
     printf("- %s: %.2f x %s = %s\n", $item->title, $item->quantity, $item->unitPrice->format(), ($item->totalNet ?? Money::zero())->format());
 }
 
-// Update the first item (lower the price); quantity stays the same
-$update = new InvoiceItemCreateOptions(quantity: $created->quantity, unitPrice: Money::of('9.99'), title: $created->title);
-$billomat->invoices->items->update($created->id, $update);
+// Update the first item: only the price is sent, quantity and title stay the same
+$billomat->invoices->items->update($created->id, new InvoiceItemUpdateOptions(unitPrice: Money::of('9.99')));
 ```

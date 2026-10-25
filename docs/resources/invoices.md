@@ -402,7 +402,7 @@ Payload for `mail()` (Pixelletter). Like the other options classes it is `final 
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |

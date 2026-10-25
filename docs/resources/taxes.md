@@ -85,7 +85,7 @@ Constructor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefaul
 
 | Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | |
+| `id` | `int` | |
 | `name` | `string` | |
 | `rate` | `float` | Percentage |
 | `isDefault` | `bool` | |

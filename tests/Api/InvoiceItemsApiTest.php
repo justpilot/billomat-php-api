@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use InvalidArgumentException;
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Api\InvoiceItemUpdateOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
@@ -32,6 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(InvoicesApi::class)]
 #[CoversClass(InvoiceItem::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
+#[CoversClass(InvoiceItemUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
@@ -359,10 +362,10 @@ final class InvoiceItemsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicesApi($http)->items;
 
-        $options = new InvoiceItemCreateOptions(
+        $options = new InvoiceItemUpdateOptions(
+            unit: 'Stück',
             quantity: 3.0,
             unitPrice: Money::of('75'),
-            unit: 'Stück',
             taxName: 'USt 19%',
             taxRate: 19.0,
             taxChangedManually: true,
@@ -385,6 +388,40 @@ final class InvoiceItemsApiTest extends TestCase
             'https://mycompany.billomat.net/api/invoice-items/77',
             $captured->url
         );
+    }
+
+    #[Test]
+    public function itSendsOnlySetFieldsOnUpdate(): void
+    {
+        $captured = new CapturedRequest();
+
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->options = $options;
+
+            return new MockResponse((string) json_encode([
+                'invoice-item' => ['id' => 77, 'invoice_id' => 123, 'quantity' => 3, 'unit_price' => 25, 'title' => 'Beratung'],
+            ]));
+        });
+
+        $api = new InvoicesApi(new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key')))->items;
+
+        $updated = $api->update(77, new InvoiceItemUpdateOptions(unitPrice: Money::of('25')));
+
+        // Billomat lässt nicht gesendete Felder unverändert (geprüft gegen die Sandbox).
+        self::assertSame(['invoice-item' => ['unit_price' => '25']], $captured->json());
+        self::assertSame('Beratung', $updated->title);
+    }
+
+    #[Test]
+    public function updateRejectsCreateOptions(): void
+    {
+        $api = new InvoicesApi(new BillomatHttpClient(new Psr18Client(new MockHttpClient()), new BillomatConfig('mycompany', 'secret-key')))->items;
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageIsOrContains('Expected Justpilot\Billomat\Api\InvoiceItemUpdateOptions, got Justpilot\Billomat\Api\InvoiceItemCreateOptions.');
+
+        /** @phpstan-ignore argument.type (absichtlich falsche Options) */
+        $api->update(77, new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: Money::of('1')));
     }
 
     #[Test]

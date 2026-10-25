@@ -27,7 +27,9 @@ declare(strict_types=1);
  *   enumList    true = kommaseparierte Werte (z. B. Zahlarten) als list<Enum>.
  *               Typ `map` mit 'enum': Objekt Schlüssel → Enum-Wert als array<string, Enum>
  *               (read-only; leere und unbekannte Werte fallen heraus).
- *   model       ['required' => true]  → Konstruktor-Parameter ohne Default
+ *   model       ['required' => true]  → Billomat liefert das Feld immer (z. B. `id`): nicht-nullbarer Typ ohne Default;
+ *                                       fehlt es, wirft fromArray() eine UnexpectedResponseException
+ *                                       (nicht mit 'nonNull' und nicht für Enums)
  *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
  *                                       (nicht für Enums: unbekannte Werte werden immer zu null)
  *               ['type' => 'int']     → abweichender Typ im Read-Model
@@ -105,7 +107,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Kunden.'],
-        'name' => ['model' => ['required' => true, 'nonNull' => true], 'doc' => 'Firmenname des Kunden.'],
+        'name' => ['model' => ['nonNull' => true], 'doc' => 'Firmenname des Kunden.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Kunden.'],
         'client_number' => ['type' => 'string', 'writable' => true, 'doc' => 'Kundennummer (frei wählbar).'],
         'number' => ['doc' => 'Laufende Nummer (ohne Präfix).'],

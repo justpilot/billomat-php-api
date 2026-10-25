@@ -26,7 +26,6 @@ final class ClientsListIntegrationTest extends AbstractBillomatIntegrationTestCa
 
         if ([] !== $clients) {
             $first = $clients[0];
-            self::assertNotNull($first->id);
             self::assertIsString($first->name);
         }
     }

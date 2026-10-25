@@ -28,7 +28,7 @@ final readonly class CountryTax
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Eintrags. */
-        public ?int $id,
+        public int $id,
         /**
          * Ländercode nach ISO 3166 Alpha-2.
          *
@@ -52,7 +52,7 @@ final readonly class CountryTax
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             countryCode: ScalarCaster::toStringOrNull($data['country_code'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );

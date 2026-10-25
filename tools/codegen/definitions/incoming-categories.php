@@ -23,7 +23,7 @@ return [
 
     'fields' => [
         // BC: Die ID ist seit jeher ein String.
-        'id' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'Kennung der Kategorie.'],
+        'id' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Kennung der Kategorie.'],
         'title' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Bezeichnung der Kategorie.'],
         'description' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Beschreibung der Kategorie.'],
     ],

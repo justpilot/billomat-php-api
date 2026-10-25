@@ -38,27 +38,27 @@ final readonly class ReminderItem
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Position. */
-        public ?int $id,
+        public int $id,
+        /** Einzelpreis. */
+        public Money $unitPrice,
         /** ID des zugehörigen Dokuments. */
-        public ?int $reminderId,
+        public ?int $reminderId = null,
         /** ID des Artikels (falls verknüpft). */
-        public ?int $articleId,
+        public ?int $articleId = null,
         /**
          * Laufende Positionsnummer innerhalb des Dokuments.
          *
          * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
          */
-        public ?int $position,
+        public ?int $position = null,
         /** Einheit (z. B. "Stück", "Stunde"). */
-        public ?string $unit,
+        public ?string $unit = null,
         /** Menge. */
-        public float $quantity,
-        /** Einzelpreis. */
-        public Money $unitPrice,
+        public float $quantity = 0.0,
         /** Titel der Position. */
-        public ?string $title,
+        public ?string $title = null,
         /** Beschreibung der Position. */
-        public ?string $description,
+        public ?string $description = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /** Gesamtbetrag der Position. */
@@ -82,13 +82,13 @@ final readonly class ReminderItem
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            unitPrice: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null), self::class, 'unit_price'),
             reminderId: ScalarCaster::toIntOrNull($data['reminder_id'] ?? null),
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
             quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
-            unitPrice: ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null) ?? Money::zero(),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),

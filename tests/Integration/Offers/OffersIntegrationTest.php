@@ -143,4 +143,48 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat->offers->delete($draft->id);
         self::assertNull($billomat->offers->get($draft->id));
     }
+
+    #[Group('integration')]
+    #[Test]
+    public function canWalkThroughOfferStatusTransitionsInSandbox(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $clientId = $this->ensureClientId();
+
+        $opts = new OfferCreateOptions(
+            clientId: $clientId,
+            title: 'Status-Test '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        )->withItem(new OfferItemCreateOptions(1.0, Money::of('10.00'), title: 'Status-Test Position'));
+
+        $offer = $billomat->offers->create($opts);
+        self::assertNotNull($offer->id);
+        $id = $offer->id;
+
+        try {
+            $billomat->offers->complete($id);
+            self::assertSame(OfferStatus::OPEN, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->cancel($id);
+            self::assertSame(OfferStatus::CANCELED, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->uncancel($id);
+            self::assertSame(OfferStatus::OPEN, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->win($id);
+            self::assertSame(OfferStatus::WON, $billomat->offers->getOrFail($id)->status);
+
+            // clear() geht erst aus WON, unclear() führt zurück nach WON.
+            $billomat->offers->clear($id);
+            self::assertSame(OfferStatus::CLEARED, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->unclear($id);
+            self::assertSame(OfferStatus::WON, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->lose($id);
+            self::assertSame(OfferStatus::LOST, $billomat->offers->getOrFail($id)->status);
+        } finally {
+            $billomat->offers->delete($id);
+        }
+    }
 }

@@ -92,4 +92,41 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
         $billomat->confirmations->delete($confirmation->id);
         self::assertNull($billomat->confirmations->get($confirmation->id));
     }
+
+    #[Group('integration')]
+    #[Test]
+    public function canWalkThroughConfirmationStatusTransitionsInSandbox(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $clientId = $this->ensureClientId();
+
+        $opts = new ConfirmationCreateOptions(
+            clientId: $clientId,
+            title: 'Status-Test '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        )->withItem(new ConfirmationItemCreateOptions(1.0, Money::of('10.00'), title: 'Status-Test Position'));
+
+        $confirmation = $billomat->confirmations->create($opts);
+        self::assertNotNull($confirmation->id);
+        $id = $confirmation->id;
+
+        try {
+            $billomat->confirmations->complete($id);
+            self::assertSame(ConfirmationStatus::COMPLETED, $billomat->confirmations->getOrFail($id)->status);
+
+            $billomat->confirmations->cancel($id);
+            self::assertSame(ConfirmationStatus::CANCELED, $billomat->confirmations->getOrFail($id)->status);
+
+            $billomat->confirmations->uncancel($id);
+            self::assertSame(ConfirmationStatus::COMPLETED, $billomat->confirmations->getOrFail($id)->status);
+
+            $billomat->confirmations->clear($id);
+            self::assertSame(ConfirmationStatus::CLEARED, $billomat->confirmations->getOrFail($id)->status);
+
+            $billomat->confirmations->unclear($id);
+            self::assertSame(ConfirmationStatus::COMPLETED, $billomat->confirmations->getOrFail($id)->status);
+        } finally {
+            $billomat->confirmations->delete($id);
+        }
+    }
 }

@@ -190,10 +190,13 @@ final class RemindersApiTest extends TestCase
         $api->complete(1);
         $api->cancel(2);
         $api->delete(3);
+        $api->uncancel(4);
 
         self::assertSame('https://mycompany.billomat.net/api/reminders/1/complete', $captured[0]->url);
         self::assertSame('https://mycompany.billomat.net/api/reminders/2/cancel', $captured[1]->url);
         self::assertSame('DELETE', $captured[2]->method);
+        self::assertSame('PUT', $captured[3]->method);
+        self::assertSame('https://mycompany.billomat.net/api/reminders/4/uncancel', $captured[3]->url);
     }
 
     #[Test]

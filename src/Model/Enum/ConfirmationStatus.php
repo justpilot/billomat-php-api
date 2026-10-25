@@ -12,8 +12,9 @@ namespace Justpilot\Billomat\Model\Enum;
  * Lebenszyklus:
  *  - DRAFT  → über `complete()` → OPEN bzw. COMPLETED (Billomat liefert
  *    nach `complete()` inzwischen COMPLETED, Stand 2026-10)
- *  - OPEN   → über `clear()`    → CLEARED (z.B. in Rechnung übernommen)
- *  - OPEN/CLEARED → über `cancel()` → CANCELED
+ *  - COMPLETED → über `clear()`  → CLEARED (z.B. in Rechnung übernommen),
+ *    zurück über `unclear()`
+ *  - COMPLETED → über `cancel()` → CANCELED, zurück über `uncancel()`
  */
 enum ConfirmationStatus: string
 {

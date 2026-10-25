@@ -284,18 +284,6 @@ final class OffersApiTest extends TestCase
         self::assertSame(['offer' => ['template_id' => 5]], $payload);
     }
 
-    /**
-     * @return iterable<string, array{string, string}>
-     */
-    public static function statusActionProvider(): iterable
-    {
-        yield 'cancel' => ['cancel', 'cancel'];
-        yield 'win' => ['win', 'win'];
-        yield 'lose' => ['lose', 'lose'];
-        yield 'clear' => ['clear', 'clear'];
-        yield 'undo' => ['undo', 'undo'];
-    }
-
     #[Test]
     public function itDeletesOfferViaDelete(): void
     {
@@ -337,14 +325,16 @@ final class OffersApiTest extends TestCase
         $api->win(2);
         $api->lose(3);
         $api->clear(4);
-        $api->undo(5);
+        $api->uncancel(5);
+        $api->unclear(6);
 
-        self::assertCount(5, $captured);
+        self::assertCount(6, $captured);
         self::assertSame('https://mycompany.billomat.net/api/offers/1/cancel', $captured[0]->url);
         self::assertSame('https://mycompany.billomat.net/api/offers/2/win', $captured[1]->url);
         self::assertSame('https://mycompany.billomat.net/api/offers/3/lose', $captured[2]->url);
         self::assertSame('https://mycompany.billomat.net/api/offers/4/clear', $captured[3]->url);
-        self::assertSame('https://mycompany.billomat.net/api/offers/5/undo', $captured[4]->url);
+        self::assertSame('https://mycompany.billomat.net/api/offers/5/uncancel', $captured[4]->url);
+        self::assertSame('https://mycompany.billomat.net/api/offers/6/unclear', $captured[5]->url);
 
         foreach ($captured as $row) {
             self::assertSame('PUT', $row->method);

@@ -30,6 +30,7 @@ use NoDiscard;
  *  - DELETE /reminders/{id}
  *  - PUT    /reminders/{id}/complete
  *  - PUT    /reminders/{id}/cancel
+ *  - PUT    /reminders/{id}/uncancel
  *  - POST   /reminders/{id}/email
  *  - GET    /reminders/{id}/pdf
  *  - PUT    /reminders/{id}/upload-signature
@@ -168,9 +169,16 @@ final class RemindersApi extends AbstractApi
         $this->deleteVoid("/reminders/{$id}");
     }
 
+    /** Storniert eine Mahnung (Status → CANCELED). */
     public function cancel(int $id): void
     {
         $this->putVoid("/reminders/{$id}/cancel");
+    }
+
+    /** Hebt die Stornierung auf (CANCELED → OPEN). */
+    public function uncancel(int $id): void
+    {
+        $this->putVoid("/reminders/{$id}/uncancel");
     }
 
     public function email(int $id, ?EmailOptions $options = null): void

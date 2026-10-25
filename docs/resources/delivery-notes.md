@@ -15,15 +15,13 @@ $billomat->deliveryNotes->tags       // tags
 
 ## Model
 
-A delivery note documents the physical handover of a delivery. Compared to an [invoice](invoices.md) it carries little monetary data: the read model has no total or price fields, and the document itself creates no payment obligation. The status lifecycle is the same as for [confirmations](confirmations.md):
+A delivery note documents the physical handover of a delivery. Compared to an [invoice](invoices.md) it carries little monetary data: the read model has no total or price fields, and the document itself creates no payment obligation. The status lifecycle is a single step:
 
 ```
-DRAFT  ──complete()──▶  OPEN / CREATED  ──clear()───▶  CLEARED
-                         │
-                         └──cancel()──▶  CANCELED
+DRAFT  ──complete()──▶  CREATED
 ```
 
-`undo()` sets `CLEARED`/`CANCELED` back to `OPEN`. A delivery note can be linked to a source invoice (`invoiceId`), confirmation (`confirmationId`) and/or offer (`offerId`).
+Unlike [confirmations](confirmations.md), the API offers no further status transitions: `PUT /delivery-notes/{id}/cancel` and `/uncancel` answer 400 ("cancellation not supported"), `/clear`, `/unclear` and `/undo` answer 404. The enum still knows `OPEN`, `CLEARED` and `CANCELED`, which Billomat may report for documents changed in the web app. A delivery note can be linked to a source invoice (`invoiceId`), confirmation (`confirmationId`) and/or offer (`offerId`).
 
 ## Endpoint overview
 
@@ -39,9 +37,6 @@ DRAFT  ──complete()──▶  OPEN / CREATED  ──clear()───▶  CLE
 | `update($id, $options)` | PUT | `/delivery-notes/{id}` |
 | `delete($id)` | DELETE | `/delivery-notes/{id}` |
 | `complete($id, $templateId?)` | PUT | `/delivery-notes/{id}/complete` |
-| `cancel($id)` | PUT | `/delivery-notes/{id}/cancel` |
-| `clear($id)` | PUT | `/delivery-notes/{id}/clear` |
-| `undo($id)` | PUT | `/delivery-notes/{id}/undo` |
 | `email($id, $options?)` | POST | `/delivery-notes/{id}/email` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/delivery-notes/{id}/upload-signature` |
 | `pdf($id, $type?, $rawPdf?)` | GET | `/delivery-notes/{id}/pdf` |
@@ -134,17 +129,7 @@ Completes the draft. Assigns the final `delivery_note_number` and generates the 
 
 #### `delete(int $id): void`
 
-Only allowed in `DRAFT`; after that, use `cancel()`.
-
-#### Status transitions
-
-```php
-$billomat->deliveryNotes->cancel($note->id);   // OPEN/CLEARED  → CANCELED
-$billomat->deliveryNotes->clear($note->id);    // OPEN          → CLEARED
-$billomat->deliveryNotes->undo($note->id);     // {clear,cancel} → OPEN
-```
-
-All three return `void`. Invalid transitions throw a `ValidationException` (422).
+Deletes the delivery note. There is no `cancel()` for delivery notes; in the sandbox, Billomat also deleted completed delivery notes.
 
 #### `email(int $id, ?EmailOptions $options = null): void`
 
@@ -397,7 +382,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 - **A delivery note carries little monetary data.** Billomat returns no total or price fields in the read model, and the document creates no receivable. If you expect a payment, you want `$billomat->invoices` or `$billomat->incomings`.
 - **No `discount`/`validity`.** Unlike `OfferCreateOptions`/`ConfirmationCreateOptions`, `DeliveryNoteCreateOptions` has no `discountRate`/`discountDays`/`discountDate`/`validityDays` fields. Don't look for them out of copy-paste habit.
 - **`update()` doesn't change line items.** Billomat ignores embedded `delivery-note-items` on PUT. Always use `$billomat->deliveryNotes->items`.
-- **`delete()` only in `DRAFT`.** After `complete()`, only `cancel()` is possible.
+- **No status transitions after `complete()`.** The SDK has no `cancel()`, `clear()` or `undo()` for delivery notes because Billomat's API doesn't support them (400/404). Up to 3.x the SDK had these methods; they always failed.
 - **`DeliveryNoteItemCreateOptions` is also the update type.** The constructor requires `quantity` and `unitPrice` even if you only want to change the title.
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `delivery-note` as an object; the SDK wraps it in a list.
 - **Multiple source references are possible.** `invoiceId`, `confirmationId` and `offerId` can all be set at the same time, but Billomat does **not** synchronize the status of the linked documents automatically.
@@ -474,14 +459,13 @@ if (false !== $signed) {
     $billomat->deliveryNotes->uploadSignature($note->id, base64_encode($signed));
 }
 
-// 6) Add a note and mark as done
+// 6) Add a note
 $billomat->deliveryNotes->comments->create(
     new DeliveryNoteCommentCreateOptions(
         deliveryNoteId: $note->id,
         comment: 'Receipt confirmed by warehouse South on June 2.',
     ),
 );
-$billomat->deliveryNotes->clear($note->id);
 
 // 7) Archive the signed PDF version
 $pdf = $billomat->deliveryNotes->pdf($note->id, PdfType::SIGNED);

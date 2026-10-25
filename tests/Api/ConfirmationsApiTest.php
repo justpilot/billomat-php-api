@@ -260,17 +260,20 @@ final class ConfirmationsApiTest extends TestCase
 
         $api->cancel(1);
         $api->clear(2);
-        $api->undo(3);
+        $api->uncancel(3);
         $api->delete(4);
+        $api->unclear(5);
 
         self::assertSame('PUT', $captured[0]->method);
         self::assertSame('https://mycompany.billomat.net/api/confirmations/1/cancel', $captured[0]->url);
         self::assertSame('PUT', $captured[1]->method);
         self::assertSame('https://mycompany.billomat.net/api/confirmations/2/clear', $captured[1]->url);
         self::assertSame('PUT', $captured[2]->method);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/3/undo', $captured[2]->url);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/3/uncancel', $captured[2]->url);
         self::assertSame('DELETE', $captured[3]->method);
         self::assertSame('https://mycompany.billomat.net/api/confirmations/4', $captured[3]->url);
+        self::assertSame('PUT', $captured[4]->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/5/unclear', $captured[4]->url);
     }
 
     #[Test]

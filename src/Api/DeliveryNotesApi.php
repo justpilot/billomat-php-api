@@ -32,9 +32,6 @@ use NoDiscard;
  *  - PUT    /delivery-notes/{id}
  *  - DELETE /delivery-notes/{id}
  *  - PUT    /delivery-notes/{id}/complete
- *  - PUT    /delivery-notes/{id}/cancel
- *  - PUT    /delivery-notes/{id}/clear
- *  - PUT    /delivery-notes/{id}/undo
  *  - POST   /delivery-notes/{id}/email
  *  - GET    /delivery-notes/{id}/pdf
  *  - PUT    /delivery-notes/{id}/upload-signature
@@ -182,21 +179,6 @@ final class DeliveryNotesApi extends AbstractApi
     public function delete(int $id): void
     {
         $this->deleteVoid("/delivery-notes/{$id}");
-    }
-
-    public function cancel(int $id): void
-    {
-        $this->putVoid("/delivery-notes/{$id}/cancel");
-    }
-
-    public function clear(int $id): void
-    {
-        $this->putVoid("/delivery-notes/{$id}/clear");
-    }
-
-    public function undo(int $id): void
-    {
-        $this->putVoid("/delivery-notes/{$id}/undo");
     }
 
     public function email(int $id, ?EmailOptions $options = null): void

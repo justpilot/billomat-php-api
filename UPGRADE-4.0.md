@@ -349,6 +349,37 @@ if ($billomat->invoices->complete($id)) {
 $billomat->invoices->complete($id); // throws on failure
 ```
 
+## Status methods without a Billomat endpoint are removed
+
+Billomat has no `PUT …/undo` endpoint (404), and delivery notes and letters can't be canceled or
+cleared through the API (`cancel` answers 400 "cancellation not supported", `clear` 404). The methods
+that called these endpoints are removed:
+
+| Removed | Replacement |
+|---|---|
+| `OffersApi::undo()` | `uncancel()` (`CANCELED → OPEN`) or `unclear()` (`CLEARED → WON`) |
+| `ConfirmationsApi::undo()` | `uncancel()` (`CANCELED → COMPLETED`) or `unclear()` (`CLEARED → COMPLETED`) |
+| `DeliveryNotesApi::cancel()`, `clear()`, `undo()` | none (Billomat offers no endpoint) |
+| `LettersApi::cancel()`, `clear()`, `undo()` | none (Billomat offers no endpoint) |
+
+```php
+// 3.x
+$billomat->offers->cancel($id);
+$billomat->offers->undo($id);          // HTTP 404
+
+$billomat->confirmations->clear($id);
+$billomat->confirmations->undo($id);   // HTTP 404
+
+// 4.0
+$billomat->offers->cancel($id);
+$billomat->offers->uncancel($id);
+
+$billomat->confirmations->clear($id);
+$billomat->confirmations->unclear($id);
+```
+
+`RemindersApi` gains `uncancel()` as well.
+
 ## Options are immutable
 
 All `*CreateOptions`/`*UpdateOptions`, `EmailOptions`, `InvoiceMailOptions`,

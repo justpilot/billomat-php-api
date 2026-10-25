@@ -12,9 +12,9 @@ namespace Justpilot\Billomat\Model\Enum;
  * Lebenszyklus:
  *  - DRAFT  → über `complete()` → OPEN
  *  - OPEN   → über `win()`  → WON
- *  - OPEN   → über `lose()` → LOST
- *  - OPEN   → über `clear()`→ CLEARED
- *  - OPEN/WON → über `cancel()` → CANCELED
+ *  - OPEN/WON → über `lose()` → LOST
+ *  - WON    → über `clear()` → CLEARED, zurück über `unclear()` → WON
+ *  - OPEN/WON → über `cancel()` → CANCELED, zurück über `uncancel()` → OPEN
  */
 enum OfferStatus: string
 {

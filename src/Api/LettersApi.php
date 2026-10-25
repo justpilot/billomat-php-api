@@ -31,9 +31,6 @@ use NoDiscard;
  *  - PUT    /letters/{id}
  *  - DELETE /letters/{id}
  *  - PUT    /letters/{id}/complete
- *  - PUT    /letters/{id}/cancel
- *  - PUT    /letters/{id}/clear
- *  - PUT    /letters/{id}/undo
  *  - POST   /letters/{id}/email
  *  - GET    /letters/{id}/pdf
  *  - PUT    /letters/{id}/upload-signature
@@ -173,21 +170,6 @@ final class LettersApi extends AbstractApi
     public function delete(int $id): void
     {
         $this->deleteVoid("/letters/{$id}");
-    }
-
-    public function cancel(int $id): void
-    {
-        $this->putVoid("/letters/{$id}/cancel");
-    }
-
-    public function clear(int $id): void
-    {
-        $this->putVoid("/letters/{$id}/clear");
-    }
-
-    public function undo(int $id): void
-    {
-        $this->putVoid("/letters/{$id}/undo");
     }
 
     public function email(int $id, ?EmailOptions $options = null): void

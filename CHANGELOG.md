@@ -26,6 +26,7 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 - `getOrFail()` on every resource and sub-resource with `get()`: returns the model or throws `NotFoundException` instead of returning `null`.
 - `BillomatConfig::$language` (and `BillomatClient::create(language: …)`) sets the `Accept-Language` header, e.g. `'en-gb'`; default stays `'de-de'`, `null` omits the header.
 - Exception messages include the method, the path and Billomat's error text, e.g. `Billomat responded with HTTP 422 to POST /clients. Name is missing`.
+- `OffersApi::uncancel()`/`unclear()`, `ConfirmationsApi::uncancel()`/`unclear()` and `RemindersApi::uncancel()` for the `/uncancel` and `/unclear` endpoints (checked in the sandbox).
 
 ### Changed
 - Development: PHPStan runs with the bleeding-edge ruleset and without `ignoreErrors` for the tests; the tests capture the outgoing `MockHttpClient` request as a typed `CapturedRequest` (method, URL, query, headers, decoded JSON body) instead of nested `mixed` arrays. No change to the public API.
@@ -73,6 +74,7 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
   - `AbstractApi::putEmptyResponse()` (use `putVoid()`).
   - The read-model properties Billomat no longer returns: `Article::$unit`/`$purchasePriceCurrencyCode`/`$categoryId`, `Client::$customerportalUrl`, `Contact::$note`, `*Property::$position`, `TaxRate::$accountId`, `ReminderText::$dueDays`, `Country::$nameDe`/`$eu`, `User::$phone`/`$mobile`/`$fax`, `Invoice::$customerportalUrl`, `CreditNote::$customerportalUrl`, `Offer`/`Confirmation::$discountRate`/`$discountDate`/`$discountDays`/`$discountAmount`/`$customerportalUrl`, `Letter::$letterNumber`/`$number`/`$numberPre`/`$numberLength`/`$note`/`$customerportalUrl`, `Reminder::$reminderNumber`/`$number`/`$numberPre`/`$numberLength`/`$totalNet`/`$quote`, `Recurring::$numberPre`, `Incoming::$supplyDate`/`$dueDays`/`$paidAt`/`$intro`, `DeliveryNote::$totalGross`/`$totalNet`/`$netGross`/`$reduction`/`$totalGrossUnreduced`/`$totalNetUnreduced`/`$currencyCode`/`$quote`/`$customerportalUrl`, `$created` on `InvoiceItem`/`OfferItem`/`CreditNoteItem`/`ConfirmationItem`, `ReminderItem::$totalGross`/`$totalNet`/`$created` and `DeliveryNoteItem::$unitPrice`/`$taxName`/`$taxRate`/`$reduction`/`$totalGross`/`$totalNet`/`$totalGrossUnreduced`/`$totalNetUnreduced`/`$created`. They also disappear from the models' constructors and `toArray()`. Fields that are writable stay in the `*CreateOptions`/`*UpdateOptions`.
 - `AbstractApi::mapHttpException()` and `HttpException::fromResponse()` (Symfony-specific; the mapping now lives in `BillomatHttpClient`).
+- **BC break: status methods for endpoints Billomat doesn't have.** `OffersApi::undo()` and `ConfirmationsApi::undo()` are gone (`PUT …/undo` answers 404); use `uncancel()` or `unclear()`. `DeliveryNotesApi` and `LettersApi` lose `cancel()`, `clear()` and `undo()`: Billomat answers `cancel` with 400 ("cancellation not supported") and `clear`/`undo` with 404, so these methods could never succeed.
 
 ## [3.4.0] - 2026-10-24
 

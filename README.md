@@ -227,11 +227,11 @@ Alle vom SDK geworfenen Exceptions erben von `BillomatException`. HTTP-Fehler we
 | 401, 403 | `AuthenticationException` |
 | 404 | `NotFoundException` |
 | 400, 422 | `ValidationException` |
-| 429 | `RateLimitException` (mit `getRetryAfter()`) |
+| 429 | `RateLimitException` |
 | sonstige 4xx/5xx | `HttpException` |
 | keine Antwort (DNS, Timeout, Verbindungsabbruch) | `TransportException` |
 
-`get($id)`-Methoden geben bei einer 404-Antwort `null` zurück, statt eine Exception zu werfen. Auf jeder `HttpException` sind `getStatusCode()` und `getResponseBody()` verfügbar — letzteres enthält den Roh-Body von Billomat und ist beim Debuggen oft hilfreich.
+`get($id)`-Methoden geben bei einer 404-Antwort `null` zurück, statt eine Exception zu werfen. `$e->isTransient()` sagt, ob ein späterer Versuch helfen kann (429, 502–504, Netzwerkfehler), `$e->mayHaveBeenProcessed()`, ob Billomat einen fehlgeschlagenen Schreib-Request trotzdem verarbeitet haben kann. Auf jeder `HttpException` sind `getStatusCode()`, `getRetryAfter()` und `getResponseBody()` verfügbar — letzteres enthält den Roh-Body von Billomat und ist beim Debuggen oft hilfreich.
 
 Beispiele und Patterns: [docs/error-handling.md](docs/error-handling.md), Hintergrund zu Rate-Limits in [docs/concepts/errors-and-rate-limits.md](docs/concepts/errors-and-rate-limits.md).
 

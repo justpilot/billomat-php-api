@@ -13,7 +13,7 @@ Billomat antwortet bei Problemen mit einem `4xx`/`5xx`-Statuscode und einer kurz
 | 401, 403 | `AuthenticationException` |
 | 404 | `NotFoundException` |
 | 400, 422 | `ValidationException` |
-| 429 | `RateLimitException` (erbt von `HttpException`, `getRetryAfter()` in Sekunden) |
+| 429 | `RateLimitException` (erbt von `HttpException`) |
 | Sonstige `4xx`/`5xx` | `HttpException` |
 | keine Antwort (DNS, Timeout, Verbindungsabbruch) | `TransportException` (PSR-18-Exception in `getPrevious()`) |
 
@@ -24,6 +24,38 @@ Die Billomat-Fehlermeldung landet in der Exception-Message, z. B. `Billomat resp
 <errors>
     <error>Resource not found</error>
 </errors>
+```
+
+## Fehler klassifizieren
+
+Jede `BillomatException` beantwortet die zwei Fragen, die ein Aufrufer meist stellt, ohne dass er Statuscodes oder `getPrevious()` auswerten muss:
+
+| Fehler | `isTransient()` | `mayHaveBeenProcessed()` | `getRetryAfter()` |
+|---|---|---|---|
+| 400, 401, 403, 404, 422, sonstige 4xx | `false` | `false` | `null` |
+| 429 | `true` | `false` | `Retry-After` bzw. `X-Rate-Limit-Reset` |
+| 502, 503, 504 | `true` | `true` | `Retry-After`, falls gesetzt |
+| 500 und sonstige 5xx | `false` | `true` | `null` |
+| `TransportException` (Netzwerkfehler, Timeout) | `true` | `true` | – |
+| `UnexpectedResponseException` (2xx mit unerwartetem Body) | `false` | `true` | – |
+
+- **`isTransient()`**: Ein späterer Versuch kann Erfolg haben. Die automatischen Retries des SDK sind dann schon ausgeschöpft; sinnvoll ist ein späterer Neuversuch, z. B. per Queue.
+- **`mayHaveBeenProcessed()`**: Billomat kann den Request trotz des Fehlers verarbeitet haben. Vor einem erneuten POST per `get()`/`list()` prüfen, ob die Rechnung schon existiert. Bei `false` (4xx) hat Billomat den Request sicher abgelehnt.
+
+```php
+use Justpilot\Billomat\Exception\BillomatException;
+use Justpilot\Billomat\Exception\HttpException;
+
+try {
+    $invoice = $billomat->invoices->create($options);
+} catch (BillomatException $e) {
+    if ($e->mayHaveBeenProcessed()) {
+        // Erst nachsehen, ob die Rechnung schon angelegt wurde.
+    }
+    if ($e->isTransient()) {
+        $job->releaseIn($e instanceof HttpException ? $e->getRetryAfter() ?? 60 : 60);
+    }
+}
 ```
 
 ## `get($id)` mit 404
@@ -58,7 +90,7 @@ Wird das Kontingent im Fenster aufgebraucht, antwortet Billomat mit `429 Too Man
 <error>Maximum number of requests reached. Try again in 246 seconds.</error>
 ```
 
-Das SDK wartet dann selbst: Es nimmt die Wartezeit aus `Retry-After` (falls gesetzt) bzw. `X-Rate-Limit-Reset` und wiederholt den Request — bei 429 jede Methode, auch POST/PUT/DELETE, weil Billomat den Request nicht verarbeitet hat. Das passiert aber nur, wenn die Wartezeit höchstens `RetryPolicy::$maxDelayMs` (Default 10 s) beträgt und noch Versuche übrig sind. Sonst wirft das SDK sofort eine `RateLimitException`; `getRetryAfter()` nennt die Sekunden bis zum nächsten Fenster (oder `null`, wenn Billomat keine Angabe gemacht hat):
+Das SDK wartet dann selbst: Es nimmt die Wartezeit aus `Retry-After` (falls gesetzt) bzw. `X-Rate-Limit-Reset` und wiederholt den Request — bei 429 jede Methode, auch POST/PUT/DELETE, weil Billomat den Request nicht verarbeitet hat. Das passiert aber nur, wenn die Wartezeit höchstens `RetryPolicy::$maxDelayMs` (Default 10 s) beträgt und noch Versuche übrig sind. Sonst wirft das SDK sofort eine `RateLimitException`; kommt sie beim Aufrufer an, sind die Retries ausgeschöpft. `getRetryAfter()` nennt die Sekunden bis zum nächsten Fenster (oder `null`, wenn Billomat keine Angabe gemacht hat):
 
 ```php
 use Justpilot\Billomat\Exception\RateLimitException;

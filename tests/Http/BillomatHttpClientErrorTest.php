@@ -284,6 +284,58 @@ final class BillomatHttpClientErrorTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('retryableStatuses')]
+    public function itPassesRetryAfterOfGatewayErrorsToTheException(int $status): void
+    {
+        $client = $this->client([new MockResponse('', [
+            'http_code' => $status,
+            'response_headers' => ['Retry-After' => '120', 'X-Rate-Limit-Reset' => (string) (time() + 900)],
+        ])], RetryPolicy::none());
+
+        try {
+            $client->request('POST', '/invoices');
+            self::fail('Expected an HttpException.');
+        } catch (HttpException $e) {
+            self::assertSame($status, $e->getStatusCode());
+            self::assertSame(120, $e->getRetryAfter());
+            self::assertTrue($e->isTransient());
+            self::assertTrue($e->mayHaveBeenProcessed());
+        }
+    }
+
+    #[Test]
+    public function itIgnoresTheRateLimitResetOfGatewayErrors(): void
+    {
+        $client = $this->client([new MockResponse('', [
+            'http_code' => 503,
+            'response_headers' => ['X-Rate-Limit-Reset' => (string) (time() + 900)],
+        ])], RetryPolicy::none());
+
+        try {
+            $client->request('GET', '/clients');
+            self::fail('Expected an HttpException.');
+        } catch (HttpException $e) {
+            self::assertNull($e->getRetryAfter());
+        }
+    }
+
+    #[Test]
+    public function itSetsNoRetryAfterForOtherErrors(): void
+    {
+        $client = $this->client([new MockResponse('', [
+            'http_code' => 500,
+            'response_headers' => ['Retry-After' => '120'],
+        ])]);
+
+        try {
+            $client->request('GET', '/clients');
+            self::fail('Expected an HttpException.');
+        } catch (HttpException $e) {
+            self::assertNull($e->getRetryAfter());
+        }
+    }
+
+    #[Test]
     public function itDoesNotRetryInternalServerErrors(): void
     {
         $client = $this->client([new MockResponse('', ['http_code' => 500])]);

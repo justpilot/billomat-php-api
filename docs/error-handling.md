@@ -18,12 +18,12 @@ Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatE
 
 | Klasse | Datei | Bedeutung |
 |---|---|---|
-| `BillomatException` | `src/Exception/BillomatException.php` | Basis-Marker. Fängst du diese, fängst du alles vom SDK. |
-| `HttpException` | `src/Exception/HttpException.php` | Generischer HTTP-Fehler. Hält Status-Code und Roh-Body. |
+| `BillomatException` | `src/Exception/BillomatException.php` | Basis-Klasse. Fängst du diese, fängst du alles vom SDK. `isTransient()` und `mayHaveBeenProcessed()` klassifizieren den Fehler (siehe [Fehler klassifizieren](concepts/errors-and-rate-limits.md#fehler-klassifizieren)). |
+| `HttpException` | `src/Exception/HttpException.php` | Generischer HTTP-Fehler. Hält Status-Code, Roh-Body und `getRetryAfter(): ?int` (bei 429 und 502/503/504). |
 | `AuthenticationException` | `src/Exception/AuthenticationException.php` | 401/403 — ungültiger oder fehlender API-Key, Berechtigung fehlt. |
 | `NotFoundException` | `src/Exception/NotFoundException.php` | 404 — Ressource existiert nicht. |
 | `ValidationException` | `src/Exception/ValidationException.php` | 400/422 — Payload abgelehnt, Pflichtfeld fehlt, Wert ungültig. |
-| `RateLimitException` | `src/Exception/RateLimitException.php` | 429 — Rate-Limit erschöpft und die Wartezeit liegt über `RetryPolicy::$maxDelayMs` (bzw. alle Versuche verbraucht). `getRetryAfter(): ?int` nennt die Sekunden bis zum nächsten Fenster. |
+| `RateLimitException` | `src/Exception/RateLimitException.php` | 429 — Rate-Limit erschöpft und die Wartezeit liegt über `RetryPolicy::$maxDelayMs` (bzw. alle Versuche verbraucht). `getRetryAfter()` nennt die Sekunden bis zum nächsten Fenster. |
 | `TransportException` | `src/Exception/TransportException.php` | Keine Antwort von Billomat (DNS, Verbindungsabbruch, Timeout). Die Exception des PSR-18-Clients steckt in `getPrevious()`. |
 | `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, aber der Body passt nicht zur erwarteten Struktur (seit 3.2). |
 

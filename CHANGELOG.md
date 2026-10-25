@@ -11,7 +11,9 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 ### Added
 - **PSR-18 transport.** The SDK works with any PSR-18 client (Symfony, Guzzle, …) and PSR-17 factories, found via `php-http/discovery` or passed to `BillomatClient`. Without a client, Symfony's `Psr18Client` is used with `BillomatConfig::$timeout` when `symfony/http-client` is installed.
 - **Automatic retries** via `BillomatConfig::$retry` (`RetryPolicy`, default: 2 retries, 500 ms base delay, 10 s cap). 429 responses are retried for every method after the wait Billomat announces (`Retry-After` or `X-Rate-Limit-Reset`); GET requests are also retried on 502/503/504 and network errors with exponential backoff and jitter. `RetryPolicy::none()` turns retries off.
-- `RateLimitException` (429, with `getRetryAfter()`) and `TransportException` (no response, wraps the PSR-18 exception), both below `BillomatException`.
+- `RateLimitException` (429) and `TransportException` (no response, wraps the PSR-18 exception), both below `BillomatException`.
+- **Error classification:** `BillomatException::isTransient()` (429, 502, 503, 504 and network errors) and `mayHaveBeenProcessed()` (`false` for 4xx, `true` for 5xx and network errors), so callers no longer inspect status codes or `getPrevious()` to decide whether to retry later or to check before resending a write request.
+- `HttpException::getRetryAfter()`: seconds announced by Billomat, set for 429 (`Retry-After` or `X-Rate-Limit-Reset`) and for 502/503/504 (`Retry-After`).
 - `WriteOptions` interface with `toArray()`, implemented by all `*CreateOptions`/`*UpdateOptions` and the other write options.
 - `Clear::Field` empties a field in `*UpdateOptions` and `SettingsUpdateOptions`: `null` still means "not sent, unchanged"; `Clear::Field` is sent as JSON `null`, which makes Billomat clear the field.
 - `with*()` methods on every options class return a copy with one field changed (PHP 8.5 `clone` with properties), e.g. `$options->withNote('…')`; `withItem()` on document create options appends a position.

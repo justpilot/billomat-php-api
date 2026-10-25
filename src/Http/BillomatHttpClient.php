@@ -159,12 +159,13 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
     }
 
     /**
-     * Wartezeit in Sekunden, die Billomat bei 429 mitteilt.
+     * Wartezeit in Sekunden, die Billomat mitteilt.
      *
-     * Billomat setzt `X-Rate-Limit-Reset` (Epoch-Sekunden des nächsten Fensters);
-     * ein Standard-`Retry-After` (Sekunden oder HTTP-Datum) hat Vorrang.
+     * Ein Standard-`Retry-After` (Sekunden oder HTTP-Datum) hat Vorrang. Bei 429 setzt
+     * Billomat `X-Rate-Limit-Reset` (Epoch-Sekunden des nächsten Fensters); den Header
+     * schickt Billomat aber bei jeder Response mit, daher zählt er nur bei `$rateLimited`.
      */
-    private function retryAfterSeconds(ResponseInterface $response): ?int
+    private function retryAfterSeconds(ResponseInterface $response, bool $rateLimited = true): ?int
     {
         $retryAfter = $response->getHeaderLine('Retry-After');
 
@@ -182,7 +183,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
 
         $reset = $response->getHeaderLine('X-Rate-Limit-Reset');
 
-        if (ctype_digit($reset)) {
+        if ($rateLimited && ctype_digit($reset)) {
             return max(0, (int) $reset - time());
         }
 
@@ -202,6 +203,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
             401, 403 => new AuthenticationException($message, $status, $body),
             404 => new NotFoundException($message, $status, $body),
             400, 422 => new ValidationException($message, $status, $body),
+            502, 503, 504 => new HttpException($message, $status, $body, retryAfter: $this->retryAfterSeconds($response, rateLimited: false)),
             default => new HttpException($message, $status, $body),
         };
     }

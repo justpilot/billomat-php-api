@@ -15,6 +15,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\IncomingPayment;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -41,10 +42,10 @@ final class IncomingPaymentsApiTest extends TestCase
     #[Test]
     public function itListsPayments(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'incoming-payments' => [
@@ -70,10 +71,10 @@ final class IncomingPaymentsApiTest extends TestCase
     #[Test]
     public function itCreatesPaymentMarkingAsPaid(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, '', $options);
 
             $body = json_encode([
                 'incoming-payment' => ['id' => 99, 'incoming_id' => 42, 'amount' => '100'],
@@ -92,21 +93,16 @@ final class IncomingPaymentsApiTest extends TestCase
         $created = $api->create($opts);
         self::assertSame(99, $created->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(1, $payload['incoming-payment']['mark_incoming_as_paid']);
+        self::assertSame(1, $captured->jsonAt('incoming-payment', 'mark_incoming_as_paid'));
     }
 
     #[Test]
     public function itDeletesPayment(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -117,6 +113,6 @@ final class IncomingPaymentsApiTest extends TestCase
         ))->payments;
 
         $api->delete(99);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

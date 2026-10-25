@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\IncomingComment;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -42,7 +43,7 @@ final class IncomingCommentsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if ('GET' === $method) {
                 return new MockResponse(

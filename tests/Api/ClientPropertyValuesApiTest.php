@@ -16,6 +16,7 @@ use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientPropertyValue;
 use Justpilot\Billomat\Model\Enum\PropertyType;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -42,10 +43,10 @@ final class ClientPropertyValuesApiTest extends TestCase
     #[Test]
     public function itListsValuesByClient(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'client-property-values' => [
@@ -68,16 +69,16 @@ final class ClientPropertyValuesApiTest extends TestCase
         self::assertCount(1, $values);
         self::assertSame('Branche', $values[0]->name);
         self::assertSame('IT', $values[0]->value);
-        self::assertStringContainsString('client_id=42', $captured['url']);
+        self::assertStringContainsString('client_id=42', $captured->url);
     }
 
     #[Test]
     public function itCreatesValue(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'client-property-value' => ['id' => 99, 'client_id' => 42, 'client_property_id' => 7, 'value' => 'Logistik'],
@@ -98,7 +99,7 @@ final class ClientPropertyValuesApiTest extends TestCase
         ));
 
         self::assertSame(99, $value->id);
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
     }
 
     #[Test]

@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ArticleProperty;
 use Justpilot\Billomat\Model\Enum\PropertyType;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -65,10 +66,10 @@ final class ArticlePropertiesApiTest extends TestCase
     #[Test]
     public function itCreatesArticleProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, '', $options);
 
             $body = json_encode([
                 'article-property' => ['id' => 99, 'name' => 'Größe', 'type' => 'TEXTFIELD'],

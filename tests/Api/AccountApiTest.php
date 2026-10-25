@@ -13,6 +13,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -37,11 +38,11 @@ final class AccountApiTest extends TestCase
     #[Test]
     public function itFetchesOwnAccountWithPlanAndQuotas(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
 
             $body = json_encode([
                 'client' => [
@@ -69,8 +70,8 @@ final class AccountApiTest extends TestCase
 
         $account = $api->get();
 
-        self::assertSame('GET', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/clients/myself', $captured['url']);
+        self::assertSame('GET', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/clients/myself', $captured->url);
 
         self::assertSame('XL', $account->plan);
         self::assertSame(12345, $account->client->id);

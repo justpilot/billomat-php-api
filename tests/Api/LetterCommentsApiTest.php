@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\LetterComment;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,10 +40,10 @@ final class LetterCommentsApiTest extends TestCase
     #[Test]
     public function itListsCommentsByLetter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'letter-comments' => [
@@ -64,7 +65,7 @@ final class LetterCommentsApiTest extends TestCase
 
         self::assertCount(1, $comments);
         self::assertSame(LetterCommentActionKey::CREATE, $comments[0]->actionkey);
-        self::assertStringContainsString('letter_id=42', $captured['url']);
+        self::assertStringContainsString('letter_id=42', $captured->url);
     }
 
     #[Test]
@@ -73,7 +74,7 @@ final class LetterCommentsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if ('POST' === $method) {
                 return new MockResponse(

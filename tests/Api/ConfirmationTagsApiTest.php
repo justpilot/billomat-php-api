@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ConfirmationTag;
 use Justpilot\Billomat\Model\ConfirmationTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,10 +40,10 @@ final class ConfirmationTagsApiTest extends TestCase
     #[Test]
     public function itListsTagsByConfirmation(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'confirmation-tags' => [
@@ -64,7 +65,7 @@ final class ConfirmationTagsApiTest extends TestCase
 
         self::assertCount(1, $tags);
         self::assertSame('wichtig', $tags[0]->name);
-        self::assertStringContainsString('confirmation_id=42', $captured['url']);
+        self::assertStringContainsString('confirmation_id=42', $captured->url);
     }
 
     #[Test]
@@ -98,10 +99,10 @@ final class ConfirmationTagsApiTest extends TestCase
     #[Test]
     public function itCreatesTag(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'confirmation-tag' => ['id' => 99, 'confirmation_id' => 42, 'name' => 'neu'],
@@ -118,16 +119,16 @@ final class ConfirmationTagsApiTest extends TestCase
         $tag = $api->create(new ConfirmationTagCreateOptions(confirmationId: 42, name: 'neu'));
 
         self::assertSame(99, $tag->id);
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
     }
 
     #[Test]
     public function itDeletesTag(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -138,6 +139,6 @@ final class ConfirmationTagsApiTest extends TestCase
         ))->tags;
 
         $api->delete(99);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

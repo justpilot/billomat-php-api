@@ -22,7 +22,7 @@ use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
-use Justpilot\Billomat\Tests\Support\JsonPayload;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -53,10 +53,10 @@ final class DeliveryNotesApiTest extends TestCase
     #[Test]
     public function itListsDeliveryNotes(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'delivery-notes' => [
@@ -85,7 +85,7 @@ final class DeliveryNotesApiTest extends TestCase
         self::assertCount(1, $notes);
         self::assertContainsOnlyInstancesOf(DeliveryNote::class, $notes);
 
-        $parts = parse_url($captured['url']);
+        $parts = parse_url($captured->url);
         self::assertSame('/api/delivery-notes', $parts['path'] ?? null);
     }
 
@@ -137,10 +137,10 @@ final class DeliveryNotesApiTest extends TestCase
     #[Test]
     public function itCreatesDeliveryNoteViaPost(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'delivery-note' => [
@@ -171,22 +171,21 @@ final class DeliveryNotesApiTest extends TestCase
         $created = $api->create($opts);
 
         self::assertSame(777, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes', $captured->url);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
-        self::assertSame(123, $payload['delivery-note']['client_id']);
-        self::assertSame(99, $payload['delivery-note']['invoice_id']);
-        self::assertCount(1, $payload['delivery-note']['delivery-note-items']['delivery-note-item']);
+        self::assertSame(123, $captured->jsonAt('delivery-note', 'client_id'));
+        self::assertSame(99, $captured->jsonAt('delivery-note', 'invoice_id'));
+        self::assertCount(1, $captured->jsonArray('delivery-note', 'delivery-note-items', 'delivery-note-item'));
     }
 
     #[Test]
     public function itUpdatesDeliveryNoteViaPut(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'delivery-note' => ['id' => 777, 'client_id' => 123, 'title' => 'Geändert'],
@@ -205,8 +204,8 @@ final class DeliveryNotesApiTest extends TestCase
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->title);
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/777', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/777', $captured->url);
     }
 
     #[Test]
@@ -214,8 +213,8 @@ final class DeliveryNotesApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -231,21 +230,21 @@ final class DeliveryNotesApiTest extends TestCase
         $api->undo(4);
         $api->delete(5);
 
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/1/complete', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/2/cancel', $captured[1]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/3/clear', $captured[2]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/4/undo', $captured[3]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/5', $captured[4]['url']);
-        self::assertSame('DELETE', $captured[4]['method']);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/1/complete', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/2/cancel', $captured[1]->url);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/3/clear', $captured[2]->url);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/4/undo', $captured[3]->url);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/5', $captured[4]->url);
+        self::assertSame('DELETE', $captured[4]->method);
     }
 
     #[Test]
     public function itEmailsDeliveryNote(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
@@ -259,17 +258,16 @@ final class DeliveryNotesApiTest extends TestCase
 
         $api->email(42, $opts);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
-        self::assertSame('me@example.com', $payload['email']['from'] ?? null);
+        self::assertSame('me@example.com', $captured->jsonAt('email', 'from'));
     }
 
     #[Test]
     public function itFetchesDeliveryNotePdfInJsonMode(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'pdf' => [
@@ -295,16 +293,16 @@ final class DeliveryNotesApiTest extends TestCase
         self::assertInstanceOf(DeliveryNotePdf::class, $pdf);
         self::assertSame(240, $pdf->deliveryNoteId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/240/pdf', $captured['url']);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/240/pdf', $captured->url);
     }
 
     #[Test]
     public function itFetchesRawPdfAndAcceptsType(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             return new MockResponse('%PDF-1.4 RAW%', ['http_code' => 200]);
         });
@@ -317,17 +315,17 @@ final class DeliveryNotesApiTest extends TestCase
         $result = $api->pdf(777, PdfType::PRINT, rawPdf: true);
 
         self::assertIsString($result);
-        self::assertStringContainsString('format=pdf', $captured['url']);
-        self::assertStringContainsString('type=print', $captured['url']);
+        self::assertStringContainsString('format=pdf', $captured->url);
+        self::assertStringContainsString('type=print', $captured->url);
     }
 
     #[Test]
     public function itUploadsSignaturePdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -340,9 +338,9 @@ final class DeliveryNotesApiTest extends TestCase
         $base64 = base64_encode('PDF-FAKE');
         $api->uploadSignature(555, $base64);
 
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/555/upload-signature', $captured['url']);
-        self::assertSame(['upload' => ['base64file' => $base64]], JsonPayload::fromOptions($captured['options']));
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/555/upload-signature', $captured->url);
+        self::assertSame(['upload' => ['base64file' => $base64]], $captured->json());
     }
 
     #[Test]

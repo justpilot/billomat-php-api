@@ -48,6 +48,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         );
 
         $client = $billomat->clients->create($clientOptions);
+        self::assertNotNull($client->id);
         $clientId = $client->id;
 
         // 2) Draft-Rechnung anlegen
@@ -549,8 +550,10 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
                 email: $faker->unique()->safeEmail(),
             );
             $createdClient = $billomat->clients->create($clientOptions);
+            self::assertNotNull($createdClient->id);
             $clientId = $createdClient->id;
         } else {
+            self::assertNotNull($clients[0]->id);
             $clientId = $clients[0]->id;
         }
 

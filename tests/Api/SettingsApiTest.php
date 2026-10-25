@@ -15,6 +15,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\NumberRangeMode;
 use Justpilot\Billomat\Model\Enum\TemplateEngine;
 use Justpilot\Billomat\Model\Settings;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -114,12 +115,12 @@ final class SettingsApiTest extends TestCase
     #[Test]
     public function itUpdatesSettingsViaPutAndSendsExpectedPayload(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $responseBody = json_encode([
                 'settings' => [
@@ -155,31 +156,22 @@ final class SettingsApiTest extends TestCase
         self::assertTrue($updated->printVersion);
 
         // Request prüfen
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/settings', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/settings', $captured->url);
 
-        $options = $captured['options'] ?? [];
-
-        // Payload robust lesen: json-Option oder body-String
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertIsArray($payload, 'Expected JSON payload array (options[json] or decoded options[body]).');
+        $payload = $captured->json();
         self::assertArrayHasKey('settings', $payload);
         self::assertIsArray($payload['settings']);
 
         // nur gesetzte Felder werden übertragen
-        self::assertSame('GROSS', $payload['settings']['net_gross'] ?? null);
-        self::assertSame('IGNORE_PREFIX', $payload['settings']['number_range_mode'] ?? null);
-        self::assertSame(30, $payload['settings']['due_days'] ?? null);
-        self::assertSame(1, $payload['settings']['print_version'] ?? null);
+        self::assertSame('GROSS', $captured->jsonAt('settings', 'net_gross'));
+        self::assertSame('IGNORE_PREFIX', $captured->jsonAt('settings', 'number_range_mode'));
+        self::assertSame(30, $captured->jsonAt('settings', 'due_days'));
+        self::assertSame(1, $captured->jsonAt('settings', 'print_version'));
 
         // nicht gesetzt => nicht im Payload
-        self::assertArrayNotHasKey('currency_code', $payload['settings']);
-        self::assertArrayNotHasKey('locale', $payload['settings']);
+        self::assertArrayNotHasKey('currency_code', $captured->jsonArray('settings'));
+        self::assertArrayNotHasKey('locale', $captured->jsonArray('settings'));
     }
 
     #[Test]

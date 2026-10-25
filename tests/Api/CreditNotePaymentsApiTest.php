@@ -16,6 +16,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNotePayment;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -42,10 +43,10 @@ final class CreditNotePaymentsApiTest extends TestCase
     #[Test]
     public function itListsPaymentsAndPassesFilters(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'credit-note-payments' => [
@@ -74,7 +75,7 @@ final class CreditNotePaymentsApiTest extends TestCase
         self::assertCount(1, $payments);
         self::assertSame('100', $payments[0]->amount->toString());
         self::assertSame(PaymentType::BANK_TRANSFER, $payments[0]->type);
-        self::assertStringContainsString('credit_note_id=42', $captured['url']);
+        self::assertStringContainsString('credit_note_id=42', $captured->url);
     }
 
     #[Test]
@@ -108,10 +109,10 @@ final class CreditNotePaymentsApiTest extends TestCase
     #[Test]
     public function itCreatesPaymentAndMarksAsPaid(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'credit-note-payment' => [
@@ -142,24 +143,19 @@ final class CreditNotePaymentsApiTest extends TestCase
 
         self::assertSame(99, $created->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(42, $payload['credit-note-payment']['credit_note_id']);
-        self::assertSame('100', $payload['credit-note-payment']['amount']);
-        self::assertSame(1, $payload['credit-note-payment']['mark_credit_note_as_paid']);
-        self::assertSame('BANK_TRANSFER', $payload['credit-note-payment']['type']);
+        self::assertSame(42, $captured->jsonAt('credit-note-payment', 'credit_note_id'));
+        self::assertSame('100', $captured->jsonAt('credit-note-payment', 'amount'));
+        self::assertSame(1, $captured->jsonAt('credit-note-payment', 'mark_credit_note_as_paid'));
+        self::assertSame('BANK_TRANSFER', $captured->jsonAt('credit-note-payment', 'type'));
     }
 
     #[Test]
     public function itDeletesPayment(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -170,7 +166,7 @@ final class CreditNotePaymentsApiTest extends TestCase
         ))->payments;
 
         $api->delete(99);
-        self::assertSame('DELETE', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/credit-note-payments/99', $captured['url']);
+        self::assertSame('DELETE', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/credit-note-payments/99', $captured->url);
     }
 }

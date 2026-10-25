@@ -14,6 +14,7 @@ use Justpilot\Billomat\Exception\RateLimitException;
 use Justpilot\Billomat\Exception\TransportException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -423,9 +424,9 @@ final class BillomatHttpClientErrorTest extends TestCase
     #[Test]
     public function itSendsJsonBodiesWithContentTypeAndZeroFractions(): void
     {
-        $captured = [];
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = $options;
+        $captured = new CapturedRequest();
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}');
         });
@@ -433,17 +434,16 @@ final class BillomatHttpClientErrorTest extends TestCase
 
         $client->request('POST', '/articles', [], ['article' => ['sales_price' => 25.0]]);
 
-        self::assertSame('{"article":{"sales_price":25.0}}', $captured['body']);
-        self::assertIsArray($captured['headers']);
-        self::assertContains('Content-Type: application/json', $captured['headers']);
+        self::assertSame('{"article":{"sales_price":25.0}}', $captured->body());
+        self::assertSame('application/json', $captured->headers()['content-type'] ?? null);
     }
 
     #[Test]
     public function itSendsNoBodyWithoutJson(): void
     {
-        $captured = [];
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = $options;
+        $captured = new CapturedRequest();
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}');
         });
@@ -451,9 +451,8 @@ final class BillomatHttpClientErrorTest extends TestCase
 
         $client->request('DELETE', '/clients/1');
 
-        self::assertSame('', $captured['body']);
-        self::assertIsArray($captured['headers']);
-        self::assertNotContains('Content-Type: application/json', $captured['headers']);
+        self::assertSame('', $captured->body());
+        self::assertArrayNotHasKey('content-type', $captured->headers());
     }
 
     #[Test]

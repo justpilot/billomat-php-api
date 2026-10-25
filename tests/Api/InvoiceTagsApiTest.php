@@ -15,6 +15,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -41,10 +42,10 @@ final class InvoiceTagsApiTest extends TestCase
     #[Test]
     public function listByInvoiceSendsMandatoryInvoiceIdAndParsesTags(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'invoice-tags' => [
@@ -67,7 +68,7 @@ final class InvoiceTagsApiTest extends TestCase
         self::assertContainsOnlyInstancesOf(InvoiceTag::class, $tags);
         self::assertSame('wichtig', $tags[0]->name);
 
-        $parts = parse_url($captured['url']);
+        $parts = parse_url($captured->url);
         self::assertSame('/api/invoice-tags', $parts['path'] ?? null);
         $query = [];
         parse_str($parts['query'] ?? '', $query);
@@ -132,10 +133,10 @@ final class InvoiceTagsApiTest extends TestCase
     #[Test]
     public function createPostsTagAndReturnsHydratedModel(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'invoice-tag' => ['id' => 33, 'invoice_id' => 100, 'name' => 'wichtig'],
@@ -150,17 +151,17 @@ final class InvoiceTagsApiTest extends TestCase
         $tag = $api->create(new InvoiceTagCreateOptions(invoiceId: 100, name: 'wichtig'));
 
         self::assertSame(33, $tag->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/invoice-tags', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/invoice-tags', $captured->url);
     }
 
     #[Test]
     public function deleteSendsDeleteRequest(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -169,7 +170,7 @@ final class InvoiceTagsApiTest extends TestCase
         $api = new InvoicesApi($http)->tags;
 
         $api->delete(7);
-        self::assertSame('DELETE', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/invoice-tags/7', $captured['url']);
+        self::assertSame('DELETE', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/invoice-tags/7', $captured->url);
     }
 }

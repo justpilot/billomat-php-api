@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ReminderTag;
 use Justpilot\Billomat\Model\ReminderTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -43,7 +44,7 @@ final class ReminderTagsApiTest extends TestCase
         $callCount = 0;
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured, &$callCount): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
             ++$callCount;
 
             if (str_contains($url, '/reminder-tags?reminder_id=42')) {

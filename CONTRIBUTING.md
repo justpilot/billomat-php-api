@@ -48,6 +48,7 @@ Every Billomat resource follows the same pattern; look at `ClientsApi`, `ClientC
 ## Tests
 
 - Unit tests use `Symfony\Component\HttpClient\MockHttpClient` with `MockResponse`, wrapped in `Psr18Client`: build a `BillomatConfig`, then `new BillomatHttpClient(new Psr18Client($mock), $config)`, then the `*Api` class. Don't mock `BillomatHttpClient` itself. Retry tests pass a `sleep:` closure so they don't actually wait.
+- Capture the outgoing request with `Tests\Support\CapturedRequest` (`$captured->record($method, $url, $options)` in the mock callback; then `->method`, `->url`, `->query()`, `->headers()`, `->body()`, `->jsonAt('invoice', 'client_id')`, `->jsonArray(…)`) instead of nested arrays. `Tests\Support\Payload::at()`/`arrayAt()` do the same for `toArray()` results. Calls that return several requests collect `CapturedRequest::of(…)` in a list.
 - Assert both the hydrated model and the outgoing request (method, URL, headers, payload).
 - **PHPUnit 13 attributes:** `#[Test]` on every test method (no `test_` prefix), `#[CoversClass(Foo::class)]` on the class, static assertions (`self::assertX()`).
 - Generated code is covered by reflection-based tests (`tests/Model/ModelRoundTripTest.php`, `tests/Api/Options/GeneratedOptionsTest.php`); it needs no per-class tests for its field mapping.
@@ -78,7 +79,7 @@ composer mutate           # Infection mutation testing (~3 min, all of src/)
 composer audit            # security audit of the dependencies
 ```
 
-**PHPStan:** level max without a baseline. Fix findings instead of adding `@phpstan-ignore` comments, ignore rules or casts that only silence them.
+**PHPStan:** level max with the bleeding-edge ruleset and without a baseline or `ignoreErrors`, tests included. Fix findings instead of adding `@phpstan-ignore` comments, ignore rules or casts that only silence them.
 
 **Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x --ignore-msi-with-no-mutations` (the last flag keeps a change without any mutants, e.g. only property hooks, from failing with 0 %). The full run on `main`/`4.x` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
 

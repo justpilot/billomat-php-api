@@ -22,7 +22,7 @@ use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
-use Justpilot\Billomat\Tests\Support\JsonPayload;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -53,10 +53,10 @@ final class ConfirmationsApiTest extends TestCase
     #[Test]
     public function itListsConfirmationsAndPassesFilters(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'confirmations' => [
@@ -87,7 +87,7 @@ final class ConfirmationsApiTest extends TestCase
         self::assertContainsOnlyInstancesOf(Confirmation::class, $confirmations);
         self::assertSame(ConfirmationStatus::DRAFT, $confirmations[0]->status);
 
-        $parts = parse_url($captured['url']);
+        $parts = parse_url($captured->url);
         self::assertSame('/api/confirmations', $parts['path'] ?? null);
     }
 
@@ -141,10 +141,10 @@ final class ConfirmationsApiTest extends TestCase
     #[Test]
     public function itCreatesConfirmationViaPost(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'confirmation' => [
@@ -176,22 +176,21 @@ final class ConfirmationsApiTest extends TestCase
         $created = $api->create($opts);
 
         self::assertSame(777, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations', $captured->url);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
-        self::assertSame(123, $payload['confirmation']['client_id']);
-        self::assertSame(99, $payload['confirmation']['offer_id']);
-        self::assertCount(1, $payload['confirmation']['confirmation-items']['confirmation-item']);
+        self::assertSame(123, $captured->jsonAt('confirmation', 'client_id'));
+        self::assertSame(99, $captured->jsonAt('confirmation', 'offer_id'));
+        self::assertCount(1, $captured->jsonArray('confirmation', 'confirmation-items', 'confirmation-item'));
     }
 
     #[Test]
     public function itUpdatesConfirmationViaPut(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'confirmation' => [
@@ -215,17 +214,17 @@ final class ConfirmationsApiTest extends TestCase
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->title);
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/777', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/777', $captured->url);
     }
 
     #[Test]
     public function itCompletesConfirmationWithTemplateId(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -236,10 +235,10 @@ final class ConfirmationsApiTest extends TestCase
         ));
 
         $api->complete(777, 5);
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/777/complete', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/777/complete', $captured->url);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
+        $payload = $captured->json();
         self::assertSame(['confirmation' => ['template_id' => 5]], $payload);
     }
 
@@ -248,8 +247,8 @@ final class ConfirmationsApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -264,23 +263,23 @@ final class ConfirmationsApiTest extends TestCase
         $api->undo(3);
         $api->delete(4);
 
-        self::assertSame('PUT', $captured[0]['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/1/cancel', $captured[0]['url']);
-        self::assertSame('PUT', $captured[1]['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/2/clear', $captured[1]['url']);
-        self::assertSame('PUT', $captured[2]['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/3/undo', $captured[2]['url']);
-        self::assertSame('DELETE', $captured[3]['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/4', $captured[3]['url']);
+        self::assertSame('PUT', $captured[0]->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/1/cancel', $captured[0]->url);
+        self::assertSame('PUT', $captured[1]->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/2/clear', $captured[1]->url);
+        self::assertSame('PUT', $captured[2]->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/3/undo', $captured[2]->url);
+        self::assertSame('DELETE', $captured[3]->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/4', $captured[3]->url);
     }
 
     #[Test]
     public function itEmailsConfirmation(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
@@ -294,18 +293,17 @@ final class ConfirmationsApiTest extends TestCase
 
         $api->email(42, $opts);
 
-        $payload = JsonPayload::fromOptions($captured['options']);
-        self::assertSame('me@example.com', $payload['email']['from'] ?? null);
-        self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
+        self::assertSame('me@example.com', $captured->jsonAt('email', 'from'));
+        self::assertSame(['kunde@example.com'], $captured->jsonAt('email', 'recipients', 'to'));
     }
 
     #[Test]
     public function itFetchesConfirmationPdfInJsonMode(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'pdf' => [
@@ -331,16 +329,16 @@ final class ConfirmationsApiTest extends TestCase
         self::assertInstanceOf(ConfirmationPdf::class, $pdf);
         self::assertSame(240, $pdf->confirmationId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/240/pdf', $captured['url']);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/240/pdf', $captured->url);
     }
 
     #[Test]
     public function itFetchesRawConfirmationPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             return new MockResponse('%PDF-1.4 RAW%', ['http_code' => 200]);
         });
@@ -354,17 +352,17 @@ final class ConfirmationsApiTest extends TestCase
 
         self::assertIsString($result);
         self::assertStringStartsWith('%PDF-1.4', $result);
-        self::assertStringContainsString('format=pdf', $captured['url']);
-        self::assertStringContainsString('type=print', $captured['url']);
+        self::assertStringContainsString('format=pdf', $captured->url);
+        self::assertStringContainsString('type=print', $captured->url);
     }
 
     #[Test]
     public function itUploadsSignaturePdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -377,9 +375,9 @@ final class ConfirmationsApiTest extends TestCase
         $base64 = base64_encode('PDF-FAKE');
         $api->uploadSignature(555, $base64);
 
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmations/555/upload-signature', $captured['url']);
-        self::assertSame(['upload' => ['base64file' => $base64]], JsonPayload::fromOptions($captured['options']));
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmations/555/upload-signature', $captured->url);
+        self::assertSame(['upload' => ['base64file' => $base64]], $captured->json());
     }
 
     #[Test]

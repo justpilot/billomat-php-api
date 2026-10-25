@@ -15,6 +15,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\RecurringTag;
 use Justpilot\Billomat\Model\RecurringTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -41,10 +42,10 @@ final class RecurringTagsApiTest extends TestCase
     #[Test]
     public function listByRecurringSendsRecurringIdFilter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'recurring-tags' => [
@@ -66,7 +67,7 @@ final class RecurringTagsApiTest extends TestCase
         self::assertCount(2, $tags);
         self::assertContainsOnlyInstancesOf(RecurringTag::class, $tags);
 
-        $parts = parse_url($captured['url']);
+        $parts = parse_url($captured->url);
         $query = [];
         parse_str($parts['query'] ?? '', $query);
         self::assertSame('42', $query['recurring_id'] ?? null);

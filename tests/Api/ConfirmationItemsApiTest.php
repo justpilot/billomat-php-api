@@ -15,6 +15,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ConfirmationItem;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -40,10 +41,10 @@ final class ConfirmationItemsApiTest extends TestCase
     #[Test]
     public function itListsItemsByConfirmation(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'confirmation-items' => [
@@ -65,16 +66,16 @@ final class ConfirmationItemsApiTest extends TestCase
 
         self::assertCount(1, $items);
         self::assertSame(ItemType::SERVICE, $items[0]->type);
-        self::assertStringContainsString('confirmation_id=123', $captured['url']);
+        self::assertStringContainsString('confirmation_id=123', $captured->url);
     }
 
     #[Test]
     public function itCreatesItem(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'confirmation-item' => ['id' => 77, 'confirmation_id' => 123, 'quantity' => 2, 'unit_price' => 50],
@@ -93,17 +94,17 @@ final class ConfirmationItemsApiTest extends TestCase
         $created = $api->create(123, $opts);
 
         self::assertSame(77, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmation-items', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmation-items', $captured->url);
     }
 
     #[Test]
     public function itUpdatesItem(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'confirmation-item' => ['id' => 77, 'confirmation_id' => 123, 'quantity' => 3, 'unit_price' => 75],
@@ -119,17 +120,17 @@ final class ConfirmationItemsApiTest extends TestCase
 
         $opts = new ConfirmationItemCreateOptions(quantity: 3.0, unitPrice: Money::of('75'));
         self::assertSame(77, $api->update(77, $opts)->id);
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/confirmation-items/77', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/confirmation-items/77', $captured->url);
     }
 
     #[Test]
     public function itDeletesItem(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -140,6 +141,6 @@ final class ConfirmationItemsApiTest extends TestCase
         ))->items;
 
         $api->delete(77);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

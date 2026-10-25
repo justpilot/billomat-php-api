@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNoteItem;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,10 +40,10 @@ final class CreditNoteItemsApiTest extends TestCase
     #[Test]
     public function itListsItemsByCreditNote(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'credit-note-items' => [
@@ -64,7 +65,7 @@ final class CreditNoteItemsApiTest extends TestCase
 
         self::assertCount(1, $items);
         self::assertSame(2.0, $items[0]->quantity);
-        self::assertStringContainsString('credit_note_id=123', $captured['url']);
+        self::assertStringContainsString('credit_note_id=123', $captured->url);
     }
 
     #[Test]
@@ -73,7 +74,7 @@ final class CreditNoteItemsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse(
                 json_encode([
@@ -93,8 +94,8 @@ final class CreditNoteItemsApiTest extends TestCase
         self::assertSame(77, $api->update(77, $opts)->id);
         $api->delete(77);
 
-        self::assertSame('POST', $captured[0]['method']);
-        self::assertSame('PUT', $captured[1]['method']);
-        self::assertSame('DELETE', $captured[2]['method']);
+        self::assertSame('POST', $captured[0]->method);
+        self::assertSame('PUT', $captured[1]->method);
+        self::assertSame('DELETE', $captured[2]->method);
     }
 }

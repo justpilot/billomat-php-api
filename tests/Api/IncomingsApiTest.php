@@ -17,6 +17,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Incoming;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -98,10 +99,10 @@ final class IncomingsApiTest extends TestCase
     #[Test]
     public function itCreatesIncoming(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'incoming' => ['id' => 777, 'supplier_id' => 42, 'status' => 'OPEN'],
@@ -125,22 +126,17 @@ final class IncomingsApiTest extends TestCase
         $created = $api->create($opts);
         self::assertSame(777, $created->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(42, $payload['incoming']['supplier_id']);
-        self::assertSame('119', $payload['incoming']['total_gross']);
+        self::assertSame(42, $captured->jsonAt('incoming', 'supplier_id'));
+        self::assertSame('119', $captured->jsonAt('incoming', 'total_gross'));
     }
 
     #[Test]
     public function itUpdatesIncoming(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'incoming' => ['id' => 777, 'supplier_id' => 42, 'label' => 'Geändert'],
@@ -158,7 +154,7 @@ final class IncomingsApiTest extends TestCase
 
         $updated = $api->update(777, $opts);
         self::assertSame('Geändert', $updated->label);
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
@@ -166,8 +162,8 @@ final class IncomingsApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -182,10 +178,10 @@ final class IncomingsApiTest extends TestCase
         $api->upload(3, base64_encode('PDF'));
         $api->delete(4);
 
-        self::assertSame('https://mycompany.billomat.net/api/incomings/1/cancel', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/incomings/2/uncancel', $captured[1]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/incomings/3/upload', $captured[2]['url']);
-        self::assertSame('DELETE', $captured[3]['method']);
+        self::assertSame('https://mycompany.billomat.net/api/incomings/1/cancel', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/incomings/2/uncancel', $captured[1]->url);
+        self::assertSame('https://mycompany.billomat.net/api/incomings/3/upload', $captured[2]->url);
+        self::assertSame('DELETE', $captured[3]->method);
     }
 
     #[Test]

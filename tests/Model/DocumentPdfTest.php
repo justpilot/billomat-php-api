@@ -35,7 +35,7 @@ use const DATE_ATOM;
 final class DocumentPdfTest extends TestCase
 {
     /**
-     * @param class-string<InvoicePdf|LetterPdf> $class
+     * @param class-string<ConfirmationPdf|CreditNotePdf|DeliveryNotePdf|InvoicePdf|LetterPdf|OfferPdf|ReminderPdf> $class
      */
     #[Test]
     #[DataProvider('models')]
@@ -61,7 +61,7 @@ final class DocumentPdfTest extends TestCase
     }
 
     /**
-     * @param class-string<InvoicePdf|LetterPdf> $class
+     * @param class-string<ConfirmationPdf|CreditNotePdf|DeliveryNotePdf|InvoicePdf|LetterPdf|OfferPdf|ReminderPdf> $class
      */
     #[Test]
     #[DataProvider('models')]
@@ -80,7 +80,7 @@ final class DocumentPdfTest extends TestCase
     }
 
     /**
-     * @param class-string<InvoicePdf|LetterPdf> $class
+     * @param class-string<ConfirmationPdf|CreditNotePdf|DeliveryNotePdf|InvoicePdf|LetterPdf|OfferPdf|ReminderPdf> $class
      */
     #[Test]
     #[DataProvider('models')]
@@ -90,7 +90,7 @@ final class DocumentPdfTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{class-string, string, string}>
+     * @return iterable<string, array{class-string<ConfirmationPdf|CreditNotePdf|DeliveryNotePdf|InvoicePdf|LetterPdf|OfferPdf|ReminderPdf>, string, string}>
      */
     public static function models(): iterable
     {

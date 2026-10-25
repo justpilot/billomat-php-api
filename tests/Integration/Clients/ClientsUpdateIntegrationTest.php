@@ -40,7 +40,7 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
 
         // 2) Originalwerte merken, damit wir sauber zurücksetzen können
         $originalName = $client->name;
-        $originalNote = $client->note ?? null;
+        $originalNote = $client->note;
 
         // 3) Update durchführen (minimal-invasiv: note ändern)
         $newNote = \sprintf('SDK integration test update %s', new DateTimeImmutable()->format('c'));

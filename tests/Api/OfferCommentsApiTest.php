@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\OfferComment;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,10 +40,10 @@ final class OfferCommentsApiTest extends TestCase
     #[Test]
     public function itListsCommentsByOffer(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'offer-comments' => [
@@ -78,17 +79,17 @@ final class OfferCommentsApiTest extends TestCase
         self::assertCount(2, $comments);
         self::assertSame(OfferCommentActionKey::CREATE, $comments[0]->actionkey);
         self::assertNull($comments[1]->actionkey);
-        self::assertStringContainsString('offer_id=42', $captured['url']);
-        self::assertStringContainsString('actionkey=CREATE%2CCOMMENT', $captured['url']);
+        self::assertStringContainsString('offer_id=42', $captured->url);
+        self::assertStringContainsString('actionkey=CREATE%2CCOMMENT', $captured->url);
     }
 
     #[Test]
     public function itCreatesComment(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'offer-comment' => [
@@ -110,25 +111,20 @@ final class OfferCommentsApiTest extends TestCase
         $created = $api->create($opts);
 
         self::assertSame(99, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/offer-comments', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/offer-comments', $captured->url);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(42, $payload['offer-comment']['offer_id']);
-        self::assertSame('Hallo', $payload['offer-comment']['comment']);
+        self::assertSame(42, $captured->jsonAt('offer-comment', 'offer_id'));
+        self::assertSame('Hallo', $captured->jsonAt('offer-comment', 'comment'));
     }
 
     #[Test]
     public function itDeletesComment(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -139,7 +135,7 @@ final class OfferCommentsApiTest extends TestCase
         ))->comments;
 
         $api->delete(99);
-        self::assertSame('DELETE', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/offer-comments/99', $captured['url']);
+        self::assertSame('DELETE', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/offer-comments/99', $captured->url);
     }
 }

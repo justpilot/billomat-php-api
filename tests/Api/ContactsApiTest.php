@@ -12,6 +12,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Contact;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -35,10 +36,10 @@ final class ContactsApiTest extends TestCase
     #[Test]
     public function itListsContactsByClient(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'contacts' => [
@@ -60,7 +61,7 @@ final class ContactsApiTest extends TestCase
 
         self::assertCount(1, $contacts);
         self::assertSame('Anna', $contacts[0]->firstName);
-        self::assertStringContainsString('client_id=42', $captured['url']);
+        self::assertStringContainsString('client_id=42', $captured->url);
     }
 
     #[Test]
@@ -94,10 +95,10 @@ final class ContactsApiTest extends TestCase
     #[Test]
     public function itCreatesContact(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'contact' => ['id' => 777, 'client_id' => 42, 'first_name' => 'Anna'],
@@ -122,23 +123,18 @@ final class ContactsApiTest extends TestCase
 
         self::assertSame(777, $created->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(42, $payload['contact']['client_id']);
-        self::assertSame('Anna', $payload['contact']['first_name']);
-        self::assertSame('anna@example.com', $payload['contact']['email']);
+        self::assertSame(42, $captured->jsonAt('contact', 'client_id'));
+        self::assertSame('Anna', $captured->jsonAt('contact', 'first_name'));
+        self::assertSame('anna@example.com', $captured->jsonAt('contact', 'email'));
     }
 
     #[Test]
     public function itUpdatesContact(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'contact' => ['id' => 777, 'client_id' => 42, 'label' => 'Geändert'],
@@ -157,16 +153,16 @@ final class ContactsApiTest extends TestCase
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->label);
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
     public function itDeletesContact(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -177,6 +173,6 @@ final class ContactsApiTest extends TestCase
         ));
 
         $api->delete(777);
-        self::assertSame('DELETE', $captured['method']);
+        self::assertSame('DELETE', $captured->method);
     }
 }

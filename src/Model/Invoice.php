@@ -31,8 +31,8 @@ use const DATE_ATOM;
 final readonly class Invoice
 {
     /**
-     * @param list<array{name: string, rate: float, amount: Money}> $taxes
-     * @param list<InvoiceItem>                                     $items
+     * @param list<TaxSummary>  $taxes
+     * @param list<InvoiceItem> $items
      */
     public function __construct(
         /** Interne Billomat-ID der Rechnung. */
@@ -179,7 +179,7 @@ final readonly class Invoice
             offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
-            taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
+            taxes: ListCaster::toList($data['taxes']['tax'] ?? null, 'name', TaxSummary::fromArray(...)),
             paymentTypes: ScalarCaster::toStringOrNull($data['payment_types'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toList($data['invoice-items']['invoice-item'] ?? null, 'id', InvoiceItem::fromArray(...)),
@@ -249,7 +249,7 @@ final readonly class Invoice
 
         if ([] !== $this->taxes) {
             $data['taxes'] = [
-                'tax' => array_map(static fn (array $tax): array => [...$tax, 'amount' => $tax['amount']->toString()], $this->taxes),
+                'tax' => array_map(static fn (TaxSummary $tax): array => $tax->toArray(), $this->taxes),
             ];
         }
 

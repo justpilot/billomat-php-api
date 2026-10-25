@@ -23,8 +23,8 @@ use const DATE_ATOM;
 final readonly class DeliveryNote
 {
     /**
-     * @param list<array{name: string, rate: float, amount: Money}> $taxes
-     * @param list<DeliveryNoteItem>                                $items
+     * @param list<TaxSummary>       $taxes
+     * @param list<DeliveryNoteItem> $items
      */
     public function __construct(
         /** Interne Billomat-ID des Lieferscheins. */
@@ -109,7 +109,7 @@ final readonly class DeliveryNote
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
+            taxes: ListCaster::toList($data['taxes']['tax'] ?? null, 'name', TaxSummary::fromArray(...)),
             items: ListCaster::toList($data['delivery-note-items']['delivery-note-item'] ?? null, 'id', DeliveryNoteItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -153,7 +153,7 @@ final readonly class DeliveryNote
 
         if ([] !== $this->taxes) {
             $data['taxes'] = [
-                'tax' => array_map(static fn (array $tax): array => [...$tax, 'amount' => $tax['amount']->toString()], $this->taxes),
+                'tax' => array_map(static fn (TaxSummary $tax): array => $tax->toArray(), $this->taxes),
             ];
         }
 

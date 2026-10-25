@@ -281,9 +281,9 @@ final class InvoiceTest extends TestCase
         // Taxes
         self::assertCount(1, $invoice->taxes);
         $firstTax = $invoice->taxes[0];
-        self::assertSame('MwSt', $firstTax['name']);
-        self::assertSame(19.0, $firstTax['rate']);
-        self::assertSame('19', $firstTax['amount']->toString());
+        self::assertSame('MwSt', $firstTax->name);
+        self::assertSame(19.0, $firstTax->rate);
+        self::assertSame('19', $firstTax->amount->toString());
 
         // Items ist in diesem Beispiel leer
         self::assertSame([], $invoice->items);

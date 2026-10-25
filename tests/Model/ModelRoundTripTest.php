@@ -199,11 +199,7 @@ final class ModelRoundTripTest extends TestCase
      */
     private function sampleList(ReflectionParameter $parameter, string $docComment): array
     {
-        if ('taxes' === $parameter->name) {
-            return [['name' => 'MwSt', 'rate' => 19.0, 'amount' => Money::of('19.95')]];
-        }
-
-        // Verschachtelte Models: Typ aus `@param list<XItem> $items` des Konstruktors.
+        // Verschachtelte Models: Typ aus `@param list<XItem> $items` bzw. `list<TaxSummary> $taxes` des Konstruktors.
         if (1 === preg_match('/@param\s+list<(\w+)>\s+\$'.$parameter->name.'\b/', $docComment, $match)
             && class_exists($itemClass = 'Justpilot\\Billomat\\Model\\'.$match[1])) {
             return [$this->sample($itemClass, empty: false)];

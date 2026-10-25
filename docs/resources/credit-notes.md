@@ -377,7 +377,7 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `quote` | `?float` |
 | `invoiceId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
+| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) |
 | `items` | `list<CreditNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |

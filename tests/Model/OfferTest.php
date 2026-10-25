@@ -96,7 +96,7 @@ final class OfferTest extends TestCase
         self::assertSame(5, $offer->templateId);
 
         self::assertCount(1, $offer->taxes);
-        self::assertSame(19.0, $offer->taxes[0]['rate']);
+        self::assertSame(19.0, $offer->taxes[0]->rate);
 
         self::assertCount(1, $offer->items);
         self::assertContainsOnlyInstancesOf(OfferItem::class, $offer->items);

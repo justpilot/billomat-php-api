@@ -476,3 +476,22 @@ Where you need a `float` (e.g. for a chart library), use `toFloat()` – precisi
 
 Payloads send amounts as JSON strings (`"unit_price":"49.9"`), and the models' `toArray()` exports them
 as strings in Billomat's form (`"40"`, `"0.1"`), no longer as floats. `json_encode($money)` gives the string, too.
+
+### Tax rows are `TaxSummary` objects
+
+`taxes` on `Invoice`, `Offer`, `CreditNote`, `Confirmation`, `DeliveryNote` and `Recurring` is a list of
+`Justpilot\Billomat\Model\TaxSummary` objects instead of arrays.
+
+```php
+// 3.x
+foreach ($invoice->taxes as $tax) {
+    echo $tax['name'], ' ', $tax['rate'], ' ', $tax['amount'];
+}
+
+// 4.0
+foreach ($invoice->taxes as $tax) {
+    echo $tax->name, ' ', $tax->rate, ' ', $tax->amount->format(2, ',', '.');
+}
+```
+
+`$tax->toArray()` gives the old array shape, with the amount as a string.

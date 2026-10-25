@@ -340,8 +340,7 @@ function renderModel(array $definition, array $fields, string $source): string
     foreach ($listFields as $field) {
         $value = '$this->' . $field['property'];
         if ('taxes' === $field['type']) {
-            // Beträge wie bei den übrigen Feldern als String exportieren.
-            $entry = "[\n                'tax' => array_map(static fn (array \$tax): array => [...\$tax, 'amount' => \$tax['amount']->toString()], {$value}),\n            ]";
+                $entry = "[\n                'tax' => array_map(static fn (TaxSummary \$tax): array => \$tax->toArray(), {$value}),\n            ]";
         } else {
             $class = $field['list']['class'];
             $entry = "[\n                '{$field['list']['item']}' => array_map(static fn ({$class} \$item): array => \$item->toArray(), {$value}),\n            ]";
@@ -371,7 +370,7 @@ function isListField(array $field): bool
 function listTypeHint(array $field): string
 {
     return 'taxes' === $field['type']
-        ? 'list<array{name: string, rate: float, amount: Money}>'
+        ? 'list<TaxSummary>'
         : 'list<' . $field['list']['class'] . '>';
 }
 
@@ -444,7 +443,7 @@ function hydrateExpression(array $field): string
     $expression = 'ScalarCaster::' . $caster . '(' . $lookup . ' ?? null)';
 
     if ('taxes' === $field['type']) {
-        return "ListCaster::toTaxList(\$data['{$field['wire']}']['tax'] ?? null)";
+        return "ListCaster::toList(\$data['{$field['wire']}']['tax'] ?? null, 'name', TaxSummary::fromArray(...))";
     }
     // Ein einzelnes Element liefert Billomat als Objekt statt als Liste – erkennbar an der `id`.
     if ('list' === $field['type']) {

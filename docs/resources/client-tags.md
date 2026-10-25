@@ -1,43 +1,43 @@
-<!-- Quelle: https://www.billomat.com/api/kunden/schlagworte/ -->
+<!-- Source: https://www.billomat.com/api/kunden/schlagworte/ -->
 
 # Client Tags (Kunden-Schlagworte)
 
-API-Wrapper für Schlagworte an Kunden unter `/client-tags`. Konzeptionell identisch zu [Invoice Tags](invoice-tags.md) — wer das Modell dort verstanden hat, kann diese Datei als Spickzettel lesen.
+API wrapper for tags on clients under `/client-tags`. Conceptually identical to [Invoice Tags](invoice-tags.md); if you know the model there, read this page as a cheat sheet.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->clients->tags
 ```
 
-`Justpilot\Billomat\Api\TagsApi` (`$billomat->clients->tags`).
+`Justpilot\Billomat\Api\TagsApi`, the generic tags class shared by all tag resources.
 
-## Überblick
+## Overview
 
-Wie bei `invoice-tags` gibt es zwei Sichten unter derselben Ressource:
+As with invoice tags, the same resource offers two views:
 
-- **Tags eines Kunden** — über `?client_id={id}`. Response-Element: `client-tag`.
-- **Tag-Cloud** — alle Tags des Accounts mit Häufigkeit, ohne Filter. Response-Element: `tag` (anderer Key!).
+- **Tags of one client**, via `?client_id={id}`. Response element: `client-tag`.
+- **Tag cloud**: all tags of the account with their frequency, without a filter. Response element: `tag` (a different key).
 
-Die zwei Sichten werden auf zwei Methoden mit zwei separaten Read-Modellen abgebildet.
+The two views map to two methods with two separate read models.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($clientId)` | GET | `/client-tags?client_id={id}` |
 | `cloud()` | GET | `/client-tags` |
-| `get($id)` | GET | `/client-tags/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/client-tags/{id}` |
 | `create($options)` | POST | `/client-tags` |
 | `delete($id)` | DELETE | `/client-tags/{id}` |
 
-Es gibt keine `update()`-Methode — ein Tag wird gelöscht und neu angelegt.
+There is no `update()` method: delete the tag and create a new one.
 
-## Methoden
+## Methods
 
 ### `list(int $clientId): list<ClientTag>`
 
-Listet die Schlagworte eines einzelnen Kunden.
+Lists the tags of a single client.
 
 ```php
 $tags = $billomat->clients->tags->list(98765);
@@ -49,17 +49,17 @@ foreach ($tags as $tag) {
 
 ### `cloud(): list<ClientTagCloudEntry>`
 
-Aggregierte Liste aller Kunden-Tags im Account mit `count`-Häufigkeit. Nützlich für Autovervollständigung im UI oder eine Tag-Cloud-Anzeige.
+Aggregated list of all client tags in the account with their `count`. Useful for autocompletion in a UI or for a tag cloud.
 
 ```php
 foreach ($billomat->clients->tags->cloud() as $entry) {
-    printf("%s (%d Kunden)\n", $entry->name, $entry->count);
+    printf("%s (%d clients)\n", $entry->name, $entry->count);
 }
 ```
 
 ### `get(int $id): ?ClientTag`
 
-Liefert `null` bei 404.
+Returns `null` on 404. `getOrFail(int $id): ClientTag` throws a `NotFoundException` instead.
 
 ### `create(ClientTagCreateOptions $options): ClientTag`
 
@@ -67,61 +67,63 @@ Liefert `null` bei 404.
 use Justpilot\Billomat\Api\ClientTagCreateOptions;
 
 $tag = $billomat->clients->tags->create(
-    new ClientTagCreateOptions(clientId: 98765, name: 'A-Kunde'),
+    new ClientTagCreateOptions(clientId: 98765, name: 'A-client'),
 );
 ```
 
-Mehrere Tags für denselben Kunden → mehrere `create()`-Aufrufe.
+Several tags for the same client mean several `create()` calls.
 
 ### `delete(int $id): void`
 
-Entfernt die Verknüpfung zwischen Kunde und Tag. Wird das Schlagwort an keinem Kunden mehr verwendet, verschwindet es automatisch aus der Tag-Cloud.
+Removes the link between client and tag. Once a tag is no longer used on any client, it disappears from the tag cloud automatically.
 
-## Write-Modell: `ClientTagCreateOptions`
+## Write model: `ClientTagCreateOptions`
 
-Konstruktor: `new ClientTagCreateOptions(int $clientId, string $name)`. Beide Werte sind Pflicht.
+Constructor: `new ClientTagCreateOptions(int $clientId, string $name)`. Both values are required. The object is `final readonly`; `withClientId()` and `withName()` return a modified copy.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` | Pflicht |
-| `name` | `name` | `string` | Pflicht, Freitext |
+| `clientId` | `client_id` | `int` | Required |
+| `name` | `name` | `string` | Required, free text |
 
-`toArray()` strippt hier nichts — beide Felder sind immer gesetzt.
+`toArray()` strips nothing here, since both fields are always set.
 
-## Read-Modell: `ClientTag`
+## Read model: `ClientTag`
 
-`final readonly class ClientTag` — eine konkrete Tag-Verknüpfung an einem Kunden.
+`final readonly class ClientTag`: one tag link on one client.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `clientId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
-## Read-Modell: `ClientTagCloudEntry`
+## Read model: `ClientTagCloudEntry`
 
-`final readonly class ClientTagCloudEntry` — ein aggregierter Eintrag aus `cloud()`. Hat bewusst **kein** `clientId`-Feld, weil der Eintrag mehrere Kunden aggregiert.
+`final readonly class ClientTagCloudEntry`: one aggregated entry from `cloud()`. It deliberately has **no** `clientId` field, because the entry aggregates several clients.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
 | `count` | `int` |
+| `extra` | `array<string, mixed>` |
 
-## Verwendete Enums
+## Enums used
 
-Keine. `name` ist freitextlich.
+None. `name` is free text.
 
-## Stolpersteine
+## Pitfalls
 
-- **Zwei Sichten, zwei Modelle.** `list()` liefert `ClientTag`, `cloud()` liefert `ClientTagCloudEntry`. Verwechslung führt zu „warum hat das Ding kein `clientId`?“-Momenten.
-- **Inkonsistente Response-Keys.** `list()` parst `client-tags.client-tag`, `cloud()` parst `client-tags.tag` — derselbe Endpunkt, zwei verschiedene innere Keys, je nach Vorhandensein des `client_id`-Filters. Das SDK kapselt das, beim Debuggen der Roh-Response aber wichtig zu wissen.
-- **Single-Item-List-Quirk.** Hat ein Kunde nur ein Tag (bzw. enthält die Cloud nur einen Eintrag), liefert Billomat ein einzelnes Objekt statt einer Liste. Beide Methoden normalisieren das via `isset($rows['id'])`- bzw. `isset($rows['name'])`-Check.
-- **Kein PUT.** Umbenennen geht nicht — alte Verknüpfung löschen, neue anlegen.
-- **`name` ist case-sensitive.** `a-kunde` und `A-Kunde` sind aus Billomats Sicht zwei verschiedene Tags und erscheinen separat in der Tag-Cloud.
+- **Two views, two models.** `list()` returns `ClientTag`, `cloud()` returns `ClientTagCloudEntry`. Mixing them up leads to "why doesn't this thing have a `clientId`?" moments.
+- **Inconsistent response keys.** `list()` parses `client-tags.client-tag`, `cloud()` parses `client-tags.tag`: same endpoint, two different inner keys depending on whether the `client_id` filter is present. The SDK hides this, but it's worth knowing when you debug the raw response.
+- **Single-item list quirk.** If a client has only one tag (or the cloud has only one entry), Billomat returns a single object instead of a list. Both methods normalize this to a list.
+- **No PUT.** Renaming isn't possible: delete the old link and create a new one.
+- **`name` is case-sensitive.** `a-client` and `A-client` are two different tags for Billomat and appear separately in the tag cloud.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -140,21 +142,21 @@ $billomat = BillomatClient::create(
 
 $clientId = 98765;
 
-// 1) Tags an einen Kunden anhängen
-foreach (['A-Kunde', 'Stammkunde', '2026-Q2'] as $name) {
+// 1) Attach tags to a client
+foreach (['A-client', 'regular', '2026-Q2'] as $name) {
     $billomat->clients->tags->create(
         new ClientTagCreateOptions(clientId: $clientId, name: $name),
     );
 }
 
-// 2) Tags des Kunden listen
+// 2) List the client's tags
 $tags = $billomat->clients->tags->list($clientId);
-printf("Tags an Kunde #%d: %s\n", $clientId, implode(', ', array_map(
+printf("Tags on client #%d: %s\n", $clientId, implode(', ', array_map(
     static fn ($t) => $t->name,
     $tags,
 )));
 
-// 3) Tag-Cloud — die 5 meistverwendeten Schlagworte
+// 3) Tag cloud: the 5 most used tags
 $cloud = $billomat->clients->tags->cloud();
 usort($cloud, static fn ($a, $b) => $b->count <=> $a->count);
 foreach (array_slice($cloud, 0, 5) as $entry) {

@@ -1,42 +1,46 @@
-<!-- Quelle: https://www.billomat.com/api/eingangsrechnungen/inbox/ -->
+<!-- Source: https://www.billomat.com/api/eingangsrechnungen/inbox/ -->
 
 # Inbox Documents (Posteingangs-Dokumente)
 
-API-Wrapper für den Billomat-Posteingang unter `/inbox-documents` — also alle PDFs/Bilder, die Billomat per E-Mail, Drag-and-Drop oder API entgegengenommen, aber noch keinem Beleg zugeordnet hat.
+API wrapper for the Billomat inbox under `/inbox-documents`: all PDFs and images Billomat has received by email, drag and drop or API but hasn't assigned to a document yet.
 
-## Zugriff
+## Access
 
 ```php
-$billomat->inboxDocuments        // hochgeladene, noch nicht verbuchte Belege
+$billomat->inboxDocuments        // uploaded documents not yet booked
 ```
 
-## Modell
+`Justpilot\Billomat\Api\InboxDocumentsApi`.
 
-Inbox-Dokumente sind Roh-Anhänge: Billomat speichert ausschließlich Datei-Metadaten (`filename`, `mimetype`, `filesize`) plus den Binärinhalt als Base64-String. Sie haben **keine** Fachdaten — keinen Lieferanten, keinen Betrag, keinen Status.
+## Model
 
-- **Beziehung zu Incomings**: Inbox-Dokumente sind die typische Vorstufe für einen [Incoming](incomings.md). Im Billomat-Web-UI gibt es einen „in Eingangsrechnung umwandeln“-Workflow; die API stellt dafür **keinen** dedizierten Endpoint bereit. Die Konvertierung läuft daher zweistufig:
-  1. Inbox-Dokument lesen (`get($id)` mit Base64-Inhalt).
-  2. Neues Incoming anlegen und denselben Base64-String über `IncomingsApi::upload($incomingId, $base64)` daran heften, anschließend `inboxDocuments->delete($id)`.
-- **Beziehung zu Suppliers**: keine direkte. Inbox-Dokumente kennen keinen Lieferanten — die Zuordnung passiert erst beim Anlegen des Incomings.
+Inbox documents are raw attachments: Billomat stores only file metadata (`filename`, `mimetype`, `filesize`) plus the binary content as a Base64 string. They have **no** business data: no supplier, no amount, no status.
 
-## Endpunkt-Übersicht
+- **Relation to incomings**: inbox documents are the typical first step towards an [incoming invoice](incomings.md). The Billomat web UI has a "convert to incoming invoice" workflow; the API offers **no** dedicated endpoint for it. The conversion therefore takes two steps:
+  1. Read the inbox document (`get($id)` with Base64 content).
+  2. Create a new incoming, attach the same Base64 string via `$billomat->incomings->upload($incomingId, $base64)`, then call `$billomat->inboxDocuments->delete($id)`.
+- **Relation to suppliers**: none directly. Inbox documents don't know a supplier; the assignment happens only when the incoming is created.
+
+## Endpoint overview
 
 ### `/inbox-documents`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/inbox-documents` |
-| `get($id)` | GET | `/inbox-documents/{id}` |
+| `listPage($filters?)` | GET | `/inbox-documents` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/inbox-documents` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/inbox-documents/{id}` |
 | `create($options)` | POST | `/inbox-documents` |
 | `delete($id)` | DELETE | `/inbox-documents/{id}` |
 
-Es gibt **kein** `update()` und **kein** `convertToIncoming()` — die API kennt diese Operationen nicht.
+There is **no** `update()` and **no** `convertToIncoming()`; the API doesn't support these operations.
 
-## Methoden
+## Methods
 
 ### `list(array $filters = []): list<InboxDocument>`
 
-Listet die Posteingangs-Dokumente. Filter laut Billomat-Doku: `per_page`, `page`, `order_by`. Die zurückgegebenen Modelle enthalten **nicht** den Base64-Inhalt — `base64file` ist in der Listen-Antwort `null`. Für den Binärinhalt muss `get()` aufgerufen werden.
+Lists the inbox documents. Filters according to the Billomat docs: `per_page`, `page`, `order_by`. The returned models **don't** contain the Base64 content: `base64file` is `null` in the list response. Call `get()` for the binary content.
 
 ```php
 $pending = $billomat->inboxDocuments->list([
@@ -45,26 +49,28 @@ $pending = $billomat->inboxDocuments->list([
 ]);
 ```
 
+`listPage()` additionally returns the pagination metadata, `iterateAll(array $filters = [], int $pageSize = 100)` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
+
 ### `get(int $id): ?InboxDocument`
 
-Liefert `null` bei 404. Im Gegensatz zu `list()` enthält die Detail-Antwort den Base64-codierten Datei-Inhalt unter `base64file`. Mit `getBinary()` lässt er sich direkt als Roh-Bytes ziehen.
+Returns `null` on 404; `getOrFail(int $id): InboxDocument` throws a `NotFoundException` instead. Unlike `list()`, the detail response contains the Base64-encoded file content in `base64file`. `getBinary()` returns it directly as raw bytes.
 
 ```php
-$doc = $billomat->inboxDocuments->get(987);
+$doc = $billomat->inboxDocuments->getOrFail(987);
 file_put_contents("/tmp/{$doc->filename}", $doc->getBinary());
 ```
 
 ### `create(InboxDocumentCreateOptions $options): InboxDocument`
 
-Lädt eine Datei in den Posteingang hoch.
+Uploads a file to the inbox.
 
 ```php
 use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 
 $opts = new InboxDocumentCreateOptions(
-    filename: 'rechnung-mai.pdf',
+    filename: 'invoice-may.pdf',
     mimeType: 'application/pdf',
-    base64file: base64_encode((string) file_get_contents('/tmp/rechnung-mai.pdf')),
+    base64file: base64_encode((string) file_get_contents('/tmp/invoice-may.pdf')),
 );
 
 $doc = $billomat->inboxDocuments->create($opts);
@@ -72,25 +78,25 @@ $doc = $billomat->inboxDocuments->create($opts);
 
 ### `delete(int $id): void`
 
-Entfernt das Dokument aus dem Posteingang.
+Removes the document from the inbox.
 
-## Write-Modell: `InboxDocumentCreateOptions`
+## Write model: `InboxDocumentCreateOptions`
 
-Die drei Pflichtfelder sind die ersten Konstruktor-Parameter; `documentType` und `metadata` sind optionale benannte Argumente. Das Objekt ist `final readonly`, `withDocumentType()` und `withMetadata()` liefern eine geänderte Kopie.
+The three required fields are the first constructor parameters; `documentType` and `metadata` are optional named arguments. The object is `final readonly`; `withDocumentType()` and `withMetadata()` return a modified copy.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `filename` | `filename` | `string` (Pflicht) | inkl. Endung, z. B. `rechnung.pdf` |
-| `mimeType` | `mimetype` | `string` (Pflicht) | Property heißt `mimeType` (camelCase), Wire-Feld ist `mimetype` (alles klein) |
-| `base64file` | `base64file` | `string` (Pflicht) | Bereits Base64-codierter Inhalt |
-| `documentType` | `document_type` | `?string` | Dokumenttyp laut Billomat-Klassifikation (z. B. `other`, `invoice`, `credit_note`); Billomat-Default `other` |
-| `metadata` | `metadata` | `?array<string, mixed>` | frei strukturierte Zusatzdaten, die Billomat unverändert speichert |
+| `filename` | `filename` | `string` (required) | Including extension, e.g. `invoice.pdf` |
+| `mimeType` | `mimetype` | `string` (required) | The property is `mimeType` (camelCase), the wire field is `mimetype` (all lower case) |
+| `base64file` | `base64file` | `string` (required) | Content that is already Base64-encoded |
+| `documentType` | `document_type` | `?string` | Document type according to Billomat's classification (e.g. `other`, `invoice`, `credit_note`); Billomat's default is `other` |
+| `metadata` | `metadata` | `?array<string, mixed>` | Free-form additional data that Billomat stores as is |
 
-## Read-Modell: `InboxDocument`
+## Read model: `InboxDocument`
 
 `final readonly class InboxDocument`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `created` | `?\DateTimeImmutable` |
@@ -99,31 +105,32 @@ Die drei Pflichtfelder sind die ersten Konstruktor-Parameter; `documentType` und
 | `fileSize` | `int` |
 | `base64file` | `?string` |
 | `updated` | `?\DateTimeImmutable` |
-| `xrechnungExtractionsId` | `?int` (E-Rechnung, nur lesend – von Billomat nicht dokumentiert) |
+| `xrechnungExtractionsId` | `?int` (e-invoicing, read-only, not documented by Billomat) |
 | `userId` | `?int` |
 | `documentType` | `?string` |
 | `pageCount` | `?int` |
 | `fileUrl` | `?string` |
 | `metadata` | `?string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 
-Plus Helper `getBinary(): string` — dekodiert `base64file` und gibt die Roh-Bytes zurück; leerer String, wenn das Feld leer oder ungültig codiert ist. Auf `InboxDocument` instanzen aus `list()` ist `base64file` üblicherweise `null` — `getBinary()` liefert dann ebenfalls einen leeren String.
+Plus the helper `getBinary(): string`, which decodes `base64file` and returns the raw bytes, or an empty string if the field is empty or invalidly encoded. On `InboxDocument` instances from `list()`, `base64file` is usually `null`, so `getBinary()` returns an empty string as well.
 
-## Verwendete Enums
+## Enums used
 
-Keine. Die Ressource hat keinen Status-Enum.
+None. The resource has no status enum.
 
-## Stolpersteine
+## Pitfalls
 
-- **E-Rechnung (undokumentiert).** `xrechnung_extractions_id` (`InboxDocument::$xrechnungExtractionsId`) liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
-- **`base64file` nur über `get()`.** `list()` liefert die Metadaten ohne Binärinhalt, um Antwort-Größen klein zu halten. Wer den PDF-Inhalt verarbeiten will, muss jedes Dokument einzeln per `get($id)` nachladen.
-- **Wire-Feld heißt `mimetype`, nicht `mime_type`.** Anders als bei den meisten anderen Ressourcen wird hier kein Snake-Case mit Unterstrich verwendet — Billomat erwartet `mimetype` in einem Wort. Die PHP-Property nennt sich trotzdem `mimeType` (camelCase).
-- **Keine API-Konvertierung in ein Incoming.** Die Billomat-API bietet kein `/inbox-documents/{id}/convert` oder ähnlich. Wer das Web-UI-Verhalten nachbauen will, muss selbst `IncomingsApi::create()` plus `IncomingsApi::upload()` aufrufen und das Inbox-Dokument anschließend manuell löschen.
-- **Vorab Base64 codieren.** `InboxDocumentCreateOptions` codiert nicht selbst — der String muss bereits Base64 sein. Roh-Bytes durchgeben erzeugt einen Upload, dessen PDF beim Download kaputt ist.
-- **Kein Update.** Inhaltliche Korrekturen (z. B. Dateiname tippen) gehen nur über löschen + neu anlegen.
-- **`mimeType`-Fallback bei kaputten Responses**: hydriert `InboxDocument::fromArray()` zu `application/octet-stream`, falls Billomat das Feld leerlässt — kein Crash, aber ein Warnsignal beim Logging.
+- **E-invoicing (undocumented).** Billomat returns `xrechnung_extractions_id` (`InboxDocument::$xrechnungExtractionsId`) in API responses but doesn't describe it in the API docs. The SDK only reads it (type derived from observed values); writing isn't supported for lack of a specification.
+- **`base64file` only via `get()`.** `list()` returns the metadata without binary content to keep responses small. To process the PDF content, load each document individually via `get($id)`.
+- **The wire field is `mimetype`, not `mime_type`.** Unlike most other resources, there's no snake_case with an underscore here; Billomat expects `mimetype` as one word. The PHP property is still called `mimeType` (camelCase).
+- **`metadata` has different types.** You write it as an array; the read model returns it as a raw `?string`.
+- **No conversion to an incoming via the API.** The Billomat API has no `/inbox-documents/{id}/convert` or similar. To replicate the web UI behavior, call `$billomat->incomings->create()` plus `$billomat->incomings->upload()` yourself and delete the inbox document afterwards.
+- **Base64-encode beforehand.** `InboxDocumentCreateOptions` doesn't encode the content; the string must already be Base64. Passing raw bytes produces an upload whose PDF is broken on download.
+- **No update.** Corrections (e.g. a typo in the file name) are only possible by deleting and creating the document again.
+- **`mimeType` fallback on broken responses.** `InboxDocument::fromArray()` falls back to `application/octet-stream` if Billomat leaves the field empty. It doesn't crash, but it's a warning sign worth logging.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -141,8 +148,8 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) PDF in den Posteingang hochladen
-$pdfPath = '/tmp/lieferantenrechnung.pdf';
+// 1) Upload a PDF to the inbox
+$pdfPath = '/tmp/supplier-invoice.pdf';
 $doc = $billomat->inboxDocuments->create(
     new InboxDocumentCreateOptions(
         filename: basename($pdfPath),
@@ -151,29 +158,29 @@ $doc = $billomat->inboxDocuments->create(
     ),
 );
 
-printf("Posteingang: #%d, %d Bytes\n", $doc->id, $doc->fileSize);
+printf("Inbox: #%d, %d bytes\n", $doc->id, $doc->fileSize);
 
-// 2) Später: Posteingang abarbeiten — jedes Dokument einzeln laden,
-//    in ein Incoming umwandeln und aus dem Posteingang entfernen.
+// 2) Later: process the inbox. Load each document individually,
+//    turn it into an incoming and remove it from the inbox.
 foreach ($billomat->inboxDocuments->list(['order_by' => 'created+ASC']) as $pending) {
     $full = $billomat->inboxDocuments->get($pending->id);
     if (null === $full) {
         continue;
     }
 
-    // 2a) Incoming anlegen (Lieferant und Betrag muss man hier selbst kennen)
+    // 2a) Create the incoming (you have to know supplier and amount yourself)
     $incomingOpts = new IncomingCreateOptions(supplierId: 4711, label: $full->filename);
     $incoming = $billomat->incomings->create($incomingOpts);
 
-    // 2b) PDF aus dem Posteingang an den Incoming hängen (Base64 direkt durchreichen)
+    // 2b) Attach the PDF from the inbox to the incoming (pass the Base64 string through)
     $billomat->incomings->upload(
         $incoming->id,
         $full->base64file ?? '',
     );
 
-    // 2c) Dokument aus dem Posteingang entfernen
+    // 2c) Remove the document from the inbox
     $billomat->inboxDocuments->delete($full->id);
 
-    printf("→ #%d in Incoming #%d überführt\n", $full->id, $incoming->id);
+    printf("→ #%d moved to incoming #%d\n", $full->id, $incoming->id);
 }
 ```

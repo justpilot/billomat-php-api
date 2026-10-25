@@ -79,7 +79,7 @@ export default defineConfig({
     socialLinks: [{ icon: 'github', link: repo }],
     footer: {
       message: 'Unofficial SDK, not affiliated with Billomat GmbH. Released under the Apache License 2.0.',
-      copyright: 'justpilot',
+      copyright: 'Copyright © 2025–present Dimitri Dovgan',
     },
   },
 })

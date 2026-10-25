@@ -28,6 +28,7 @@ use Justpilot\Billomat\Model\DeliveryNoteComment;
 use Justpilot\Billomat\Model\IncomingComment;
 use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\LetterComment;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\OfferComment;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -91,7 +92,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             title: 'IT-CommentTest '.date('His'),
             currencyCode: 'EUR',
         );
-        $item = new InvoiceItemCreateOptions(1.0, 10.0, unit: 'Stück', title: 'Pos');
+        $item = new InvoiceItemCreateOptions(1.0, Money::of('10'), unit: 'Stück', title: 'Pos');
         $invOpts = $invOpts->withItem($item);
         $invoice = $billomat->invoices->create($invOpts);
         self::assertNotNull($invoice->id);

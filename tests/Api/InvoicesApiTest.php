@@ -24,6 +24,7 @@ use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -51,6 +52,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(InvoicePdf::class)]
+#[UsesClass(Money::class)]
 final class InvoicesApiTest extends TestCase
 {
     #[Test]
@@ -74,8 +76,8 @@ final class InvoicesApiTest extends TestCase
                             'date' => '2025-01-01',
                             'due_date' => '2025-01-15',
                             'currency_code' => 'EUR',
-                            'total_gross' => 119.00,
-                            'total_net' => 100.00,
+                            'total_gross' => '119',
+                            'total_net' => '100',
                         ],
                         [
                             'id' => 2,
@@ -85,8 +87,8 @@ final class InvoicesApiTest extends TestCase
                             'date' => '2025-01-02',
                             'due_date' => '2025-01-16',
                             'currency_code' => 'EUR',
-                            'total_gross' => 59.50,
-                            'total_net' => 50.00,
+                            'total_gross' => '59.5',
+                            'total_net' => '50',
                         ],
                     ],
                 ],
@@ -119,8 +121,8 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('2025-01-01', $first->date?->format('Y-m-d'));
         self::assertSame('2025-01-15', $first->dueDate?->format('Y-m-d'));
         self::assertSame('EUR', $first->currencyCode);
-        self::assertSame(119.0, $first->totalGross);
-        self::assertSame(100.0, $first->totalNet);
+        self::assertSame('119', $first->totalGross?->toString());
+        self::assertSame('100', $first->totalNet?->toString());
 
         // Request prüfen
         self::assertSame('GET', $captured['method']);
@@ -157,8 +159,8 @@ final class InvoicesApiTest extends TestCase
                     'date' => '2025-02-01',
                     'due_date' => '2025-02-15',
                     'currency_code' => 'EUR',
-                    'total_gross' => 238.00,
-                    'total_net' => 200.00,
+                    'total_gross' => '238',
+                    'total_net' => '200',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -183,8 +185,8 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('2025-02-01', $invoice->date?->format('Y-m-d'));
         self::assertSame('2025-02-15', $invoice->dueDate?->format('Y-m-d'));
         self::assertSame('EUR', $invoice->currencyCode);
-        self::assertSame(238.0, $invoice->totalGross);
-        self::assertSame(200.0, $invoice->totalNet);
+        self::assertSame('238', $invoice->totalGross?->toString());
+        self::assertSame('200', $invoice->totalNet?->toString());
 
         self::assertSame('GET', $captured['method']);
         self::assertSame(
@@ -213,8 +215,8 @@ final class InvoicesApiTest extends TestCase
                     'date' => '2025-03-01',
                     'due_date' => '2025-03-15',
                     'currency_code' => 'EUR',
-                    'total_gross' => 0.0,
-                    'total_net' => 0.0,
+                    'total_gross' => '0',
+                    'total_net' => '0',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -242,7 +244,7 @@ final class InvoicesApiTest extends TestCase
         // --- Add a single invoice item ---
         $item = new InvoiceItemCreateOptions(
             quantity: 2.0,
-            unitPrice: 100.0,
+            unitPrice: Money::of('100'),
             unit: 'Stunde',
             taxRate: 19.0,
             title: 'Beratung',
@@ -301,7 +303,7 @@ final class InvoicesApiTest extends TestCase
         $firstItem = $items[0];
 
         self::assertSame(2.0, $firstItem['quantity'] ?? null);
-        self::assertSame(100.0, $firstItem['unit_price'] ?? null);
+        self::assertSame('100', $firstItem['unit_price'] ?? null);
         self::assertSame('Beratung', $firstItem['title'] ?? null);
         self::assertSame('Leistungspaket März', $firstItem['description'] ?? null);
         self::assertSame('Stunde', $firstItem['unit'] ?? null);
@@ -963,14 +965,14 @@ final class InvoicesApiTest extends TestCase
                 'invoice-groups' => [
                     'invoice-group' => [
                         [
-                            'total_gross' => 347.28,
-                            'total_net' => 291.83,
+                            'total_gross' => '347.28',
+                            'total_net' => '291.83',
                             'client_id' => 476,
                             'invoice-params' => ['client_id' => 476],
                         ],
                         [
-                            'total_gross' => 1127.53,
-                            'total_net' => 947.50,
+                            'total_gross' => '1127.53',
+                            'total_net' => '947.5',
                             'client_id' => 477,
                             'invoice-params' => ['client_id' => 477],
                         ],
@@ -993,7 +995,7 @@ final class InvoicesApiTest extends TestCase
 
         self::assertCount(2, $groups);
         self::assertContainsOnlyInstancesOf(InvoiceGroup::class, $groups);
-        self::assertSame(347.28, $groups[0]->totalGross);
+        self::assertSame('347.28', $groups[0]->totalGross?->toString());
         self::assertSame(476, $groups[0]->clientId);
         self::assertSame(['client_id' => 476], $groups[0]->invoiceParams);
 
@@ -1015,8 +1017,8 @@ final class InvoicesApiTest extends TestCase
             $body = json_encode([
                 'invoice-groups' => [
                     'invoice-group' => [
-                        'total_gross' => 100.0,
-                        'total_net' => 84.03,
+                        'total_gross' => '100',
+                        'total_net' => '84.03',
                         'status' => 'OPEN',
                         'invoice-params' => ['status' => 'OPEN'],
                     ],

@@ -13,6 +13,7 @@ use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -57,7 +58,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'PDF Testposition',
@@ -195,7 +196,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // 3) Eine simple Position hinzufügen
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: 40.0,
+            unitPrice: Money::of('40'),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Testposition',
@@ -267,7 +268,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
             currencyCode: 'EUR',
         );
 
-        $unitPrice = $faker->randomFloat(2, 20, 100);
+        $unitPrice = Money::of((string) $faker->randomFloat(2, 20, 100));
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
@@ -339,7 +340,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Testposition Delete',
@@ -399,7 +400,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Testposition Cancel',
@@ -469,7 +470,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Testposition Uncancel',
@@ -558,7 +559,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $item = new InvoiceItemCreateOptions(
             1.0,
-            $faker->randomFloat(2, 10, 50),
+            Money::of((string) $faker->randomFloat(2, 10, 50)),
             title: 'Update Draft Position',
         );
         $invoiceOpts = $invoiceOpts->withItem($item);

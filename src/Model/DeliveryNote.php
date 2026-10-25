@@ -23,7 +23,7 @@ use const DATE_ATOM;
 final readonly class DeliveryNote
 {
     /**
-     * @param list<array{name: string, rate: float, amount: float}> $taxes
+     * @param list<array{name: string, rate: float, amount: Money}> $taxes
      * @param list<DeliveryNoteItem>                                $items
      */
     public function __construct(

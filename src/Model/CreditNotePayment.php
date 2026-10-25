@@ -31,7 +31,7 @@ final readonly class CreditNotePayment
         /** Zahlungsdatum. */
         public ?DateTimeImmutable $date,
         /** Zahlungsbetrag. */
-        public float $amount,
+        public Money $amount,
         /** Zahlungsart. */
         public ?InvoicePaymentType $type,
         /** Kommentar zur Zahlung. */
@@ -53,7 +53,7 @@ final readonly class CreditNotePayment
         /** ID der Banktransaktion (finAPI), falls die Zahlung daraus stammt. */
         public ?string $finapiTransactionId = null,
         /** Betrag der Banktransaktion (finAPI). */
-        public ?float $finapiTransactionAmount = null,
+        public ?Money $finapiTransactionAmount = null,
         /** Titel des zugehörigen Dokuments. */
         public ?string $documentTitle = null,
     ) {
@@ -70,7 +70,7 @@ final readonly class CreditNotePayment
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             creditNoteId: ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null) ?? 0,
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
-            amount: ScalarCaster::toFloatOrNull($data['amount'] ?? null) ?? 0.0,
+            amount: ScalarCaster::toMoneyOrNull($data['amount'] ?? null) ?? Money::zero(),
             type: InvoicePaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
@@ -81,7 +81,7 @@ final readonly class CreditNotePayment
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             paymentGroup: ScalarCaster::toStringOrNull($data['payment_group'] ?? null),
             finapiTransactionId: ScalarCaster::toStringOrNull($data['finapi_transaction_id'] ?? null),
-            finapiTransactionAmount: ScalarCaster::toFloatOrNull($data['finapi_transaction_amount'] ?? null),
+            finapiTransactionAmount: ScalarCaster::toMoneyOrNull($data['finapi_transaction_amount'] ?? null),
             documentTitle: ScalarCaster::toStringOrNull($data['document_title'] ?? null),
         );
     }
@@ -101,7 +101,7 @@ final readonly class CreditNotePayment
             'credit_note_id' => $this->creditNoteId,
             'user_id' => $this->userId,
             'date' => $this->date?->format('Y-m-d'),
-            'amount' => $this->amount,
+            'amount' => $this->amount->toString(),
             'type' => $this->type?->value,
             'comment' => $this->comment,
             'transaction_purpose' => $this->transactionPurpose,
@@ -110,7 +110,7 @@ final readonly class CreditNotePayment
             'quote' => $this->quote,
             'payment_group' => $this->paymentGroup,
             'finapi_transaction_id' => $this->finapiTransactionId,
-            'finapi_transaction_amount' => $this->finapiTransactionAmount,
+            'finapi_transaction_amount' => $this->finapiTransactionAmount?->toString(),
             'document_title' => $this->documentTitle,
         ];
     }

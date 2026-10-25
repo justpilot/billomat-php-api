@@ -15,6 +15,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNotePayment;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(Money::class)]
 final class CreditNotePaymentsApiTest extends TestCase
 {
     #[Test]
@@ -51,7 +53,7 @@ final class CreditNotePaymentsApiTest extends TestCase
                         [
                             'id' => 1,
                             'credit_note_id' => 42,
-                            'amount' => 100.0,
+                            'amount' => '100',
                             'date' => '2026-02-01',
                             'type' => 'BANK_TRANSFER',
                         ],
@@ -70,7 +72,7 @@ final class CreditNotePaymentsApiTest extends TestCase
         $payments = $api->list(filters: ['credit_note_id' => 42]);
 
         self::assertCount(1, $payments);
-        self::assertSame(100.0, $payments[0]->amount);
+        self::assertSame('100', $payments[0]->amount->toString());
         self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payments[0]->type);
         self::assertStringContainsString('credit_note_id=42', $captured['url']);
     }
@@ -83,7 +85,7 @@ final class CreditNotePaymentsApiTest extends TestCase
                 'credit-note-payment' => [
                     'id' => 1,
                     'credit_note_id' => 42,
-                    'amount' => 100.0,
+                    'amount' => '100',
                     'date' => '2026-02-01',
                     'type' => 'CASH',
                 ],
@@ -115,7 +117,7 @@ final class CreditNotePaymentsApiTest extends TestCase
                 'credit-note-payment' => [
                     'id' => 99,
                     'credit_note_id' => 42,
-                    'amount' => 100.0,
+                    'amount' => '100',
                     'type' => 'BANK_TRANSFER',
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -130,7 +132,7 @@ final class CreditNotePaymentsApiTest extends TestCase
 
         $opts = new CreditNotePaymentCreateOptions(
             creditNoteId: 42,
-            amount: 100.0,
+            amount: Money::of('100'),
             date: new DateTimeImmutable('2026-02-01'),
             type: InvoicePaymentType::BANK_TRANSFER,
             markCreditNoteAsPaid: true,
@@ -146,7 +148,7 @@ final class CreditNotePaymentsApiTest extends TestCase
         }
 
         self::assertSame(42, $payload['credit-note-payment']['credit_note_id']);
-        self::assertSame(100.0, $payload['credit-note-payment']['amount']);
+        self::assertSame('100', $payload['credit-note-payment']['amount']);
         self::assertSame(1, $payload['credit-note-payment']['mark_credit_note_as_paid']);
         self::assertSame('BANK_TRANSFER', $payload['credit-note-payment']['type']);
     }

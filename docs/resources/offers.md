@@ -109,6 +109,7 @@ Positionen können direkt im `create()`-Call über `items: […]` oder `withItem
 ```php
 use Justpilot\Billomat\Api\OfferCreateOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new OfferCreateOptions(
     clientId: 12345,
@@ -116,7 +117,7 @@ $opts = new OfferCreateOptions(
     date: new DateTimeImmutable('2026-06-02'),
     validityDays: 30,
     items: [
-        new OfferItemCreateOptions(quantity: 1.0, unitPrice: 99.00, title: 'Setup-Pauschale'),
+        new OfferItemCreateOptions(quantity: 1.0, unitPrice: Money::of('99.00'), title: 'Setup-Pauschale'),
     ],
 );
 
@@ -191,7 +192,7 @@ $items = $billomat->offers->items->list($offer->id);
 
 $item = $billomat->offers->items->create(
     $offer->id,
-    new OfferItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
+    new OfferItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
 $billomat->offers->items->update($item->id, $opts);
@@ -265,7 +266,7 @@ Konstruktor: `new OfferCreateOptions(int $clientId, …)` — `clientId` ist Pfl
 Positionen werden über den Konstruktor-Parameter `items` (`list<OfferItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
 
 ```php
-$opts = $opts->withItem(new OfferItemCreateOptions(quantity: 1.0, unitPrice: 99.0));
+$opts = $opts->withItem(new OfferItemCreateOptions(quantity: 1.0, unitPrice: Money::of('99')));
 ```
 
 `toArray()` rendert sie als `offer-items.offer-item`.
@@ -293,12 +294,12 @@ Spiegelt `OfferCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne 
 
 ## Write-Modell: `OfferItemCreateOptions`
 
-Konstruktor: `new OfferItemCreateOptions(float $quantity, float $unitPrice)`. Beide Werte sind Pflicht und werden auch dann mitgeschickt, wenn sie `0` sind (siehe `ARRAY_FILTER_USE_BOTH` in `toArray()`).
+Konstruktor: `new OfferItemCreateOptions(float $quantity, Money $unitPrice)`. Beide Werte sind Pflicht und werden auch dann mitgeschickt, wenn sie `0` sind (siehe `ARRAY_FILTER_USE_BOTH` in `toArray()`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
-| `unitPrice` | `unit_price` | `float` | Pflicht (Konstruktor) |
+| `unitPrice` | `unit_price` | `Money` | Pflicht (Konstruktor) |
 | `type` | `type` | `?InvoiceItemType` | `PRODUCT`/`SERVICE` |
 | `articleId` | `article_id` | `?int` | |
 | `title` | `title` | `?string` | |
@@ -364,17 +365,17 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `validityDays` | `?int` |
 | `address` | `?string` |
 | `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `totalGross`, `totalNet` | `?float` |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
+| `totalGross`, `totalNet` | `?Money` |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `netGross` | `?NetGross` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
+| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
 | `items` | `list<OfferItem>` — eingebettet aus `offer-items.offer-item` |
 | `updated` | `?\DateTimeImmutable` |
 | `validityDate` | `?\DateTimeImmutable` (Gültig bis, nur Datum) |
-| `totalReduction` | `?float` |
+| `totalReduction` | `?Money` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `OfferItem`
@@ -385,13 +386,13 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 |---|---|
 | `id`, `offerId`, `articleId`, `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
+| `quantity`, `unitPrice` | `float`, `Money` |
 | `taxName` | `?string` |
 | `taxRate` | `?float` |
 | `taxChangedManually` | `?bool` |
 | `title`, `description`, `reduction` | `?string` |
 | `type` | `?InvoiceItemType` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
+| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `optional` | `?bool` (Optionale Position) |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -476,6 +477,7 @@ use Justpilot\Billomat\Api\OfferTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -492,23 +494,23 @@ $opts = new OfferCreateOptions(
 );
 
 $setup = new OfferItemCreateOptions(
-    quantity: 1.0, unitPrice: 250.00,
+    quantity: 1.0, unitPrice: Money::of('250.00'),
     title: 'Setup-Pauschale',
     type: InvoiceItemType::SERVICE,
 );
 $opts = $opts->withItem($setup);
 
 $hosting = new OfferItemCreateOptions(
-    quantity: 12.0, unitPrice: 19.90,
+    quantity: 12.0, unitPrice: Money::of('19.90'),
     title: 'Hosting Basic (12 Monate)',
     unit: 'Monat',
 );
 $opts = $opts->withItem($hosting);
 
 $offer = $billomat->offers->create($opts);
-printf("Angebot #%d (DRAFT) angelegt, Brutto: %.2f %s\n",
+printf("Angebot #%d (DRAFT) angelegt, Brutto: %s %s\n",
     $offer->id,
-    $offer->totalGross ?? 0.0,
+    $offer->totalGross?->format(2, ',', '.') ?? '0,00',
     $offer->currencyCode ?? 'EUR',
 );
 

@@ -115,6 +115,7 @@ Items können direkt im `create()`-Call über `items: […]` oder `withItem()` m
 ```php
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new CreditNoteCreateOptions(
     clientId: 12345,
@@ -124,7 +125,7 @@ $opts = new CreditNoteCreateOptions(
 );
 
 $item = new CreditNoteItemCreateOptions(
-    quantity: 1.0, unitPrice: -19.90,
+    quantity: 1.0, unitPrice: Money::of('-19.90'),
     title: 'Rückerstattung Hosting (Mai)',
 );
 $opts = $opts->withItem($item);
@@ -182,10 +183,11 @@ Funktioniert ausschließlich an Gutschriften im Status `DRAFT`.
 
 ```php
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $item = $billomat->creditNotes->items->create(
     $creditNote->id,
-    new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: -19.90),
+    new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: Money::of('-19.90')),
 );
 
 $items = $billomat->creditNotes->items->list($creditNote->id);
@@ -237,10 +239,11 @@ Ein Update gibt es nicht — zum Umbenennen muss der Tag gelöscht und neu angel
 ```php
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $payment = new CreditNotePaymentCreateOptions(
     creditNoteId: $creditNote->id,
-        amount: 19.90,
+        amount: Money::of('19.90'),
     type: InvoicePaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('2026-06-05'),
     markCreditNoteAsPaid: true,
@@ -249,7 +252,7 @@ $payment = new CreditNotePaymentCreateOptions(
 $billomat->creditNotes->payments->create($payment);
 ```
 
-Erst beim Anlegen einer Auszahlung mit `markCreditNoteAsPaid = true` (Wire-Wert `1`) wechselt die Gutschrift in den Status `PAID`. Ohne das Flag bleibt sie `OPEN` und behält einen `openAmount > 0`.
+Erst beim Anlegen einer Auszahlung mit `markCreditNoteAsPaid = true` (Wire-Wert `1`) wechselt die Gutschrift in den Status `PAID`. Ohne das Flag bleibt sie `OPEN` und behält einen positiven `openAmount` (`$creditNote->openAmount?->isPositive()`).
 
 ## Write-Modell: `CreditNoteCreateOptions`
 
@@ -284,12 +287,12 @@ Spiegelt `CreditNoteCreateOptions` ohne `clientId`-Pflicht (jetzt nullable) und 
 
 ## Write-Modell: `CreditNoteItemCreateOptions`
 
-Konstruktor: `new CreditNoteItemCreateOptions(float $quantity, float $unitPrice)`. Beide Werte sind Pflicht und werden **auch dann mitgeschickt, wenn sie `0` sind** (Sonderfall im `toArray()`-Filter).
+Konstruktor: `new CreditNoteItemCreateOptions(float $quantity, Money $unitPrice)`. Beide Werte sind Pflicht und werden **auch dann mitgeschickt, wenn sie `0` sind** (Sonderfall im `toArray()`-Filter).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `quantity` | `quantity` | `float` (Pflicht) | |
-| `unitPrice` | `unit_price` | `float` (Pflicht) | negativ möglich, üblich bei Rückerstattung |
+| `unitPrice` | `unit_price` | `Money` (Pflicht) | negativ möglich, üblich bei Rückerstattung |
 | `type` | `type` | `?InvoiceItemType` | wiederverwendet aus Invoice-Domain |
 | `articleId` | `article_id` | `?int` | |
 | `title` | `title` | `?string` | |
@@ -320,12 +323,12 @@ Konstruktor: `new CreditNoteCommentCreateOptions(int $creditNoteId, string $comm
 
 ## Write-Modell: `CreditNotePaymentCreateOptions`
 
-Konstruktor: `new CreditNotePaymentCreateOptions(int $creditNoteId, float $amount)`.
+Konstruktor: `new CreditNotePaymentCreateOptions(int $creditNoteId, Money $amount)`.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `creditNoteId` | `credit_note_id` | `int` (Pflicht) | wird immer mitgeschickt |
-| `amount` | `amount` | `float` (Pflicht) | wird immer mitgeschickt |
+| `amount` | `amount` | `Money` (Pflicht) | wird immer mitgeschickt |
 | `date` | `date` | `?\DateTimeImmutable` | `Y-m-d` |
 | `comment` | `comment` | `?string` | |
 | `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck der Überweisung |
@@ -365,19 +368,19 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `status` | `?CreditNoteStatus` |
 | `date` | `?\DateTimeImmutable` |
 | `address`, `title`, `label`, `intro`, `note` | `?string` |
-| `totalGross`, `totalNet` | `?float` |
+| `totalGross`, `totalNet` | `?Money` |
 | `netGross` | `?NetGross` |
 | `reduction` | `?string` |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `paidAmount`, `openAmount` | `?float` |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
+| `paidAmount`, `openAmount` | `?Money` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `invoiceId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
+| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
 | `items` | `list<CreditNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
-| `totalReduction` | `?float` |
+| `totalReduction` | `?Money` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `CreditNoteItem`
@@ -389,12 +392,12 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `articleId` | `?int` |
 | `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
+| `quantity`, `unitPrice` | `float`, `Money` |
 | `taxName`, `taxRate`, `taxChangedManually` | `?string`, `?float`, `?bool` |
 | `title`, `description`, `reduction` | `?string` |
 | `type` | `?InvoiceItemType` |
-| `totalGross`, `totalNet` | `?float` |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
+| `totalGross`, `totalNet` | `?Money` |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `taxRateReverseCharge` | `?float` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -439,7 +442,7 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `id` | `?int` |
 | `creditNoteId` | `int` |
 | `date` | `?\DateTimeImmutable` |
-| `amount` | `float` |
+| `amount` | `Money` |
 | `type` | `?InvoicePaymentType` |
 | `comment`, `transactionPurpose` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -448,7 +451,7 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `quote` | `?float` |
 | `paymentGroup` | `?string` |
 | `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
-| `finapiTransactionAmount` | `?float` (finAPI-Bankabgleich) |
+| `finapiTransactionAmount` | `?Money` (finAPI-Bankabgleich) |
 | `documentTitle` | `?string` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -503,6 +506,7 @@ use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -519,7 +523,7 @@ $opts = new CreditNoteCreateOptions(
 );
 
 $item = new CreditNoteItemCreateOptions(
-    quantity: 1.0, unitPrice: -19.90,
+    quantity: 1.0, unitPrice: Money::of('-19.90'),
     title: 'Rückerstattung Webhosting Basic (Mai)',
 );
 $opts = $opts->withItem($item);
@@ -550,7 +554,7 @@ $billomat->creditNotes->email($creditNote->id, $mail);
 // 5) Auszahlung verbuchen — OPEN → PAID
 $payment = new CreditNotePaymentCreateOptions(
     creditNoteId: $creditNote->id,
-        amount: 19.90,
+        amount: Money::of('19.90'),
     type: InvoicePaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('2026-06-05'),
     transactionPurpose: 'Erstattung Hosting Mai',

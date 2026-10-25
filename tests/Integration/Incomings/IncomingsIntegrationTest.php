@@ -9,6 +9,7 @@ use Justpilot\Billomat\Api\IncomingCreateOptions;
 use Justpilot\Billomat\Api\IncomingUpdateOptions;
 use Justpilot\Billomat\Api\SupplierCreateOptions;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -59,7 +60,7 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
             incomingNumber: 'IT-IN-'.date('His'),
             label: 'Integrationstest Incoming',
             note: 'Auto-Test',
-            totalGross: $faker->randomFloat(2, 50, 500),
+            totalGross: Money::of((string) $faker->randomFloat(2, 50, 500)),
             currencyCode: 'EUR',
         );
 

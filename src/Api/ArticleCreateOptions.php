@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\ArticleType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Money;
 
 /**
  * Typisierter Payload für POST /articles gemäß Billomat-API.
@@ -68,7 +69,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
          * Typ: FLOAT
          * Default: 0.0
          */
-        public ?float $salesPrice = null,
+        public ?Money $salesPrice = null,
         /**
          * Währung (ISO-Währungscode).
          *
@@ -87,7 +88,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
          * Billomat-Feld: sales_price2
          * Typ: FLOAT
          */
-        public ?float $salesPrice2 = null,
+        public ?Money $salesPrice2 = null,
         /**
          * Preis für Kunden der Preisgruppe 3.
          *
@@ -96,7 +97,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
          * Billomat-Feld: sales_price3
          * Typ: FLOAT
          */
-        public ?float $salesPrice3 = null,
+        public ?Money $salesPrice3 = null,
         /**
          * Preis für Kunden der Preisgruppe 4.
          *
@@ -105,7 +106,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
          * Billomat-Feld: sales_price4
          * Typ: FLOAT
          */
-        public ?float $salesPrice4 = null,
+        public ?Money $salesPrice4 = null,
         /**
          * Preis für Kunden der Preisgruppe 5.
          *
@@ -114,7 +115,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
          * Billomat-Feld: sales_price5
          * Typ: FLOAT
          */
-        public ?float $salesPrice5 = null,
+        public ?Money $salesPrice5 = null,
         /**
          * Bezeichnung der Einheit.
          *
@@ -138,7 +139,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
          * Typ: FLOAT
          * Default: null
          */
-        public ?float $purchasePrice = null,
+        public ?Money $purchasePrice = null,
         /**
          * Währung des Einkaufspreises (ISO-Währungscode).
          *
@@ -216,7 +217,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `salesPrice`. */
-    public function withSalesPrice(?float $salesPrice): self
+    public function withSalesPrice(?Money $salesPrice): self
     {
         return clone($this, ['salesPrice' => $salesPrice]);
     }
@@ -228,25 +229,25 @@ final readonly class ArticleCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `salesPrice2`. */
-    public function withSalesPrice2(?float $salesPrice2): self
+    public function withSalesPrice2(?Money $salesPrice2): self
     {
         return clone($this, ['salesPrice2' => $salesPrice2]);
     }
 
     /** Kopie mit geändertem `salesPrice3`. */
-    public function withSalesPrice3(?float $salesPrice3): self
+    public function withSalesPrice3(?Money $salesPrice3): self
     {
         return clone($this, ['salesPrice3' => $salesPrice3]);
     }
 
     /** Kopie mit geändertem `salesPrice4`. */
-    public function withSalesPrice4(?float $salesPrice4): self
+    public function withSalesPrice4(?Money $salesPrice4): self
     {
         return clone($this, ['salesPrice4' => $salesPrice4]);
     }
 
     /** Kopie mit geändertem `salesPrice5`. */
-    public function withSalesPrice5(?float $salesPrice5): self
+    public function withSalesPrice5(?Money $salesPrice5): self
     {
         return clone($this, ['salesPrice5' => $salesPrice5]);
     }
@@ -264,7 +265,7 @@ final readonly class ArticleCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `purchasePrice`. */
-    public function withPurchasePrice(?float $purchasePrice): self
+    public function withPurchasePrice(?Money $purchasePrice): self
     {
         return clone($this, ['purchasePrice' => $purchasePrice]);
     }
@@ -318,15 +319,15 @@ final readonly class ArticleCreateOptions implements WriteOptions
             'number_length' => $this->numberLength,
             'title' => $this->title,
             'description' => $this->description,
-            'sales_price' => $this->salesPrice,
+            'sales_price' => $this->salesPrice?->toString(),
             'currency_code' => $this->currencyCode,
-            'sales_price2' => $this->salesPrice2,
-            'sales_price3' => $this->salesPrice3,
-            'sales_price4' => $this->salesPrice4,
-            'sales_price5' => $this->salesPrice5,
+            'sales_price2' => $this->salesPrice2?->toString(),
+            'sales_price3' => $this->salesPrice3?->toString(),
+            'sales_price4' => $this->salesPrice4?->toString(),
+            'sales_price5' => $this->salesPrice5?->toString(),
             'unit' => $this->unit,
             'unit_id' => $this->unitId,
-            'purchase_price' => $this->purchasePrice,
+            'purchase_price' => $this->purchasePrice?->toString(),
             'purchase_price_currency_code' => $this->purchasePriceCurrencyCode,
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,

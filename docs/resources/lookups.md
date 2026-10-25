@@ -206,7 +206,7 @@ $texts = $billomat->reminderTexts->list(['order_by' => 'sorting+ASC']);
 | `sort` | `?int` |
 | `chargeName` | `?string` |
 | `chargeDescription` | `?string` |
-| `chargeAmount` | `?float` |
+| `chargeAmount` | `?Money` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ### `roles`
@@ -338,10 +338,10 @@ if (null !== $default) {
 // 4) Mahnstufen für Reporting laden
 foreach ($billomat->reminderTexts->list(['order_by' => 'sorting+ASC']) as $level) {
     printf(
-        "Stufe %d: %s — %.2f EUR Mahngebühr\n",
+        "Stufe %d: %s — %s EUR Mahngebühr\n",
         $level->sort ?? 0,
         $level->name ?? '-',
-        $level->chargeAmount ?? 0.0,
+        $level->chargeAmount?->format(2, ',', '.') ?? '0,00',
     );
 }
 

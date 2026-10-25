@@ -21,6 +21,7 @@ use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNotePdf;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -45,6 +46,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class CreditNotesApiTest extends TestCase
 {
     #[Test]
@@ -89,8 +91,8 @@ final class CreditNotesApiTest extends TestCase
                     'status' => CreditNoteStatus::OPEN->value,
                     'credit_note_number' => 'GS-2026-0001',
                     'invoice_id' => 42,
-                    'open_amount' => 50.0,
-                    'paid_amount' => 0.0,
+                    'open_amount' => '50',
+                    'paid_amount' => '0',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -108,7 +110,7 @@ final class CreditNotesApiTest extends TestCase
         self::assertSame(CreditNoteStatus::OPEN, $note->status);
         self::assertSame('GS-2026-0001', $note->creditNoteNumber);
         self::assertSame(42, $note->invoiceId);
-        self::assertSame(50.0, $note->openAmount);
+        self::assertSame('50', $note->openAmount?->toString());
     }
 
     #[Test]
@@ -157,7 +159,7 @@ final class CreditNotesApiTest extends TestCase
             invoiceId: 99,
         );
 
-        $item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: 50.0);
+        $item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: Money::of('50'));
         $opts = $opts->withItem($item);
 
         $created = $api->create($opts);

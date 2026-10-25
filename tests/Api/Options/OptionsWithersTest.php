@@ -75,9 +75,11 @@ use Justpilot\Billomat\Api\TaxRateCreateOptions;
 use Justpilot\Billomat\Api\TemplateCreateOptions;
 use Justpilot\Billomat\Api\TemplateUpdateOptions;
 use Justpilot\Billomat\Api\WriteOptions;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionMethod;
@@ -160,6 +162,7 @@ use UnitEnum;
 #[CoversClass(TaxRateCreateOptions::class)]
 #[CoversClass(TemplateCreateOptions::class)]
 #[CoversClass(TemplateUpdateOptions::class)]
+#[UsesClass(Money::class)]
 final class OptionsWithersTest extends TestCase
 {
     #[Test]
@@ -237,6 +240,7 @@ final class OptionsWithersTest extends TestCase
             'bool' === $name => !$parameter->isDefaultValueAvailable() || true !== $parameter->getDefaultValue(),
             'array' === $name => ['wert'],
             DateTimeImmutable::class === $name => new DateTimeImmutable('2026-01-02'),
+            Money::class === $name => Money::of('19.99'),
             is_subclass_of($name, UnitEnum::class) => $this->lastCase($name),
             default => self::fail('Kein Beispielwert für Typ '.$name),
         };
@@ -252,6 +256,7 @@ final class OptionsWithersTest extends TestCase
             \is_string($value) => $value.'-neu',
             \is_bool($value) => !$value,
             \is_array($value) => ['neu'],
+            $value instanceof Money => Money::of('20'),
             $value instanceof UnitEnum => $name::cases()[0],
             default => self::fail('Kein zweiter Beispielwert für Typ '.$name),
         };

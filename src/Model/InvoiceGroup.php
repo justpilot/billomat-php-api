@@ -25,8 +25,8 @@ final readonly class InvoiceGroup
      * @param array<string, scalar> $invoiceParams Filter zum Drill-down (z. B. ['client_id' => 476]).
      */
     public function __construct(
-        public ?float $totalGross,
-        public ?float $totalNet,
+        public ?Money $totalGross,
+        public ?Money $totalNet,
         public ?int $clientId = null,
         public ?string $status = null,
         public ?string $day = null,
@@ -52,8 +52,8 @@ final readonly class InvoiceGroup
         }
 
         return new self(
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null),
             status: ScalarCaster::toStringOrNull($data['status'] ?? null),
             day: ScalarCaster::toStringOrNull($data['day'] ?? null),

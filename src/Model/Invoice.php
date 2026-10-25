@@ -31,7 +31,7 @@ use const DATE_ATOM;
 final readonly class Invoice
 {
     /**
-     * @param list<array{name: string, rate: float, amount: float}> $taxes
+     * @param list<array{name: string, rate: float, amount: Money}> $taxes
      * @param list<InvoiceItem>                                     $items
      */
     public function __construct(
@@ -72,7 +72,7 @@ final readonly class Invoice
         /** Skontofrist in Tagen. */
         public ?int $discountDays = null,
         /** Skontobetrag. */
-        public ?float $discountAmount = null,
+        public ?Money $discountAmount = null,
         /** Dokumentenüberschrift. */
         public ?string $title = null,
         /** Bezeichnung. */
@@ -82,21 +82,21 @@ final readonly class Invoice
         /** Anmerkungstext. */
         public ?string $note = null,
         /** Gesamtbetrag brutto. */
-        public ?float $totalGross = null,
+        public ?Money $totalGross = null,
         /** Gesamtbetrag netto. */
-        public ?float $totalNet = null,
+        public ?Money $totalNet = null,
         /** Preisbasis (NET, GROSS oder SETTINGS). */
         public ?NetGross $netGross = null,
         /** Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction = null,
         /** Gesamtbetrag brutto vor Rabatt. */
-        public ?float $totalGrossUnreduced = null,
+        public ?Money $totalGrossUnreduced = null,
         /** Gesamtbetrag netto vor Rabatt. */
-        public ?float $totalNetUnreduced = null,
+        public ?Money $totalNetUnreduced = null,
         /** Bereits bezahlter Betrag. */
-        public ?float $paidAmount = null,
+        public ?Money $paidAmount = null,
         /** Offener Betrag. */
-        public ?float $openAmount = null,
+        public ?Money $openAmount = null,
         /** Währung (ISO-Währungscode, z. B. "EUR"). */
         public ?string $currencyCode = null,
         /** Währungskurs (für Umrechnung in die Standard-Währung). */
@@ -128,7 +128,7 @@ final readonly class Invoice
         /** Referenz der Factur-X-/ZUGFeRD-Rechnung. */
         public ?string $facturxReference = null,
         /** Summe der Rabatte. */
-        public ?float $totalReduction = null,
+        public ?Money $totalReduction = null,
         /** Wurde die Rechnung digital weiterverarbeitet? */
         public ?bool $digProceeded = null,
     ) {
@@ -160,19 +160,19 @@ final readonly class Invoice
             discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
             discountDate: ScalarCaster::toDateTimeOrNull($data['discount_date'] ?? null),
             discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
-            discountAmount: ScalarCaster::toFloatOrNull($data['discount_amount'] ?? null),
+            discountAmount: ScalarCaster::toMoneyOrNull($data['discount_amount'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
-            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
-            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
-            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
-            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
+            totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
+            paidAmount: ScalarCaster::toMoneyOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toMoneyOrNull($data['open_amount'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),
@@ -186,7 +186,7 @@ final readonly class Invoice
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
-            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
+            totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
             digProceeded: ScalarCaster::toBoolOrNull($data['dig_proceeded'] ?? null),
         );
     }
@@ -219,19 +219,19 @@ final readonly class Invoice
             'discount_rate' => $this->discountRate,
             'discount_date' => $this->discountDate?->format('Y-m-d'),
             'discount_days' => $this->discountDays,
-            'discount_amount' => $this->discountAmount,
+            'discount_amount' => $this->discountAmount?->toString(),
             'title' => $this->title,
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
+            'total_gross' => $this->totalGross?->toString(),
+            'total_net' => $this->totalNet?->toString(),
             'net_gross' => $this->netGross?->value,
             'reduction' => $this->reduction,
-            'total_gross_unreduced' => $this->totalGrossUnreduced,
-            'total_net_unreduced' => $this->totalNetUnreduced,
-            'paid_amount' => $this->paidAmount,
-            'open_amount' => $this->openAmount,
+            'total_gross_unreduced' => $this->totalGrossUnreduced?->toString(),
+            'total_net_unreduced' => $this->totalNetUnreduced?->toString(),
+            'paid_amount' => $this->paidAmount?->toString(),
+            'open_amount' => $this->openAmount?->toString(),
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'invoice_id' => $this->invoiceId,
@@ -243,7 +243,7 @@ final readonly class Invoice
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'facturx_reference' => $this->facturxReference,
-            'total_reduction' => $this->totalReduction,
+            'total_reduction' => $this->totalReduction?->toString(),
             'dig_proceeded' => $this->digProceeded,
         ];
 

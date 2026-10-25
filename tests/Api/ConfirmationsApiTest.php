@@ -21,6 +21,7 @@ use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -45,6 +46,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ConfirmationsApiTest extends TestCase
 {
     #[Test]
@@ -167,7 +169,7 @@ final class ConfirmationsApiTest extends TestCase
             offerId: 99,
         );
 
-        $item = new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: 50.0, title: 'Beratung');
+        $item = new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: Money::of('50'), title: 'Beratung');
         $opts = $opts->withItem($item);
 
         $created = $api->create($opts);

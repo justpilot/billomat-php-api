@@ -15,6 +15,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class InvoiceItemsApiTest extends TestCase
 {
     #[Test]
@@ -65,10 +67,10 @@ final class InvoiceItemsApiTest extends TestCase
                             'description' => 'Beschreibung A',
                             'reduction' => '10%',
                             'type' => 'SERVICE',
-                            'total_gross' => 119.0,
-                            'total_net' => 100.0,
-                            'total_gross_unreduced' => 130.0,
-                            'total_net_unreduced' => 110.0,
+                            'total_gross' => '119',
+                            'total_net' => '100',
+                            'total_gross_unreduced' => '130',
+                            'total_net_unreduced' => '110',
                             'created' => '2025-03-01T12:00:00+01:00',
                         ],
                         [
@@ -86,10 +88,10 @@ final class InvoiceItemsApiTest extends TestCase
                             'description' => 'Beschreibung B',
                             'reduction' => null,
                             'type' => 'PRODUCT',
-                            'total_gross' => 214.0,
-                            'total_net' => 200.0,
-                            'total_gross_unreduced' => 214.0,
-                            'total_net_unreduced' => 200.0,
+                            'total_gross' => '214',
+                            'total_net' => '200',
+                            'total_gross_unreduced' => '214',
+                            'total_net_unreduced' => '200',
                             'created' => '2025-03-01T13:00:00+01:00',
                         ],
                     ],
@@ -124,7 +126,7 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertSame(1, $first->position);
         self::assertSame('Stück', $first->unit);
         self::assertSame(2.0, $first->quantity);
-        self::assertSame(50.0, $first->unitPrice);
+        self::assertSame('50', $first->unitPrice->toString());
         self::assertSame('USt 19%', $first->taxName);
         self::assertSame(19.0, $first->taxRate);
         self::assertFalse($first->taxChangedManually);
@@ -132,10 +134,10 @@ final class InvoiceItemsApiTest extends TestCase
         self::assertSame('Beschreibung A', $first->description);
         self::assertSame('10%', $first->reduction);
         self::assertSame(InvoiceItemType::SERVICE, $first->type);
-        self::assertSame(119.0, $first->totalGross);
-        self::assertSame(100.0, $first->totalNet);
-        self::assertSame(130.0, $first->totalGrossUnreduced);
-        self::assertSame(110.0, $first->totalNetUnreduced);
+        self::assertSame('119', $first->totalGross?->toString());
+        self::assertSame('100', $first->totalNet?->toString());
+        self::assertSame('130', $first->totalGrossUnreduced?->toString());
+        self::assertSame('110', $first->totalNetUnreduced?->toString());
 
         $second = $items[1];
         self::assertSame(2, $second->id);
@@ -178,10 +180,10 @@ final class InvoiceItemsApiTest extends TestCase
                     'description' => 'Ein Item',
                     'reduction' => null,
                     'type' => 'SERVICE',
-                    'total_gross' => 267.75,
-                    'total_net' => 225.0,
-                    'total_gross_unreduced' => 267.75,
-                    'total_net_unreduced' => 225.0,
+                    'total_gross' => '267.75',
+                    'total_net' => '225',
+                    'total_gross_unreduced' => '267.75',
+                    'total_net_unreduced' => '225',
                     'created' => '2025-03-02T10:00:00+01:00',
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -269,10 +271,10 @@ final class InvoiceItemsApiTest extends TestCase
                     'description' => 'Aus Tests',
                     'reduction' => null,
                     'type' => 'SERVICE',
-                    'total_gross' => 119.0,
-                    'total_net' => 100.0,
-                    'total_gross_unreduced' => 119.0,
-                    'total_net_unreduced' => 100.0,
+                    'total_gross' => '119',
+                    'total_net' => '100',
+                    'total_gross_unreduced' => '119',
+                    'total_net_unreduced' => '100',
                     'created' => '2025-03-03T10:00:00+01:00',
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -290,7 +292,7 @@ final class InvoiceItemsApiTest extends TestCase
 
         $options = new InvoiceItemCreateOptions(
             quantity: 2.0,
-            unitPrice: 50.0,
+            unitPrice: Money::of('50'),
             unit: 'Stück',
             taxName: 'USt 19%',
             taxRate: 19.0,
@@ -350,10 +352,10 @@ final class InvoiceItemsApiTest extends TestCase
                     'description' => 'Geänderte Beschreibung',
                     'reduction' => '5%',
                     'type' => 'PRODUCT',
-                    'total_gross' => 267.75,
-                    'total_net' => 225.0,
-                    'total_gross_unreduced' => 281.85,
-                    'total_net_unreduced' => 237.5,
+                    'total_gross' => '267.75',
+                    'total_net' => '225',
+                    'total_gross_unreduced' => '281.85',
+                    'total_net_unreduced' => '237.5',
                     'created' => '2025-03-03T10:00:00+01:00',
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -371,7 +373,7 @@ final class InvoiceItemsApiTest extends TestCase
 
         $options = new InvoiceItemCreateOptions(
             quantity: 3.0,
-            unitPrice: 75.0,
+            unitPrice: Money::of('75'),
             unit: 'Stück',
             taxName: 'USt 19%',
             taxRate: 19.0,

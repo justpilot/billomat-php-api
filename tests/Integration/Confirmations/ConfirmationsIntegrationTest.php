@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -71,7 +72,7 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
 
         $item = new ConfirmationItemCreateOptions(
             1.0,
-            $faker->randomFloat(2, 10, 100),
+            Money::of((string) $faker->randomFloat(2, 10, 100)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Testposition',

@@ -105,6 +105,7 @@ Positionen können direkt über `items: […]` oder `withItem()` im Payload land
 ```php
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new ConfirmationCreateOptions(
     clientId: 12345,
@@ -112,7 +113,7 @@ $opts = new ConfirmationCreateOptions(
     title: 'Auftragsbestätigung',
     date: new DateTimeImmutable('today'),
     items: [
-        new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: 99.00),
+        new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: Money::of('99.00')),
     ],
 );
 
@@ -172,7 +173,7 @@ $items = $billomat->confirmations->items->list($conf->id);
 
 $item = $billomat->confirmations->items->create(
     $conf->id,
-    new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
+    new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
 $billomat->confirmations->items->update($item->id, $opts);
@@ -256,12 +257,12 @@ Spiegelt `ConfirmationCreateOptions` ohne `clientId`-Pflicht (jetzt optional) un
 
 ## Write-Modell: `ConfirmationItemCreateOptions`
 
-Konstruktor: `new ConfirmationItemCreateOptions(float $quantity, float $unitPrice)`. Beide Pflicht, werden auch bei `0` mitgeschickt.
+Konstruktor: `new ConfirmationItemCreateOptions(float $quantity, Money $unitPrice)`. Beide Pflicht, werden auch bei `0` mitgeschickt.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
-| `unitPrice` | `unit_price` | `float` | Pflicht (Konstruktor) |
+| `unitPrice` | `unit_price` | `Money` | Pflicht (Konstruktor) |
 | `type` | `type` | `?InvoiceItemType` | |
 | `articleId` | `article_id` | `?int` | |
 | `title`, `description`, `unit` | analog | `?string` | |
@@ -314,16 +315,16 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `date` | `?\DateTimeImmutable` |
 | `address` | `?string` |
 | `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
+| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `netGross` | `?NetGross` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `offerId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
+| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
 | `items` | `list<ConfirmationItem>` |
 | `updated` | `?\DateTimeImmutable` |
-| `totalReduction` | `?float` |
+| `totalReduction` | `?Money` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `ConfirmationItem`
@@ -334,13 +335,13 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 |---|---|
 | `id`, `confirmationId`, `articleId`, `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
+| `quantity`, `unitPrice` | `float`, `Money` |
 | `taxName` | `?string` |
 | `taxRate` | `?float` |
 | `taxChangedManually` | `?bool` |
 | `title`, `description`, `reduction` | `?string` |
 | `type` | `?InvoiceItemType` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
+| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Read-Modell: `ConfirmationComment`
@@ -422,6 +423,7 @@ use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -438,7 +440,7 @@ $opts = new ConfirmationCreateOptions(
 );
 
 $item = new ConfirmationItemCreateOptions(
-    quantity: 12.0, unitPrice: 19.90,
+    quantity: 12.0, unitPrice: Money::of('19.90'),
     title: 'Hosting Basic (12 Monate)',
     unit: 'Monat',
     type: InvoiceItemType::SERVICE,

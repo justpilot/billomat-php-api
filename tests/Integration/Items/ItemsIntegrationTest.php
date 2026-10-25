@@ -20,6 +20,7 @@ use Justpilot\Billomat\Model\ConfirmationItem;
 use Justpilot\Billomat\Model\CreditNoteItem;
 use Justpilot\Billomat\Model\DeliveryNoteItem;
 use Justpilot\Billomat\Model\InvoiceItem;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\OfferItem;
 use Justpilot\Billomat\Model\ReminderItem;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -64,7 +65,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $invOpts = new InvoiceCreateOptions(clientId: $this->ensureClientId($billomat), currencyCode: 'EUR');
-        $seed = new InvoiceItemCreateOptions(1.0, 10.0, unit: 'Stück', title: 'Seed');
+        $seed = new InvoiceItemCreateOptions(1.0, Money::of('10'), unit: 'Stück', title: 'Seed');
         $invOpts = $invOpts->withItem($seed);
         $invoice = $billomat->invoices->create($invOpts);
         self::assertNotNull($invoice->id);
@@ -73,7 +74,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             // Zusatz-Position über die ItemsApi
             $extra = new InvoiceItemCreateOptions(
                 2.0,
-                25.0,
+                Money::of('25'),
                 unit: 'Stunde',
                 taxRate: 19.0,
                 title: 'Zusatz',
@@ -82,7 +83,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             self::assertNotNull($created->id);
             self::assertSame(2.0, $created->quantity);
 
-            $update = new InvoiceItemCreateOptions(3.0, 25.0, title: 'Zusatz (geändert)');
+            $update = new InvoiceItemCreateOptions(3.0, Money::of('25'), title: 'Zusatz (geändert)');
             $updated = $billomat->invoices->items->update($created->id, $update);
             self::assertSame(3.0, $updated->quantity);
 
@@ -106,7 +107,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($offer->id);
 
         try {
-            $opt = new OfferItemCreateOptions(1.0, 50.0, unit: 'Stück', title: 'Angebotsposition');
+            $opt = new OfferItemCreateOptions(1.0, Money::of('50'), unit: 'Stück', title: 'Angebotsposition');
             $created = $billomat->offers->items->create($offer->id, $opt);
             self::assertNotNull($created->id);
 
@@ -129,7 +130,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($conf->id);
 
         try {
-            $opt = new ConfirmationItemCreateOptions(1.0, 75.0, unit: 'Stück', title: 'Position');
+            $opt = new ConfirmationItemCreateOptions(1.0, Money::of('75'), unit: 'Stück', title: 'Position');
             $created = $billomat->confirmations->items->create($conf->id, $opt);
             self::assertNotNull($created->id);
 
@@ -152,7 +153,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($note->id);
 
         try {
-            $opt = new CreditNoteItemCreateOptions(1.0, 30.0, unit: 'Stück', title: 'Storno-Position');
+            $opt = new CreditNoteItemCreateOptions(1.0, Money::of('30'), unit: 'Stück', title: 'Storno-Position');
             $created = $billomat->creditNotes->items->create($note->id, $opt);
             self::assertNotNull($created->id);
 
@@ -175,7 +176,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($note->id);
 
         try {
-            $opt = new DeliveryNoteItemCreateOptions(5.0, 12.0, unit: 'Stück', title: 'Lieferposition');
+            $opt = new DeliveryNoteItemCreateOptions(5.0, Money::of('12'), unit: 'Stück', title: 'Lieferposition');
             $created = $billomat->deliveryNotes->items->create($note->id, $opt);
             self::assertNotNull($created->id);
 

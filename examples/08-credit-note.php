@@ -16,6 +16,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -46,7 +47,7 @@ try {
     );
 
     $item = new CreditNoteItemCreateOptions(
-        quantity: 1.0, unitPrice: 75.0,
+        quantity: 1.0, unitPrice: Money::of('75'),
         title: 'Rückerstattung Versand',
         type: InvoiceItemType::PRODUCT,
         unit: 'Pauschal',

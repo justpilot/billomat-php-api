@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Model\Money;
 
 /**
  * Typisierter Payload für POST /incomings.
@@ -108,14 +109,14 @@ final readonly class IncomingCreateOptions implements WriteOptions
          * Billomat-Feld: total_gross
          * Typ: FLOAT
          */
-        public ?float $totalGross = null,
+        public ?Money $totalGross = null,
         /**
          * Gesamtbetrag netto.
          *
          * Billomat-Feld: total_net
          * Typ: FLOAT
          */
-        public ?float $totalNet = null,
+        public ?Money $totalNet = null,
         /**
          * Währung (ISO-Währungscode).
          *
@@ -230,13 +231,13 @@ final readonly class IncomingCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `totalGross`. */
-    public function withTotalGross(?float $totalGross): self
+    public function withTotalGross(?Money $totalGross): self
     {
         return clone($this, ['totalGross' => $totalGross]);
     }
 
     /** Kopie mit geändertem `totalNet`. */
-    public function withTotalNet(?float $totalNet): self
+    public function withTotalNet(?Money $totalNet): self
     {
         return clone($this, ['totalNet' => $totalNet]);
     }
@@ -296,8 +297,8 @@ final readonly class IncomingCreateOptions implements WriteOptions
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
+            'total_gross' => $this->totalGross?->toString(),
+            'total_net' => $this->totalNet?->toString(),
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'base64file' => $this->base64file,

@@ -245,13 +245,13 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `dueDays` | `?int` |
 | `dueDate` | `?\DateTimeImmutable` |
 | `address`, `subject`, `label`, `intro`, `note` | `?string` |
-| `totalGross` | `?float` |
+| `totalGross` | `?Money` |
 | `currencyCode` | `?string` |
 | `reminderTextId`, `templateId` | `?int` |
 | `items` | `list<ReminderItem>` |
 | `updated` | `?\DateTimeImmutable` |
-| `paidAmount` | `?float` (Bereits bezahlter Betrag) |
-| `openAmount` | `?float` (Offener Betrag) |
+| `paidAmount` | `?Money` (Bereits bezahlter Betrag) |
+| `openAmount` | `?Money` (Offener Betrag) |
 | `reminderLevel` | `?int` (Mahnstufe, siehe `ReminderTextsApi`) |
 | `reminderLevelName` | `?string` (Name der Mahnstufe) |
 | `isOld` | `?bool` |
@@ -268,9 +268,9 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `articleId` | `?int` |
 | `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
+| `quantity`, `unitPrice` | `float`, `Money` |
 | `title`, `description` | `?string` |
-| `total` | `?float` |
+| `total` | `?Money` |
 | `isCharge` | `?bool` (Position ist eine Mahngebühr) |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -399,6 +399,6 @@ file_put_contents("mahnung-{$reminder->id}.pdf", $pdfBinary);
 
 // 8) Generierte Reminder-Items inspizieren (read-only)
 foreach ($billomat->reminders->items->list($reminder->id) as $item) {
-    printf("- %s: %.2f\n", $item->title ?? 'Position', $item->total ?? 0.0);
+    printf("- %s: %s\n", $item->title ?? 'Position', $item->total?->format(2, ',', '.') ?? '-');
 }
 ```

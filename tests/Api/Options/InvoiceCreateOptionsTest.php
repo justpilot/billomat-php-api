@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -17,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoiceCreateOptions::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
+#[UsesClass(Money::class)]
 final class InvoiceCreateOptionsTest extends TestCase
 {
     #[Test]
@@ -81,8 +83,8 @@ final class InvoiceCreateOptionsTest extends TestCase
     public function withItemReturnsCopyWithAppendedItem(): void
     {
         $options = new InvoiceCreateOptions(clientId: 1);
-        $item1 = new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: 10.0);
-        $item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 20.0);
+        $item1 = new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: Money::of('10'));
+        $item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: Money::of('20'));
 
         $withItems = $options->withItem($item1)->withItem($item2);
 
@@ -96,7 +98,7 @@ final class InvoiceCreateOptionsTest extends TestCase
         $options = new InvoiceCreateOptions(clientId: 1);
         $item = new InvoiceItemCreateOptions(
             quantity: 3.0,
-            unitPrice: 49.90,
+            unitPrice: Money::of('49.9'),
             title: 'Beratung',
             type: InvoiceItemType::SERVICE,
         );
@@ -111,7 +113,7 @@ final class InvoiceCreateOptionsTest extends TestCase
         $serialised = $payload['invoice-items']['invoice-item'][0];
         self::assertSame('Beratung', $serialised['title']);
         self::assertSame(3.0, $serialised['quantity']);
-        self::assertSame(49.90, $serialised['unit_price']);
+        self::assertSame('49.9', $serialised['unit_price']);
         self::assertSame('SERVICE', $serialised['type']);
     }
 }

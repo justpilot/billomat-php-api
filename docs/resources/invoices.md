@@ -101,7 +101,7 @@ use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 // Umsatz pro Kunde
 $byClient = $billomat->invoices->listGrouped(InvoiceGroupBy::CLIENT);
 foreach ($byClient as $group) {
-    printf("Kunde %d: %.2f EUR brutto\n", $group->clientId, $group->totalGross);
+    printf("Kunde %d: %s EUR brutto\n", $group->clientId, $group->totalGross?->format(2, ',', '.') ?? '-');
 }
 
 // Mehrere Achsen kombinieren — Reihenfolge bestimmt die Aggregation:
@@ -137,10 +137,11 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new InvoiceCreateOptions(clientId: 12345, title: 'Webentwicklung Mai 2026', dueDays: 14);
 
-$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.0, title: 'Konzeption');
+$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: Money::of('95'), title: 'Konzeption');
 $opts = $opts->withItem($item);
 
 $invoice = $billomat->invoices->create($opts);
@@ -329,7 +330,7 @@ Konstruktor: `new InvoiceCreateOptions(int $clientId, …)` — `clientId` ist P
 Positionen werden über den Konstruktor-Parameter `items` (`list<InvoiceItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
 
 ```php
-$opts = $opts->withItem(new InvoiceItemCreateOptions(quantity: 5.0, unitPrice: 25.0));
+$opts = $opts->withItem(new InvoiceItemCreateOptions(quantity: 5.0, unitPrice: Money::of('25')));
 ```
 
 `toArray()` rendert sie in `invoice-items.invoice-item`. Details: [Invoice Items](invoice-items.md).
@@ -396,21 +397,21 @@ Payload für `mail()` (Pixelletter), wie die übrigen Options `final readonly` m
 | `supplyDateType` | `?SupplyDateType` |
 | `dueDays`, `discountDays` | `?int` |
 | `address` | `?string` |
-| `discountRate`, `discountAmount` | `?float` |
+| `discountRate`, `discountAmount` | `?float`, `?Money` |
 | `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `totalGross`, `totalNet` | `?float` |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `paidAmount`, `openAmount` | `?float` |
+| `totalGross`, `totalNet` | `?Money` |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
+| `paidAmount`, `openAmount` | `?Money` |
 | `netGross` | `?NetGross` |
 | `currencyCode`, `paymentTypes` | `?string` |
 | `quote` | `?float` |
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` — Steuer-Zusammenfassung |
+| `taxes` | `list<array{name:string,rate:float,amount:Money}>` — Steuer-Zusammenfassung |
 | `templateId` | `?int` |
 | `items` | `list<InvoiceItem>` — falls die API die Positionen mitliefert |
 | `updated` | `?\DateTimeImmutable` |
 | `facturxReference` | `?string` (E-Rechnung, nur lesend – von Billomat nicht dokumentiert) |
-| `totalReduction` | `?float` |
+| `totalReduction` | `?Money` |
 | `digProceeded` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -449,6 +450,7 @@ use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -463,10 +465,10 @@ $opts = new InvoiceCreateOptions(
     dueDays: 14,
 );
 
-$item1 = new InvoiceItemCreateOptions(quantity: 4.0, unitPrice: 120.0, title: 'Workshop');
+$item1 = new InvoiceItemCreateOptions(quantity: 4.0, unitPrice: Money::of('120'), title: 'Workshop');
 $opts = $opts->withItem($item1);
 
-$item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 85.0, title: 'Nachgespräch');
+$item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: Money::of('85'), title: 'Nachgespräch');
 $opts = $opts->withItem($item2);
 
 $invoice = $billomat->invoices->create($opts);
@@ -478,10 +480,10 @@ $billomat->invoices->complete($invoice->id);
 // 3) Frisch laden, jetzt mit Rechnungsnummer
 $completed = $billomat->invoices->get($invoice->id);
 printf(
-    "Abgeschlossen: %s%d (Brutto: %.2f %s)\n",
+    "Abgeschlossen: %s%d (Brutto: %s %s)\n",
     $completed->numberPre,
     $completed->number,
-    $completed->totalGross,
+    $completed->totalGross?->format(2, ',', '.'),
     $completed->currencyCode,
 );
 

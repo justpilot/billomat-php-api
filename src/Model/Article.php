@@ -43,7 +43,7 @@ final readonly class Article
         /** Beschreibung. */
         public ?string $description = null,
         /** Verkaufspreis. */
-        public ?float $salesPrice = null,
+        public ?Money $salesPrice = null,
         /**
          * Währung (ISO-Währungscode).
          *
@@ -55,29 +55,29 @@ final readonly class Article
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice2 = null,
+        public ?Money $salesPrice2 = null,
         /**
          * Preis für Kunden der Preisgruppe 3.
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice3 = null,
+        public ?Money $salesPrice3 = null,
         /**
          * Preis für Kunden der Preisgruppe 4.
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice4 = null,
+        public ?Money $salesPrice4 = null,
         /**
          * Preis für Kunden der Preisgruppe 5.
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice5 = null,
+        public ?Money $salesPrice5 = null,
         /** ID der verknüpften Einheit. */
         public ?int $unitId = null,
         /** Einkaufspreis. */
-        public ?float $purchasePrice = null,
+        public ?Money $purchasePrice = null,
         /** ID des verknüpften Lieferanten. */
         public ?int $supplierId = null,
         /** ID des verknüpften Steuersatzes. */
@@ -119,14 +119,14 @@ final readonly class Article
             numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
-            salesPrice: ScalarCaster::toFloatOrNull($data['sales_price'] ?? null),
+            salesPrice: ScalarCaster::toMoneyOrNull($data['sales_price'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
-            salesPrice2: ScalarCaster::toFloatOrNull($data['sales_price2'] ?? null),
-            salesPrice3: ScalarCaster::toFloatOrNull($data['sales_price3'] ?? null),
-            salesPrice4: ScalarCaster::toFloatOrNull($data['sales_price4'] ?? null),
-            salesPrice5: ScalarCaster::toFloatOrNull($data['sales_price5'] ?? null),
+            salesPrice2: ScalarCaster::toMoneyOrNull($data['sales_price2'] ?? null),
+            salesPrice3: ScalarCaster::toMoneyOrNull($data['sales_price3'] ?? null),
+            salesPrice4: ScalarCaster::toMoneyOrNull($data['sales_price4'] ?? null),
+            salesPrice5: ScalarCaster::toMoneyOrNull($data['sales_price5'] ?? null),
             unitId: ScalarCaster::toIntOrNull($data['unit_id'] ?? null),
-            purchasePrice: ScalarCaster::toFloatOrNull($data['purchase_price'] ?? null),
+            purchasePrice: ScalarCaster::toMoneyOrNull($data['purchase_price'] ?? null),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             taxId: ScalarCaster::toIntOrNull($data['tax_id'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -157,14 +157,14 @@ final readonly class Article
             'number_length' => $this->numberLength,
             'title' => $this->title,
             'description' => $this->description,
-            'sales_price' => $this->salesPrice,
+            'sales_price' => $this->salesPrice?->toString(),
             'currency_code' => $this->currencyCode,
-            'sales_price2' => $this->salesPrice2,
-            'sales_price3' => $this->salesPrice3,
-            'sales_price4' => $this->salesPrice4,
-            'sales_price5' => $this->salesPrice5,
+            'sales_price2' => $this->salesPrice2?->toString(),
+            'sales_price3' => $this->salesPrice3?->toString(),
+            'sales_price4' => $this->salesPrice4?->toString(),
+            'sales_price5' => $this->salesPrice5?->toString(),
             'unit_id' => $this->unitId,
-            'purchase_price' => $this->purchasePrice,
+            'purchase_price' => $this->purchasePrice?->toString(),
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,
             'updated' => $this->updated?->format(DATE_ATOM),

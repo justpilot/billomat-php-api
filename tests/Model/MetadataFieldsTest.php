@@ -74,6 +74,7 @@ use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterComment;
 use Justpilot\Billomat\Model\LetterTag;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferComment;
 use Justpilot\Billomat\Model\OfferItem;
@@ -194,6 +195,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(TemplateDocumentType::class)]
 #[UsesClass(TemplateFormat::class)]
 #[UsesClass(TemplateType::class)]
+#[UsesClass(Money::class)]
 final class MetadataFieldsTest extends TestCase
 {
     /**

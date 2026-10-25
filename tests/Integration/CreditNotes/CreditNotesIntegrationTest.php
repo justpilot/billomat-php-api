@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -70,7 +71,7 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
 
         $item = new CreditNoteItemCreateOptions(
             1.0,
-            $faker->randomFloat(2, 5, 50),
+            Money::of((string) $faker->randomFloat(2, 5, 50)),
             title: 'Korrekturposition',
         );
 

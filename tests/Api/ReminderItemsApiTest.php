@@ -10,6 +10,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\ReminderItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -28,6 +29,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ReminderItemsApiTest extends TestCase
 {
     #[Test]
@@ -57,7 +59,7 @@ final class ReminderItemsApiTest extends TestCase
         $items = $api->list(42);
 
         self::assertCount(1, $items);
-        self::assertSame(100.0, $items[0]->unitPrice);
+        self::assertSame('100', $items[0]->unitPrice->toString());
         self::assertStringContainsString('reminder_id=42', $captured['url']);
     }
 

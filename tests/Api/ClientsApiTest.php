@@ -16,6 +16,7 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -42,6 +43,7 @@ use const PHP_URL_QUERY;
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ClientsApiTest extends TestCase
 {
     #[Test]
@@ -514,8 +516,8 @@ final class ClientsApiTest extends TestCase
         self::assertSame('2026-01-10', $c->sepaMandateDate->format('Y-m-d'));
         self::assertSame('CASH,BANK_TRANSFER', $c->defaultPaymentTypes);
         self::assertTrue($c->enableCustomerportal);
-        self::assertSame(11900.50, $c->revenueGross);
-        self::assertSame(10000.42, $c->revenueNet);
+        self::assertSame('11900.5', $c->revenueGross?->toString());
+        self::assertSame('10000.42', $c->revenueNet?->toString());
         self::assertSame('ABSOLUTE', $c->discountRateType);
         self::assertSame('ABSOLUTE', $c->discountDaysType);
         self::assertSame('ABSOLUTE', $c->dueDaysType);

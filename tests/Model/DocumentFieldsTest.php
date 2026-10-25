@@ -30,6 +30,7 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceItem;
 use Justpilot\Billomat\Model\Letter;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferItem;
 use Justpilot\Billomat\Model\Recurring;
@@ -74,6 +75,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(RecurringItem::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class DocumentFieldsTest extends TestCase
 {
     /**
@@ -87,12 +89,12 @@ final class DocumentFieldsTest extends TestCase
         yield 'Confirmation' => [
             Confirmation::fromArray(...),
             ['id' => '1', 'total_reduction' => '12.5'],
-            ['totalReduction' => 12.5],
+            ['totalReduction' => '12.5'],
         ];
         yield 'CreditNote' => [
             CreditNote::fromArray(...),
             ['id' => '1', 'total_reduction' => '12.5'],
-            ['totalReduction' => 12.5],
+            ['totalReduction' => '12.5'],
         ];
         yield 'CreditNoteItem' => [
             CreditNoteItem::fromArray(...),
@@ -107,7 +109,7 @@ final class DocumentFieldsTest extends TestCase
         yield 'Invoice' => [
             Invoice::fromArray(...),
             ['id' => '1', 'total_reduction' => '12.5', 'dig_proceeded' => '1'],
-            ['totalReduction' => 12.5, 'digProceeded' => true],
+            ['totalReduction' => '12.5', 'digProceeded' => true],
         ];
         yield 'Letter' => [
             Letter::fromArray(...),
@@ -117,7 +119,7 @@ final class DocumentFieldsTest extends TestCase
         yield 'Offer' => [
             Offer::fromArray(...),
             ['id' => '1', 'validity_date' => '2026-11-17', 'total_reduction' => '12.5'],
-            ['validityDate' => '2026-11-17', 'totalReduction' => 12.5],
+            ['validityDate' => '2026-11-17', 'totalReduction' => '12.5'],
         ];
         yield 'OfferItem' => [
             OfferItem::fromArray(...),
@@ -127,17 +129,17 @@ final class DocumentFieldsTest extends TestCase
         yield 'Recurring' => [
             Recurring::fromArray(...),
             ['id' => '1', 'total_reduction' => '12.5', 'total_net_unreduced' => '12.5', 'total_gross_unreduced' => '12.5', 'discount_amount' => '12.5', 'status' => 'Text', 'in_progress' => '1', 'ultimo' => '1', 'email_filename' => 'Text', 'email_bcc' => '1', 'letter_color' => '1', 'letter_duplex' => '1', 'letter_paper_weight' => '42', 'offer_id' => '42', 'confirmation_id' => '42'],
-            ['totalReduction' => 12.5, 'totalNetUnreduced' => 12.5, 'totalGrossUnreduced' => 12.5, 'discountAmount' => 12.5, 'status' => 'Text', 'inProgress' => true, 'ultimo' => true, 'emailFilename' => 'Text', 'emailBcc' => true, 'letterColor' => true, 'letterDuplex' => true, 'letterPaperWeight' => 42, 'offerId' => 42, 'confirmationId' => 42],
+            ['totalReduction' => '12.5', 'totalNetUnreduced' => '12.5', 'totalGrossUnreduced' => '12.5', 'discountAmount' => '12.5', 'status' => 'Text', 'inProgress' => true, 'ultimo' => true, 'emailFilename' => 'Text', 'emailBcc' => true, 'letterColor' => true, 'letterDuplex' => true, 'letterPaperWeight' => 42, 'offerId' => 42, 'confirmationId' => 42],
         ];
         yield 'Reminder' => [
             Reminder::fromArray(...),
             ['id' => '1', 'paid_amount' => '12.5', 'open_amount' => '12.5', 'reminder_level' => '42', 'reminder_level_name' => 'Text', 'is_old' => '1'],
-            ['paidAmount' => 12.5, 'openAmount' => 12.5, 'reminderLevel' => 42, 'reminderLevelName' => 'Text', 'isOld' => true],
+            ['paidAmount' => '12.5', 'openAmount' => '12.5', 'reminderLevel' => 42, 'reminderLevelName' => 'Text', 'isOld' => true],
         ];
         yield 'ReminderItem' => [
             ReminderItem::fromArray(...),
             ['id' => '1', 'total' => '12.5', 'is_charge' => '1'],
-            ['total' => 12.5, 'isCharge' => true],
+            ['total' => '12.5', 'isCharge' => true],
         ];
     }
 
@@ -156,6 +158,9 @@ final class DocumentFieldsTest extends TestCase
             $actual = $props[$property];
             if ($actual instanceof DateTimeImmutable) {
                 $actual = $actual->format('Y-m-d');
+            }
+            if ($actual instanceof Money) {
+                $actual = $actual->toString();
             }
 
             self::assertSame($value, $actual, $property);

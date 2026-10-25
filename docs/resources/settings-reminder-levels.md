@@ -61,7 +61,7 @@ Liefert `null` bei 404.
 | `sort` | `sorting` (Fallback `sort`) | `?int` | Reihenfolge der Stufe |
 | `chargeName` | `charge_name` | `?string` | Name der Mahngebühr |
 | `chargeDescription` | `charge_description` | `?string` | Beschreibung der Mahngebühr |
-| `chargeAmount` | `charge_amount` | `?float` | Höhe der Mahngebühr |
+| `chargeAmount` | `charge_amount` | `?Money` | Höhe der Mahngebühr |
 | `customfield` | `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 ## Stolpersteine
@@ -91,11 +91,11 @@ $texts = $billomat->reminderTexts->list();
 usort($texts, static fn ($a, $b) => ($a->sort ?? 0) <=> ($b->sort ?? 0));
 
 foreach ($texts as $rt) {
-    printf("Stufe %d: %s\n  Betreff: %s\n  Gebühr: %.2f € (%s)\n",
+    printf("Stufe %d: %s\n  Betreff: %s\n  Gebühr: %s € (%s)\n",
         $rt->sort ?? 0,
         $rt->name ?? '',
         $rt->subject ?? '',
-        $rt->chargeAmount ?? 0.0,
+        $rt->chargeAmount?->format(2, ',', '.') ?? '0,00',
         $rt->chargeName ?? 'keine',
     );
 }

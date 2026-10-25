@@ -16,6 +16,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Justpilot\Billomat\Api\IncomingCreateOptions;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
 use Justpilot\Billomat\Api\IncomingTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -43,8 +44,8 @@ try {
         date: new DateTimeImmutable('yesterday'),
         supplyDate: new DateTimeImmutable('yesterday'),
         dueDays: 14,
-        totalGross: 119.0,
-        totalNet: 100.0,
+        totalGross: Money::of('119'),
+        totalNet: Money::of('100'),
         note: 'Beleg-Erfassung aus examples/10-incoming.php',
     );
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 
 /**
  * Typisierter Payload für POST /confirmation-items gemäß Billomat-API
@@ -32,7 +33,7 @@ final readonly class ConfirmationItemCreateOptions implements WriteOptions
          *
          * Billomat-Feld: unit_price
          */
-        public float $unitPrice,
+        public Money $unitPrice,
         /**
          * ID des Artikels (falls verknüpft).
          *
@@ -107,7 +108,7 @@ final readonly class ConfirmationItemCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `unitPrice`. */
-    public function withUnitPrice(float $unitPrice): self
+    public function withUnitPrice(Money $unitPrice): self
     {
         return clone($this, ['unitPrice' => $unitPrice]);
     }
@@ -185,7 +186,7 @@ final readonly class ConfirmationItemCreateOptions implements WriteOptions
             'title' => $this->title,
             'description' => $this->description,
             'quantity' => $this->quantity,
-            'unit_price' => $this->unitPrice,
+            'unit_price' => $this->unitPrice->toString(),
             'unit' => $this->unit,
             'tax_name' => $this->taxName,
             'tax_rate' => $this->taxRate,

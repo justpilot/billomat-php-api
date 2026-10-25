@@ -21,6 +21,7 @@ use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -45,6 +46,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class DeliveryNotesApiTest extends TestCase
 {
     #[Test]
@@ -162,7 +164,7 @@ final class DeliveryNotesApiTest extends TestCase
             invoiceId: 99,
         );
 
-        $item = new DeliveryNoteItemCreateOptions(quantity: 5.0, unitPrice: 0.0, title: 'Lieferung');
+        $item = new DeliveryNoteItemCreateOptions(quantity: 5.0, unitPrice: Money::of('0'), title: 'Lieferung');
         $opts = $opts->withItem($item);
 
         $created = $api->create($opts);

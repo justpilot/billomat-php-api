@@ -9,6 +9,7 @@ use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferItem;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -21,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(OfferStatus::class)]
 #[UsesClass(OfferItem::class)]
+#[UsesClass(Money::class)]
 final class OfferTest extends TestCase
 {
     #[Test]
@@ -87,7 +89,7 @@ final class OfferTest extends TestCase
         self::assertInstanceOf(DateTimeImmutable::class, $offer->date);
         self::assertSame(30, $offer->validityDays);
         self::assertSame('Angebot Web-Relaunch', $offer->title);
-        self::assertSame(1190.0, $offer->totalGross);
+        self::assertSame('1190', $offer->totalGross?->toString());
         self::assertSame(NetGross::NET, $offer->netGross);
         self::assertSame(1.0, $offer->quote);
         self::assertNull($offer->freeTextId);
@@ -120,7 +122,7 @@ final class OfferTest extends TestCase
         ]);
 
         self::assertCount(1, $offer->items);
-        self::assertSame(50.0, $offer->items[0]->unitPrice);
+        self::assertSame('50', $offer->items[0]->unitPrice->toString());
     }
 
     #[Test]

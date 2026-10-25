@@ -43,13 +43,13 @@ final readonly class Incoming
         /** Anmerkungstext. */
         public ?string $note = null,
         /** Gesamtbetrag brutto. */
-        public ?float $totalGross = null,
+        public ?Money $totalGross = null,
         /** Gesamtbetrag netto. */
-        public ?float $totalNet = null,
+        public ?Money $totalNet = null,
         /** Bereits bezahlter Betrag. */
-        public ?float $paidAmount = null,
+        public ?Money $paidAmount = null,
         /** Offener Betrag. */
-        public ?float $openAmount = null,
+        public ?Money $openAmount = null,
         /** Währung (ISO-Währungscode). */
         public ?string $currencyCode = null,
         /** Währungskurs (für Umrechnung in die Standard-Währung). */
@@ -89,10 +89,10 @@ final readonly class Incoming
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
-            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
-            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
+            paidAmount: ScalarCaster::toMoneyOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toMoneyOrNull($data['open_amount'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -125,10 +125,10 @@ final readonly class Incoming
             'address' => $this->address,
             'label' => $this->label,
             'note' => $this->note,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
-            'paid_amount' => $this->paidAmount,
-            'open_amount' => $this->openAmount,
+            'total_gross' => $this->totalGross?->toString(),
+            'total_net' => $this->totalNet?->toString(),
+            'paid_amount' => $this->paidAmount?->toString(),
+            'open_amount' => $this->openAmount?->toString(),
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'updated' => $this->updated?->format(DATE_ATOM),

@@ -16,6 +16,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Justpilot\Billomat\Api\RecurringCreateOptions;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
@@ -52,7 +53,7 @@ try {
     );
 
     $item = new RecurringItemCreateOptions(
-        quantity: 1.0, unitPrice: 19.9,
+        quantity: 1.0, unitPrice: Money::of('19.9'),
         title: 'Webhosting Basic',
         unit: 'Monat',
     );
@@ -81,7 +82,7 @@ try {
     // 4) Preis-Update für die einzige Position
     foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
         $update = new RecurringItemCreateOptions(
-            quantity: 1.0, unitPrice: 24.9,
+            quantity: 1.0, unitPrice: Money::of('24.9'),
             title: $current->title,
             unit: $current->unit,
         );

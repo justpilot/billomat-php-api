@@ -15,6 +15,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\InvoicePayment;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(Money::class)]
 final class InvoicePaymentsApiTest extends TestCase
 {
     #[Test]
@@ -54,7 +56,7 @@ final class InvoicePaymentsApiTest extends TestCase
                             'id' => 1,
                             'invoice_id' => 100,
                             'date' => '2025-01-01',
-                            'amount' => 119.0,
+                            'amount' => '119',
                             'type' => 'BANK_TRANSFER',
                             'comment' => 'Testzahlung 1',
                         ],
@@ -62,7 +64,7 @@ final class InvoicePaymentsApiTest extends TestCase
                             'id' => 2,
                             'invoice_id' => 100,
                             'date' => '2025-01-02',
-                            'amount' => 50.0,
+                            'amount' => '50',
                             'type' => 'CASH',
                             'comment' => 'Testzahlung 2',
                         ],
@@ -96,7 +98,7 @@ final class InvoicePaymentsApiTest extends TestCase
         $first = $payments[0];
         self::assertSame(1, $first->id);
         self::assertSame(100, $first->invoiceId);
-        self::assertSame(119.0, $first->amount);
+        self::assertSame('119', $first->amount->toString());
         self::assertInstanceOf(DateTimeImmutable::class, $first->date);
         self::assertSame('2025-01-01', $first->date?->format('Y-m-d'));
         self::assertSame(InvoicePaymentType::BANK_TRANSFER, $first->type);
@@ -119,7 +121,7 @@ final class InvoicePaymentsApiTest extends TestCase
                     'id' => 5,
                     'invoice_id' => 200,
                     'date' => '2025-02-10',
-                    'amount' => 200.0,
+                    'amount' => '200',
                     'type' => 'PAYPAL',
                     'comment' => 'PayPal-Zahlung',
                 ],
@@ -139,7 +141,7 @@ final class InvoicePaymentsApiTest extends TestCase
         self::assertInstanceOf(InvoicePayment::class, $payment);
         self::assertSame(5, $payment->id);
         self::assertSame(200, $payment->invoiceId);
-        self::assertSame(200.0, $payment->amount);
+        self::assertSame('200', $payment->amount->toString());
         self::assertSame('2025-02-10', $payment->date?->format('Y-m-d'));
         self::assertSame(InvoicePaymentType::PAYPAL, $payment->type);
         self::assertSame('PayPal-Zahlung', $payment->comment);
@@ -161,7 +163,7 @@ final class InvoicePaymentsApiTest extends TestCase
                     'id' => 10,
                     'invoice_id' => 300,
                     'date' => '2025-03-01',
-                    'amount' => 119.0,
+                    'amount' => '119',
                     'type' => 'BANK_TRANSFER',
                     'comment' => 'Testzahlung',
                 ],
@@ -180,7 +182,7 @@ final class InvoicePaymentsApiTest extends TestCase
 
         $opts = new InvoicePaymentCreateOptions(
             invoiceId: 300,
-            amount: 119.0,
+            amount: Money::of('119'),
             date: new DateTimeImmutable('2025-03-01'),
             type: InvoicePaymentType::BANK_TRANSFER,
             comment: 'Testzahlung',
@@ -192,7 +194,7 @@ final class InvoicePaymentsApiTest extends TestCase
 
         self::assertSame(10, $payment->id);
         self::assertSame(300, $payment->invoiceId);
-        self::assertSame(119.0, $payment->amount);
+        self::assertSame('119', $payment->amount->toString());
         self::assertSame('2025-03-01', $payment->date?->format('Y-m-d'));
         self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payment->type);
         self::assertSame('Testzahlung', $payment->comment);
@@ -216,7 +218,7 @@ final class InvoicePaymentsApiTest extends TestCase
 
         $inner = $payload['invoice-payment'];
         self::assertSame(300, $inner['invoice_id'] ?? null);
-        self::assertSame(119.0, $inner['amount'] ?? null);
+        self::assertSame('119', $inner['amount'] ?? null);
         self::assertSame('2025-03-01', $inner['date'] ?? null);
         self::assertSame('BANK_TRANSFER', $inner['type'] ?? null);
         self::assertSame('Testzahlung', $inner['comment'] ?? null);

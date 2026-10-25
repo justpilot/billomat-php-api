@@ -59,7 +59,7 @@ final readonly class Reminder
         /** Anmerkungstext. */
         public ?string $note = null,
         /** Gesamtbetrag brutto. */
-        public ?float $totalGross = null,
+        public ?Money $totalGross = null,
         /** Währung (ISO-Währungscode). */
         public ?string $currencyCode = null,
         /** ID des Mahntextes (Mahnstufe). */
@@ -73,9 +73,9 @@ final readonly class Reminder
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /** Bereits bezahlter Betrag der Rechnung. */
-        public ?float $paidAmount = null,
+        public ?Money $paidAmount = null,
         /** Offener Betrag der Rechnung. */
-        public ?float $openAmount = null,
+        public ?Money $openAmount = null,
         /** Mahnstufe. */
         public ?int $reminderLevel = null,
         /** Bezeichnung der Mahnstufe. */
@@ -107,15 +107,15 @@ final readonly class Reminder
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             reminderTextId: ScalarCaster::toIntOrNull($data['reminder_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toList($data['reminder-items']['reminder-item'] ?? null, 'id', ReminderItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
-            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
-            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            paidAmount: ScalarCaster::toMoneyOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toMoneyOrNull($data['open_amount'] ?? null),
             reminderLevel: ScalarCaster::toIntOrNull($data['reminder_level'] ?? null),
             reminderLevelName: ScalarCaster::toStringOrNull($data['reminder_level_name'] ?? null),
             isOld: ScalarCaster::toBoolOrNull($data['is_old'] ?? null),
@@ -146,14 +146,14 @@ final readonly class Reminder
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
-            'total_gross' => $this->totalGross,
+            'total_gross' => $this->totalGross?->toString(),
             'currency_code' => $this->currencyCode,
             'reminder_text_id' => $this->reminderTextId,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
-            'paid_amount' => $this->paidAmount,
-            'open_amount' => $this->openAmount,
+            'paid_amount' => $this->paidAmount?->toString(),
+            'open_amount' => $this->openAmount?->toString(),
             'reminder_level' => $this->reminderLevel,
             'reminder_level_name' => $this->reminderLevelName,
             'is_old' => $this->isOld,

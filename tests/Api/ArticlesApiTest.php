@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -34,6 +35,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ArticleType::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ArticlesApiTest extends TestCase
 {
     #[Test]
@@ -47,8 +49,8 @@ final class ArticlesApiTest extends TestCase
             $body = json_encode([
                 'articles' => [
                     'article' => [
-                        ['id' => 1, 'title' => 'Beratung', 'sales_price' => 100.0, 'unit' => 'Stunde'],
-                        ['id' => 2, 'title' => 'Hardware', 'sales_price' => 50.0],
+                        ['id' => 1, 'title' => 'Beratung', 'sales_price' => '100', 'unit' => 'Stunde'],
+                        ['id' => 2, 'title' => 'Hardware', 'sales_price' => '50'],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -66,7 +68,7 @@ final class ArticlesApiTest extends TestCase
         self::assertCount(2, $articles);
         self::assertContainsOnlyInstancesOf(Article::class, $articles);
         self::assertSame('Beratung', $articles[0]->title);
-        self::assertSame(100.0, $articles[0]->salesPrice);
+        self::assertSame('100', $articles[0]->salesPrice?->toString());
         self::assertStringContainsString('title=Beratung', $captured['url']);
     }
 
@@ -79,7 +81,7 @@ final class ArticlesApiTest extends TestCase
                     'id' => 1234,
                     'title' => 'Test',
                     'article_number' => 'A-2026-001',
-                    'sales_price' => 99.99,
+                    'sales_price' => '99.99',
                     'currency_code' => 'EUR',
                     'tax_id' => 1,
                 ],
@@ -98,7 +100,7 @@ final class ArticlesApiTest extends TestCase
         self::assertInstanceOf(Article::class, $article);
         self::assertSame(1234, $article->id);
         self::assertSame('A-2026-001', $article->articleNumber);
-        self::assertSame(99.99, $article->salesPrice);
+        self::assertSame('99.99', $article->salesPrice?->toString());
         self::assertSame(1, $article->taxId);
     }
 
@@ -126,7 +128,7 @@ final class ArticlesApiTest extends TestCase
             $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
             $body = json_encode([
-                'article' => ['id' => 777, 'title' => 'Neu', 'sales_price' => 25.0],
+                'article' => ['id' => 777, 'title' => 'Neu', 'sales_price' => '25'],
             ], JSON_THROW_ON_ERROR);
 
             return new MockResponse($body, ['http_code' => 201]);
@@ -139,7 +141,7 @@ final class ArticlesApiTest extends TestCase
 
         $opts = new ArticleCreateOptions(
             title: 'Neu',
-            salesPrice: 25.0,
+            salesPrice: Money::of('25'),
             currencyCode: 'EUR',
             unit: 'Stück',
         );
@@ -156,7 +158,7 @@ final class ArticlesApiTest extends TestCase
         }
 
         self::assertSame('Neu', $payload['article']['title']);
-        self::assertSame(25.0, $payload['article']['sales_price']);
+        self::assertSame('25', $payload['article']['sales_price']);
         self::assertSame('Stück', $payload['article']['unit']);
     }
 
@@ -169,7 +171,7 @@ final class ArticlesApiTest extends TestCase
             $captured = ['method' => $method, 'url' => $url];
 
             $body = json_encode([
-                'article' => ['id' => 777, 'title' => 'Geändert', 'sales_price' => 30.0],
+                'article' => ['id' => 777, 'title' => 'Geändert', 'sales_price' => '30'],
             ], JSON_THROW_ON_ERROR);
 
             return new MockResponse($body, ['http_code' => 200]);
@@ -180,11 +182,11 @@ final class ArticlesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ArticleUpdateOptions(salesPrice: 30.0);
+        $opts = new ArticleUpdateOptions(salesPrice: Money::of('30'));
 
         $updated = $api->update(777, $opts);
 
-        self::assertSame(30.0, $updated->salesPrice);
+        self::assertSame('30', $updated->salesPrice?->toString());
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/articles/777', $captured['url']);
     }

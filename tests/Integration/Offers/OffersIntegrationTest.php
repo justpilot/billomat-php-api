@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\OfferCreateOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -83,7 +84,7 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $item = new OfferItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Testposition',
@@ -118,7 +119,7 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $item = new OfferItemCreateOptions(
             1.0,
-            $faker->randomFloat(2, 10, 50),
+            Money::of((string) $faker->randomFloat(2, 10, 50)),
             title: 'Update Test Position',
         );
         $opts = $opts->withItem($item);

@@ -17,6 +17,7 @@ use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Model\RecurringItem;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -43,6 +44,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(RecurringItem::class)]
+#[UsesClass(Money::class)]
 final class RecurringsApiTest extends TestCase
 {
     #[Test]
@@ -140,12 +142,12 @@ final class RecurringsApiTest extends TestCase
                     'next_creation_date' => '2026-07-01',
                     'taxes' => [
                         'tax' => [
-                            ['name' => 'MwSt', 'rate' => 19.0, 'amount' => 19.0],
+                            ['name' => 'MwSt', 'rate' => 19.0, 'amount' => '19'],
                         ],
                     ],
                     'recurring-items' => [
                         'recurring-item' => [
-                            ['id' => 100, 'recurring_id' => 42, 'quantity' => 1.0, 'unit_price' => 100.0, 'title' => 'Hosting Basic'],
+                            ['id' => 100, 'recurring_id' => 42, 'quantity' => 1.0, 'unit_price' => '100', 'title' => 'Hosting Basic'],
                         ],
                     ],
                 ],
@@ -201,7 +203,7 @@ final class RecurringsApiTest extends TestCase
             cycle: RecurringCycle::MONTHLY,
             startDate: new DateTimeImmutable('2026-07-01'),
             items: [
-                new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 100.0),
+                new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('100')),
             ],
         );
 

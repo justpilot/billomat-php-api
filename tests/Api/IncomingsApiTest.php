@@ -16,6 +16,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -36,6 +37,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class IncomingsApiTest extends TestCase
 {
     #[Test]
@@ -45,7 +47,7 @@ final class IncomingsApiTest extends TestCase
             $body = json_encode([
                 'incomings' => [
                     'incoming' => [
-                        ['id' => 1, 'supplier_id' => 42, 'status' => 'OPEN', 'total_gross' => 119.0],
+                        ['id' => 1, 'supplier_id' => 42, 'status' => 'OPEN', 'total_gross' => '119'],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -61,7 +63,7 @@ final class IncomingsApiTest extends TestCase
         $incomings = $api->list();
         self::assertCount(1, $incomings);
         self::assertSame(IncomingStatus::OPEN, $incomings[0]->status);
-        self::assertSame(119.0, $incomings[0]->totalGross);
+        self::assertSame('119', $incomings[0]->totalGross?->toString());
     }
 
     #[Test]
@@ -74,8 +76,8 @@ final class IncomingsApiTest extends TestCase
                     'supplier_id' => 42,
                     'incoming_number' => 'IN-2026-0001',
                     'status' => 'PAID',
-                    'paid_amount' => 100.0,
-                    'open_amount' => 0.0,
+                    'paid_amount' => '100',
+                    'open_amount' => '0',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -116,8 +118,8 @@ final class IncomingsApiTest extends TestCase
         $opts = new IncomingCreateOptions(
             supplierId: 42,
             date: new DateTimeImmutable('2026-03-01'),
-            totalGross: 119.0,
-            totalNet: 100.0,
+            totalGross: Money::of('119'),
+            totalNet: Money::of('100'),
         );
 
         $created = $api->create($opts);
@@ -129,7 +131,7 @@ final class IncomingsApiTest extends TestCase
         }
 
         self::assertSame(42, $payload['incoming']['supplier_id']);
-        self::assertSame(119.0, $payload['incoming']['total_gross']);
+        self::assertSame('119', $payload['incoming']['total_gross']);
     }
 
     #[Test]

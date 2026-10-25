@@ -80,7 +80,7 @@ composer audit            # security audit of the dependencies
 
 **PHPStan:** fix findings instead of adding baseline entries, `@phpstan-ignore` comments or casts that only silence them.
 
-**Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x`. The full run on `main`/`4.x` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
+**Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x --ignore-msi-with-no-mutations` (the last flag keeps a change without any mutants, e.g. only property hooks, from failing with 0 %). The full run on `main`/`4.x` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
 
 **Rector vs. PHP-CS-Fixer:** if one tool reverts the other's change, that's a configuration bug; please open an issue instead of committing a workaround.
 

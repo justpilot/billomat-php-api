@@ -134,7 +134,7 @@ jobs:
 
       - name: Run Infection on changed lines
         if: github.event_name == 'pull_request'
-        run: composer mutate -- --logger-github --git-diff-lines --git-diff-base=origin/${{ github.base_ref }} --min-msi=90 --min-covered-msi=90
+        run: composer mutate -- --logger-github --git-diff-lines --git-diff-base=origin/${{ github.base_ref }} --min-msi=90 --min-covered-msi=90 --ignore-msi-with-no-mutations
 
       - name: Run Infection on all code
         if: github.event_name == 'push'

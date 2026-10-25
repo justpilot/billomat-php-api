@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\LetterCommentCreateOptions;
 use Justpilot\Billomat\Api\LetterCommentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
@@ -26,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(LetterComment::class)]
 #[CoversClass(LetterCommentActionKey::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class LetterCommentsApiTest extends TestCase

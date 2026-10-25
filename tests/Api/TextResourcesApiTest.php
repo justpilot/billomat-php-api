@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\EmailTemplatesApi;
 use Justpilot\Billomat\Api\FreeTextsApi;
 use Justpilot\Billomat\Api\ReminderTextsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\EmailTemplate;
@@ -30,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(FreeText::class)]
 #[CoversClass(ReminderText::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class TextResourcesApiTest extends TestCase

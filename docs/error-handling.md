@@ -10,22 +10,26 @@ Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatE
     ├── HttpException
     │   ├── AuthenticationException
     │   ├── ValidationException
-    │   └── NotFoundException
+    │   ├── NotFoundException
+    │   └── RateLimitException
+    ├── TransportException
     └── UnexpectedResponseException
 ```
 
 | Klasse | Datei | Bedeutung |
 |---|---|---|
 | `BillomatException` | `src/Exception/BillomatException.php` | Basis-Marker. Fängst du diese, fängst du alles vom SDK. |
-| `HttpException` | `src/Exception/HttpException.php` | Generischer HTTP-Fehler. Hält Status-Code, Roh-Body, vorhergehende Exception. |
+| `HttpException` | `src/Exception/HttpException.php` | Generischer HTTP-Fehler. Hält Status-Code und Roh-Body. |
 | `AuthenticationException` | `src/Exception/AuthenticationException.php` | 401/403 — ungültiger oder fehlender API-Key, Berechtigung fehlt. |
 | `NotFoundException` | `src/Exception/NotFoundException.php` | 404 — Ressource existiert nicht. |
 | `ValidationException` | `src/Exception/ValidationException.php` | 400/422 — Payload abgelehnt, Pflichtfeld fehlt, Wert ungültig. |
+| `RateLimitException` | `src/Exception/RateLimitException.php` | 429 — Rate-Limit erschöpft und die Wartezeit liegt über `RetryPolicy::$maxDelayMs` (bzw. alle Versuche verbraucht). `getRetryAfter(): ?int` nennt die Sekunden bis zum nächsten Fenster. |
+| `TransportException` | `src/Exception/TransportException.php` | Keine Antwort von Billomat (DNS, Verbindungsabbruch, Timeout). Die Exception des PSR-18-Clients steckt in `getPrevious()`. |
 | `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, aber der Body passt nicht zur erwarteten Struktur (seit 3.2). |
 
 ## Mapping HTTP-Status → Exception
 
-`AbstractApi::mapHttpException()` ist die zentrale Übersetzungstabelle:
+`BillomatHttpClient::request()` (siehe `src/Http/BillomatHttpClient.php`) übersetzt jede Antwort mit Status ≥ 400 in eine SDK-Exception — erst nachdem die automatischen Wiederholungen (siehe [HTTP-Layer](advanced/http-layer.md#retries-und-rate-limits)) ausgeschöpft sind:
 
 | HTTP-Status | Geworfene Exception |
 |---|---|
@@ -34,13 +38,15 @@ Alle vom SDK geworfenen Fehler erben von `Justpilot\Billomat\Exception\BillomatE
 | 404 Not Found | `NotFoundException` |
 | 400 Bad Request | `ValidationException` |
 | 422 Unprocessable Entity | `ValidationException` |
+| 429 Too Many Requests | `RateLimitException` |
 | sonstige 4xx, 5xx | `HttpException` |
+| keine Antwort (Netzwerkfehler) | `TransportException` |
 
-Jede dieser Exceptions trägt:
+Jede `HttpException` (inkl. Subklassen) trägt:
 
-- `getStatusCode(): int` — den HTTP-Code von Billomat,
-- `getResponseBody(): ?string` — den unveränderten Antwort-Body (oder `null`, falls er nicht gelesen werden konnte). Hilfreich, weil Billomat Validierungsdetails als JSON-Struktur mitschickt,
-- `getPrevious(): ?\Throwable` — die ursprüngliche Symfony-Exception.
+- `getMessage(): string` — z. B. `Billomat responded with HTTP 422 to POST /clients. <Fehlertext von Billomat>`. Den Fehlertext liest das SDK aus `{"errors": {"error": …}}` (JSON) bzw. `<error>…</error>` (XML); fehlt er, endet die Message nach dem Pfad,
+- `getStatusCode(): int` — den HTTP-Code von Billomat (identisch mit `getCode()`),
+- `getResponseBody(): ?string` — den unveränderten Antwort-Body. Hilfreich, weil Billomat Validierungsdetails als JSON-Struktur mitschickt.
 
 ## Sonderfall: `get($id)` gibt `null` statt 404
 
@@ -67,6 +73,7 @@ Andere 4xx/5xx-Antworten (z. B. 401 bei abgelaufenem Key) werfen weiterhin wie g
 ```php
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\RateLimitException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 
@@ -87,6 +94,10 @@ try {
         $e->getStatusCode(),
         $e->getResponseBody() ?? '(kein Body)',
     ));
+    throw $e;
+} catch (RateLimitException $e) {
+    // Limit erschöpft, SDK hat nicht länger gewartet
+    $wait = $e->getRetryAfter(); // Sekunden oder null
     throw $e;
 } catch (HttpException $e) {
     // Alles andere (500er, unbekannte 4xx)
@@ -128,7 +139,7 @@ use Justpilot\Billomat\Exception\BillomatException;
 try {
     $billomat->invoices->complete($id);
 } catch (BillomatException $e) {
-    // fängt jede SDK-Exception (HttpException + Subklassen + andere)
+    // fängt jede SDK-Exception (HttpException + Subklassen, TransportException, …)
 }
 ```
 
@@ -138,4 +149,6 @@ API-Methoden werfen eine `UnexpectedResponseException`, wenn Billomat zwar mit 2
 
 Bis einschließlich 3.1 war das eine einfache `\RuntimeException`. Da `UnexpectedResponseException` über `BillomatException` weiterhin von `\RuntimeException` erbt, greifen bestehende `catch (\RuntimeException)`-Blöcke unverändert.
 
-Antwortet Billomat mit 2xx und einem Body, der kein gültiges JSON ist, wirft `json_decode()` eine `\JsonException`. Diese ist (noch) keine `BillomatException`.
+Auch ein 2xx-Body, der kein gültiges JSON oder kein JSON-Objekt ist, führt zu einer `UnexpectedResponseException` (die ursprüngliche `\JsonException` steckt in `getPrevious()`).
+
+Kommt gar keine Antwort zurück (DNS-Fehler, Verbindungsabbruch, Timeout), wirft das SDK eine `TransportException`. GET-Requests werden vorher gemäß `RetryPolicy` wiederholt, POST/PUT/DELETE nicht.

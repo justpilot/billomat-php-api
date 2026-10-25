@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\ArticleCreateOptions;
 use Justpilot\Billomat\Api\ArticlesApi;
 use Justpilot\Billomat\Api\ArticleUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
@@ -28,6 +29,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ArticleUpdateOptions::class)]
 #[CoversClass(Article::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ArticleType::class)]

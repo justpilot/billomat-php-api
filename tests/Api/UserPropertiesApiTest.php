@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Api\UserPropertiesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
@@ -27,6 +28,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(PropertyCreateOptions::class)]
 #[CoversClass(PropertyType::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]

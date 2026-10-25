@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\CountryTaxesApi;
 use Justpilot\Billomat\Api\IncomingCategoriesApi;
 use Justpilot\Billomat\Api\RolesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -32,6 +33,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Role::class)]
 #[CoversClass(CountryTax::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]

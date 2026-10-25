@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\RecurringsApi;
 use Justpilot\Billomat\Api\RecurringUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
@@ -36,6 +37,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(RecurringCycle::class)]
 #[UsesClass(RecurringItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]

@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\ContactCreateOptions;
 use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\ContactUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Contact;
@@ -26,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ContactUpdateOptions::class)]
 #[CoversClass(Contact::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class ContactsApiTest extends TestCase

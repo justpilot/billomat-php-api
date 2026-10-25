@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -39,6 +40,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(OfferStatus::class)]
 #[UsesClass(OfferItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]

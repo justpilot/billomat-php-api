@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
@@ -28,6 +29,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Settings::class)]
 #[UsesClass(SettingsUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(NumberRangeMode::class)]

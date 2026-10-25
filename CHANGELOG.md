@@ -8,16 +8,27 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 
+### Added
+- **PSR-18 transport.** The SDK works with any PSR-18 client (Symfony, Guzzle, …) and PSR-17 factories, found via `php-http/discovery` or passed to `BillomatClient`. Without a client, Symfony's `Psr18Client` is used with `BillomatConfig::$timeout` when `symfony/http-client` is installed.
+- **Automatic retries** via `BillomatConfig::$retry` (`RetryPolicy`, default: 2 retries, 500 ms base delay, 10 s cap). 429 responses are retried for every method after the wait Billomat announces (`Retry-After` or `X-Rate-Limit-Reset`); GET requests are also retried on 502/503/504 and network errors with exponential backoff and jitter. `RetryPolicy::none()` turns retries off.
+- `RateLimitException` (429, with `getRetryAfter()`) and `TransportException` (no response, wraps the PSR-18 exception), both below `BillomatException`.
+- Exception messages include the method, the path and Billomat's error text, e.g. `Billomat responded with HTTP 422 to POST /clients. Name is missing`.
+
 ### Changed
 - **BC break: PHP 8.5 is now the minimum version** (`"php": "^8.5"`). CI runs on PHP 8.5 (required) and 8.6 (experimental); Rector uses the PHP 8.5 rule set.
 - **Read-only API methods are marked `#[\NoDiscard]`:** `get()`, `getMyself()`, `list()`, `listPage()`, `listBy*()`, `listGrouped()`, `iterateAll()`, `cloud()`, `pdf()`, `thumb()`, `avatar()` and `SearchApi::query()`. PHP 8.5 emits a warning when their result is ignored; cast to `(void)` to discard it on purpose. Write methods (`create()`, `update()`, `delete()`, …) are not marked.
 - **BC break: `BillomatConfig` validates its input.** The Billomat ID must be a valid subdomain (letters, digits, inner hyphens, at most 63 characters), and the base URI is parsed with PHP 8.5's `Uri\Rfc3986\Uri` and must be absolute. Otherwise the constructor throws an `InvalidArgumentException`, instead of sending requests to a wrong host.
+- **BC break: `symfony/http-client` is no longer a dependency.** Install a PSR-18 client and PSR-17 factories (e.g. `symfony/http-client` + `nyholm/psr7`, or `guzzlehttp/guzzle`). `BillomatClient::__construct()` and `create()` take a `Psr\Http\Client\ClientInterface` instead of a Symfony `HttpClientInterface`; wrap Symfony clients in `Psr18Client`.
+- **BC break: `BillomatHttpClientInterface::request()` returns a PSR-7 `ResponseInterface` and throws the SDK exceptions itself.** Custom `AbstractApi` subclasses no longer catch Symfony exceptions; read the body with `(string) $response->getBody()`.
+- **BC break:** a 2xx response whose body is not a JSON object throws `UnexpectedResponseException` instead of `JsonException`.
+- Array query parameters go out as `key%5B%5D=v` (PSR-7 URIs encode the brackets per RFC 3986, which servers decode to the same `key[]`).
 
 ### Removed
 - **BC break: everything marked `@deprecated since 3.1` is gone.**
   - `DunningLevelsApi`, `$billomat->dunningLevels` and the `DunningLevel` model (`/dunning-levels` answers with 404). Use `$billomat->reminderTexts` for reminder levels.
   - `AbstractApi::putEmptyResponse()` (use `putVoid()`).
   - The read-model properties Billomat no longer returns: `Article::$unit`/`$purchasePriceCurrencyCode`/`$categoryId`, `Client::$customerportalUrl`, `Contact::$note`, `*Property::$position`, `TaxRate::$accountId`, `ReminderText::$dueDays`, `Country::$nameDe`/`$eu`, `User::$phone`/`$mobile`/`$fax`, `Invoice::$customerportalUrl`, `CreditNote::$customerportalUrl`, `Offer`/`Confirmation::$discountRate`/`$discountDate`/`$discountDays`/`$discountAmount`/`$customerportalUrl`, `Letter::$letterNumber`/`$number`/`$numberPre`/`$numberLength`/`$note`/`$customerportalUrl`, `Reminder::$reminderNumber`/`$number`/`$numberPre`/`$numberLength`/`$totalNet`/`$quote`, `Recurring::$numberPre`, `Incoming::$supplyDate`/`$dueDays`/`$paidAt`/`$intro`, `DeliveryNote::$totalGross`/`$totalNet`/`$netGross`/`$reduction`/`$totalGrossUnreduced`/`$totalNetUnreduced`/`$currencyCode`/`$quote`/`$customerportalUrl`, `$created` on `InvoiceItem`/`OfferItem`/`CreditNoteItem`/`ConfirmationItem`, `ReminderItem::$totalGross`/`$totalNet`/`$created` and `DeliveryNoteItem::$unitPrice`/`$taxName`/`$taxRate`/`$reduction`/`$totalGross`/`$totalNet`/`$totalGrossUnreduced`/`$totalNetUnreduced`/`$created`. They also disappear from the models' constructors and `toArray()`. Fields that are writable stay in the `*CreateOptions`/`*UpdateOptions`.
+- `AbstractApi::mapHttpException()` and `HttpException::fromResponse()` (Symfony-specific; the mapping now lives in `BillomatHttpClient`).
 
 ## [3.4.0] - 2026-10-24
 

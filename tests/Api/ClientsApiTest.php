@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -33,6 +34,7 @@ use const PHP_URL_QUERY;
 #[CoversClass(Page::class)]
 #[CoversClass(PageInfo::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]

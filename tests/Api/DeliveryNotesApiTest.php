@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\DeliveryNoteUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -39,6 +40,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(DeliveryNoteStatus::class)]
 #[UsesClass(DeliveryNoteItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]

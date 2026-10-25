@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\TemplateCreateOptions;
 use Justpilot\Billomat\Api\TemplatesApi;
 use Justpilot\Billomat\Api\TemplateUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
@@ -30,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(TemplateCreateOptions::class)]
 #[UsesClass(TemplateUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(TemplateDocumentType::class)]

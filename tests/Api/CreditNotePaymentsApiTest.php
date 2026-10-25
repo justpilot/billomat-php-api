@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNotePayment;
@@ -26,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(CreditNotePaymentCreateOptions::class)]
 #[CoversClass(CreditNotePayment::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoicePaymentType::class)]

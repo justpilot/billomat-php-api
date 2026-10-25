@@ -2,7 +2,7 @@
 
 Das SDK wird vollständig mit **PHPUnit 13** getestet. Es gibt zwei Test-Arten:
 
-- **Unit-Tests** unter `tests/` (außer `tests/Integration/`) — mocken die HTTP-Ebene mit Symfonys `MockHttpClient`. Benötigen keine Credentials, laufen in jedem Setup.
+- **Unit-Tests** unter `tests/` (außer `tests/Integration/`) — mocken die HTTP-Ebene mit Symfonys `MockHttpClient`, eingewickelt in `Psr18Client`. Benötigen keine Credentials, laufen in jedem Setup.
 - **Integrationstests** unter `tests/Integration/` — sprechen den realen Billomat-Sandbox an. Werden ohne Credentials automatisch übersprungen.
 
 ## Tests ausführen
@@ -46,6 +46,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 #[CoversClass(ClientsApi::class)]
@@ -69,7 +70,7 @@ final class MyApiTest extends TestCase
         });
 
         $config = new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key');
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new ClientsApi($http);
 
         $result = $api->list(['per_page' => 50]);
@@ -85,9 +86,10 @@ Wichtige Punkte:
 
 - **`#[Test]` statt `test_`-Präfix.** Methodennamen lesen sich wie Sätze (`it_lists_clients_and_passes_filters`, `it_creates_a_new_client_via_post`).
 - **`#[CoversClass(Foo::class)]` ist Pflicht** — die strikte PHPUnit-Konfiguration erzwingt sie. Mehrere Klassen einfach mehrfach attributieren.
-- `BillomatHttpClient` wird **direkt** instanziiert und mit dem Mock verbunden. Nicht den `BillomatHttpClient` selbst mocken — er enthält den Query-String-Builder, der unter Test bleiben soll.
-- Der `$captured`-Trick aus dem Closure-Argument findet sich an vielen Stellen — er erlaubt Assertions über Methode, URL, Header und Payload (`$options['json']` oder `$options['body']`).
-- `MockResponse` kann auch HTTP-Fehler simulieren (`['http_code' => 404]`) — nützlich für Exception-Tests, siehe `tests/Api/AbstractApiExceptionTest.php`.
+- `BillomatHttpClient` wird **direkt** instanziiert und mit dem Mock verbunden. Der `MockHttpClient` ist ein Symfony-Client, kein PSR-18-Client — deshalb `new Psr18Client($mock)`. Nicht den `BillomatHttpClient` selbst mocken — er enthält Query-String-Builder, Fehler-Mapping und Retry-Logik, die unter Test bleiben sollen.
+- Der `$captured`-Trick aus dem Closure-Argument findet sich an vielen Stellen — er erlaubt Assertions über Methode, URL, Header und Payload. Weil der Request über PSR-18 läuft, enthält `$options['body']` den JSON-Body als String (mit `json_decode()` prüfen) und `$options['headers']` eine Liste von `"Name: value"`-Strings; einen `'json'`-Key gibt es nicht. Array-Filter stehen in der URL als `key%5B%5D=v`.
+- `MockResponse` kann auch HTTP-Fehler simulieren (`['http_code' => 404]`) — nützlich für Exception-Tests, siehe `tests/Api/AbstractApiExceptionTest.php` und `tests/Http/BillomatHttpClientErrorTest.php`.
+- Bei Retry-Tests (429, 502/503/504) dem `BillomatHttpClient` eine `sleep:`-Closure (`Closure(int $ms): void`) mitgeben, die die Wartezeit nur protokolliert — sonst wartet der Test wirklich. Alternativ `retry: RetryPolicy::none()` in der `BillomatConfig` setzen.
 
 Eine reale, vollständig kommentierte Vorlage steht in `tests/Api/ClientsApiTest.php`.
 

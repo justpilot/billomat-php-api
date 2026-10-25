@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\SearchApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\SearchResult;
@@ -23,6 +24,7 @@ use const PHP_URL_QUERY;
 #[CoversClass(SearchApi::class)]
 #[CoversClass(SearchResult::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class SearchApiTest extends TestCase

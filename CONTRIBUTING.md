@@ -40,7 +40,7 @@ Jede Billomat-Ressource folgt demselben Muster — orientiere dich für eine neu
 
 ## Tests
 
-- Unit-Tests verwenden `Symfony\Component\HttpClient\MockHttpClient` mit `MockResponse`. Sie konstruieren `BillomatConfig`, dann `BillomatHttpClient`, dann die `*Api`-Klasse direkt — `BillomatHttpClient` selbst wird nicht gemockt.
+- Unit-Tests verwenden `Symfony\Component\HttpClient\MockHttpClient` mit `MockResponse`, eingewickelt in `Psr18Client`. Sie konstruieren `BillomatConfig`, dann `new BillomatHttpClient(new Psr18Client($mock), $config)`, dann die `*Api`-Klasse direkt — `BillomatHttpClient` selbst wird nicht gemockt. Tests für Retries übergeben `sleep:` eine Closure, damit sie nicht wirklich warten.
 - Asserts sollten sowohl das hydratisierte Modell als auch den abgesetzten Request (Methode, URL, Header, Payload) prüfen.
 - **PHPUnit-12-Attribut-Stil:** `#[Test]` auf jeder Test-Methode (kein `test_`-Präfix), `#[CoversClass(Foo::class)]` auf der Klasse (mehrfach, falls mehrere SUTs), statische Assertions (`self::assertX()`).
 - Integrationstests gehören unter `tests/Integration/`, erben von `AbstractBillomatIntegrationTestCase` und verwenden `createBillomatClientOrSkip()`. Sie müssen `markTestSkipped()` aufrufen, wenn `BILLOMAT_ID`/`BILLOMAT_API_KEY` fehlen.

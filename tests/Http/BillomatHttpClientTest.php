@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Http;
 
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 #[CoversClass(BillomatHttpClient::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 final class BillomatHttpClientTest extends TestCase
 {
     #[Test]

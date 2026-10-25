@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\ActivitiesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Activity;
@@ -27,6 +28,7 @@ use const PHP_URL_QUERY;
 #[CoversClass(Page::class)]
 #[CoversClass(PageInfo::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class ActivitiesApiTest extends TestCase

@@ -9,6 +9,7 @@ use Justpilot\Billomat\Api\IncomingCreateOptions;
 use Justpilot\Billomat\Api\IncomingsApi;
 use Justpilot\Billomat\Api\IncomingUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -31,6 +32,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Incoming::class)]
 #[CoversClass(IncomingStatus::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]

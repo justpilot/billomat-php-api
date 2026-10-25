@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\ReminderEmailOptions;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -37,6 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ReminderPdf::class)]
 #[CoversClass(ReminderStatus::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]

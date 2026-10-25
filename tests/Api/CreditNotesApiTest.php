@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Api\CreditNoteUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -39,6 +40,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(CreditNoteStatus::class)]
 #[UsesClass(CreditNoteItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]

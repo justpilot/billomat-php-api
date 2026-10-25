@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiversApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
@@ -27,6 +28,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(RecurringEmailReceiverCreateOptions::class)]
 #[CoversClass(RecurringEmailReceiverType::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]

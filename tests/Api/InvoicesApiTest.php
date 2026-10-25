@@ -12,6 +12,7 @@ use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -43,6 +44,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(InvoiceItemCreateOptions::class)]
 #[UsesClass(InvoiceMailOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]

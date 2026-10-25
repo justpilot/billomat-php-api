@@ -8,7 +8,7 @@
 
 **Language / Sprache:** English (this file) · [Deutsch](README.md)
 
-Modern, fully typed PHP 8.5+ SDK for the [Billomat API](https://www.billomat.com/api/) — built on Symfony components, with `final readonly` read models, separate typed write options, and a clean exception hierarchy.
+Modern, fully typed PHP 8.5+ SDK for the [Billomat API](https://www.billomat.com/api/) — works with any PSR-18 HTTP client (Symfony, Guzzle, …), with `final readonly` read models, separate typed write options, and a clean exception hierarchy.
 
 > Unofficial SDK. This project is not affiliated with Billomat GmbH and is developed and maintained independently.
 
@@ -34,7 +34,7 @@ Modern, fully typed PHP 8.5+ SDK for the [Billomat API](https://www.billomat.com
 
 - PHP 8.5 or newer
 - Composer
-- Symfony components 8.1 or newer (`^8.1`). Symfony 7.x is no longer supported.
+- A PSR-18 HTTP client plus PSR-17 factories, e.g. `symfony/http-client` with `nyholm/psr7`, or `guzzlehttp/guzzle`
 - A Billomat account with API access enabled
 - An API key from the account settings under `https://<billomatId>.billomat.net/app/settings/api`
 
@@ -44,6 +44,14 @@ Modern, fully typed PHP 8.5+ SDK for the [Billomat API](https://www.billomat.com
 
 ```bash
 composer require justpilot/billomat-php-api
+```
+
+The SDK does not ship its own HTTP client; it needs a PSR-18 client and PSR-17 factories. If the `php-http/discovery` Composer plugin is allowed, it installs an implementation automatically when none is present. Otherwise, install one explicitly:
+
+```bash
+composer require justpilot/billomat-php-api symfony/http-client nyholm/psr7
+# or
+composer require justpilot/billomat-php-api guzzlehttp/guzzle
 ```
 
 ## Quickstart
@@ -88,10 +96,11 @@ Full runnable examples live under [examples/](examples/).
 ## Features
 
 - PHP 8.5+, fully typed (`final readonly` models, enums, named arguments).
-- HTTP layer on top of `symfony/http-client`; bring your own `HttpClientInterface`.
+- HTTP layer on top of PSR-18/PSR-17: bring any client (Symfony, Guzzle, …), or let `php-http/discovery` find one.
+- Automatic retries: 429 after the wait Billomat announces (`Retry-After` or `X-Rate-Limit-Reset`), plus GET requests on 502/503/504 and network errors with exponential backoff — configurable via `RetryPolicy`.
 - One `*Api` class per Billomat resource with consistent verbs (`list`, `get`, `create`, `update`, `delete`) plus resource-specific actions (`complete`, `cancel`, `pdf`, `thumb`, …).
 - Auto-pagination via an `iterateAll()` generator and `listPage()` with metadata.
-- Structured exception hierarchy with mapping to HTTP status codes (401/403, 404, 400/422).
+- Structured exception hierarchy with mapping to HTTP status codes (401/403, 404, 400/422, 429) and a dedicated `TransportException` for network failures.
 
 ## Resources
 
@@ -157,8 +166,9 @@ $billomat = BillomatClient::create(
     apiKey: '…',
     appId: null,        // optional, only for registered third-party apps
     appSecret: null,    // optional
-    timeout: 10.0,      // seconds
-    httpClient: null,   // optional custom HttpClientInterface
+    timeout: 10.0,      // seconds (only for the client the SDK creates)
+    httpClient: null,   // optional custom PSR-18 client
+    retry: new RetryPolicy(maxRetries: 2), // RetryPolicy::none() disables retries
 );
 ```
 
@@ -205,7 +215,9 @@ Every exception thrown by the SDK extends `BillomatException`. HTTP errors are m
 | 401, 403 | `AuthenticationException` |
 | 404 | `NotFoundException` |
 | 400, 422 | `ValidationException` |
+| 429 | `RateLimitException` (with `getRetryAfter()`) |
 | other 4xx/5xx | `HttpException` |
+| no response (DNS, timeout, connection reset) | `TransportException` |
 
 `get($id)` methods return `null` on 404 instead of throwing. Every `HttpException` exposes `getStatusCode()` and `getResponseBody()` — the latter contains Billomat's raw response body and is often useful when debugging.
 
@@ -213,25 +225,27 @@ Patterns and examples: [docs/error-handling.md](docs/error-handling.md). Backgro
 
 ## Logging & HTTP client
 
-The Symfony HTTP client can be decorated before being handed to `BillomatClient` — the standard Symfony toolbox covers logging, tracing, retry, and tests:
+`httpClient` accepts any PSR-18 client (`Psr\Http\Client\ClientInterface`). Without one, the SDK uses Symfony's `Psr18Client` with the configured timeout if `symfony/http-client` is installed, otherwise the client found by `php-http/discovery`. A custom client configures its own timeout. Wrap a Symfony `HttpClientInterface` — for example one decorated with logging or tracing — in `Psr18Client`:
 
 ```php
 use Justpilot\Billomat\BillomatClient;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\RetryableHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\TraceableHttpClient;
 
-$inner = HttpClient::create(['max_duration' => 30.0]);
-$decorated = new TraceableHttpClient(new RetryableHttpClient($inner));
+$inner = HttpClient::create(['timeout' => 10.0, 'max_duration' => 30.0]);
+$decorated = new TraceableHttpClient($inner);
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
-    httpClient: $decorated,
+    httpClient: new Psr18Client($decorated),
 );
 ```
 
-For unit tests, `Symfony\Component\HttpClient\MockHttpClient` is a drop-in replacement. HTTP layer specifics (query encoding, `+` vs. `%2B`, array filters) live in [docs/advanced/http-layer.md](docs/advanced/http-layer.md).
+The SDK retries 429 and transient errors itself (`RetryPolicy`); an extra `RetryableHttpClient` is not needed.
+
+For unit tests, use `Symfony\Component\HttpClient\MockHttpClient` wrapped in `Psr18Client`. HTTP layer specifics (query encoding, `+` vs. `%2B`, array filters) live in [docs/advanced/http-layer.md](docs/advanced/http-layer.md).
 
 ## Tests
 

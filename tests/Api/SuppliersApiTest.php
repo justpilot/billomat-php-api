@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\SupplierCreateOptions;
 use Justpilot\Billomat\Api\SuppliersApi;
 use Justpilot\Billomat\Api\SupplierUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Supplier;
@@ -26,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(SupplierUpdateOptions::class)]
 #[CoversClass(Supplier::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class SuppliersApiTest extends TestCase

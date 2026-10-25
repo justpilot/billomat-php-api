@@ -6,17 +6,18 @@ Billomat antwortet bei Problemen mit einem `4xx`/`5xx`-Statuscode und einer kurz
 
 ## Status-Code-Mapping
 
-`AbstractApi::mapHttpException()` (siehe `src/Api/AbstractApi.php`) übersetzt Symfonys `HttpExceptionInterface` in:
+`BillomatHttpClient::request()` (siehe `src/Http/BillomatHttpClient.php`) übersetzt jede Antwort mit Status ≥ 400 — nach eventuellen automatischen Wiederholungen — in:
 
 | Status | SDK-Exception |
 |---|---|
 | 401, 403 | `AuthenticationException` |
 | 404 | `NotFoundException` |
 | 400, 422 | `ValidationException` |
-| 429 | `HttpException` (Rate-Limit) |
+| 429 | `RateLimitException` (erbt von `HttpException`, `getRetryAfter()` in Sekunden) |
 | Sonstige `4xx`/`5xx` | `HttpException` |
+| keine Antwort (DNS, Timeout, Verbindungsabbruch) | `TransportException` (PSR-18-Exception in `getPrevious()`) |
 
-Der rohe Response-Body bleibt in der Exception erhalten (`getResponseBody()`), so dass die Billomat-Fehlermeldung sichtbar bleibt:
+Die Billomat-Fehlermeldung landet in der Exception-Message, z. B. `Billomat responded with HTTP 404 to GET /invoices/1. Resource not found`. Der rohe Response-Body bleibt zusätzlich erhalten (`getResponseBody()`):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -47,7 +48,7 @@ Die API zählt Aufrufe in **15-Minuten-Fenstern**, festgelegt auf `XX:00–XX:14
 | `X-Rate-Limit-Remaining` | verbleibende Aufrufe im aktuellen Fenster |
 | `X-Rate-Limit-Reset` | Epoch-Sekunden des nächsten Fensterstarts |
 
-Das SDK ruft beide nicht automatisch ab; bei Bedarf lassen sie sich über die Response-Header des darunter liegenden Symfony-`HttpClient` lesen.
+Das SDK wertet `X-Rate-Limit-Reset` bei einer 429-Antwort aus (siehe unten). `X-Rate-Limit-Remaining` liest es nicht — wer vorab drosseln will, kann die Header mit einem Decorator um den PSR-18-Client herum mitlesen.
 
 ### 429 — Limit überschritten
 
@@ -57,7 +58,17 @@ Wird das Kontingent im Fenster aufgebraucht, antwortet Billomat mit `429 Too Man
 <error>Maximum number of requests reached. Try again in 246 seconds.</error>
 ```
 
-Empfehlung: in eigenen Retry-Schleifen `X-Rate-Limit-Reset` auswerten, statt fest 15 Minuten zu warten — der nächste Fenster-Start liegt meist deutlich näher.
+Das SDK wartet dann selbst: Es nimmt die Wartezeit aus `Retry-After` (falls gesetzt) bzw. `X-Rate-Limit-Reset` und wiederholt den Request — bei 429 jede Methode, auch POST/PUT/DELETE, weil Billomat den Request nicht verarbeitet hat. Das passiert aber nur, wenn die Wartezeit höchstens `RetryPolicy::$maxDelayMs` (Default 10 s) beträgt und noch Versuche übrig sind. Sonst wirft das SDK sofort eine `RateLimitException`; `getRetryAfter()` nennt die Sekunden bis zum nächsten Fenster (oder `null`, wenn Billomat keine Angabe gemacht hat):
+
+```php
+use Justpilot\Billomat\Exception\RateLimitException;
+
+try {
+    $billomat->invoices->list();
+} catch (RateLimitException $e) {
+    $job->releaseIn($e->getRetryAfter() ?? 60); // z. B. Queue-Job später erneut einplanen
+}
+```
 
 ### Registrierte vs. unregistrierte App
 
@@ -70,8 +81,17 @@ App-Registrierung erfolgt im Billomat-UI unter *Einstellungen → Administration
 
 ### Webhooks sparen Aufrufe
 
-Webhooks zählen **nicht** auf das Rate-Limit. Statt regelmässig Listen abzufragen lohnt sich ein Webhook-Empfänger pro relevantem Event (siehe [Webhooks](webhooks.md)).
+Webhooks zählen **nicht** auf das Rate-Limit. Statt regelmäßig Listen abzufragen lohnt sich ein Webhook-Empfänger pro relevantem Event (siehe [Webhooks](webhooks.md)).
 
-## Eigene Retry-Strategie
+## Automatische Wiederholungen
 
-Das SDK retryt selbst nicht. Wer das braucht, kann den `HttpClientInterface` per Konstruktor in `BillomatClient` austauschen und Symfonys `RetryableHttpClient` mit einer 429-aware Strategie davorhängen.
+`BillomatConfig::$retry` (`RetryPolicy`, Default: `maxRetries: 2`, `baseDelayMs: 500`, `maxDelayMs: 10_000`) legt fest, was das SDK wiederholt:
+
+| Fall | Methoden | Wartezeit |
+|---|---|---|
+| 429 | alle | `Retry-After` bzw. `X-Rate-Limit-Reset`; länger als `maxDelayMs` → sofort `RateLimitException` |
+| 502, 503, 504 | nur GET | exponentielles Backoff mit Jitter |
+| Netzwerkfehler | nur GET | exponentielles Backoff mit Jitter |
+| 500, sonstige Fehler | — | kein Retry |
+
+POST/PUT/DELETE werden außer bei 429 nie wiederholt, weil sie bei Billomat nicht idempotent sind. Wer eine eigene Strategie braucht (z. B. längeres Warten auf das nächste Fenster in einem Hintergrund-Job), schaltet die eingebauten Wiederholungen mit `RetryPolicy::none()` ab oder erhöht `maxDelayMs` — siehe [Konfiguration](../configuration.md#retries-retrypolicy).

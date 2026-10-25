@@ -15,7 +15,7 @@ $billomat->deliveryNoteTags       // Schlagworte
 
 ## Modell
 
-Ein Lieferschein dokumentiert die physische Übergabe einer Lieferung. Er ist im Vergleich zur [Rechnung](invoices.md) wert-arm — Beträge erscheinen im Read-Modell zwar (für interne Auswertungen), das Dokument selbst hat aber keine Zahlungspflicht. Der Status-Lebenszyklus ist identisch zur [Auftragsbestätigung](confirmations.md):
+Ein Lieferschein dokumentiert die physische Übergabe einer Lieferung. Er ist im Vergleich zur [Rechnung](invoices.md) wert-arm — das Read-Modell enthält keine Summen- oder Preisfelder, und das Dokument selbst hat keine Zahlungspflicht. Der Status-Lebenszyklus ist identisch zur [Auftragsbestätigung](confirmations.md):
 
 ```
 DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
@@ -297,22 +297,15 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 | `status` | `?DeliveryNoteStatus` |
 | `date` | `?\DateTimeImmutable` |
 | `address` | `?string` |
-| `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `netGross` | `?NetGross` |
-| `currencyCode` | `?string` |
-| `quote` | `?float` |
+| `title`, `label`, `intro`, `note` | `?string` |
 | `invoiceId` | `?int` |
 | `confirmationId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
-| `customerportalUrl` | `?string` |
 | `items` | `list<DeliveryNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `offerId` | `?int` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `totalGross`, `totalNet`, `netGross`, `reduction`, `totalGrossUnreduced`, `totalNetUnreduced`, `currencyCode`, `quote`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `DeliveryNoteItem`
 
@@ -322,17 +315,11 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 |---|---|
 | `id`, `deliveryNoteId`, `articleId`, `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
-| `taxName` | `?string` |
-| `taxRate` | `?float` |
+| `quantity` | `float` |
 | `taxChangedManually` | `?bool` |
-| `title`, `description`, `reduction` | `?string` |
+| `title`, `description` | `?string` |
 | `type` | `?InvoiceItemType` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `created` | `?\DateTimeImmutable` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `unitPrice`, `taxName`, `taxRate`, `reduction`, `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced`, `created`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null` (`unitPrice`: immer `0.0`). Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `DeliveryNoteComment`
 
@@ -387,7 +374,7 @@ Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine P
 
 ## Stolpersteine
 
-- **Lieferschein ist wert-arm.** Beträge sind im Read-Modell enthalten (vom Backend errechnet), aber das Dokument löst keine Forderung aus. Wer eine Zahlung erwartet, ist hier falsch — `InvoicesApi` oder `IncomingsApi` ist gemeint.
+- **Lieferschein ist wert-arm.** Billomat liefert im Read-Modell keine Summen- oder Preisfelder, und das Dokument löst keine Forderung aus. Wer eine Zahlung erwartet, ist hier falsch — `InvoicesApi` oder `IncomingsApi` ist gemeint.
 - **Kein `discount`/`validity`.** Anders als `OfferCreateOptions`/`ConfirmationCreateOptions` hat `DeliveryNoteCreateOptions` keine `discountRate`/`discountDays`/`discountDate`/`validityDays`-Felder. Wer aus Copy-Paste-Reflex sucht, findet sie nicht.
 - **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `delivery-note-items` beim PUT. Stets die `DeliveryNoteItemsApi` verwenden.
 - **`delete()` nur im `DRAFT`.** Nach `complete()` ist nur noch `cancel()` möglich.

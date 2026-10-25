@@ -33,12 +33,6 @@ final readonly class ReminderText
         public ?string $header = null,
         /** Anmerkung. */
         public ?string $footer = null,
-        /**
-         * Fälligkeit in Tagen.
-         *
-         * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $dueDays = null,
         /** Reihenfolge der Mahnstufe. */
         public ?int $sort = null,
         /** Name der Mahngebühr (falls vorhanden). */
@@ -65,7 +59,6 @@ final readonly class ReminderText
             subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
             header: ScalarCaster::toStringOrNull($data['header'] ?? null),
             footer: ScalarCaster::toStringOrNull($data['footer'] ?? null),
-            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             sort: ScalarCaster::toIntOrNull($data['sorting'] ?? $data['sort'] ?? null),
             chargeName: ScalarCaster::toStringOrNull($data['charge_name'] ?? null),
             chargeDescription: ScalarCaster::toStringOrNull($data['charge_description'] ?? null),
@@ -89,7 +82,6 @@ final readonly class ReminderText
             'subject' => $this->subject,
             'header' => $this->header,
             'footer' => $this->footer,
-            'due_days' => $this->dueDays,
             'sort' => $this->sort,
             'charge_name' => $this->chargeName,
             'charge_description' => $this->chargeDescription,

@@ -31,7 +31,6 @@ use Justpilot\Billomat\Api\DeliveryNoteCommentsApi;
 use Justpilot\Billomat\Api\DeliveryNoteItemsApi;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\DeliveryNoteTagsApi;
-use Justpilot\Billomat\Api\DunningLevelsApi;
 use Justpilot\Billomat\Api\EmailTemplatesApi;
 use Justpilot\Billomat\Api\FreeTextsApi;
 use Justpilot\Billomat\Api\InboxDocumentsApi;
@@ -153,10 +152,6 @@ final readonly class BillomatClient
     public FreeTextsApi $freeTexts;
     public ReminderTextsApi $reminderTexts;
     public UnitsApi $units;
-    /**
-     * @deprecated since 3.1 – `/dunning-levels` antwortet mit 404; {@see $reminderTexts} verwenden
-     */
-    public DunningLevelsApi $dunningLevels;
     public UsersApi $users;
     public CountriesApi $countries;
     public CurrenciesApi $currencies;
@@ -238,7 +233,6 @@ final readonly class BillomatClient
         $this->freeTexts = new FreeTextsApi($this->http);
         $this->reminderTexts = new ReminderTextsApi($this->http);
         $this->units = new UnitsApi($this->http);
-        $this->dunningLevels = new DunningLevelsApi($this->http);
         $this->users = new UsersApi($this->http);
         $this->countries = new CountriesApi($this->http);
         $this->currencies = new CurrenciesApi($this->http);

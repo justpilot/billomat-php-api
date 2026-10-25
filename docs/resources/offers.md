@@ -356,8 +356,6 @@ Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hin
 | `date` | `?\DateTimeImmutable` |
 | `validityDays` | `?int` |
 | `address` | `?string` |
-| `discountRate`, `discountDays`, `discountAmount` | `?float`, `?int`, `?float` |
-| `discountDate` | `?\DateTimeImmutable` |
 | `title`, `label`, `intro`, `note`, `reduction` | `?string` |
 | `totalGross`, `totalNet` | `?float` |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
@@ -366,14 +364,11 @@ Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hin
 | `quote` | `?float` |
 | `freeTextId`, `templateId` | `?int` |
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
-| `customerportalUrl` | `?string` — Direktlink ins Kundenportal |
 | `items` | `list<OfferItem>` — eingebettet aus `offer-items.offer-item` |
 | `updated` | `?\DateTimeImmutable` |
 | `validityDate` | `?\DateTimeImmutable` (Gültig bis, nur Datum) |
 | `totalReduction` | `?float` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `discountRate`, `discountDate`, `discountDays`, `discountAmount`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `OfferItem`
 
@@ -390,11 +385,8 @@ Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hin
 | `title`, `description`, `reduction` | `?string` |
 | `type` | `?InvoiceItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `created` | `?\DateTimeImmutable` |
 | `optional` | `?bool` (Optionale Position) |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `OfferComment`
 

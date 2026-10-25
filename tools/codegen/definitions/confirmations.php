@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 return [
     'specResource' => 'auftragsbestaetigungen',
@@ -61,10 +60,9 @@ return [
         'status' => ['type' => 'string', 'readOnly' => true, 'enum' => 'ConfirmationStatus', 'doc' => 'Status der Auftragsbestätigung.'],
         'date' => ['doc' => 'Auftragsbestätigungsdatum.'],
         'address' => ['doc' => 'Komplette Adresse.', 'details' => ['Laut Doku veraltet – Billomat verarbeitet das Feld nicht mehr, bitte contact_id oder client_id verwenden.']],
-        'discount_rate' => ['type' => 'int', 'writable' => true, 'model' => ['type' => 'float'], 'update' => ['type' => 'float'], 'doc' => 'Skonto in Prozent.', 'deprecated' => $gone('discount_rate')],
-        'discount_date' => ['type' => 'date', 'writable' => true, 'doc' => 'Skontodatum.', 'deprecated' => $gone('discount_date')],
-        'discount_days' => ['type' => 'int', 'writable' => true, 'doc' => 'Skontozeitraum in Tagen.', 'deprecated' => $gone('discount_days')],
-        'discount_amount' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Skontobetrag.', 'deprecated' => $gone('discount_amount')],
+        'discount_rate' => ['type' => 'int', 'writable' => true, 'model' => ['type' => 'float'], 'update' => ['type' => 'float'], 'doc' => 'Skonto in Prozent.', 'optionsOnly' => true],
+        'discount_date' => ['type' => 'date', 'writable' => true, 'doc' => 'Skontodatum.', 'optionsOnly' => true],
+        'discount_days' => ['type' => 'int', 'writable' => true, 'doc' => 'Skontozeitraum in Tagen.', 'optionsOnly' => true],
         'title' => ['doc' => 'Dokumentenüberschrift.'],
         'label' => ['doc' => 'Bezeichnung.'],
         'intro' => ['doc' => 'Einleitungstext.'],
@@ -81,7 +79,6 @@ return [
         'free_text_id' => ['doc' => 'ID des Freitextes zur Belegung von title, label, intro und note.'],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Auftragsbestätigung abgeschlossen wird.'],
         'taxes' => ['type' => 'taxes', 'readOnly' => true, 'doc' => 'Steuerzeilen der Auftragsbestätigung.'],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Persönliche URL zum Kundenportal.', 'deprecated' => $gone('customerportal_url')],
         'confirmation-items' => [
             'type' => 'list',
             'readOnly' => true,

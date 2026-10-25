@@ -12,7 +12,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 return [
     'specResource' => null,
@@ -29,9 +28,6 @@ return [
         'first_name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Vorname.'],
         'last_name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Nachname.'],
         'salutation' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Anrede.'],
-        'phone' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Telefonnummer.', 'deprecated' => $gone('phone')],
-        'mobile' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Mobilnummer.', 'deprecated' => $gone('mobile')],
-        'fax' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Faxnummer.', 'deprecated' => $gone('fax')],
         'role_id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'ID der Rolle des Benutzers.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Benutzers.'],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],

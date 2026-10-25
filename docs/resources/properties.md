@@ -137,11 +137,8 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
-| `position` | `?int` |
 | `isNvl` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `ClientProperty`
 
@@ -153,11 +150,8 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
-| `position` | `?int` |
 | `isNvl` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `SupplierProperty`
 
@@ -169,11 +163,8 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
-| `position` | `?int` |
 | `isNvl` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `IncomingProperty`
 
@@ -185,11 +176,8 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
-| `position` | `?int` |
 | `isNvl` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Verwendete Enums
 
@@ -201,7 +189,7 @@ Gemeinsame Options-Klasse für alle fünf APIs, sowohl für `create()` als auch 
 - **Eine Options-Klasse für alle fünf APIs.** `PropertyCreateOptions` lebt im Namespace `Justpilot\Billomat\Api` und wird mehrfach verwendet. Beim Refactoring nicht versehentlich pro Ressource duplizieren.
 - **`userProperties` hat keinen Values-Endpoint.** Anders als die vier anderen Parents pflegt Billomat User-Property-Werte direkt am Benutzer-Datensatz, nicht über eine separate Sub-Ressource.
 - **`type` ist optional.** Wird `type` weggelassen, behandelt Billomat das Feld als Freitext. Für `CHECKBOX`-Felder ist `defaultValue` ein String — typische Wire-Werte sind `"0"` und `"1"`.
-- **`position` liefert Billomat beim Lesen nicht mit.** Das Feld ist im Read-Modell daher in der Regel `null`; es ist kein Eindeutigkeits-Constraint.
+- **`position` liefert Billomat beim Lesen nicht mit.** Das Feld lässt sich über `PropertyCreateOptions` setzen, fehlt aber in den Read-Modellen; es ist kein Eindeutigkeits-Constraint.
 - **Löschen ist destruktiv.** Wer eine Definition löscht, verliert auch die bisher daran gespeicherten Werte an den Instanzen. Für „nur ausblenden" gibt es keinen API-Weg — die Anwendungsebene muss das selbst modellieren.
 - **`update()` nimmt dieselbe Klasse wie `create()`.** Es gibt keinen separaten `PropertyUpdateOptions`-Typ. Bei einem PUT ohne `type` lässt Billomat den bisherigen Typ stehen.
 

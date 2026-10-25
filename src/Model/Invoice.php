@@ -117,12 +117,6 @@ final readonly class Invoice
          * Beispiel: "BANK_TRANSFER,CASH"
          */
         public ?string $paymentTypes = null,
-        /**
-         * URL zum Customer-Portal für diese Rechnung.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** ID der Vorlage, mit der die Rechnung abgeschlossen wird. */
         public ?int $templateId = null,
         /** Positionen der Rechnung (nur bei GET /invoices/{id}). */
@@ -187,7 +181,6 @@ final readonly class Invoice
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
             taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
             paymentTypes: ScalarCaster::toStringOrNull($data['payment_types'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toList($data['invoice-items']['invoice-item'] ?? null, 'id', InvoiceItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -246,7 +239,6 @@ final readonly class Invoice
             'confirmation_id' => $this->confirmationId,
             'recurring_id' => $this->recurringId,
             'payment_types' => $this->paymentTypes,
-            'customerportal_url' => $this->customerportalUrl,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,

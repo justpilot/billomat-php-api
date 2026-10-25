@@ -141,7 +141,7 @@ Every resource is reachable as a `public readonly` property on `BillomatClient`.
 | Tax-free countries | `$billomat->countryTaxes` | [docs/resources/settings-tax-free-countries.md](docs/resources/settings-tax-free-countries.md) |
 | Roles | `$billomat->roles` | [docs/resources/settings-roles.md](docs/resources/settings-roles.md) |
 | Templates | `$billomat->templates` | [docs/resources/templates.md](docs/resources/templates.md) |
-| Lookups (Countries, Currencies, Units, DunningLevels, Users, EmailTemplates, FreeTexts, ReminderTexts) | `$billomat->countries`, `currencies`, `units`, `dunningLevels`, `users`, `emailTemplates`, `freeTexts`, `reminderTexts` | [docs/resources/lookups.md](docs/resources/lookups.md) |
+| Lookups (Countries, Currencies, Units, Users, EmailTemplates, FreeTexts, ReminderTexts) | `$billomat->countries`, `currencies`, `units`, `users`, `emailTemplates`, `freeTexts`, `reminderTexts` | [docs/resources/lookups.md](docs/resources/lookups.md) |
 
 ### Concepts
 

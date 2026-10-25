@@ -29,7 +29,7 @@ DRAFT  ── complete() ──▶  OPEN  ── Zahlung der Rechnung ──▶ 
   └── delete() (nur im DRAFT)
 ```
 
-Aus einer offenen Mahnung können weitere Mahnstufen entstehen — Billomat zählt die Mahnstufe intern hoch und nutzt dafür die in `dunningLevels` hinterlegten Vorlagen.
+Aus einer offenen Mahnung können weitere Mahnstufen entstehen — Billomat zählt die Mahnstufe intern hoch und nutzt dafür die als Mahnstufen in `reminderTexts` hinterlegten Vorlagen (siehe [Mahnstufen](settings-reminder-levels.md)).
 
 ## Endpunkt-Übersicht
 
@@ -232,16 +232,13 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `contactId` | `?int` |
 | `invoiceId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `reminderNumber` | `?string` (formatierte Nummer inkl. Präfix) |
-| `number`, `numberPre`, `numberLength` | `?int`, `?string`, `?int` |
 | `status` | `?ReminderStatus` |
 | `date` | `?\DateTimeImmutable` |
 | `dueDays` | `?int` |
 | `dueDate` | `?\DateTimeImmutable` |
 | `address`, `subject`, `label`, `intro`, `note` | `?string` |
-| `totalGross`, `totalNet` | `?float` |
+| `totalGross` | `?float` |
 | `currencyCode` | `?string` |
-| `quote` | `?float` |
 | `reminderTextId`, `templateId` | `?int` |
 | `items` | `list<ReminderItem>` |
 | `updated` | `?\DateTimeImmutable` |
@@ -251,8 +248,6 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `reminderLevelName` | `?string` (Name der Mahnstufe) |
 | `isOld` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `reminderNumber`, `number`, `numberPre`, `numberLength`, `totalNet`, `quote`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `ReminderItem`
 
@@ -267,13 +262,9 @@ Es gibt **keine** `ReminderItemCreateOptions` und keine `ReminderItemUpdateOptio
 | `unit` | `?string` |
 | `quantity`, `unitPrice` | `float` |
 | `title`, `description` | `?string` |
-| `totalGross`, `totalNet` | `?float` |
-| `created` | `?\DateTimeImmutable` |
 | `total` | `?float` |
 | `isCharge` | `?bool` (Position ist eine Mahngebühr) |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `totalGross`, `totalNet`, `created`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `ReminderTag`
 
@@ -322,7 +313,7 @@ Es gibt **keinen** eigenen Comment-ActionKey-Enum für Reminders — Mahnungen b
 - **`dueDate` schlägt `dueDays`.** Werden beide gesetzt, gewinnt das absolute `due_date`. Konsistenter ist es, nur eines der beiden Felder zu pflegen.
 - **`reminderTextId` ohne Eintrag in `/reminder-texts` führt zu 422.** Vor dem `create()` sicherstellen, dass der Mahntext-Baustein wirklich existiert (per `$billomat->reminderTexts->list()`).
 - **Status `OVERDUE` ist read-only.** Er entsteht serverseitig — ein `update()` mit `status = OVERDUE` wirkt nicht, das Feld kommt im Write-Payload gar nicht vor.
-- **Mehrere Mahnstufen für dieselbe Rechnung sind möglich.** Eine zweite Mahnung zur selben Rechnung erzeugt automatisch die nächsthöhere Mahnstufe gemäß `DunningLevelsApi`-Konfiguration.
+- **Mehrere Mahnstufen für dieselbe Rechnung sind möglich.** Eine zweite Mahnung zur selben Rechnung erzeugt automatisch die nächsthöhere Mahnstufe gemäß den in `reminderTexts` (`ReminderTextsApi`) konfigurierten Mahnstufen.
 - **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /reminder-tags` ohne `reminder_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `reminder_id` die konkreten Tags (`reminder-tag`-Wrapper). Der SDK trennt das in `cloud()` und `listByReminder()`.
 
 ## End-to-End-Beispiel
@@ -394,6 +385,6 @@ file_put_contents("mahnung-{$reminder->id}.pdf", $pdfBinary);
 
 // 8) Generierte Reminder-Items inspizieren (read-only)
 foreach ($billomat->reminderItems->listByReminder($reminder->id) as $item) {
-    printf("- %s: %.2f\n", $item->title ?? 'Position', $item->totalGross ?? 0.0);
+    printf("- %s: %.2f\n", $item->title ?? 'Position', $item->total ?? 0.0);
 }
 ```

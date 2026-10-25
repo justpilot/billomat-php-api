@@ -20,7 +20,7 @@ declare(strict_types=1);
  * @param string|null                         $specResource Spec-Slug; null, wenn Billomat die Positionen nicht dokumentiert
  * @param bool                                $withOptions  false, wenn es keine Create-Options gibt (Mahnungen)
  * @param list<string>                        $omit         Felder, die die Ressource nicht kennt
- * @param list<string>                        $deprecated   Felder, die Billomat nicht (mehr) ausliefert
+ * @param list<string>                        $optionsOnly  Felder, die Billomat nicht (mehr) ausliefert (nur noch in den Options)
  * @param array<string, array<string, mixed>> $extra        zusätzliche Felder hinter `customfield`
  */
 return static function (
@@ -31,7 +31,7 @@ return static function (
     string $docUrl,
     bool $withOptions = true,
     array $omit = [],
-    array $deprecated = ['created'],
+    array $optionsOnly = ['created'],
     array $extra = [],
 ): array {
     $path = str_replace('_', '-', substr($parentField, 0, -3)) . '-items';
@@ -74,9 +74,12 @@ return static function (
     foreach ($fields as $name => $field) {
         $fields[$name]['model'] = ['required' => true, ...$field['model'] ?? []];
     }
-    foreach ($deprecated as $name) {
-        $fallback = empty($fields[$name]['model']['nonNull']) ? 'null' : '0.0';
-        $fields[$name]['deprecated'] = "since 3.1 – Billomat liefert `{$name}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `{$fallback}`. Wird in 4.0 entfernt.";
+    foreach ($optionsOnly as $name) {
+        if (!empty($fields[$name]['readOnly'])) {
+            unset($fields[$name]);
+        } else {
+            $fields[$name]['optionsOnly'] = true;
+        }
     }
 
     $fields['customfield'] = ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'];

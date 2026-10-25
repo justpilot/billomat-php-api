@@ -36,30 +36,6 @@ final readonly class Reminder
         public ?int $invoiceId = null,
         /** Erstellungszeitpunkt der Mahnung. */
         public ?DateTimeImmutable $created = null,
-        /**
-         * Mahnungsnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `reminder_number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $reminderNumber = null,
-        /**
-         * Laufende Nummer (ohne Präfix).
-         *
-         * @deprecated since 3.1 – Billomat liefert `number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $number = null,
-        /**
-         * Präfix der Mahnungsnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $numberPre = null,
-        /**
-         * Mindestlänge der Mahnungsnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `number_length` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $numberLength = null,
         /** Status der Mahnung. */
         public ?ReminderStatus $status = null,
         /** Mahnungsdatum. */
@@ -84,20 +60,8 @@ final readonly class Reminder
         public ?string $note = null,
         /** Gesamtbetrag brutto. */
         public ?float $totalGross = null,
-        /**
-         * Gesamtbetrag netto.
-         *
-         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $totalNet = null,
         /** Währung (ISO-Währungscode). */
         public ?string $currencyCode = null,
-        /**
-         * Umrechnungskurs.
-         *
-         * @deprecated since 3.1 – Billomat liefert `quote` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $quote = null,
         /** ID des Mahntextes (Mahnstufe). */
         public ?int $reminderTextId = null,
         /** ID der Vorlage, mit der die Mahnung abgeschlossen wird. */
@@ -134,10 +98,6 @@ final readonly class Reminder
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            reminderNumber: ScalarCaster::toStringOrNull($data['reminder_number'] ?? null),
-            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
-            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
-            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             status: ReminderStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
@@ -148,9 +108,7 @@ final readonly class Reminder
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
-            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             reminderTextId: ScalarCaster::toIntOrNull($data['reminder_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toList($data['reminder-items']['reminder-item'] ?? null, 'id', ReminderItem::fromArray(...)),
@@ -179,10 +137,6 @@ final readonly class Reminder
             'contact_id' => $this->contactId,
             'invoice_id' => $this->invoiceId,
             'created' => $this->created?->format(DATE_ATOM),
-            'reminder_number' => $this->reminderNumber,
-            'number' => $this->number,
-            'number_pre' => $this->numberPre,
-            'number_length' => $this->numberLength,
             'status' => $this->status?->value,
             'date' => $this->date?->format('Y-m-d'),
             'due_days' => $this->dueDays,
@@ -193,9 +147,7 @@ final readonly class Reminder
             'intro' => $this->intro,
             'note' => $this->note,
             'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
             'currency_code' => $this->currencyCode,
-            'quote' => $this->quote,
             'reminder_text_id' => $this->reminderTextId,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),

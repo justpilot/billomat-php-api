@@ -257,18 +257,13 @@ Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurü
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `letterNumber` | `?string` (formatierte Nummer inkl. Präfix) |
-| `number`, `numberPre`, `numberLength` | `?int`, `?string`, `?int` |
 | `status` | `?LetterStatus` |
 | `date` | `?\DateTimeImmutable` |
-| `address`, `subject`, `label`, `intro`, `note` | `?string` |
+| `address`, `subject`, `label`, `intro` | `?string` |
 | `templateId` | `?int` |
-| `customerportalUrl` | `?string` |
 | `updated` | `?\DateTimeImmutable` |
 | `supplierId` | `?int` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `letterNumber`, `number`, `numberPre`, `numberLength`, `note`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Read-Modell: `LetterComment`
 

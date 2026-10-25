@@ -362,13 +362,10 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `invoiceId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
 | `taxes` | `list<array{name:string,rate:float,amount:float}>` |
-| `customerportalUrl` | `?string` |
 | `items` | `list<CreditNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?float` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `customerportalUrl`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `CreditNoteItem`
 
@@ -385,11 +382,8 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 | `type` | `?InvoiceItemType` |
 | `totalGross`, `totalNet` | `?float` |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `created` | `?\DateTimeImmutable` |
 | `taxRateReverseCharge` | `?float` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Read-Modell: `CreditNoteComment`
 

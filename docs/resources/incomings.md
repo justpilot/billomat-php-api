@@ -291,10 +291,9 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `id` | `?int` |
 | `supplierId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `date`, `supplyDate`, `dueDate`, `paidAt` | `?\DateTimeImmutable` |
-| `dueDays` | `?int` |
+| `date`, `dueDate` | `?\DateTimeImmutable` |
 | `status` | `?IncomingStatus` |
-| `incomingNumber` (Wire-Feld `number`, Fallback `incoming_number`), `address`, `label`, `intro`, `note` | `?string` |
+| `incomingNumber` (Wire-Feld `number`, Fallback `incoming_number`), `address`, `label`, `note` | `?string` |
 | `totalGross`, `totalNet`, `paidAmount`, `openAmount` | `?float` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
@@ -305,8 +304,6 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `pageCount` | `?int` |
 | `hasAttachment` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `supplyDate`, `dueDays`, `paidAt`, `intro`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 `paidAmount` und `openAmount` werden serverseitig aus den Zahlungen berechnet.
 
@@ -386,11 +383,8 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
-| `position` | `?int` |
 | `isNvl` | `?bool` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `position`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 ## Verwendete Enums
 

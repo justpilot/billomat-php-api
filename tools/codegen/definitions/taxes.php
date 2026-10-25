@@ -40,13 +40,6 @@ return [
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Steuersatzes.'],
-        'account_id' => [
-            'type' => 'int',
-            'readOnly' => true,
-            'model' => ['required' => true],
-            'doc' => 'ID des Accounts, zu dem der Steuersatz gehört.',
-            'deprecated' => 'since 3.1 – Billomat liefert `account_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
-        ],
         'name' => [
             'doc' => 'Name des Steuersatzes.',
             'details' => ['Beispiel: "MwSt"'],

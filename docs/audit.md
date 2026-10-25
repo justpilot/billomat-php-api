@@ -43,7 +43,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `einstellungen/freitexte` | Freitexte | ✓ | ✓ | — | — | ✓ |  |
 | `einstellungen/kunden-attribute` | Kunden-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/lieferanten-attribute` | Lieferanten-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts. DunningLevelsApi (/dunning-levels) ist deprecated – Endpoint antwortet mit 404. |
+| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts; im SDK read-only über ReminderTextsApi. |
 | `einstellungen/rollen` | Rollen | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /roles. |
 | `einstellungen/steuerfreie-laender` | Steuerfreie Länder | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /country-taxes. |
 | `einstellungen/steuersaetze` | Steuersätze | ✓ | — | — | — | ✓ |  |

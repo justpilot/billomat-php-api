@@ -457,18 +457,6 @@ parameters:
 			path: src/Api/DeliveryNotesApi.php
 
 		-
-			message: '#^Method Justpilot\\Billomat\\Api\\DunningLevelsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/DunningLevelsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DunningLevel\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DunningLevelsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\EmailTemplatesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1983,5 +1971,5 @@ parameters:
 		-
 			message: '#^Using nullsafe method call on non\-nullable type DateTimeImmutable\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 3
+			count: 2
 			path: tests/Model/InvoiceTest.php

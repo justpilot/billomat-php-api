@@ -155,12 +155,6 @@ return [
         'sepa_mandate_date' => ['doc' => 'Ausstelldatum des SEPA-Mandats.'],
         'default_payment_types' => ['doc' => 'Standard-Zahlarten (CSV).', 'details' => ['Beispiel: "CASH,BANK_TRANSFER"']],
         'enable_customerportal' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Kundenportal aktiviert?'],
-        'customerportal_url' => [
-            'type' => 'string',
-            'readOnly' => true,
-            'doc' => 'Persönliche URL zum Kundenportal.',
-            'deprecated' => 'since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
-        ],
         'revenue_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Brutto-Umsatz (read-only Auswertungsfeld).'],
         'revenue_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Netto-Umsatz (read-only Auswertungsfeld).'],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],

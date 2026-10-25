@@ -74,34 +74,14 @@ final readonly class Article
          * Ohne Angabe gilt der Normalpreis.
          */
         public ?float $salesPrice5 = null,
-        /**
-         * Bezeichnung der Einheit.
-         *
-         * Besser `unitId` verwenden.
-         *
-         * @deprecated since 3.1 – Billomat liefert `unit` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $unit = null,
         /** ID der verknüpften Einheit. */
         public ?int $unitId = null,
         /** Einkaufspreis. */
         public ?float $purchasePrice = null,
-        /**
-         * Währung des Einkaufspreises (ISO-Währungscode).
-         *
-         * @deprecated since 3.1 – Billomat liefert `purchase_price_currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $purchasePriceCurrencyCode = null,
         /** ID des verknüpften Lieferanten. */
         public ?int $supplierId = null,
         /** ID des verknüpften Steuersatzes. */
         public ?int $taxId = null,
-        /**
-         * ID der Artikelkategorie.
-         *
-         * @deprecated since 3.1 – Billomat liefert `category_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $categoryId = null,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
@@ -145,13 +125,10 @@ final readonly class Article
             salesPrice3: ScalarCaster::toFloatOrNull($data['sales_price3'] ?? null),
             salesPrice4: ScalarCaster::toFloatOrNull($data['sales_price4'] ?? null),
             salesPrice5: ScalarCaster::toFloatOrNull($data['sales_price5'] ?? null),
-            unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
             unitId: ScalarCaster::toIntOrNull($data['unit_id'] ?? null),
             purchasePrice: ScalarCaster::toFloatOrNull($data['purchase_price'] ?? null),
-            purchasePriceCurrencyCode: ScalarCaster::toStringOrNull($data['purchase_price_currency_code'] ?? null),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             taxId: ScalarCaster::toIntOrNull($data['tax_id'] ?? null),
-            categoryId: ScalarCaster::toIntOrNull($data['category_id'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
@@ -186,13 +163,10 @@ final readonly class Article
             'sales_price3' => $this->salesPrice3,
             'sales_price4' => $this->salesPrice4,
             'sales_price5' => $this->salesPrice5,
-            'unit' => $this->unit,
             'unit_id' => $this->unitId,
             'purchase_price' => $this->purchasePrice,
-            'purchase_price_currency_code' => $this->purchasePriceCurrencyCode,
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,
-            'category_id' => $this->categoryId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'archived' => $this->archived,

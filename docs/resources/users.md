@@ -109,16 +109,11 @@ echo $me?->email;
 | `firstName` | `?string` | `first_name` |
 | `lastName` | `?string` | `last_name` |
 | `salutation` | `?string` | `salutation` |
-| `phone` | `?string` | `phone` |
-| `mobile` | `?string` | `mobile` |
-| `fax` | `?string` | `fax` |
 | `roleId` | `?int` | `role_id` |
 | `created`, `updated` | `?\DateTimeImmutable` |  |
 | `locale` | `?string` |  |
 | `timezone` | `?string` |  |
 | `isAccountOwner` | `?bool` | Inhaber des Accounts |
 | `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
-
-> **Veraltet seit 3.1:** `phone`, `mobile`, `fax`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 `User::fromArray($data)` hydratisiert aus dem Billomat-Wire-Format; `User::toArray()` schreibt zurück (snake_case).

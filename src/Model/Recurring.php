@@ -59,12 +59,6 @@ final readonly class Recurring
         public ?int $discountDays = null,
         /** Name der Abo-Rechnung (nur intern sichtbar). */
         public ?string $name = null,
-        /**
-         * Präfix der Rechnungsnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $numberPre = null,
         /** Dokumentenüberschrift. */
         public ?string $title = null,
         /** Bezeichnung. */
@@ -177,7 +171,6 @@ final readonly class Recurring
             discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
             discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
-            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
@@ -247,7 +240,6 @@ final readonly class Recurring
             'discount_rate' => $this->discountRate,
             'discount_days' => $this->discountDays,
             'name' => $this->name,
-            'number_pre' => $this->numberPre,
             'title' => $this->title,
             'label' => $this->label,
             'intro' => $this->intro,

@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 $optionsOrder = [
     'client_id', 'contact_id', 'address', 'number_pre', 'supply_date', 'supply_date_type', 'due_days', 'discount_rate',
@@ -76,7 +75,7 @@ return [
         'discount_rate' => ['create' => ['type' => 'int'], 'update' => ['type' => 'int'], 'doc' => 'Skonto in Prozent.'],
         'discount_days' => ['doc' => 'Skontofrist in Tagen.'],
         'name' => ['doc' => 'Name der Abo-Rechnung (nur intern sichtbar).'],
-        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Rechnungsnummer.', 'deprecated' => $gone('number_pre')],
+        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Rechnungsnummer.', 'optionsOnly' => true],
         'title' => ['doc' => 'Dokumentenüberschrift.'],
         'label' => ['doc' => 'Bezeichnung.'],
         'intro' => ['doc' => 'Einleitungstext.'],

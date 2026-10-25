@@ -31,24 +31,6 @@ final readonly class User
         public ?string $lastName = null,
         /** Anrede. */
         public ?string $salutation = null,
-        /**
-         * Telefonnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `phone` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $phone = null,
-        /**
-         * Mobilnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `mobile` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $mobile = null,
-        /**
-         * Faxnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `fax` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $fax = null,
         /** ID der Rolle des Benutzers. */
         public ?int $roleId = null,
         /** Erstellungszeitpunkt des Benutzers. */
@@ -79,9 +61,6 @@ final readonly class User
             firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
             lastName: ScalarCaster::toStringOrNull($data['last_name'] ?? null),
             salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
-            phone: ScalarCaster::toStringOrNull($data['phone'] ?? null),
-            mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
-            fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
             roleId: ScalarCaster::toIntOrNull($data['role_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -107,9 +86,6 @@ final readonly class User
             'first_name' => $this->firstName,
             'last_name' => $this->lastName,
             'salutation' => $this->salutation,
-            'phone' => $this->phone,
-            'mobile' => $this->mobile,
-            'fax' => $this->fax,
             'role_id' => $this->roleId,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),

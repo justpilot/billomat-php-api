@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 $optionsOrder = ['supplier_id', 'number', 'incoming_number', 'date', 'supply_date', 'due_date', 'due_days', 'address', 'label', 'intro', 'note', 'total_gross', 'total_net', 'currency_code', 'quote', 'base64file', 'category', 'client_number', 'expense_account_number'];
 
@@ -53,10 +52,9 @@ return [
         'supplier_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Lieferanten.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Eingangsrechnung.'],
         'date' => ['doc' => 'Rechnungsdatum.'],
-        'supply_date' => ['type' => 'date', 'writable' => true, 'doc' => 'Liefer-/Leistungsdatum.', 'deprecated' => $gone('supply_date')],
+        'supply_date' => ['type' => 'date', 'writable' => true, 'doc' => 'Liefer-/Leistungsdatum.', 'optionsOnly' => true],
         'due_date' => ['doc' => 'Fälligkeitsdatum.'],
-        'due_days' => ['type' => 'int', 'writable' => true, 'doc' => 'Tage bis zur Fälligkeit.', 'deprecated' => $gone('due_days')],
-        'paid_at' => ['type' => 'date', 'readOnly' => true, 'doc' => 'Zahlungsdatum.', 'deprecated' => $gone('paid_at')],
+        'due_days' => ['type' => 'int', 'writable' => true, 'doc' => 'Tage bis zur Fälligkeit.', 'optionsOnly' => true],
         'status' => ['type' => 'string', 'readOnly' => true, 'enum' => 'IncomingStatus', 'doc' => 'Status der Eingangsrechnung.'],
         // Billomat liefert die Belegnummer als `number`; `incoming_number` nur als Fallback.
         'incoming_number' => [
@@ -68,7 +66,7 @@ return [
         'number' => ['optionsOnly' => true, 'doc' => 'Rechnungsnummer des Lieferanten.', 'details' => ['So liefert Billomat die Nummer auch in den Antworten aus (im Read-Model: `incomingNumber`).']],
         'address' => ['doc' => 'Komplette Absendeadresse.'],
         'label' => ['doc' => 'Bezeichnung.'],
-        'intro' => ['type' => 'string', 'writable' => true, 'doc' => 'Einleitungstext.', 'deprecated' => $gone('intro')],
+        'intro' => ['type' => 'string', 'writable' => true, 'doc' => 'Einleitungstext.', 'optionsOnly' => true],
         'note' => ['doc' => 'Anmerkungstext.'],
         'total_gross' => ['doc' => 'Gesamtbetrag brutto.'],
         'total_net' => ['doc' => 'Gesamtbetrag netto.'],

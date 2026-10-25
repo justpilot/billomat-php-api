@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 $optionsOrder = static fn (string ...$swap): array => [
     'client_id', 'contact_id', 'address', 'number_pre', 'number', 'number_length', 'date', 'supply_date', 'supply_date_type',
@@ -110,7 +109,6 @@ return [
             'doc' => 'Akzeptierte Zahlungsarten (kommasepariert).',
             'details' => ['Beispiel: "BANK_TRANSFER,CASH"'],
         ],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'URL zum Customer-Portal für diese Rechnung.', 'deprecated' => $gone('customerportal_url')],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Rechnung abgeschlossen wird.'],
         'invoice-items' => [
             'type' => 'list',

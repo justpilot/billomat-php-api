@@ -487,7 +487,6 @@ final class ClientsApiTest extends TestCase
         self::assertSame('2026-01-10', $c->sepaMandateDate->format('Y-m-d'));
         self::assertSame('CASH,BANK_TRANSFER', $c->defaultPaymentTypes);
         self::assertTrue($c->enableCustomerportal);
-        self::assertSame('https://portal.example.com/abc', $c->customerportalUrl);
         self::assertSame(11900.50, $c->revenueGross);
         self::assertSame(10000.42, $c->revenueNet);
         self::assertSame('ABSOLUTE', $c->discountRateType);

@@ -72,7 +72,7 @@ return [
             'type' => 'string',
             'writable' => true,
             'doc' => 'Notiz zum Kontakt.',
-            'deprecated' => 'since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
+            'optionsOnly' => true,
         ],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],

@@ -52,7 +52,6 @@ final class CountriesCurrenciesApiTest extends TestCase
         $countries = $api->list();
         self::assertCount(1, $countries);
         self::assertSame('DE', $countries[0]->code);
-        self::assertTrue($countries[0]->eu);
     }
 
     #[Test]

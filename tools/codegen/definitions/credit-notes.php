@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 return [
     'specResource' => 'gutschriften',
@@ -79,7 +78,6 @@ return [
         'free_text_id' => ['doc' => 'ID des Freitextes zur Belegung von title, label, intro und note.'],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Gutschrift abgeschlossen wird.'],
         'taxes' => ['type' => 'taxes', 'readOnly' => true, 'doc' => 'Steuerzeilen der Gutschrift.'],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Persönliche URL zum Kundenportal.', 'deprecated' => $gone('customerportal_url')],
         'credit-note-items' => [
             'type' => 'list',
             'readOnly' => true,

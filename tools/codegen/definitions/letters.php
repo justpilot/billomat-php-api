@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 return [
     'specResource' => 'briefe',
@@ -52,19 +51,17 @@ return [
         'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Briefs.'],
-        'letter_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Briefnummer.', 'deprecated' => $gone('letter_number')],
-        'number' => ['type' => 'int', 'writable' => true, 'doc' => 'Laufende Nummer (ohne Präfix).', 'deprecated' => $gone('number')],
-        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Briefnummer.', 'deprecated' => $gone('number_pre')],
-        'number_length' => ['type' => 'int', 'writable' => true, 'doc' => 'Mindestlänge der Briefnummer.', 'deprecated' => $gone('number_length')],
+        'number' => ['type' => 'int', 'writable' => true, 'doc' => 'Laufende Nummer (ohne Präfix).', 'optionsOnly' => true],
+        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Briefnummer.', 'optionsOnly' => true],
+        'number_length' => ['type' => 'int', 'writable' => true, 'doc' => 'Mindestlänge der Briefnummer.', 'optionsOnly' => true],
         'status' => ['type' => 'string', 'readOnly' => true, 'enum' => 'LetterStatus', 'doc' => 'Status des Briefs.'],
         'date' => ['doc' => 'Briefdatum.'],
         'address' => ['doc' => 'Komplette Briefadresse.', 'details' => ['Laut Doku veraltet – Billomat verarbeitet das Feld nicht mehr, bitte contact_id oder client_id verwenden.']],
         'subject' => ['doc' => 'Dokumentenüberschrift.'],
         'label' => ['doc' => 'Bezeichnung.'],
         'intro' => ['doc' => 'Brieftext.'],
-        'note' => ['type' => 'string', 'writable' => true, 'doc' => 'Anmerkung.', 'deprecated' => $gone('note')],
+        'note' => ['type' => 'string', 'writable' => true, 'doc' => 'Anmerkung.', 'optionsOnly' => true],
         'template_id' => ['doc' => 'ID der Vorlage, mit der der Brief abgeschlossen wird.'],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Persönliche URL zum Kundenportal.', 'deprecated' => $gone('customerportal_url')],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
         'supplier_id' => ['doc' => 'ID des Lieferanten.', 'details' => ['Wird statt `client_id` verwendet, wenn der Brief an einen Lieferanten geht.']],

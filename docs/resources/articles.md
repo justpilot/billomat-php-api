@@ -149,13 +149,10 @@ Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und
 | `salesPrice` | `?float` |
 | `salesPrice2` ... `salesPrice5` | `?float` |
 | `currencyCode` | `?string` |
-| `unit` | `?string` |
 | `unitId` | `?int` |
 | `purchasePrice` | `?float` |
-| `purchasePriceCurrencyCode` | `?string` |
 | `supplierId` | `?int` |
 | `taxId` | `?int` |
-| `categoryId` | `?int` |
 | `updated` | `?\DateTimeImmutable` |
 | `archived` | `?bool` |
 | `type` | `?ArticleType` |
@@ -163,8 +160,6 @@ Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und
 | `costCenter` | `?string` |
 | `purchasePriceNetGross` | `?NetGross` (Ob `purchasePrice` netto oder brutto ist) |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `unit`, `purchasePriceCurrencyCode`, `categoryId`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
 
 ## Article Tags
 

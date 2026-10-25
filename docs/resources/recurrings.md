@@ -188,7 +188,7 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 |---|---|
 | `id` | `?int` |
 | `clientId` | `int` |
-| `contactId`, `numberPre` | `?int`, `?string` |
+| `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
 | `address` | `?string` |
 | `supplyDate`, `startDate`, `endDate` | `?\DateTimeImmutable` |
@@ -222,8 +222,6 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `offerId` | `?int` |
 | `confirmationId` | `?int` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
-
-> **Veraltet seit 3.1:** `numberPre`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
 
 `counter` zählt die bereits ausgeführten Läufe; `nextCreationDate` ist der nächste geplante Erzeugungs-Tag.
 

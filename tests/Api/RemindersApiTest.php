@@ -96,7 +96,6 @@ final class RemindersApiTest extends TestCase
 
         self::assertInstanceOf(Reminder::class, $reminder);
         self::assertSame('1. Mahnung', $reminder->subject);
-        self::assertSame('M-2026-0001', $reminder->reminderNumber);
     }
 
     #[Test]

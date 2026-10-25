@@ -59,7 +59,7 @@ final class ArticlesApi extends AbstractApi
     }
 
     /**
-     * @param ArticleFilter|array<string, scalar|array|null> $filters
+     * @param ArticleFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Article>
      */
@@ -76,7 +76,7 @@ final class ArticlesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param ArticleFilter|array<string, scalar|array|null> $filters
+     * @param ArticleFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Article>
      */
@@ -94,7 +94,7 @@ final class ArticlesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param ArticleFilter|array<string, scalar|array|null> $filters
+     * @param ArticleFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Article>
      */
@@ -115,7 +115,7 @@ final class ArticlesApi extends AbstractApi
 
         $row = $data['article'] ?? null;
 
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

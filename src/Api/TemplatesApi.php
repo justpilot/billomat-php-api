@@ -23,35 +23,14 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht GET /templates
      *
-     * @param TemplateFilter|array<string, scalar|array|null> $query
+     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $query
      *
      * @return list<Template>
      */
     #[NoDiscard]
     public function list(TemplateFilter|array $query = []): array
     {
-        $data = $this->getJson('/templates', self::filterQuery($query));
-
-        $raw = $data['templates']['template'] ?? [];
-
-        // Billomat kann bei 1 Element ein einzelnes Objekt liefern
-        if (\is_array($raw) && isset($raw['id'])) {
-            $raw = [$raw];
-        }
-
-        if (!\is_array($raw)) {
-            return [];
-        }
-
-        $templates = [];
-        foreach ($raw as $row) {
-            if (\is_array($row)) {
-                /** @var array<string,mixed> $row */
-                $templates[] = Template::fromArray($row);
-            }
-        }
-
-        return $templates;
+        return $this->listResource('/templates', 'templates', 'template', Template::fromArray(...), $query);
     }
 
     /**
@@ -72,7 +51,7 @@ final class TemplatesApi extends AbstractApi
 
         $tpl = $data['template'] ?? null;
 
-        if (!\is_array($tpl)) {
+        if (!self::isRecord($tpl)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when fetching template.');
         }
 
@@ -106,7 +85,7 @@ final class TemplatesApi extends AbstractApi
 
         $tpl = $data['template'] ?? null;
 
-        if (!\is_array($tpl)) {
+        if (!self::isRecord($tpl)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when creating template.');
         }
 
@@ -129,7 +108,7 @@ final class TemplatesApi extends AbstractApi
 
         $tpl = $data['template'] ?? null;
 
-        if (!\is_array($tpl)) {
+        if (!self::isRecord($tpl)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when updating template.');
         }
 

@@ -29,13 +29,13 @@ final class LetterPdf
     public static function fromArray(array $data): self
     {
         return new self(
-            id: (int) ($data['id'] ?? 0),
-            letterId: (int) ($data['letter_id'] ?? 0),
+            id: ScalarCaster::toIntOrNull($data['id'] ?? null) ?? 0,
+            letterId: ScalarCaster::toIntOrNull($data['letter_id'] ?? null) ?? 0,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            filename: (string) ($data['filename'] ?? ''),
-            mimeType: (string) ($data['mimetype'] ?? 'application/pdf'),
-            fileSize: (int) ($data['filesize'] ?? 0),
-            base64file: (string) ($data['base64file'] ?? ''),
+            filename: ScalarCaster::toStringOrNull($data['filename'] ?? null) ?? '',
+            mimeType: ScalarCaster::toStringOrNull($data['mimetype'] ?? null) ?? 'application/pdf',
+            fileSize: ScalarCaster::toIntOrNull($data['filesize'] ?? null) ?? 0,
+            base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null) ?? '',
         );
     }
 

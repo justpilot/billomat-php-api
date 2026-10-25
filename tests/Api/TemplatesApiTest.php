@@ -16,6 +16,7 @@ use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Enum\TemplateType;
 use Justpilot\Billomat\Model\Template;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -39,27 +40,6 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(TemplateType::class)]
 final class TemplatesApiTest extends TestCase
 {
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>
-     */
-    private function extractJsonPayload(array $options): array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            /** @var array<string,mixed> $decoded */
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-            $payload = $decoded;
-        }
-
-        self::assertIsArray($payload, 'Expected JSON payload array (options[json] or decoded options[body]).');
-
-        /** @var array<string,mixed> $payload */
-        return $payload;
-    }
-
     #[Test]
     public function itListsTemplates(): void
     {
@@ -159,7 +139,7 @@ final class TemplatesApiTest extends TestCase
         self::assertSame('https://mycompany.billomat.net/api/templates', $captured['url']);
 
         $options = $captured['options'] ?? [];
-        $payload = $this->extractJsonPayload($options);
+        $payload = JsonPayload::fromOptions($options);
 
         self::assertArrayHasKey('template', $payload);
         self::assertIsArray($payload['template']);
@@ -202,7 +182,7 @@ final class TemplatesApiTest extends TestCase
         self::assertSame('https://mycompany.billomat.net/api/templates/12', $captured['url']);
 
         $options = $captured['options'] ?? [];
-        $payload = $this->extractJsonPayload($options);
+        $payload = JsonPayload::fromOptions($options);
 
         self::assertArrayHasKey('template', $payload);
         self::assertIsArray($payload['template']);

@@ -27,33 +27,14 @@ final class TaxesApi extends AbstractApi
     /**
      * Listet alle Steuersätze auf.
      *
-     * @param array<string, scalar|array|null> $query (z.B. page, per_page)
+     * @param array<string, scalar|array<scalar|null>|null> $query (z.B. page, per_page)
      *
      * @return list<TaxRate>
      */
     #[NoDiscard]
     public function list(array $query = []): array
     {
-        $data = $this->getJson('/taxes', $query);
-
-        $taxesData = $data['taxes']['tax'] ?? [];
-
-        if ([] === $taxesData || null === $taxesData) {
-            return [];
-        }
-
-        // Billomat liefert bei einem Element teilweise ein einzelnes Array statt Liste
-        if (!\is_array($taxesData) || isset($taxesData['id'])) {
-            $taxesData = [$taxesData];
-        }
-
-        /** @var list<TaxRate> $taxes */
-        $taxes = array_map(
-            TaxRate::fromArray(...),
-            $taxesData
-        );
-
-        return $taxes;
+        return $this->listResource('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $query);
     }
 
     /**
@@ -73,7 +54,7 @@ final class TaxesApi extends AbstractApi
 
         $taxData = $data['tax'] ?? null;
 
-        if (!\is_array($taxData)) {
+        if (!self::isRecord($taxData)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when fetching tax rate.');
         }
 
@@ -104,7 +85,7 @@ final class TaxesApi extends AbstractApi
 
         $taxData = $data['tax'] ?? null;
 
-        if (!\is_array($taxData)) {
+        if (!self::isRecord($taxData)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when creating tax rate.');
         }
 
@@ -126,7 +107,7 @@ final class TaxesApi extends AbstractApi
 
         $taxData = $data['tax'] ?? null;
 
-        if (!\is_array($taxData)) {
+        if (!self::isRecord($taxData)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when updating tax rate.');
         }
 

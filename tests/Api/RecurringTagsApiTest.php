@@ -66,7 +66,7 @@ final class RecurringTagsApiTest extends TestCase
         self::assertCount(2, $tags);
         self::assertContainsOnlyInstancesOf(RecurringTag::class, $tags);
 
-        $parts = parse_url((string) $captured['url']);
+        $parts = parse_url($captured['url']);
         $query = [];
         parse_str($parts['query'] ?? '', $query);
         self::assertSame('42', $query['recurring_id'] ?? null);

@@ -50,7 +50,7 @@ final class PaymentsApi extends AbstractSubResourceApi
      *
      * Weitere Filter laut Doku: from, to (YYYY-MM-DD), type (Komma-separiert), user_id.
      *
-     * @param array<string, scalar|array<mixed>|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TPayment>
      */

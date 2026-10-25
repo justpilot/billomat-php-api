@@ -22,6 +22,7 @@ use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -178,7 +179,7 @@ final class ConfirmationsApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/confirmations', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame(123, $payload['confirmation']['client_id']);
         self::assertSame(99, $payload['confirmation']['offer_id']);
         self::assertCount(1, $payload['confirmation']['confirmation-items']['confirmation-item']);
@@ -238,7 +239,7 @@ final class ConfirmationsApiTest extends TestCase
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/confirmations/777/complete', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame(['confirmation' => ['template_id' => 5]], $payload);
     }
 
@@ -293,7 +294,7 @@ final class ConfirmationsApiTest extends TestCase
 
         $api->email(42, $opts);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame('me@example.com', $payload['email']['from'] ?? null);
         self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
     }
@@ -378,27 +379,7 @@ final class ConfirmationsApiTest extends TestCase
 
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/confirmations/555/upload-signature', $captured['url']);
-        self::assertSame(['upload' => ['base64file' => $base64]], $this->extractJsonPayload($captured['options']));
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
+        self::assertSame(['upload' => ['base64file' => $base64]], JsonPayload::fromOptions($captured['options']));
     }
 
     #[Test]

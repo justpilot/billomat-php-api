@@ -25,7 +25,7 @@ use NoDiscard;
 final class CountryTaxesApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<CountryTax>
      */
@@ -36,7 +36,7 @@ final class CountryTaxesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<CountryTax>
      */
@@ -47,7 +47,7 @@ final class CountryTaxesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, CountryTax>
      */
@@ -67,7 +67,7 @@ final class CountryTaxesApi extends AbstractApi
         }
 
         $row = $data['country-tax'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

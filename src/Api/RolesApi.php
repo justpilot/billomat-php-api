@@ -25,7 +25,7 @@ use NoDiscard;
 final class RolesApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Role>
      */
@@ -36,7 +36,7 @@ final class RolesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Role>
      */
@@ -47,7 +47,7 @@ final class RolesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Role>
      */
@@ -67,7 +67,7 @@ final class RolesApi extends AbstractApi
         }
 
         $row = $data['role'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

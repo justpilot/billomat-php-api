@@ -52,7 +52,7 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         } catch (ValidationException $e) {
             // Sollte bei frisch angelegtem Kunden ohne Dokumente eigentlich nicht passieren —
             // wenn doch (z. B. Account-Quirks), als Skip behandeln statt failen.
-            $this->markTestSkipped(
+            self::markTestSkipped(
                 'Billomat hat den Kunden nicht gelöscht ('.$e->getMessage().'). '
                 .'Möglicherweise ist Hard-Delete für diesen Account-Typ deaktiviert.'
             );
@@ -74,11 +74,11 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         try {
             $binary = $billomat->clients->avatar($clientId);
         } catch (NotFoundException) {
-            $this->markTestSkipped("Client {$clientId} hat keinen Avatar (404).");
+            self::markTestSkipped("Client {$clientId} hat keinen Avatar (404).");
         } catch (AuthenticationException $e) {
             // Manche Accounts/Pläne geben 401/403 statt 404 zurück, wenn der
             // Avatar-Endpoint für diesen Account-Typ deaktiviert ist.
-            $this->markTestSkipped(
+            self::markTestSkipped(
                 'Avatar-Endpoint vom Account abgelehnt (401/403). '
                 .'Vermutlich für diesen Account-Typ nicht verfügbar: '.$e->getMessage()
             );
@@ -111,9 +111,9 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         try {
             $binary = $billomat->clients->avatar($clientId, 128);
         } catch (NotFoundException) {
-            $this->markTestSkipped("Client {$clientId} hat keinen Avatar (404).");
+            self::markTestSkipped("Client {$clientId} hat keinen Avatar (404).");
         } catch (AuthenticationException $e) {
-            $this->markTestSkipped(
+            self::markTestSkipped(
                 'Avatar-Endpoint vom Account abgelehnt (401/403): '.$e->getMessage()
             );
         }
@@ -158,7 +158,7 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
         }
 
         if ([] === $candidates) {
-            $this->markTestSkipped('Konnte keine Client-ID für den Avatar-Test ermitteln.');
+            self::markTestSkipped('Konnte keine Client-ID für den Avatar-Test ermitteln.');
         }
 
         return $candidates[0];

@@ -15,6 +15,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\RecurringItem;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -66,7 +67,7 @@ final class RecurringItemsApiTest extends TestCase
         self::assertContainsOnlyInstancesOf(RecurringItem::class, $items);
         self::assertSame(42, $items[0]->recurringId);
 
-        $parts = parse_url((string) $captured['url']);
+        $parts = parse_url($captured['url']);
         $query = [];
         parse_str($parts['query'] ?? '', $query);
         self::assertSame('42', $query['recurring_id'] ?? null);
@@ -110,7 +111,7 @@ final class RecurringItemsApiTest extends TestCase
         self::assertSame(42, $item->recurringId);
         self::assertSame(ItemType::SERVICE, $item->type);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertSame(42, $payload['recurring-item']['recurring_id']);
         self::assertSame('Setup', $payload['recurring-item']['title']);
@@ -160,25 +161,5 @@ final class RecurringItemsApiTest extends TestCase
 
         $api->delete(100);
         self::assertSame('DELETE', $captured['method']);
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
     }
 }

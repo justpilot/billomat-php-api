@@ -18,7 +18,7 @@ use NoDiscard;
 final class FreeTextsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<FreeText>
      */
@@ -35,7 +35,7 @@ final class FreeTextsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<FreeText>
      */
@@ -53,7 +53,7 @@ final class FreeTextsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, FreeText>
      */
@@ -73,7 +73,7 @@ final class FreeTextsApi extends AbstractApi
         }
 
         $row = $data['free-text'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

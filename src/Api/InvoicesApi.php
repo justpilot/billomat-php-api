@@ -73,7 +73,7 @@ final class InvoicesApi extends AbstractApi
      *
      * Entspricht GET /invoices
      *
-     * @param InvoiceFilter|array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Invoice>
      */
@@ -90,7 +90,7 @@ final class InvoicesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param InvoiceFilter|array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Invoice>
      */
@@ -108,7 +108,7 @@ final class InvoicesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param InvoiceFilter|array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Invoice>
      */
@@ -126,8 +126,8 @@ final class InvoicesApi extends AbstractApi
      * Mehrere Werte werden in der Reihenfolge der Aggregation als CSV gesendet
      * ("client,year" gruppiert zuerst nach Kunde, dann nach Jahr).
      *
-     * @param InvoiceGroupBy|non-empty-list<InvoiceGroupBy>  $groupBy
-     * @param InvoiceFilter|array<string, scalar|array|null> $filters optionale zusätzliche Filter (analog zu list())
+     * @param InvoiceGroupBy|non-empty-list<InvoiceGroupBy>               $groupBy
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters optionale zusätzliche Filter (analog zu list())
      *
      * @return list<InvoiceGroup>
      */
@@ -160,7 +160,7 @@ final class InvoicesApi extends AbstractApi
 
         $invoiceData = $data['invoice'] ?? null;
 
-        if (!\is_array($invoiceData)) {
+        if (!self::isRecord($invoiceData)) {
             return null;
         }
 

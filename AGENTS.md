@@ -19,8 +19,7 @@ composer test:coverage          # PHPUnit with HTML+Clover coverage in build/
 
 composer lint                   # PHP-CS-Fixer (dry-run)
 composer lint:fix               # PHP-CS-Fixer (apply)
-composer analyse                # PHPStan level max (uses phpstan-baseline.neon)
-composer analyse:baseline       # Regenerate the PHPStan baseline
+composer analyse                # PHPStan level max (no baseline; fix findings instead of ignoring them)
 composer refactor               # Apply Rector
 composer refactor:dry           # Show Rector suggestions
 composer mutate                 # Infection mutation testing (~3 min, all of src/)

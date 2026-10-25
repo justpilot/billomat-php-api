@@ -499,11 +499,11 @@ function hydrateExpression(array $field): string
     $expression = 'ScalarCaster::' . $caster . '(' . $lookup . ' ?? null)';
 
     if ('taxes' === $field['type']) {
-        return "ListCaster::toList(\$data['{$field['wire']}']['tax'] ?? null, 'name', TaxSummary::fromArray(...))";
+        return "ListCaster::toNestedList(\$data['{$field['wire']}'] ?? null, 'tax', 'name', TaxSummary::fromArray(...))";
     }
     // Ein einzelnes Element liefert Billomat als Objekt statt als Liste – erkennbar an der `id`.
     if ('list' === $field['type']) {
-        return "ListCaster::toList(\$data['{$field['wire']}']['{$field['list']['item']}'] ?? null, 'id', {$field['list']['class']}::fromArray(...))";
+        return "ListCaster::toNestedList(\$data['{$field['wire']}'] ?? null, '{$field['list']['item']}', 'id', {$field['list']['class']}::fromArray(...))";
     }
 
     // `mixed`: Wert unverändert übernehmen (z. B. Eigenschaftswerte, deren Typ von der Eigenschaft abhängt).

@@ -26,14 +26,14 @@ final class ClientsUpdateIntegrationTest extends AbstractBillomatIntegrationTest
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] === $clients) {
-            $this->markTestSkipped('No clients available in sandbox to test update().');
+            self::markTestSkipped('No clients available in sandbox to test update().');
         }
 
         /** @var Client $client */
         $client = $clients[0];
 
         if (null === $client->id) {
-            $this->markTestSkipped('Client id missing in list response.');
+            self::markTestSkipped('Client id missing in list response.');
         }
 
         $id = $client->id;

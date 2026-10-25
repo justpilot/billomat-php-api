@@ -67,7 +67,7 @@ final class InvoiceTagsApiTest extends TestCase
         self::assertContainsOnlyInstancesOf(InvoiceTag::class, $tags);
         self::assertSame('wichtig', $tags[0]->name);
 
-        $parts = parse_url((string) $captured['url']);
+        $parts = parse_url($captured['url']);
         self::assertSame('/api/invoice-tags', $parts['path'] ?? null);
         $query = [];
         parse_str($parts['query'] ?? '', $query);

@@ -100,7 +100,6 @@
     "lint": "php-cs-fixer fix --dry-run --diff",
     "lint:fix": "php-cs-fixer fix",
     "analyse": "phpstan analyse --memory-limit=512M",
-    "analyse:baseline": "phpstan analyse --memory-limit=512M --generate-baseline",
     "refactor": "rector process",
     "refactor:dry": "rector process --dry-run",
     "mutate": [
@@ -129,7 +128,6 @@
     "lint": "Code-Style prüfen (Dry-Run)",
     "lint:fix": "Code-Style automatisch korrigieren",
     "analyse": "PHPStan auf Level max",
-    "analyse:baseline": "PHPStan-Baseline regenerieren",
     "refactor": "Rector-Regeln anwenden",
     "refactor:dry": "Rector-Vorschläge anzeigen ohne zu schreiben",
     "mutate": "Infection Mutation-Tests ausführen",

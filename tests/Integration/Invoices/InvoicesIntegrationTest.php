@@ -31,7 +31,10 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoices = $billomat->invoices->list(['per_page' => 1]);
 
         if ([] !== $invoices) {
-            return $invoices[0]->id;
+            $id = $invoices[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         // Falls keine Rechnung existiert → Client & Rechnung anlegen und abschließen
@@ -428,7 +431,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertInstanceOf(Invoice::class, $cancelled);
 
         // je nach Billomat: "CANCELED"
-        $this->assertContains(
+        self::assertContains(
             $cancelled->status,
             [InvoiceStatus::CANCELED],
             'Invoice status after cancel() should be CANCELED.'
@@ -493,7 +496,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $cancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $cancelled);
-        $this->assertContains(
+        self::assertContains(
             $cancelled->status,
             [InvoiceStatus::CANCELED],
             'Invoice status after cancel() should be CANCELED.'
@@ -506,7 +509,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertInstanceOf(Invoice::class, $uncancelled);
 
         // Status sollte nicht mehr CANCELED sein
-        $this->assertNotContains(
+        self::assertNotContains(
             $uncancelled->status,
             [InvoiceStatus::CANCELED],
             'Invoice status after uncancel() should no longer be CANCELED.'
@@ -579,6 +582,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         // optional: nochmal neu holen
         $fetched = $billomat->invoices->get($draft->id);
+        self::assertNotNull($fetched);
         self::assertSame($newDate->format('Y-m-d'), $fetched->date?->format('Y-m-d'));
     }
 }

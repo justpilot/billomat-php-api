@@ -60,36 +60,14 @@ final class SuppliersApi extends AbstractApi
     }
 
     /**
-     * @param SupplierFilter|array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Supplier>
      */
     #[NoDiscard]
     public function list(SupplierFilter|array $filters = []): array
     {
-        $data = $this->getJson('/suppliers', self::filterQuery($filters));
-
-        $node = $data['suppliers']['supplier'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Supplier> $models */
-        $models = array_map(
-            Supplier::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters);
     }
 
     /**
@@ -99,7 +77,7 @@ final class SuppliersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param SupplierFilter|array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Supplier>
      */
@@ -117,7 +95,7 @@ final class SuppliersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param SupplierFilter|array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Supplier>
      */
@@ -138,7 +116,7 @@ final class SuppliersApi extends AbstractApi
 
         $row = $data['supplier'] ?? null;
 
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 
@@ -169,7 +147,7 @@ final class SuppliersApi extends AbstractApi
 
         $created = $data['supplier'] ?? null;
 
-        if (!\is_array($created)) {
+        if (!self::isRecord($created)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when creating supplier.');
         }
 
@@ -183,7 +161,7 @@ final class SuppliersApi extends AbstractApi
         $data = $this->putJson("/suppliers/{$id}", $payload);
 
         $row = $data['supplier'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when updating supplier.');
         }
 

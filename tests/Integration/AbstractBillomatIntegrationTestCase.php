@@ -25,11 +25,11 @@ abstract class AbstractBillomatIntegrationTestCase extends TestCase
      */
     protected function createBillomatClientOrSkip(): BillomatClient
     {
-        $billomatId = getenv('BILLOMAT_ID') ?: null;
-        $apiKey = getenv('BILLOMAT_API_KEY') ?: null;
+        $billomatId = getenv('BILLOMAT_ID');
+        $apiKey = getenv('BILLOMAT_API_KEY');
 
-        if (!$billomatId || !$apiKey) {
-            $this->markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
+        if (!\is_string($billomatId) || '' === $billomatId || !\is_string($apiKey) || '' === $apiKey) {
+            self::markTestSkipped('Environment variables BILLOMAT_ID or BILLOMAT_API_KEY missing.');
         }
 
         $appId = getenv('BILLOMAT_APP_ID');

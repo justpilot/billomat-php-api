@@ -69,7 +69,7 @@ More in [docs/testing.md](docs/testing.md).
 ```bash
 composer lint             # PHP-CS-Fixer (dry run)
 composer lint:fix         # PHP-CS-Fixer (apply)
-composer analyse          # PHPStan level max
+composer analyse          # PHPStan level max (no baseline)
 composer refactor:dry     # Rector suggestions
 composer refactor         # apply Rector
 composer generate         # regenerate models/options/filters
@@ -78,7 +78,7 @@ composer mutate           # Infection mutation testing (~3 min, all of src/)
 composer audit            # security audit of the dependencies
 ```
 
-**PHPStan:** fix findings instead of adding baseline entries, `@phpstan-ignore` comments or casts that only silence them.
+**PHPStan:** level max without a baseline. Fix findings instead of adding `@phpstan-ignore` comments, ignore rules or casts that only silence them.
 
 **Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x --ignore-msi-with-no-mutations` (the last flag keeps a change without any mutants, e.g. only property hooks, from failing with 0 %). The full run on `main`/`4.x` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
 
@@ -102,4 +102,4 @@ Add notable changes to the `[Unreleased]` section of `CHANGELOG.md`, grouped by 
 - [ ] New resources: docs under `docs/resources/` and an entry in its README
 - [ ] `CHANGELOG.md` updated (and `UPGRADE-4.0.md` for breaking changes)
 - [ ] Code comments in German, identifiers in English
-- [ ] No new PHPStan baseline entries
+- [ ] `composer analyse` passes without new ignores

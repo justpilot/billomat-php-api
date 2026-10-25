@@ -22,6 +22,7 @@ use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -173,7 +174,7 @@ final class DeliveryNotesApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/delivery-notes', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame(123, $payload['delivery-note']['client_id']);
         self::assertSame(99, $payload['delivery-note']['invoice_id']);
         self::assertCount(1, $payload['delivery-note']['delivery-note-items']['delivery-note-item']);
@@ -258,7 +259,7 @@ final class DeliveryNotesApiTest extends TestCase
 
         $api->email(42, $opts);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertSame('me@example.com', $payload['email']['from'] ?? null);
     }
 
@@ -341,27 +342,7 @@ final class DeliveryNotesApiTest extends TestCase
 
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/delivery-notes/555/upload-signature', $captured['url']);
-        self::assertSame(['upload' => ['base64file' => $base64]], $this->extractJsonPayload($captured['options']));
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
+        self::assertSame(['upload' => ['base64file' => $base64]], JsonPayload::fromOptions($captured['options']));
     }
 
     #[Test]

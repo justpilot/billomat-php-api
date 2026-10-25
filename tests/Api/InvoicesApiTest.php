@@ -25,6 +25,7 @@ use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -519,7 +520,7 @@ final class InvoicesApiTest extends TestCase
         self::assertInstanceOf(DateTimeImmutable::class, $pdf->created);
         self::assertSame(
             '2009-09-02T12:04:15+02:00',
-            $pdf->created?->format('c')
+            $pdf->created->format('c')
         );
 
         $binary = $pdf->getBinary();
@@ -693,6 +694,7 @@ final class InvoicesApiTest extends TestCase
 
         // Optional: Content-Type prüfen (kann als "headers" array oder "normalized_headers" auftauchen)
         $headers = $options['headers'] ?? [];
+        self::assertIsArray($headers);
         $flat = [];
 
         foreach ($headers as $k => $v) {
@@ -700,7 +702,7 @@ final class InvoicesApiTest extends TestCase
                 [$hn, $hv] = explode(':', $v, 2);
                 $flat[strtolower(trim($hn))] = trim($hv);
             } elseif (\is_string($k)) {
-                $flat[strtolower($k)] = \is_array($v) ? implode(', ', $v) : (string) $v;
+                $flat[strtolower($k)] = \is_array($v) ? implode(', ', $v) : (\is_string($v) ? $v : '');
             }
         }
 
@@ -747,7 +749,7 @@ final class InvoicesApiTest extends TestCase
             $captured['url']
         );
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertArrayHasKey('email', $payload);
 
@@ -787,7 +789,7 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoices/123/email', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertSame(['email' => []], $payload);
     }
@@ -821,7 +823,7 @@ final class InvoicesApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoices/888/mail', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertArrayHasKey('mail', $payload);
         self::assertSame(1, $payload['mail']['color']);
@@ -856,7 +858,7 @@ final class InvoicesApiTest extends TestCase
             $captured['url']
         );
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertSame(['upload' => ['base64file' => $base64]], $payload);
     }
@@ -923,32 +925,6 @@ final class InvoicesApiTest extends TestCase
         self::assertSame(4004, $payload['invoice_id']);
         self::assertSame(5005, $payload['free_text_id']);
         self::assertSame(6006, $payload['template_id']);
-    }
-
-    /**
-     * Liest den JSON-Payload aus den `options` von MockHttpClient.
-     *
-     * MockHttpClient verschiebt `options[json]` häufig in `options[body]` als
-     * vorab serialisierten String. Symmetrisch zur Pattern an anderen Stellen
-     * in dieser Test-Datei (z. B. test_it_completes_invoice_...).
-     *
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
     }
 
     #[Test]

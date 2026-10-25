@@ -35,7 +35,7 @@ abstract class AbstractApi
     /**
      * Führt einen GET-Request aus und gibt den JSON-Body als Array zurück.
      *
-     * @param array<string, scalar|array|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      *
      * @return array<string,mixed>
      */
@@ -133,11 +133,11 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                                      $path     Endpunkt, z. B. "/clients"
-     * @param string                                      $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                                      $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T             $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param ListFilter|array<string, scalar|array|null> $filters  optionale Query-Filter
+     * @param string                                                   $path     Endpunkt, z. B. "/clients"
+     * @param string                                                   $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                                   $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T                          $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters  optionale Query-Filter
      *
      * @return list<T>
      */
@@ -145,20 +145,7 @@ abstract class AbstractApi
     {
         $data = $this->getJson($path, self::filterQuery($filters));
 
-        $node = $data[$outerKey][$innerKey] ?? null;
-
-        if (null === $node || [] === $node || '' === $node) {
-            return [];
-        }
-
-        if (!\is_array($node)) {
-            return [];
-        }
-
-        /** @var list<array<string,mixed>> $rows */
-        $rows = array_is_list($node) ? $node : [$node];
-
-        return array_map($hydrate, $rows);
+        return array_map($hydrate, self::envelopeRows($data[$outerKey] ?? null, $innerKey));
     }
 
     /**
@@ -171,11 +158,11 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                                      $path     Endpunkt, z. B. "/clients"
-     * @param string                                      $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                                      $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T             $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param ListFilter|array<string, scalar|array|null> $filters  optionale Query-Filter
+     * @param string                                                   $path     Endpunkt, z. B. "/clients"
+     * @param string                                                   $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                                   $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T                          $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters  optionale Query-Filter
      *
      * @return Page<T>
      */
@@ -189,14 +176,7 @@ abstract class AbstractApi
             $envelope = [];
         }
 
-        $node = $envelope[$innerKey] ?? null;
-        if (null === $node || [] === $node || '' === $node || !\is_array($node)) {
-            $items = [];
-        } else {
-            /** @var list<array<string,mixed>> $rows */
-            $rows = array_is_list($node) ? $node : [$node];
-            $items = array_map($hydrate, $rows);
-        }
+        $items = array_map($hydrate, self::envelopeRows($envelope, $innerKey));
 
         $info = new PageInfo(
             page: ScalarCaster::toIntOrNull($envelope['@page'] ?? $filters['page'] ?? null) ?? 1,
@@ -219,12 +199,12 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                                      $path     Endpunkt, z. B. "/clients"
-     * @param string                                      $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                                      $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T             $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param ListFilter|array<string, scalar|array|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
-     * @param int                                         $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit)
+     * @param string                                                   $path     Endpunkt, z. B. "/clients"
+     * @param string                                                   $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                                   $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T                          $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
+     * @param int                                                      $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit)
      *
      * @return Generator<int, T>
      */
@@ -256,6 +236,45 @@ abstract class AbstractApi
     }
 
     /**
+     * Normalisiert den inneren Knoten eines Listen-Envelopes auf eine Liste von Datensätzen.
+     *
+     * Ein einzelner Treffer kommt als Objekt statt als Liste, „keine Treffer“ als leerer String
+     * oder leeres Array; Einträge, die keine Datensätze sind, fallen heraus.
+     *
+     * @return list<array<string,mixed>>
+     */
+    protected static function envelopeRows(mixed $envelope, string $innerKey): array
+    {
+        if (!\is_array($envelope)) {
+            return [];
+        }
+
+        $node = $envelope[$innerKey] ?? null;
+        if (!\is_array($node) || [] === $node) {
+            return [];
+        }
+
+        $rows = [];
+        foreach (array_is_list($node) ? $node : [$node] as $row) {
+            if (self::isRecord($row)) {
+                $rows[] = $row;
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Prüft, dass ein dekodierter JSON-Wert ein Objekt (assoziatives Array mit String-Schlüsseln) ist.
+     *
+     * @phpstan-assert-if-true array<string,mixed> $value
+     */
+    protected static function isRecord(mixed $value): bool
+    {
+        return \is_array($value) && array_all($value, static fn (mixed $_, int|string $key): bool => \is_string($key));
+    }
+
+    /**
      * Liest aus einer Billomat-Envelope-Response den eingewickelten Datensatz.
      *
      * Billomat antwortet bei {@code get()}/{@code create()}/{@code update()} mit
@@ -273,11 +292,10 @@ abstract class AbstractApi
     {
         $node = $payload[$key] ?? null;
 
-        if (!\is_array($node)) {
+        if (!self::isRecord($node)) {
             throw new UnexpectedResponseException(\sprintf('Unexpected response from Billomat when %s.', $context));
         }
 
-        /** @var array<string,mixed> $node */
         return $node;
     }
 
@@ -296,18 +314,17 @@ abstract class AbstractApi
             throw new UnexpectedResponseException('Unexpected response from Billomat: the body is not valid JSON.', 0, $e);
         }
 
-        if (!\is_array($decoded)) {
+        if (!self::isRecord($decoded)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat: expected a JSON object.');
         }
 
-        /** @var array<string,mixed> $decoded */
         return $decoded;
     }
 
     /**
      * Führt einen GET-Request aus und gibt den Response-Body roh zurück (z. B. für Binary wie /thumb).
      *
-     * @param array<string, scalar|array|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      */
     protected function getRaw(string $path, array $query = []): string
     {
@@ -317,9 +334,9 @@ abstract class AbstractApi
     /**
      * Wandelt einen typisierten Filter in Query-Parameter um; Arrays bleiben unverändert.
      *
-     * @param ListFilter|array<string, scalar|array<mixed>|null> $filters
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
-     * @return array<string, scalar|array<mixed>|null>
+     * @return array<string, scalar|array<scalar|null>|null>
      */
     protected static function filterQuery(ListFilter|array $filters): array
     {
@@ -332,7 +349,7 @@ abstract class AbstractApi
      * Billomat antwortet gelegentlich mit 200 und leerem Body oder einer HTML-/JSON-Seite;
      * ohne Prüfung landet das unbemerkt als „PDF“ beim Kunden.
      *
-     * @param array<string, scalar|array<mixed>|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      *
      * @throws UnexpectedResponseException bei leerem Body oder fehlendem `%PDF-`-Header
      */

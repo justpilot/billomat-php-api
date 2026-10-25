@@ -16,33 +16,14 @@ use NoDiscard;
 final class UnitsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Unit>
      */
     #[NoDiscard]
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/units', $filters);
-
-        $node = $data['units']['unit'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Unit> $models */
-        $models = array_map(Unit::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/units', 'units', 'unit', Unit::fromArray(...), $filters);
     }
 
     /**
@@ -52,7 +33,7 @@ final class UnitsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Unit>
      */
@@ -70,7 +51,7 @@ final class UnitsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Unit>
      */
@@ -90,7 +71,7 @@ final class UnitsApi extends AbstractApi
         }
 
         $row = $data['unit'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             return null;
         }
 

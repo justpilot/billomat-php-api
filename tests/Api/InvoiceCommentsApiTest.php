@@ -15,6 +15,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\InvoiceComment;
+use Justpilot\Billomat\Tests\Support\JsonPayload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -142,7 +143,7 @@ final class InvoiceCommentsApiTest extends TestCase
         self::assertSame('POST', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoice-comments', $captured['url']);
 
-        $payload = $this->extractJsonPayload($captured['options']);
+        $payload = JsonPayload::fromOptions($captured['options']);
         self::assertIsArray($payload);
         self::assertSame(100, $payload['invoice-comment']['invoice_id']);
         self::assertSame('Anruf vom Kunden.', $payload['invoice-comment']['comment']);
@@ -165,25 +166,5 @@ final class InvoiceCommentsApiTest extends TestCase
         $api->delete(42);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoice-comments/42', $captured['url']);
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
     }
 }

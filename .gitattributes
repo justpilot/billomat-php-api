@@ -13,7 +13,6 @@
 /.gitignore             export-ignore
 /.php-cs-fixer.dist.php export-ignore
 /phpstan.neon.dist      export-ignore
-/phpstan-baseline.neon  export-ignore
 /phpunit.xml.dist       export-ignore
 /rector.php             export-ignore
 /infection.json5        export-ignore

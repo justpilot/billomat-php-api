@@ -50,13 +50,13 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $templates = $billomat->templates->list(['per_page' => 1]);
 
         if ([] === $templates) {
-            $this->markTestSkipped('No templates available in sandbox to test get().');
+            self::markTestSkipped('No templates available in sandbox to test get().');
         }
 
         $id = $templates[0]->id;
 
         if (null === $id) {
-            $this->markTestSkipped('Template id missing in list response.');
+            self::markTestSkipped('Template id missing in list response.');
         }
 
         $tpl = $billomat->templates->get($id);
@@ -67,7 +67,7 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($tpl->templateType);
 
         // Für UPLOADED kann format/base64file gesetzt sein – muss aber nicht immer
-        if ('UPLOADED' === $tpl->templateType?->value) {
+        if ('UPLOADED' === $tpl->templateType->value) {
             // format/base64file sind laut Doku erst beim single GET vorhanden
             // aber wir prüfen nur "nicht kaputt"
         }
@@ -82,13 +82,13 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $templates = $billomat->templates->list(['per_page' => 1]);
 
         if ([] === $templates) {
-            $this->markTestSkipped('No templates available in sandbox to test thumb().');
+            self::markTestSkipped('No templates available in sandbox to test thumb().');
         }
 
         $id = $templates[0]->id;
 
         if (null === $id) {
-            $this->markTestSkipped('Template id missing in list response.');
+            self::markTestSkipped('Template id missing in list response.');
         }
 
         $raw = $billomat->templates->thumb($id, TemplateThumbFormat::PNG);

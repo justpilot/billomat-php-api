@@ -91,15 +91,15 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         // Empfänger gesetzt ist (der i. d. R. der/die User:in selbst ist).
         $enabled = getenv('BILLOMAT_TEST_EMAIL');
         if ('1' !== $enabled) {
-            $this->markTestSkipped(
+            self::markTestSkipped(
                 'Set BILLOMAT_TEST_EMAIL=1 to enable POST /invoices/{id}/email integration test. '
                 .'WARNUNG: Billomat versendet daraufhin eine echte E-Mail aus dem Sandbox-Account.'
             );
         }
 
-        $recipient = getenv('BILLOMAT_TEST_EMAIL_RECIPIENT') ?: null;
-        if (!$recipient) {
-            $this->markTestSkipped(
+        $recipient = getenv('BILLOMAT_TEST_EMAIL_RECIPIENT');
+        if (!\is_string($recipient) || '' === $recipient) {
+            self::markTestSkipped(
                 'Set BILLOMAT_TEST_EMAIL_RECIPIENT to a real address (idealerweise deine eigene), '
                 .'an die der Sandbox-Test die Test-Rechnung schicken darf.'
             );
@@ -123,7 +123,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     public function canUploadSignatureInSandboxWhenExplicitlyEnabled(): void
     {
         if ('1' !== getenv('BILLOMAT_TEST_UPLOAD_SIGNATURE')) {
-            $this->markTestSkipped(
+            self::markTestSkipped(
                 'Set BILLOMAT_TEST_UPLOAD_SIGNATURE=1 to enable PUT /invoices/{id}/upload-signature '
                 .'integration test. (Der Test lädt ein Dummy-PDF in die Rechnung und mutiert deren Zustand.)'
             );
@@ -158,7 +158,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     public function canSendInvoiceViaPixelletterWhenExplicitlyEnabled(): void
     {
         if ('1' !== getenv('BILLOMAT_TEST_MAIL')) {
-            $this->markTestSkipped(
+            self::markTestSkipped(
                 'Set BILLOMAT_TEST_MAIL=1 to enable POST /invoices/{id}/mail integration test. '
                 .'⚠ Pixelletter-Versand ist KOSTENPFLICHTIG (echte Briefzustellung). '
                 .'Nur aktivieren, wenn du das tatsächlich willst.'
@@ -178,7 +178,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
     public function canSendInvoiceToEncashWhenExplicitlyEnabled(): void
     {
         if ('1' !== getenv('BILLOMAT_TEST_ENCASH')) {
-            $this->markTestSkipped(
+            self::markTestSkipped(
                 'Set BILLOMAT_TEST_ENCASH=1 to enable PUT /invoices/{id}/encash integration test. '
                 .'⚠ Diese Aktion übergibt die Rechnung an Billomats Inkasso-Partner — '
                 .'auch in der Sandbox können dabei reale Vorgänge angestoßen werden. '

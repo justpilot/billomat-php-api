@@ -50,6 +50,28 @@ final class ListCaster
     }
 
     /**
+     * Wie {@see toList()}, liest die Liste aber aus einem Wrapper-Objekt
+     * (z. B. `taxes` → `tax`). Ist der Wrapper kein Array (z. B. ein leerer String),
+     * ergibt das eine leere Liste.
+     *
+     * @template T
+     *
+     * @param string                           $innerKey  Schlüssel der Liste im Wrapper (z. B. 'tax')
+     * @param string                           $singleKey Schlüssel, an dem ein einzelnes Objekt erkannt wird (z. B. 'id')
+     * @param callable(array<string,mixed>): T $hydrate
+     *
+     * @return list<T>
+     */
+    public static function toNestedList(mixed $wrapper, string $innerKey, string $singleKey, callable $hydrate): array
+    {
+        if (!\is_array($wrapper)) {
+            return [];
+        }
+
+        return self::toList($wrapper[$innerKey] ?? null, $singleKey, $hydrate);
+    }
+
+    /**
      * Zerlegt einen kommaseparierten Billomat-String (z. B. "BANK_TRANSFER,CASH") in Enum-Fälle.
      *
      * Leerzeichen um die Werte werden entfernt; unbekannte und leere Werte fallen heraus.

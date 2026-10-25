@@ -38,7 +38,7 @@ final class InvoicePaymentTest extends TestCase
         self::assertSame(789, $payment->invoiceId);
 
         self::assertInstanceOf(DateTimeImmutable::class, $payment->date);
-        self::assertSame('2025-03-10', $payment->date?->format('Y-m-d'));
+        self::assertSame('2025-03-10', $payment->date->format('Y-m-d'));
 
         self::assertSame('119.9', $payment->amount->toString());
         self::assertSame(PaymentType::BANK_TRANSFER, $payment->type);

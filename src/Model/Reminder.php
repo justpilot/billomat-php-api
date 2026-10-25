@@ -150,7 +150,7 @@ final readonly class Reminder
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             reminderTextId: ScalarCaster::toIntOrNull($data['reminder_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            items: ListCaster::toList($data['reminder-items']['reminder-item'] ?? null, 'id', ReminderItem::fromArray(...)),
+            items: ListCaster::toNestedList($data['reminder-items'] ?? null, 'reminder-item', 'id', ReminderItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             paidAmount: ScalarCaster::toMoneyOrNull($data['paid_amount'] ?? null),

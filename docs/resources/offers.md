@@ -8,9 +8,9 @@ API-Wrapper für Angebote unter `/offers` und ihre drei Sub-Ressourcen (`/offer-
 
 ```php
 $billomat->offers          // Angebote selbst
-$billomat->offerItems      // Positionen eines Angebots
-$billomat->offerComments   // Kommentare / Audit-Trail
-$billomat->offerTags       // Schlagworte
+$billomat->offers->items      // Positionen eines Angebots
+$billomat->offers->comments   // Kommentare / Audit-Trail
+$billomat->offers->tags       // Schlagworte
 ```
 
 ## Modell
@@ -52,7 +52,7 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  ACCEPTED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByOffer($offerId, $query?)` | GET | `/offer-items?offer_id={id}` |
+| `list($offerId, $query?)` | GET | `/offer-items?offer_id={id}` |
 | `get($id)` | GET | `/offer-items/{id}` |
 | `create($offerId, $options)` | POST | `/offer-items` |
 | `update($id, $options)` | PUT | `/offer-items/{id}` |
@@ -62,7 +62,7 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  ACCEPTED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByOffer($offerId, $actionKeys?)` | GET | `/offer-comments?offer_id={id}` |
+| `list($offerId, $actionKeys?)` | GET | `/offer-comments?offer_id={id}` |
 | `get($id)` | GET | `/offer-comments/{id}` |
 | `create($options)` | POST | `/offer-comments` |
 | `delete($id)` | DELETE | `/offer-comments/{id}` |
@@ -71,7 +71,7 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  ACCEPTED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByOffer($offerId)` | GET | `/offer-tags?offer_id={id}` |
+| `list($offerId)` | GET | `/offer-tags?offer_id={id}` |
 | `cloud()` | GET | `/offer-tags` |
 | `get($id)` | GET | `/offer-tags/{id}` |
 | `create($options)` | POST | `/offer-tags` |
@@ -119,9 +119,9 @@ $offer = $billomat->offers->create($opts);
 
 #### `update(int $id, OfferUpdateOptions $options): Offer`
 
-Schmaler Subset für Partial-Updates. Voll editierbar nur im Status `DRAFT`. Positionen lassen sich per PUT auf `/offers/{id}` nicht ändern — dafür die `OfferItemsApi` verwenden. Die Klasse hat daher kein `addItem()`.
+Schmaler Subset für Partial-Updates. Voll editierbar nur im Status `DRAFT`. Positionen lassen sich per PUT auf `/offers/{id}` nicht ändern — dafür die `$billomat->offers->items` verwenden. Die Klasse hat daher kein `addItem()`.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
 DRAFT → OPEN. Vergibt die endgültige `offer_number` und generiert das PDF. Optional kann eine abweichende Template-ID übergeben werden.
 
@@ -129,7 +129,7 @@ DRAFT → OPEN. Vergibt die endgültige `offer_number` und generiert das PDF. Op
 $billomat->offers->complete($offer->id, templateId: 42);
 ```
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
 Erlaubt nur im Status `DRAFT`. Bei anderen Status liefert Billomat 422 → `ValidationException`.
 
@@ -145,7 +145,7 @@ $billomat->offers->undo($offer->id);     // {win,lose,clear,cancel} → OPEN
 
 Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge führen zu `ValidationException` (422) oder `HttpException`.
 
-#### `email(int $id, ?OfferEmailOptions $options = null): bool`
+#### `email(int $id, ?OfferEmailOptions $options = null): void`
 
 Versendet das Angebot per E-Mail. Ohne Options nutzt Billomat alle Defaults (Absender, Betreff, Body, Vorlage); das PDF wird automatisch angehängt.
 
@@ -160,7 +160,7 @@ $email->subject = 'Ihr Angebot {NUMBER}';
 $billomat->offers->email($offer->id, $email);
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
+#### `uploadSignature(int $id, string $base64Pdf): void`
 
 Lädt eine unterschriebene PDF-Version hoch. `$base64Pdf` ist der Base64-codierte PDF-Inhalt (ohne `data:`-Prefix).
 
@@ -180,32 +180,32 @@ $bytes = $billomat->offers->pdf($offer->id, InvoicePdfType::SIGNED, rawPdf: true
 ### Offer Items
 
 ```php
-$items = $billomat->offerItems->listByOffer($offer->id);
+$items = $billomat->offers->items->list($offer->id);
 
-$item = $billomat->offerItems->create(
+$item = $billomat->offers->items->create(
     $offer->id,
     new OfferItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
 );
 
-$billomat->offerItems->update($item->id, $opts);
-$billomat->offerItems->delete($item->id);
+$billomat->offers->items->update($item->id, $opts);
+$billomat->offers->items->delete($item->id);
 ```
 
 `create()` injiziert `offer_id` automatisch in den Payload — `OfferItemCreateOptions` selbst hat dieses Feld nicht. `update()` verwendet dieselbe Klasse wie `create()`.
 
 ### Offer Comments
 
-`listByOffer()` kann optional auf bestimmte `actionkey`-Werte gefiltert werden (kommasepariert an die API geschickt):
+`list()` kann optional auf bestimmte `actionkey`-Werte gefiltert werden (kommasepariert an die API geschickt):
 
 ```php
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 
-$comments = $billomat->offerComments->listByOffer(
+$comments = $billomat->offers->comments->list(
     $offer->id,
     actionKeys: [OfferCommentActionKey::EMAIL, OfferCommentActionKey::WIN],
 );
 
-$billomat->offerComments->create(
+$billomat->offers->comments->create(
     new OfferCommentCreateOptions(offerId: $offer->id, comment: 'Telefonisch zugesagt.'),
 );
 ```
@@ -217,12 +217,12 @@ Kommentare zu System-Aktionen (`COMPLETE`, `WIN`, `EMAIL`, …) legt Billomat au
 ```php
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
 
-$tag = $billomat->offerTags->create(
+$tag = $billomat->offers->tags->create(
     new OfferTagCreateOptions(offerId: $offer->id, name: 'hot-lead'),
 );
 
-$tags  = $billomat->offerTags->listByOffer($offer->id); // list<OfferTag>
-$cloud = $billomat->offerTags->cloud();                 // list<OfferTagCloudEntry>, aggregiert mit count
+$tags  = $billomat->offers->tags->list($offer->id); // list<OfferTag>
+$cloud = $billomat->offers->tags->cloud();                 // list<OfferTagCloudEntry>, aggregiert mit count
 ```
 
 ## Write-Modell: `OfferCreateOptions`
@@ -303,7 +303,7 @@ Konstruktor: `new OfferItemCreateOptions(float $quantity, float $unitPrice)`. Be
 | `reduction` | `reduction` | `?string` | absolut oder mit `%` |
 | `position` | `position` | `?int` | |
 
-`OfferItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ. Das heißt: der Konstruktor verlangt `quantity` und `unitPrice` auch dann, wenn du sie gar nicht ändern willst.
+`ItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ. Das heißt: der Konstruktor verlangt `quantity` und `unitPrice` auch dann, wenn du sie gar nicht ändern willst.
 
 ## Write-Modell: `OfferCommentCreateOptions`
 
@@ -442,7 +442,7 @@ Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hin
 ## Stolpersteine
 
 - **Status-Übergänge sind streng.** `win()`/`lose()`/`clear()`/`cancel()` nur aus `OPEN`. Wer aus einem `DRAFT` direkt einen Versuch wagt, bekommt 422. Reihenfolge: erst `complete()`, dann Status setzen.
-- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `offer-items` beim PUT auf `/offers/{id}`. Stets die `OfferItemsApi` verwenden.
+- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `offer-items` beim PUT auf `/offers/{id}`. Stets die `$billomat->offers->items` verwenden.
 - **`delete()` nur im `DRAFT`.** Sobald `complete()` gelaufen ist, ist das Angebot nummeriert und nicht mehr löschbar — nur noch `cancel()` ist möglich.
 - **`OfferItemCreateOptions` ist auch der Update-Typ.** Es gibt keinen separaten `OfferItemUpdateOptions`-Typ. Der Konstruktor verlangt also immer `quantity` und `unitPrice`, auch wenn du nur den Titel ändern willst. Werte ggf. aus dem bestehenden `OfferItem` übernehmen.
 - **`array_is_list`-Normalisierung in `list()`.** Bei genau einem Treffer liefert Billomat `offer` als Objekt statt Liste — die Methode erkennt das und packt das Single-Result selbst in ein Array.
@@ -500,7 +500,7 @@ printf("Angebot #%d (DRAFT) angelegt, Brutto: %.2f %s\n",
 );
 
 // 2) Tag setzen
-$billomat->offerTags->create(
+$billomat->offers->tags->create(
     new OfferTagCreateOptions(offerId: $offer->id, name: 'hot-lead'),
 );
 
@@ -522,7 +522,7 @@ $billomat->offers->email($offer->id, $email);
 // 5) Kunde nimmt an → win()
 $billomat->offers->win($offer->id);
 
-$billomat->offerComments->create(
+$billomat->offers->comments->create(
     new OfferCommentCreateOptions(
         offerId: $offer->id,
         comment: 'Bestätigung per Telefon am 02.06.',
@@ -534,7 +534,7 @@ $pdf = $billomat->offers->pdf($offer->id);
 file_put_contents("angebot-{$opened?->offerNumber}.pdf", $pdf->getBinary());
 
 // 7) Audit-Trail einsehen — nur Statuswechsel
-$status = $billomat->offerComments->listByOffer(
+$status = $billomat->offers->comments->list(
     $offer->id,
     actionKeys: [
         OfferCommentActionKey::COMPLETE,

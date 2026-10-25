@@ -9,6 +9,10 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Article;
+use Justpilot\Billomat\Model\ArticleProperty;
+use Justpilot\Billomat\Model\ArticlePropertyValue;
+use Justpilot\Billomat\Model\ArticleTag;
+use Justpilot\Billomat\Model\ArticleTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -26,6 +30,33 @@ use NoDiscard;
  */
 final class ArticlesApi extends AbstractApi
 {
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ArticleTag, ArticleTagCloudEntry, ArticleTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'article', ArticleTag::fromArray(...), ArticleTagCloudEntry::fromArray(...), ArticleTagCreateOptions::class);
+    }
+
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<ArticleProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'article', ArticleProperty::fromArray(...));
+    }
+
+    /**
+     * Attributwerte, siehe {@see PropertyValuesApi}.
+     *
+     * @var PropertyValuesApi<ArticlePropertyValue, ArticlePropertyValueCreateOptions>
+     */
+    public private(set) PropertyValuesApi $propertyValues {
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'article', ArticlePropertyValue::fromArray(...), ArticlePropertyValueCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -113,10 +144,8 @@ final class ArticlesApi extends AbstractApi
         return Article::fromArray($this->unwrapEnvelope($data, 'article', 'updating article'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/articles/{$id}");
-
-        return true;
     }
 }

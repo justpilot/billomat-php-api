@@ -44,7 +44,7 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $clientId = $this->ensureClientId();
 
-        $contacts = $billomat->contacts->listByClient($clientId, ['per_page' => 5]);
+        $contacts = $billomat->contacts->list($clientId, ['per_page' => 5]);
 
         self::assertIsArray($contacts);
         self::assertContainsOnlyInstancesOf(Contact::class, $contacts);
@@ -82,7 +82,7 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame('Berlin', $fetched->city);
 
         // Cleanup
-        self::assertTrue($billomat->contacts->delete($contact->id));
+        $billomat->contacts->delete($contact->id);
         self::assertNull($billomat->contacts->get($contact->id));
     }
 }

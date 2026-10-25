@@ -19,7 +19,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
  * Generiert aus tools/codegen/definitions/confirmations.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ConfirmationUpdateOptions
+final class ConfirmationUpdateOptions implements WriteOptions
 {
     /**
      * ID des Kunden.

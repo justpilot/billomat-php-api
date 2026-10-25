@@ -10,6 +10,10 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Model\ClientProperty;
+use Justpilot\Billomat\Model\ClientPropertyValue;
+use Justpilot\Billomat\Model\ClientTag;
+use Justpilot\Billomat\Model\ClientTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -27,6 +31,33 @@ use NoDiscard;
  */
 final class ClientsApi extends AbstractApi
 {
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ClientTag, ClientTagCloudEntry, ClientTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'client', ClientTag::fromArray(...), ClientTagCloudEntry::fromArray(...), ClientTagCreateOptions::class);
+    }
+
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<ClientProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'client', ClientProperty::fromArray(...));
+    }
+
+    /**
+     * Attributwerte, siehe {@see PropertyValuesApi}.
+     *
+     * @var PropertyValuesApi<ClientPropertyValue, ClientPropertyValueCreateOptions>
+     */
+    public private(set) PropertyValuesApi $propertyValues {
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'client', ClientPropertyValue::fromArray(...), ClientPropertyValueCreateOptions::class);
+    }
+
     #[NoDiscard]
     public function getMyself(): Client
     {
@@ -174,14 +205,10 @@ final class ClientsApi extends AbstractApi
      * (Rechnungen, Angebote, …) hängen, können nicht hart gelöscht, sondern
      * nur archiviert werden. In diesem Fall wirft Billomat 400/422 und die
      * SDK propagiert eine {@see ValidationException}.
-     *
-     * @return bool true bei Erfolg
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/clients/{$id}");
-
-        return true;
     }
 
     /**

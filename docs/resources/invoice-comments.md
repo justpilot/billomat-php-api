@@ -7,10 +7,10 @@ API-Wrapper für Kommentare an Rechnungen unter `/invoice-comments`.
 ## Zugriff
 
 ```php
-$billomat->invoiceComments
+$billomat->invoices->comments
 ```
 
-`Justpilot\Billomat\Api\InvoiceCommentsApi`.
+`Justpilot\Billomat\Api\CommentsApi` (`$billomat->invoices->comments`).
 
 ## Überblick
 
@@ -23,7 +23,7 @@ Billomat protokolliert für jede Rechnung einen Strom von Kommentaren — teils 
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByInvoice($invoiceId, $actionKeys?)` | GET | `/invoice-comments?invoice_id={id}` |
+| `list($invoiceId, $actionKeys?)` | GET | `/invoice-comments?invoice_id={id}` |
 | `get($id)` | GET | `/invoice-comments/{id}` |
 | `create($options)` | POST | `/invoice-comments` |
 | `delete($id)` | DELETE | `/invoice-comments/{id}` |
@@ -32,7 +32,7 @@ Es gibt bewusst keine `list()` ohne `invoice_id` — Billomat verlangt den Filte
 
 ## Methoden
 
-### `listByInvoice(int $invoiceId, ?array $actionKeys = null): list<InvoiceComment>`
+### `list(int $invoiceId, ?array $actionKeys = null): list<InvoiceComment>`
 
 Listet alle Kommentare einer Rechnung. Optional kann auf bestimmte ActionKey-Typen gefiltert werden; die Liste wird als CSV an Billomat geschickt.
 
@@ -40,10 +40,10 @@ Listet alle Kommentare einer Rechnung. Optional kann auf bestimmte ActionKey-Typ
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 
 // Alle Kommentare
-$all = $billomat->invoiceComments->listByInvoice(98765);
+$all = $billomat->invoices->comments->list(98765);
 
 // Nur Zahlungs- und Mahnungseinträge
-$financial = $billomat->invoiceComments->listByInvoice(
+$financial = $billomat->invoices->comments->list(
     98765,
     [InvoiceCommentActionKey::PAYMENT, InvoiceCommentActionKey::DUNNING],
 );
@@ -58,7 +58,7 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 
-$comment = $billomat->invoiceComments->create(
+$comment = $billomat->invoices->comments->create(
     new InvoiceCommentCreateOptions(
         invoiceId: 98765,
         comment: 'Kunde meldete sich zur Klärung — Rückruf vereinbart 2026-06-05.',
@@ -68,7 +68,7 @@ $comment = $billomat->invoiceComments->create(
 
 `actionkey` ist optional und sollte für manuelle Kommentare leer gelassen werden — Billomat befüllt das Feld bei systemischen Aktionen automatisch.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 ## Write-Modell: `InvoiceCommentCreateOptions`
 
@@ -124,7 +124,7 @@ Billomat dokumentiert keine geschlossene Liste — falls künftig neue Werte auf
 
 ## Stolpersteine
 
-- **`invoice_id` ist Pflicht.** Ohne den Filter antwortet Billomat mit 400 — `listByInvoice()` setzt den Filter automatisch.
+- **`invoice_id` ist Pflicht.** Ohne den Filter antwortet Billomat mit 400 — `list()` setzt den Filter automatisch.
 - **System-Kommentare nicht überschreiben.** `actionkey` ist primär ein API-Output. Wer dort manuell einen Wert wie `PAYMENT` setzt, kann die Aktivitätsansicht in der Billomat-UI verfälschen.
 - **`delete()` löscht auch System-Kommentare.** Vorsicht beim Aufräumen: System-Einträge sind Teil des Audit-Trails.
 
@@ -149,7 +149,7 @@ $billomat = BillomatClient::create(
 $invoiceId = 98765;
 
 // 1) Manuellen Kommentar anhängen
-$billomat->invoiceComments->create(
+$billomat->invoices->comments->create(
     new InvoiceCommentCreateOptions(
         invoiceId: $invoiceId,
         comment: 'Kunde wünscht Verlängerung um 14 Tage.',
@@ -157,7 +157,7 @@ $billomat->invoiceComments->create(
 );
 
 // 2) Komplette Historie anzeigen
-foreach ($billomat->invoiceComments->listByInvoice($invoiceId) as $c) {
+foreach ($billomat->invoices->comments->list($invoiceId) as $c) {
     printf(
         "[%s] %s — %s\n",
         $c->created?->format('Y-m-d H:i') ?? '???',
@@ -167,7 +167,7 @@ foreach ($billomat->invoiceComments->listByInvoice($invoiceId) as $c) {
 }
 
 // 3) Nur Mahn-Historie ausfiltern
-$dunning = $billomat->invoiceComments->listByInvoice(
+$dunning = $billomat->invoices->comments->list(
     $invoiceId,
     [InvoiceCommentActionKey::DUNNING],
 );

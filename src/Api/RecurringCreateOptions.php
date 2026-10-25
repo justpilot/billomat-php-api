@@ -15,7 +15,7 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
  *
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
  * Positionen lassen sich beim Anlegen über addItem() direkt mitsenden;
- * spätere Änderungen an Positionen laufen über RecurringItemsApi.
+ * spätere Änderungen an Positionen laufen über $billomat->recurrings->items.
  *
  * Doku:
  * https://www.billomat.com/api/abo-rechnungen/
@@ -23,7 +23,7 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
  * Generiert aus tools/codegen/definitions/recurrings.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class RecurringCreateOptions
+final class RecurringCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

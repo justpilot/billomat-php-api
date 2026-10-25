@@ -70,7 +70,7 @@ $opts = new InboxDocumentCreateOptions(
 $doc = $billomat->inboxDocuments->create($opts);
 ```
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 Entfernt das Dokument aus dem Posteingang.
 

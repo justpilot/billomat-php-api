@@ -75,7 +75,7 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($incoming->id, $updated->id);
 
         // Cleanup
-        self::assertTrue($billomat->incomings->delete($incoming->id));
+        $billomat->incomings->delete($incoming->id);
         self::assertNull($billomat->incomings->get($incoming->id));
     }
 }

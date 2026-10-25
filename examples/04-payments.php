@@ -40,7 +40,7 @@ try {
     $opts->type = InvoicePaymentType::BANK_TRANSFER;
     $opts->comment = 'Test-Zahlung aus examples/04-payments.php';
 
-    $payment = $billomat->invoicePayments->create($opts);
+    $payment = $billomat->invoices->payments->create($opts);
     printf("Zahlung #%d angelegt: %.2f EUR via %s\n",
         $payment->id,
         $payment->amount,
@@ -48,8 +48,7 @@ try {
     );
 
     // Alle Zahlungen zur Rechnung listen
-    $all = $billomat->invoicePayments->list([
-        'invoice_id' => $invoiceId,
+    $all = $billomat->invoices->payments->list($invoiceId, [
         'order_by' => 'date+DESC',
     ]);
     printf("Zahlungen insgesamt: %d\n", count($all));
@@ -63,7 +62,7 @@ try {
     }
 
     // Die eben angelegte Test-Zahlung wieder entfernen
-    $billomat->invoicePayments->delete($payment->id);
+    $billomat->invoices->payments->delete($payment->id);
     printf("Test-Zahlung #%d wieder gelöscht.\n", $payment->id);
 } catch (BillomatException $e) {
     fwrite(STDERR, sprintf("Fehler: %s (HTTP %s)\n",

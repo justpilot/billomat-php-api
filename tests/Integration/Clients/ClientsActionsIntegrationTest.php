@@ -47,7 +47,7 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
         // 2) Löschen
         try {
-            $result = $billomat->clients->delete($clientId);
+            $billomat->clients->delete($clientId);
         } catch (ValidationException $e) {
             // Sollte bei frisch angelegtem Kunden ohne Dokumente eigentlich nicht passieren —
             // wenn doch (z. B. Account-Quirks), als Skip behandeln statt failen.
@@ -56,8 +56,6 @@ final class ClientsActionsIntegrationTest extends AbstractBillomatIntegrationTes
                 .'Möglicherweise ist Hard-Delete für diesen Account-Typ deaktiviert.'
             );
         }
-
-        self::assertTrue($result);
 
         // 3) GET sollte null liefern (404 wird als null gemapped)
         $deleted = $billomat->clients->get($clientId);

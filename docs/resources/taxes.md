@@ -58,7 +58,7 @@ $created = $billomat->taxes->create($opts);
 
 Verwendet **dieselbe** Options-Klasse wie `create()`. Es gibt also kein Partial-Update — du sendest immer einen vollständigen Steuersatz.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 Löscht einen Steuersatz. Achtung: das schlägt fehl, wenn der Satz noch in Rechnungen referenziert wird.
 

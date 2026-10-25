@@ -124,13 +124,13 @@ $invoice = $billomat->invoices->create($opts);
 // $invoice->status === InvoiceStatus::DRAFT
 ```
 
-Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen unter `invoice-items.invoice-item` im Payload. Alternativ: leere Rechnung anlegen und Positionen separat via `$billomat->invoiceItems->create($invoiceId, …)` ergänzen, siehe [Invoice Items](invoice-items.md).
+Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen unter `invoice-items.invoice-item` im Payload. Alternativ: leere Rechnung anlegen und Positionen separat via `$billomat->invoices->items->create($invoiceId, …)` ergänzen, siehe [Invoice Items](invoice-items.md).
 
 ### `update(int $id, InvoiceUpdateOptions $options): Invoice`
 
-Funktioniert nur für `DRAFT`. Positionen sind hier **nicht** veränderbar — dafür die `InvoiceItemsApi` nutzen.
+Funktioniert nur für `DRAFT`. Positionen sind hier **nicht** veränderbar — dafür die `$billomat->invoices->items` nutzen.
 
-### `complete(int $id, ?int $templateId = null): bool`
+### `complete(int $id, ?int $templateId = null): void`
 
 Schließt eine `DRAFT`-Rechnung ab.
 
@@ -141,21 +141,21 @@ $billomat->invoices->complete($invoice->id);
 $billomat->invoices->complete($invoice->id, templateId: 42);
 ```
 
-Rückgabe `true`, wenn Billomat HTTP 200 antwortet. Nach `complete()`:
+Fehler kommen als Exception. Nach `complete()`:
 
 - `invoice_number` ist gesetzt,
 - ein PDF wurde generiert (über `pdf()` abrufbar),
 - Status wechselt auf `OPEN`, `OVERDUE` oder `PAID`.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 Nur für `DRAFT`. Anderenfalls antwortet Billomat mit 422 → `ValidationException`.
 
-### `cancel(int $id): bool` / `uncancel(int $id): bool`
+### `cancel(int $id): void` / `uncancel(int $id): void`
 
 Storniert eine bereits abgeschlossene Rechnung oder macht die Stornierung rückgängig.
 
-### `email(int $id, ?InvoiceEmailOptions $options = null): bool`
+### `email(int $id, ?InvoiceEmailOptions $options = null): void`
 
 Versendet die Rechnung als PDF-Anhang per E-Mail. Ohne `$options` zieht Billomat alle Defaults aus dem Account (Absender, Empfänger aus den Kunden-Stammdaten, Betreff/Body aus der Default-Vorlage).
 
@@ -182,7 +182,7 @@ Voraussetzungen:
 - Die Rechnung muss `complete()`-d sein (sonst existiert kein PDF).
 - `from` muss im Billomat-Account als Absender hinterlegt sein, sonst antwortet die API mit `ValidationException`.
 
-### `mail(int $id, ?InvoiceMailOptions $options = null): bool`
+### `mail(int $id, ?InvoiceMailOptions $options = null): void`
 
 Verschickt die Rechnung postalisch über den Pixelletter-Service. **Kostenpflichtig** — Billomat verrechnet Porto + Druck.
 
@@ -199,7 +199,7 @@ $billomat->invoices->mail($invoice->id, $opts);
 
 Die Empfängeradresse wird automatisch aus der auf der Rechnung hinterlegten Adresse übernommen — eine separate Adress-Property gibt es bewusst nicht.
 
-### `uploadSignature(int $id, string $base64Pdf): bool`
+### `uploadSignature(int $id, string $base64Pdf): void`
 
 Lädt eine unterschriebene PDF-Version der Rechnung hoch und ersetzt damit das von Billomat erzeugte PDF.
 
@@ -208,7 +208,7 @@ $signed = base64_encode(file_get_contents('/path/to/signed-invoice.pdf'));
 $billomat->invoices->uploadSignature($invoice->id, $signed);
 ```
 
-### `encash(int $id): bool`
+### `encash(int $id): void`
 
 Übergibt eine Rechnung an das Inkasso-Verfahren von Billomat. Laut Billomat-Doku muss die Rechnung dafür im Status `OPEN` oder `OVERDUE` sein.
 

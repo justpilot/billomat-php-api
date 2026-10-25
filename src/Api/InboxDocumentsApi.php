@@ -95,10 +95,8 @@ final class InboxDocumentsApi extends AbstractApi
         return InboxDocument::fromArray($this->unwrapEnvelope($data, 'inbox-document', 'creating inbox document'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/inbox-documents/{$id}");
-
-        return true;
     }
 }

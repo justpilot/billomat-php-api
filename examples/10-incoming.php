@@ -54,7 +54,7 @@ try {
     );
 
     // 2) Schlagwort anhängen — z. B. "büro"
-    $billomat->incomingTags->create(
+    $billomat->incomings->tags->create(
         new IncomingTagCreateOptions(incomingId: $incoming->id, name: 'büro'),
     );
 
@@ -68,7 +68,7 @@ try {
     $payment->markIncomingAsPaid = true;
     $payment->transactionPurpose = $incoming->incomingNumber ?? '';
 
-    $created = $billomat->incomingPayments->create($payment);
+    $created = $billomat->incomings->payments->create($payment);
     printf("Zahlung #%d verbucht: %.2f via %s\n",
         $created->id,
         $created->amount,

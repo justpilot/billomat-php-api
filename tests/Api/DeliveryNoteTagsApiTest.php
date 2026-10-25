@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\DeliveryNotesApi;
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
-use Justpilot\Billomat\Api\DeliveryNoteTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(DeliveryNoteTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(DeliveryNotesApi::class)]
 #[CoversClass(DeliveryNoteTagCreateOptions::class)]
 #[CoversClass(DeliveryNoteTag::class)]
 #[CoversClass(DeliveryNoteTagCloudEntry::class)]
@@ -51,12 +55,12 @@ final class DeliveryNoteTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new DeliveryNoteTagsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        $tags = $api->listByDeliveryNote(42);
+        $tags = $api->list(42);
 
         self::assertCount(1, $tags);
         self::assertSame('eilig', $tags[0]->name);
@@ -76,10 +80,10 @@ final class DeliveryNoteTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new DeliveryNoteTagsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $cloud = $api->cloud();
 
@@ -106,13 +110,13 @@ final class DeliveryNoteTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new DeliveryNoteTagsApi(new BillomatHttpClient(
+        $api = new DeliveryNotesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $tag = $api->create(new DeliveryNoteTagCreateOptions(deliveryNoteId: 42, name: 'neu'));
         self::assertSame(99, $tag->id);
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 }

@@ -222,11 +222,11 @@ final class DeliveryNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->complete(1));
-        self::assertTrue($api->cancel(2));
-        self::assertTrue($api->clear(3));
-        self::assertTrue($api->undo(4));
-        self::assertTrue($api->delete(5));
+        $api->complete(1);
+        $api->cancel(2);
+        $api->clear(3);
+        $api->undo(4);
+        $api->delete(5);
 
         self::assertSame('https://mycompany.billomat.net/api/delivery-notes/1/complete', $captured[0]['url']);
         self::assertSame('https://mycompany.billomat.net/api/delivery-notes/2/cancel', $captured[1]['url']);
@@ -256,7 +256,7 @@ final class DeliveryNotesApiTest extends TestCase
         $opts->from = 'me@example.com';
         $opts->to = ['kunde@example.com'];
 
-        self::assertTrue($api->email(42, $opts));
+        $api->email(42, $opts);
 
         $payload = $this->extractJsonPayload($captured['options']);
         self::assertSame('me@example.com', $payload['email']['from'] ?? null);
@@ -337,7 +337,7 @@ final class DeliveryNotesApiTest extends TestCase
         ));
 
         $base64 = base64_encode('PDF-FAKE');
-        self::assertTrue($api->uploadSignature(555, $base64));
+        $api->uploadSignature(555, $base64);
 
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/delivery-notes/555/upload-signature', $captured['url']);

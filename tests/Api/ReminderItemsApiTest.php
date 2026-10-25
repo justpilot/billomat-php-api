@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ReminderItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
@@ -21,6 +22,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(ReminderItemsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
 #[CoversClass(ReminderItem::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -52,7 +54,7 @@ final class ReminderItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $items = $api->listByReminder(42);
+        $items = $api->list(42);
 
         self::assertCount(1, $items);
         self::assertSame(100.0, $items[0]->unitPrice);

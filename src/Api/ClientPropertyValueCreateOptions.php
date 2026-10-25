@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/client-property-values.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ClientPropertyValueCreateOptions
+final class ClientPropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

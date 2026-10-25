@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
  * Generiert aus tools/codegen/definitions/confirmation-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ConfirmationCommentCreateOptions
+final class ConfirmationCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

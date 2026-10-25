@@ -75,8 +75,7 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($rate, $fetched->rate);
 
         // 3) löschen
-        $deleteResult = $billomat->taxes->delete($taxId);
-        self::assertTrue($deleteResult);
+        $billomat->taxes->delete($taxId);
 
         // 4) sicherstellen, dass er weg ist (get() gibt null zurück)
         $afterDelete = $billomat->taxes->get($taxId);

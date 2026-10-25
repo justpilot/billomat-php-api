@@ -71,10 +71,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $draftId = $draft->id;
 
         // 3) Abschließen – hier wird in der Regel das PDF erzeugt
-        $completed = $billomat->invoices->complete($draftId);
-        if (!$completed) {
-            throw new RuntimeException('Failed to complete invoice for PDF integration test.');
-        }
+        $billomat->invoices->complete($draftId);
 
         return $draftId;
     }
@@ -251,9 +248,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $draftId = $draft->id;
 
         // 3) Rechnung abschließen (ohne template_id, damit Defaults greifen)
-        $result = $billomat->invoices->complete($draftId);
-
-        self::assertTrue($result);
+        $billomat->invoices->complete($draftId);
 
         // 4) Invoice neu laden und prüfen
         $completed = $billomat->invoices->get($draftId);
@@ -319,9 +314,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $draftId = $draft->id;
 
         // 3) Löschen
-        $result = $billomat->invoices->delete($draftId);
-
-        self::assertTrue($result);
+        $billomat->invoices->delete($draftId);
 
         // 4) Nachprüfen, dass sie weg ist
         $deleted = $billomat->invoices->get($draftId);
@@ -378,15 +371,13 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $draftId = $draft->id;
 
         // 3) Rechnung zuerst abschließen (cancel geht i.d.R. nur auf nicht-DRAFT)
-        $completedResult = $billomat->invoices->complete($draftId);
-        self::assertTrue($completedResult);
+        $billomat->invoices->complete($draftId);
 
         $completed = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $completed);
 
         // 4) Stornieren
-        $cancelResult = $billomat->invoices->cancel($draftId);
-        self::assertTrue($cancelResult);
+        $billomat->invoices->cancel($draftId);
 
         $cancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $cancelled);
@@ -448,12 +439,10 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $draftId = $draft->id;
 
         // 3) Abschließen
-        $completedResult = $billomat->invoices->complete($draftId);
-        self::assertTrue($completedResult);
+        $billomat->invoices->complete($draftId);
 
         // 4) Stornieren
-        $cancelResult = $billomat->invoices->cancel($draftId);
-        self::assertTrue($cancelResult);
+        $billomat->invoices->cancel($draftId);
 
         $cancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $cancelled);
@@ -464,8 +453,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         );
 
         // 5) Stornierung zurücknehmen
-        $uncancelResult = $billomat->invoices->uncancel($draftId);
-        self::assertTrue($uncancelResult);
+        $billomat->invoices->uncancel($draftId);
 
         $uncancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $uncancelled);

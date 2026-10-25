@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Api\InvoiceItemsApi;
+use Justpilot\Billomat\Api\InvoicesApi;
+use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -23,7 +25,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(InvoiceItemsApi::class)]
+#[CoversClass(ItemsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(InvoicesApi::class)]
 #[CoversClass(InvoiceItem::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -104,9 +108,9 @@ final class InvoiceItemsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoiceItemsApi($http);
+        $api = new InvoicesApi($http)->items;
 
-        $items = $api->listByInvoice(123, ['per_page' => 50]);
+        $items = $api->list(123, ['per_page' => 50]);
 
         // Rückgabe prüfen
         self::assertIsArray($items);
@@ -191,7 +195,7 @@ final class InvoiceItemsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoiceItemsApi($http);
+        $api = new InvoicesApi($http)->items;
 
         $item = $api->get(10);
 
@@ -220,7 +224,7 @@ final class InvoiceItemsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoiceItemsApi($http);
+        $api = new InvoicesApi($http)->items;
 
         $item = $api->get(999999);
 
@@ -282,7 +286,7 @@ final class InvoiceItemsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoiceItemsApi($http);
+        $api = new InvoicesApi($http)->items;
 
         $options = new InvoiceItemCreateOptions(
             quantity: 2.0,
@@ -363,7 +367,7 @@ final class InvoiceItemsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoiceItemsApi($http);
+        $api = new InvoicesApi($http)->items;
 
         $options = new InvoiceItemCreateOptions(
             quantity: 3.0,
@@ -413,11 +417,9 @@ final class InvoiceItemsApiTest extends TestCase
         );
 
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
-        $api = new InvoiceItemsApi($http);
+        $api = new InvoicesApi($http)->items;
 
-        $result = $api->delete(77);
-
-        self::assertTrue($result);
+        $api->delete(77);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/invoice-items/77',
@@ -443,12 +445,12 @@ final class InvoiceItemsApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $api = new InvoiceItemsApi(new BillomatHttpClient(
+        $api = new InvoicesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig(billomatId: 'x', apiKey: 'k'),
-        ));
+        ))->items;
 
-        $items = $api->listByInvoice(99);
+        $items = $api->list(99);
 
         self::assertCount(1, $items);
         self::assertSame(1, $items[0]->id);
@@ -462,11 +464,11 @@ final class InvoiceItemsApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $api = new InvoiceItemsApi(new BillomatHttpClient(
+        $api = new InvoicesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig(billomatId: 'x', apiKey: 'k'),
-        ));
+        ))->items;
 
-        self::assertSame([], $api->listByInvoice(99));
+        self::assertSame([], $api->list(99));
     }
 }

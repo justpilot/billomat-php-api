@@ -59,7 +59,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
 
         $propOpts = new PropertyCreateOptions(name: 'IT-ArtProp-'.date('His'));
         $propOpts->type = PropertyType::TEXTFIELD;
-        $prop = $billomat->articleProperties->create($propOpts);
+        $prop = $billomat->articles->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
         $articleOpts = new ArticleCreateOptions(title: 'IT-PV-Artikel '.date('His'));
@@ -69,19 +69,19 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         self::assertNotNull($article->id);
 
         try {
-            $value = $billomat->articlePropertyValues->create(new ArticlePropertyValueCreateOptions(
+            $value = $billomat->articles->propertyValues->create(new ArticlePropertyValueCreateOptions(
                 articleId: $article->id,
                 articlePropertyId: $prop->id,
                 value: 'Testwert',
             ));
             self::assertNotNull($value->id);
 
-            $values = $billomat->articlePropertyValues->list(['article_id' => $article->id]);
+            $values = $billomat->articles->propertyValues->list($article->id);
             self::assertContainsOnlyInstancesOf(ArticlePropertyValue::class, $values);
             self::assertGreaterThanOrEqual(1, \count($values));
         } finally {
             $billomat->articles->delete($article->id);
-            $billomat->articleProperties->delete($prop->id);
+            $billomat->articles->properties->delete($prop->id);
         }
     }
 
@@ -93,7 +93,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
 
         $propOpts = new PropertyCreateOptions(name: 'IT-CliProp-'.date('His'));
         $propOpts->type = PropertyType::TEXTFIELD;
-        $prop = $billomat->clientProperties->create($propOpts);
+        $prop = $billomat->clients->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
         $clientOpts = new ClientCreateOptions();
@@ -102,7 +102,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         self::assertNotNull($client->id);
 
         try {
-            $value = $billomat->clientPropertyValues->create(new ClientPropertyValueCreateOptions(
+            $value = $billomat->clients->propertyValues->create(new ClientPropertyValueCreateOptions(
                 clientId: $client->id,
                 clientPropertyId: $prop->id,
                 value: 'Testwert',
@@ -110,12 +110,12 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
             self::assertNotNull($value->id);
             self::assertSame($client->id, $value->clientId);
 
-            $values = $billomat->clientPropertyValues->list(['client_id' => $client->id]);
+            $values = $billomat->clients->propertyValues->list($client->id);
             self::assertContainsOnlyInstancesOf(ClientPropertyValue::class, $values);
             self::assertGreaterThanOrEqual(1, \count($values));
         } finally {
             $billomat->clients->delete($client->id);
-            $billomat->clientProperties->delete($prop->id);
+            $billomat->clients->properties->delete($prop->id);
         }
     }
 
@@ -127,24 +127,24 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
 
         $propOpts = new PropertyCreateOptions(name: 'IT-SupProp-'.date('His'));
         $propOpts->type = PropertyType::TEXTFIELD;
-        $prop = $billomat->supplierProperties->create($propOpts);
+        $prop = $billomat->suppliers->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
         $supplierId = $this->ensureSupplierId($billomat);
 
         try {
-            $value = $billomat->supplierPropertyValues->create(new SupplierPropertyValueCreateOptions(
+            $value = $billomat->suppliers->propertyValues->create(new SupplierPropertyValueCreateOptions(
                 supplierId: $supplierId,
                 supplierPropertyId: $prop->id,
                 value: 'Testwert',
             ));
             self::assertNotNull($value->id);
 
-            $values = $billomat->supplierPropertyValues->list(['supplier_id' => $supplierId]);
+            $values = $billomat->suppliers->propertyValues->list($supplierId);
             self::assertContainsOnlyInstancesOf(SupplierPropertyValue::class, $values);
             self::assertGreaterThanOrEqual(1, \count($values));
         } finally {
-            $billomat->supplierProperties->delete($prop->id);
+            $billomat->suppliers->properties->delete($prop->id);
         }
     }
 
@@ -156,7 +156,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
 
         $propOpts = new PropertyCreateOptions(name: 'IT-IncProp-'.date('His'));
         $propOpts->type = PropertyType::TEXTFIELD;
-        $prop = $billomat->incomingProperties->create($propOpts);
+        $prop = $billomat->incomings->properties->create($propOpts);
         self::assertNotNull($prop->id);
 
         $incomingOpts = new IncomingCreateOptions(supplierId: $this->ensureSupplierId($billomat));
@@ -165,19 +165,19 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
         self::assertNotNull($incoming->id);
 
         try {
-            $value = $billomat->incomingPropertyValues->create(new IncomingPropertyValueCreateOptions(
+            $value = $billomat->incomings->propertyValues->create(new IncomingPropertyValueCreateOptions(
                 incomingId: $incoming->id,
                 incomingPropertyId: $prop->id,
                 value: 'Testwert',
             ));
             self::assertNotNull($value->id);
 
-            $values = $billomat->incomingPropertyValues->list(['incoming_id' => $incoming->id]);
+            $values = $billomat->incomings->propertyValues->list($incoming->id);
             self::assertContainsOnlyInstancesOf(IncomingPropertyValue::class, $values);
             self::assertGreaterThanOrEqual(1, \count($values));
         } finally {
             $billomat->incomings->delete($incoming->id);
-            $billomat->incomingProperties->delete($prop->id);
+            $billomat->incomings->properties->delete($prop->id);
         }
     }
 }

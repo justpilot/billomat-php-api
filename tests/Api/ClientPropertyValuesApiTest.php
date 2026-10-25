@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
-use Justpilot\Billomat\Api\ClientPropertyValuesApi;
+use Justpilot\Billomat\Api\ClientsApi;
+use Justpilot\Billomat\Api\PropertyValuesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ClientPropertyValuesApi::class)]
+#[CoversClass(PropertyValuesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ClientsApi::class)]
 #[CoversClass(ClientPropertyValueCreateOptions::class)]
 #[CoversClass(ClientPropertyValue::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -51,12 +55,12 @@ final class ClientPropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ClientPropertyValuesApi(new BillomatHttpClient(
+        $api = new ClientsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
-        $values = $api->list(['client_id' => 42]);
+        $values = $api->list(filters: ['client_id' => 42]);
 
         self::assertCount(1, $values);
         self::assertSame('Branche', $values[0]->name);
@@ -79,10 +83,10 @@ final class ClientPropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new ClientPropertyValuesApi(new BillomatHttpClient(
+        $api = new ClientsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
         $value = $api->create(new ClientPropertyValueCreateOptions(
             clientId: 42,
@@ -107,10 +111,10 @@ final class ClientPropertyValuesApiTest extends TestCase
             return new MockResponse('{"errors":{"error":"resource not found"}}', ['http_code' => 404]);
         });
 
-        $api = new ClientPropertyValuesApi(new BillomatHttpClient(
+        $api = new ClientsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
         $value = $api->get(5);
         self::assertNotNull($value);

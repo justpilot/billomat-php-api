@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ArticlePropertyValueCreateOptions;
-use Justpilot\Billomat\Api\ArticlePropertyValuesApi;
+use Justpilot\Billomat\Api\ArticlesApi;
+use Justpilot\Billomat\Api\PropertyValuesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -21,7 +23,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ArticlePropertyValuesApi::class)]
+#[CoversClass(PropertyValuesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ArticlesApi::class)]
 #[CoversClass(ArticlePropertyValueCreateOptions::class)]
 #[CoversClass(ArticlePropertyValue::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -49,12 +53,12 @@ final class ArticlePropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ArticlePropertyValuesApi(new BillomatHttpClient(
+        $api = new ArticlesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
-        $values = $api->list(['article_id' => 42]);
+        $values = $api->list(filters: ['article_id' => 42]);
 
         self::assertCount(1, $values);
         self::assertSame('Farbe', $values[0]->name);
@@ -77,10 +81,10 @@ final class ArticlePropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new ArticlePropertyValuesApi(new BillomatHttpClient(
+        $api = new ArticlesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
         $value = $api->create(new ArticlePropertyValueCreateOptions(
             articleId: 42,

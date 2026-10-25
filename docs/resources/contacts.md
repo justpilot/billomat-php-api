@@ -16,7 +16,7 @@ $billomat->contacts
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByClient($clientId, $query?)` | GET | `/contacts?client_id={id}` |
+| `list($clientId, $query?)` | GET | `/contacts?client_id={id}` |
 | `get($id)` | GET | `/contacts/{id}` |
 | `create($options)` | POST | `/contacts` |
 | `update($id, $options)` | PUT | `/contacts/{id}` |
@@ -26,12 +26,12 @@ Es gibt **keine** ungefilterte `list()`-Methode — Billomats `GET /contacts` ve
 
 ## Methoden
 
-### `listByClient(int $clientId, array $query = []): list<Contact>`
+### `list(int $clientId, array $query = []): list<Contact>`
 
 Listet alle Ansprechpartner eines Kunden.
 
 ```php
-$contacts = $billomat->contacts->listByClient(98765);
+$contacts = $billomat->contacts->list(98765);
 
 foreach ($contacts as $contact) {
     printf("#%d %s %s <%s>\n",
@@ -77,9 +77,9 @@ $billomat->contacts->update($contactId, $patch);
 
 `ContactUpdateOptions` ist ein echtes Partial-Update: nur gesetzte (nicht-`null`) Properties werden gesendet. Die `client_id` ist beim Update bewusst nicht änderbar.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
-Entfernt den Ansprechpartner. Gibt `true` zurück, wenn der Aufruf erfolgreich war.
+Entfernt den Ansprechpartner. Fehler kommen als Exception.
 
 ## Write-Modell: `ContactCreateOptions`
 
@@ -163,8 +163,8 @@ Keine. Alle Felder sind Strings, einschließlich `salutation` und `countryCode` 
 
 ## Stolpersteine
 
-- **`listByClient()` ist ein Pflichtfilter.** Billomats `GET /contacts` ohne `client_id` liefert keine globale Liste, sondern einen Fehler. Das SDK macht den Filter zum erzwungenen Konstruktor-Argument.
-- **Single-Item-List-Quirk.** Hat ein Kunde genau einen Ansprechpartner, liefert Billomat ein einzelnes Objekt unter `contacts.contact` statt einer Liste. `listByClient()` normalisiert das via `array_is_list()`-Check zu einer `list<Contact>`.
+- **`list()` ist ein Pflichtfilter.** Billomats `GET /contacts` ohne `client_id` liefert keine globale Liste, sondern einen Fehler. Das SDK macht den Filter zum erzwungenen Konstruktor-Argument.
+- **Single-Item-List-Quirk.** Hat ein Kunde genau einen Ansprechpartner, liefert Billomat ein einzelnes Objekt unter `contacts.contact` statt einer Liste. `list()` normalisiert das via `array_is_list()`-Check zu einer `list<Contact>`.
 - **`client_id` ist beim Update nicht änderbar.** `ContactUpdateOptions` enthält das Feld bewusst nicht. Wer einen Ansprechpartner zu einem anderen Kunden „verschieben“ will, muss ihn löschen und neu anlegen.
 - **`toArray()` strippt `null`.** Ein Feld auf `null` setzen, um es per Update zu **leeren**, funktioniert nicht — das Feld wird ausgelassen und Billomat behält den alten Wert. Zum Leeren einen leeren String `''` senden.
 
@@ -189,7 +189,7 @@ $billomat = BillomatClient::create(
 $clientId = 98765;
 
 // 1) Bestehende Ansprechpartner listen
-foreach ($billomat->contacts->listByClient($clientId) as $contact) {
+foreach ($billomat->contacts->list($clientId) as $contact) {
     printf("[#%d] %s %s — %s\n",
         $contact->id,
         $contact->firstName ?? '',

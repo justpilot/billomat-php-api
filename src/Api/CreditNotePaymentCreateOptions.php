@@ -19,7 +19,7 @@ use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
  * Generiert aus tools/codegen/definitions/credit-note-payments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class CreditNotePaymentCreateOptions
+final class CreditNotePaymentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

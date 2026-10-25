@@ -271,7 +271,7 @@ final class RecurringsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/recurrings/99', $captured['url']);
     }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
-use Justpilot\Billomat\Api\ArticlePropertiesApi;
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\ArticlesApi;
+use Justpilot\Billomat\Api\PropertiesApi;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ArticlePropertiesApi::class)]
+#[CoversClass(PropertiesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ArticlesApi::class)]
 #[CoversClass(PropertyCreateOptions::class)]
 #[CoversClass(ArticleProperty::class)]
 #[CoversClass(PropertyType::class)]
@@ -47,10 +51,10 @@ final class ArticlePropertiesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ArticlePropertiesApi(new BillomatHttpClient(
+        $api = new ArticlesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->properties;
 
         $props = $api->list();
         self::assertCount(1, $props);
@@ -73,10 +77,10 @@ final class ArticlePropertiesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new ArticlePropertiesApi(new BillomatHttpClient(
+        $api = new ArticlesApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->properties;
 
         $opts = new PropertyCreateOptions(name: 'Größe');
         $opts->type = PropertyType::TEXTFIELD;

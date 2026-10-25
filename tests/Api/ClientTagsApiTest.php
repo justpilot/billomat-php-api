@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ClientTagCreateOptions;
-use Justpilot\Billomat\Api\ClientTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ClientTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ClientsApi::class)]
 #[CoversClass(ClientTagCreateOptions::class)]
 #[CoversClass(ClientTag::class)]
 #[CoversClass(ClientTagCloudEntry::class)]
@@ -70,12 +74,12 @@ final class ClientTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new ClientTagsApi(new BillomatHttpClient(
+        $api = new ClientsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        self::assertCount(1, $api->listByClient(42));
+        self::assertCount(1, $api->list(42));
 
         $cloud = $api->cloud();
         self::assertCount(1, $cloud);
@@ -84,6 +88,6 @@ final class ClientTagsApiTest extends TestCase
         $tag = $api->create(new ClientTagCreateOptions(clientId: 42, name: 'neu'));
         self::assertSame(99, $tag->id);
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 }

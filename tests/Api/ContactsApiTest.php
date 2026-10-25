@@ -56,7 +56,7 @@ final class ContactsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $contacts = $api->listByClient(42);
+        $contacts = $api->list(42);
 
         self::assertCount(1, $contacts);
         self::assertSame('Anna', $contacts[0]->firstName);
@@ -175,7 +175,7 @@ final class ContactsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->delete(777));
+        $api->delete(777);
         self::assertSame('DELETE', $captured['method']);
     }
 }

@@ -18,7 +18,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
  * Generiert aus tools/codegen/definitions/articles.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ArticleUpdateOptions
+final class ArticleUpdateOptions implements WriteOptions
 {
     /**
      * Laufende Nummer (ohne Präfix).

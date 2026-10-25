@@ -16,7 +16,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/contacts.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ContactUpdateOptions
+final class ContactUpdateOptions implements WriteOptions
 {
     /**
      * Bezeichnung des Kontakts.

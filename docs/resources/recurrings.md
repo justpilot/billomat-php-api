@@ -8,9 +8,9 @@ API-Wrapper für Abo-Rechnungen unter `/recurrings` und ihre drei Sub-Ressourcen
 
 ```php
 $billomat->recurrings              // Abo-Rechnungen selbst
-$billomat->recurringItems          // Positionen einer Abo-Rechnung
-$billomat->recurringTags           // Schlagworte
-$billomat->recurringEmailReceivers // E-Mail-Empfänger (TO/CC/BCC)
+$billomat->recurrings->items          // Positionen einer Abo-Rechnung
+$billomat->recurrings->tags           // Schlagworte
+$billomat->recurrings->emailReceivers // E-Mail-Empfänger (TO/CC/BCC)
 ```
 
 ## Modell
@@ -39,7 +39,7 @@ Aus einem Recurring entstehen mit der Zeit „echte“ Rechnungen — diese refe
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByRecurring($recurringId, $query?)` | GET | `/recurring-items?recurring_id={id}` |
+| `list($recurringId, $query?)` | GET | `/recurring-items?recurring_id={id}` |
 | `get($id)` | GET | `/recurring-items/{id}` |
 | `create($recurringId, $options)` | POST | `/recurring-items` |
 | `update($id, $options)` | PUT | `/recurring-items/{id}` |
@@ -49,7 +49,7 @@ Aus einem Recurring entstehen mit der Zeit „echte“ Rechnungen — diese refe
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByRecurring($recurringId)` | GET | `/recurring-tags?recurring_id={id}` |
+| `list($recurringId)` | GET | `/recurring-tags?recurring_id={id}` |
 | `cloud()` | GET | `/recurring-tags` |
 | `get($id)` | GET | `/recurring-tags/{id}` |
 | `create($options)` | POST | `/recurring-tags` |
@@ -59,7 +59,7 @@ Aus einem Recurring entstehen mit der Zeit „echte“ Rechnungen — diese refe
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByRecurring($recurringId)` | GET | `/recurring-email-receivers?recurring_id={id}` |
+| `list($recurringId)` | GET | `/recurring-email-receivers?recurring_id={id}` |
 | `get($id)` | GET | `/recurring-email-receivers/{id}` |
 | `create($options)` | POST | `/recurring-email-receivers` |
 | `delete($id)` | DELETE | `/recurring-email-receivers/{id}` |
@@ -107,9 +107,9 @@ $recurring = $billomat->recurrings->create($opts);
 
 ### `update(int $id, RecurringUpdateOptions $options): Recurring`
 
-Schmaler Subset für Partial-Updates. Positionen sind hier laut Billomat-Doku **nicht** veränderbar — dafür die `RecurringItemsApi` nutzen. Die Klasse bietet daher kein `addItem()`.
+Schmaler Subset für Partial-Updates. Positionen sind hier laut Billomat-Doku **nicht** veränderbar — dafür die `$billomat->recurrings->items` nutzen. Die Klasse bietet daher kein `addItem()`.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 ## Write-Modell: `RecurringCreateOptions`
 
@@ -232,15 +232,15 @@ Strukturell identisch zu `InvoiceItem`, referenzieren aber `recurring_id` statt 
 ### Methoden
 
 ```php
-$items = $billomat->recurringItems->listByRecurring($recurring->id);
+$items = $billomat->recurrings->items->list($recurring->id);
 
-$item = $billomat->recurringItems->create(
+$item = $billomat->recurrings->items->create(
     $recurring->id,
     new RecurringItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
 );
 
-$billomat->recurringItems->update($item->id, $opts);
-$billomat->recurringItems->delete($item->id);
+$billomat->recurrings->items->update($item->id, $opts);
+$billomat->recurrings->items->delete($item->id);
 ```
 
 `create()` injiziert `recurring_id` automatisch in den Payload — `RecurringItemCreateOptions` selbst hat dieses Feld nicht.
@@ -271,12 +271,12 @@ Funktional identisch zu [Invoice Tags](invoice-tags.md), bezogen auf eine Abo-Re
 ```php
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 
-$tag = $billomat->recurringTags->create(
+$tag = $billomat->recurrings->tags->create(
     new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'auto-paid'),
 );
 
-$tags = $billomat->recurringTags->listByRecurring($recurring->id);
-$cloud = $billomat->recurringTags->cloud(); // aggregiert, mit count
+$tags = $billomat->recurrings->tags->list($recurring->id);
+$cloud = $billomat->recurrings->tags->cloud(); // aggregiert, mit count
 ```
 
 Read-Modelle: `RecurringTag` (Verknüpfung mit `recurringId`) und `RecurringTagCloudEntry` (aggregiert).
@@ -289,7 +289,7 @@ Pflegt die TO/CC/BCC-Liste für die automatische E-Mail-Versendung (`action = EM
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
 
-$billomat->recurringEmailReceivers->create(
+$billomat->recurrings->emailReceivers->create(
     new RecurringEmailReceiverCreateOptions(
         recurringId: $recurring->id,
         type: RecurringEmailReceiverType::TO,
@@ -297,7 +297,7 @@ $billomat->recurringEmailReceivers->create(
     ),
 );
 
-$billomat->recurringEmailReceivers->create(
+$billomat->recurrings->emailReceivers->create(
     new RecurringEmailReceiverCreateOptions(
         recurringId: $recurring->id,
         type: RecurringEmailReceiverType::BCC,
@@ -326,7 +326,7 @@ Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt: `recurrin
 
 ## Stolpersteine
 
-- **Items nicht über `update()` ändern.** Billomat ignoriert eingebettete `recurring-items` beim PUT auf `/recurrings/{id}`. Stets die `RecurringItemsApi` verwenden.
+- **Items nicht über `update()` ändern.** Billomat ignoriert eingebettete `recurring-items` beim PUT auf `/recurrings/{id}`. Stets die `$billomat->recurrings->items` verwenden.
 - **`action = EMAIL` ohne Empfänger geht schief.** Wer `action` auf `EMAIL` setzt, muss mindestens einen `RecurringEmailReceiver` vom Typ `TO` angelegt haben.
 - **`emailTemplateId`** zieht eine im Billomat-Account hinterlegte E-Mail-Vorlage; `emailSender`/`emailSubject`/`emailMessage` überschreiben einzelne Felder davon punktuell.
 - **`cycle` und `cycleNumber` zusammen lesen.** `cycle=MONTHLY` allein heißt nicht „monatlich“ — es heißt „`cycleNumber` Monate“. Default ist 1, wenn nicht gesetzt.
@@ -377,7 +377,7 @@ printf("Abo #%d angelegt, nächster Lauf: %s\n",
 );
 
 // 2) E-Mail-Empfänger pflegen
-$billomat->recurringEmailReceivers->create(
+$billomat->recurrings->emailReceivers->create(
     new RecurringEmailReceiverCreateOptions(
         recurringId: $recurring->id,
         type: RecurringEmailReceiverType::TO,
@@ -385,7 +385,7 @@ $billomat->recurringEmailReceivers->create(
     ),
 );
 
-$billomat->recurringEmailReceivers->create(
+$billomat->recurrings->emailReceivers->create(
     new RecurringEmailReceiverCreateOptions(
         recurringId: $recurring->id,
         type: RecurringEmailReceiverType::BCC,
@@ -394,14 +394,14 @@ $billomat->recurringEmailReceivers->create(
 );
 
 // 3) Tag setzen, damit Filtern leichter fällt
-$billomat->recurringTags->create(
+$billomat->recurrings->tags->create(
     new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'hosting'),
 );
 
 // 4) Position später anpassen — Preis-Update
-foreach ($billomat->recurringItems->listByRecurring($recurring->id) as $current) {
+foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
     $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 24.90);
     $update->title = $current->title;
-    $billomat->recurringItems->update($current->id, $update);
+    $billomat->recurrings->items->update($current->id, $update);
 }
 ```

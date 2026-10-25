@@ -8,10 +8,10 @@ API-Wrapper für Gutschriften unter `/credit-notes` und ihre vier Sub-Ressourcen
 
 ```php
 $billomat->creditNotes         // Gutschriften selbst
-$billomat->creditNoteItems     // Positionen
-$billomat->creditNoteComments  // Aktivitäts-Log / freie Kommentare
-$billomat->creditNoteTags      // Schlagworte
-$billomat->creditNotePayments  // Auszahlungen an den Kunden
+$billomat->creditNotes->items     // Positionen
+$billomat->creditNotes->comments  // Aktivitäts-Log / freie Kommentare
+$billomat->creditNotes->tags      // Schlagworte
+$billomat->creditNotes->payments  // Auszahlungen an den Kunden
 ```
 
 ## Modell
@@ -49,7 +49,7 @@ Nur Gutschriften im Status `DRAFT` sind voll editierbar — `update()` an einer 
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByCreditNote($creditNoteId, $query?)` | GET | `/credit-note-items?credit_note_id={id}` |
+| `list($creditNoteId, $query?)` | GET | `/credit-note-items?credit_note_id={id}` |
 | `get($id)` | GET | `/credit-note-items/{id}` |
 | `create($creditNoteId, $options)` | POST | `/credit-note-items` |
 | `update($id, $options)` | PUT | `/credit-note-items/{id}` |
@@ -59,7 +59,7 @@ Nur Gutschriften im Status `DRAFT` sind voll editierbar — `update()` an einer 
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByCreditNote($creditNoteId, $actionKeys?)` | GET | `/credit-note-comments?credit_note_id={id}` |
+| `list($creditNoteId, $actionKeys?)` | GET | `/credit-note-comments?credit_note_id={id}` |
 | `get($id)` | GET | `/credit-note-comments/{id}` |
 | `create($options)` | POST | `/credit-note-comments` |
 | `delete($id)` | DELETE | `/credit-note-comments/{id}` |
@@ -68,7 +68,7 @@ Nur Gutschriften im Status `DRAFT` sind voll editierbar — `update()` an einer 
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByCreditNote($creditNoteId)` | GET | `/credit-note-tags?credit_note_id={id}` |
+| `list($creditNoteId)` | GET | `/credit-note-tags?credit_note_id={id}` |
 | `cloud()` | GET | `/credit-note-tags` |
 | `get($id)` | GET | `/credit-note-tags/{id}` |
 | `create($options)` | POST | `/credit-note-tags` |
@@ -124,17 +124,17 @@ $creditNote = $billomat->creditNotes->create($opts);
 
 #### `update(int $id, CreditNoteUpdateOptions $options): CreditNote`
 
-Nur im Status `DRAFT` ratsam. Items werden hier **nicht** akzeptiert — die `CreditNoteItemsApi` benutzen.
+Nur im Status `DRAFT` ratsam. Items werden hier **nicht** akzeptiert — die `$billomat->creditNotes->items` benutzen.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
-Status `DRAFT → OPEN`. Optional kann eine konkrete `templateId` für das PDF mitgegeben werden, sonst greift das Account-Default-Template. Gibt `true` zurück, wenn Billomat mit 200 antwortet.
+Status `DRAFT → OPEN`. Optional kann eine konkrete `templateId` für das PDF mitgegeben werden, sonst greift das Account-Default-Template. Fehler kommen als Exception.
 
-#### `cancel(int $id): bool` / `uncancel(int $id): bool`
+#### `cancel(int $id): void` / `uncancel(int $id): void`
 
 `cancel()` setzt den Status auf `CANCELED`; `uncancel()` kehrt das zurück nach `OPEN`. Beides ist nur an abgeschlossenen Gutschriften sinnvoll.
 
-#### `email(int $id, ?CreditNoteEmailOptions $options = null): bool`
+#### `email(int $id, ?CreditNoteEmailOptions $options = null): void`
 
 Ohne Optionen verwendet Billomat alle Default-Werte des Kunden bzw. der hinterlegten E-Mail-Vorlage. Wirft bei fehlender Empfänger-Konfiguration `ValidationException`.
 
@@ -159,11 +159,11 @@ $pdf = $billomat->creditNotes->pdf($creditNote->id);                 // Model
 $raw = $billomat->creditNotes->pdf($creditNote->id, rawPdf: true);   // string (PDF binary)
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
+#### `uploadSignature(int $id, string $base64Pdf): void`
 
 Hängt eine vom Kunden unterschriebene PDF-Version an die Gutschrift.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
 Funktioniert ausschließlich an Gutschriften im Status `DRAFT`.
 
@@ -172,14 +172,14 @@ Funktioniert ausschließlich an Gutschriften im Status `DRAFT`.
 ```php
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 
-$item = $billomat->creditNoteItems->create(
+$item = $billomat->creditNotes->items->create(
     $creditNote->id,
     new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: -19.90),
 );
 
-$items = $billomat->creditNoteItems->listByCreditNote($creditNote->id);
-$billomat->creditNoteItems->update($item->id, $newOpts);
-$billomat->creditNoteItems->delete($item->id);
+$items = $billomat->creditNotes->items->list($creditNote->id);
+$billomat->creditNotes->items->update($item->id, $newOpts);
+$billomat->creditNotes->items->delete($item->id);
 ```
 
 `create()` injiziert `credit_note_id` automatisch in den Payload — `CreditNoteItemCreateOptions` selbst hat dieses Feld nicht.
@@ -190,7 +190,7 @@ $billomat->creditNoteItems->delete($item->id);
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 
-$comment = $billomat->creditNoteComments->create(
+$comment = $billomat->creditNotes->comments->create(
     new CreditNoteCommentCreateOptions(
         creditNoteId: $creditNote->id,
         comment: 'Kunde bestätigt Rückerstattung per Mail.',
@@ -198,7 +198,7 @@ $comment = $billomat->creditNoteComments->create(
 );
 
 // Nur EMAIL-/PAYMENT-Einträge des Aktivitäts-Logs
-$entries = $billomat->creditNoteComments->listByCreditNote(
+$entries = $billomat->creditNotes->comments->list(
     $creditNote->id,
     [CreditNoteCommentActionKey::EMAIL, CreditNoteCommentActionKey::PAYMENT],
 );
@@ -211,12 +211,12 @@ Billomat führt im selben Endpunkt sowohl freie User-Kommentare als auch System-
 ```php
 use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
 
-$billomat->creditNoteTags->create(
+$billomat->creditNotes->tags->create(
     new CreditNoteTagCreateOptions(creditNoteId: $creditNote->id, name: 'rückerstattung'),
 );
 
-$tags = $billomat->creditNoteTags->listByCreditNote($creditNote->id);
-$cloud = $billomat->creditNoteTags->cloud(); // aggregiert, mit count
+$tags = $billomat->creditNotes->tags->list($creditNote->id);
+$cloud = $billomat->creditNotes->tags->cloud(); // aggregiert, mit count
 ```
 
 Ein Update gibt es nicht — zum Umbenennen muss der Tag gelöscht und neu angelegt werden.
@@ -235,7 +235,7 @@ $payment->type = InvoicePaymentType::BANK_TRANSFER;
 $payment->date = new DateTimeImmutable('2026-06-05');
 $payment->markCreditNoteAsPaid = true;
 
-$billomat->creditNotePayments->create($payment);
+$billomat->creditNotes->payments->create($payment);
 ```
 
 Erst beim Anlegen einer Auszahlung mit `markCreditNoteAsPaid = true` (Wire-Wert `1`) wechselt die Gutschrift in den Status `PAID`. Ohne das Flag bleibt sie `OPEN` und behält einen `openAmount > 0`.
@@ -465,14 +465,14 @@ Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Defaul
 ## Stolpersteine
 
 - **`update()` nur im DRAFT.** Sobald die Gutschrift abgeschlossen ist, ignoriert Billomat die meisten Felder oder antwortet mit 422. Vor dem Editieren stets `cancel()` → `update()` → `complete()` in Erwägung ziehen.
-- **Items im Update-Payload werden ignoriert.** `CreditNoteUpdateOptions` hat bewusst kein `addItem()`. Positionsänderungen laufen über die `CreditNoteItemsApi`.
+- **Items im Update-Payload werden ignoriert.** `CreditNoteUpdateOptions` hat bewusst kein `addItem()`. Positionsänderungen laufen über die `$billomat->creditNotes->items`.
 - **`markCreditNoteAsPaid` ist immer im Payload.** Anders als die anderen Felder wird `mark_credit_note_as_paid` nicht weggefiltert — der Default `false` wird als `0` mitgesendet. Beim Setzen auf `true` flippt der Status auf `PAID`, sobald die Summe der Payments den Bruttobetrag erreicht.
 - **`quantity` und `unitPrice` bleiben im Payload, auch wenn sie `0` sind.** `CreditNoteItemCreateOptions::toArray()` whitelistet sie explizit gegen den `array_filter`.
 - **Negative Beträge bei Items.** Eine Gutschrift gleicht eine Rechnung aus — die Praxis ist, im `unitPrice` einen negativen Wert anzugeben (z. B. `-19.90`). Billomat akzeptiert das ohne Umweg.
 - **`number` manuell setzen kollidiert mit Auto-Numbering.** Wenn der Account auf automatische Nummern eingestellt ist, führt ein manuelles `number` zu einer `ValidationException` bei `complete()`.
 - **`uncancel()` setzt zurück auf `OPEN`, nicht auf `DRAFT`.** Eine versehentlich stornierte Gutschrift kann reaktiviert werden, aber sie ist danach nicht wieder editierbar.
-- **`actionkey` im Comment-Filter ist CSV, kein Array.** `listByCreditNote($id, [...])` übergibt mehrere ActionKeys als komma-separierten String, nicht als `actionkey[]=…`.
-- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /credit-note-tags` ohne `credit_note_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `credit_note_id` die konkreten Tags (`credit-note-tag`-Wrapper). Der SDK trennt das in `cloud()` und `listByCreditNote()`.
+- **`actionkey` im Comment-Filter ist CSV, kein Array.** `list($id, [...])` übergibt mehrere ActionKeys als komma-separierten String, nicht als `actionkey[]=…`.
+- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /credit-note-tags` ohne `credit_note_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `credit_note_id` die konkreten Tags (`credit-note-tag`-Wrapper). Der SDK trennt das in `cloud()` und `list()`.
 
 ## End-to-End-Beispiel
 
@@ -517,7 +517,7 @@ printf("Gutschrift #%d angelegt (Status: %s)\n",
 $billomat->creditNotes->complete($creditNote->id);
 
 // 3) Tag setzen
-$billomat->creditNoteTags->create(
+$billomat->creditNotes->tags->create(
     new CreditNoteTagCreateOptions(creditNoteId: $creditNote->id, name: 'rückerstattung'),
 );
 
@@ -539,7 +539,7 @@ $payment->date = new DateTimeImmutable('2026-06-05');
 $payment->transactionPurpose = 'Erstattung Hosting Mai';
 $payment->markCreditNoteAsPaid = true;
 
-$billomat->creditNotePayments->create($payment);
+$billomat->creditNotes->payments->create($payment);
 
 // 6) PDF abholen
 $pdfBinary = $billomat->creditNotes->pdf($creditNote->id, rawPdf: true);

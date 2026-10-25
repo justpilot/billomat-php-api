@@ -9,7 +9,12 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Confirmation;
+use Justpilot\Billomat\Model\ConfirmationComment;
+use Justpilot\Billomat\Model\ConfirmationItem;
 use Justpilot\Billomat\Model\ConfirmationPdf;
+use Justpilot\Billomat\Model\ConfirmationTag;
+use Justpilot\Billomat\Model\ConfirmationTagCloudEntry;
+use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
@@ -35,6 +40,33 @@ use NoDiscard;
  */
 final class ConfirmationsApi extends AbstractApi
 {
+    /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<ConfirmationItem, ConfirmationItemCreateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'confirmation', ConfirmationItem::fromArray(...), ConfirmationItemCreateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<ConfirmationComment, ConfirmationCommentCreateOptions, ConfirmationCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'confirmation', ConfirmationComment::fromArray(...), ConfirmationCommentCreateOptions::class, ConfirmationCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ConfirmationTag, ConfirmationTagCloudEntry, ConfirmationTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'confirmation', ConfirmationTag::fromArray(...), ConfirmationTagCloudEntry::fromArray(...), ConfirmationTagCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -122,7 +154,7 @@ final class ConfirmationsApi extends AbstractApi
         return Confirmation::fromArray($this->unwrapEnvelope($data, 'confirmation', 'updating confirmation'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -133,56 +165,42 @@ final class ConfirmationsApi extends AbstractApi
         $payload = ['confirmation' => $body];
 
         $this->putVoid("/confirmations/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/confirmations/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/confirmations/{$id}/cancel");
-
-        return true;
     }
 
     /** Markiert eine Auftragsbestätigung als erledigt (Status → CLEARED). */
-    public function clear(int $id): bool
+    public function clear(int $id): void
     {
         $this->putVoid("/confirmations/{$id}/clear");
-
-        return true;
     }
 
     /** Setzt einen Status zurück auf OPEN (Rückgängigmachen von clear/cancel). */
-    public function undo(int $id): bool
+    public function undo(int $id): void
     {
         $this->putVoid("/confirmations/{$id}/undo");
-
-        return true;
     }
 
-    public function email(int $id, ?ConfirmationEmailOptions $options = null): bool
+    public function email(int $id, ?ConfirmationEmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postJson("/confirmations/{$id}/email", $payload);
-
-        return true;
     }
 
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/confirmations/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**

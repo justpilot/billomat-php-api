@@ -17,7 +17,7 @@ use DateTimeImmutable;
  * Generiert aus tools/codegen/definitions/letters.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class LetterCreateOptions
+final class LetterCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

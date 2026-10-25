@@ -111,11 +111,11 @@ Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zu
 | Ressource | Zugriff | Doku |
 |---|---|---|
 | Kunden | `$billomat->clients`, `clientPropertyValues` | [docs/resources/clients.md](docs/resources/clients.md) |
-| Kundenschlagworte | `$billomat->clientTags` | [docs/resources/client-tags.md](docs/resources/client-tags.md) |
+| Kundenschlagworte | `$billomat->clients->tags` | [docs/resources/client-tags.md](docs/resources/client-tags.md) |
 | Ansprechpartner | `$billomat->contacts` | [docs/resources/contacts.md](docs/resources/contacts.md) |
 | Lieferanten | `$billomat->suppliers`, `supplierTags`, `supplierPropertyValues` | [docs/resources/suppliers.md](docs/resources/suppliers.md) |
 | Artikel | `$billomat->articles`, `articleTags`, `articlePropertyValues` | [docs/resources/articles.md](docs/resources/articles.md) |
-| Property-Definitionen | `$billomat->articleProperties`, `clientProperties`, `supplierProperties`, `incomingProperties`, `userProperties` | [docs/resources/properties.md](docs/resources/properties.md) |
+| Property-Definitionen | `$billomat->articles->properties`, `clientProperties`, `supplierProperties`, `incomingProperties`, `userProperties` | [docs/resources/properties.md](docs/resources/properties.md) |
 
 ### Ausgangsbelege
 

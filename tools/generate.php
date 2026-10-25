@@ -484,7 +484,7 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $out .= "\n";
     }
     $out .= classDoc($options['doc'], $definition['docUrl'], $source, 'Doku:');
-    $out .= 'final class ' . $options['class'] . "\n{\n";
+    $out .= 'final class ' . $options['class'] . " implements WriteOptions\n{\n";
 
     // Pflichtfelder beim Anlegen werden als Konstruktor-Parameter erzwungen.
     $promoted = $isCreate

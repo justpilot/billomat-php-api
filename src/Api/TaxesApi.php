@@ -125,14 +125,11 @@ final class TaxesApi extends AbstractApi
      * Löscht einen Steuersatz.
      *
      * Entspricht DELETE /taxes/{id}
-     *
-     * @return bool true bei Erfolg (HTTP 200)
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/taxes/{$id}");
 
         // Wenn kein HttpException geflogen ist, gehen wir von Erfolg aus.
-        return true;
     }
 }

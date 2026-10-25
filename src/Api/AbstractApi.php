@@ -83,6 +83,8 @@ abstract class AbstractApi
      * Wird z. B. für PUT /invoices/{id}/complete verwendet.
      *
      * @param array<string,mixed> $body
+     *
+     * @return array<string,mixed>
      */
     protected function putJson(string $path, array $body): array
     {

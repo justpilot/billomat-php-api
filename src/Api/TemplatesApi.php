@@ -130,11 +130,9 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht DELETE /templates/{id}
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/templates/{$id}");
-
-        return true;
     }
 
     /**

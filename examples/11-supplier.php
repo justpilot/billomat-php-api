@@ -46,13 +46,13 @@ try {
     printf("Lieferant #%d angelegt: %s\n", $supplier->id, $supplier->name ?? '?');
 
     // 2) Schlagwort anhängen
-    $billomat->supplierTags->create(
+    $billomat->suppliers->tags->create(
         new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'IT-Dienstleister'),
     );
 
     // 3) Property-Wert anlegen (nur wenn eine Property-Definition vorgegeben wurde)
     if ($propertyIdRaw !== null) {
-        $value = $billomat->supplierPropertyValues->create(
+        $value = $billomat->suppliers->propertyValues->create(
             new SupplierPropertyValueCreateOptions(
                 supplierId: $supplier->id,
                 supplierPropertyId: (int)$propertyIdRaw,

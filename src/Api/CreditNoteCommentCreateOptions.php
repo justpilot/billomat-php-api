@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
  * Generiert aus tools/codegen/definitions/credit-note-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class CreditNoteCommentCreateOptions
+final class CreditNoteCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

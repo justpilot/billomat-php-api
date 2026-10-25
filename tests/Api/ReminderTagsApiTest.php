@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderTagCreateOptions;
-use Justpilot\Billomat\Api\ReminderTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ReminderTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(RemindersApi::class)]
 #[CoversClass(ReminderTagCreateOptions::class)]
 #[CoversClass(ReminderTag::class)]
 #[CoversClass(ReminderTagCloudEntry::class)]
@@ -63,19 +67,19 @@ final class ReminderTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new ReminderTagsApi(new BillomatHttpClient(
+        $api = new RemindersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        $tags = $api->listByReminder(42);
+        $tags = $api->list(42);
         self::assertCount(1, $tags);
         self::assertSame('eilig', $tags[0]->name);
 
         $tag = $api->create(new ReminderTagCreateOptions(reminderId: 42, name: 'neu'));
         self::assertSame(99, $tag->id);
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 
     #[Test]
@@ -91,10 +95,10 @@ final class ReminderTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ReminderTagsApi(new BillomatHttpClient(
+        $api = new RemindersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $cloud = $api->cloud();
         self::assertCount(1, $cloud);

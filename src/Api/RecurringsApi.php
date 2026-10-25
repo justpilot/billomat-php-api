@@ -6,6 +6,9 @@ namespace Justpilot\Billomat\Api;
 
 use Generator;
 use Justpilot\Billomat\Model\Recurring;
+use Justpilot\Billomat\Model\RecurringItem;
+use Justpilot\Billomat\Model\RecurringTag;
+use Justpilot\Billomat\Model\RecurringTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -23,6 +26,31 @@ use NoDiscard;
  */
 final class RecurringsApi extends AbstractApi
 {
+    /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<RecurringItem, RecurringItemCreateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'recurring', RecurringItem::fromArray(...), RecurringItemCreateOptions::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<RecurringTag, RecurringTagCloudEntry, RecurringTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'recurring', RecurringTag::fromArray(...), RecurringTagCloudEntry::fromArray(...), RecurringTagCreateOptions::class);
+    }
+
+    /**
+     * E-Mail-Empfänger, siehe {@see RecurringEmailReceiversApi}.
+     */
+    public private(set) RecurringEmailReceiversApi $emailReceivers {
+        get => $this->emailReceivers ??= new RecurringEmailReceiversApi($this->http);
+    }
+
     /**
      * Listet Abo-Rechnungen mit optionalen Filtern.
      *
@@ -109,10 +137,8 @@ final class RecurringsApi extends AbstractApi
         return Recurring::fromArray($this->unwrapEnvelope($data, 'recurring', 'updating recurring'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/recurrings/{$id}");
-
-        return true;
     }
 }

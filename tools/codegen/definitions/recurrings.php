@@ -44,7 +44,7 @@ return [
             '',
             'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.',
             'Positionen lassen sich beim Anlegen über addItem() direkt mitsenden;',
-            'spätere Änderungen an Positionen laufen über RecurringItemsApi.',
+            'spätere Änderungen an Positionen laufen über $billomat->recurrings->items.',
         ],
     ],
 
@@ -57,7 +57,7 @@ return [
             'Typisierter Payload für PUT /recurrings/{id}.',
             '',
             'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update).',
-            'Positionen lassen sich hier nicht bearbeiten, dafür ist RecurringItemsApi zuständig.',
+            'Positionen lassen sich hier nicht bearbeiten, dafür ist $billomat->recurrings->items zuständig.',
         ],
     ],
 

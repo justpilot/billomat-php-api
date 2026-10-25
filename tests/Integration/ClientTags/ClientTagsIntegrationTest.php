@@ -43,7 +43,7 @@ final class ClientTagsIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $cloud = $billomat->clientTags->cloud();
+        $cloud = $billomat->clients->tags->cloud();
 
         self::assertIsArray($cloud);
         self::assertContainsOnlyInstancesOf(ClientTagCloudEntry::class, $cloud);
@@ -57,16 +57,16 @@ final class ClientTagsIntegrationTest extends AbstractBillomatIntegrationTestCas
         $clientId = $this->ensureClientId();
 
         $opts = new ClientTagCreateOptions(clientId: $clientId, name: 'IT-CT-'.date('His'));
-        $tag = $billomat->clientTags->create($opts);
+        $tag = $billomat->clients->tags->create($opts);
 
         self::assertNotNull($tag->id);
 
         try {
-            $tags = $billomat->clientTags->listByClient($clientId);
+            $tags = $billomat->clients->tags->list($clientId);
             self::assertContainsOnlyInstancesOf(ClientTag::class, $tags);
             self::assertGreaterThanOrEqual(1, \count($tags));
         } finally {
-            self::assertTrue($billomat->clientTags->delete($tag->id));
+            $billomat->clients->tags->delete($tag->id);
         }
     }
 }

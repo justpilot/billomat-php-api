@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
-use Justpilot\Billomat\Api\IncomingPaymentsApi;
+use Justpilot\Billomat\Api\IncomingsApi;
+use Justpilot\Billomat\Api\PaymentsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(IncomingPaymentsApi::class)]
+#[CoversClass(PaymentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(IncomingsApi::class)]
 #[CoversClass(IncomingPaymentCreateOptions::class)]
 #[CoversClass(IncomingPayment::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -51,12 +55,12 @@ final class IncomingPaymentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new IncomingPaymentsApi(new BillomatHttpClient(
+        $api = new IncomingsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->payments;
 
-        $payments = $api->list(['incoming_id' => 42]);
+        $payments = $api->list(filters: ['incoming_id' => 42]);
         self::assertCount(1, $payments);
         self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payments[0]->type);
     }
@@ -76,10 +80,10 @@ final class IncomingPaymentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new IncomingPaymentsApi(new BillomatHttpClient(
+        $api = new IncomingsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->payments;
 
         $opts = new IncomingPaymentCreateOptions(incomingId: 42, amount: 100.0);
         $opts->markIncomingAsPaid = true;
@@ -106,12 +110,12 @@ final class IncomingPaymentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new IncomingPaymentsApi(new BillomatHttpClient(
+        $api = new IncomingsApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->payments;
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
     }
 }

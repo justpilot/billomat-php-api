@@ -174,10 +174,10 @@ final class IncomingsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->cancel(1));
-        self::assertTrue($api->uncancel(2));
-        self::assertTrue($api->upload(3, base64_encode('PDF')));
-        self::assertTrue($api->delete(4));
+        $api->cancel(1);
+        $api->uncancel(2);
+        $api->upload(3, base64_encode('PDF'));
+        $api->delete(4);
 
         self::assertSame('https://mycompany.billomat.net/api/incomings/1/cancel', $captured[0]['url']);
         self::assertSame('https://mycompany.billomat.net/api/incomings/2/uncancel', $captured[1]['url']);

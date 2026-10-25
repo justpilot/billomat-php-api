@@ -7,16 +7,16 @@ API-Wrapper für die Positionen einer Rechnung. Endpunkte unter `/invoice-items`
 ## Zugriff
 
 ```php
-$billomat->invoiceItems
+$billomat->invoices->items
 ```
 
-`Justpilot\Billomat\Api\InvoiceItemsApi`.
+`Justpilot\Billomat\Api\ItemsApi` (`$billomat->invoices->items`).
 
 ## Endpunkt-Übersicht
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByInvoice($invoiceId, $query?)` | GET | `/invoice-items?invoice_id={id}` |
+| `list($invoiceId, $query?)` | GET | `/invoice-items?invoice_id={id}` |
 | `get($id)` | GET | `/invoice-items/{id}` |
 | `create($invoiceId, $options)` | POST | `/invoice-items` |
 | `update($id, $options)` | PUT | `/invoice-items/{id}` |
@@ -24,12 +24,12 @@ $billomat->invoiceItems
 
 ## Methoden
 
-### `listByInvoice(int $invoiceId, array $query = []): list<InvoiceItem>`
+### `list(int $invoiceId, array $query = []): list<InvoiceItem>`
 
 Listet alle Positionen einer Rechnung. `invoice_id` wird automatisch als Filter gesetzt, weitere Filter (`page`, `per_page` …) können über `$query` mitgegeben werden.
 
 ```php
-$items = $billomat->invoiceItems->listByInvoice(98765, [
+$items = $billomat->invoices->items->list(98765, [
     'per_page' => 100,
 ]);
 ```
@@ -51,16 +51,16 @@ $item->title = 'Premium-Support (3 Monate)';
 $item->type = InvoiceItemType::SERVICE;
 $item->unit = 'Monat';
 
-$created = $billomat->invoiceItems->create($invoiceId, $item);
+$created = $billomat->invoices->items->create($invoiceId, $item);
 ```
 
 ### `update(int $id, InvoiceItemCreateOptions $options): InvoiceItem`
 
 Aktualisiert eine bestehende Position. Verwendet **dieselbe** Options-Klasse wie `create()` — eine eigene `UpdateOptions` gibt es nicht. `quantity` und `unitPrice` werden immer gesendet (sie sind Pflicht im Konstruktor), alle anderen `null`-Felder bleiben unangetastet.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
-Löscht eine Position. Gibt `true` zurück, wenn Billomat ohne Fehler antwortet.
+Löscht eine Position. Fehler kommen als Exception.
 
 ## Write-Modell: `InvoiceItemCreateOptions`
 
@@ -146,7 +146,7 @@ $first->title = 'Lizenzgebühr Modul A';
 $first->type = InvoiceItemType::PRODUCT;
 $first->unit = 'Lizenz';
 
-$created = $billomat->invoiceItems->create($invoice->id, $first);
+$created = $billomat->invoices->items->create($invoice->id, $first);
 
 // Zweite Position
 $second = new InvoiceItemCreateOptions(quantity: 2.5, unitPrice: 110.0);
@@ -154,15 +154,15 @@ $second->title = 'Anpassung & Support';
 $second->type = InvoiceItemType::SERVICE;
 $second->unit = 'Stunde';
 
-$billomat->invoiceItems->create($invoice->id, $second);
+$billomat->invoices->items->create($invoice->id, $second);
 
 // Alle Positionen lesen
-foreach ($billomat->invoiceItems->listByInvoice($invoice->id) as $item) {
+foreach ($billomat->invoices->items->list($invoice->id) as $item) {
     printf("- %s: %.2f x %.2f = %.2f\n", $item->title, $item->quantity, $item->unitPrice, $item->totalNet ?? 0.0);
 }
 
 // Erste Position aktualisieren (Preis senken) — quantity bleibt gleich
 $update = new InvoiceItemCreateOptions(quantity: $created->quantity, unitPrice: 9.99);
 $update->title = $created->title;
-$billomat->invoiceItems->update($created->id, $update);
+$billomat->invoices->items->update($created->id, $update);
 ```

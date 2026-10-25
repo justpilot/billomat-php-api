@@ -24,7 +24,7 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $props = $billomat->articleProperties->list();
+        $props = $billomat->articles->properties->list();
 
         self::assertIsArray($props);
         self::assertContainsOnlyInstancesOf(ArticleProperty::class, $props);
@@ -36,7 +36,7 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $props = $billomat->clientProperties->list();
+        $props = $billomat->clients->properties->list();
 
         self::assertIsArray($props);
         self::assertContainsOnlyInstancesOf(ClientProperty::class, $props);
@@ -48,7 +48,7 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $props = $billomat->supplierProperties->list();
+        $props = $billomat->suppliers->properties->list();
 
         self::assertIsArray($props);
         self::assertContainsOnlyInstancesOf(SupplierProperty::class, $props);
@@ -60,7 +60,7 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $props = $billomat->incomingProperties->list();
+        $props = $billomat->incomings->properties->list();
 
         self::assertIsArray($props);
         self::assertContainsOnlyInstancesOf(IncomingProperty::class, $props);
@@ -75,12 +75,12 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
         $opts = new PropertyCreateOptions(name: 'IT-Prop-'.date('His'));
         $opts->type = PropertyType::TEXTFIELD;
 
-        $prop = $billomat->articleProperties->create($opts);
+        $prop = $billomat->articles->properties->create($opts);
 
         self::assertNotNull($prop->id);
         self::assertSame(PropertyType::TEXTFIELD, $prop->type);
 
-        self::assertTrue($billomat->articleProperties->delete($prop->id));
+        $billomat->articles->properties->delete($prop->id);
     }
 
     #[Group('integration')]
@@ -92,10 +92,10 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
         $opts = new PropertyCreateOptions(name: 'IT-ClientProp-'.date('His'));
         $opts->type = PropertyType::TEXTFIELD;
 
-        $prop = $billomat->clientProperties->create($opts);
+        $prop = $billomat->clients->properties->create($opts);
 
         self::assertNotNull($prop->id);
 
-        self::assertTrue($billomat->clientProperties->delete($prop->id));
+        $billomat->clients->properties->delete($prop->id);
     }
 }

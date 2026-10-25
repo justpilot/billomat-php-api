@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
  * Generiert aus tools/codegen/definitions/letter-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class LetterCommentCreateOptions
+final class LetterCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

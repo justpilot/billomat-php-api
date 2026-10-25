@@ -74,10 +74,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         self::assertNotNull($draft->id);
 
         // Aktionen wie email/mail/encash benötigen i. d. R. eine abgeschlossene Rechnung.
-        self::assertTrue(
-            $billomat->invoices->complete($draft->id),
-            'Failed to complete invoice for action integration test.'
-        );
+        $billomat->invoices->complete($draft->id);
 
         return $draft->id;
     }
@@ -113,8 +110,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $opts->body = "Automatisierter Integrationstest des justpilot/billomat-php-api SDK.\n\n"
             .'Diese Mail wurde aus der Sandbox geschickt. Du kannst sie löschen.';
 
-        $result = $billomat->invoices->email($invoiceId, $opts);
-        self::assertTrue($result);
+        $billomat->invoices->email($invoiceId, $opts);
     }
 
     #[Group('integration')]
@@ -144,8 +140,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
         $base64 = base64_encode($minimalPdf);
 
-        $result = $billomat->invoices->uploadSignature($invoiceId, $base64);
-        self::assertTrue($result);
+        $billomat->invoices->uploadSignature($invoiceId, $base64);
 
         // Sanity-Check: Rechnung existiert weiterhin und ist nicht zerstört.
         $afterUpload = $billomat->invoices->get($invoiceId);
@@ -173,8 +168,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $opts->duplex = true;
         $opts->paperWeight = '80';
 
-        $result = $billomat->invoices->mail($invoiceId, $opts);
-        self::assertTrue($result);
+        $billomat->invoices->mail($invoiceId, $opts);
     }
 
     #[Group('integration')]
@@ -199,7 +193,6 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         self::assertInstanceOf(Invoice::class, $invoice);
         self::assertNotSame(InvoiceStatus::DRAFT, $invoice->status);
 
-        $result = $billomat->invoices->encash($invoiceId);
-        self::assertTrue($result);
+        $billomat->invoices->encash($invoiceId);
     }
 }

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
-use Justpilot\Billomat\Api\OfferCommentsApi;
+use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
@@ -22,7 +24,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(OfferCommentsApi::class)]
+#[CoversClass(CommentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(OffersApi::class)]
 #[CoversClass(OfferCommentCreateOptions::class)]
 #[CoversClass(OfferComment::class)]
 #[CoversClass(OfferCommentActionKey::class)]
@@ -64,12 +68,12 @@ final class OfferCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new OfferCommentsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $comments = $api->listByOffer(42, [OfferCommentActionKey::CREATE, OfferCommentActionKey::COMMENT]);
+        $comments = $api->list(42, [OfferCommentActionKey::CREATE, OfferCommentActionKey::COMMENT]);
 
         self::assertCount(2, $comments);
         self::assertSame(OfferCommentActionKey::CREATE, $comments[0]->actionkey);
@@ -97,10 +101,10 @@ final class OfferCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new OfferCommentsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
         $opts = new OfferCommentCreateOptions(offerId: 42, comment: 'Hallo');
         $created = $api->create($opts);
@@ -129,12 +133,12 @@ final class OfferCommentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new OfferCommentsApi(new BillomatHttpClient(
+        $api = new OffersApi(new BillomatHttpClient(
             new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/offer-comments/99', $captured['url']);
     }

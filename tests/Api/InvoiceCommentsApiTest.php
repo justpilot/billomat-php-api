@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
-use Justpilot\Billomat\Api\InvoiceCommentsApi;
+use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -23,7 +25,9 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(InvoiceCommentsApi::class)]
+#[CoversClass(CommentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(InvoicesApi::class)]
 #[CoversClass(InvoiceComment::class)]
 #[CoversClass(InvoiceCommentCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -56,9 +60,9 @@ final class InvoiceCommentsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new InvoiceCommentsApi($http);
+        $api = new InvoicesApi($http)->comments;
 
-        $comments = $api->listByInvoice(100, [InvoiceCommentActionKey::CREATE, InvoiceCommentActionKey::COMPLETE]);
+        $comments = $api->list(100, [InvoiceCommentActionKey::CREATE, InvoiceCommentActionKey::COMPLETE]);
 
         self::assertCount(2, $comments);
         self::assertContainsOnlyInstancesOf(InvoiceComment::class, $comments);
@@ -88,9 +92,9 @@ final class InvoiceCommentsApiTest extends TestCase
         ]);
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new InvoiceCommentsApi($http);
+        $api = new InvoicesApi($http)->comments;
 
-        $comments = $api->listByInvoice(5);
+        $comments = $api->list(5);
 
         self::assertCount(1, $comments);
         self::assertSame(7, $comments[0]->id);
@@ -104,7 +108,7 @@ final class InvoiceCommentsApiTest extends TestCase
         ]);
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new InvoiceCommentsApi($http);
+        $api = new InvoicesApi($http)->comments;
 
         self::assertNull($api->get(999));
     }
@@ -129,7 +133,7 @@ final class InvoiceCommentsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new InvoiceCommentsApi($http);
+        $api = new InvoicesApi($http)->comments;
 
         $comment = $api->create(new InvoiceCommentCreateOptions(invoiceId: 100, comment: 'Anruf vom Kunden.'));
 
@@ -156,9 +160,9 @@ final class InvoiceCommentsApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        $api = new InvoiceCommentsApi($http);
+        $api = new InvoicesApi($http)->comments;
 
-        self::assertTrue($api->delete(42));
+        $api->delete(42);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/invoice-comments/42', $captured['url']);
     }

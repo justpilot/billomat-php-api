@@ -8,9 +8,9 @@ API-Wrapper für Auftragsbestätigungen unter `/confirmations` und ihre drei Sub
 
 ```php
 $billomat->confirmations          // Auftragsbestätigungen selbst
-$billomat->confirmationItems      // Positionen
-$billomat->confirmationComments   // Kommentare / Audit-Trail
-$billomat->confirmationTags       // Schlagworte
+$billomat->confirmations->items      // Positionen
+$billomat->confirmations->comments   // Kommentare / Audit-Trail
+$billomat->confirmations->tags       // Schlagworte
 ```
 
 ## Modell
@@ -48,7 +48,7 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByConfirmation($confirmationId, $query?)` | GET | `/confirmation-items?confirmation_id={id}` |
+| `list($confirmationId, $query?)` | GET | `/confirmation-items?confirmation_id={id}` |
 | `get($id)` | GET | `/confirmation-items/{id}` |
 | `create($confirmationId, $options)` | POST | `/confirmation-items` |
 | `update($id, $options)` | PUT | `/confirmation-items/{id}` |
@@ -58,7 +58,7 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByConfirmation($confirmationId, $actionKeys?)` | GET | `/confirmation-comments?confirmation_id={id}` |
+| `list($confirmationId, $actionKeys?)` | GET | `/confirmation-comments?confirmation_id={id}` |
 | `get($id)` | GET | `/confirmation-comments/{id}` |
 | `create($options)` | POST | `/confirmation-comments` |
 | `delete($id)` | DELETE | `/confirmation-comments/{id}` |
@@ -67,7 +67,7 @@ DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listByConfirmation($confirmationId)` | GET | `/confirmation-tags?confirmation_id={id}` |
+| `list($confirmationId)` | GET | `/confirmation-tags?confirmation_id={id}` |
 | `cloud()` | GET | `/confirmation-tags` |
 | `get($id)` | GET | `/confirmation-tags/{id}` |
 | `create($options)` | POST | `/confirmation-tags` |
@@ -112,13 +112,13 @@ $conf = $billomat->confirmations->create($opts);
 
 #### `update(int $id, ConfirmationUpdateOptions $options): Confirmation`
 
-Schmaler Subset, voll editierbar nur im `DRAFT`. Positionen werden hier nicht verarbeitet — `ConfirmationItemsApi` nutzen.
+Schmaler Subset, voll editierbar nur im `DRAFT`. Positionen werden hier nicht verarbeitet — `$billomat->confirmations->items` nutzen.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
 DRAFT → OPEN. Vergibt die endgültige `confirmation_number` und erzeugt das PDF. Optional kann eine abweichende Template-ID übergeben werden.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
 Nur im `DRAFT` erlaubt — danach kommt `cancel()` infrage.
 
@@ -132,7 +132,7 @@ $billomat->confirmations->undo($conf->id);     // {clear,cancel} → OPEN
 
 Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge → `ValidationException` (422).
 
-#### `email(int $id, ?ConfirmationEmailOptions $options = null): bool`
+#### `email(int $id, ?ConfirmationEmailOptions $options = null): void`
 
 Versendet die Auftragsbestätigung per E-Mail. Ohne Options nutzt Billomat die im Account hinterlegten Defaults und hängt das PDF automatisch an.
 
@@ -144,7 +144,7 @@ $email->to = ['kunde@example.com'];
 $billomat->confirmations->email($conf->id, $email);
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
+#### `uploadSignature(int $id, string $base64Pdf): void`
 
 Lädt eine unterschriebene PDF-Version hoch. `$base64Pdf` ist der reine Base64-codierte PDF-Inhalt.
 
@@ -160,15 +160,15 @@ file_put_contents('ab.pdf', $pdf->getBinary());
 ### Confirmation Items
 
 ```php
-$items = $billomat->confirmationItems->listByConfirmation($conf->id);
+$items = $billomat->confirmations->items->list($conf->id);
 
-$item = $billomat->confirmationItems->create(
+$item = $billomat->confirmations->items->create(
     $conf->id,
     new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
 );
 
-$billomat->confirmationItems->update($item->id, $opts);
-$billomat->confirmationItems->delete($item->id);
+$billomat->confirmations->items->update($item->id, $opts);
+$billomat->confirmations->items->delete($item->id);
 ```
 
 `create()` injiziert `confirmation_id` automatisch — die Options-Klasse selbst hat dieses Feld nicht. `update()` verwendet dieselbe Klasse wie `create()`.
@@ -179,12 +179,12 @@ $billomat->confirmationItems->delete($item->id);
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 
-$comments = $billomat->confirmationComments->listByConfirmation(
+$comments = $billomat->confirmations->comments->list(
     $conf->id,
     actionKeys: [ConfirmationCommentActionKey::COMPLETE, ConfirmationCommentActionKey::EMAIL],
 );
 
-$billomat->confirmationComments->create(
+$billomat->confirmations->comments->create(
     new ConfirmationCommentCreateOptions(
         confirmationId: $conf->id,
         comment: 'Auftrag bestätigt am 02.06.',
@@ -197,12 +197,12 @@ $billomat->confirmationComments->create(
 ```php
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 
-$tag = $billomat->confirmationTags->create(
+$tag = $billomat->confirmations->tags->create(
     new ConfirmationTagCreateOptions(confirmationId: $conf->id, name: 'auftrag-2026'),
 );
 
-$tags  = $billomat->confirmationTags->listByConfirmation($conf->id);
-$cloud = $billomat->confirmationTags->cloud();
+$tags  = $billomat->confirmations->tags->list($conf->id);
+$cloud = $billomat->confirmations->tags->cloud();
 ```
 
 ## Write-Modell: `ConfirmationCreateOptions`
@@ -261,7 +261,7 @@ Konstruktor: `new ConfirmationItemCreateOptions(float $quantity, float $unitPric
 | `reduction` | `reduction` | `?string` | |
 | `position` | `position` | `?int` | |
 
-`ConfirmationItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ.
+`ItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ.
 
 ## Write-Modell: `ConfirmationCommentCreateOptions`
 
@@ -389,7 +389,7 @@ Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
 ## Stolpersteine
 
 - **Schlankerer Lebenszyklus als beim Angebot.** Es gibt kein `win()`/`lose()` — eine Auftragsbestätigung wird entweder als erledigt (`clear()`) markiert oder storniert (`cancel()`). Wer aus Gewohnheit `win()` aufrufen will, sucht den falschen Endpoint.
-- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `confirmation-items` beim PUT. Stets die `ConfirmationItemsApi` verwenden.
+- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `confirmation-items` beim PUT. Stets die `$billomat->confirmations->items` verwenden.
 - **`delete()` nur im `DRAFT`.** Nach `complete()` ist nur noch `cancel()` möglich.
 - **`ConfirmationItemCreateOptions` ist auch der Update-Typ.** Der Konstruktor verlangt `quantity` und `unitPrice` auch beim Update, an dem sich diese Werte gar nicht ändern sollen.
 - **`array_is_list`-Normalisierung in `list()`.** Bei genau einem Treffer liefert Billomat `confirmation` als Objekt — das SDK packt das selbst in eine Liste.
@@ -437,7 +437,7 @@ $conf = $billomat->confirmations->create($opts);
 printf("AB #%d angelegt (DRAFT)\n", $conf->id);
 
 // 2) Tag setzen
-$billomat->confirmationTags->create(
+$billomat->confirmations->tags->create(
     new ConfirmationTagCreateOptions(confirmationId: $conf->id, name: 'auftrag-2026'),
 );
 
@@ -456,7 +456,7 @@ $email->to = ['kunde@example.com'];
 $billomat->confirmations->email($conf->id, $email);
 
 // 5) Internen Vermerk hinterlegen
-$billomat->confirmationComments->create(
+$billomat->confirmations->comments->create(
     new ConfirmationCommentCreateOptions(
         confirmationId: $conf->id,
         comment: 'Auftrag abgewickelt — bereit für Rechnungsstellung.',

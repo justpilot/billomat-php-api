@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Model\RecurringEmailReceiver;
 use NoDiscard;
 
 /**
- * API-Wrapper für E-Mail-Empfänger einer Abo-Rechnung.
+ * E-Mail-Empfänger einer Abo-Rechnung.
+ *
+ * Erreichbar über `$billomat->recurrings->emailReceivers`.
  *
  * Endpoints:
  *  - GET    /recurring-email-receivers?recurring_id={id}
@@ -17,48 +20,37 @@ use NoDiscard;
  *  - DELETE /recurring-email-receivers/{id}
  *
  * Doku: https://www.billomat.com/api/abo-rechnungen/email-empfaenger/
+ *
+ * @extends AbstractSubResourceApi<RecurringEmailReceiver>
  */
-final class RecurringEmailReceiversApi extends AbstractApi
+final class RecurringEmailReceiversApi extends AbstractSubResourceApi
 {
+    protected const string PLURAL = 'email-receivers';
+    protected const string SINGULAR = 'email-receiver';
+
+    public function __construct(BillomatHttpClientInterface $http)
+    {
+        parent::__construct($http, 'recurring', RecurringEmailReceiver::fromArray(...));
+    }
+
     /**
+     * Listet die E-Mail-Empfänger einer Abo-Rechnung.
+     *
      * @return list<RecurringEmailReceiver>
      */
     #[NoDiscard]
-    public function listByRecurring(int $recurringId): array
+    public function list(int $recurringId): array
     {
-        return $this->listResource('/recurring-email-receivers', 'recurring-email-receivers', 'recurring-email-receiver', RecurringEmailReceiver::fromArray(...), ['recurring_id' => $recurringId]);
-    }
-
-    #[NoDiscard]
-    public function get(int $id): ?RecurringEmailReceiver
-    {
-        $data = $this->getJsonOrNull("/recurring-email-receivers/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['recurring-email-receiver'] ?? null;
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return RecurringEmailReceiver::fromArray($row);
+        return $this->listWhere(['recurring_id' => $recurringId]);
     }
 
     public function create(RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
     {
-        $payload = ['recurring-email-receiver' => $options->toArray()];
-
-        $data = $this->postJson('/recurring-email-receivers', $payload);
-
-        return RecurringEmailReceiver::fromArray($this->unwrapEnvelope($data, 'recurring-email-receiver', 'creating recurring e-mail receiver'));
+        return $this->createFrom($options->toArray());
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
-        $this->deleteVoid("/recurring-email-receivers/{$id}");
-
-        return true;
+        $this->deleteById($id);
     }
 }

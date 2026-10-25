@@ -37,12 +37,6 @@ parameters:
 			path: src/Api/AbstractApi.php
 
 		-
-			message: '#^Method Justpilot\\Billomat\\Api\\AbstractApi\:\:putJson\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/AbstractApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ActivitiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -59,66 +53,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/ActivitiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticleProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticlePropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ArticlePropertyValuesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ArticlePropertyValuesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ArticlePropertyValuesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ArticlePropertyValuesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticlePropertyValue\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticlePropertyValuesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ArticleTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticleTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ArticlesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -145,48 +79,6 @@ parameters:
 			path: src/Api/ArticlesApi.php
 
 		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ArticlesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ClientPropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ClientPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ClientPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ClientPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ClientPropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ClientPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ClientProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ClientPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ClientPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ClientTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ClientTagsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ClientsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -209,36 +101,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/ClientsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ClientsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationCommentsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationItemsApi\:\:listByConfirmation\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ConfirmationItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ConfirmationTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ConfirmationsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -265,25 +127,7 @@ parameters:
 			path: src/Api/ConfirmationsApi.php
 
 		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ConfirmationsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ContactsApi\:\:listByClient\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ContactsApi.php
-
-		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Contact\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ContactsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/ContactsApi.php
@@ -325,42 +169,6 @@ parameters:
 			path: src/Api/CountryTaxesApi.php
 
 		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNoteCommentsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\CreditNoteItemsApi\:\:listByCreditNote\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/CreditNoteItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNoteItemsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\CreditNotePaymentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/CreditNotePaymentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNotePayment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNotePaymentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\CreditNoteTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNoteTagsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\CreditNotesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -385,12 +193,6 @@ parameters:
 			path: src/Api/CreditNotesApi.php
 
 		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/CreditNotesApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\CurrenciesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -401,30 +203,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Api/CurrenciesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNoteCommentsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNoteItemsApi\:\:listByDeliveryNote\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/DeliveryNoteItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNoteItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNoteTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNoteTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\DeliveryNotesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -446,12 +224,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\DeliveryNote\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/DeliveryNotesApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/DeliveryNotesApi.php
@@ -553,84 +325,6 @@ parameters:
 			path: src/Api/IncomingCategoriesApi.php
 
 		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingCommentsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPaymentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/IncomingPaymentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingPayment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingPaymentsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/IncomingPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/IncomingPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/IncomingPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertyValuesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/IncomingPropertyValuesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/IncomingPropertyValuesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\IncomingPropertyValuesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/IncomingPropertyValuesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingPropertyValue\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingPropertyValuesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\IncomingTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingTagsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\IncomingsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -653,48 +347,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/IncomingsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/IncomingsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoiceComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoiceCommentsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\InvoiceItemsApi\:\:listByInvoice\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/InvoiceItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoiceItemsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\InvoicePaymentsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/InvoicePaymentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoicePayment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoicePaymentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\InvoiceTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoiceTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\InvoicesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -727,24 +379,6 @@ parameters:
 			path: src/Api/InvoicesApi.php
 
 		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/InvoicesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\LetterComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/LetterCommentsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\LetterTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/LetterTagsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\LettersApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -767,36 +401,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/LettersApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/LettersApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\OfferComment\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OfferCommentsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\OfferItemsApi\:\:listByOffer\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/OfferItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OfferItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\OfferTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OfferTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\OffersApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -823,36 +427,6 @@ parameters:
 			path: src/Api/OffersApi.php
 
 		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/OffersApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\RecurringEmailReceiver\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringEmailReceiversApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\RecurringItemsApi\:\:listByRecurring\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/RecurringItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\RecurringTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringTagsApi.php
-
-		-
 			message: '#^Method Justpilot\\Billomat\\Api\\RecurringsApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -875,24 +449,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Api/RecurringsApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RecurringsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\ReminderItemsApi\:\:listByReminder\(\) has parameter \$query with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/ReminderItemsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\ReminderTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/ReminderTagsApi.php
 
 		-
 			message: '#^Method Justpilot\\Billomat\\Api\\ReminderTextsApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
@@ -926,12 +482,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\Reminder\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/RemindersApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Api/RemindersApi.php
@@ -971,126 +521,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: src/Api/SettingsApi.php
-
-		-
-			message: '#^Cannot access offset ''supplier\-property'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/SupplierPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/SupplierPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/SupplierPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/SupplierPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\SupplierProperty given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/SupplierPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\SupplierProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Api/SupplierPropertiesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/SupplierPropertiesApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/SupplierPropertyValuesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertyValuesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/SupplierPropertyValuesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertyValuesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/SupplierPropertyValuesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\SupplierPropertyValuesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/SupplierPropertyValuesApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\SupplierPropertyValue given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/SupplierPropertyValuesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\SupplierPropertyValue\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Api/SupplierPropertyValuesApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Api/SupplierPropertyValuesApi.php
-
-		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/SupplierTagsApi.php
-
-		-
-			message: '#^Cannot access offset ''name'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Api/SupplierTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\SupplierTag given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/SupplierTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\<string, mixed\>\)\: Justpilot\\Billomat\\Model\\SupplierTagCloudEntry given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/SupplierTagsApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\SupplierTag\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Api/SupplierTagsApi.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between null and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: src/Api/SupplierTagsApi.php
 
 		-
 			message: '#^Cannot access offset ''supplier'' on mixed\.$#'
@@ -1217,36 +647,6 @@ parameters:
 			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Api/UnitsApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\UserPropertiesApi\:\:iterateAll\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/UserPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\UserPropertiesApi\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/UserPropertiesApi.php
-
-		-
-			message: '#^Method Justpilot\\Billomat\\Api\\UserPropertiesApi\:\:listPage\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Api/UserPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$data of static method Justpilot\\Billomat\\Model\\UserProperty\:\:fromArray\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/UserPropertiesApi.php
-
-		-
-			message: '#^Parameter \#1 \$payload of method Justpilot\\Billomat\\Api\\AbstractApi\:\:unwrapEnvelope\(\) expects array\<string, mixed\>, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Api/UserPropertiesApi.php
 
 		-
 			message: '#^Cannot access offset ''user'' on mixed\.$#'

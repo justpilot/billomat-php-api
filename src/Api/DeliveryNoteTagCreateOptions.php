@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/delivery-note-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class DeliveryNoteTagCreateOptions
+final class DeliveryNoteTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

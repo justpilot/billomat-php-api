@@ -8,11 +8,11 @@ API-Wrapper für Lieferanten unter `/suppliers` und ihre zwei Sub-Ressourcen (`/
 
 ```php
 $billomat->suppliers               // Lieferanten selbst
-$billomat->supplierTags            // Schlagworte an einem Lieferanten
-$billomat->supplierPropertyValues  // Werte benutzerdefinierter Lieferanten-Eigenschaften
+$billomat->suppliers->tags            // Schlagworte an einem Lieferanten
+$billomat->suppliers->propertyValues  // Werte benutzerdefinierter Lieferanten-Eigenschaften
 ```
 
-Die Definitionen der Eigenschaften (Property-Schemata) liegen separat unter `$billomat->supplierProperties` — siehe [Property-Definitionen](properties.md). Hier geht es ausschließlich um die Werte, die ein konkreter Lieferant für diese Definitionen trägt.
+Die Definitionen der Eigenschaften (Property-Schemata) liegen separat unter `$billomat->suppliers->properties` — siehe [Property-Definitionen](properties.md). Hier geht es ausschließlich um die Werte, die ein konkreter Lieferant für diese Definitionen trägt.
 
 ## Modell
 
@@ -38,7 +38,7 @@ Ein Supplier ist ein Lieferant — strukturell das Gegenstück zu [Clients](clie
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `listBySupplier($supplierId)` | GET | `/supplier-tags?supplier_id={id}` |
+| `list($supplierId)` | GET | `/supplier-tags?supplier_id={id}` |
 | `cloud()` | GET | `/supplier-tags` |
 | `get($id)` | GET | `/supplier-tags/{id}` |
 | `create($options)` | POST | `/supplier-tags` |
@@ -48,7 +48,7 @@ Ein Supplier ist ein Lieferant — strukturell das Gegenstück zu [Clients](clie
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `list($filters?)` | GET | `/supplier-property-values` |
+| `list($parentId?, $filters?)` | GET | `/supplier-property-values` |
 | `get($id)` | GET | `/supplier-property-values/{id}` |
 | `create($options)` | POST | `/supplier-property-values` |
 
@@ -91,7 +91,7 @@ $supplier = $billomat->suppliers->create($opts);
 
 Partial-Update — nicht gesetzte Properties bleiben unverändert.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 ## Write-Modell: `SupplierCreateOptions`
 
@@ -181,13 +181,13 @@ Funktional identisch zu [Article Tags](articles.md#article-tags), bezogen auf ei
 ```php
 use Justpilot\Billomat\Api\SupplierTagCreateOptions;
 
-$tag = $billomat->supplierTags->create(
+$tag = $billomat->suppliers->tags->create(
     new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'hosting'),
 );
 
-$tags  = $billomat->supplierTags->listBySupplier($supplier->id);
-$cloud = $billomat->supplierTags->cloud(); // aggregiert, mit count
-$billomat->supplierTags->delete($tag->id);
+$tags  = $billomat->suppliers->tags->list($supplier->id);
+$cloud = $billomat->suppliers->tags->cloud(); // aggregiert, mit count
+$billomat->suppliers->tags->delete($tag->id);
 ```
 
 Ein `update()` gibt es nicht — Tags werden gelöscht und neu angelegt.
@@ -224,12 +224,10 @@ Speichert die Werte für die in [`properties.md`](properties.md) definierten Lie
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
 
 // Werte für einen Lieferanten auflisten
-$values = $billomat->supplierPropertyValues->list([
-    'supplier_id' => $supplier->id,
-]);
+$values = $billomat->suppliers->propertyValues->list($supplier->id);
 
 // Wert für die Property "Kreditorennummer Buchhaltung" (id = 17) setzen
-$value = $billomat->supplierPropertyValues->create(
+$value = $billomat->suppliers->propertyValues->create(
     new SupplierPropertyValueCreateOptions(
         supplierId: $supplier->id,
         supplierPropertyId: 17,
@@ -321,15 +319,15 @@ printf("Lieferant #%d (%s) angelegt — Kreditor-Nr. %s\n",
 );
 
 // 2) Tags vergeben
-$billomat->supplierTags->create(
+$billomat->suppliers->tags->create(
     new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'hosting'),
 );
-$billomat->supplierTags->create(
+$billomat->suppliers->tags->create(
     new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'monthly-invoice'),
 );
 
 // 3) Custom-Property setzen (SupplierProperty #17 = "Kreditorennummer Buchhaltung")
-$billomat->supplierPropertyValues->create(
+$billomat->suppliers->propertyValues->create(
     new SupplierPropertyValueCreateOptions(
         supplierId: $supplier->id,
         supplierPropertyId: 17,
@@ -344,7 +342,7 @@ $update->note = 'Standard-Hostingpartner seit 2018.';
 $billomat->suppliers->update($supplier->id, $update);
 
 // 5) Cloud-Übersicht aller Supplier-Tags
-foreach ($billomat->supplierTags->cloud() as $entry) {
+foreach ($billomat->suppliers->tags->cloud() as $entry) {
     printf("%s (%d)\n", $entry->name, $entry->count);
 }
 ```

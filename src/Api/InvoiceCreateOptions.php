@@ -21,7 +21,7 @@ use Justpilot\Billomat\Model\Enum\SupplyDateType;
  * Generiert aus tools/codegen/definitions/invoices.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class InvoiceCreateOptions
+final class InvoiceCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

@@ -8,11 +8,17 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\InvoiceGroup;
+use Justpilot\Billomat\Model\InvoiceItem;
+use Justpilot\Billomat\Model\InvoicePayment;
 use Justpilot\Billomat\Model\InvoicePdf;
+use Justpilot\Billomat\Model\InvoiceTag;
+use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -25,6 +31,42 @@ use NoDiscard;
  */
 final class InvoicesApi extends AbstractApi
 {
+    /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<InvoiceItem, InvoiceItemCreateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'invoice', InvoiceItem::fromArray(...), InvoiceItemCreateOptions::class);
+    }
+
+    /**
+     * Zahlungen, siehe {@see PaymentsApi}.
+     *
+     * @var PaymentsApi<InvoicePayment, InvoicePaymentCreateOptions>
+     */
+    public private(set) PaymentsApi $payments {
+        get => $this->payments ??= new PaymentsApi($this->http, 'invoice', InvoicePayment::fromArray(...), InvoicePaymentCreateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<InvoiceComment, InvoiceCommentCreateOptions, InvoiceCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'invoice', InvoiceComment::fromArray(...), InvoiceCommentCreateOptions::class, InvoiceCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<InvoiceTag, InvoiceTagCloudEntry, InvoiceTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'invoice', InvoiceTag::fromArray(...), InvoiceTagCloudEntry::fromArray(...), InvoiceTagCreateOptions::class);
+    }
+
     /**
      * Listet Rechnungen mit optionalen Filtern.
      *
@@ -178,7 +220,7 @@ final class InvoicesApi extends AbstractApi
      * @param int      $id         ID der Rechnung
      * @param int|null $templateId Optionale ID der Vorlage für die PDF-Erzeugung
      */
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -191,8 +233,6 @@ final class InvoicesApi extends AbstractApi
         $payload = ['invoice' => $body];
 
         $this->putVoid("/invoices/{$id}/complete", $payload);
-
-        return true;
     }
 
     /**
@@ -202,39 +242,29 @@ final class InvoicesApi extends AbstractApi
      *
      * @throws ValidationException wenn die Rechnung nicht DRAFT ist
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/invoices/{$id}");
-
-        return true;
     }
 
     /**
      * Markiert eine Rechnung als storniert.
      *
      * Entspricht PUT /invoices/{id}/cancel
-     *
-     * @return bool true bei Erfolg
      */
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/invoices/{$id}/cancel");
-
-        return true;
     }
 
     /**
      * Hebt die Stornierung einer Rechnung wieder auf.
      *
      * Entspricht PUT /invoices/{id}/uncancel
-     *
-     * @return bool true bei Erfolg
      */
-    public function uncancel(int $id): bool
+    public function uncancel(int $id): void
     {
         $this->putVoid("/invoices/{$id}/uncancel");
-
-        return true;
     }
 
     /**
@@ -246,13 +276,11 @@ final class InvoicesApi extends AbstractApi
      * (Absender aus den Settings, Empfänger aus den Kunden-Stammdaten,
      * Default-Subject/Body, PDF als Anhang).
      */
-    public function email(int $id, ?InvoiceEmailOptions $options = null): bool
+    public function email(int $id, ?InvoiceEmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postJson("/invoices/{$id}/email", $payload);
-
-        return true;
     }
 
     /**
@@ -262,13 +290,11 @@ final class InvoicesApi extends AbstractApi
      *
      * ⚠️ Kostenpflichtige Aktion.
      */
-    public function mail(int $id, ?InvoiceMailOptions $options = null): bool
+    public function mail(int $id, ?InvoiceMailOptions $options = null): void
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 
         $this->postJson("/invoices/{$id}/mail", $payload);
-
-        return true;
     }
 
     /**
@@ -278,13 +304,11 @@ final class InvoicesApi extends AbstractApi
      *
      * @param string $base64Pdf base64-codierter PDF-Inhalt der unterschriebenen Rechnung
      */
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/invoices/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**
@@ -294,11 +318,9 @@ final class InvoicesApi extends AbstractApi
      *
      * Voraussetzungen laut Billomat: Rechnung muss OPEN oder OVERDUE sein.
      */
-    public function encash(int $id): bool
+    public function encash(int $id): void
     {
         $this->putVoid("/invoices/{$id}/encash");
-
-        return true;
     }
 
     /**

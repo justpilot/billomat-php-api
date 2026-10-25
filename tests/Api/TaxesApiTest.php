@@ -280,9 +280,7 @@ final class TaxesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
-        $result = $api->delete(10);
-
-        self::assertTrue($result);
+        $api->delete(10);
         self::assertSame('DELETE', $captured['method']);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes/10',

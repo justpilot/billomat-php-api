@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Generator;
 use Justpilot\Billomat\Model\User;
+use Justpilot\Billomat\Model\UserProperty;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -16,6 +17,15 @@ use NoDiscard;
  */
 final class UsersApi extends AbstractApi
 {
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<UserProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'user', UserProperty::fromArray(...));
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *

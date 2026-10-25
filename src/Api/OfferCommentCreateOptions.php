@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
  * Generiert aus tools/codegen/definitions/offer-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class OfferCommentCreateOptions
+final class OfferCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

@@ -8,7 +8,14 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Model\IncomingComment;
+use Justpilot\Billomat\Model\IncomingPayment;
+use Justpilot\Billomat\Model\IncomingProperty;
+use Justpilot\Billomat\Model\IncomingPropertyValue;
+use Justpilot\Billomat\Model\IncomingTag;
+use Justpilot\Billomat\Model\IncomingTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -29,6 +36,51 @@ use NoDiscard;
  */
 final class IncomingsApi extends AbstractApi
 {
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<IncomingComment, IncomingCommentCreateOptions, IncomingCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'incoming', IncomingComment::fromArray(...), IncomingCommentCreateOptions::class, IncomingCommentActionKey::class);
+    }
+
+    /**
+     * Zahlungen, siehe {@see PaymentsApi}.
+     *
+     * @var PaymentsApi<IncomingPayment, IncomingPaymentCreateOptions>
+     */
+    public private(set) PaymentsApi $payments {
+        get => $this->payments ??= new PaymentsApi($this->http, 'incoming', IncomingPayment::fromArray(...), IncomingPaymentCreateOptions::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<IncomingTag, IncomingTagCloudEntry, IncomingTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'incoming', IncomingTag::fromArray(...), IncomingTagCloudEntry::fromArray(...), IncomingTagCreateOptions::class);
+    }
+
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<IncomingProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'incoming', IncomingProperty::fromArray(...));
+    }
+
+    /**
+     * Attributwerte, siehe {@see PropertyValuesApi}.
+     *
+     * @var PropertyValuesApi<IncomingPropertyValue, IncomingPropertyValueCreateOptions>
+     */
+    public private(set) PropertyValuesApi $propertyValues {
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'incoming', IncomingPropertyValue::fromArray(...), IncomingPropertyValueCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -116,36 +168,28 @@ final class IncomingsApi extends AbstractApi
         return Incoming::fromArray($this->unwrapEnvelope($data, 'incoming', 'updating incoming'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/incomings/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/incomings/{$id}/cancel");
-
-        return true;
     }
 
-    public function uncancel(int $id): bool
+    public function uncancel(int $id): void
     {
         $this->putVoid("/incomings/{$id}/uncancel");
-
-        return true;
     }
 
     /**
      * Lädt ein PDF zur Eingangsrechnung hoch.
      */
-    public function upload(int $id, string $base64Pdf): bool
+    public function upload(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/incomings/{$id}/upload", $payload);
-
-        return true;
     }
 }

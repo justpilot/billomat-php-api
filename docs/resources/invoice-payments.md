@@ -7,16 +7,16 @@ API-Wrapper für Rechnungszahlungen unter `/invoice-payments`.
 ## Zugriff
 
 ```php
-$billomat->invoicePayments
+$billomat->invoices->payments
 ```
 
-`Justpilot\Billomat\Api\InvoicePaymentsApi`.
+`Justpilot\Billomat\Api\PaymentsApi` (`$billomat->invoices->payments`).
 
 ## Endpunkt-Übersicht
 
 | Methode | HTTP | Pfad |
 |---|---|---|
-| `list($filters?)` | GET | `/invoice-payments` |
+| `list($invoiceId?, $filters?)` | GET | `/invoice-payments` |
 | `get($id)` | GET | `/invoice-payments/{id}` |
 | `create($options)` | POST | `/invoice-payments` |
 | `delete($id)` | DELETE | `/invoice-payments/{id}` |
@@ -25,7 +25,7 @@ Es gibt keine `update()`-Methode — Billomat unterstützt das Bearbeiten einer 
 
 ## Methoden
 
-### `list(array $filters = []): list<InvoicePayment>`
+### `list(?int $parentId = null, array $filters = []): list<InvoicePayment>`
 
 Filter laut Billomat-Doku:
 
@@ -38,8 +38,7 @@ Filter laut Billomat-Doku:
 | `user_id` | Eingebende User-ID |
 
 ```php
-$payments = $billomat->invoicePayments->list([
-    'invoice_id' => $invoice->id,
+$payments = $billomat->invoices->payments->list($invoice->id, [
     'order_by' => 'date+DESC',
 ]);
 ```
@@ -60,10 +59,10 @@ $opts->type = InvoicePaymentType::BANK_TRANSFER;
 $opts->comment = 'Überweisung Eingang vom 01.06.';
 $opts->markInvoiceAsPaid = true;
 
-$payment = $billomat->invoicePayments->create($opts);
+$payment = $billomat->invoices->payments->create($opts);
 ```
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
 Setzt laut Billomat-Doku den Status der Rechnung zurück auf `OPEN` oder `OVERDUE`, wenn die Zahlung sie vorher auf `PAID` gesetzt hatte.
 
@@ -154,12 +153,11 @@ $opts->type = InvoicePaymentType::BANK_TRANSFER;
 $opts->date = new DateTimeImmutable('today');
 $opts->transactionPurpose = 'Rechnung RE-2026-0042';
 
-$payment = $billomat->invoicePayments->create($opts);
+$payment = $billomat->invoices->payments->create($opts);
 printf("Zahlung #%d angelegt: %.2f EUR per %s\n", $payment->id, $payment->amount, $payment->type?->label());
 
 // Alle Zahlungen zur Rechnung listen
-$paymentsForInvoice = $billomat->invoicePayments->list([
-    'invoice_id' => $invoiceId,
+$paymentsForInvoice = $billomat->invoices->payments->list($invoiceId, [
     'order_by' => 'date+ASC',
 ]);
 
@@ -167,5 +165,5 @@ $sum = array_sum(array_map(static fn($p) => $p->amount, $paymentsForInvoice));
 printf("Bislang verbucht: %.2f EUR über %d Eingänge\n", $sum, count($paymentsForInvoice));
 
 // Letzte Zahlung wieder entfernen (Storno)
-$billomat->invoicePayments->delete($payment->id);
+$billomat->invoices->payments->delete($payment->id);
 ```

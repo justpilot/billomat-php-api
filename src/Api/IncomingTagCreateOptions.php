@@ -13,7 +13,7 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/incoming-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class IncomingTagCreateOptions
+final class IncomingTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**

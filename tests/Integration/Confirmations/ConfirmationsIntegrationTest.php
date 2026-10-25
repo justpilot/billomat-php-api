@@ -79,7 +79,7 @@ final class ConfirmationsIntegrationTest extends AbstractBillomatIntegrationTest
         self::assertSame(ConfirmationStatus::DRAFT, $confirmation->status);
 
         // Cleanup
-        self::assertTrue($billomat->confirmations->delete($confirmation->id));
+        $billomat->confirmations->delete($confirmation->id);
         self::assertNull($billomat->confirmations->get($confirmation->id));
     }
 }

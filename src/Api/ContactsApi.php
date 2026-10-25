@@ -27,12 +27,12 @@ use NoDiscard;
 final class ContactsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $query
+     * @param array<string, scalar|array<mixed>|null> $query
      *
      * @return list<Contact>
      */
     #[NoDiscard]
-    public function listByClient(int $clientId, array $query = []): array
+    public function list(int $clientId, array $query = []): array
     {
         $params = array_merge(['client_id' => $clientId], $query);
 
@@ -80,10 +80,8 @@ final class ContactsApi extends AbstractApi
         return Contact::fromArray($this->unwrapEnvelope($data, 'contact', 'updating contact'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/contacts/{$id}");
-
-        return true;
     }
 }

@@ -80,7 +80,7 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($letter->id, $updated->id);
 
         // Cleanup
-        self::assertTrue($billomat->letters->delete($letter->id));
+        $billomat->letters->delete($letter->id);
         self::assertNull($billomat->letters->get($letter->id));
     }
 }

@@ -9,8 +9,13 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\Offer;
+use Justpilot\Billomat\Model\OfferComment;
+use Justpilot\Billomat\Model\OfferItem;
 use Justpilot\Billomat\Model\OfferPdf;
+use Justpilot\Billomat\Model\OfferTag;
+use Justpilot\Billomat\Model\OfferTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
@@ -37,6 +42,33 @@ use NoDiscard;
  */
 final class OffersApi extends AbstractApi
 {
+    /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<OfferItem, OfferItemCreateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'offer', OfferItem::fromArray(...), OfferItemCreateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<OfferComment, OfferCommentCreateOptions, OfferCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'offer', OfferComment::fromArray(...), OfferCommentCreateOptions::class, OfferCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<OfferTag, OfferTagCloudEntry, OfferTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'offer', OfferTag::fromArray(...), OfferTagCloudEntry::fromArray(...), OfferTagCreateOptions::class);
+    }
+
     /**
      * Listet Angebote mit optionalen Filtern.
      *
@@ -139,7 +171,7 @@ final class OffersApi extends AbstractApi
     /**
      * Schließt ein Angebot ab (DRAFT → OPEN, vergibt Angebotsnummer).
      */
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -150,8 +182,6 @@ final class OffersApi extends AbstractApi
         $payload = ['offer' => $body];
 
         $this->putVoid("/offers/{$id}/complete", $payload);
-
-        return true;
     }
 
     /**
@@ -159,75 +189,59 @@ final class OffersApi extends AbstractApi
      *
      * @throws ValidationException wenn das Angebot nicht DRAFT ist
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/offers/{$id}");
-
-        return true;
     }
 
     /** Storniert ein Angebot. */
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/offers/{$id}/cancel");
-
-        return true;
     }
 
     /** Markiert ein Angebot als gewonnen (Status → ACCEPTED). */
-    public function win(int $id): bool
+    public function win(int $id): void
     {
         $this->putVoid("/offers/{$id}/win");
-
-        return true;
     }
 
     /** Markiert ein Angebot als verloren (Status → REJECTED). */
-    public function lose(int $id): bool
+    public function lose(int $id): void
     {
         $this->putVoid("/offers/{$id}/lose");
-
-        return true;
     }
 
     /** Markiert ein Angebot als erledigt (Status → CLEARED). */
-    public function clear(int $id): bool
+    public function clear(int $id): void
     {
         $this->putVoid("/offers/{$id}/clear");
-
-        return true;
     }
 
     /**
      * Setzt einen Status zurück auf OPEN (Rückgängigmachen von win/lose/clear/cancel).
      */
-    public function undo(int $id): bool
+    public function undo(int $id): void
     {
         $this->putVoid("/offers/{$id}/undo");
-
-        return true;
     }
 
     /** Versendet ein Angebot per E-Mail. */
-    public function email(int $id, ?OfferEmailOptions $options = null): bool
+    public function email(int $id, ?OfferEmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postJson("/offers/{$id}/email", $payload);
-
-        return true;
     }
 
     /**
      * Lädt eine unterschriebene PDF-Version des Angebots hoch.
      */
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/offers/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**

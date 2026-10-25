@@ -77,20 +77,20 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             $extra->title = 'Zusatz';
             $extra->unit = 'Stunde';
             $extra->taxRate = 19.0;
-            $created = $billomat->invoiceItems->create($invoice->id, $extra);
+            $created = $billomat->invoices->items->create($invoice->id, $extra);
             self::assertNotNull($created->id);
             self::assertSame(2.0, $created->quantity);
 
             $update = new InvoiceItemCreateOptions(3.0, 25.0);
             $update->title = 'Zusatz (geändert)';
-            $updated = $billomat->invoiceItems->update($created->id, $update);
+            $updated = $billomat->invoices->items->update($created->id, $update);
             self::assertSame(3.0, $updated->quantity);
 
-            $items = $billomat->invoiceItems->listByInvoice($invoice->id);
+            $items = $billomat->invoices->items->list($invoice->id);
             self::assertContainsOnlyInstancesOf(InvoiceItem::class, $items);
             self::assertGreaterThanOrEqual(2, \count($items));
 
-            self::assertTrue($billomat->invoiceItems->delete($created->id));
+            $billomat->invoices->items->delete($created->id);
         } finally {
             $billomat->invoices->delete($invoice->id);
         }
@@ -109,13 +109,13 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             $opt = new OfferItemCreateOptions(1.0, 50.0);
             $opt->title = 'Angebotsposition';
             $opt->unit = 'Stück';
-            $created = $billomat->offerItems->create($offer->id, $opt);
+            $created = $billomat->offers->items->create($offer->id, $opt);
             self::assertNotNull($created->id);
 
-            $items = $billomat->offerItems->listByOffer($offer->id);
+            $items = $billomat->offers->items->list($offer->id);
             self::assertContainsOnlyInstancesOf(OfferItem::class, $items);
 
-            self::assertTrue($billomat->offerItems->delete($created->id));
+            $billomat->offers->items->delete($created->id);
         } finally {
             $billomat->offers->delete($offer->id);
         }
@@ -134,13 +134,13 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             $opt = new ConfirmationItemCreateOptions(1.0, 75.0);
             $opt->title = 'Position';
             $opt->unit = 'Stück';
-            $created = $billomat->confirmationItems->create($conf->id, $opt);
+            $created = $billomat->confirmations->items->create($conf->id, $opt);
             self::assertNotNull($created->id);
 
-            $items = $billomat->confirmationItems->listByConfirmation($conf->id);
+            $items = $billomat->confirmations->items->list($conf->id);
             self::assertContainsOnlyInstancesOf(ConfirmationItem::class, $items);
 
-            self::assertTrue($billomat->confirmationItems->delete($created->id));
+            $billomat->confirmations->items->delete($created->id);
         } finally {
             $billomat->confirmations->delete($conf->id);
         }
@@ -159,13 +159,13 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             $opt = new CreditNoteItemCreateOptions(1.0, 30.0);
             $opt->title = 'Storno-Position';
             $opt->unit = 'Stück';
-            $created = $billomat->creditNoteItems->create($note->id, $opt);
+            $created = $billomat->creditNotes->items->create($note->id, $opt);
             self::assertNotNull($created->id);
 
-            $items = $billomat->creditNoteItems->listByCreditNote($note->id);
+            $items = $billomat->creditNotes->items->list($note->id);
             self::assertContainsOnlyInstancesOf(CreditNoteItem::class, $items);
 
-            self::assertTrue($billomat->creditNoteItems->delete($created->id));
+            $billomat->creditNotes->items->delete($created->id);
         } finally {
             $billomat->creditNotes->delete($note->id);
         }
@@ -184,13 +184,13 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             $opt = new DeliveryNoteItemCreateOptions(5.0, 12.0);
             $opt->title = 'Lieferposition';
             $opt->unit = 'Stück';
-            $created = $billomat->deliveryNoteItems->create($note->id, $opt);
+            $created = $billomat->deliveryNotes->items->create($note->id, $opt);
             self::assertNotNull($created->id);
 
-            $items = $billomat->deliveryNoteItems->listByDeliveryNote($note->id);
+            $items = $billomat->deliveryNotes->items->list($note->id);
             self::assertContainsOnlyInstancesOf(DeliveryNoteItem::class, $items);
 
-            self::assertTrue($billomat->deliveryNoteItems->delete($created->id));
+            $billomat->deliveryNotes->items->delete($created->id);
         } finally {
             $billomat->deliveryNotes->delete($note->id);
         }
@@ -208,7 +208,7 @@ final class ItemsIntegrationTest extends AbstractBillomatIntegrationTestCase
             self::markTestSkipped('No reminders in sandbox – cannot probe reminder items.');
         }
 
-        $items = $billomat->reminderItems->listByReminder($reminders[0]->id);
+        $items = $billomat->reminders->items->list($reminders[0]->id);
 
         self::assertIsArray($items);
         self::assertContainsOnlyInstancesOf(ReminderItem::class, $items);

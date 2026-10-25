@@ -9,7 +9,13 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\CreditNote;
+use Justpilot\Billomat\Model\CreditNoteComment;
+use Justpilot\Billomat\Model\CreditNoteItem;
+use Justpilot\Billomat\Model\CreditNotePayment;
 use Justpilot\Billomat\Model\CreditNotePdf;
+use Justpilot\Billomat\Model\CreditNoteTag;
+use Justpilot\Billomat\Model\CreditNoteTagCloudEntry;
+use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
@@ -34,6 +40,42 @@ use NoDiscard;
  */
 final class CreditNotesApi extends AbstractApi
 {
+    /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<CreditNoteItem, CreditNoteItemCreateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'credit-note', CreditNoteItem::fromArray(...), CreditNoteItemCreateOptions::class);
+    }
+
+    /**
+     * Zahlungen, siehe {@see PaymentsApi}.
+     *
+     * @var PaymentsApi<CreditNotePayment, CreditNotePaymentCreateOptions>
+     */
+    public private(set) PaymentsApi $payments {
+        get => $this->payments ??= new PaymentsApi($this->http, 'credit-note', CreditNotePayment::fromArray(...), CreditNotePaymentCreateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<CreditNoteComment, CreditNoteCommentCreateOptions, CreditNoteCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'credit-note', CreditNoteComment::fromArray(...), CreditNoteCommentCreateOptions::class, CreditNoteCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<CreditNoteTag, CreditNoteTagCloudEntry, CreditNoteTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'credit-note', CreditNoteTag::fromArray(...), CreditNoteTagCloudEntry::fromArray(...), CreditNoteTagCreateOptions::class);
+    }
+
     /**
      * @param array<string, scalar|array|null> $filters
      *
@@ -121,7 +163,7 @@ final class CreditNotesApi extends AbstractApi
         return CreditNote::fromArray($this->unwrapEnvelope($data, 'credit-note', 'updating credit note'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -132,47 +174,35 @@ final class CreditNotesApi extends AbstractApi
         $payload = ['credit-note' => $body];
 
         $this->putVoid("/credit-notes/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/credit-notes/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/credit-notes/{$id}/cancel");
-
-        return true;
     }
 
-    public function uncancel(int $id): bool
+    public function uncancel(int $id): void
     {
         $this->putVoid("/credit-notes/{$id}/uncancel");
-
-        return true;
     }
 
-    public function email(int $id, ?CreditNoteEmailOptions $options = null): bool
+    public function email(int $id, ?CreditNoteEmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postJson("/credit-notes/{$id}/email", $payload);
-
-        return true;
     }
 
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/credit-notes/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**

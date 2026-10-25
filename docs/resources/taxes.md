@@ -64,7 +64,7 @@ Löscht einen Steuersatz. Achtung: das schlägt fehl, wenn der Satz noch in Rech
 
 ## Write-Modell: `TaxRateCreateOptions`
 
-Konstruktor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefault = false)`.
+Konstruktor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefault = false)`. Das Objekt ist `final readonly`; `with*()`-Methoden (z. B. `$opts->withRate(7.0)`) liefern eine geänderte Kopie.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|

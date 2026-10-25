@@ -139,11 +139,12 @@ final class SettingsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new SettingsApi($http);
 
-        $opts = new SettingsUpdateOptions();
-        $opts->netGross = NetGross::GROSS;
-        $opts->numberRangeMode = NumberRangeMode::IGNORE_PREFIX;
-        $opts->dueDays = 30;
-        $opts->printVersion = true;
+        $opts = new SettingsUpdateOptions(
+            netGross: NetGross::GROSS,
+            numberRangeMode: NumberRangeMode::IGNORE_PREFIX,
+            dueDays: 30,
+            printVersion: true,
+        );
 
         $updated = $api->update($opts);
 
@@ -184,43 +185,34 @@ final class SettingsApiTest extends TestCase
     #[Test]
     public function updateOptionsSerializeAllNewWritableFields(): void
     {
-        $opts = new SettingsUpdateOptions();
-
-        $opts->bgcolor = 'ffffff';
-        $opts->color1 = 'aabbcc';
-        $opts->articleNumberPre = 'A-';
-        $opts->articleNumberLength = 5;
-
-        $opts->invoiceLabel = 'Rechnung';
-        $opts->invoiceIntro = 'Anbei …';
-        $opts->invoiceNote = 'Bitte überweisen …';
-
-        $opts->offerLabel = 'Angebot';
-        $opts->offerIntro = 'Hier unser Angebot';
-        $opts->offerNote = 'Gültig 30 Tage';
-        $opts->offerFilename = 'angebot-{nr}';
-
-        $opts->confirmationNumberPre = 'AB-';
-        $opts->confirmationNumberLength = 4;
-        $opts->confirmationLabel = 'Auftragsbestätigung';
-        $opts->confirmationIntro = 'Wir bestätigen Ihren Auftrag';
-
-        $opts->creditNoteNumberPre = 'GU-';
-        $opts->creditNoteLabel = 'Gutschrift';
-
-        $opts->deliveryNoteNumberPre = 'LS-';
-        $opts->deliveryNoteLabel = 'Lieferschein';
-
-        $opts->reminderFilename = 'mahnung-{nr}';
-        $opts->reminderDueDays = 7;
-
-        $opts->letterLabel = 'Brief';
-        $opts->letterIntro = '…';
-
-        $opts->bccAddresses = ['archiv@example.com', 'cc@example.com'];
-        $opts->taxation = 'STANDARD';
-
-        $opts->priceGroups = [2 => 'Sonderpreis', 3 => 'B2B'];
+        $opts = new SettingsUpdateOptions(
+            bgcolor: 'ffffff',
+            color1: 'aabbcc',
+            articleNumberPre: 'A-',
+            articleNumberLength: 5,
+            priceGroups: [2 => 'Sonderpreis', 3 => 'B2B'],
+            invoiceLabel: 'Rechnung',
+            invoiceIntro: 'Anbei …',
+            invoiceNote: 'Bitte überweisen …',
+            offerLabel: 'Angebot',
+            offerIntro: 'Hier unser Angebot',
+            offerNote: 'Gültig 30 Tage',
+            offerFilename: 'angebot-{nr}',
+            confirmationNumberPre: 'AB-',
+            confirmationNumberLength: 4,
+            confirmationLabel: 'Auftragsbestätigung',
+            confirmationIntro: 'Wir bestätigen Ihren Auftrag',
+            creditNoteNumberPre: 'GU-',
+            creditNoteLabel: 'Gutschrift',
+            deliveryNoteNumberPre: 'LS-',
+            deliveryNoteLabel: 'Lieferschein',
+            reminderFilename: 'mahnung-{nr}',
+            reminderDueDays: 7,
+            letterLabel: 'Brief',
+            letterIntro: '…',
+            bccAddresses: ['archiv@example.com', 'cc@example.com'],
+            taxation: 'STANDARD',
+        );
 
         $payload = $opts->toArray();
 

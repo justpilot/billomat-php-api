@@ -53,11 +53,13 @@ Liefert `null` bei 404.
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 
-$opts = new InvoicePaymentCreateOptions(invoiceId: 98765, amount: 1190.00);
-$opts->date = new DateTimeImmutable('2026-06-01');
-$opts->type = InvoicePaymentType::BANK_TRANSFER;
-$opts->comment = 'Überweisung Eingang vom 01.06.';
-$opts->markInvoiceAsPaid = true;
+$opts = new InvoicePaymentCreateOptions(
+    invoiceId: 98765, amount: 1190.00,
+    date: new DateTimeImmutable('2026-06-01'),
+    type: InvoicePaymentType::BANK_TRANSFER,
+    comment: 'Überweisung Eingang vom 01.06.',
+    markInvoiceAsPaid: true,
+);
 
 $payment = $billomat->invoices->payments->create($opts);
 ```
@@ -148,10 +150,12 @@ $billomat = BillomatClient::create(
 $invoiceId = 98765;
 
 // Zahlung anlegen
-$opts = new InvoicePaymentCreateOptions(invoiceId: $invoiceId, amount: 590.00);
-$opts->type = InvoicePaymentType::BANK_TRANSFER;
-$opts->date = new DateTimeImmutable('today');
-$opts->transactionPurpose = 'Rechnung RE-2026-0042';
+$opts = new InvoicePaymentCreateOptions(
+    invoiceId: $invoiceId, amount: 590.00,
+    type: InvoicePaymentType::BANK_TRANSFER,
+    date: new DateTimeImmutable('today'),
+    transactionPurpose: 'Rechnung RE-2026-0042',
+);
 
 $payment = $billomat->invoices->payments->create($opts);
 printf("Zahlung #%d angelegt: %.2f EUR per %s\n", $payment->id, $payment->amount, $payment->type?->label());

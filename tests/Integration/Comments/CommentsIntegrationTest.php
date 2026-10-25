@@ -50,10 +50,11 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $this->faker()->company();
-        $opts->email = $this->faker()->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $this->faker()->company(),
+            countryCode: 'DE',
+            email: $this->faker()->unique()->safeEmail(),
+        );
         $client = $billomat->clients->create($opts);
         $id = $client->id;
         self::assertNotNull($id);
@@ -71,8 +72,7 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-CommentTest '.date('His'));
-        $opts->countryCode = 'DE';
+        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-CommentTest '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
         $id = $created->id;
         self::assertNotNull($id);
@@ -86,13 +86,13 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $invOpts = new InvoiceCreateOptions(clientId: $this->ensureClientId($billomat));
-        $invOpts->currencyCode = 'EUR';
-        $invOpts->title = 'IT-CommentTest '.date('His');
-        $item = new InvoiceItemCreateOptions(1.0, 10.0);
-        $item->title = 'Pos';
-        $item->unit = 'Stück';
-        $invOpts->addItem($item);
+        $invOpts = new InvoiceCreateOptions(
+            clientId: $this->ensureClientId($billomat),
+            title: 'IT-CommentTest '.date('His'),
+            currencyCode: 'EUR',
+        );
+        $item = new InvoiceItemCreateOptions(1.0, 10.0, unit: 'Stück', title: 'Pos');
+        $invOpts = $invOpts->withItem($item);
         $invoice = $billomat->invoices->create($invOpts);
         self::assertNotNull($invoice->id);
 
@@ -227,8 +227,10 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $incomingOpts = new IncomingCreateOptions(supplierId: $this->ensureSupplierId($billomat));
-        $incomingOpts->incomingNumber = 'IT-IN-Comment-'.date('His');
+        $incomingOpts = new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId($billomat),
+            incomingNumber: 'IT-IN-Comment-'.date('His'),
+        );
         $incoming = $billomat->incomings->create($incomingOpts);
         self::assertNotNull($incoming->id);
 

@@ -22,9 +22,7 @@ final class ClientUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesArchivedAndDunningRunAsOneOrZero(): void
     {
-        $options = new ClientUpdateOptions();
-        $options->archived = true;
-        $options->dunningRun = false;
+        $options = new ClientUpdateOptions(archived: true, dunningRun: false);
 
         $payload = $options->toArray();
 
@@ -35,16 +33,17 @@ final class ClientUpdateOptionsTest extends TestCase
     #[Test]
     public function itMapsCamelCaseToSnakeCase(): void
     {
-        $options = new ClientUpdateOptions();
-        $options->name = 'Acme';
-        $options->countryCode = 'DE';
-        $options->firstName = 'Max';
-        $options->lastName = 'Mustermann';
-        $options->bankIban = 'DE89370400440532013000';
-        $options->sepaMandate = 'M-001';
-        $options->sepaMandateDate = '2024-01-01';
-        $options->dueDays = 14;
-        $options->discountRate = 2.5;
+        $options = new ClientUpdateOptions(
+            name: 'Acme',
+            countryCode: 'DE',
+            firstName: 'Max',
+            lastName: 'Mustermann',
+            discountRate: 2.5,
+            dueDays: 14,
+            bankIban: 'DE89370400440532013000',
+            sepaMandate: 'M-001',
+            sepaMandateDate: '2024-01-01',
+        );
 
         $payload = $options->toArray();
 

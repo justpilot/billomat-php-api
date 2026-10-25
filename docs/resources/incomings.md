@@ -102,13 +102,15 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\IncomingCreateOptions;
 
-$opts = new IncomingCreateOptions(supplierId: 4711);
-$opts->incomingNumber = 'LR-2026-0815';
-$opts->date = new DateTimeImmutable('2026-05-30');
-$opts->dueDate = new DateTimeImmutable('2026-06-29');
-$opts->totalGross = 357.00;
-$opts->totalNet = 300.00;
-$opts->currencyCode = 'EUR';
+$opts = new IncomingCreateOptions(
+    supplierId: 4711,
+    incomingNumber: 'LR-2026-0815',
+    date: new DateTimeImmutable('2026-05-30'),
+    dueDate: new DateTimeImmutable('2026-06-29'),
+    totalGross: 357.00,
+    totalNet: 300.00,
+    currencyCode: 'EUR',
+);
 
 $incoming = $billomat->incomings->create($opts);
 ```
@@ -168,11 +170,11 @@ use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 
 $payment = new IncomingPaymentCreateOptions(
     incomingId: $incoming->id,
-    amount: 357.00,
+        amount: 357.00,
+    date: new DateTimeImmutable('2026-06-15'),
+    type: InvoicePaymentType::BANK_TRANSFER,
+    markIncomingAsPaid: true,
 );
-$payment->date = new DateTimeImmutable('2026-06-15');
-$payment->type = InvoicePaymentType::BANK_TRANSFER;
-$payment->markIncomingAsPaid = true;
 
 $billomat->incomings->payments->create($payment);
 ```
@@ -212,7 +214,7 @@ Es gibt bewusst kein `update()` — Werte werden in Billomat per `create()` upge
 
 ## Write-Modell: `IncomingCreateOptions`
 
-Konstruktor: `new IncomingCreateOptions(int $supplierId)` — `supplierId` ist Pflicht.
+Konstruktor: `new IncomingCreateOptions(int $supplierId, …)` — `supplierId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withLabel('Neu')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -232,7 +234,7 @@ Konstruktor: `new IncomingCreateOptions(int $supplierId)` — `supplierId` ist P
 
 ## Write-Modell: `IncomingUpdateOptions`
 
-Spiegelt `IncomingCreateOptions`, aber `supplierId` ist hier `?int` (nicht im Konstruktor). Felder, die nicht gesetzt sind, bleiben unberührt.
+Spiegelt `IncomingCreateOptions`, aber `supplierId` ist hier optional (`?int`, kein Pflichtparameter). `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new IncomingUpdateOptions(note: Clear::Field)`.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -427,14 +429,16 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Eingangsrechnung anlegen
-$opts = new IncomingCreateOptions(supplierId: 4711);
-$opts->incomingNumber = 'LR-2026-0815';
-$opts->date = new DateTimeImmutable('2026-05-30');
-$opts->dueDate = new DateTimeImmutable('2026-06-29');
-$opts->totalGross = 357.00;
-$opts->totalNet = 300.00;
-$opts->currencyCode = 'EUR';
-$opts->label = 'Hosting Mai 2026';
+$opts = new IncomingCreateOptions(
+    supplierId: 4711,
+    incomingNumber: 'LR-2026-0815',
+    date: new DateTimeImmutable('2026-05-30'),
+    dueDate: new DateTimeImmutable('2026-06-29'),
+    totalGross: 357.00,
+    totalNet: 300.00,
+    currencyCode: 'EUR',
+    label: 'Hosting Mai 2026',
+);
 
 $incoming = $billomat->incomings->create($opts);
 
@@ -454,12 +458,12 @@ $billomat->incomings->payments->create(
     (function () use ($incoming): IncomingPaymentCreateOptions {
         $p = new IncomingPaymentCreateOptions(
             incomingId: $incoming->id,
-            amount: 357.00,
+                amount: 357.00,
+            date: new DateTimeImmutable('2026-06-15'),
+            type: InvoicePaymentType::BANK_TRANSFER,
+            transactionPurpose: 'RG LR-2026-0815',
+            markIncomingAsPaid: true,
         );
-        $p->date = new DateTimeImmutable('2026-06-15');
-        $p->type = InvoicePaymentType::BANK_TRANSFER;
-        $p->transactionPurpose = 'RG LR-2026-0815';
-        $p->markIncomingAsPaid = true;
 
         return $p;
     })(),

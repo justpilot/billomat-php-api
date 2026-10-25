@@ -82,8 +82,7 @@ final class ArticlePropertiesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Größe');
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'Größe', type: PropertyType::TEXTFIELD);
 
         $created = $api->create($opts);
         self::assertSame(99, $created->id);

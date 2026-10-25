@@ -15,431 +15,680 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/clients.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ClientCreateOptions implements WriteOptions
+final readonly class ClientCreateOptions implements WriteOptions
 {
-    /**
-     * Firmenname des Kunden.
-     *
-     * Billomat-Feld: name
-     * Typ: ALNUM
-     */
-    public ?string $name = null;
+    public function __construct(
+        /**
+         * Firmenname des Kunden.
+         *
+         * Billomat-Feld: name
+         * Typ: ALNUM
+         */
+        public ?string $name = null,
+        /**
+         * Kundennummer (frei wählbar).
+         *
+         * Billomat-Feld: client_number
+         */
+        public ?string $clientNumber = null,
+        /**
+         * Laufende Nummer (ohne Präfix).
+         *
+         * Billomat-Feld: number
+         * Typ: INT
+         * Default: nächste freie Nummer
+         */
+        public ?int $number = null,
+        /**
+         * Präfix der Kundennummer.
+         *
+         * Billomat-Feld: number_pre
+         * Typ: ALNUM
+         * Default: Wert aus Einstellungen
+         */
+        public ?string $numberPre = null,
+        /**
+         * Mindestlänge der Kundennummer.
+         *
+         * Billomat-Feld: number_length
+         * Typ: INT
+         * Default: Wert aus den Einstellungen
+         */
+        public ?int $numberLength = null,
+        /**
+         * Straße.
+         *
+         * Billomat-Feld: street
+         * Typ: ALNUM
+         */
+        public ?string $street = null,
+        /**
+         * Postleitzahl.
+         *
+         * Billomat-Feld: zip
+         * Typ: ALNUM
+         */
+        public ?string $zip = null,
+        /**
+         * Ort.
+         *
+         * Billomat-Feld: city
+         * Typ: ALNUM
+         */
+        public ?string $city = null,
+        /**
+         * Bundesland / Bezirk / Region.
+         *
+         * Billomat-Feld: state
+         * Typ: ALNUM
+         */
+        public ?string $state = null,
+        /**
+         * Ländercode des Kunden (ISO 3166-1 Alpha-2).
+         *
+         * Beispiel: "DE", "AT", "CH"
+         *
+         * Billomat-Feld: country_code
+         * Typ: Ländercode nach ISO 3166 Alpha-2
+         * Default: Wert aus eigener Firma
+         */
+        public ?string $countryCode = null,
+        /**
+         * Vorname.
+         *
+         * Billomat-Feld: first_name
+         * Typ: ALNUM
+         */
+        public ?string $firstName = null,
+        /**
+         * Nachname.
+         *
+         * Billomat-Feld: last_name
+         * Typ: ALNUM
+         */
+        public ?string $lastName = null,
+        /**
+         * Anrede.
+         *
+         * Billomat-Feld: salutation
+         * Typ: ALNUM
+         */
+        public ?string $salutation = null,
+        /**
+         * E-Mail-Adresse.
+         *
+         * Billomat-Feld: email
+         * Typ: gültige E-Mail-Adresse
+         */
+        public ?string $email = null,
+        /**
+         * Telefonnummer.
+         *
+         * Billomat-Feld: phone
+         * Typ: ALNUM
+         */
+        public ?string $phone = null,
+        /**
+         * Faxnummer.
+         *
+         * Billomat-Feld: fax
+         * Typ: ALNUM
+         */
+        public ?string $fax = null,
+        /**
+         * Mobilnummer.
+         *
+         * Billomat-Feld: mobile
+         * Typ: ALNUM
+         */
+        public ?string $mobile = null,
+        /**
+         * Website (ohne Schema).
+         *
+         * Beispiel: "example.com"
+         *
+         * Billomat-Feld: www
+         * Typ: URL (ohne http)
+         */
+        public ?string $www = null,
+        /**
+         * Notiz zum Kunden.
+         *
+         * Billomat-Feld: note
+         * Typ: ALNUM
+         */
+        public ?string $note = null,
+        /**
+         * Gebietsschema des Kunden.
+         *
+         * Beispiel: "de_DE"
+         *
+         * Billomat-Feld: locale
+         * Typ: ALNUM
+         */
+        public ?string $locale = null,
+        /**
+         * Steuernummer.
+         *
+         * Billomat-Feld: tax_number
+         * Typ: ALNUM
+         */
+        public ?string $taxNumber = null,
+        /**
+         * Umsatzsteuer-ID (USt-IdNr.).
+         *
+         * Billomat-Feld: vat_number
+         * Typ: gültige Ust-IdNr.
+         */
+        public ?string $vatNumber = null,
+        /**
+         * Steuerregel.
+         *
+         * Billomat-Feld: tax_rule
+         * Typ: TAX | NO_TAX | COUNTRY
+         * Default: COUNTRY
+         */
+        public ?string $taxRule = null,
+        /**
+         * Preisbasis.
+         *
+         * Billomat-Feld: net_gross
+         * Typ: NET | GROSS | SETTINGS
+         * Default: SETTINGS
+         */
+        public ?string $netGross = null,
+        /**
+         * Währung des Kunden (ISO-Währungscode).
+         *
+         * Beispiel: "EUR"
+         *
+         * Billomat-Feld: currency_code
+         * Typ: ISO-Währungscode
+         */
+        public ?string $currencyCode = null,
+        /**
+         * Debitorennummer.
+         *
+         * Wird häufig als Referenz zur FIBU verwendet.
+         *
+         * Billomat-Feld: debitor_account_number
+         * Typ: INT
+         */
+        public ?int $debitorAccountNumber = null,
+        /**
+         * Preisgruppe.
+         *
+         * Artikel können mehrere Preise haben – die Preisgruppe legt fest,
+         * welcher Preis für den Kunden verwendet wird.
+         *
+         * Billomat-Feld: price_group
+         * Typ: INT
+         */
+        public ?int $priceGroup = null,
+        /**
+         * Archivierungsstatus.
+         *
+         * true = archiviert, false = aktiv.
+         *
+         * Billomat-Feld: archived
+         * Typ: BOOL
+         * Default: 0
+         */
+        public ?bool $archived = null,
+        /**
+         * Automatischer Mahnlauf.
+         *
+         * true = Kunde wird in automatischem Mahnlauf berücksichtigt.
+         *
+         * Billomat-Feld: dunning_run
+         * Typ: BOOL
+         */
+        public ?bool $dunningRun = null,
+        /**
+         * Rabatt in Prozent.
+         *
+         * Billomat-Feld: reduction
+         * Typ: FLOAT
+         */
+        public ?float $reduction = null,
+        /**
+         * Typ des Skonto-Satzes.
+         *
+         * Billomat-Feld: discount_rate_type
+         * Typ: SETTINGS | ABSOLUTE | RELATIVE
+         * Default: SETTINGS
+         */
+        public ?string $discountRateType = null,
+        /**
+         * Skonto-Satz.
+         *
+         * Billomat-Feld: discount_rate
+         * Typ: FLOAT
+         */
+        public ?float $discountRate = null,
+        /**
+         * Typ des Skonto-Zeitraums.
+         *
+         * Billomat-Feld: discount_days_type
+         * Typ: SETTINGS | ABSOLUTE | RELATIVE
+         * Default: SETTINGS
+         */
+        public ?string $discountDaysType = null,
+        /**
+         * Skonto-Tage.
+         *
+         * Billomat-Feld: discount_days
+         * Typ: FLOAT
+         */
+        public ?float $discountDays = null,
+        /**
+         * Typ der Fälligkeit.
+         *
+         * Billomat-Feld: due_days_type
+         * Typ: SETTINGS | ABSOLUTE | RELATIVE
+         * Default: SETTINGS
+         */
+        public ?string $dueDaysType = null,
+        /**
+         * Fälligkeit in Tagen nach Rechnungsdatum.
+         *
+         * Billomat-Feld: due_days
+         * Typ: INT
+         */
+        public ?int $dueDays = null,
+        /**
+         * Typ der Mahnfälligkeit.
+         *
+         * Billomat-Feld: reminder_due_days_type
+         * Typ: SETTINGS | ABSOLUTE | RELATIVE
+         * Default: SETTINGS
+         */
+        public ?string $reminderDueDaysType = null,
+        /**
+         * Mahnfälligkeit in Tagen.
+         *
+         * Billomat-Feld: reminder_due_days
+         * Typ: INT
+         */
+        public ?int $reminderDueDays = null,
+        /**
+         * Typ der Angebotsgültigkeit.
+         *
+         * Billomat-Feld: offer_validity_days_type
+         * Typ: SETTINGS | ABSOLUTE | RELATIVE
+         * Default: SETTINGS
+         */
+        public ?string $offerValidityDaysType = null,
+        /**
+         * Angebotsgültigkeit in Tagen.
+         *
+         * Billomat-Feld: offer_validity_days
+         * Typ: INT
+         */
+        public ?int $offerValidityDays = null,
+        /**
+         * Kontoinhaber.
+         *
+         * Billomat-Feld: bank_account_owner
+         * Typ: ALNUM
+         */
+        public ?string $bankAccountOwner = null,
+        /**
+         * Bankleitzahl.
+         *
+         * Billomat-Feld: bank_number
+         * Typ: ALNUM
+         */
+        public ?string $bankNumber = null,
+        /**
+         * Bankname.
+         *
+         * Billomat-Feld: bank_name
+         * Typ: ALNUM
+         */
+        public ?string $bankName = null,
+        /**
+         * Kontonummer.
+         *
+         * Billomat-Feld: bank_account_number
+         * Typ: ALNUM
+         */
+        public ?string $bankAccountNumber = null,
+        /**
+         * SWIFT / BIC.
+         *
+         * Billomat-Feld: bank_swift
+         * Typ: ALNUM
+         */
+        public ?string $bankSwift = null,
+        /**
+         * IBAN.
+         *
+         * Billomat-Feld: bank_iban
+         * Typ: gültige IBAN
+         */
+        public ?string $bankIban = null,
+        /**
+         * SEPA-Mandatsreferenz.
+         *
+         * Billomat-Feld: sepa_mandate
+         * Typ: ALNUM
+         */
+        public ?string $sepaMandate = null,
+        /**
+         * Ausstelldatum des SEPA-Mandats.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: sepa_mandate_date
+         * Typ: DATE
+         */
+        public ?string $sepaMandateDate = null,
+        /**
+         * Standard-Zahlarten (CSV).
+         *
+         * Beispiel: "CASH,BANK_TRANSFER"
+         *
+         * Billomat-Feld: default_payment_types
+         * Typ: ALNUM
+         */
+        public ?string $defaultPaymentTypes = null,
+    ) {
+    }
 
-    /**
-     * Kundennummer (frei wählbar).
-     *
-     * Billomat-Feld: client_number
-     */
-    public ?string $clientNumber = null;
+    /** Kopie mit geändertem `name`. */
+    public function withName(?string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
 
-    /**
-     * Laufende Nummer (ohne Präfix).
-     *
-     * Billomat-Feld: number
-     * Typ: INT
-     * Default: nächste freie Nummer
-     */
-    public ?int $number = null;
+    /** Kopie mit geändertem `clientNumber`. */
+    public function withClientNumber(?string $clientNumber): self
+    {
+        return clone($this, ['clientNumber' => $clientNumber]);
+    }
 
-    /**
-     * Präfix der Kundennummer.
-     *
-     * Billomat-Feld: number_pre
-     * Typ: ALNUM
-     * Default: Wert aus Einstellungen
-     */
-    public ?string $numberPre = null;
+    /** Kopie mit geändertem `number`. */
+    public function withNumber(?int $number): self
+    {
+        return clone($this, ['number' => $number]);
+    }
 
-    /**
-     * Mindestlänge der Kundennummer.
-     *
-     * Billomat-Feld: number_length
-     * Typ: INT
-     * Default: Wert aus den Einstellungen
-     */
-    public ?int $numberLength = null;
+    /** Kopie mit geändertem `numberPre`. */
+    public function withNumberPre(?string $numberPre): self
+    {
+        return clone($this, ['numberPre' => $numberPre]);
+    }
 
-    /**
-     * Straße.
-     *
-     * Billomat-Feld: street
-     * Typ: ALNUM
-     */
-    public ?string $street = null;
+    /** Kopie mit geändertem `numberLength`. */
+    public function withNumberLength(?int $numberLength): self
+    {
+        return clone($this, ['numberLength' => $numberLength]);
+    }
 
-    /**
-     * Postleitzahl.
-     *
-     * Billomat-Feld: zip
-     * Typ: ALNUM
-     */
-    public ?string $zip = null;
+    /** Kopie mit geändertem `street`. */
+    public function withStreet(?string $street): self
+    {
+        return clone($this, ['street' => $street]);
+    }
 
-    /**
-     * Ort.
-     *
-     * Billomat-Feld: city
-     * Typ: ALNUM
-     */
-    public ?string $city = null;
+    /** Kopie mit geändertem `zip`. */
+    public function withZip(?string $zip): self
+    {
+        return clone($this, ['zip' => $zip]);
+    }
 
-    /**
-     * Bundesland / Bezirk / Region.
-     *
-     * Billomat-Feld: state
-     * Typ: ALNUM
-     */
-    public ?string $state = null;
+    /** Kopie mit geändertem `city`. */
+    public function withCity(?string $city): self
+    {
+        return clone($this, ['city' => $city]);
+    }
 
-    /**
-     * Ländercode des Kunden (ISO 3166-1 Alpha-2).
-     *
-     * Beispiel: "DE", "AT", "CH"
-     *
-     * Billomat-Feld: country_code
-     * Typ: Ländercode nach ISO 3166 Alpha-2
-     * Default: Wert aus eigener Firma
-     */
-    public ?string $countryCode = null;
+    /** Kopie mit geändertem `state`. */
+    public function withState(?string $state): self
+    {
+        return clone($this, ['state' => $state]);
+    }
 
-    /**
-     * Vorname.
-     *
-     * Billomat-Feld: first_name
-     * Typ: ALNUM
-     */
-    public ?string $firstName = null;
+    /** Kopie mit geändertem `countryCode`. */
+    public function withCountryCode(?string $countryCode): self
+    {
+        return clone($this, ['countryCode' => $countryCode]);
+    }
 
-    /**
-     * Nachname.
-     *
-     * Billomat-Feld: last_name
-     * Typ: ALNUM
-     */
-    public ?string $lastName = null;
+    /** Kopie mit geändertem `firstName`. */
+    public function withFirstName(?string $firstName): self
+    {
+        return clone($this, ['firstName' => $firstName]);
+    }
 
-    /**
-     * Anrede.
-     *
-     * Billomat-Feld: salutation
-     * Typ: ALNUM
-     */
-    public ?string $salutation = null;
+    /** Kopie mit geändertem `lastName`. */
+    public function withLastName(?string $lastName): self
+    {
+        return clone($this, ['lastName' => $lastName]);
+    }
 
-    /**
-     * E-Mail-Adresse.
-     *
-     * Billomat-Feld: email
-     * Typ: gültige E-Mail-Adresse
-     */
-    public ?string $email = null;
+    /** Kopie mit geändertem `salutation`. */
+    public function withSalutation(?string $salutation): self
+    {
+        return clone($this, ['salutation' => $salutation]);
+    }
 
-    /**
-     * Telefonnummer.
-     *
-     * Billomat-Feld: phone
-     * Typ: ALNUM
-     */
-    public ?string $phone = null;
+    /** Kopie mit geändertem `email`. */
+    public function withEmail(?string $email): self
+    {
+        return clone($this, ['email' => $email]);
+    }
 
-    /**
-     * Faxnummer.
-     *
-     * Billomat-Feld: fax
-     * Typ: ALNUM
-     */
-    public ?string $fax = null;
+    /** Kopie mit geändertem `phone`. */
+    public function withPhone(?string $phone): self
+    {
+        return clone($this, ['phone' => $phone]);
+    }
 
-    /**
-     * Mobilnummer.
-     *
-     * Billomat-Feld: mobile
-     * Typ: ALNUM
-     */
-    public ?string $mobile = null;
+    /** Kopie mit geändertem `fax`. */
+    public function withFax(?string $fax): self
+    {
+        return clone($this, ['fax' => $fax]);
+    }
 
-    /**
-     * Website (ohne Schema).
-     *
-     * Beispiel: "example.com"
-     *
-     * Billomat-Feld: www
-     * Typ: URL (ohne http)
-     */
-    public ?string $www = null;
+    /** Kopie mit geändertem `mobile`. */
+    public function withMobile(?string $mobile): self
+    {
+        return clone($this, ['mobile' => $mobile]);
+    }
 
-    /**
-     * Notiz zum Kunden.
-     *
-     * Billomat-Feld: note
-     * Typ: ALNUM
-     */
-    public ?string $note = null;
+    /** Kopie mit geändertem `www`. */
+    public function withWww(?string $www): self
+    {
+        return clone($this, ['www' => $www]);
+    }
 
-    /**
-     * Gebietsschema des Kunden.
-     *
-     * Beispiel: "de_DE"
-     *
-     * Billomat-Feld: locale
-     * Typ: ALNUM
-     */
-    public ?string $locale = null;
+    /** Kopie mit geändertem `note`. */
+    public function withNote(?string $note): self
+    {
+        return clone($this, ['note' => $note]);
+    }
 
-    /**
-     * Steuernummer.
-     *
-     * Billomat-Feld: tax_number
-     * Typ: ALNUM
-     */
-    public ?string $taxNumber = null;
+    /** Kopie mit geändertem `locale`. */
+    public function withLocale(?string $locale): self
+    {
+        return clone($this, ['locale' => $locale]);
+    }
 
-    /**
-     * Umsatzsteuer-ID (USt-IdNr.).
-     *
-     * Billomat-Feld: vat_number
-     * Typ: gültige Ust-IdNr.
-     */
-    public ?string $vatNumber = null;
+    /** Kopie mit geändertem `taxNumber`. */
+    public function withTaxNumber(?string $taxNumber): self
+    {
+        return clone($this, ['taxNumber' => $taxNumber]);
+    }
 
-    /**
-     * Steuerregel.
-     *
-     * Billomat-Feld: tax_rule
-     * Typ: TAX | NO_TAX | COUNTRY
-     * Default: COUNTRY
-     */
-    public ?string $taxRule = null;
+    /** Kopie mit geändertem `vatNumber`. */
+    public function withVatNumber(?string $vatNumber): self
+    {
+        return clone($this, ['vatNumber' => $vatNumber]);
+    }
 
-    /**
-     * Preisbasis.
-     *
-     * Billomat-Feld: net_gross
-     * Typ: NET | GROSS | SETTINGS
-     * Default: SETTINGS
-     */
-    public ?string $netGross = null;
+    /** Kopie mit geändertem `taxRule`. */
+    public function withTaxRule(?string $taxRule): self
+    {
+        return clone($this, ['taxRule' => $taxRule]);
+    }
 
-    /**
-     * Währung des Kunden (ISO-Währungscode).
-     *
-     * Beispiel: "EUR"
-     *
-     * Billomat-Feld: currency_code
-     * Typ: ISO-Währungscode
-     */
-    public ?string $currencyCode = null;
+    /** Kopie mit geändertem `netGross`. */
+    public function withNetGross(?string $netGross): self
+    {
+        return clone($this, ['netGross' => $netGross]);
+    }
 
-    /**
-     * Debitorennummer.
-     *
-     * Wird häufig als Referenz zur FIBU verwendet.
-     *
-     * Billomat-Feld: debitor_account_number
-     * Typ: INT
-     */
-    public ?int $debitorAccountNumber = null;
+    /** Kopie mit geändertem `currencyCode`. */
+    public function withCurrencyCode(?string $currencyCode): self
+    {
+        return clone($this, ['currencyCode' => $currencyCode]);
+    }
 
-    /**
-     * Preisgruppe.
-     *
-     * Artikel können mehrere Preise haben – die Preisgruppe legt fest,
-     * welcher Preis für den Kunden verwendet wird.
-     *
-     * Billomat-Feld: price_group
-     * Typ: INT
-     */
-    public ?int $priceGroup = null;
+    /** Kopie mit geändertem `debitorAccountNumber`. */
+    public function withDebitorAccountNumber(?int $debitorAccountNumber): self
+    {
+        return clone($this, ['debitorAccountNumber' => $debitorAccountNumber]);
+    }
 
-    /**
-     * Archivierungsstatus.
-     *
-     * true = archiviert, false = aktiv.
-     *
-     * Billomat-Feld: archived
-     * Typ: BOOL
-     * Default: 0
-     */
-    public ?bool $archived = null;
+    /** Kopie mit geändertem `priceGroup`. */
+    public function withPriceGroup(?int $priceGroup): self
+    {
+        return clone($this, ['priceGroup' => $priceGroup]);
+    }
 
-    /**
-     * Automatischer Mahnlauf.
-     *
-     * true = Kunde wird in automatischem Mahnlauf berücksichtigt.
-     *
-     * Billomat-Feld: dunning_run
-     * Typ: BOOL
-     */
-    public bool $dunningRun = false;
+    /** Kopie mit geändertem `archived`. */
+    public function withArchived(?bool $archived): self
+    {
+        return clone($this, ['archived' => $archived]);
+    }
 
-    /**
-     * Rabatt in Prozent.
-     *
-     * Billomat-Feld: reduction
-     * Typ: FLOAT
-     */
-    public ?float $reduction = null;
+    /** Kopie mit geändertem `dunningRun`. */
+    public function withDunningRun(?bool $dunningRun): self
+    {
+        return clone($this, ['dunningRun' => $dunningRun]);
+    }
 
-    /**
-     * Typ des Skonto-Satzes.
-     *
-     * Billomat-Feld: discount_rate_type
-     * Typ: SETTINGS | ABSOLUTE | RELATIVE
-     * Default: SETTINGS
-     */
-    public ?string $discountRateType = null;
+    /** Kopie mit geändertem `reduction`. */
+    public function withReduction(?float $reduction): self
+    {
+        return clone($this, ['reduction' => $reduction]);
+    }
 
-    /**
-     * Skonto-Satz.
-     *
-     * Billomat-Feld: discount_rate
-     * Typ: FLOAT
-     */
-    public ?float $discountRate = null;
+    /** Kopie mit geändertem `discountRateType`. */
+    public function withDiscountRateType(?string $discountRateType): self
+    {
+        return clone($this, ['discountRateType' => $discountRateType]);
+    }
 
-    /**
-     * Typ des Skonto-Zeitraums.
-     *
-     * Billomat-Feld: discount_days_type
-     * Typ: SETTINGS | ABSOLUTE | RELATIVE
-     * Default: SETTINGS
-     */
-    public ?string $discountDaysType = null;
+    /** Kopie mit geändertem `discountRate`. */
+    public function withDiscountRate(?float $discountRate): self
+    {
+        return clone($this, ['discountRate' => $discountRate]);
+    }
 
-    /**
-     * Skonto-Tage.
-     *
-     * Billomat-Feld: discount_days
-     * Typ: FLOAT
-     */
-    public ?float $discountDays = null;
+    /** Kopie mit geändertem `discountDaysType`. */
+    public function withDiscountDaysType(?string $discountDaysType): self
+    {
+        return clone($this, ['discountDaysType' => $discountDaysType]);
+    }
 
-    /**
-     * Typ der Fälligkeit.
-     *
-     * Billomat-Feld: due_days_type
-     * Typ: SETTINGS | ABSOLUTE | RELATIVE
-     * Default: SETTINGS
-     */
-    public ?string $dueDaysType = null;
+    /** Kopie mit geändertem `discountDays`. */
+    public function withDiscountDays(?float $discountDays): self
+    {
+        return clone($this, ['discountDays' => $discountDays]);
+    }
 
-    /**
-     * Fälligkeit in Tagen nach Rechnungsdatum.
-     *
-     * Billomat-Feld: due_days
-     * Typ: INT
-     */
-    public ?int $dueDays = null;
+    /** Kopie mit geändertem `dueDaysType`. */
+    public function withDueDaysType(?string $dueDaysType): self
+    {
+        return clone($this, ['dueDaysType' => $dueDaysType]);
+    }
 
-    /**
-     * Typ der Mahnfälligkeit.
-     *
-     * Billomat-Feld: reminder_due_days_type
-     * Typ: SETTINGS | ABSOLUTE | RELATIVE
-     * Default: SETTINGS
-     */
-    public ?string $reminderDueDaysType = null;
+    /** Kopie mit geändertem `dueDays`. */
+    public function withDueDays(?int $dueDays): self
+    {
+        return clone($this, ['dueDays' => $dueDays]);
+    }
 
-    /**
-     * Mahnfälligkeit in Tagen.
-     *
-     * Billomat-Feld: reminder_due_days
-     * Typ: INT
-     */
-    public ?int $reminderDueDays = null;
+    /** Kopie mit geändertem `reminderDueDaysType`. */
+    public function withReminderDueDaysType(?string $reminderDueDaysType): self
+    {
+        return clone($this, ['reminderDueDaysType' => $reminderDueDaysType]);
+    }
 
-    /**
-     * Typ der Angebotsgültigkeit.
-     *
-     * Billomat-Feld: offer_validity_days_type
-     * Typ: SETTINGS | ABSOLUTE | RELATIVE
-     * Default: SETTINGS
-     */
-    public ?string $offerValidityDaysType = null;
+    /** Kopie mit geändertem `reminderDueDays`. */
+    public function withReminderDueDays(?int $reminderDueDays): self
+    {
+        return clone($this, ['reminderDueDays' => $reminderDueDays]);
+    }
 
-    /**
-     * Angebotsgültigkeit in Tagen.
-     *
-     * Billomat-Feld: offer_validity_days
-     * Typ: INT
-     */
-    public ?int $offerValidityDays = null;
+    /** Kopie mit geändertem `offerValidityDaysType`. */
+    public function withOfferValidityDaysType(?string $offerValidityDaysType): self
+    {
+        return clone($this, ['offerValidityDaysType' => $offerValidityDaysType]);
+    }
 
-    /**
-     * Kontoinhaber.
-     *
-     * Billomat-Feld: bank_account_owner
-     * Typ: ALNUM
-     */
-    public ?string $bankAccountOwner = null;
+    /** Kopie mit geändertem `offerValidityDays`. */
+    public function withOfferValidityDays(?int $offerValidityDays): self
+    {
+        return clone($this, ['offerValidityDays' => $offerValidityDays]);
+    }
 
-    /**
-     * Bankleitzahl.
-     *
-     * Billomat-Feld: bank_number
-     * Typ: ALNUM
-     */
-    public ?string $bankNumber = null;
+    /** Kopie mit geändertem `bankAccountOwner`. */
+    public function withBankAccountOwner(?string $bankAccountOwner): self
+    {
+        return clone($this, ['bankAccountOwner' => $bankAccountOwner]);
+    }
 
-    /**
-     * Bankname.
-     *
-     * Billomat-Feld: bank_name
-     * Typ: ALNUM
-     */
-    public ?string $bankName = null;
+    /** Kopie mit geändertem `bankNumber`. */
+    public function withBankNumber(?string $bankNumber): self
+    {
+        return clone($this, ['bankNumber' => $bankNumber]);
+    }
 
-    /**
-     * Kontonummer.
-     *
-     * Billomat-Feld: bank_account_number
-     * Typ: ALNUM
-     */
-    public ?string $bankAccountNumber = null;
+    /** Kopie mit geändertem `bankName`. */
+    public function withBankName(?string $bankName): self
+    {
+        return clone($this, ['bankName' => $bankName]);
+    }
 
-    /**
-     * SWIFT / BIC.
-     *
-     * Billomat-Feld: bank_swift
-     * Typ: ALNUM
-     */
-    public ?string $bankSwift = null;
+    /** Kopie mit geändertem `bankAccountNumber`. */
+    public function withBankAccountNumber(?string $bankAccountNumber): self
+    {
+        return clone($this, ['bankAccountNumber' => $bankAccountNumber]);
+    }
 
-    /**
-     * IBAN.
-     *
-     * Billomat-Feld: bank_iban
-     * Typ: gültige IBAN
-     */
-    public ?string $bankIban = null;
+    /** Kopie mit geändertem `bankSwift`. */
+    public function withBankSwift(?string $bankSwift): self
+    {
+        return clone($this, ['bankSwift' => $bankSwift]);
+    }
 
-    /**
-     * SEPA-Mandatsreferenz.
-     *
-     * Billomat-Feld: sepa_mandate
-     * Typ: ALNUM
-     */
-    public ?string $sepaMandate = null;
+    /** Kopie mit geändertem `bankIban`. */
+    public function withBankIban(?string $bankIban): self
+    {
+        return clone($this, ['bankIban' => $bankIban]);
+    }
 
-    /**
-     * Ausstelldatum des SEPA-Mandats.
-     *
-     * Format: YYYY-MM-DD
-     *
-     * Billomat-Feld: sepa_mandate_date
-     * Typ: DATE
-     */
-    public ?string $sepaMandateDate = null;
+    /** Kopie mit geändertem `sepaMandate`. */
+    public function withSepaMandate(?string $sepaMandate): self
+    {
+        return clone($this, ['sepaMandate' => $sepaMandate]);
+    }
 
-    /**
-     * Standard-Zahlarten (CSV).
-     *
-     * Beispiel: "CASH,BANK_TRANSFER"
-     *
-     * Billomat-Feld: default_payment_types
-     * Typ: ALNUM
-     */
-    public ?string $defaultPaymentTypes = null;
+    /** Kopie mit geändertem `sepaMandateDate`. */
+    public function withSepaMandateDate(?string $sepaMandateDate): self
+    {
+        return clone($this, ['sepaMandateDate' => $sepaMandateDate]);
+    }
+
+    /** Kopie mit geändertem `defaultPaymentTypes`. */
+    public function withDefaultPaymentTypes(?string $defaultPaymentTypes): self
+    {
+        return clone($this, ['defaultPaymentTypes' => $defaultPaymentTypes]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -448,7 +697,7 @@ final class ClientCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        $data = [
+        return array_filter([
             'name' => $this->name,
             'client_number' => $this->clientNumber,
             'number' => $this->number,
@@ -498,9 +747,6 @@ final class ClientCreateOptions implements WriteOptions
             'sepa_mandate' => $this->sepaMandate,
             'sepa_mandate_date' => $this->sepaMandateDate,
             'default_payment_types' => $this->defaultPaymentTypes,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

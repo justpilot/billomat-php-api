@@ -26,10 +26,11 @@ final class ClientTagsIntegrationTest extends AbstractBillomatIntegrationTestCas
         }
 
         $faker = $this->faker();
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
         self::assertNotNull($created->id);

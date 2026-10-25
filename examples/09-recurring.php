@@ -40,19 +40,23 @@ $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
 try {
     // 1) Monatliches Abo anlegen — Billomat erstellt + verschickt die Rechnung automatisch
-    $opts = new RecurringCreateOptions(clientId: $clientId);
-    $opts->name = 'Hosting Basic';
-    $opts->title = 'Webhosting-Abo';
-    $opts->cycle = RecurringCycle::MONTHLY;
-    $opts->cycleNumber = 1;
-    $opts->action = RecurringAction::EMAIL;
-    $opts->startDate = new DateTimeImmutable('first day of next month');
-    $opts->dueDays = 14;
+    $opts = new RecurringCreateOptions(
+        clientId: $clientId,
+        name: 'Hosting Basic',
+        title: 'Webhosting-Abo',
+        cycle: RecurringCycle::MONTHLY,
+        cycleNumber: 1,
+        action: RecurringAction::EMAIL,
+        startDate: new DateTimeImmutable('first day of next month'),
+        dueDays: 14,
+    );
 
-    $item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.9);
-    $item->title = 'Webhosting Basic';
-    $item->unit = 'Monat';
-    $opts->addItem($item);
+    $item = new RecurringItemCreateOptions(
+        quantity: 1.0, unitPrice: 19.9,
+        title: 'Webhosting Basic',
+        unit: 'Monat',
+    );
+    $opts = $opts->withItem($item);
 
     $recurring = $billomat->recurrings->create($opts);
     printf("Abo #%d angelegt, nächster Lauf: %s\n",
@@ -76,9 +80,11 @@ try {
 
     // 4) Preis-Update für die einzige Position
     foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
-        $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 24.9);
-        $update->title = $current->title;
-        $update->unit = $current->unit;
+        $update = new RecurringItemCreateOptions(
+            quantity: 1.0, unitPrice: 24.9,
+            title: $current->title,
+            unit: $current->unit,
+        );
         $billomat->recurrings->items->update($current->id, $update);
         printf("Position #%d auf %.2f angepasst.\n", $current->id, 24.9);
     }

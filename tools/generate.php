@@ -484,88 +484,140 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $out .= "\n";
     }
     $out .= classDoc($options['doc'], $definition['docUrl'], $source, 'Doku:');
-    $out .= 'final class ' . $options['class'] . " implements WriteOptions\n{\n";
+    $out .= 'final readonly class ' . $options['class'] . " implements WriteOptions\n{\n";
 
-    // Pflichtfelder beim Anlegen werden als Konstruktor-Parameter erzwungen.
-    $promoted = $isCreate
+    // Pflichtfelder beim Anlegen stehen vorne im Konstruktor, danach alle optionalen Felder.
+    $required = $isCreate
         ? array_values(array_filter($writable, static fn (array $f): bool => !empty($f['create']['constructor'])))
         : [];
-    if ([] !== $promoted) {
-        $out .= "    public function __construct(\n";
-        foreach ($promoted as $field) {
-            $out .= docBlock(optionsDocLines($field, $isCreate), '        ');
-            $out .= '        public ' . optionsPhpType($field, $dateObjects) . ' $' . $field['property'];
-            if (\array_key_exists('default', $field['create'])) {
-                $out .= ' = ' . var_export($field['create']['default'], true);
-            }
-            $out .= ",\n";
-        }
-        $out .= "    ) {\n    }\n\n";
-    }
+    $ordered = [...$required, ...array_values(array_filter($writable, static fn (array $f): bool => !\in_array($f, $required, true)))];
 
-    foreach ($writable as $field) {
-        if (\in_array($field, $promoted, true)) {
-            continue;
-        }
-
-        $nonNull = $isCreate && !empty($field['create']['nonNull']);
-
-        $out .= docBlock(optionsDocLines($field, $isCreate), '    ');
-        $type = optionsPhpType($field, $dateObjects);
-        $out .= '    public ' . ($nonNull || 'mixed' === $type ? '' : '?') . $type . ' $' . $field['property'] . ' = '
-            . ($nonNull ? var_export($field['create']['default'], true) : 'null') . ";\n\n";
-    }
-
-    // `items`: Positionen, die über addItem() gesammelt und verschachtelt mitgesendet werden.
+    // `items`: Positionen, die beim Anlegen verschachtelt mitgesendet werden.
     $items = $isCreate ? ($options['items'] ?? null) : null;
+
+    $out .= "    public function __construct(\n";
+    foreach ($ordered as $field) {
+        $out .= docBlock(optionsDocLines($field, $isCreate), '        ');
+        $out .= '        public ' . optionsParamType($field, $isCreate, $dateObjects) . ' $' . $field['property'] . optionsDefault($field, $isCreate) . ",\n";
+    }
     if (null !== $items) {
-        $class = $items['class'];
-        $out .= "    /**\n     * @var list<{$class}>\n     */\n    private array \$items = [];\n\n";
-        $out .= "    /**\n     * Fügt eine Position hinzu, die beim Anlegen mitgesendet wird.\n     */\n";
-        $out .= "    public function addItem({$class} \$item): self\n    {\n        \$this->items[] = \$item;\n\n        return \$this;\n    }\n\n";
-        $out .= "    /**\n     * @return list<{$class}>\n     */\n    public function getItems(): array\n    {\n        return \$this->items;\n    }\n\n";
+        $out .= "        /**\n         * Positionen, die beim Anlegen mitgesendet werden.\n         *\n         * @var list<{$items['class']}>\n         */\n";
+        $out .= "        public array \$items = [],\n";
+    }
+    $out .= "    ) {\n    }\n\n";
+
+    // Wither: Kopie mit einem geänderten Feld (clone with, PHP 8.5).
+    foreach ($ordered as $field) {
+        $property = $field['property'];
+        $out .= "    /** Kopie mit geändertem `{$property}`. */\n";
+        $out .= '    public function with' . ucfirst($property) . '(' . optionsParamType($field, $isCreate, $dateObjects) . " \${$property}): self\n";
+        $out .= "    {\n        return clone(\$this, ['{$property}' => \${$property}]);\n    }\n\n";
+    }
+    if (null !== $items) {
+        $out .= "    /** Kopie mit einer zusätzlichen Position. */\n";
+        $out .= "    public function withItem({$items['class']} \$item): self\n    {\n        return clone(\$this, ['items' => [...\$this->items, \$item]]);\n    }\n\n";
     }
 
-    $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n     *\n     * @return array<string,mixed>\n     */\n";
+    $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n";
+    if (!$isCreate) {
+        $out .= "     *\n     * Nicht gesetzte Felder (null) fehlen im Payload, {@see Clear::Field} wird als null gesendet und leert das Feld.\n";
+    }
+    $out .= "     *\n     * @return array<string,mixed>\n     */\n";
     $entries = '';
     $filterNulls = false;
     foreach (exportFields($writable, $options['toArray'] ?? null, $source) as $field) {
-        $value = '$this->' . $field['property'];
+        $property = '$this->' . $field['property'];
         $nonNull = $isCreate && (!empty($field['create']['nonNull']) || !empty($field['create']['constructor']));
         $filterNulls = $filterNulls || !$nonNull;
-        if (null !== $field['enumClass']) {
-            $value .= $nonNull ? '->value' : '?->value';
-        }
-        if ($dateObjects && 'date' === $field['type']) {
-            $value .= ($nonNull ? '->' : '?->') . "format('Y-m-d')";
-        }
-        if ($boolAsInt && 'bool' === $field['type']) {
-            $value = boolAsIntExpression($value, $nonNull);
-        }
-        $entries .= "            '" . $field['wire'] . "' => " . $value . ",\n";
+        $entries .= "            '" . $field['wire'] . "' => " . optionsExportExpression($field, $property, $isCreate, $nonNull, $dateObjects, $boolAsInt) . ",\n";
     }
 
     $out .= "    public function toArray(): array\n    {\n";
-    if (null !== $items) {
-        if (!$filterNulls) {
-            throw new RuntimeException("'items' braucht mindestens ein nullbares Feld ({$source}).");
-        }
-        $out .= "        \$data = [\n" . $entries . "        ];\n\n        // Null-Felder entfernen\n";
-        $out .= "        \$data = array_filter(\$data, static fn (mixed \$v): bool => null !== \$v);\n\n";
-        $out .= "        if ([] !== \$this->items) {\n            \$data['{$items['wire']}'] = [\n";
-        $out .= "                '{$items['item']}' => array_map(static fn ({$class} \$item): array => \$item->toArray(), \$this->items),\n";
-        $out .= "            ];\n        }\n\n        return \$data;\n    }\n}\n";
-
-        return $out;
-    }
     // Sind alle Felder nicht-nullbar, gibt es nichts zu filtern.
-    if (!$filterNulls) {
-        return $out . "        return [\n" . $entries . "        ];\n    }\n}\n";
+    $payload = match (true) {
+        !$filterNulls => "[\n" . $entries . "        ]",
+        $isCreate => "array_filter([\n" . $entries . "        ], static fn (mixed \$v): bool => null !== \$v)",
+        // Update: nicht gesetzte Felder entfernen, Clear::Field als null senden.
+        default => "array_map(\n            static fn (mixed \$v): mixed => \$v instanceof Clear ? null : \$v,\n            array_filter([\n"
+            . preg_replace('/^/m', '    ', rtrim($entries, "\n")) . "\n            ], static fn (mixed \$v): bool => null !== \$v),\n        )",
+    };
+    if (null === $items) {
+        return $out . '        return ' . $payload . ";\n    }\n}\n";
     }
-    $out .= "        \$data = [\n" . $entries . "        ];\n\n        // Null-Felder entfernen\n";
-    $out .= "        return array_filter(\$data, static fn (mixed \$v): bool => null !== \$v);\n    }\n}\n";
+
+    $out .= '        $data = ' . $payload . ";\n\n";
+    $out .= "        if ([] !== \$this->items) {\n            \$data['{$items['wire']}'] = [\n";
+    $out .= "                '{$items['item']}' => array_map(static fn ({$items['class']} \$item): array => \$item->toArray(), \$this->items),\n";
+    $out .= "            ];\n        }\n\n        return \$data;\n    }\n}\n";
 
     return $out;
+}
+
+/**
+ * PHP-Typ eines Options-Parameters; Update-Felder akzeptieren zusätzlich {@see Clear}.
+ *
+ * @param array<string, mixed> $field
+ */
+function optionsParamType(array $field, bool $isCreate, bool $dateObjects): string
+{
+    $type = optionsPhpType($field, $dateObjects);
+    if ('mixed' === $type) {
+        return 'mixed';
+    }
+    if (!$isCreate) {
+        return $type . '|Clear|null';
+    }
+
+    return !empty($field['create']['nonNull']) || !empty($field['create']['constructor']) ? $type : '?' . $type;
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function optionsDefault(array $field, bool $isCreate): string
+{
+    if ($isCreate && !empty($field['create']['constructor'])) {
+        return \array_key_exists('default', $field['create']) ? ' = ' . var_export($field['create']['default'], true) : '';
+    }
+    if ($isCreate && !empty($field['create']['nonNull'])) {
+        return ' = ' . var_export($field['create']['default'], true);
+    }
+
+    return ' = null';
+}
+
+/**
+ * Ausdruck, mit dem ein Feld in toArray() serialisiert wird.
+ *
+ * In Update-Options kann ein Feld auch {@see Clear} sein – das wird unverändert durchgereicht.
+ *
+ * @param array<string, mixed> $field
+ */
+function optionsExportExpression(array $field, string $value, bool $isCreate, bool $nonNull, bool $dateObjects, bool $boolAsInt): string
+{
+    $isDate = $dateObjects && 'date' === $field['type'];
+    $isBool = $boolAsInt && 'bool' === $field['type'];
+
+    if (!$isCreate) {
+        return match (true) {
+            null !== $field['enumClass'] => "{$value} instanceof {$field['enumClass']} ? {$value}->value : {$value}",
+            $isDate => "{$value} instanceof DateTimeImmutable ? {$value}->format('Y-m-d') : {$value}",
+            $isBool => "\\is_bool({$value}) ? ({$value} ? 1 : 0) : {$value}",
+            default => $value,
+        };
+    }
+
+    if (null !== $field['enumClass']) {
+        $value .= $nonNull ? '->value' : '?->value';
+    }
+    if ($isDate) {
+        $value .= ($nonNull ? '->' : '?->') . "format('Y-m-d')";
+    }
+    if ($isBool) {
+        $value = boolAsIntExpression($value, $nonNull);
+    }
+
+    return $value;
 }
 
 /**

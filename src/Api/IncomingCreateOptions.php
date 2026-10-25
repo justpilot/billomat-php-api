@@ -17,7 +17,7 @@ use DateTimeImmutable;
  * Generiert aus tools/codegen/definitions/incomings.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class IncomingCreateOptions implements WriteOptions
+final readonly class IncomingCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -27,159 +27,255 @@ final class IncomingCreateOptions implements WriteOptions
          * Typ: INT
          */
         public int $supplierId,
+        /**
+         * Rechnungsdatum.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: date
+         * Typ: DATE
+         */
+        public ?DateTimeImmutable $date = null,
+        /**
+         * Liefer-/Leistungsdatum.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: supply_date
+         */
+        public ?DateTimeImmutable $supplyDate = null,
+        /**
+         * Fälligkeitsdatum.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: due_date
+         * Typ: DATE
+         */
+        public ?DateTimeImmutable $dueDate = null,
+        /**
+         * Tage bis zur Fälligkeit.
+         *
+         * Billomat-Feld: due_days
+         */
+        public ?int $dueDays = null,
+        /**
+         * Rechnungsnummer des Lieferanten.
+         *
+         * Billomat-Feld: incoming_number
+         */
+        public ?string $incomingNumber = null,
+        /**
+         * Rechnungsnummer des Lieferanten.
+         *
+         * So liefert Billomat die Nummer auch in den Antworten aus (im Read-Model: `incomingNumber`).
+         *
+         * Billomat-Feld: number
+         * Typ: ALNUM
+         */
+        public ?string $number = null,
+        /**
+         * Komplette Absendeadresse.
+         *
+         * Billomat-Feld: address
+         * Typ: ALNUM
+         * Default: Adresse des Lieferanten
+         */
+        public ?string $address = null,
+        /**
+         * Bezeichnung.
+         *
+         * Billomat-Feld: label
+         * Typ: ALNUM
+         */
+        public ?string $label = null,
+        /**
+         * Einleitungstext.
+         *
+         * Billomat-Feld: intro
+         */
+        public ?string $intro = null,
+        /**
+         * Anmerkungstext.
+         *
+         * Billomat-Feld: note
+         * Typ: ALNUM
+         */
+        public ?string $note = null,
+        /**
+         * Gesamtbetrag brutto.
+         *
+         * Billomat-Feld: total_gross
+         * Typ: FLOAT
+         */
+        public ?float $totalGross = null,
+        /**
+         * Gesamtbetrag netto.
+         *
+         * Billomat-Feld: total_net
+         * Typ: FLOAT
+         */
+        public ?float $totalNet = null,
+        /**
+         * Währung (ISO-Währungscode).
+         *
+         * Billomat-Feld: currency_code
+         * Typ: ISO-Währungscode
+         * Default: Währung des Lieferanten
+         */
+        public ?string $currencyCode = null,
+        /**
+         * Währungskurs (für Umrechnung in die Standard-Währung).
+         *
+         * Billomat-Feld: quote
+         * Typ: FLOAT
+         * Default: 1.0000
+         */
+        public ?float $quote = null,
+        /**
+         * Kundennummer beim Lieferanten (z. B. eigene Vertragsnummer).
+         *
+         * Billomat-Feld: client_number
+         * Typ: ALNUM
+         */
+        public ?string $clientNumber = null,
+        /**
+         * Aufwandskonto laut SKR/Konten-Mapping.
+         *
+         * Billomat-Feld: expense_account_number
+         * Typ: INT
+         */
+        public ?int $expenseAccountNumber = null,
+        /**
+         * Kategorie.
+         *
+         * Billomat-Feld: category
+         * Typ: ALNUM
+         */
+        public ?string $category = null,
+        /**
+         * Base64-codiertes Belegdokument (PDF oder Bild).
+         *
+         * Billomat-Feld: base64file
+         * Typ: BASE64FILE
+         */
+        public ?string $base64file = null,
     ) {
     }
 
-    /**
-     * Rechnungsdatum.
-     *
-     * Format: YYYY-MM-DD
-     *
-     * Billomat-Feld: date
-     * Typ: DATE
-     */
-    public ?DateTimeImmutable $date = null;
+    /** Kopie mit geändertem `supplierId`. */
+    public function withSupplierId(int $supplierId): self
+    {
+        return clone($this, ['supplierId' => $supplierId]);
+    }
 
-    /**
-     * Liefer-/Leistungsdatum.
-     *
-     * Format: YYYY-MM-DD
-     *
-     * Billomat-Feld: supply_date
-     */
-    public ?DateTimeImmutable $supplyDate = null;
+    /** Kopie mit geändertem `date`. */
+    public function withDate(?DateTimeImmutable $date): self
+    {
+        return clone($this, ['date' => $date]);
+    }
 
-    /**
-     * Fälligkeitsdatum.
-     *
-     * Format: YYYY-MM-DD
-     *
-     * Billomat-Feld: due_date
-     * Typ: DATE
-     */
-    public ?DateTimeImmutable $dueDate = null;
+    /** Kopie mit geändertem `supplyDate`. */
+    public function withSupplyDate(?DateTimeImmutable $supplyDate): self
+    {
+        return clone($this, ['supplyDate' => $supplyDate]);
+    }
 
-    /**
-     * Tage bis zur Fälligkeit.
-     *
-     * Billomat-Feld: due_days
-     */
-    public ?int $dueDays = null;
+    /** Kopie mit geändertem `dueDate`. */
+    public function withDueDate(?DateTimeImmutable $dueDate): self
+    {
+        return clone($this, ['dueDate' => $dueDate]);
+    }
 
-    /**
-     * Rechnungsnummer des Lieferanten.
-     *
-     * Billomat-Feld: incoming_number
-     */
-    public ?string $incomingNumber = null;
+    /** Kopie mit geändertem `dueDays`. */
+    public function withDueDays(?int $dueDays): self
+    {
+        return clone($this, ['dueDays' => $dueDays]);
+    }
 
-    /**
-     * Rechnungsnummer des Lieferanten.
-     *
-     * So liefert Billomat die Nummer auch in den Antworten aus (im Read-Model: `incomingNumber`).
-     *
-     * Billomat-Feld: number
-     * Typ: ALNUM
-     */
-    public ?string $number = null;
+    /** Kopie mit geändertem `incomingNumber`. */
+    public function withIncomingNumber(?string $incomingNumber): self
+    {
+        return clone($this, ['incomingNumber' => $incomingNumber]);
+    }
 
-    /**
-     * Komplette Absendeadresse.
-     *
-     * Billomat-Feld: address
-     * Typ: ALNUM
-     * Default: Adresse des Lieferanten
-     */
-    public ?string $address = null;
+    /** Kopie mit geändertem `number`. */
+    public function withNumber(?string $number): self
+    {
+        return clone($this, ['number' => $number]);
+    }
 
-    /**
-     * Bezeichnung.
-     *
-     * Billomat-Feld: label
-     * Typ: ALNUM
-     */
-    public ?string $label = null;
+    /** Kopie mit geändertem `address`. */
+    public function withAddress(?string $address): self
+    {
+        return clone($this, ['address' => $address]);
+    }
 
-    /**
-     * Einleitungstext.
-     *
-     * Billomat-Feld: intro
-     */
-    public ?string $intro = null;
+    /** Kopie mit geändertem `label`. */
+    public function withLabel(?string $label): self
+    {
+        return clone($this, ['label' => $label]);
+    }
 
-    /**
-     * Anmerkungstext.
-     *
-     * Billomat-Feld: note
-     * Typ: ALNUM
-     */
-    public ?string $note = null;
+    /** Kopie mit geändertem `intro`. */
+    public function withIntro(?string $intro): self
+    {
+        return clone($this, ['intro' => $intro]);
+    }
 
-    /**
-     * Gesamtbetrag brutto.
-     *
-     * Billomat-Feld: total_gross
-     * Typ: FLOAT
-     */
-    public ?float $totalGross = null;
+    /** Kopie mit geändertem `note`. */
+    public function withNote(?string $note): self
+    {
+        return clone($this, ['note' => $note]);
+    }
 
-    /**
-     * Gesamtbetrag netto.
-     *
-     * Billomat-Feld: total_net
-     * Typ: FLOAT
-     */
-    public ?float $totalNet = null;
+    /** Kopie mit geändertem `totalGross`. */
+    public function withTotalGross(?float $totalGross): self
+    {
+        return clone($this, ['totalGross' => $totalGross]);
+    }
 
-    /**
-     * Währung (ISO-Währungscode).
-     *
-     * Billomat-Feld: currency_code
-     * Typ: ISO-Währungscode
-     * Default: Währung des Lieferanten
-     */
-    public ?string $currencyCode = null;
+    /** Kopie mit geändertem `totalNet`. */
+    public function withTotalNet(?float $totalNet): self
+    {
+        return clone($this, ['totalNet' => $totalNet]);
+    }
 
-    /**
-     * Währungskurs (für Umrechnung in die Standard-Währung).
-     *
-     * Billomat-Feld: quote
-     * Typ: FLOAT
-     * Default: 1.0000
-     */
-    public ?float $quote = null;
+    /** Kopie mit geändertem `currencyCode`. */
+    public function withCurrencyCode(?string $currencyCode): self
+    {
+        return clone($this, ['currencyCode' => $currencyCode]);
+    }
 
-    /**
-     * Kundennummer beim Lieferanten (z. B. eigene Vertragsnummer).
-     *
-     * Billomat-Feld: client_number
-     * Typ: ALNUM
-     */
-    public ?string $clientNumber = null;
+    /** Kopie mit geändertem `quote`. */
+    public function withQuote(?float $quote): self
+    {
+        return clone($this, ['quote' => $quote]);
+    }
 
-    /**
-     * Aufwandskonto laut SKR/Konten-Mapping.
-     *
-     * Billomat-Feld: expense_account_number
-     * Typ: INT
-     */
-    public ?int $expenseAccountNumber = null;
+    /** Kopie mit geändertem `clientNumber`. */
+    public function withClientNumber(?string $clientNumber): self
+    {
+        return clone($this, ['clientNumber' => $clientNumber]);
+    }
 
-    /**
-     * Kategorie.
-     *
-     * Billomat-Feld: category
-     * Typ: ALNUM
-     */
-    public ?string $category = null;
+    /** Kopie mit geändertem `expenseAccountNumber`. */
+    public function withExpenseAccountNumber(?int $expenseAccountNumber): self
+    {
+        return clone($this, ['expenseAccountNumber' => $expenseAccountNumber]);
+    }
 
-    /**
-     * Base64-codiertes Belegdokument (PDF oder Bild).
-     *
-     * Billomat-Feld: base64file
-     * Typ: BASE64FILE
-     */
-    public ?string $base64file = null;
+    /** Kopie mit geändertem `category`. */
+    public function withCategory(?string $category): self
+    {
+        return clone($this, ['category' => $category]);
+    }
+
+    /** Kopie mit geändertem `base64file`. */
+    public function withBase64file(?string $base64file): self
+    {
+        return clone($this, ['base64file' => $base64file]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -188,7 +284,7 @@ final class IncomingCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        $data = [
+        return array_filter([
             'supplier_id' => $this->supplierId,
             'number' => $this->number,
             'incoming_number' => $this->incomingNumber,
@@ -208,9 +304,6 @@ final class IncomingCreateOptions implements WriteOptions
             'category' => $this->category,
             'client_number' => $this->clientNumber,
             'expense_account_number' => $this->expenseAccountNumber,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

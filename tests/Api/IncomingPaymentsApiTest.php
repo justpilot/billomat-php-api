@@ -85,8 +85,7 @@ final class IncomingPaymentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->payments;
 
-        $opts = new IncomingPaymentCreateOptions(incomingId: 42, amount: 100.0);
-        $opts->markIncomingAsPaid = true;
+        $opts = new IncomingPaymentCreateOptions(incomingId: 42, amount: 100.0, markIncomingAsPaid: true);
 
         $created = $api->create($opts);
         self::assertSame(99, $created->id);

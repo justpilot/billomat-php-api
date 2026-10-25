@@ -36,23 +36,29 @@ $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
 try {
     // 1) Angebot mit zwei Positionen anlegen (DRAFT)
-    $opts = new OfferCreateOptions(clientId: $clientId);
-    $opts->title = 'Angebot ' . date('Y-m-d');
-    $opts->date = new DateTimeImmutable('today');
-    $opts->validityDays = 14;
-    $opts->intro = 'Vielen Dank für Ihre Anfrage. Hier unser unverbindliches Angebot:';
+    $opts = new OfferCreateOptions(
+        clientId: $clientId,
+        title: 'Angebot ' . date('Y-m-d'),
+        date: new DateTimeImmutable('today'),
+        validityDays: 14,
+        intro: 'Vielen Dank für Ihre Anfrage. Hier unser unverbindliches Angebot:',
+    );
 
-    $workshop = new OfferItemCreateOptions(quantity: 1.0, unitPrice: 980.0);
-    $workshop->title = 'Workshop "Discovery"';
-    $workshop->type = InvoiceItemType::SERVICE;
-    $workshop->unit = 'Tag';
-    $opts->addItem($workshop);
+    $workshop = new OfferItemCreateOptions(
+        quantity: 1.0, unitPrice: 980.0,
+        title: 'Workshop "Discovery"',
+        type: InvoiceItemType::SERVICE,
+        unit: 'Tag',
+    );
+    $opts = $opts->withItem($workshop);
 
-    $followUp = new OfferItemCreateOptions(quantity: 4.0, unitPrice: 110.0);
-    $followUp->title = 'Nachgespräche & Reporting';
-    $followUp->type = InvoiceItemType::SERVICE;
-    $followUp->unit = 'Stunde';
-    $opts->addItem($followUp);
+    $followUp = new OfferItemCreateOptions(
+        quantity: 4.0, unitPrice: 110.0,
+        title: 'Nachgespräche & Reporting',
+        type: InvoiceItemType::SERVICE,
+        unit: 'Stunde',
+    );
+    $opts = $opts->withItem($followUp);
 
     $offer = $billomat->offers->create($opts);
     printf("Entwurf angelegt: #%d, Status %s, Brutto %.2f %s\n",

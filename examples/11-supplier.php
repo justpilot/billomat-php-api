@@ -36,11 +36,13 @@ $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
 try {
     // 1) Lieferant anlegen
-    $opts = new SupplierCreateOptions(name: sprintf('Beispiel-Lieferant %s', date('Ymd-His')));
-    $opts->countryCode = 'DE';
-    $opts->email = 'lieferant@example.com';
-    $opts->note = 'Angelegt durch examples/11-supplier.php';
-    $opts->bankIban = 'DE89370400440532013000';
+    $opts = new SupplierCreateOptions(
+        name: sprintf('Beispiel-Lieferant %s', date('Ymd-His')),
+        countryCode: 'DE',
+        email: 'lieferant@example.com',
+        note: 'Angelegt durch examples/11-supplier.php',
+        bankIban: 'DE89370400440532013000',
+    );
 
     $supplier = $billomat->suppliers->create($opts);
     printf("Lieferant #%d angelegt: %s\n", $supplier->id, $supplier->name ?? '?');

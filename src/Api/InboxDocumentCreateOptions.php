@@ -9,28 +9,41 @@ namespace Justpilot\Billomat\Api;
  *
  * Doku: https://www.billomat.com/en/api/inbox-documents/
  */
-final class InboxDocumentCreateOptions
+final readonly class InboxDocumentCreateOptions implements WriteOptions
 {
+    /**
+     * @param string                    $filename     Dateiname
+     * @param string                    $mimeType     MIME-Typ (`mimetype`)
+     * @param string                    $base64file   Dateiinhalt, Base64-kodiert
+     * @param string|null               $documentType Dokumenttyp laut Billomat-Klassifikation (z. B. "other", "invoice",
+     *                                                "credit_note"); Default laut Billomat: "other"
+     * @param array<string, mixed>|null $metadata     frei strukturierte Zusatzdaten (Schlüssel-Wert-Paare),
+     *                                                die Billomat unverändert speichert
+     */
     public function __construct(
         public string $filename,
         public string $mimeType,
         public string $base64file,
+        public ?string $documentType = null,
+        public ?array $metadata = null,
     ) {
     }
 
-    /**
-     * Dokumenttyp laut Billomat-Klassifikation (z.B. "other", "invoice",
-     * "credit_note"). Default laut Billomat: "other".
-     */
-    public ?string $documentType = null;
+    /** Kopie mit geändertem `documentType`. */
+    public function withDocumentType(?string $documentType): self
+    {
+        return clone($this, ['documentType' => $documentType]);
+    }
 
     /**
-     * Frei strukturierte Zusatzdaten (Schlüssel-Wert-Paare), die Billomat
-     * unverändert speichert.
+     * Kopie mit geänderten Zusatzdaten.
      *
-     * @var array<string, mixed>|null
+     * @param array<string, mixed>|null $metadata
      */
-    public ?array $metadata = null;
+    public function withMetadata(?array $metadata): self
+    {
+        return clone($this, ['metadata' => $metadata]);
+    }
 
     /**
      * @return array<string,mixed>

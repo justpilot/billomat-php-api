@@ -15,8 +15,7 @@ final class LetterUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesSupplierId(): void
     {
-        $options = new LetterUpdateOptions();
-        $options->supplierId = 99;
+        $options = new LetterUpdateOptions(supplierId: 99);
 
         self::assertSame(99, $options->toArray()['supplier_id']);
     }

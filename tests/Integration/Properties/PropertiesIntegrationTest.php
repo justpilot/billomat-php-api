@@ -72,8 +72,7 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $opts = new PropertyCreateOptions(name: 'IT-Prop-'.date('His'));
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'IT-Prop-'.date('His'), type: PropertyType::TEXTFIELD);
 
         $prop = $billomat->articles->properties->create($opts);
 
@@ -89,8 +88,7 @@ final class PropertiesIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $opts = new PropertyCreateOptions(name: 'IT-ClientProp-'.date('His'));
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'IT-ClientProp-'.date('His'), type: PropertyType::TEXTFIELD);
 
         $prop = $billomat->clients->properties->create($opts);
 

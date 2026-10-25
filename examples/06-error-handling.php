@@ -36,8 +36,7 @@ $missing = $billomat->clients->get(99999999);
 echo "1) Nicht existierender Kunde: " . ($missing === null ? "null wie erwartet\n" : "Treffer?!\n");
 
 // 2) ValidationException: leeren Client-Namen senden
-$badOpts = new ClientCreateOptions();
-$badOpts->name = '';
+$badOpts = new ClientCreateOptions(name: '');
 
 try {
     $billomat->clients->create($badOpts);

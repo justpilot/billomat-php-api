@@ -94,18 +94,21 @@ Liefert `null` bei 404. Eingebettete `confirmation-items` und `taxes` werden aut
 
 #### `create(ConfirmationCreateOptions $options): Confirmation`
 
-Positionen können direkt mit `addItem()` im Payload landen (als `confirmation-items.confirmation-item`). Optional kann `offerId` gesetzt werden, um die Auftragsbestätigung an ein bestehendes Angebot zu hängen.
+Positionen können direkt über `items: […]` oder `withItem()` im Payload landen (als `confirmation-items.confirmation-item`). Optional kann `offerId` gesetzt werden, um die Auftragsbestätigung an ein bestehendes Angebot zu hängen.
 
 ```php
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 
-$opts = new ConfirmationCreateOptions(clientId: 12345);
-$opts->offerId = 678;
-$opts->title = 'Auftragsbestätigung';
-$opts->date = new DateTimeImmutable('today');
-
-$opts->addItem(new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: 99.00));
+$opts = new ConfirmationCreateOptions(
+    clientId: 12345,
+    offerId: 678,
+    title: 'Auftragsbestätigung',
+    date: new DateTimeImmutable('today'),
+    items: [
+        new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: 99.00),
+    ],
+);
 
 $conf = $billomat->confirmations->create($opts);
 ```
@@ -132,15 +135,14 @@ $billomat->confirmations->undo($conf->id);     // {clear,cancel} → OPEN
 
 Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge → `ValidationException` (422).
 
-#### `email(int $id, ?ConfirmationEmailOptions $options = null): void`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
 Versendet die Auftragsbestätigung per E-Mail. Ohne Options nutzt Billomat die im Account hinterlegten Defaults und hängt das PDF automatisch an.
 
 ```php
-use Justpilot\Billomat\Api\ConfirmationEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-$email = new ConfirmationEmailOptions();
-$email->to = ['kunde@example.com'];
+$email = new EmailOptions(to: ['kunde@example.com']);
 $billomat->confirmations->email($conf->id, $email);
 ```
 
@@ -207,7 +209,7 @@ $cloud = $billomat->confirmations->tags->cloud();
 
 ## Write-Modell: `ConfirmationCreateOptions`
 
-Konstruktor: `new ConfirmationCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+Konstruktor: `new ConfirmationCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -229,11 +231,11 @@ Konstruktor: `new ConfirmationCreateOptions(int $clientId)` — `clientId` ist P
 
 ### Positionen
 
-`addItem(ConfirmationItemCreateOptions $item): self` und `getItems(): list<ConfirmationItemCreateOptions>` für mitgegebene Positionen. `toArray()` rendert sie als `confirmation-items.confirmation-item`.
+Positionen werden als Liste über den Konstruktor-Parameter `items` übergeben (`items: [new ConfirmationItemCreateOptions(…), …]`) und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position. `toArray()` rendert sie als `confirmation-items.confirmation-item`.
 
 ## Write-Modell: `ConfirmationUpdateOptions`
 
-Spiegelt `ConfirmationCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne Items-Helper. `discountRate` ist hier `?float` statt `?int`. Felder, die nicht gesetzt werden, bleiben unberührt.
+Spiegelt `ConfirmationCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne `items`. `discountRate` ist hier `?float` statt `?int`. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new ConfirmationUpdateOptions(note: Clear::Field)`.
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
@@ -278,9 +280,9 @@ Konstruktor: `new ConfirmationItemCreateOptions(float $quantity, float $unitPric
 | `confirmationId` | `confirmation_id` | `int` (Pflicht) |
 | `name` | `name` | `string` (Pflicht) |
 
-## Write-Modell: `ConfirmationEmailOptions`
+## Write-Modell: `EmailOptions`
 
-Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
+Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions). Keine Pflichtfelder.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -409,7 +411,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
-use Justpilot\Billomat\Api\ConfirmationEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -421,17 +423,21 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Auftragsbestätigung aus Angebot anlegen
-$opts = new ConfirmationCreateOptions(clientId: 12345);
-$opts->offerId = 678;
-$opts->title = 'Auftragsbestätigung Webhosting';
-$opts->date = new DateTimeImmutable('today');
-$opts->intro = 'Wir bestätigen Ihren Auftrag wie folgt.';
+$opts = new ConfirmationCreateOptions(
+    clientId: 12345,
+    offerId: 678,
+    title: 'Auftragsbestätigung Webhosting',
+    date: new DateTimeImmutable('today'),
+    intro: 'Wir bestätigen Ihren Auftrag wie folgt.',
+);
 
-$item = new ConfirmationItemCreateOptions(quantity: 12.0, unitPrice: 19.90);
-$item->title = 'Hosting Basic (12 Monate)';
-$item->unit = 'Monat';
-$item->type = InvoiceItemType::SERVICE;
-$opts->addItem($item);
+$item = new ConfirmationItemCreateOptions(
+    quantity: 12.0, unitPrice: 19.90,
+    title: 'Hosting Basic (12 Monate)',
+    unit: 'Monat',
+    type: InvoiceItemType::SERVICE,
+);
+$opts = $opts->withItem($item);
 
 $conf = $billomat->confirmations->create($opts);
 printf("AB #%d angelegt (DRAFT)\n", $conf->id);
@@ -451,8 +457,7 @@ printf("Status: %s, Bestätigungsnummer: %s\n",
 );
 
 // 4) Versenden — Default-Vorlage
-$email = new ConfirmationEmailOptions();
-$email->to = ['kunde@example.com'];
+$email = new EmailOptions(to: ['kunde@example.com']);
 $billomat->confirmations->email($conf->id, $email);
 
 // 5) Internen Vermerk hinterlegen

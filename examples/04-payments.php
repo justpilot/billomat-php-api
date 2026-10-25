@@ -35,10 +35,12 @@ $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
 try {
     // Zahlung anlegen
-    $opts = new InvoicePaymentCreateOptions(invoiceId: $invoiceId, amount: 1.00);
-    $opts->date = new DateTimeImmutable('today');
-    $opts->type = InvoicePaymentType::BANK_TRANSFER;
-    $opts->comment = 'Test-Zahlung aus examples/04-payments.php';
+    $opts = new InvoicePaymentCreateOptions(
+        invoiceId: $invoiceId, amount: 1.00,
+        date: new DateTimeImmutable('today'),
+        type: InvoicePaymentType::BANK_TRANSFER,
+        comment: 'Test-Zahlung aus examples/04-payments.php',
+    );
 
     $payment = $billomat->invoices->payments->create($opts);
     printf("Zahlung #%d angelegt: %.2f EUR via %s\n",

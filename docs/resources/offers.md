@@ -98,20 +98,20 @@ Liefert `null` bei 404. Eingebettete `offer-items` und `taxes` werden automatisc
 
 #### `create(OfferCreateOptions $options): Offer`
 
-Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen als `offer-items.offer-item` im Payload. Neue Angebote starten im Status `DRAFT`.
+Positionen können direkt im `create()`-Call über `items: […]` oder `withItem()` mitgegeben werden — sie landen als `offer-items.offer-item` im Payload. Neue Angebote starten im Status `DRAFT`.
 
 ```php
 use Justpilot\Billomat\Api\OfferCreateOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 
-$opts = new OfferCreateOptions(clientId: 12345);
-$opts->title = 'Webhosting-Angebot';
-$opts->date = new DateTimeImmutable('2026-06-02');
-$opts->validityDays = 30;
-
-$opts->addItem(
-    (new OfferItemCreateOptions(quantity: 1.0, unitPrice: 99.00))
-        ->title = 'Setup-Pauschale',
+$opts = new OfferCreateOptions(
+    clientId: 12345,
+    title: 'Webhosting-Angebot',
+    date: new DateTimeImmutable('2026-06-02'),
+    validityDays: 30,
+    items: [
+        new OfferItemCreateOptions(quantity: 1.0, unitPrice: 99.00, title: 'Setup-Pauschale'),
+    ],
 );
 
 $offer = $billomat->offers->create($opts);
@@ -119,7 +119,7 @@ $offer = $billomat->offers->create($opts);
 
 #### `update(int $id, OfferUpdateOptions $options): Offer`
 
-Schmaler Subset für Partial-Updates. Voll editierbar nur im Status `DRAFT`. Positionen lassen sich per PUT auf `/offers/{id}` nicht ändern — dafür die `$billomat->offers->items` verwenden. Die Klasse hat daher kein `addItem()`.
+Schmaler Subset für Partial-Updates. Voll editierbar nur im Status `DRAFT`. Positionen lassen sich per PUT auf `/offers/{id}` nicht ändern — dafür die `$billomat->offers->items` verwenden. Die Klasse hat daher kein `items`-Feld.
 
 #### `complete(int $id, ?int $templateId = null): void`
 
@@ -145,17 +145,18 @@ $billomat->offers->undo($offer->id);     // {win,lose,clear,cancel} → OPEN
 
 Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge führen zu `ValidationException` (422) oder `HttpException`.
 
-#### `email(int $id, ?OfferEmailOptions $options = null): void`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
 Versendet das Angebot per E-Mail. Ohne Options nutzt Billomat alle Defaults (Absender, Betreff, Body, Vorlage); das PDF wird automatisch angehängt.
 
 ```php
-use Justpilot\Billomat\Api\OfferEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-$email = new OfferEmailOptions();
-$email->to = ['kunde@example.com'];
-$email->bcc = ['vertrieb@meinefirma.de'];
-$email->subject = 'Ihr Angebot {NUMBER}';
+$email = new EmailOptions(
+    to: ['kunde@example.com'],
+    bcc: ['vertrieb@meinefirma.de'],
+    subject: 'Ihr Angebot {NUMBER}',
+);
 
 $billomat->offers->email($offer->id, $email);
 ```
@@ -227,7 +228,7 @@ $cloud = $billomat->offers->tags->cloud();                 // list<OfferTagCloud
 
 ## Write-Modell: `OfferCreateOptions`
 
-Konstruktor: `new OfferCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+Konstruktor: `new OfferCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -255,17 +256,17 @@ Konstruktor: `new OfferCreateOptions(int $clientId)` — `clientId` ist Pflicht.
 
 ### Positionen
 
-Positionen werden nicht über eine Property gesetzt, sondern über `addItem()` angehängt:
+Positionen werden über den Konstruktor-Parameter `items` (`list<OfferItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
 
 ```php
-$opts->addItem(new OfferItemCreateOptions(quantity: 1.0, unitPrice: 99.0));
+$opts = $opts->withItem(new OfferItemCreateOptions(quantity: 1.0, unitPrice: 99.0));
 ```
 
-`getItems(): list<OfferItemCreateOptions>` listet die hinzugefügten Positionen. `toArray()` rendert sie als `offer-items.offer-item`.
+`toArray()` rendert sie als `offer-items.offer-item`.
 
 ## Write-Modell: `OfferUpdateOptions`
 
-Spiegelt `OfferCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne Items-Helper. `discountRate` ist hier `?float` statt `?int`. Felder, die nicht gesetzt werden, bleiben unberührt.
+Spiegelt `OfferCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne `items`. `discountRate` ist hier `?float` statt `?int`. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new OfferUpdateOptions(note: Clear::Field)`.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -324,9 +325,9 @@ Konstruktor: `new OfferTagCreateOptions(int $offerId, string $name)` — beide P
 | `offerId` | `offer_id` | `int` (Pflicht) |
 | `name` | `name` | `string` (Pflicht) |
 
-## Write-Modell: `OfferEmailOptions`
+## Write-Modell: `EmailOptions`
 
-Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hinterlegten Defaults zurück.
+Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions). Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hinterlegten Defaults zurück.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -463,7 +464,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Api\OfferCreateOptions;
-use Justpilot\Billomat\Api\OfferEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -476,21 +477,27 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Angebot anlegen (Status: DRAFT) mit zwei Positionen
-$opts = new OfferCreateOptions(clientId: 12345);
-$opts->title = 'Webhosting & Beratung';
-$opts->date = new DateTimeImmutable('today');
-$opts->validityDays = 30;
-$opts->intro = 'Vielen Dank für Ihre Anfrage.';
+$opts = new OfferCreateOptions(
+    clientId: 12345,
+    title: 'Webhosting & Beratung',
+    date: new DateTimeImmutable('today'),
+    validityDays: 30,
+    intro: 'Vielen Dank für Ihre Anfrage.',
+);
 
-$setup = new OfferItemCreateOptions(quantity: 1.0, unitPrice: 250.00);
-$setup->title = 'Setup-Pauschale';
-$setup->type = InvoiceItemType::SERVICE;
-$opts->addItem($setup);
+$setup = new OfferItemCreateOptions(
+    quantity: 1.0, unitPrice: 250.00,
+    title: 'Setup-Pauschale',
+    type: InvoiceItemType::SERVICE,
+);
+$opts = $opts->withItem($setup);
 
-$hosting = new OfferItemCreateOptions(quantity: 12.0, unitPrice: 19.90);
-$hosting->title = 'Hosting Basic (12 Monate)';
-$hosting->unit = 'Monat';
-$opts->addItem($hosting);
+$hosting = new OfferItemCreateOptions(
+    quantity: 12.0, unitPrice: 19.90,
+    title: 'Hosting Basic (12 Monate)',
+    unit: 'Monat',
+);
+$opts = $opts->withItem($hosting);
 
 $offer = $billomat->offers->create($opts);
 printf("Angebot #%d (DRAFT) angelegt, Brutto: %.2f %s\n",
@@ -514,9 +521,7 @@ printf("Status: %s, Angebotsnummer: %s\n",
 );
 
 // 4) Versenden — Defaults vom Billomat-Account
-$email = new OfferEmailOptions();
-$email->to = ['kunde@example.com'];
-$email->bcc = ['vertrieb@meinefirma.de'];
+$email = new EmailOptions(to: ['kunde@example.com'], bcc: ['vertrieb@meinefirma.de']);
 $billomat->offers->email($offer->id, $email);
 
 // 5) Kunde nimmt an → win()

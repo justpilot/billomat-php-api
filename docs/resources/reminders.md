@@ -93,10 +93,12 @@ Pflicht ist ausschließlich die `invoiceId` — Adresse, Mahntext, Fälligkeit e
 ```php
 use Justpilot\Billomat\Api\ReminderCreateOptions;
 
-$opts = new ReminderCreateOptions(invoiceId: 9876);
-$opts->reminderTextId = 42;
-$opts->dueDays = 7;
-$opts->subject = 'Zahlungserinnerung zu Rechnung 2026-0042';
+$opts = new ReminderCreateOptions(
+    invoiceId: 9876,
+    reminderTextId: 42,
+    dueDays: 7,
+    subject: 'Zahlungserinnerung zu Rechnung 2026-0042',
+);
 
 $reminder = $billomat->reminders->create($opts);
 ```
@@ -113,16 +115,14 @@ Status `DRAFT → OPEN`. Mit optionaler `templateId` lässt sich ein konkretes L
 
 Setzt den Status auf `CANCELED`. Eine `uncancel()`-Methode existiert für Mahnungen **nicht** — eine stornierte Mahnung muss ggf. neu angelegt werden.
 
-#### `email(int $id, ?ReminderEmailOptions $options = null): void`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
 Ohne Optionen verwendet Billomat alle Default-Werte aus der hinterlegten E-Mail-Vorlage.
 
 ```php
-use Justpilot\Billomat\Api\ReminderEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-$mail = new ReminderEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->subject = 'Erinnerung: offene Rechnung 2026-0042';
+$mail = new EmailOptions(to: ['kunde@example.com'], subject: 'Erinnerung: offene Rechnung 2026-0042');
 
 $billomat->reminders->email($reminder->id, $mail);
 ```
@@ -170,7 +170,7 @@ Ein Update existiert nicht — zum Umbenennen wird gelöscht und neu angelegt.
 
 ## Write-Modell: `ReminderCreateOptions`
 
-Konstruktor: `new ReminderCreateOptions(int $invoiceId)`.
+Konstruktor: `new ReminderCreateOptions(int $invoiceId, …)` — `invoiceId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withSubject('Neu')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -192,7 +192,7 @@ Konstruktor: `new ReminderCreateOptions(int $invoiceId)`.
 
 ## Write-Modell: `ReminderUpdateOptions`
 
-Spiegelt `ReminderCreateOptions` **ohne** `invoiceId` — die Bindung an die Rechnung steht fest. Felder, die `null` bleiben, werden aus dem Payload gestrippt.
+Spiegelt `ReminderCreateOptions` **ohne** `invoiceId` — die Bindung an die Rechnung steht fest. Felder, die `null` bleiben, werden aus dem Payload gestrippt. Mit `Clear::Field` wird ein Feld dagegen als JSON-`null` gesendet und von Billomat geleert, z. B. `new ReminderUpdateOptions(note: Clear::Field)`.
 
 ## Write-Modell: `ReminderTagCreateOptions`
 
@@ -201,7 +201,9 @@ Spiegelt `ReminderCreateOptions` **ohne** `invoiceId` — die Bindung an die Rec
 | `reminderId` | `reminder_id` | `int` (Pflicht) | |
 | `name` | `name` | `string` (Pflicht) | |
 
-## Write-Modell: `ReminderEmailOptions`
+## Write-Modell: `EmailOptions`
+
+Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -326,7 +328,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\ReminderCreateOptions;
-use Justpilot\Billomat\Api\ReminderEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\ReminderTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 
@@ -353,10 +355,12 @@ $reminderTexts = $billomat->reminderTexts->list();
 $firstStage = $reminderTexts[0] ?? null;
 
 // 3) Mahnung als Entwurf anlegen
-$opts = new ReminderCreateOptions(invoiceId: $invoice->id);
-$opts->reminderTextId = $firstStage?->id;
-$opts->dueDays = 7;
-$opts->subject = 'Zahlungserinnerung zu Rechnung ' . ($invoice->invoiceNumber ?? '');
+$opts = new ReminderCreateOptions(
+    invoiceId: $invoice->id,
+    reminderTextId: $firstStage?->id,
+    dueDays: 7,
+    subject: 'Zahlungserinnerung zu Rechnung ' . ($invoice->invoiceNumber ?? ''),
+);
 
 $reminder = $billomat->reminders->create($opts);
 printf("Mahnung #%d angelegt (Status: %s)\n",
@@ -373,10 +377,11 @@ $billomat->reminders->tags->create(
 $billomat->reminders->complete($reminder->id);
 
 // 6) Per E-Mail versenden
-$mail = new ReminderEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->subject = 'Erinnerung: noch offene Rechnung';
-$mail->body = "Guten Tag,\n\nbitte begleichen Sie unsere offene Rechnung.\n\nViele Grüße";
+$mail = new EmailOptions(
+    to: ['kunde@example.com'],
+    subject: 'Erinnerung: noch offene Rechnung',
+    body: "Guten Tag,\n\nbitte begleichen Sie unsere offene Rechnung.\n\nViele Grüße",
+);
 $billomat->reminders->email($reminder->id, $mail);
 
 // 7) PDF lokal sichern

@@ -75,25 +75,27 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\ArticleCreateOptions;
 
-$opts = new ArticleCreateOptions(title: 'Webhosting Basic');
-$opts->description = 'Shared Hosting, 10 GB SSD';
-$opts->salesPrice = 19.90;
-$opts->currencyCode = 'EUR';
-$opts->unit = 'Monat';
-$opts->taxId = 12345;
+$opts = new ArticleCreateOptions(
+    title: 'Webhosting Basic',
+    description: 'Shared Hosting, 10 GB SSD',
+    salesPrice: 19.90,
+    currencyCode: 'EUR',
+    unit: 'Monat',
+    taxId: 12345,
+);
 
 $article = $billomat->articles->create($opts);
 ```
 
 ### `update(int $id, ArticleUpdateOptions $options): Article`
 
-Partial-Update — nicht gesetzte Properties bleiben unangetastet.
+Partial-Update — Felder, die `null` bleiben, bleiben unangetastet.
 
 ### `delete(int $id): void`
 
 ## Write-Modell: `ArticleCreateOptions`
 
-Konstruktor: `new ArticleCreateOptions(string $title)` — `title` ist Pflicht.
+Konstruktor: `new ArticleCreateOptions(string $title, …)` — `title` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withDescription('Neu')`).
 
 ### Identifikation
 
@@ -130,7 +132,7 @@ Konstruktor: `new ArticleCreateOptions(string $title)` — `title` ist Pflicht.
 
 ## Write-Modell: `ArticleUpdateOptions`
 
-Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und alle Felder sind nullable. Nicht gesetzte Properties bleiben unverändert.
+Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und alle Felder sind nullable. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new ArticleUpdateOptions(description: Clear::Field)`.
 
 ## Read-Modell: `Article`
 
@@ -287,13 +289,15 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Artikel anlegen
-$opts = new ArticleCreateOptions(title: 'Webhosting Basic');
-$opts->description = 'Shared Hosting, 10 GB SSD, tägliches Backup';
-$opts->salesPrice = 19.90;
-$opts->salesPrice2 = 17.90; // Stufe für Wiederverkäufer
-$opts->currencyCode = 'EUR';
-$opts->unit = 'Monat';
-$opts->taxId = 12345;
+$opts = new ArticleCreateOptions(
+    title: 'Webhosting Basic',
+    description: 'Shared Hosting, 10 GB SSD, tägliches Backup',
+    salesPrice: 19.90,
+    salesPrice2: 17.90, // Stufe für Wiederverkäufer
+    currencyCode: 'EUR',
+    unit: 'Monat',
+    taxId: 12345,
+);
 
 $article = $billomat->articles->create($opts);
 printf("Artikel #%d (%s) angelegt\n", $article->id, $article->articleNumber);
@@ -316,8 +320,7 @@ $billomat->articles->propertyValues->create(
 );
 
 // 4) Preis später anpassen — Partial-Update
-$update = new ArticleUpdateOptions();
-$update->salesPrice = 24.90;
+$update = new ArticleUpdateOptions(salesPrice: 24.90);
 $billomat->articles->update($article->id, $update);
 
 // 5) Cloud-Übersicht aller Artikel-Tags

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\OfferCreateOptions;
-use Justpilot\Billomat\Api\OfferEmailOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OffersApi;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
@@ -34,7 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(OffersApi::class)]
 #[CoversClass(OfferCreateOptions::class)]
 #[CoversClass(OfferUpdateOptions::class)]
-#[CoversClass(OfferEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(Offer::class)]
 #[CoversClass(OfferPdf::class)]
 #[CoversClass(OfferStatus::class)]
@@ -187,15 +187,16 @@ final class OffersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new OfferCreateOptions(clientId: 123);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->validityDays = 30;
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'Angebot März';
+        $opts = new OfferCreateOptions(
+            clientId: 123,
+            date: new DateTimeImmutable('2026-03-01'),
+            validityDays: 30,
+            title: 'Angebot März',
+            currencyCode: 'EUR',
+        );
 
-        $item = new OfferItemCreateOptions(quantity: 2.0, unitPrice: 100.0);
-        $item->title = 'Beratung';
-        $opts->addItem($item);
+        $item = new OfferItemCreateOptions(quantity: 2.0, unitPrice: 100.0, title: 'Beratung');
+        $opts = $opts->withItem($item);
 
         $created = $api->create($opts);
 
@@ -243,8 +244,7 @@ final class OffersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new OfferUpdateOptions();
-        $opts->date = new DateTimeImmutable('2026-03-10');
+        $opts = new OfferUpdateOptions(date: new DateTimeImmutable('2026-03-10'));
 
         $updated = $api->update(777, $opts);
 
@@ -386,10 +386,7 @@ final class OffersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new OfferEmailOptions();
-        $opts->from = 'me@example.com';
-        $opts->to = ['kunde@example.com'];
-        $opts->subject = 'Ihr Angebot';
+        $opts = new EmailOptions(from: 'me@example.com', to: ['kunde@example.com'], subject: 'Ihr Angebot');
 
         $api->email(42, $opts);
 

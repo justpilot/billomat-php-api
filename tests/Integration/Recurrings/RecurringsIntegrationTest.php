@@ -39,10 +39,11 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
         }
 
         $faker = $this->faker();
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $client = $billomat->clients->create($opts);
         $id = $client->id;
@@ -58,20 +59,25 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
         // Sicherer Draft: action=CREATE erzeugt nur eine Entwurfs-Rechnung beim Lauf
         // (kein Versand). Startdatum weit in der Zukunft, damit nichts ungewollt
         // ausgeführt wird, falls Cleanup hängenbleibt.
-        $opts = new RecurringCreateOptions(clientId: $clientId);
-        $opts->name = 'IT-Recurring-'.date('YmdHis');
-        $opts->title = 'Integrationstest Abo';
-        $opts->currencyCode = 'EUR';
-        $opts->action = RecurringAction::CREATE;
-        $opts->cycle = RecurringCycle::MONTHLY;
-        $opts->cycleNumber = 1;
-        $opts->startDate = new DateTimeImmutable('+10 years');
+        $opts = new RecurringCreateOptions(
+            clientId: $clientId,
+            name: 'IT-Recurring-'.date('YmdHis'),
+            title: 'Integrationstest Abo',
+            currencyCode: 'EUR',
+            action: RecurringAction::CREATE,
+            cycleNumber: 1,
+            cycle: RecurringCycle::MONTHLY,
+            startDate: new DateTimeImmutable('+10 years'),
+        );
 
-        $item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 50.0);
-        $item->title = 'Abo-Position';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
-        $opts->addItem($item);
+        $item = new RecurringItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: 50.0,
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Abo-Position',
+        );
+        $opts = $opts->withItem($item);
 
         return $opts;
     }
@@ -102,8 +108,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
 
         try {
             // Update: Titel ändern
-            $update = new RecurringUpdateOptions();
-            $update->title = 'Integrationstest Abo (geändert)';
+            $update = new RecurringUpdateOptions(title: 'Integrationstest Abo (geändert)');
             $updated = $billomat->recurrings->update($created->id, $update);
 
             self::assertSame($created->id, $updated->id);
@@ -130,18 +135,24 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
 
         try {
             // Zusätzliche Position über die ItemsApi anlegen
-            $newItem = new RecurringItemCreateOptions(quantity: 2.0, unitPrice: 25.0);
-            $newItem->title = 'Zusatz-Position';
-            $newItem->unit = 'Stück';
-            $newItem->taxRate = 19.0;
+            $newItem = new RecurringItemCreateOptions(
+                quantity: 2.0,
+                unitPrice: 25.0,
+                unit: 'Stück',
+                taxRate: 19.0,
+                title: 'Zusatz-Position',
+            );
 
             $created = $billomat->recurrings->items->create($recurring->id, $newItem);
             self::assertNotNull($created->id);
             self::assertSame(2.0, $created->quantity);
 
             // Update der Position
-            $updateItem = new RecurringItemCreateOptions(quantity: 3.0, unitPrice: 25.0);
-            $updateItem->title = 'Zusatz-Position (geändert)';
+            $updateItem = new RecurringItemCreateOptions(
+                quantity: 3.0,
+                unitPrice: 25.0,
+                title: 'Zusatz-Position (geändert)',
+            );
             $updated = $billomat->recurrings->items->update($created->id, $updateItem);
             self::assertSame(3.0, $updated->quantity);
 
@@ -192,10 +203,10 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
         // E-Mail-Empfänger setzen ein Recurring voraus, das überhaupt Mails verschickt.
         // Daher action=EMAIL mit minimalen E-Mail-Feldern. startDate weit in der Zukunft
         // verhindert ungewollten Versand.
-        $opts = $this->buildSafeDraft($billomat);
-        $opts->action = RecurringAction::EMAIL;
-        $opts->emailSubject = 'Integrationstest Abo-Versand';
-        $opts->emailMessage = 'Auto-Test';
+        $opts = $this->buildSafeDraft($billomat)
+            ->withAction(RecurringAction::EMAIL)
+            ->withEmailSubject('Integrationstest Abo-Versand')
+            ->withEmailMessage('Auto-Test');
 
         $recurring = $billomat->recurrings->create($opts);
 

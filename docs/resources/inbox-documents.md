@@ -76,13 +76,15 @@ Entfernt das Dokument aus dem Posteingang.
 
 ## Write-Modell: `InboxDocumentCreateOptions`
 
-Alle drei Felder werden über den Konstruktor gesetzt und sind Pflicht.
+Die drei Pflichtfelder sind die ersten Konstruktor-Parameter; `documentType` und `metadata` sind optionale benannte Argumente. Das Objekt ist `final readonly`, `withDocumentType()` und `withMetadata()` liefern eine geänderte Kopie.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `filename` | `filename` | `string` (Pflicht) | inkl. Endung, z. B. `rechnung.pdf` |
 | `mimeType` | `mimetype` | `string` (Pflicht) | Property heißt `mimeType` (camelCase), Wire-Feld ist `mimetype` (alles klein) |
 | `base64file` | `base64file` | `string` (Pflicht) | Bereits Base64-codierter Inhalt |
+| `documentType` | `document_type` | `?string` | Dokumenttyp laut Billomat-Klassifikation (z. B. `other`, `invoice`, `credit_note`); Billomat-Default `other` |
+| `metadata` | `metadata` | `?array<string, mixed>` | frei strukturierte Zusatzdaten, die Billomat unverändert speichert |
 
 ## Read-Modell: `InboxDocument`
 
@@ -160,8 +162,7 @@ foreach ($billomat->inboxDocuments->list(['order_by' => 'created+ASC']) as $pend
     }
 
     // 2a) Incoming anlegen (Lieferant und Betrag muss man hier selbst kennen)
-    $incomingOpts = new IncomingCreateOptions(supplierId: 4711);
-    $incomingOpts->label = $full->filename;
+    $incomingOpts = new IncomingCreateOptions(supplierId: 4711, label: $full->filename);
     $incoming = $billomat->incomings->create($incomingOpts);
 
     // 2b) PDF aus dem Posteingang an den Incoming hängen (Base64 direkt durchreichen)

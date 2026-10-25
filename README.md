@@ -74,12 +74,9 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Rechnung als Entwurf anlegen
-$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.00);
-$item->title = 'Konzeption';
+$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.00, title: 'Konzeption');
 
-$options = new InvoiceCreateOptions(clientId: 12345);
-$options->title = 'Webentwicklung Mai 2026';
-$options->addItem($item);
+$options = new InvoiceCreateOptions(clientId: 12345, title: 'Webentwicklung Mai 2026', items: [$item]);
 
 $invoice = $billomat->invoices->create($options);
 

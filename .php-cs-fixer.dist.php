@@ -24,6 +24,13 @@ return (new PhpCsFixer\Config())
         'phpdoc_to_comment' => false,
         'no_superfluous_phpdoc_tags' => ['allow_mixed' => true, 'remove_inheritdoc' => true],
         'php_unit_test_class_requires_covers' => false,
+        // PHP 8.5: clone($obj, [...]) wird wie eine Funktion aufgerufen – kein Leerzeichen nach `clone` erzwingen.
+        'single_space_around_construct' => [
+            'constructs_followed_by_a_single_space' => array_values(array_diff(
+                (new PhpCsFixer\Fixer\LanguageConstruct\SingleSpaceAroundConstructFixer())->getConfigurationDefinition()->resolve([])['constructs_followed_by_a_single_space'],
+                ['clone'],
+            )),
+        ],
     ])
     ->setFinder($finder)
     ->setCacheFile(__DIR__ . '/build/.php-cs-fixer.cache');

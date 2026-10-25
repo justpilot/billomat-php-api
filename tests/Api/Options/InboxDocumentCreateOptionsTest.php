@@ -38,9 +38,9 @@ final class InboxDocumentCreateOptionsTest extends TestCase
             filename: 'beleg.pdf',
             mimeType: 'application/pdf',
             base64file: 'JVBERi0xLg==',
+            documentType: 'invoice',
+            metadata: ['vendor' => 'ACME', 'amount' => 99.0],
         );
-        $options->documentType = 'invoice';
-        $options->metadata = ['vendor' => 'ACME', 'amount' => 99.0];
 
         $payload = $options->toArray();
 

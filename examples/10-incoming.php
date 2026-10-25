@@ -37,14 +37,16 @@ $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
 try {
     // 1) Eingangsrechnung anlegen
-    $opts = new IncomingCreateOptions(supplierId: $supplierId);
-    $opts->incomingNumber = 'RE-' . date('Ymd-His');
-    $opts->date = new DateTimeImmutable('yesterday');
-    $opts->supplyDate = new DateTimeImmutable('yesterday');
-    $opts->dueDays = 14;
-    $opts->totalGross = 119.0;
-    $opts->totalNet = 100.0;
-    $opts->note = 'Beleg-Erfassung aus examples/10-incoming.php';
+    $opts = new IncomingCreateOptions(
+        supplierId: $supplierId,
+        incomingNumber: 'RE-' . date('Ymd-His'),
+        date: new DateTimeImmutable('yesterday'),
+        supplyDate: new DateTimeImmutable('yesterday'),
+        dueDays: 14,
+        totalGross: 119.0,
+        totalNet: 100.0,
+        note: 'Beleg-Erfassung aus examples/10-incoming.php',
+    );
 
     $incoming = $billomat->incomings->create($opts);
     printf("Eingangsbeleg #%d angelegt: Brutto %.2f %s\n",
@@ -61,12 +63,12 @@ try {
     // 3) Zahlung verbuchen → markiert direkt als bezahlt
     $payment = new IncomingPaymentCreateOptions(
         incomingId: $incoming->id,
-        amount: $incoming->totalGross ?? 119.0,
+            amount: $incoming->totalGross ?? 119.0,
+        date: new DateTimeImmutable('today'),
+        type: InvoicePaymentType::BANK_TRANSFER,
+        markIncomingAsPaid: true,
+        transactionPurpose: $incoming->incomingNumber ?? '',
     );
-    $payment->date = new DateTimeImmutable('today');
-    $payment->type = InvoicePaymentType::BANK_TRANSFER;
-    $payment->markIncomingAsPaid = true;
-    $payment->transactionPurpose = $incoming->incomingNumber ?? '';
 
     $created = $billomat->incomings->payments->create($payment);
     printf("Zahlung #%d verbucht: %.2f via %s\n",

@@ -187,7 +187,7 @@ final class DeliveryNotesApi extends AbstractApi
         $this->putVoid("/delivery-notes/{$id}/undo");
     }
 
-    public function email(int $id, ?DeliveryNoteEmailOptions $options = null): void
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 

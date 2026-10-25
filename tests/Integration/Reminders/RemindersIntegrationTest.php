@@ -59,10 +59,12 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoiceId = $this->findOverdueInvoiceIdOrSkip();
         $billomat = $this->createBillomatClientOrSkip();
 
-        $opts = new ReminderCreateOptions(invoiceId: $invoiceId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->subject = 'Integrationstest-Mahnung '.date('d.m.Y H:i:s');
-        $opts->label = 'Reminder Integrationstest';
+        $opts = new ReminderCreateOptions(
+            invoiceId: $invoiceId,
+            date: new DateTimeImmutable('today'),
+            subject: 'Integrationstest-Mahnung '.date('d.m.Y H:i:s'),
+            label: 'Reminder Integrationstest',
+        );
 
         $reminder = $billomat->reminders->create($opts);
 
@@ -70,8 +72,7 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame(ReminderStatus::DRAFT, $reminder->status);
 
         // Update
-        $update = new ReminderUpdateOptions();
-        $update->subject = 'Geänderter Mahnungs-Betreff';
+        $update = new ReminderUpdateOptions(subject: 'Geänderter Mahnungs-Betreff');
         $updated = $billomat->reminders->update($reminder->id, $update);
 
         self::assertSame($reminder->id, $updated->id);

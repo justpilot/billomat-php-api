@@ -291,13 +291,13 @@ final class InvoiceItemsApiTest extends TestCase
         $options = new InvoiceItemCreateOptions(
             quantity: 2.0,
             unitPrice: 50.0,
+            unit: 'Stück',
+            taxName: 'USt 19%',
+            taxRate: 19.0,
+            title: 'Neue Position',
+            description: 'Aus Tests',
+            type: InvoiceItemType::SERVICE,
         );
-        $options->title = 'Neue Position';
-        $options->description = 'Aus Tests';
-        $options->unit = 'Stück';
-        $options->taxName = 'USt 19%';
-        $options->taxRate = 19.0;
-        $options->type = InvoiceItemType::SERVICE;
 
         $created = $api->create(123, $options);
 
@@ -372,15 +372,15 @@ final class InvoiceItemsApiTest extends TestCase
         $options = new InvoiceItemCreateOptions(
             quantity: 3.0,
             unitPrice: 75.0,
+            unit: 'Stück',
+            taxName: 'USt 19%',
+            taxRate: 19.0,
+            taxChangedManually: true,
+            title: 'Geänderter Titel',
+            description: 'Geänderte Beschreibung',
+            reduction: '5%',
+            type: InvoiceItemType::PRODUCT,
         );
-        $options->title = 'Geänderter Titel';
-        $options->description = 'Geänderte Beschreibung';
-        $options->unit = 'Stück';
-        $options->taxName = 'USt 19%';
-        $options->taxRate = 19.0;
-        $options->taxChangedManually = true;
-        $options->reduction = '5%';
-        $options->type = InvoiceItemType::PRODUCT;
 
         $updated = $api->update(77, $options);
 

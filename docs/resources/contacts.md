@@ -54,28 +54,29 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\ContactCreateOptions;
 
-$opts = new ContactCreateOptions(clientId: 98765);
-$opts->firstName = 'Erika';
-$opts->lastName = 'Mustermann';
-$opts->email = 'erika@example.com';
+$opts = new ContactCreateOptions(
+    clientId: 98765,
+    firstName: 'Erika',
+    lastName: 'Mustermann',
+    email: 'erika@example.com',
+);
 
 $created = $billomat->contacts->create($opts);
 ```
 
-`clientId` ist Pflicht und Konstruktor-Argument; alle anderen Felder sind optional und werden als Properties gesetzt.
+`clientId` ist Pflicht und erstes Konstruktor-Argument; alle anderen Felder sind optional und werden als benannte Argumente übergeben.
 
 ### `update(int $id, ContactUpdateOptions $options): Contact`
 
 ```php
 use Justpilot\Billomat\Api\ContactUpdateOptions;
 
-$patch = new ContactUpdateOptions();
-$patch->email = 'neue.adresse@example.com';
+$patch = new ContactUpdateOptions(email: 'neue.adresse@example.com');
 
 $billomat->contacts->update($contactId, $patch);
 ```
 
-`ContactUpdateOptions` ist ein echtes Partial-Update: nur gesetzte (nicht-`null`) Properties werden gesendet. Die `client_id` ist beim Update bewusst nicht änderbar.
+`ContactUpdateOptions` ist ein echtes Partial-Update: nur nicht-`null` Felder werden gesendet, `Clear::Field` leert ein Feld. Die `client_id` ist beim Update bewusst nicht änderbar.
 
 ### `delete(int $id): void`
 
@@ -83,7 +84,7 @@ Entfernt den Ansprechpartner. Fehler kommen als Exception.
 
 ## Write-Modell: `ContactCreateOptions`
 
-Konstruktor: `new ContactCreateOptions(int $clientId)`. Alle weiteren Felder sind public-Properties und nullable.
+Konstruktor: `new ContactCreateOptions(int $clientId, …)`. Alle weiteren Felder sind optionale, nullable Konstruktor-Parameter und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withEmail('neu@example.com')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -107,7 +108,7 @@ Konstruktor: `new ContactCreateOptions(int $clientId)`. Alle weiteren Felder sin
 
 ## Write-Modell: `ContactUpdateOptions`
 
-Funktional identisch zu `ContactCreateOptions`, **ohne** `clientId`. Beim Update lässt Billomat die Kundenzugehörigkeit nicht ändern. Alle Felder sind optionale Properties, und `toArray()` strippt `null`-Werte ebenfalls.
+Funktional identisch zu `ContactCreateOptions`, **ohne** `clientId`. Beim Update lässt Billomat die Kundenzugehörigkeit nicht ändern. Alle Felder sind optionale Konstruktor-Parameter, und `toArray()` strippt `null`-Werte ebenfalls. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new ContactUpdateOptions(note: Clear::Field)`.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -199,20 +200,21 @@ foreach ($billomat->contacts->list($clientId) as $contact) {
 }
 
 // 2) Neuen Ansprechpartner anlegen
-$opts = new ContactCreateOptions(clientId: $clientId);
-$opts->label = 'Buchhaltung';
-$opts->salutation = 'Frau';
-$opts->firstName = 'Erika';
-$opts->lastName = 'Mustermann';
-$opts->email = 'buchhaltung@example.com';
-$opts->countryCode = 'DE';
+$opts = new ContactCreateOptions(
+    clientId: $clientId,
+    label: 'Buchhaltung',
+    salutation: 'Frau',
+    firstName: 'Erika',
+    lastName: 'Mustermann',
+    email: 'buchhaltung@example.com',
+    countryCode: 'DE',
+);
 
 $created = $billomat->contacts->create($opts);
 printf("Angelegt: #%d %s %s\n", $created->id, $created->firstName, $created->lastName);
 
 // 3) E-Mail-Adresse aktualisieren
-$patch = new ContactUpdateOptions();
-$patch->email = 'finance@example.com';
+$patch = new ContactUpdateOptions(email: 'finance@example.com');
 
 $updated = $billomat->contacts->update($created->id, $patch);
 var_dump($updated->email); // 'finance@example.com'

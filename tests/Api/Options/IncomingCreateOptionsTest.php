@@ -15,12 +15,14 @@ final class IncomingCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesNewSpecFields(): void
     {
-        $options = new IncomingCreateOptions(supplierId: 5);
-        $options->number = 'RE-2026-001';
-        $options->base64file = 'JVBERi0xLg==';
-        $options->category = 'Software';
-        $options->clientNumber = 'AC-42';
-        $options->expenseAccountNumber = 4980;
+        $options = new IncomingCreateOptions(
+            supplierId: 5,
+            number: 'RE-2026-001',
+            clientNumber: 'AC-42',
+            expenseAccountNumber: 4980,
+            category: 'Software',
+            base64file: 'JVBERi0xLg==',
+        );
 
         $payload = $options->toArray();
 

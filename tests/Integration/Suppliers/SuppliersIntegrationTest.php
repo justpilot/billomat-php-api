@@ -37,19 +37,20 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant '.date('His'));
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
-        $opts->phone = $faker->phoneNumber();
-        $opts->city = $faker->city();
+        $opts = new SupplierCreateOptions(
+            name: 'IT-Lieferant '.date('His'),
+            city: $faker->city(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+            phone: $faker->phoneNumber(),
+        );
 
         $supplier = $billomat->suppliers->create($opts);
 
         self::assertNotNull($supplier->id);
 
         // Update
-        $update = new SupplierUpdateOptions();
-        $update->city = 'München';
+        $update = new SupplierUpdateOptions(city: 'München');
         $updated = $billomat->suppliers->update($supplier->id, $update);
 
         self::assertSame($supplier->id, $updated->id);

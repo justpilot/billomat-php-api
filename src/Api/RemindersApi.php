@@ -161,7 +161,7 @@ final class RemindersApi extends AbstractApi
         $this->putVoid("/reminders/{$id}/cancel");
     }
 
-    public function email(int $id, ?ReminderEmailOptions $options = null): void
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 

@@ -137,10 +137,12 @@ final class ArticlesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ArticleCreateOptions(title: 'Neu');
-        $opts->salesPrice = 25.0;
-        $opts->currencyCode = 'EUR';
-        $opts->unit = 'Stück';
+        $opts = new ArticleCreateOptions(
+            title: 'Neu',
+            salesPrice: 25.0,
+            currencyCode: 'EUR',
+            unit: 'Stück',
+        );
 
         $created = $api->create($opts);
 
@@ -178,8 +180,7 @@ final class ArticlesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ArticleUpdateOptions();
-        $opts->salesPrice = 30.0;
+        $opts = new ArticleUpdateOptions(salesPrice: 30.0);
 
         $updated = $api->update(777, $opts);
 

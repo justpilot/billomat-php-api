@@ -306,3 +306,86 @@ if ($billomat->invoices->complete($id)) {
 // 4.0
 $billomat->invoices->complete($id); // throws on failure
 ```
+
+## Options are immutable
+
+All `*CreateOptions`/`*UpdateOptions`, `EmailOptions`, `InvoiceMailOptions`,
+`InboxDocumentCreateOptions` and `SettingsUpdateOptions` are `final readonly` classes. Every field
+is a constructor parameter with a default, so pass named arguments instead of assigning properties.
+Required fields (e.g. `clientId` on `InvoiceCreateOptions`) are still the first positional
+parameters:
+
+```php
+// 3.x
+$options = new ClientCreateOptions();
+$options->name = 'ACME GmbH';
+$options->email = 'info@acme.test';
+
+// 4.0
+$options = new ClientCreateOptions(name: 'ACME GmbH', email: 'info@acme.test');
+```
+
+To change a field later, or to build options step by step, use the `with*()` methods. They return
+a copy and leave the original untouched:
+
+```php
+// 3.x
+if (null !== $from) {
+    $options->from = $from;
+}
+
+// 4.0
+if (null !== $from) {
+    $options = $options->withFrom($from);
+}
+```
+
+Spreading an array of named arguments works too: `new ClientCreateOptions(...$fields)`.
+
+### Positions go into the constructor
+
+`addItem()` and `getItems()` are gone from the document create options (invoices, offers,
+confirmations, credit notes, delivery notes, recurrings):
+
+```php
+// 3.x
+$options = new InvoiceCreateOptions($clientId);
+$options->addItem($item);
+$items = $options->getItems();
+
+// 4.0
+$options = new InvoiceCreateOptions($clientId, items: [$item]);
+$options = $options->withItem($another);
+$items = $options->items;
+```
+
+### Clearing a field with `Clear::Field`
+
+In 3.x, `null` meant "don't send", so an update could not empty a field. In `*UpdateOptions` and
+`SettingsUpdateOptions`, `null` still means "not sent, unchanged"; `Clear::Field` is sent as JSON
+`null`, and Billomat empties the field:
+
+```php
+use Justpilot\Billomat\Api\Clear;
+
+$billomat->clients->update($id, new ClientUpdateOptions(note: Clear::Field));
+```
+
+### One `EmailOptions` class
+
+`InvoiceEmailOptions`, `OfferEmailOptions`, `ConfirmationEmailOptions`, `CreditNoteEmailOptions`,
+`DeliveryNoteEmailOptions`, `ReminderEmailOptions` and `LetterEmailOptions` had identical fields and
+are merged into `EmailOptions`:
+
+```php
+// 3.x
+$billomat->invoices->email($id, $invoiceEmailOptions);
+
+// 4.0
+$billomat->invoices->email($id, new EmailOptions(to: ['kunde@example.test'], subject: 'Ihre Rechnung'));
+```
+
+### `ClientCreateOptions::$dunningRun` defaults to `null`
+
+3.x always sent `dunning_run=0`. 4.0 sends it only when you set it, so Billomat's account default
+applies. Pass `dunningRun: false` to keep the old behaviour.

@@ -74,28 +74,30 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\SupplierCreateOptions;
 
-$opts = new SupplierCreateOptions(name: 'Hetzner Online GmbH');
-$opts->street = 'Industriestr. 25';
-$opts->zip = '91710';
-$opts->city = 'Gunzenhausen';
-$opts->countryCode = 'DE';
-$opts->vatNumber = 'DE812871812';
-$opts->bankIban = 'DE89370400440532013000';
-$opts->bankBic = 'COBADEFFXXX';
-$opts->currencyCode = 'EUR';
+$opts = new SupplierCreateOptions(
+    name: 'Hetzner Online GmbH',
+    street: 'Industriestr. 25',
+    zip: '91710',
+    city: 'Gunzenhausen',
+    countryCode: 'DE',
+    vatNumber: 'DE812871812',
+    bankIban: 'DE89370400440532013000',
+    bankBic: 'COBADEFFXXX',
+    currencyCode: 'EUR',
+);
 
 $supplier = $billomat->suppliers->create($opts);
 ```
 
 ### `update(int $id, SupplierUpdateOptions $options): Supplier`
 
-Partial-Update — nicht gesetzte Properties bleiben unverändert.
+Partial-Update — Felder, die `null` bleiben, bleiben unverändert.
 
 ### `delete(int $id): void`
 
 ## Write-Modell: `SupplierCreateOptions`
 
-Konstruktor: `new SupplierCreateOptions(string $name)` — `name` ist Pflicht.
+Konstruktor: `new SupplierCreateOptions(string $name, …)` — `name` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withEmail('neu@example.com')`).
 
 ### Identifikation & Ansprache
 
@@ -143,7 +145,7 @@ Konstruktor: `new SupplierCreateOptions(string $name)` — `name` ist Pflicht.
 
 ## Write-Modell: `SupplierUpdateOptions`
 
-Spiegelt `SupplierCreateOptions` exakt, jedoch ist `name` nicht mehr Pflicht und alle Felder sind nullable. Nicht gesetzte Properties bleiben unverändert.
+Spiegelt `SupplierCreateOptions` exakt, jedoch ist `name` nicht mehr Pflicht und alle Felder sind nullable. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new SupplierUpdateOptions(note: Clear::Field)`.
 
 ## Read-Modell: `Supplier`
 
@@ -299,17 +301,19 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Lieferant anlegen
-$opts = new SupplierCreateOptions(name: 'Hetzner Online GmbH');
-$opts->street = 'Industriestr. 25';
-$opts->zip = '91710';
-$opts->city = 'Gunzenhausen';
-$opts->countryCode = 'DE';
-$opts->email = 'billing@hetzner.com';
-$opts->www = 'https://www.hetzner.com';
-$opts->vatNumber = 'DE812871812';
-$opts->bankIban = 'DE89370400440532013000';
-$opts->bankBic = 'COBADEFFXXX';
-$opts->currencyCode = 'EUR';
+$opts = new SupplierCreateOptions(
+    name: 'Hetzner Online GmbH',
+    street: 'Industriestr. 25',
+    zip: '91710',
+    city: 'Gunzenhausen',
+    countryCode: 'DE',
+    email: 'billing@hetzner.com',
+    www: 'https://www.hetzner.com',
+    vatNumber: 'DE812871812',
+    bankIban: 'DE89370400440532013000',
+    bankBic: 'COBADEFFXXX',
+    currencyCode: 'EUR',
+);
 
 $supplier = $billomat->suppliers->create($opts);
 printf("Lieferant #%d (%s) angelegt — Kreditor-Nr. %s\n",
@@ -336,9 +340,7 @@ $billomat->suppliers->propertyValues->create(
 );
 
 // 4) Kontaktdaten später nachpflegen — Partial-Update
-$update = new SupplierUpdateOptions();
-$update->phone = '+49 9831 505-0';
-$update->note = 'Standard-Hostingpartner seit 2018.';
+$update = new SupplierUpdateOptions(phone: '+49 9831 505-0', note: 'Standard-Hostingpartner seit 2018.');
 $billomat->suppliers->update($supplier->id, $update);
 
 // 5) Cloud-Übersicht aller Supplier-Tags

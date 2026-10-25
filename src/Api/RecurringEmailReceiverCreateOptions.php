@@ -17,7 +17,7 @@ use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
  * Generiert aus tools/codegen/definitions/recurring-email-receivers.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class RecurringEmailReceiverCreateOptions implements WriteOptions
+final readonly class RecurringEmailReceiverCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -42,6 +42,24 @@ final class RecurringEmailReceiverCreateOptions implements WriteOptions
          */
         public string $address,
     ) {
+    }
+
+    /** Kopie mit geändertem `recurringId`. */
+    public function withRecurringId(int $recurringId): self
+    {
+        return clone($this, ['recurringId' => $recurringId]);
+    }
+
+    /** Kopie mit geändertem `type`. */
+    public function withType(RecurringEmailReceiverType $type): self
+    {
+        return clone($this, ['type' => $type]);
+    }
+
+    /** Kopie mit geändertem `address`. */
+    public function withAddress(string $address): self
+    {
+        return clone($this, ['address' => $address]);
     }
 
     /**

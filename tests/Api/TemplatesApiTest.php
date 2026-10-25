@@ -149,8 +149,7 @@ final class TemplatesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
-        $opts = new TemplateCreateOptions(TemplateDocumentType::INVOICE);
-        $opts->name = 'Neu';
+        $opts = new TemplateCreateOptions(TemplateDocumentType::INVOICE, name: 'Neu');
 
         $created = $api->create($opts);
 
@@ -191,9 +190,7 @@ final class TemplatesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
-        $u = new TemplateUpdateOptions();
-        $u->name = 'Umbenannt';
-        $u->isDefault = true;
+        $u = new TemplateUpdateOptions(name: 'Umbenannt', isDefault: true);
 
         $updated = $api->update(12, $u);
 

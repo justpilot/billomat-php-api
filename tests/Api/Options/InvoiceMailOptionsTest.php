@@ -21,9 +21,7 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itConvertsBoolColorAndDuplexToOneZero(): void
     {
-        $options = new InvoiceMailOptions();
-        $options->color = true;
-        $options->duplex = false;
+        $options = new InvoiceMailOptions(color: true, duplex: false);
 
         $payload = $options->toArray();
 
@@ -34,8 +32,7 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itPassesPaperWeightThroughUntouched(): void
     {
-        $options = new InvoiceMailOptions();
-        $options->paperWeight = '90';
+        $options = new InvoiceMailOptions(paperWeight: '90');
 
         $payload = $options->toArray();
 
@@ -45,8 +42,7 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itStripsNullFields(): void
     {
-        $options = new InvoiceMailOptions();
-        $options->color = true;
+        $options = new InvoiceMailOptions(color: true);
 
         $payload = $options->toArray();
 
@@ -56,11 +52,12 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itWrapsAttachmentsInAttachmentEnvelope(): void
     {
-        $options = new InvoiceMailOptions();
-        $options->attachments = [
-            ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
-            ['filename' => 'flyer.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'WFla'],
-        ];
+        $options = new InvoiceMailOptions(
+            attachments: [
+                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+                ['filename' => 'flyer.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'WFla'],
+            ],
+        );
 
         $payload = $options->toArray();
 

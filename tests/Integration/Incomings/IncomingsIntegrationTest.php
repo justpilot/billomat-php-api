@@ -26,8 +26,7 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $suppliers[0]->id;
         }
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant Incoming '.date('His'));
-        $opts->countryCode = 'DE';
+        $opts = new SupplierCreateOptions(name: 'IT-Lieferant Incoming '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
         self::assertNotNull($created->id);
 
@@ -54,13 +53,15 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $supplierId = $this->ensureSupplierId();
         $faker = $this->faker();
 
-        $opts = new IncomingCreateOptions(supplierId: $supplierId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->incomingNumber = 'IT-IN-'.date('His');
-        $opts->label = 'Integrationstest Incoming';
-        $opts->note = 'Auto-Test';
-        $opts->totalGross = $faker->randomFloat(2, 50, 500);
-        $opts->currencyCode = 'EUR';
+        $opts = new IncomingCreateOptions(
+            supplierId: $supplierId,
+            date: new DateTimeImmutable('today'),
+            incomingNumber: 'IT-IN-'.date('His'),
+            label: 'Integrationstest Incoming',
+            note: 'Auto-Test',
+            totalGross: $faker->randomFloat(2, 50, 500),
+            currencyCode: 'EUR',
+        );
 
         $incoming = $billomat->incomings->create($opts);
 
@@ -68,8 +69,7 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($supplierId, $incoming->supplierId);
 
         // Update
-        $update = new IncomingUpdateOptions();
-        $update->label = 'Geänderter Label';
+        $update = new IncomingUpdateOptions(label: 'Geänderter Label');
         $updated = $billomat->incomings->update($incoming->id, $update);
 
         self::assertSame($incoming->id, $updated->id);

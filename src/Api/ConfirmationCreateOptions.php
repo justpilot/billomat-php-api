@@ -11,7 +11,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
  * Typisierter Payload für POST /confirmations.
  *
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
- * Positionen lassen sich beim Anlegen über addItem() direkt mitsenden.
+ * Positionen lassen sich beim Anlegen über `items:` bzw. withItem() direkt mitsenden.
  *
  * Doku:
  * https://www.billomat.com/en/api/confirmations/
@@ -19,7 +19,7 @@ use Justpilot\Billomat\Model\Enum\NetGross;
  * Generiert aus tools/codegen/definitions/confirmations.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ConfirmationCreateOptions implements WriteOptions
+final readonly class ConfirmationCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
@@ -29,204 +29,299 @@ final class ConfirmationCreateOptions implements WriteOptions
          * Typ: INT
          */
         public int $clientId,
+        /**
+         * ID des Kontakts.
+         *
+         * Billomat-Feld: contact_id
+         * Typ: INT
+         */
+        public ?int $contactId = null,
+        /**
+         * Laufende Nummer (ohne Präfix).
+         *
+         * Billomat-Feld: number
+         * Typ: INT
+         * Default: nächste freie Nummer
+         */
+        public ?int $number = null,
+        /**
+         * Präfix der Auftragsbestätigungsnummer.
+         *
+         * Billomat-Feld: number_pre
+         * Typ: ALNUM
+         * Default: Wert aus Einstellungen
+         */
+        public ?string $numberPre = null,
+        /**
+         * Mindestlänge der Auftragsbestätigungsnummer (wird mit führenden Nullen aufgefüllt).
+         *
+         * Billomat-Feld: number_length
+         * Typ: INT
+         * Default: Wert aus Einstellungen
+         */
+        public ?int $numberLength = null,
+        /**
+         * Auftragsbestätigungsdatum.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: date
+         * Typ: DATE
+         * Default: heute
+         */
+        public ?DateTimeImmutable $date = null,
+        /**
+         * Komplette Adresse.
+         *
+         * Laut Doku veraltet – Billomat verarbeitet das Feld nicht mehr, bitte contact_id oder client_id verwenden.
+         *
+         * Billomat-Feld: address
+         * Typ: ALNUM
+         * Default: Adresse des Kunden
+         */
+        public ?string $address = null,
+        /**
+         * Skonto in Prozent.
+         *
+         * Billomat-Feld: discount_rate
+         */
+        public ?int $discountRate = null,
+        /**
+         * Skontodatum.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: discount_date
+         */
+        public ?DateTimeImmutable $discountDate = null,
+        /**
+         * Skontozeitraum in Tagen.
+         *
+         * Billomat-Feld: discount_days
+         */
+        public ?int $discountDays = null,
+        /**
+         * Dokumentenüberschrift.
+         *
+         * Billomat-Feld: title
+         * Typ: ALNUM
+         */
+        public ?string $title = null,
+        /**
+         * Bezeichnung.
+         *
+         * Billomat-Feld: label
+         * Typ: ALNUM
+         */
+        public ?string $label = null,
+        /**
+         * Einleitungstext.
+         *
+         * Billomat-Feld: intro
+         * Typ: ALNUM
+         * Default: Wert aus Einstellungen
+         */
+        public ?string $intro = null,
+        /**
+         * Anmerkungstext.
+         *
+         * Billomat-Feld: note
+         * Typ: ALNUM
+         * Default: Wert aus Einstellungen
+         */
+        public ?string $note = null,
+        /**
+         * Preisbasis (Brutto- oder Netto-Preise).
+         *
+         * Billomat-Feld: net_gross
+         * Typ: ALNUM („NET“, „GROSS“)
+         * Default: Wert aus den Einstellungen
+         */
+        public ?NetGross $netGross = null,
+        /**
+         * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
+         *
+         * Billomat-Feld: reduction
+         * Typ: ALNUM
+         */
+        public ?string $reduction = null,
+        /**
+         * Währung (ISO-Währungscode).
+         *
+         * Billomat-Feld: currency_code
+         * Typ: ISO-Währungscode
+         * Default: Standard-Währung
+         */
+        public ?string $currencyCode = null,
+        /**
+         * Währungskurs (für Umrechnung in die Standard-Währung).
+         *
+         * Billomat-Feld: quote
+         * Typ: FLOAT
+         * Default: 1.0000
+         */
+        public ?float $quote = null,
+        /**
+         * ID des Quell-Angebots.
+         *
+         * Billomat-Feld: offer_id
+         * Typ: INT
+         */
+        public ?int $offerId = null,
+        /**
+         * ID des Freitextes zur Belegung von title, label, intro und note.
+         *
+         * Billomat-Feld: free_text_id
+         * Typ: INT
+         */
+        public ?int $freeTextId = null,
+        /**
+         * ID der Vorlage, mit der die Auftragsbestätigung abgeschlossen wird.
+         *
+         * Billomat-Feld: template_id
+         * Typ: INT
+         * Default: ID der Standardvorlage
+         */
+        public ?int $templateId = null,
+        /**
+         * Positionen, die beim Anlegen mitgesendet werden.
+         *
+         * @var list<ConfirmationItemCreateOptions>
+         */
+        public array $items = [],
     ) {
     }
 
-    /**
-     * ID des Kontakts.
-     *
-     * Billomat-Feld: contact_id
-     * Typ: INT
-     */
-    public ?int $contactId = null;
-
-    /**
-     * Laufende Nummer (ohne Präfix).
-     *
-     * Billomat-Feld: number
-     * Typ: INT
-     * Default: nächste freie Nummer
-     */
-    public ?int $number = null;
-
-    /**
-     * Präfix der Auftragsbestätigungsnummer.
-     *
-     * Billomat-Feld: number_pre
-     * Typ: ALNUM
-     * Default: Wert aus Einstellungen
-     */
-    public ?string $numberPre = null;
-
-    /**
-     * Mindestlänge der Auftragsbestätigungsnummer (wird mit führenden Nullen aufgefüllt).
-     *
-     * Billomat-Feld: number_length
-     * Typ: INT
-     * Default: Wert aus Einstellungen
-     */
-    public ?int $numberLength = null;
-
-    /**
-     * Auftragsbestätigungsdatum.
-     *
-     * Format: YYYY-MM-DD
-     *
-     * Billomat-Feld: date
-     * Typ: DATE
-     * Default: heute
-     */
-    public ?DateTimeImmutable $date = null;
-
-    /**
-     * Komplette Adresse.
-     *
-     * Laut Doku veraltet – Billomat verarbeitet das Feld nicht mehr, bitte contact_id oder client_id verwenden.
-     *
-     * Billomat-Feld: address
-     * Typ: ALNUM
-     * Default: Adresse des Kunden
-     */
-    public ?string $address = null;
-
-    /**
-     * Skonto in Prozent.
-     *
-     * Billomat-Feld: discount_rate
-     */
-    public ?int $discountRate = null;
-
-    /**
-     * Skontodatum.
-     *
-     * Format: YYYY-MM-DD
-     *
-     * Billomat-Feld: discount_date
-     */
-    public ?DateTimeImmutable $discountDate = null;
-
-    /**
-     * Skontozeitraum in Tagen.
-     *
-     * Billomat-Feld: discount_days
-     */
-    public ?int $discountDays = null;
-
-    /**
-     * Dokumentenüberschrift.
-     *
-     * Billomat-Feld: title
-     * Typ: ALNUM
-     */
-    public ?string $title = null;
-
-    /**
-     * Bezeichnung.
-     *
-     * Billomat-Feld: label
-     * Typ: ALNUM
-     */
-    public ?string $label = null;
-
-    /**
-     * Einleitungstext.
-     *
-     * Billomat-Feld: intro
-     * Typ: ALNUM
-     * Default: Wert aus Einstellungen
-     */
-    public ?string $intro = null;
-
-    /**
-     * Anmerkungstext.
-     *
-     * Billomat-Feld: note
-     * Typ: ALNUM
-     * Default: Wert aus Einstellungen
-     */
-    public ?string $note = null;
-
-    /**
-     * Preisbasis (Brutto- oder Netto-Preise).
-     *
-     * Billomat-Feld: net_gross
-     * Typ: ALNUM („NET“, „GROSS“)
-     * Default: Wert aus den Einstellungen
-     */
-    public ?NetGross $netGross = null;
-
-    /**
-     * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
-     *
-     * Billomat-Feld: reduction
-     * Typ: ALNUM
-     */
-    public ?string $reduction = null;
-
-    /**
-     * Währung (ISO-Währungscode).
-     *
-     * Billomat-Feld: currency_code
-     * Typ: ISO-Währungscode
-     * Default: Standard-Währung
-     */
-    public ?string $currencyCode = null;
-
-    /**
-     * Währungskurs (für Umrechnung in die Standard-Währung).
-     *
-     * Billomat-Feld: quote
-     * Typ: FLOAT
-     * Default: 1.0000
-     */
-    public ?float $quote = null;
-
-    /**
-     * ID des Quell-Angebots.
-     *
-     * Billomat-Feld: offer_id
-     * Typ: INT
-     */
-    public ?int $offerId = null;
-
-    /**
-     * ID des Freitextes zur Belegung von title, label, intro und note.
-     *
-     * Billomat-Feld: free_text_id
-     * Typ: INT
-     */
-    public ?int $freeTextId = null;
-
-    /**
-     * ID der Vorlage, mit der die Auftragsbestätigung abgeschlossen wird.
-     *
-     * Billomat-Feld: template_id
-     * Typ: INT
-     * Default: ID der Standardvorlage
-     */
-    public ?int $templateId = null;
-
-    /**
-     * @var list<ConfirmationItemCreateOptions>
-     */
-    private array $items = [];
-
-    /**
-     * Fügt eine Position hinzu, die beim Anlegen mitgesendet wird.
-     */
-    public function addItem(ConfirmationItemCreateOptions $item): self
+    /** Kopie mit geändertem `clientId`. */
+    public function withClientId(int $clientId): self
     {
-        $this->items[] = $item;
-
-        return $this;
+        return clone($this, ['clientId' => $clientId]);
     }
 
-    /**
-     * @return list<ConfirmationItemCreateOptions>
-     */
-    public function getItems(): array
+    /** Kopie mit geändertem `contactId`. */
+    public function withContactId(?int $contactId): self
     {
-        return $this->items;
+        return clone($this, ['contactId' => $contactId]);
+    }
+
+    /** Kopie mit geändertem `number`. */
+    public function withNumber(?int $number): self
+    {
+        return clone($this, ['number' => $number]);
+    }
+
+    /** Kopie mit geändertem `numberPre`. */
+    public function withNumberPre(?string $numberPre): self
+    {
+        return clone($this, ['numberPre' => $numberPre]);
+    }
+
+    /** Kopie mit geändertem `numberLength`. */
+    public function withNumberLength(?int $numberLength): self
+    {
+        return clone($this, ['numberLength' => $numberLength]);
+    }
+
+    /** Kopie mit geändertem `date`. */
+    public function withDate(?DateTimeImmutable $date): self
+    {
+        return clone($this, ['date' => $date]);
+    }
+
+    /** Kopie mit geändertem `address`. */
+    public function withAddress(?string $address): self
+    {
+        return clone($this, ['address' => $address]);
+    }
+
+    /** Kopie mit geändertem `discountRate`. */
+    public function withDiscountRate(?int $discountRate): self
+    {
+        return clone($this, ['discountRate' => $discountRate]);
+    }
+
+    /** Kopie mit geändertem `discountDate`. */
+    public function withDiscountDate(?DateTimeImmutable $discountDate): self
+    {
+        return clone($this, ['discountDate' => $discountDate]);
+    }
+
+    /** Kopie mit geändertem `discountDays`. */
+    public function withDiscountDays(?int $discountDays): self
+    {
+        return clone($this, ['discountDays' => $discountDays]);
+    }
+
+    /** Kopie mit geändertem `title`. */
+    public function withTitle(?string $title): self
+    {
+        return clone($this, ['title' => $title]);
+    }
+
+    /** Kopie mit geändertem `label`. */
+    public function withLabel(?string $label): self
+    {
+        return clone($this, ['label' => $label]);
+    }
+
+    /** Kopie mit geändertem `intro`. */
+    public function withIntro(?string $intro): self
+    {
+        return clone($this, ['intro' => $intro]);
+    }
+
+    /** Kopie mit geändertem `note`. */
+    public function withNote(?string $note): self
+    {
+        return clone($this, ['note' => $note]);
+    }
+
+    /** Kopie mit geändertem `netGross`. */
+    public function withNetGross(?NetGross $netGross): self
+    {
+        return clone($this, ['netGross' => $netGross]);
+    }
+
+    /** Kopie mit geändertem `reduction`. */
+    public function withReduction(?string $reduction): self
+    {
+        return clone($this, ['reduction' => $reduction]);
+    }
+
+    /** Kopie mit geändertem `currencyCode`. */
+    public function withCurrencyCode(?string $currencyCode): self
+    {
+        return clone($this, ['currencyCode' => $currencyCode]);
+    }
+
+    /** Kopie mit geändertem `quote`. */
+    public function withQuote(?float $quote): self
+    {
+        return clone($this, ['quote' => $quote]);
+    }
+
+    /** Kopie mit geändertem `offerId`. */
+    public function withOfferId(?int $offerId): self
+    {
+        return clone($this, ['offerId' => $offerId]);
+    }
+
+    /** Kopie mit geändertem `freeTextId`. */
+    public function withFreeTextId(?int $freeTextId): self
+    {
+        return clone($this, ['freeTextId' => $freeTextId]);
+    }
+
+    /** Kopie mit geändertem `templateId`. */
+    public function withTemplateId(?int $templateId): self
+    {
+        return clone($this, ['templateId' => $templateId]);
+    }
+
+    /** Kopie mit einer zusätzlichen Position. */
+    public function withItem(ConfirmationItemCreateOptions $item): self
+    {
+        return clone($this, ['items' => [...$this->items, $item]]);
     }
 
     /**
@@ -236,7 +331,7 @@ final class ConfirmationCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        $data = [
+        $data = array_filter([
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
             'address' => $this->address,
@@ -258,10 +353,7 @@ final class ConfirmationCreateOptions implements WriteOptions
             'offer_id' => $this->offerId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
-        ];
-
-        // Null-Felder entfernen
-        $data = array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
 
         if ([] !== $this->items) {
             $data['confirmation-items'] = [

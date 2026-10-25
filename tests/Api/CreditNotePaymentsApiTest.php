@@ -128,10 +128,13 @@ final class CreditNotePaymentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->payments;
 
-        $opts = new CreditNotePaymentCreateOptions(creditNoteId: 42, amount: 100.0);
-        $opts->date = new DateTimeImmutable('2026-02-01');
-        $opts->type = InvoicePaymentType::BANK_TRANSFER;
-        $opts->markCreditNoteAsPaid = true;
+        $opts = new CreditNotePaymentCreateOptions(
+            creditNoteId: 42,
+            amount: 100.0,
+            date: new DateTimeImmutable('2026-02-01'),
+            type: InvoicePaymentType::BANK_TRANSFER,
+            markCreditNoteAsPaid: true,
+        );
 
         $created = $api->create($opts);
 

@@ -77,8 +77,7 @@ use Justpilot\Billomat\Exception\RateLimitException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 
-$opts = new ClientCreateOptions();
-$opts->name = 'Beispiel GmbH';
+$opts = new ClientCreateOptions(name: 'Beispiel GmbH');
 // (vergessen: email, falls Pflicht im Account)
 
 try {

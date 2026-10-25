@@ -129,8 +129,7 @@ final class OfferItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new OfferItemCreateOptions(quantity: 2.0, unitPrice: 50.0);
-        $opts->title = 'Neue Position';
+        $opts = new OfferItemCreateOptions(quantity: 2.0, unitPrice: 50.0, title: 'Neue Position');
 
         $created = $api->create(123, $opts);
 

@@ -6,10 +6,10 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
-use Justpilot\Billomat\Api\CreditNoteEmailOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Api\CreditNoteUpdateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -34,7 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(CreditNotesApi::class)]
 #[CoversClass(CreditNoteCreateOptions::class)]
 #[CoversClass(CreditNoteUpdateOptions::class)]
-#[CoversClass(CreditNoteEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(CreditNote::class)]
 #[CoversClass(CreditNotePdf::class)]
 #[CoversClass(CreditNoteStatus::class)]
@@ -150,13 +150,15 @@ final class CreditNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new CreditNoteCreateOptions(clientId: 123);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->invoiceId = 99;
-        $opts->title = 'Korrektur';
+        $opts = new CreditNoteCreateOptions(
+            clientId: 123,
+            date: new DateTimeImmutable('2026-03-01'),
+            title: 'Korrektur',
+            invoiceId: 99,
+        );
 
         $item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: 50.0);
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $created = $api->create($opts);
 
@@ -189,8 +191,7 @@ final class CreditNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new CreditNoteUpdateOptions();
-        $opts->title = 'Geändert';
+        $opts = new CreditNoteUpdateOptions(title: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
@@ -241,9 +242,7 @@ final class CreditNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new CreditNoteEmailOptions();
-        $opts->from = 'me@example.com';
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(from: 'me@example.com', to: ['kunde@example.com']);
 
         $api->email(42, $opts);
 

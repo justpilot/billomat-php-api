@@ -28,10 +28,11 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
         }
 
         $faker = $this->faker();
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
 
@@ -59,12 +60,14 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $clientId = $this->ensureClientId();
 
-        $opts = new LetterCreateOptions(clientId: $clientId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->subject = 'Integrationstest-Brief '.date('d.m.Y H:i:s');
-        $opts->label = 'Letter Integrationstest';
-        $opts->intro = 'Sehr geehrte Damen und Herren,';
-        $opts->note = 'Dies ist ein automatisierter Test.';
+        $opts = new LetterCreateOptions(
+            clientId: $clientId,
+            date: new DateTimeImmutable('today'),
+            subject: 'Integrationstest-Brief '.date('d.m.Y H:i:s'),
+            label: 'Letter Integrationstest',
+            intro: 'Sehr geehrte Damen und Herren,',
+            note: 'Dies ist ein automatisierter Test.',
+        );
 
         $letter = $billomat->letters->create($opts);
 
@@ -73,8 +76,7 @@ final class LettersIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame(LetterStatus::DRAFT, $letter->status);
 
         // Update
-        $update = new LetterUpdateOptions();
-        $update->subject = 'Geänderter Betreff';
+        $update = new LetterUpdateOptions(subject: 'Geänderter Betreff');
         $updated = $billomat->letters->update($letter->id, $update);
 
         self::assertSame($letter->id, $updated->id);

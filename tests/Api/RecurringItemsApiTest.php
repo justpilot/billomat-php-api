@@ -95,9 +95,12 @@ final class RecurringItemsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http)->items;
 
-        $opts = new RecurringItemCreateOptions(quantity: 1.5, unitPrice: 99.0);
-        $opts->title = 'Setup';
-        $opts->type = InvoiceItemType::SERVICE;
+        $opts = new RecurringItemCreateOptions(
+            quantity: 1.5,
+            unitPrice: 99.0,
+            title: 'Setup',
+            type: InvoiceItemType::SERVICE,
+        );
 
         $item = $api->create(42, $opts);
 

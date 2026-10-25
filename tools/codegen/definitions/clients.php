@@ -47,7 +47,7 @@ declare(strict_types=1);
  * 'toArray' => [...] an 'model' oder an den Options legt Auswahl und Reihenfolge der
  * toArray()-Schlüssel fest (Billomat-Feldnamen); ohne die Liste gilt die Feldreihenfolge.
  * 'dateObjects' => true an den Options führt Datumsfelder als DateTimeImmutable statt als String.
- * 'items' => ['class' => …, 'wire' => …, 'item' => …] an den Create-Options erzeugt addItem()/getItems()
+ * 'items' => ['class' => …, 'wire' => …, 'item' => …] an den Create-Options erzeugt den Konstruktor-Parameter `items` und withItem()
  * und sendet die gesammelten Positionen verschachtelt mit (z. B. invoice-items.invoice-item).
  *
  * Nach Änderungen: composer generate
@@ -128,11 +128,9 @@ return [
             'details' => ['Artikel können mehrere Preise haben – die Preisgruppe legt fest,', 'welcher Preis für den Kunden verwendet wird.'],
         ],
         'archived' => ['doc' => 'Archivierungsstatus.', 'details' => ['true = archiviert, false = aktiv.']],
-        // BC: ClientCreateOptions sendet dunning_run seit jeher immer mit (Default false).
         'dunning_run' => [
             'doc' => 'Automatischer Mahnlauf.',
             'details' => ['true = Kunde wird in automatischem Mahnlauf berücksichtigt.'],
-            'create' => ['nonNull' => true, 'default' => false],
         ],
         'reduction' => ['doc' => 'Rabatt in Prozent.'],
         'discount_rate_type' => ['doc' => 'Typ des Skonto-Satzes.'],

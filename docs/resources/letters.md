@@ -94,11 +94,13 @@ Pflicht ist ausschließlich die `clientId`. Der eigentliche Brieftext (`intro` +
 ```php
 use Justpilot\Billomat\Api\LetterCreateOptions;
 
-$opts = new LetterCreateOptions(clientId: 12345);
-$opts->subject = 'Information zur DSGVO-Aktualisierung';
-$opts->date = new DateTimeImmutable('2026-06-02');
-$opts->intro = 'Sehr geehrte Damen und Herren,';
-$opts->note = "Hiermit informieren wir Sie über …\n\nMit freundlichen Grüßen";
+$opts = new LetterCreateOptions(
+    clientId: 12345,
+    subject: 'Information zur DSGVO-Aktualisierung',
+    date: new DateTimeImmutable('2026-06-02'),
+    intro: 'Sehr geehrte Damen und Herren,',
+    note: "Hiermit informieren wir Sie über …\n\nMit freundlichen Grüßen",
+);
 
 $letter = $billomat->letters->create($opts);
 ```
@@ -117,17 +119,18 @@ Status `DRAFT → COMPLETED`. Optional kann ein konkretes Layout-Template forcie
 - `clear()` → Status `CLEARED` („erledigt“, etwa wenn der Brief bearbeitet/abgehakt ist).
 - `undo()` → setzt einen `OPEN`-Brief zurück nach `DRAFT`, sodass er wieder editierbar wird.
 
-#### `email(int $id, ?LetterEmailOptions $options = null): void`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
 Versendet den Brief per E-Mail. Ohne Optionen greifen die Defaults aus der hinterlegten Vorlage.
 
 ```php
-use Justpilot\Billomat\Api\LetterEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-$mail = new LetterEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->subject = 'Unser Anschreiben';
-$mail->body = 'Anbei unser Schreiben als PDF.';
+$mail = new EmailOptions(
+    to: ['kunde@example.com'],
+    subject: 'Unser Anschreiben',
+    body: 'Anbei unser Schreiben als PDF.',
+);
 
 $billomat->letters->email($letter->id, $mail);
 ```
@@ -192,7 +195,7 @@ Kein Update — zum Umbenennen wird gelöscht und neu angelegt.
 
 ## Write-Modell: `LetterCreateOptions`
 
-Konstruktor: `new LetterCreateOptions(int $clientId)`.
+Konstruktor: `new LetterCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withLabel('Neu')`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -212,7 +215,7 @@ Konstruktor: `new LetterCreateOptions(int $clientId)`.
 
 ## Write-Modell: `LetterUpdateOptions`
 
-Spiegelt `LetterCreateOptions` ohne `clientId`-Pflicht (jetzt nullable). Felder, die `null` bleiben, werden aus dem Payload gestrippt.
+Spiegelt `LetterCreateOptions` ohne `clientId`-Pflicht (jetzt nullable). Felder, die `null` bleiben, werden aus dem Payload gestrippt. Mit `Clear::Field` wird ein Feld dagegen als JSON-`null` gesendet und von Billomat geleert, z. B. `new LetterUpdateOptions(note: Clear::Field)`.
 
 ## Write-Modell: `LetterCommentCreateOptions`
 
@@ -231,7 +234,9 @@ Konstruktor: `new LetterCommentCreateOptions(int $letterId, string $comment)`.
 | `letterId` | `letter_id` | `int` (Pflicht) | |
 | `name` | `name` | `string` (Pflicht) | |
 
-## Write-Modell: `LetterEmailOptions`
+## Write-Modell: `EmailOptions`
+
+Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -341,7 +346,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\LetterCommentCreateOptions;
 use Justpilot\Billomat\Api\LetterCreateOptions;
-use Justpilot\Billomat\Api\LetterEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\LetterTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 
@@ -351,17 +356,19 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Brief als Entwurf anlegen
-$opts = new LetterCreateOptions(clientId: 12345);
-$opts->subject = 'Information zur DSGVO-Aktualisierung';
-$opts->date = new DateTimeImmutable('2026-06-02');
-$opts->intro = 'Sehr geehrte Damen und Herren,';
-$opts->note = <<<TEXT
-        hiermit informieren wir Sie über die Aktualisierung unserer Datenschutzerklärung.
-        Die neue Fassung tritt zum 01.07.2026 in Kraft.
+$opts = new LetterCreateOptions(
+    clientId: 12345,
+    subject: 'Information zur DSGVO-Aktualisierung',
+    date: new DateTimeImmutable('2026-06-02'),
+    intro: 'Sehr geehrte Damen und Herren,',
+    note: <<<TEXT
+            hiermit informieren wir Sie über die Aktualisierung unserer Datenschutzerklärung.
+            Die neue Fassung tritt zum 01.07.2026 in Kraft.
 
-        Mit freundlichen Grüßen
-        Ihre Justpilot GmbH
-        TEXT;
+            Mit freundlichen Grüßen
+            Ihre Justpilot GmbH
+            TEXT,
+);
 
 $letter = $billomat->letters->create($opts);
 printf("Brief #%d angelegt (Status: %s)\n",
@@ -378,10 +385,11 @@ $billomat->letters->tags->create(
 $billomat->letters->complete($letter->id);
 
 // 4) Per E-Mail versenden
-$mail = new LetterEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->subject = 'Unsere aktualisierte Datenschutzerklärung';
-$mail->body = 'Anbei finden Sie unser Schreiben als PDF.';
+$mail = new EmailOptions(
+    to: ['kunde@example.com'],
+    subject: 'Unsere aktualisierte Datenschutzerklärung',
+    body: 'Anbei finden Sie unser Schreiben als PDF.',
+);
 $billomat->letters->email($letter->id, $mail);
 
 // 5) Audit-Notiz anhängen

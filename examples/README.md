@@ -54,7 +54,7 @@ php examples/12-email-invoice.php
 | [`09-recurring.php`](09-recurring.php) | Abo-Rechnung mit E-Mail-Empfänger, Tag und Preis-Update. |
 | [`10-incoming.php`](10-incoming.php) | Eingangsrechnung erfassen, taggen, Zahlung verbuchen. |
 | [`11-supplier.php`](11-supplier.php) | Lieferant mit Tag und Property-Wert anlegen. |
-| [`12-email-invoice.php`](12-email-invoice.php) | Rechnung per `InvoiceEmailOptions` an Kunden versenden. |
+| [`12-email-invoice.php`](12-email-invoice.php) | Rechnung per `EmailOptions` an Kunden versenden. |
 
 ## Daten aufräumen
 

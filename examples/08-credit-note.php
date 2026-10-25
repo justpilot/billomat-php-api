@@ -38,16 +38,20 @@ $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 
 try {
     // 1) Gutschrift mit Position anlegen
-    $opts = new CreditNoteCreateOptions(clientId: $clientId);
-    $opts->title = 'Gutschrift ' . date('Y-m-d');
-    $opts->date = new DateTimeImmutable('today');
-    $opts->intro = 'Wir schreiben Ihnen folgenden Betrag gut:';
+    $opts = new CreditNoteCreateOptions(
+        clientId: $clientId,
+        title: 'Gutschrift ' . date('Y-m-d'),
+        date: new DateTimeImmutable('today'),
+        intro: 'Wir schreiben Ihnen folgenden Betrag gut:',
+    );
 
-    $item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: 75.0);
-    $item->title = 'Rückerstattung Versand';
-    $item->type = InvoiceItemType::PRODUCT;
-    $item->unit = 'Pauschal';
-    $opts->addItem($item);
+    $item = new CreditNoteItemCreateOptions(
+        quantity: 1.0, unitPrice: 75.0,
+        title: 'Rückerstattung Versand',
+        type: InvoiceItemType::PRODUCT,
+        unit: 'Pauschal',
+    );
+    $opts = $opts->withItem($item);
 
     $creditNote = $billomat->creditNotes->create($opts);
     printf("Entwurf angelegt: #%d, Brutto %.2f %s\n",
@@ -62,12 +66,12 @@ try {
     // 3) Auszahlung verbuchen → Status PAID
     $payment = new CreditNotePaymentCreateOptions(
         creditNoteId: $creditNote->id,
-        amount: $creditNote->totalGross ?? 75.0,
+            amount: $creditNote->totalGross ?? 75.0,
+        date: new DateTimeImmutable('today'),
+        type: InvoicePaymentType::BANK_TRANSFER,
+        markCreditNoteAsPaid: true,
+        comment: 'Erstattung per SEPA-Überweisung',
     );
-    $payment->date = new DateTimeImmutable('today');
-    $payment->type = InvoicePaymentType::BANK_TRANSFER;
-    $payment->markCreditNoteAsPaid = true;
-    $payment->comment = 'Erstattung per SEPA-Überweisung';
 
     $created = $billomat->creditNotes->payments->create($payment);
     printf("Auszahlung #%d verbucht: %.2f via %s\n",

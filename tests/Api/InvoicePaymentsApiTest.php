@@ -181,12 +181,12 @@ final class InvoicePaymentsApiTest extends TestCase
         $opts = new InvoicePaymentCreateOptions(
             invoiceId: 300,
             amount: 119.0,
+            date: new DateTimeImmutable('2025-03-01'),
+            type: InvoicePaymentType::BANK_TRANSFER,
+            comment: 'Testzahlung',
+            transactionPurpose: 'Rechnung RE-300',
+            markInvoiceAsPaid: true,
         );
-        $opts->date = new DateTimeImmutable('2025-03-01');
-        $opts->type = InvoicePaymentType::BANK_TRANSFER;
-        $opts->comment = 'Testzahlung';
-        $opts->transactionPurpose = 'Rechnung RE-300';
-        $opts->markInvoiceAsPaid = true;
 
         $payment = $api->create($opts);
 

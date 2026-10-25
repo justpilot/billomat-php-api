@@ -50,13 +50,13 @@ return static function (string $prefix, string $label, string $parentField, ?str
                 ...$writable,
                 'type' => 'int',
                 'doc' => 'ID des Datensatzes, an dem das Schlagwort hängt.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['nonNull' => true],
                 'create' => ['constructor' => true],
             ],
             'name' => [
                 ...$writable,
                 'doc' => 'Name des Schlagworts.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['nonNull' => true],
                 'create' => ['constructor' => true],
             ],
             'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
@@ -77,9 +77,9 @@ return static function (string $prefix, string $label, string $parentField, ?str
         ],
 
         'fields' => [
-            'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Schlagworts.'],
-            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'Name des Schlagworts.'],
-            'count' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'Häufigkeit des Schlagworts.'],
+            'id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'Interne Billomat-ID des Schlagworts.'],
+            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['nonNull' => true], 'doc' => 'Name des Schlagworts.'],
+            'count' => ['type' => 'int', 'readOnly' => true, 'model' => ['nonNull' => true], 'doc' => 'Häufigkeit des Schlagworts.'],
         ],
     ];
 

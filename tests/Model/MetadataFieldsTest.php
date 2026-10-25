@@ -196,6 +196,9 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(Money::class)]
 final class MetadataFieldsTest extends TestCase
 {
+    /** Pflichtfelder, die Billomat immer liefert (`id`, bei Positionen `unit_price`, bei Zahlungen `amount`). */
+    private const array REQUIRED = ['id' => '1', 'unit_price' => '1', 'amount' => '1'];
+
     /**
      * Pro Model: `fromArray()` und die erwarteten Metadaten-Keys.
      *
@@ -273,7 +276,7 @@ final class MetadataFieldsTest extends TestCase
     public function itHydratesAndExportsMetadataFields(Closure $hydrate, array $keys): void
     {
         $data = [
-            'id' => '1',
+            ...self::REQUIRED,
             'created' => '2026-10-20T19:58:59+02:00',
             'updated' => '2026-10-20T20:02:16+02:00',
             'customfield' => 'crm-4711',
@@ -306,7 +309,7 @@ final class MetadataFieldsTest extends TestCase
     #[DataProvider('models')]
     public function itTreatsEmptyMetadataAsNull(Closure $hydrate, array $keys): void
     {
-        $props = get_object_vars($hydrate(['id' => '1', 'created' => '', 'updated' => '', 'customfield' => '']));
+        $props = get_object_vars($hydrate([...self::REQUIRED, 'created' => '', 'updated' => '', 'customfield' => '']));
 
         foreach ($keys as $key) {
             self::assertNull($props[$key]);

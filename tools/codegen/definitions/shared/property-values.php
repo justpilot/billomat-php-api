@@ -45,21 +45,20 @@ return static function (string $prefix, string $label, string $parentField, stri
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Eigenschaftswerts.'],
             $parentField => [
                 'doc' => 'ID des Datensatzes, zu dem der Wert gehört.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['nonNull' => true],
                 'create' => ['constructor' => true],
             ],
             "{$resource}_property_id" => [
                 'doc' => 'ID der Eigenschaft.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['nonNull' => true],
                 'create' => ['constructor' => true],
             ],
-            'type' => ['type' => 'string', 'enum' => 'PropertyType', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX).'],
-            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Name der Eigenschaft.'],
+            'type' => ['type' => 'string', 'enum' => 'PropertyType', 'readOnly' => true, 'doc' => 'Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX).'],
+            'name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Name der Eigenschaft.'],
             // Der Typ des Werts hängt von der Eigenschaft ab (Text, Checkbox, …), deshalb `mixed`.
             'value' => [
                 'type' => 'mixed',
                 'doc' => 'Wert der Eigenschaft.',
-                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
             'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt.'],

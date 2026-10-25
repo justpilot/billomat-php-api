@@ -67,8 +67,6 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($draft->id);
-
         $invoiceId = $draft->id;
 
         // 3) Rechnung abschließen (damit sie zahlbar ist)

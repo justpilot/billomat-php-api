@@ -31,7 +31,7 @@ $supplier = $billomat->suppliers->create(new SupplierCreateOptions(
     email: 'lieferant@example.com',
     bankIban: 'DE89370400440532013000',
 ));
-$supplierId = requireId($supplier->id);
+$supplierId = $supplier->id;
 
 printf("Lieferant #%d angelegt: %s\n", $supplierId, $supplier->name);
 
@@ -51,4 +51,4 @@ $value = $billomat->suppliers->propertyValues->create(new SupplierPropertyValueC
     value: 'Premium',
 ));
 
-printf("Property-Wert #%d gesetzt (Property %d).\n", requireId($value->id), $propertyId);
+printf("Property-Wert #%d gesetzt (Property %d).\n", $value->id, $propertyId);

@@ -152,7 +152,7 @@ try {
 
 ## Non-HTTP errors
 
-API methods throw an `UnexpectedResponseException` when Billomat responds with 2xx but the body doesn't match the expected structure — e.g. when the wrapper element `client` or `invoice` is missing. This is a defensive check and shouldn't happen in practice; if it does, please open an issue with the raw body.
+API methods throw an `UnexpectedResponseException` when Billomat responds with 2xx but the body doesn't match the expected structure — e.g. when the wrapper element `client` or `invoice` is missing, or a read model lacks a field Billomat always sends (e.g. `id`; the message names model and field). This is a defensive check and shouldn't happen in practice; if it does, please open an issue with the raw body.
 
 Up to and including 3.1 this was a plain `\RuntimeException`. Since `UnexpectedResponseException` still extends `\RuntimeException` through `BillomatException`, existing `catch (\RuntimeException)` blocks keep working.
 

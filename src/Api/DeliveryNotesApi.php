@@ -41,10 +41,10 @@ final class DeliveryNotesApi extends AbstractApi
     /**
      * Positionen, siehe {@see ItemsApi}.
      *
-     * @var ItemsApi<DeliveryNoteItem, DeliveryNoteItemCreateOptions>
+     * @var ItemsApi<DeliveryNoteItem, DeliveryNoteItemCreateOptions, DeliveryNoteItemUpdateOptions>
      */
     public private(set) ItemsApi $items {
-        get => $this->items ??= new ItemsApi($this->http, 'delivery-note', DeliveryNoteItem::fromArray(...), DeliveryNoteItemCreateOptions::class);
+        get => $this->items ??= new ItemsApi($this->http, 'delivery-note', DeliveryNoteItem::fromArray(...), DeliveryNoteItemCreateOptions::class, DeliveryNoteItemUpdateOptions::class);
     }
 
     /**

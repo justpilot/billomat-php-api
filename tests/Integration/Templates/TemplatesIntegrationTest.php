@@ -30,7 +30,6 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
         if ([] !== $templates) {
             $first = $templates[0];
 
-            self::assertNotNull($first->id);
             self::assertGreaterThan(0, $first->id);
 
             // type / templateType können je nach Sandbox immer gesetzt sein

@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Internal;
 /**
  * Hilfsklasse für verschachtelte Listen in Billomat-Responses
  * (z. B. `taxes.tax` oder `invoice-items.invoice-item`) und für kommaseparierte
- * Enum-Werte (z. B. `payment_types`).
+ * Enum-Werte (z. B. `payment_types`) sowie Enum-Maps (z. B. `rights`).
  *
  * Billomat liefert eine Liste mit genau einem Eintrag als einzelnes Objekt
  * statt als Liste. Diese Klasse normalisiert beide Formen auf eine Liste und
@@ -98,5 +98,35 @@ final class ListCaster
         }
 
         return $list;
+    }
+
+    /**
+     * Wandelt ein Billomat-Objekt mit Enum-Werten (z. B. `rights`: Bereich → `READ`/`UPDATE`/`DELETE`)
+     * in eine Map aus Enum-Fällen.
+     *
+     * Einträge mit leerem oder unbekanntem Wert sowie nicht-String-Schlüssel fallen heraus;
+     * ist der Wert kein Objekt (z. B. ein leerer String), ergibt das eine leere Map.
+     *
+     * @template T of \BackedEnum
+     *
+     * @param class-string<T> $enum
+     *
+     * @return array<string, T>
+     */
+    public static function toEnumMap(mixed $value, string $enum): array
+    {
+        if (!\is_array($value)) {
+            return [];
+        }
+
+        $map = [];
+        foreach ($value as $key => $raw) {
+            $case = $enum::tryFrom(ScalarCaster::toStringOrNull($raw) ?? '');
+            if (\is_string($key) && null !== $case) {
+                $map[$key] = $case;
+            }
+        }
+
+        return $map;
     }
 }

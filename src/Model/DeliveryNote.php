@@ -57,9 +57,9 @@ final readonly class DeliveryNote
      */
     public function __construct(
         /** Interne Billomat-ID des Lieferscheins. */
-        public ?int $id,
+        public int $id,
         /** ID des Kunden. */
-        public int $clientId,
+        public int $clientId = 0,
         /** ID des Kontakts. */
         public ?int $contactId = null,
         /** Erstellungszeitpunkt des Lieferscheins. */
@@ -125,7 +125,7 @@ final readonly class DeliveryNote
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),

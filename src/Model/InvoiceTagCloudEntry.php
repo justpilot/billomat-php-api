@@ -29,11 +29,11 @@ final readonly class InvoiceTagCloudEntry
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Schlagworts. */
-        public ?int $id,
+        public ?int $id = null,
         /** Name des Schlagworts. */
-        public string $name,
+        public string $name = '',
         /** Häufigkeit des Schlagworts. */
-        public int $count,
+        public int $count = 0,
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *

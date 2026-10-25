@@ -15,6 +15,7 @@ use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -55,7 +56,6 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         );
 
         $client = $billomat->clients->create($clientOpts);
-        self::assertNotNull($client->id);
 
         $invoiceOpts = new InvoiceCreateOptions(
             clientId: $client->id,
@@ -75,7 +75,6 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
-        self::assertNotNull($draft->id);
 
         // Aktionen wie email/mail/encash benötigen i. d. R. eine abgeschlossene Rechnung.
         $billomat->invoices->complete($draft->id);
@@ -85,6 +84,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
     #[Group('integration')]
     #[Test]
+    #[DoesNotPerformAssertions]
     public function canEmailInvoiceInSandboxWhenExplicitlyEnabled(): void
     {
         // Doppelte Sicherheitsbremse: nur wenn EXPLIZIT aktiviert UND ein
@@ -155,6 +155,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
     #[Group('integration')]
     #[Test]
+    #[DoesNotPerformAssertions]
     public function canSendInvoiceViaPixelletterWhenExplicitlyEnabled(): void
     {
         if ('1' !== getenv('BILLOMAT_TEST_MAIL')) {

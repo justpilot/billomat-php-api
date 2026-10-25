@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
 
 use const DATE_ATOM;
 
@@ -34,14 +36,18 @@ final readonly class User
         'locale' => true,
         'timezone' => true,
         'is_account_owner' => true,
+        'rights' => true,
     ];
 
-    /** @param array<string, mixed> $extra */
+    /**
+     * @param array<string, AccessLevel> $rights
+     * @param array<string, mixed>       $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Benutzers. */
-        public ?int $id,
+        public int $id,
         /** E-Mail-Adresse (Login). */
-        public ?string $email,
+        public ?string $email = null,
         /** Vorname. */
         public ?string $firstName = null,
         /** Nachname. */
@@ -63,6 +69,12 @@ final readonly class User
         /** Ist der Benutzer Inhaber des Accounts? */
         public ?bool $isAccountOwner = null,
         /**
+         * Zugriffsrechte des Benutzers je Bereich (z. B. "articles", "banking").
+         *
+         * Bereiche ohne Zugriff (bei Billomat ein leerer String) fehlen in der Map.
+         */
+        public array $rights = [],
+        /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
          * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
@@ -79,7 +91,7 @@ final readonly class User
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             email: ScalarCaster::toStringOrNull($data['email'] ?? null),
             firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
             lastName: ScalarCaster::toStringOrNull($data['last_name'] ?? null),
@@ -91,6 +103,7 @@ final readonly class User
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             timezone: ScalarCaster::toStringOrNull($data['timezone'] ?? null),
             isAccountOwner: ScalarCaster::toBoolOrNull($data['is_account_owner'] ?? null),
+            rights: ListCaster::toEnumMap($data['rights'] ?? null, AccessLevel::class),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -118,6 +131,7 @@ final readonly class User
             'locale' => $this->locale,
             'timezone' => $this->timezone,
             'is_account_owner' => $this->isAccountOwner,
+            'rights' => array_map(static fn (AccessLevel $v): string => $v->value, $this->rights),
         ];
     }
 }

@@ -18,6 +18,7 @@ require __DIR__.'/bootstrap.php';
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
+use Justpilot\Billomat\Api\RecurringItemUpdateOptions;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
@@ -44,7 +45,7 @@ $recurring = $billomat->recurrings->create(
         title: 'Webhosting Basic',
     )),
 );
-$recurringId = requireId($recurring->id);
+$recurringId = $recurring->id;
 
 printf("Abo #%d angelegt, nächster Lauf: %s\n", $recurringId, $recurring->nextCreationDate?->format('Y-m-d') ?? 'offen');
 
@@ -58,15 +59,9 @@ $billomat->recurrings->emailReceivers->create(new RecurringEmailReceiverCreateOp
 // 3) Schlagwort setzen
 $billomat->recurrings->tags->create(new RecurringTagCreateOptions(recurringId: $recurringId, name: 'hosting'));
 
-// 4) Preis der Positionen anheben (update() ersetzt die Position komplett)
+// 4) Preis der Positionen anheben: nur der Preis wird gesendet, die übrigen Felder bleiben
 $newPrice = Money::of('24.90');
 foreach ($billomat->recurrings->items->list($recurringId) as $item) {
-    $itemId = requireId($item->id);
-    $billomat->recurrings->items->update($itemId, new RecurringItemCreateOptions(
-        quantity: $item->quantity,
-        unitPrice: $newPrice,
-        unit: $item->unit,
-        title: $item->title,
-    ));
-    printf("Position #%d auf %s angepasst.\n", $itemId, $newPrice->format(2, ',', '.'));
+    $billomat->recurrings->items->update($item->id, new RecurringItemUpdateOptions(unitPrice: $newPrice));
+    printf("Position #%d auf %s angepasst.\n", $item->id, $newPrice->format(2, ',', '.'));
 }

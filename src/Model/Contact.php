@@ -52,9 +52,9 @@ final readonly class Contact
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Kontakts. */
-        public ?int $id,
+        public int $id,
         /** ID des Kunden, zu dem der Kontakt gehört. */
-        public int $clientId,
+        public int $clientId = 0,
         /** Erstellungszeitpunkt des Kontakts. */
         public ?DateTimeImmutable $created = null,
         /** Bezeichnung des Kontakts. */
@@ -124,7 +124,7 @@ final readonly class Contact
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),

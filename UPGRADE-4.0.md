@@ -511,6 +511,26 @@ use Justpilot\Billomat\Api\Clear;
 $billomat->clients->update($id, new ClientUpdateOptions(note: Clear::Field));
 ```
 
+### Item updates take `*ItemUpdateOptions`
+
+`ItemsApi::update()` on invoices, offers, credit notes, confirmations, delivery notes and
+recurrings takes the new `*ItemUpdateOptions` instead of `*ItemCreateOptions`. All fields are
+optional, only the ones you set are sent, and Billomat keeps the rest of the item:
+
+```php
+// 3.x: quantity and unit price had to be repeated
+$billomat->invoices->items->update($item->id, new InvoiceItemCreateOptions(
+    quantity: $item->quantity,
+    unitPrice: Money::of('24.90'),
+    title: $item->title,
+));
+
+// 4.0
+$billomat->invoices->items->update($item->id, new InvoiceItemUpdateOptions(unitPrice: Money::of('24.90')));
+```
+
+Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
+
 ### One `EmailOptions` class
 
 `InvoiceEmailOptions`, `OfferEmailOptions`, `ConfirmationEmailOptions`, `CreditNoteEmailOptions`,
@@ -529,6 +549,48 @@ $billomat->invoices->email($id, new EmailOptions(to: ['kunde@example.test'], sub
 
 3.x always sent `dunning_run=0`. 4.0 sends it only when you set it, so Billomat's account default
 applies. Pass `dunningRun: false` to keep the old behaviour.
+
+## Read-model IDs are `int`
+
+`$id` is a non-nullable `int` on every model of an addressable resource (documents, clients,
+suppliers, articles, contacts, items, payments, comments, tags, properties, property values,
+settings models, `User`, `Role`, `InboxDocument`, …; `IncomingCategory::$id` is a `string`).
+Null checks and fallbacks on the ID can go:
+
+```php
+// 3.x
+$invoice = $billomat->invoices->create($options);
+if (null === $invoice->id) {
+    throw new RuntimeException('No ID');
+}
+$billomat->invoices->items->create($invoice->id, $item);
+
+// 4.0
+$invoice = $billomat->invoices->create($options);
+$billomat->invoices->items->create($invoice->id, $item);
+```
+
+If Billomat ever answers without a usable `id`, `fromArray()` throws an
+`UnexpectedResponseException` (`Unexpected response from Billomat: Invoice without a valid "id"
+field.`) instead of returning a model with `null`. The same goes for `unitPrice` on document items
+and `amount` on payments, which used to fall back to `Money::zero()`. `WebhookPayload::model()`
+turns this into an `InvalidWebhookException`. Code that hydrates models from its own arrays (tests,
+fixtures) has to include these fields.
+
+The ID stays `?int` on `*TagCloudEntry`, `Country`, `Currency`, `Activity` and `SearchResult`.
+
+### Read-model constructors
+
+If you build read models yourself (e.g. in tests), only the required fields are mandatory and come
+first; every other parameter has a default. Use named arguments:
+
+```php
+// 3.x: every core field was a positional parameter without default
+new InvoiceItem(7, 1, null, 1, 'Stück', 2.0, Money::of('10'), …);
+
+// 4.0
+new InvoiceItem(id: 7, unitPrice: Money::of('10'), quantity: 2.0);
+```
 
 ## Amounts are `Money` instead of `float`
 
@@ -693,6 +755,28 @@ $receiver->type->value; // 'To' even if Billomat sent something unknown
 // 4.0
 $receiver->type?->value; // null for unknown values
 ```
+
+### Role permissions are `AccessLevel` enums
+
+`Role::$permissions` is `array<string, AccessLevel>` instead of `array<string, ?string>`. Areas without
+access (Billomat sends `""`) and unknown values are no longer in the map instead of being `null`.
+`Role::toArray()` puts the permissions back as top-level fields (`'articles' => 'DELETE'`), like Billomat
+sends them, instead of nesting them under `permissions`. The areas the SDK knows are in `Role::AREAS`.
+
+```php
+// 3.x
+$canDelete = ($role->permissions['invoices'] ?? null) === 'DELETE';
+$noAccess = null === $role->permissions['banking'];
+$role->toArray()['permissions']['articles']; // 'DELETE'
+
+// 4.0
+$canDelete = ($role->permissions['invoices'] ?? null) === AccessLevel::DELETE;
+$canEdit = ($role->permissions['invoices'] ?? null)?->allows(AccessLevel::UPDATE) ?? false; // UPDATE or DELETE
+$noAccess = !isset($role->permissions['banking']);
+$role->toArray()['articles']; // 'DELETE'
+```
+
+`User::$rights` is new and uses the same type.
 
 ### `InvoiceMailOptions::$paperWeight` is an `int`
 

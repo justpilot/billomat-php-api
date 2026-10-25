@@ -53,7 +53,7 @@ final class WebhookEventTest extends TestCase
             $class,
         );
 
-        $payload = WebhookPayload::fromArray($event, [$event->envelopeKey() => ['id' => '7']]);
+        $payload = WebhookPayload::fromArray($event, [$event->envelopeKey() => ['id' => '7', 'amount' => '1']]);
         $model = $payload->model();
 
         self::assertInstanceOf($class, $model);

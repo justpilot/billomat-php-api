@@ -24,6 +24,7 @@ use NoDiscard;
  *
  * @template TItem of object
  * @template TCreate of WriteOptions
+ * @template TUpdate of WriteOptions
  *
  * @extends AbstractSubResourceApi<TItem>
  */
@@ -33,15 +34,17 @@ final class ItemsApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'item';
 
     /**
-     * @param string                              $parent       Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
-     * @param Closure(array<string,mixed>): TItem $hydrate      Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoiceComment::fromArray()}
-     * @param class-string<TCreate>               $optionsClass erwartete Create-Options
+     * @param string                              $parent             Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
+     * @param Closure(array<string,mixed>): TItem $hydrate            Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoiceComment::fromArray()}
+     * @param class-string<TCreate>               $optionsClass       erwartete Create-Options
+     * @param class-string<TUpdate>               $updateOptionsClass erwartete Update-Options
      */
     public function __construct(
         BillomatHttpClientInterface $http,
         string $parent,
         Closure $hydrate,
         private readonly string $optionsClass,
+        private readonly string $updateOptionsClass,
     ) {
         parent::__construct($http, $parent, $hydrate);
     }
@@ -74,13 +77,15 @@ final class ItemsApi extends AbstractSubResourceApi
     }
 
     /**
-     * @param TCreate $options
+     * Ändert eine Position. Nur gesetzte Felder werden gesendet, die übrigen bleiben unverändert.
+     *
+     * @param TUpdate $options
      *
      * @return TItem
      */
     public function update(int $id, WriteOptions $options): object
     {
-        $this->assertOptions($options, $this->optionsClass);
+        $this->assertOptions($options, $this->updateOptionsClass);
 
         return $this->updateFrom($id, $options->toArray());
     }

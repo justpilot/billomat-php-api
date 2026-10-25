@@ -57,10 +57,8 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             email: $this->faker()->unique()->safeEmail(),
         );
         $client = $billomat->clients->create($opts);
-        $id = $client->id;
-        self::assertNotNull($id);
 
-        return $id;
+        return $client->id;
     }
 
     private function ensureSupplierId(BillomatClient $billomat): int
@@ -75,10 +73,8 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $opts = new SupplierCreateOptions(name: 'IT-Lieferant-CommentTest '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
-        $id = $created->id;
-        self::assertNotNull($id);
 
-        return $id;
+        return $created->id;
     }
 
     #[Group('integration')]
@@ -95,7 +91,6 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $item = new InvoiceItemCreateOptions(1.0, Money::of('10'), unit: 'Stück', title: 'Pos');
         $invOpts = $invOpts->withItem($item);
         $invoice = $billomat->invoices->create($invOpts);
-        self::assertNotNull($invoice->id);
 
         try {
             $comment = $billomat->invoices->comments->create(new InvoiceCommentCreateOptions($invoice->id, 'IT-Comment-'.date('His')));
@@ -118,7 +113,6 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $offer = $billomat->offers->create(new OfferCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($offer->id);
 
         try {
             $comment = $billomat->offers->comments->create(new OfferCommentCreateOptions($offer->id, 'IT-OffComment-'.date('His')));
@@ -141,7 +135,6 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $conf = $billomat->confirmations->create(new ConfirmationCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($conf->id);
 
         try {
             $comment = $billomat->confirmations->comments->create(new ConfirmationCommentCreateOptions($conf->id, 'IT-ConfComment-'.date('His')));
@@ -163,7 +156,6 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $note = $billomat->creditNotes->create(new CreditNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($note->id);
 
         try {
             $comment = $billomat->creditNotes->comments->create(new CreditNoteCommentCreateOptions($note->id, 'IT-GsComment-'.date('His')));
@@ -185,7 +177,6 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $note = $billomat->deliveryNotes->create(new DeliveryNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($note->id);
 
         try {
             $comment = $billomat->deliveryNotes->comments->create(new DeliveryNoteCommentCreateOptions($note->id, 'IT-LsComment-'.date('His')));
@@ -207,7 +198,6 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $letter = $billomat->letters->create(new LetterCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($letter->id);
 
         try {
             $comment = $billomat->letters->comments->create(new LetterCommentCreateOptions($letter->id, 'IT-BrComment-'.date('His')));
@@ -233,7 +223,6 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             incomingNumber: 'IT-IN-Comment-'.date('His'),
         );
         $incoming = $billomat->incomings->create($incomingOpts);
-        self::assertNotNull($incoming->id);
 
         try {
             $comment = $billomat->incomings->comments->create(new IncomingCommentCreateOptions($incoming->id, 'IT-InComment-'.date('His')));

@@ -28,7 +28,7 @@ final readonly class Country
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** ISO-Ländercode (z. B. "DE"). */
-        public string $code,
+        public string $code = '',
         /** Name des Landes. */
         public ?string $name = null,
         /** Interne Billomat-ID des Landes. */

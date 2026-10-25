@@ -286,7 +286,7 @@ Same fields as `ClientCreateOptions`, all optional. Only fields that are not `nu
 
 | Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | Billomat's internal ID. Nullable because a freshly constructed object might not have one. |
+| `id` | `int` | Billomat's internal ID. Always set; a response without it throws `UnexpectedResponseException`. |
 | `name` | `string` | Required, not nullable. |
 | `created`, `updated` | `?\DateTimeImmutable` | |
 | `clientNumber` | `?string` | |
@@ -359,7 +359,7 @@ Calling `create()` again with the same `clientPropertyId` overwrites the existin
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `clientPropertyId` | `int` |
 | `type` | `?PropertyType` (`TEXTFIELD`, `TEXTAREA`, `CHECKBOX`) |

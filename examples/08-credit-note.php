@@ -39,7 +39,7 @@ $creditNote = $billomat->creditNotes->create(
         type: ItemType::PRODUCT,
     )),
 );
-$creditNoteId = requireId($creditNote->id);
+$creditNoteId = $creditNote->id;
 $amount = $creditNote->totalGross ?? Money::of('75.00');
 
 printf("Entwurf angelegt: #%d, Brutto %s %s\n", $creditNoteId, $amount->format(2, ',', '.'), $creditNote->currencyCode ?? '');
@@ -57,5 +57,5 @@ $payment = $billomat->creditNotes->payments->create(new CreditNotePaymentCreateO
     markCreditNoteAsPaid: true,
 ));
 
-printf("Auszahlung #%d verbucht: %s via %s\n", requireId($payment->id), $payment->amount->format(2, ',', '.'), $payment->type?->label() ?? '?');
+printf("Auszahlung #%d verbucht: %s via %s\n", $payment->id, $payment->amount->format(2, ',', '.'), $payment->type?->label() ?? '?');
 printf("Endstatus: %s\n", $billomat->creditNotes->getOrFail($creditNoteId)->status?->label() ?? '?');

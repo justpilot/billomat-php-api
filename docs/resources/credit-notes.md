@@ -188,6 +188,7 @@ Only works on credit notes in status `DRAFT`.
 
 ```php
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
+use Justpilot\Billomat\Api\CreditNoteItemUpdateOptions;
 use Justpilot\Billomat\Model\Money;
 
 $item = $billomat->creditNotes->items->create(
@@ -196,11 +197,11 @@ $item = $billomat->creditNotes->items->create(
 );
 
 $items = $billomat->creditNotes->items->list($creditNote->id);
-$billomat->creditNotes->items->update($item->id, $newOpts);
+$billomat->creditNotes->items->update($item->id, new CreditNoteItemUpdateOptions(unitPrice: Money::of('-24.90')));
 $billomat->creditNotes->items->delete($item->id);
 ```
 
-`create()` adds `credit_note_id` to the payload automatically; `CreditNoteItemCreateOptions` itself has no such field. `update()` uses the same options class as `create()`.
+`create()` adds `credit_note_id` to the payload automatically; `CreditNoteItemCreateOptions` itself has no such field. `update()` takes `CreditNoteItemUpdateOptions`: every field is optional, only the fields you set are sent and Billomat keeps the others.
 
 ### Credit note comments
 
@@ -366,7 +367,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
@@ -395,7 +396,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `?int` |
 | `articleId` | `?int` |
 | `position` | `?int` |
@@ -414,7 +415,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -432,7 +433,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
@@ -451,7 +452,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `int` |
 | `date` | `?\DateTimeImmutable` |
 | `amount` | `Money` |

@@ -31,7 +31,7 @@ return [
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Mahnstufe.'],
-        'name' => ['model' => ['required' => true], 'doc' => 'Name der Mahnstufe.'],
+        'name' => ['doc' => 'Name der Mahnstufe.'],
         'subject' => ['doc' => 'Betreff.'],
         'header' => ['doc' => 'Einleitung.'],
         'footer' => ['doc' => 'Anmerkung.'],

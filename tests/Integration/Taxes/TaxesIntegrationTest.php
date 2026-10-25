@@ -30,7 +30,6 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         if ([] !== $taxes) {
             $first = $taxes[0];
 
-            self::assertNotNull($first->id);
             self::assertGreaterThan(0, $first->id);
 
             self::assertNotSame('', trim($first->name));
@@ -59,7 +58,6 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $created = $billomat->taxes->create($options);
 
-        self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
         self::assertSame($name, $created->name);
         self::assertSame($rate, $created->rate);

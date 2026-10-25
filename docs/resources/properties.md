@@ -140,7 +140,7 @@ All five are `final readonly` classes with the same structure:
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `string` |
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |

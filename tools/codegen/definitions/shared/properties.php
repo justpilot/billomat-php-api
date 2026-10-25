@@ -50,14 +50,13 @@ return static fn (string $class, string $label, string $specResource, string $pa
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Attributs.'],
         'name' => [
             'doc' => 'Name des Attributs.',
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['nonNull' => true],
             'create' => ['constructor' => true],
         ],
         'type' => [
             'doc' => 'Typ des Attributs.',
             'details' => ['TEXTFIELD = einzeiliges Textfeld, TEXTAREA = mehrzeiliges Textfeld, CHECKBOX = Checkbox'],
             'enum' => 'PropertyType',
-            'model' => ['required' => true],
         ],
         'default_value' => ['doc' => 'Standardwert.'],
         // BC: PropertyCreateOptions sendet `position` weiterhin, falls gesetzt.

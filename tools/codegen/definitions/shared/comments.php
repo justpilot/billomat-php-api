@@ -31,7 +31,7 @@ return static function (string $prefix, string $label, string $parentField, ?str
             ...$writable,
             'type' => 'int',
             'doc' => 'ID des Dokuments, an dem der Kommentar hängt.',
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['nonNull' => true],
             'create' => ['constructor' => true],
         ],
         'comment' => [...$writable, 'doc' => 'Kommentartext.', 'create' => ['constructor' => true]],

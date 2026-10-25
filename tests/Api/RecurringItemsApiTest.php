@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
+use Justpilot\Billomat\Api\RecurringItemUpdateOptions;
 use Justpilot\Billomat\Api\RecurringsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
@@ -31,6 +32,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RecurringsApi::class)]
 #[CoversClass(RecurringItem::class)]
 #[CoversClass(RecurringItemCreateOptions::class)]
+#[CoversClass(RecurringItemUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
@@ -136,7 +138,7 @@ final class RecurringItemsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http)->items;
 
-        $opts = new RecurringItemCreateOptions(quantity: 2.0, unitPrice: Money::of('75'));
+        $opts = new RecurringItemUpdateOptions(quantity: 2.0, unitPrice: Money::of('75'));
 
         $item = $api->update(100, $opts);
 

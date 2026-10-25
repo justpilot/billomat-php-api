@@ -6,10 +6,18 @@ namespace Justpilot\Billomat\Tests\Model;
 
 use BackedEnum;
 use DateTimeImmutable;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
+use Justpilot\Billomat\Model\Activity;
+use Justpilot\Billomat\Model\Country;
+use Justpilot\Billomat\Model\Currency;
+use Justpilot\Billomat\Model\InboxDocument;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Model\Role;
+use Justpilot\Billomat\Model\SearchResult;
 use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\UsesNamespace;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -21,12 +29,14 @@ use ReflectionProperty;
 /**
  * Prüft alle Read-Models mit `fromArray()` und `toArray()` per Reflection: `fromArray(toArray())`
  * ergibt dasselbe Model – mit einem eigenen Wert pro Feld und mit leeren Werten (null, false) –,
- * und fehlende Pflichtfelder fallen auf den Leerwert ihres Typs zurück.
+ * fehlende optionale Felder fallen auf den Leerwert ihres Typs zurück, fehlende Pflichtfelder
+ * (`model.required`, z. B. `id`) werfen eine UnexpectedResponseException.
  *
  * Deckt damit jedes Feld-Mapping des Generators ab, ohne pro Model einen eigenen Test zu pflegen.
  */
 #[CoversNamespace('Justpilot\\Billomat\\Model')]
 #[UsesNamespace('Justpilot\\Billomat\\Internal')]
+#[UsesClass(UnexpectedResponseException::class)]
 final class ModelRoundTripTest extends TestCase
 {
     private int $counter = 0;
@@ -85,12 +95,48 @@ final class ModelRoundTripTest extends TestCase
     #[DataProvider('generatedModels')]
     public function missingFieldsFallBackToEmptyValues(string $class): void
     {
-        $model = $class::fromArray([]);
+        // Pflichtfelder (`model.required`) liefert Billomat immer; nur sie stehen in den Daten.
+        $sample = $this->sample($class, empty: false);
+        $model = $class::fromArray(array_intersect_key($this->export($sample), array_flip(self::requiredFields($class))));
         self::assertIsObject($model);
 
+        $this->assertOptionalFieldsAreEmpty($sample, $model);
+    }
+
+    /**
+     * Der Konstruktor braucht nur die Pflichtfelder; alle anderen Parameter haben den Leerwert ihres Typs als Default.
+     *
+     * @param class-string $class
+     */
+    #[Test]
+    #[DataProvider('generatedModels')]
+    public function constructorDefaultsAreEmptyValues(string $class): void
+    {
+        $sample = $this->sample($class, empty: false);
+        $required = [];
+        foreach (new ReflectionClass($class)->getConstructor()?->getParameters() ?? [] as $parameter) {
+            if (!$parameter->isOptional()) {
+                $required[$parameter->name] = new ReflectionProperty($class, $parameter->name)->getValue($sample);
+            }
+        }
+
+        $this->assertOptionalFieldsAreEmpty($sample, new $class(...$required));
+    }
+
+    /**
+     * Pflichtfelder wie in `$sample`, alle anderen null bzw. der Leerwert ihres Typs.
+     */
+    private function assertOptionalFieldsAreEmpty(object $sample, object $model): void
+    {
+        $class = $model::class;
         foreach (new ReflectionClass($class)->getConstructor()?->getParameters() ?? [] as $parameter) {
             $type = $parameter->getType();
             $value = new ReflectionProperty($class, $parameter->name)->getValue($model);
+            if (!$parameter->isOptional()) {
+                self::assertEquals(new ReflectionProperty($class, $parameter->name)->getValue($sample), $value, $class.'::$'.$parameter->name);
+
+                continue;
+            }
             if (!$type instanceof ReflectionNamedType || $type->allowsNull()) {
                 self::assertNull($value, $class.'::$'.$parameter->name);
 
@@ -103,11 +149,102 @@ final class ModelRoundTripTest extends TestCase
                 'string' => '',
                 'bool' => false,
                 'array' => [],
-                Money::class => Money::zero(),
                 default => self::fail('Kein Leerwert für Typ '.$type->getName()),
             };
             self::assertEquals($expected, $value, $class.'::$'.$parameter->name);
         }
+    }
+
+    /**
+     * @param class-string $class
+     */
+    #[Test]
+    #[DataProvider('requiredFieldsOfModels')]
+    public function missingRequiredFieldThrows(string $class, string $field): void
+    {
+        $data = $this->export($this->sample($class, empty: false));
+        self::assertArrayHasKey($field, $data);
+        unset($data[$field]);
+
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains(\sprintf('Unexpected response from Billomat: %s without a valid "%s" field.', new ReflectionClass($class)->getShortName(), $field));
+
+        $class::fromArray($data);
+    }
+
+    /**
+     * Billomat liefert leere Werte als "": ein leeres Pflichtfeld zählt wie ein fehlendes.
+     *
+     * @param class-string $class
+     */
+    #[Test]
+    #[DataProvider('requiredFieldsOfModels')]
+    public function emptyRequiredFieldThrows(string $class, string $field): void
+    {
+        $data = [...$this->export($this->sample($class, empty: false)), $field => ''];
+
+        $this->expectException(UnexpectedResponseException::class);
+
+        $class::fromArray($data);
+    }
+
+    /**
+     * Jedes Read-Model mit `id` hat sie als Pflichtfeld. Ausnahmen: Tag-Cloud-Einträge (aggregiert,
+     * nicht einzeln abrufbar), Länder und Währungen (Schlüssel ist der Code) sowie die Verweise
+     * in Aktivitäten und Suchtreffern.
+     *
+     * @param class-string $class
+     */
+    #[Test]
+    #[DataProvider('models')]
+    public function idIsRequired(string $class): void
+    {
+        $parameters = new ReflectionClass($class)->getConstructor()?->getParameters() ?? [];
+        $id = array_find($parameters, static fn (ReflectionParameter $p): bool => 'id' === $p->name);
+        if (null === $id) {
+            $this->expectNotToPerformAssertions();
+
+            return;
+        }
+
+        $nullable = str_ends_with($class, 'TagCloudEntry') || \in_array($class, [Activity::class, SearchResult::class, Country::class, Currency::class], true);
+        self::assertSame($nullable, $id->isOptional() || true === $id->getType()?->allowsNull(), $class.'::$id');
+    }
+
+    /**
+     * Pflichtfelder der generierten Models plus `id` der handgeschriebenen Ressourcen-Models.
+     *
+     * @return iterable<string, array{class-string, string}>
+     */
+    public static function requiredFieldsOfModels(): iterable
+    {
+        foreach (self::generatedModels() as $name => [$class]) {
+            foreach (self::requiredFields($class) as $field) {
+                yield $name.'.'.$field => [$class, $field];
+            }
+        }
+        yield 'InboxDocument.id' => [InboxDocument::class, 'id'];
+        yield 'Role.id' => [Role::class, 'id'];
+    }
+
+    /**
+     * Billomat-Feldnamen der Konstruktor-Parameter ohne Default (bei generierten Models: `model.required`).
+     *
+     * @param class-string $class
+     *
+     * @return list<string>
+     */
+    private static function requiredFields(string $class): array
+    {
+        $required = array_filter(
+            new ReflectionClass($class)->getConstructor()?->getParameters() ?? [],
+            static fn (ReflectionParameter $p): bool => !$p->isOptional(),
+        );
+
+        return array_values(array_map(
+            static fn (ReflectionParameter $p): string => strtolower((string) preg_replace('/[A-Z]/', '_$0', $p->name)),
+            $required,
+        ));
     }
 
     /**
@@ -213,7 +350,7 @@ final class ModelRoundTripTest extends TestCase
     }
 
     /**
-     * @return list<mixed>
+     * @return array<mixed>
      */
     private function sampleList(ReflectionParameter $parameter, string $docComment): array
     {
@@ -226,6 +363,11 @@ final class ModelRoundTripTest extends TestCase
         if (1 === preg_match('/@param\s+list<(\w+)>\s+\$'.$parameter->name.'\b/', $docComment, $match)
             && is_subclass_of($enumClass = 'Justpilot\\Billomat\\Model\\Enum\\'.$match[1], BackedEnum::class)) {
             return [array_first($enumClass::cases()), array_last($enumClass::cases())];
+        }
+        // Enum-Maps (z. B. `array<string, AccessLevel> $rights`): echte Bereichsnamen, damit auch Role sie erkennt.
+        if (1 === preg_match('/@param\s+array<string,\s*(\w+)>\s+\$'.$parameter->name.'\b/', $docComment, $match)
+            && is_subclass_of($enumClass = 'Justpilot\\Billomat\\Model\\Enum\\'.$match[1], BackedEnum::class)) {
+            return ['articles' => array_first($enumClass::cases()), 'settings_addons' => array_last($enumClass::cases())];
         }
 
         return [];

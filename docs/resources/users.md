@@ -105,6 +105,7 @@ echo $me?->email;
 ## Pitfalls
 
 - **No write access via the API.** Billomat documents only read endpoints for `/users` (list, single, avatar, myself); there is no official `POST/PUT/DELETE /users`. User management — creating users, changing roles, passwords, deleting — happens only in the Billomat web UI. The SDK therefore deliberately has no `create`/`update`/`delete` for users. (Custom field *definitions* under `$billomat->users->properties` are writable.)
+- **Rights are a map of `AccessLevel`.** `$user->rights['invoices'] ?? null` is `READ`, `UPDATE`, `DELETE` or `null` (no access). Levels include the lower ones, so check with `allows()`: `($user->rights['invoices'] ?? null)?->allows(AccessLevel::UPDATE) ?? false`. Values the SDK doesn't know are dropped.
 - **`role_id` is a read-only reference.** A user's role is in `User::$roleId`; the role definitions come from [`settings-roles.md`](settings-roles.md). Assigning a role to a user happens in the UI.
 
 ## Read model: `User`
@@ -113,7 +114,7 @@ echo $me?->email;
 
 | Property | Type | Mapping |
 |---|---|---|
-| `id` | `?int` | `id` |
+| `id` | `int` | `id` |
 | `email` | `?string` | `email` |
 | `firstName` | `?string` | `first_name` |
 | `lastName` | `?string` | `last_name` |
@@ -124,6 +125,7 @@ echo $me?->email;
 | `locale` | `?string` | `locale` |
 | `timezone` | `?string` | `timezone` |
 | `isAccountOwner` | `?bool` | Account owner |
+| `rights` | `array<string, AccessLevel>` | `rights`: access level per area (`articles`, `banking`, …); areas without access are left out |
 | `extra` | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
 `User::fromArray($data)` hydrates from the Billomat wire format; `User::toArray()` writes it back (snake_case).

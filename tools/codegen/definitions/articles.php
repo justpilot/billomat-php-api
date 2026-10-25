@@ -52,7 +52,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Artikels.'],
-        'created' => ['type' => 'datetime', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Erstellungszeitpunkt des Artikels.'],
+        'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Artikels.'],
         'article_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Vollständige Artikelnummer (Präfix + laufende Nummer).'],
         'number' => ['doc' => 'Laufende Nummer (ohne Präfix).'],
         'number_pre' => ['doc' => 'Präfix der Artikelnummer.'],

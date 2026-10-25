@@ -44,10 +44,10 @@ final class CreditNotesApi extends AbstractApi
     /**
      * Positionen, siehe {@see ItemsApi}.
      *
-     * @var ItemsApi<CreditNoteItem, CreditNoteItemCreateOptions>
+     * @var ItemsApi<CreditNoteItem, CreditNoteItemCreateOptions, CreditNoteItemUpdateOptions>
      */
     public private(set) ItemsApi $items {
-        get => $this->items ??= new ItemsApi($this->http, 'credit-note', CreditNoteItem::fromArray(...), CreditNoteItemCreateOptions::class);
+        get => $this->items ??= new ItemsApi($this->http, 'credit-note', CreditNoteItem::fromArray(...), CreditNoteItemCreateOptions::class, CreditNoteItemUpdateOptions::class);
     }
 
     /**

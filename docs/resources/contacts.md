@@ -125,7 +125,7 @@ Same fields as `ContactCreateOptions`, **without** `clientId`: Billomat doesn't 
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `created` | `?\DateTimeImmutable` |
 | `label` | `?string` |

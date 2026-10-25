@@ -100,7 +100,7 @@ $piece = $billomat->units->get(42);
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `string` |
 | `created`, `updated` | `?\DateTimeImmutable` |
 | `customfield` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
@@ -121,7 +121,7 @@ $all = $billomat->users->list();
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `email` | `?string` |
 | `firstName` | `?string` |
 | `lastName` | `?string` |
@@ -152,7 +152,7 @@ $default = array_find(
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `?string` |
 | `subject` | `?string` |
 | `body` | `?string` |
@@ -176,7 +176,7 @@ $blocks = $billomat->freeTexts->list();
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `title` | `?string` |
 | `label` | `?string` |
 | `intro` | `?string` |
@@ -202,7 +202,7 @@ $texts = $billomat->reminderTexts->list(['order_by' => OrderBy::asc('sorting')->
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `?string` |
 | `subject` | `?string` |
 | `header` | `?string` |
@@ -218,8 +218,10 @@ $texts = $billomat->reminderTexts->list(['order_by' => OrderBy::asc('sorting')->
 Endpoint: `/roles`. User roles with their access rights. Details: [settings-roles.md](settings-roles.md).
 
 ```php
+use Justpilot\Billomat\Model\Enum\AccessLevel;
+
 $master = $billomat->roles->get(1);
-$canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === 'DELETE';
+$canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === AccessLevel::DELETE;
 ```
 
 #### Read model: `Role`
@@ -228,9 +230,9 @@ $canDeleteInvoices = ($master?->permissions['invoices'] ?? null) === 'DELETE';
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `name` | `?string` |
-| `permissions` | `array<string,?string>` |
+| `permissions` | `array<string, AccessLevel>` |
 
 ### `countryTaxes`
 
@@ -246,7 +248,7 @@ $taxFree = array_map(static fn ($c) => $c->countryCode, $billomat->countryTaxes-
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `countryCode` | `?string` |
 
 ### `incomingCategories`

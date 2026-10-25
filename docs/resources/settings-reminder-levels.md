@@ -58,7 +58,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
 | Property | Billomat field | Type | Purpose |
 |---|---|---|---|
-| `id` | `id` | `?int` | |
+| `id` | `id` | `int` | |
 | `name` | `name` | `?string` | Name of the reminder level (internal) |
 | `subject` | `subject` | `?string` | Subject of the reminder e-mail/letter |
 | `header` | `header` | `?string` | Introduction |

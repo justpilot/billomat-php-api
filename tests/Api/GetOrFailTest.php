@@ -87,7 +87,7 @@ final class GetOrFailTest extends TestCase
             $slug = explode('/', (string) parse_url($url, PHP_URL_PATH))[2] ?? '';
             $key = (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
 
-            return new MockResponse((string) json_encode([$key => ['id' => '7']]));
+            return new MockResponse((string) json_encode([$key => ['id' => '7', 'unit_price' => '1', 'amount' => '1']]));
         });
         $billomat = new BillomatClient(new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'), new Psr18Client($mock));
         $api = $this->api($billomat, $resource, $subResource);

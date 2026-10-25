@@ -47,8 +47,6 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $supplier = $billomat->suppliers->create($opts);
 
-        self::assertNotNull($supplier->id);
-
         // Update
         $update = new SupplierUpdateOptions(city: 'München');
         $updated = $billomat->suppliers->update($supplier->id, $update);
@@ -73,7 +71,6 @@ final class SuppliersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $supplierOpts = new SupplierCreateOptions(name: 'IT-Tag-Lieferant '.date('His'));
         $supplier = $billomat->suppliers->create($supplierOpts);
-        self::assertNotNull($supplier->id);
 
         try {
             $tagOpts = new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'IT-SupTag-'.date('His'));

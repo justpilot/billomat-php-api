@@ -49,7 +49,7 @@ final readonly class IncomingCategory
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toStringOrNull($data['id'] ?? null) ?? '',
+            id: ScalarCaster::required(ScalarCaster::toStringOrNull($data['id'] ?? null), self::class, 'id'),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             extra: array_diff_key($data, self::FIELDS),

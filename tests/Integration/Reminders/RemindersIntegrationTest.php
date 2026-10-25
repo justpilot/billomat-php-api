@@ -47,7 +47,6 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $reminders) {
             $first = $reminders[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
         }
     }
@@ -68,7 +67,6 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $reminder = $billomat->reminders->create($opts);
 
-        self::assertNotNull($reminder->id);
         self::assertSame(ReminderStatus::DRAFT, $reminder->status);
 
         // Update

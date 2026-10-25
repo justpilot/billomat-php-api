@@ -38,33 +38,33 @@ final readonly class DeliveryNoteItem
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Position. */
-        public ?int $id,
+        public int $id,
         /** ID des zugehörigen Dokuments. */
-        public ?int $deliveryNoteId,
+        public ?int $deliveryNoteId = null,
         /** ID des Artikels (falls verknüpft). */
-        public ?int $articleId,
+        public ?int $articleId = null,
         /**
          * Laufende Positionsnummer innerhalb des Dokuments.
          *
          * Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).
          */
-        public ?int $position,
+        public ?int $position = null,
         /** Einheit (z. B. "Stück", "Stunde"). */
-        public ?string $unit,
+        public ?string $unit = null,
         /** Menge. */
-        public float $quantity,
+        public float $quantity = 0.0,
         /**
          * Flag, ob die Steuerrate manuell geändert wurde.
          *
          * Laut Doku Pflicht, *wenn* nicht der Standard-Steuersatz angewendet werden soll.
          */
-        public ?bool $taxChangedManually,
+        public ?bool $taxChangedManually = null,
         /** Titel der Position. */
-        public ?string $title,
+        public ?string $title = null,
         /** Beschreibung der Position. */
-        public ?string $description,
+        public ?string $description = null,
         /** Typ der Position (Produkt/Dienstleistung). */
-        public ?ItemType $type,
+        public ?ItemType $type = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /**
@@ -84,7 +84,7 @@ final readonly class DeliveryNoteItem
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             deliveryNoteId: ScalarCaster::toIntOrNull($data['delivery_note_id'] ?? null),
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),

@@ -40,9 +40,9 @@ final readonly class ReminderText
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Mahnstufe. */
-        public ?int $id,
+        public int $id,
         /** Name der Mahnstufe. */
-        public ?string $name,
+        public ?string $name = null,
         /** Betreff. */
         public ?string $subject = null,
         /** Einleitung. */
@@ -76,7 +76,7 @@ final readonly class ReminderText
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
             header: ScalarCaster::toStringOrNull($data['header'] ?? null),

@@ -159,7 +159,7 @@ Mirrors `ArticleCreateOptions`, but `title` is no longer required and every fiel
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `created` | `?\DateTimeImmutable` |
 | `articleNumber` | `?string` (combined: `numberPre` + padded `number`) |
 | `number` | `?int` |
@@ -216,7 +216,7 @@ Both values are required and set via the constructor:
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `articleId` | `int` |
 | `name` | `string` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
@@ -267,7 +267,7 @@ All three values are required and set via the constructor:
 
 | Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `articleId` | `int` |
 | `articlePropertyId` | `int` |
 | `type` | `?PropertyType` (`TEXTFIELD`, `TEXTAREA`, `CHECKBOX`) |

@@ -61,7 +61,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Mahnung.'],
-        'client_id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['type' => 'int', 'readOnly' => true, 'model' => ['nonNull' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         // Die Rechnung lässt sich nach dem Anlegen nicht mehr ändern.
         'invoice_id' => ['create' => ['constructor' => true], 'update' => ['skip' => true], 'doc' => 'ID der überfälligen Rechnung.'],

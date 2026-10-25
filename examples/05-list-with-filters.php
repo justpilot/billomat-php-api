@@ -28,7 +28,7 @@ $recentClients = $billomat->clients->list(new ClientFilter(orderBy: OrderBy::des
 
 echo "Zuletzt angelegte Kunden:\n";
 foreach ($recentClients as $client) {
-    printf("  #%d  %s\n", $client->id ?? 0, $client->name);
+    printf("  #%d  %s\n", $client->id, $client->name);
 }
 
 // 2) Rechnungen mit mehreren Status-Werten, nach Datum und Nummer sortiert
@@ -42,7 +42,7 @@ echo "\nOffene oder überfällige Rechnungen (max. 10):\n";
 foreach ($openOrOverdue as $invoice) {
     printf(
         "  #%d  %s  %s  offen: %s %s\n",
-        $invoice->id ?? 0,
+        $invoice->id,
         $invoice->invoiceNumber ?? '?',
         $invoice->status?->label() ?? '?',
         $invoice->openAmount?->format(2, ',', '.') ?? '?',

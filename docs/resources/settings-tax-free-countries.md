@@ -32,7 +32,7 @@ $billomat->countryTaxes
 
 ```php
 foreach ($billomat->countryTaxes->list() as $row) {
-    printf("#%d %s\n", $row->id ?? 0, $row->countryCode ?? '');
+    printf("#%d %s\n", $row->id, $row->countryCode ?? '');
 }
 ```
 
@@ -57,7 +57,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `id` | `id` | `?int` |
+| `id` | `id` | `int` |
 | `countryCode` | `country_code` | `?string` |
 | `extra` | — | `array<string,mixed>`: fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 

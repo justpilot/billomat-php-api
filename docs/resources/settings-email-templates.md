@@ -62,7 +62,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `id` | `id` | `?int` |
+| `id` | `id` | `int` |
 | `name` | `name` | `?string` |
 | `subject` | `subject` | `?string` |
 | `body` | `text` (fallback `body`) | `?string` |

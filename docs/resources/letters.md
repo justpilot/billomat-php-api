@@ -1,42 +1,44 @@
-<!-- Quelle: https://www.billomat.com/api/briefe/ -->
+<!-- Source: https://www.billomat.com/api/briefe/ -->
 
 # Letters (Briefe)
 
-API-Wrapper für freie Korrespondenz unter `/letters` und ihre zwei Sub-Ressourcen (`/letter-comments`, `/letter-tags`).
+API wrapper for free-form correspondence under `/letters` and its two sub-resources (`/letter-comments`, `/letter-tags`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->letters         // Briefe selbst
-$billomat->letters->comments  // Aktivitäts-Log / freie Kommentare
-$billomat->letters->tags      // Schlagworte
+$billomat->letters            // letters
+$billomat->letters->comments  // activity log / free-form comments
+$billomat->letters->tags      // tags
 ```
 
-## Modell
+## Model
 
-Ein Brief (Letter) ist freie, formgebundene Korrespondenz an einen Kunden — ohne Positionsliste, ohne Steuerberechnung, ohne Zahlungs-Lifecycle. Hauptzweck ist das Versenden per E-Mail oder postalisch (Pixelletter), das Hochladen eines extern erzeugten PDFs (`upload()`) und die Ablage im Kunden-Vorgangs-Verlauf.
+A letter is free-form, formal correspondence to a client (or supplier, via `supplierId`), with no line items, no tax calculation and no payment lifecycle. Its main purposes are sending by email, uploading an externally generated PDF (`upload()`) and keeping a record in the client's history. Billomat also offers postal delivery for letters (Pixelletter, `POST /letters/{id}/mail`); the SDK doesn't wrap that endpoint.
 
-Der Lifecycle ist statusgetrieben, aber schlanker als bei Invoices/CreditNotes:
+The lifecycle is status-driven, but simpler than for invoices or credit notes:
 
 ```
-DRAFT  ── complete() ──▶  OPEN  ── clear() ──▶  CLEARED   (erledigt)
+DRAFT  ── complete() ──▶  OPEN / COMPLETED  ── clear() ──▶  CLEARED   (done)
   │                        │
   │                        ├── cancel() ──▶  CANCELED
   │                        │
-  │                        └── undo() ──▶  DRAFT          (Rücksetzen)
-  └── delete() (nur im DRAFT)
+  │                        └── undo() ──▶  DRAFT          (reset)
+  └── delete() (only in DRAFT)
 ```
 
-`undo()` ist die Letter-spezifische Möglichkeit, einen offenen Brief zurück in den Entwurfsstatus zu bringen — eine `uncancel()`-Variante gibt es bewusst nicht.
+`undo()` is the letter-specific way to move an open letter back to draft; there is deliberately no `uncancel()` variant.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
 ### `/letters`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/letters` |
-| `get($id)` | GET | `/letters/{id}` |
+| `listPage($filters?)` | GET | `/letters` (one page plus pagination metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/letters` (all pages, lazily) |
+| `get($id)` / `getOrFail($id)` | GET | `/letters/{id}` |
 | `create($options)` | POST | `/letters` |
 | `update($id, $options)` | PUT | `/letters/{id}` |
 | `delete($id)` | DELETE | `/letters/{id}` |
@@ -51,32 +53,32 @@ DRAFT  ── complete() ──▶  OPEN  ── clear() ──▶  CLEARED   (e
 
 ### `/letter-comments`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($letterId, $actionKeys?)` | GET | `/letter-comments?letter_id={id}` |
-| `get($id)` | GET | `/letter-comments/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/letter-comments/{id}` |
 | `create($options)` | POST | `/letter-comments` |
 | `delete($id)` | DELETE | `/letter-comments/{id}` |
 
 ### `/letter-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($letterId)` | GET | `/letter-tags?letter_id={id}` |
 | `cloud()` | GET | `/letter-tags` |
-| `get($id)` | GET | `/letter-tags/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/letter-tags/{id}` |
 | `create($options)` | POST | `/letter-tags` |
 | `delete($id)` | DELETE | `/letter-tags/{id}` |
 
-## Methoden
+## Methods
 
 ### Letters
 
 #### `list(LetterFilter|array $filters = []): list<Letter>`
 
-Billomat filtert u. a. nach `client_id`, `contact_id`, `supplier_id`, `status`, `from`, `to`, `tags`, …
+Billomat filters by `client_id`, `contact_id`, `supplier_id`, `status`, `from`, `to`, `tags` and more.
 
-Empfohlen ist der typisierte Filter `LetterFilter` mit den camelCase-Feldern `clientId`, `contactId`, `supplierId`, `status` (`list<LetterStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro` und `tags`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter. Ein einfaches Array funktioniert weiterhin. Arrays werden 1:1 als Query-String durchgereicht, Array-Werte landen als `key[]=…`.
+The typed filter `LetterFilter` is recommended. Its camelCase fields are `clientId`, `contactId`, `supplierId`, `status` (`list<LetterStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro` and `tags`. Multi-value fields are lists and are sent comma-separated. On top of that there are `orderBy`, `page`, `perPage` and `extra` for further query parameters. A plain array still works: it is passed through to the query string as is, and array values are sent as `key[]=…`.
 
 ```php
 use Justpilot\Billomat\Api\LetterFilter;
@@ -89,23 +91,25 @@ $drafts = $billomat->letters->list(new LetterFilter(
 ));
 ```
 
+`listPage()` takes the same filters and returns a `Page` with pagination metadata; `iterateAll()` walks through all pages lazily. See [Pagination and filtering](../concepts/pagination-and-filtering.md).
+
 #### `get(int $id): ?Letter`
 
-Liefert `null` bei 404.
+Returns `null` on 404. `getOrFail()` throws a `NotFoundException` instead.
 
 #### `create(LetterCreateOptions $options): Letter`
 
-Pflicht ist ausschließlich die `clientId`. Der eigentliche Brieftext (`intro` + `note`) und das Layout-Template (`templateId`) sind frei wählbar.
+Only `clientId` is required. The actual letter text (`intro` plus `note`) and the layout template (`templateId`) are up to you.
 
 ```php
 use Justpilot\Billomat\Api\LetterCreateOptions;
 
 $opts = new LetterCreateOptions(
     clientId: 12345,
-    subject: 'Information zur DSGVO-Aktualisierung',
+    subject: 'Update to our privacy policy',
     date: new DateTimeImmutable('2026-06-02'),
-    intro: 'Sehr geehrte Damen und Herren,',
-    note: "Hiermit informieren wir Sie über …\n\nMit freundlichen Grüßen",
+    intro: 'Dear Sir or Madam,',
+    note: "We would like to inform you about …\n\nKind regards",
 );
 
 $letter = $billomat->letters->create($opts);
@@ -113,29 +117,29 @@ $letter = $billomat->letters->create($opts);
 
 #### `update(int $id, LetterUpdateOptions $options): Letter`
 
-Nur im Status `DRAFT` ratsam. Felder, die `null` bleiben, werden serverseitig nicht angefasst.
+Only advisable in status `DRAFT`. Fields left at `null` are not touched on the server.
 
 #### `complete(int $id, ?int $templateId = null): void`
 
-Status `DRAFT → COMPLETED`. Optional kann ein konkretes Layout-Template forciert werden.
+Completes the draft (Billomat now reports `COMPLETED`). Optionally forces a specific layout template.
 
 #### `cancel(int $id): void` / `clear(int $id): void` / `undo(int $id): void`
 
-- `cancel()` → Status `CANCELED` (terminal aus Workflow-Sicht).
-- `clear()` → Status `CLEARED` („erledigt“, etwa wenn der Brief bearbeitet/abgehakt ist).
-- `undo()` → setzt einen `OPEN`-Brief zurück nach `DRAFT`, sodass er wieder editierbar wird.
+- `cancel()` → status `CANCELED` (terminal from a workflow perspective).
+- `clear()` → status `CLEARED` ("done", e.g. once the letter has been handled).
+- `undo()` → moves an `OPEN` letter back to `DRAFT` so it becomes editable again.
 
 #### `email(int $id, ?EmailOptions $options = null): void`
 
-Versendet den Brief per E-Mail. Ohne Optionen greifen die Defaults aus der hinterlegten Vorlage.
+Sends the letter by email. Without options, the defaults from the configured template apply.
 
 ```php
 use Justpilot\Billomat\Api\EmailOptions;
 
 $mail = new EmailOptions(
-    to: ['kunde@example.com'],
-    subject: 'Unser Anschreiben',
-    body: 'Anbei unser Schreiben als PDF.',
+    to: ['client@example.com'],
+    subject: 'Our letter',
+    body: 'Please find our letter attached as a PDF.',
 );
 
 $billomat->letters->email($letter->id, $mail);
@@ -143,26 +147,26 @@ $billomat->letters->email($letter->id, $mail);
 
 #### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): LetterPdf|string`
 
-Per Default ein `LetterPdf`-Modell. Mit `$rawPdf = true` wird `?format=pdf` gehängt und das binäre PDF zurückgegeben.
+Returns a `LetterPdf` model by default. With `$rawPdf = true`, `?format=pdf` is appended and the binary PDF is returned.
 
 ```php
-$pdf = $billomat->letters->pdf($letter->id);                 // Model
+$pdf = $billomat->letters->pdf($letter->id);                 // model
 $raw = $billomat->letters->pdf($letter->id, rawPdf: true);   // string (PDF binary)
 ```
 
 #### `upload(int $id, string $base64Pdf): void`
 
-**Letter-spezifisch**: lädt ein komplett extern erzeugtes Brief-PDF in den Slot des Briefs. Praktisch, wenn das Layout nicht über Billomat-Templates läuft (z. B. fertige Word/InDesign-Exporte). Diese Methode hat **keine** Entsprechung bei Invoices/CreditNotes/Reminders.
+**Letter-specific**: uploads a complete, externally generated letter PDF into the letter. Useful when the layout isn't built with Billomat templates (e.g. finished Word or InDesign exports). This method has **no** counterpart for invoices, credit notes or reminders.
 
 #### `uploadSignature(int $id, string $base64Pdf): void`
 
-Hängt eine vom Empfänger unterschriebene Variante an.
+Attaches a version signed by the recipient.
 
 #### `delete(int $id): void`
 
-Funktioniert ausschließlich an Briefen im Status `DRAFT`.
+Only works on letters in status `DRAFT`.
 
-### Letter Comments
+### Letter comments
 
 ```php
 use Justpilot\Billomat\Api\LetterCommentCreateOptions;
@@ -171,80 +175,81 @@ use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 $comment = $billomat->letters->comments->create(
     new LetterCommentCreateOptions(
         letterId: $letter->id,
-        comment: 'Brief postalisch versendet am 03.06.2026.',
+        comment: 'Letter sent by post on 2026-06-03.',
     ),
 );
 
-// Nur EMAIL- und UPLOAD-Einträge anzeigen
+// Show only EMAIL and UPLOAD entries
 $entries = $billomat->letters->comments->list(
     $letter->id,
     [LetterCommentActionKey::EMAIL, LetterCommentActionKey::UPLOAD],
 );
 ```
 
-Wie bei Credit Notes mischt der Endpunkt freie User-Kommentare mit System-Audit-Einträgen. ActionKeys werden als CSV-String übergeben.
+As with credit notes, the endpoint mixes free-form user comments with system audit entries. Action keys are sent as a comma-separated string.
 
-### Letter Tags
+### Letter tags
 
 ```php
 use Justpilot\Billomat\Api\LetterTagCreateOptions;
 
 $billomat->letters->tags->create(
-    new LetterTagCreateOptions(letterId: $letter->id, name: 'dsgvo'),
+    new LetterTagCreateOptions(letterId: $letter->id, name: 'privacy'),
 );
 
 $tags = $billomat->letters->tags->list($letter->id);
-$cloud = $billomat->letters->tags->cloud(); // aggregiert, mit count
+$cloud = $billomat->letters->tags->cloud(); // aggregated, with count
 ```
 
-Kein Update — zum Umbenennen wird gelöscht und neu angelegt.
+There is no update. To rename a tag, delete it and create it again.
 
-## Write-Modell: `LetterCreateOptions`
+## Write model: `LetterCreateOptions`
 
-Konstruktor: `new LetterCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withLabel('Neu')`).
+Constructor: `new LetterCreateOptions(int $clientId, …)`. `clientId` is required and the first parameter. Every field is a constructor parameter with a default and is passed as a named argument. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withLabel('New')`).
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` (Pflicht) | |
+| `clientId` | `client_id` | `int` (required) | |
 | `contactId` | `contact_id` | `?int` | |
-| `address` | `address` | `?string` | mehrzeilige Anschrift, überschreibt die Kunden-Adresse |
+| `address` | `address` | `?string` | multi-line address, overrides the client address |
 | `numberPre` | `number_pre` | `?string` | |
-| `number` | `number` | `?int` | manuelle Nummerierung |
+| `number` | `number` | `?int` | manual numbering |
 | `numberLength` | `number_length` | `?int` | |
 | `date` | `date` | `?\DateTimeImmutable` | `Y-m-d` |
-| `subject` | `subject` | `?string` | Betreffzeile |
+| `subject` | `subject` | `?string` | subject line |
 | `label` | `label` | `?string` | |
-| `intro` | `intro` | `?string` | Brief-Anrede / Einleitung |
-| `note` | `note` | `?string` | Brief-Haupttext |
+| `intro` | `intro` | `?string` | salutation / introduction |
+| `note` | `note` | `?string` | main letter text |
+| `templateId` | `template_id` | `?int` | layout template |
+| `supplierId` | `supplier_id` | `?int` | recipient supplier |
 | `freeTextId` | `free_text_id` | `?int` | |
-| `templateId` | `template_id` | `?int` | Layout-Template |
 
-## Write-Modell: `LetterUpdateOptions`
+## Write model: `LetterUpdateOptions`
 
-Spiegelt `LetterCreateOptions` ohne `clientId`-Pflicht (jetzt nullable). Felder, die `null` bleiben, werden aus dem Payload gestrippt. Mit `Clear::Field` wird ein Feld dagegen als JSON-`null` gesendet und von Billomat geleert, z. B. `new LetterUpdateOptions(note: Clear::Field)`.
+Mirrors `LetterCreateOptions`, but `clientId` is optional (nullable). Fields left at `null` are stripped from the payload. `Clear::Field` instead sends the field as JSON `null`, and Billomat empties it, e.g. `new LetterUpdateOptions(note: Clear::Field)`.
 
-## Write-Modell: `LetterCommentCreateOptions`
+## Write model: `LetterCommentCreateOptions`
 
-Konstruktor: `new LetterCommentCreateOptions(int $letterId, string $comment)`.
+Constructor: `new LetterCommentCreateOptions(int $letterId, string $comment)`.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `letterId` | `letter_id` | `int` (Pflicht) | |
-| `comment` | `comment` | `string` (Pflicht) | |
-| `actionkey` | `actionkey` | `?LetterCommentActionKey` | wird in der Regel von Billomat gesetzt |
+| `letterId` | `letter_id` | `int` (required) | |
+| `comment` | `comment` | `string` (required) | |
+| `actionkey` | `actionkey` | `?LetterCommentActionKey` | usually set by Billomat |
 
-## Write-Modell: `LetterTagCreateOptions`
+## Write model: `LetterTagCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `letterId` | `letter_id` | `int` (Pflicht) | |
-| `name` | `name` | `string` (Pflicht) | |
+| `letterId` | `letter_id` | `int` (required) | |
+| `name` | `name` | `string` (required) | |
 
-## Write-Modell: `EmailOptions`
+## Write model: `EmailOptions`
 
-Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions).
+Shared class for sending every document type by email (invoices, offers, confirmations, credit notes, delivery notes, reminders, letters); the full description is on the [Invoices](invoices.md#write-model-emailoptions) page.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `emailTemplateId` | `email_template_id` | `?int` | |
 | `from` | `from` | `?string` | |
@@ -252,17 +257,17 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `cc` | `recipients.cc` | `list<string>` | |
 | `bcc` | `recipients.bcc` | `list<string>` | |
 | `subject` | `subject` | `?string` | |
-| `body` | `body` | `?string` | E-Mail-Text (nicht der Brief-Inhalt) |
-| `filename` | `filename` | `?string` | Name des PDF-Anhangs |
-| `attachments` | `attachments.attachment` | `list<array{filename,mimetype,base64file}>` | zusätzliche Anhänge |
+| `body` | `body` | `?string` | email text (not the letter content) |
+| `filename` | `filename` | `?string` | name of the PDF attachment |
+| `attachments` | `attachments.attachment` | `list<array{filename,mimetype,base64file}>` | additional attachments |
 
-Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurückfällt.
+Empty recipient arrays are left out, so Billomat falls back to the template.
 
-## Read-Modell: `Letter`
+## Read model: `Letter`
 
-`final readonly class Letter`. Deutlich schmaler als `Invoice` oder `CreditNote` — keine Total-Felder, keine Items.
+`final readonly class Letter`. Much leaner than `Invoice` or `CreditNote`: no total fields, no items.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `clientId` | `int` |
@@ -274,11 +279,12 @@ Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurü
 | `templateId` | `?int` |
 | `updated` | `?\DateTimeImmutable` |
 | `supplierId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
-## Read-Modell: `LetterComment`
+## Read model: `LetterComment`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `letterId` | `int` |
@@ -286,35 +292,38 @@ Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurü
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
 | `actionkey` | `?LetterCommentActionKey` |
-| `actionkeyRaw` | `?string` (Roh-Wert für unbekannte Keys) |
+| `actionkeyRaw` | `?string` (raw value for unknown keys) |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `LetterTag`
+## Read model: `LetterTag`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `letterId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `LetterTagCloudEntry`
+## Read model: `LetterTagCloudEntry`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
 | `count` | `int` |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `LetterPdf`
+## Read model: `LetterPdf`
 
 `final class LetterPdf`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id`, `letterId` | `int` |
 | `created` | `?\DateTimeImmutable` |
@@ -322,26 +331,26 @@ Leere Empfänger-Arrays werden weggelassen, damit Billomat auf die Vorlage zurü
 | `fileSize` | `int` |
 | `base64file` | `string` |
 
-`getBinary(): string` dekodiert `base64file` zurück in Roh-Bytes.
+`getBinary(): string` decodes `base64file` back into raw bytes.
 
-## Verwendete Enums
+## Enums used
 
-- [`LetterStatus`](../../src/Model/Enum/LetterStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Beachte: kein `PAID`, kein `OVERDUE` — Briefe haben keinen Zahlungs-Lifecycle.
-- [`LetterCommentActionKey`](../../src/Model/Enum/LetterCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`, `UPLOAD`. Der zusätzliche `UPLOAD`-Key markiert ein über `upload()` hochgeladenes Brief-PDF.
-- [`PdfType`](../../src/Model/Enum/PdfType.php): wiederverwendet für die PDF-Varianten in `pdf()`.
+- [`LetterStatus`](../../src/Model/Enum/LetterStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. After `complete()`, Billomat now returns `COMPLETED`. Note: no `PAID`, no `OVERDUE`; letters have no payment lifecycle.
+- [`LetterCommentActionKey`](../../src/Model/Enum/LetterCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`, `UPLOAD`. The additional `UPLOAD` key marks a letter PDF uploaded via `upload()`.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): shared PDF variants for `pdf()`.
 
-## Stolpersteine
+## Pitfalls
 
-- **Kein Items-Konzept.** Im Gegensatz zu Invoices, Offers, Confirmations und CreditNotes haben Briefe keine Positionsliste — wer Beträge oder Tabellen darstellen will, muss sie als formatierten Text in `note` packen oder per `upload()` ein fertiges PDF einspielen.
-- **`upload()` ersetzt das Layout vollständig.** Das hochgeladene PDF wird beim Versand 1:1 genutzt — `templateId` und `subject` werden für das PDF dann ignoriert. Für die E-Mail-Begleittexte gilt das aber nicht.
-- **`undo()` statt `uncancel()`.** Briefe haben eine Rückkehr-Funktion von `OPEN` zu `DRAFT` (`/letters/{id}/undo`) — aber **keinen** Weg zurück aus `CANCELED`. Ein versehentlich stornierter Brief muss neu angelegt werden.
-- **`clear()` ist nicht `cancel()`.** `clear()` markiert den Brief als „erledigt“ (`CLEARED`), z. B. wenn die intern angestoßene Aktion abgeschlossen ist — `cancel()` markiert ihn als „ungültig“.
-- **`update()` nur im DRAFT.** Sobald der Brief auf `OPEN` steht, ignoriert Billomat die meisten Felder. Erst `undo()` aufrufen, dann editieren, dann `complete()`.
-- **`number` manuell setzen kollidiert mit Auto-Numbering.** Wenn der Account auf automatische Nummern konfiguriert ist, schlägt `complete()` mit `ValidationException` fehl.
-- **`actionkey` im Comment-Filter ist CSV, kein Array.** `list($id, [...])` übergibt mehrere ActionKeys als komma-separierten String, nicht als `actionkey[]=…`.
-- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /letter-tags` ohne `letter_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `letter_id` die konkreten Tags (`letter-tag`-Wrapper). Der SDK trennt das in `cloud()` und `list()`.
+- **No line items.** Unlike invoices, offers, confirmations and credit notes, letters have no list of line items. To show amounts or tables, put them as formatted text into `note` or upload a finished PDF via `upload()`.
+- **`upload()` replaces the layout completely.** The uploaded PDF is used as is when sending; `templateId` and `subject` are then ignored for the PDF. This doesn't apply to the accompanying email texts.
+- **`undo()` instead of `uncancel()`.** Letters can go back from `OPEN` to `DRAFT` (`/letters/{id}/undo`), but there is **no** way back from `CANCELED`. An accidentally canceled letter has to be created again.
+- **`clear()` is not `cancel()`.** `clear()` marks the letter as "done" (`CLEARED`), e.g. when the internal action it triggered is finished; `cancel()` marks it as "void".
+- **`update()` only in DRAFT.** Once the letter is `OPEN`, Billomat ignores most fields. Call `undo()` first, then edit, then `complete()`.
+- **Setting `number` manually conflicts with auto-numbering.** If the account uses automatic numbers, `complete()` fails with a `ValidationException`.
+- **`actionkey` in the comment filter is CSV, not an array.** `list($id, [...])` sends multiple action keys as a comma-separated string, not as `actionkey[]=…`.
+- **Tag cloud and list share the same endpoint.** `GET /letter-tags` without `letter_id` returns the aggregated cloud (`tag` wrapper); with `letter_id` it returns the actual tags (`letter-tag` wrapper). The SDK splits this into `cloud()` and `list()`.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -350,9 +359,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\LetterCommentCreateOptions;
 use Justpilot\Billomat\Api\LetterCreateOptions;
-use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\LetterTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 
@@ -361,55 +370,55 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Brief als Entwurf anlegen
+// 1) Create the letter as a draft
 $opts = new LetterCreateOptions(
     clientId: 12345,
-    subject: 'Information zur DSGVO-Aktualisierung',
+    subject: 'Update to our privacy policy',
     date: new DateTimeImmutable('2026-06-02'),
-    intro: 'Sehr geehrte Damen und Herren,',
+    intro: 'Dear Sir or Madam,',
     note: <<<TEXT
-            hiermit informieren wir Sie über die Aktualisierung unserer Datenschutzerklärung.
-            Die neue Fassung tritt zum 01.07.2026 in Kraft.
+            we would like to inform you that our privacy policy has been updated.
+            The new version takes effect on 2026-07-01.
 
-            Mit freundlichen Grüßen
-            Ihre Justpilot GmbH
+            Kind regards
+            Justpilot GmbH
             TEXT,
 );
 
 $letter = $billomat->letters->create($opts);
-printf("Brief #%d angelegt (Status: %s)\n",
+printf("Letter #%d created (status: %s)\n",
     $letter->id,
-    $letter->status?->label() ?? 'unbekannt',
+    $letter->status?->label() ?? 'unknown',
 );
 
-// 2) Tag setzen
+// 2) Add a tag
 $billomat->letters->tags->create(
-    new LetterTagCreateOptions(letterId: $letter->id, name: 'dsgvo'),
+    new LetterTagCreateOptions(letterId: $letter->id, name: 'privacy'),
 );
 
-// 3) Abschließen — DRAFT → OPEN
+// 3) Complete the draft
 $billomat->letters->complete($letter->id);
 
-// 4) Per E-Mail versenden
+// 4) Send by email
 $mail = new EmailOptions(
-    to: ['kunde@example.com'],
-    subject: 'Unsere aktualisierte Datenschutzerklärung',
-    body: 'Anbei finden Sie unser Schreiben als PDF.',
+    to: ['client@example.com'],
+    subject: 'Our updated privacy policy',
+    body: 'Please find our letter attached as a PDF.',
 );
 $billomat->letters->email($letter->id, $mail);
 
-// 5) Audit-Notiz anhängen
+// 5) Add an audit note
 $billomat->letters->comments->create(
     new LetterCommentCreateOptions(
         letterId: $letter->id,
-        comment: 'Versand am ' . new DateTimeImmutable()->format('d.m.Y') . ' an Hauptkontakt.',
+        comment: 'Sent on ' . new DateTimeImmutable()->format('Y-m-d') . ' to the main contact.',
     ),
 );
 
-// 6) PDF lokal sichern
+// 6) Save the PDF locally
 $pdfBinary = $billomat->letters->pdf($letter->id, rawPdf: true);
-file_put_contents("brief-{$letter->id}.pdf", $pdfBinary);
+file_put_contents("letter-{$letter->id}.pdf", $pdfBinary);
 
-// 7) Wenn das Schreiben intern abgehakt ist → CLEARED
+// 7) Once the letter has been handled internally → CLEARED
 $billomat->letters->clear($letter->id);
 ```

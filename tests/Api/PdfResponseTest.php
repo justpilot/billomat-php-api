@@ -69,7 +69,7 @@ final class PdfResponseTest extends TestCase
         $api = new $class($this->http(static fn (): MockResponse => new MockResponse($body)));
 
         $this->expectException(UnexpectedResponseException::class);
-        $this->expectExceptionMessage('Unexpected response from Billomat for GET /'.$path.'/5/pdf: '.$reason.'.');
+        $this->expectExceptionMessageIsOrContains('Unexpected response from Billomat for GET /'.$path.'/5/pdf: '.$reason.'.');
 
         (void) $api->pdf(5, rawPdf: true);
     }

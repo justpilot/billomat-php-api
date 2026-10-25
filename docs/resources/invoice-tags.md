@@ -1,43 +1,43 @@
-<!-- Quelle: https://www.billomat.com/api/rechnungen/schlagworte/ -->
+<!-- Source: https://www.billomat.com/api/rechnungen/schlagworte/ -->
 
 # Invoice Tags (Schlagworte)
 
-API-Wrapper für Schlagworte an Rechnungen unter `/invoice-tags`.
+API wrapper for invoice tags at `/invoice-tags`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->invoices->tags
 ```
 
-`Justpilot\Billomat\Api\TagsApi` (`$billomat->invoices->tags`).
+The generic `Justpilot\Billomat\Api\TagsApi`, typed for `InvoiceTag`, `InvoiceTagCloudEntry` and `InvoiceTagCreateOptions`.
 
-## Überblick
+## Overview
 
-Tags an Rechnungen funktionieren wie frei wählbare Stichworte (`wichtig`, `A-Kunde`, `Saison`). Dieselbe Ressource liefert zwei verschiedene Sichten:
+Invoice tags are free-form keywords (`important`, `key-account`, `season`). The same resource provides two different views:
 
-- **Tags einer Rechnung** — über `?invoice_id={id}`. Response-Element: `invoice-tag`.
-- **Tag-Cloud** — alle Tags des Accounts mit Häufigkeit, ohne Filter. Response-Element: `tag` (anderer Key!).
+- **Tags of one invoice**, via `?invoice_id={id}`. Response element: `invoice-tag`.
+- **Tag cloud**: all tags of the account with their frequency, without a filter. Response element: `tag` (a different key).
 
-Das SDK trennt das in zwei Methoden mit zwei separaten Read-Modellen.
+The SDK splits this into two methods with two separate read models.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($invoiceId)` | GET | `/invoice-tags?invoice_id={id}` |
 | `cloud()` | GET | `/invoice-tags` |
-| `get($id)` | GET | `/invoice-tags/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/invoice-tags/{id}` |
 | `create($options)` | POST | `/invoice-tags` |
 | `delete($id)` | DELETE | `/invoice-tags/{id}` |
 
-Es gibt keine `update()`-Methode — ein Tag wird gelöscht und neu angelegt.
+There is no `update()` method; delete the tag and create it again.
 
-## Methoden
+## Methods
 
 ### `list(int $invoiceId): list<InvoiceTag>`
 
-Listet die Schlagworte einer einzelnen Rechnung.
+Lists the tags of a single invoice.
 
 ```php
 $tags = $billomat->invoices->tags->list(98765);
@@ -49,17 +49,17 @@ foreach ($tags as $tag) {
 
 ### `cloud(): list<InvoiceTagCloudEntry>`
 
-Aggregierte Liste aller Tags im Account mit `count`-Häufigkeit. Praktisch für UI-Autovervollständigung oder eine Tag-Cloud-Anzeige.
+Aggregated list of all tags in the account with their `count`. Useful for autocompletion or a tag cloud in a UI.
 
 ```php
 foreach ($billomat->invoices->tags->cloud() as $entry) {
-    printf("%s (%d Rechnungen)\n", $entry->name, $entry->count);
+    printf("%s (%d invoices)\n", $entry->name, $entry->count);
 }
 ```
 
-### `get(int $id): ?InvoiceTag`
+### `get(int $id): ?InvoiceTag` / `getOrFail(int $id): InvoiceTag`
 
-Liefert `null` bei 404.
+`get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
 ### `create(InvoiceTagCreateOptions $options): InvoiceTag`
 
@@ -67,53 +67,55 @@ Liefert `null` bei 404.
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 
 $tag = $billomat->invoices->tags->create(
-    new InvoiceTagCreateOptions(invoiceId: 98765, name: 'A-Kunde'),
+    new InvoiceTagCreateOptions(invoiceId: 98765, name: 'key-account'),
 );
 ```
 
-Mehrere Tags für dieselbe Rechnung → mehrere `create()`-Aufrufe.
+Several tags for the same invoice → several `create()` calls.
 
 ### `delete(int $id): void`
 
-Entfernt die Verknüpfung zwischen Rechnung und Tag. Wird das Schlagwort an keiner Rechnung mehr verwendet, verschwindet es automatisch aus der Tag-Cloud.
+Removes the link between invoice and tag. Once the tag isn't used on any invoice, it disappears from the tag cloud automatically.
 
-## Write-Modell: `InvoiceTagCreateOptions`
+## Write model: `InvoiceTagCreateOptions`
 
-Konstruktor: `new InvoiceTagCreateOptions(int $invoiceId, string $name)`. Beide Werte sind Pflicht.
+Constructor: `new InvoiceTagCreateOptions(int $invoiceId, string $name)`. Both values are required. The object is immutable (`final readonly`) and has `withInvoiceId()`/`withName()`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `invoiceId` | `invoice_id` | `int` |
 | `name` | `name` | `string` |
 
-## Read-Modell: `InvoiceTag`
+## Read model: `InvoiceTag`
 
-`final readonly class InvoiceTag` — eine konkrete Tag-Verknüpfung an einer Rechnung.
+`final readonly class InvoiceTag`: one tag linked to an invoice.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `invoiceId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
-## Read-Modell: `InvoiceTagCloudEntry`
+## Read model: `InvoiceTagCloudEntry`
 
-`final readonly class InvoiceTagCloudEntry` — ein aggregierter Eintrag aus `cloud()`. Hat bewusst **kein** `invoiceId`-Feld, weil der Eintrag mehrere Rechnungen aggregiert.
+`final readonly class InvoiceTagCloudEntry`: one aggregated entry from `cloud()`. It intentionally has **no** `invoiceId` field because the entry aggregates several invoices.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
 | `count` | `int` |
+| `extra` | `array<string, mixed>` |
 
-## Stolpersteine
+## Pitfalls
 
-- **Zwei Sichten, zwei Modelle.** `list()` liefert `InvoiceTag`, `cloud()` liefert `InvoiceTagCloudEntry`. Verwechslung führt zu „warum hat das Ding kein `invoiceId`?“-Momenten.
-- **Kein PUT.** Umbenennen geht nicht — alte Verknüpfung löschen, neue anlegen.
-- **`name` ist case-sensitive.** `wichtig` und `Wichtig` sind aus Billomats Sicht zwei verschiedene Tags und erscheinen separat in der Tag-Cloud.
+- **Two views, two models.** `list()` returns `InvoiceTag`, `cloud()` returns `InvoiceTagCloudEntry`. Mixing them up leads to "why doesn't this have an `invoiceId`?" moments.
+- **No PUT.** Renaming isn't possible: delete the old link and create a new one.
+- **`name` is case-sensitive.** For Billomat, `important` and `Important` are two different tags and appear separately in the tag cloud.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -124,6 +126,8 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Model\InvoiceTag;
+use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -132,23 +136,23 @@ $billomat = BillomatClient::create(
 
 $invoiceId = 98765;
 
-// 1) Tags anhängen
-foreach (['wichtig', 'A-Kunde', '2026-Q2'] as $name) {
+// 1) Add tags
+foreach (['important', 'key-account', '2026-Q2'] as $name) {
     $billomat->invoices->tags->create(
         new InvoiceTagCreateOptions(invoiceId: $invoiceId, name: $name),
     );
 }
 
-// 2) Tags der Rechnung listen
+// 2) List the invoice's tags
 $tags = $billomat->invoices->tags->list($invoiceId);
-printf("Tags an Rechnung #%d: %s\n", $invoiceId, implode(', ', array_map(
-    static fn ($t) => $t->name,
+printf("Tags on invoice #%d: %s\n", $invoiceId, implode(', ', array_map(
+    static fn (InvoiceTag $t): string => $t->name,
     $tags,
 )));
 
-// 3) Tag-Cloud — die 5 meistverwendeten Schlagworte
+// 3) Tag cloud: the 5 most used tags
 $cloud = $billomat->invoices->tags->cloud();
-usort($cloud, static fn ($a, $b) => $b->count <=> $a->count);
+usort($cloud, static fn (InvoiceTagCloudEntry $a, InvoiceTagCloudEntry $b): int => $b->count <=> $a->count);
 foreach (array_slice($cloud, 0, 5) as $entry) {
     printf("%-20s %d\n", $entry->name, $entry->count);
 }

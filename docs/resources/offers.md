@@ -1,23 +1,23 @@
-<!-- Quelle: https://www.billomat.com/api/angebote/ -->
+<!-- Source: https://www.billomat.com/api/angebote/ -->
 
 # Offers (Angebote)
 
-API-Wrapper für Angebote unter `/offers` und ihre drei Sub-Ressourcen (`/offer-items`, `/offer-comments`, `/offer-tags`).
+API wrapper for offers (quotes) at `/offers` and their three sub-resources (`/offer-items`, `/offer-comments`, `/offer-tags`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->offers          // Angebote selbst
-$billomat->offers->items      // Positionen eines Angebots
-$billomat->offers->comments   // Kommentare / Audit-Trail
-$billomat->offers->tags       // Schlagworte
+$billomat->offers           // offers
+$billomat->offers->items    // items of an offer
+$billomat->offers->comments // comments / audit trail
+$billomat->offers->tags     // tags
 ```
 
-## Modell
+## Model
 
-Ein Angebot durchläuft einen festen Status-Lebenszyklus:
+An offer goes through a fixed status lifecycle:
 
-```
+```text
 DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON
                          │
                          ├──lose()────▶  LOST
@@ -25,16 +25,18 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON
                          └──cancel()──▶  CANCELED
 ```
 
-`undo()` führt jeden dieser Folge-Status zurück auf `OPEN`. Voll editierbar ist ein Angebot nur im Status `DRAFT`; ab `complete()` wird die endgültige `offer_number` vergeben und die Bearbeitung auf wenige Felder beschränkt. Aus einem angenommenen Angebot entstehen üblicherweise eine [Auftragsbestätigung](confirmations.md) oder direkt eine Rechnung.
+`undo()` takes each of these follow-up states back to `OPEN`. An offer is fully editable only as a `DRAFT`; `complete()` assigns the final `offer_number` and limits editing to a few fields. An accepted offer usually becomes a [confirmation](confirmations.md) (Auftragsbestätigung) or directly an [invoice](invoices.md).
 
-## Endpunkt-Übersicht
+## Endpoints
 
 ### `/offers`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/offers` |
-| `get($id)` | GET | `/offers/{id}` |
+| `listPage($filters?)` | GET | `/offers` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/offers` (lazy, across all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/offers/{id}` |
 | `create($options)` | POST | `/offers` |
 | `update($id, $options)` | PUT | `/offers/{id}` |
 | `delete($id)` | DELETE | `/offers/{id}` |
@@ -50,42 +52,42 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON
 
 ### `/offer-items`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($offerId, $query?)` | GET | `/offer-items?offer_id={id}` |
-| `get($id)` | GET | `/offer-items/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/offer-items/{id}` |
 | `create($offerId, $options)` | POST | `/offer-items` |
 | `update($id, $options)` | PUT | `/offer-items/{id}` |
 | `delete($id)` | DELETE | `/offer-items/{id}` |
 
 ### `/offer-comments`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($offerId, $actionKeys?)` | GET | `/offer-comments?offer_id={id}` |
-| `get($id)` | GET | `/offer-comments/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/offer-comments/{id}` |
 | `create($options)` | POST | `/offer-comments` |
 | `delete($id)` | DELETE | `/offer-comments/{id}` |
 
 ### `/offer-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($offerId)` | GET | `/offer-tags?offer_id={id}` |
 | `cloud()` | GET | `/offer-tags` |
-| `get($id)` | GET | `/offer-tags/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/offer-tags/{id}` |
 | `create($options)` | POST | `/offer-tags` |
 | `delete($id)` | DELETE | `/offer-tags/{id}` |
 
-## Methoden
+## Methods
 
 ### Offers
 
 #### `list(OfferFilter|array $filters = []): list<Offer>`
 
-Liefert Angebote mit optionalen Filtern (z. B. `client_id`, `status`, `from`/`to`, `number_pre`, `tags`, `order_by`). Billomat liefert bei genau einem Treffer das Objekt als Assoc-Array statt einer Liste; `array_is_list()` erkennt das und packt den Einzeltreffer in ein Array.
+Returns offers with optional filters (e.g. `client_id`, `status`, `from`/`to`, `number_pre`, `tags`, `order_by`). When there is exactly one match, Billomat returns the object as an associative array instead of a list; `array_is_list()` detects this and wraps the single result in an array.
 
-Empfohlen ist der typisierte Filter `OfferFilter` mit den camelCase-Feldern `clientId`, `contactId`, `offerNumber`, `status` (`list<OfferStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` und `articleId`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `number_pre`). Ein einfaches Array funktioniert weiterhin.
+The typed `OfferFilter` is the recommended way to filter. Its camelCase fields are `clientId`, `contactId`, `offerNumber`, `status` (`list<OfferStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` and `articleId`; multi-value fields are lists and are sent comma-separated. On top come `orderBy`, `page`, `perPage` and `extra` for further query parameters (e.g. `number_pre`). A plain array still works.
 
 ```php
 use Justpilot\Billomat\Api\OfferFilter;
@@ -98,13 +100,15 @@ $open = $billomat->offers->list(new OfferFilter(
 ));
 ```
 
-#### `get(int $id): ?Offer`
+`listPage()` and `iterateAll()` work as described in [Pagination](../advanced/pagination.md).
 
-Liefert `null` bei 404. Eingebettete `offer-items` und `taxes` werden automatisch hydriert.
+#### `get(int $id): ?Offer` / `getOrFail(int $id): Offer`
+
+`get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead. Embedded `offer-items` and `taxes` are hydrated automatically.
 
 #### `create(OfferCreateOptions $options): Offer`
 
-Positionen können direkt im `create()`-Call über `items: […]` oder `withItem()` mitgegeben werden — sie landen als `offer-items.offer-item` im Payload. Neue Angebote starten im Status `DRAFT`.
+Items can be passed directly in the `create()` call via `items: […]` or `withItem()`; they end up as `offer-items.offer-item` in the payload. New offers start with status `DRAFT`.
 
 ```php
 use Justpilot\Billomat\Api\OfferCreateOptions;
@@ -113,11 +117,11 @@ use Justpilot\Billomat\Model\Money;
 
 $opts = new OfferCreateOptions(
     clientId: 12345,
-    title: 'Webhosting-Angebot',
+    title: 'Web hosting offer',
     date: new DateTimeImmutable('2026-06-02'),
     validityDays: 30,
     items: [
-        new OfferItemCreateOptions(quantity: 1.0, unitPrice: Money::of('99.00'), title: 'Setup-Pauschale'),
+        new OfferItemCreateOptions(quantity: 1.0, unitPrice: Money::of('99.00'), title: 'Setup fee'),
     ],
 );
 
@@ -126,11 +130,11 @@ $offer = $billomat->offers->create($opts);
 
 #### `update(int $id, OfferUpdateOptions $options): Offer`
 
-Schmaler Subset für Partial-Updates. Voll editierbar nur im Status `DRAFT`. Positionen lassen sich per PUT auf `/offers/{id}` nicht ändern — dafür die `$billomat->offers->items` verwenden. Die Klasse hat daher kein `items`-Feld.
+For partial updates. Fully editable only as a `DRAFT`. Items can't be changed with a PUT to `/offers/{id}`; use `$billomat->offers->items` for that. The class therefore has no `items` field.
 
 #### `complete(int $id, ?int $templateId = null): void`
 
-DRAFT → OPEN. Vergibt die endgültige `offer_number` und generiert das PDF. Optional kann eine abweichende Template-ID übergeben werden.
+DRAFT → OPEN. Assigns the final `offer_number` and generates the PDF. Optionally pass a different template ID.
 
 ```php
 $billomat->offers->complete($offer->id, templateId: 42);
@@ -138,31 +142,31 @@ $billomat->offers->complete($offer->id, templateId: 42);
 
 #### `delete(int $id): void`
 
-Erlaubt nur im Status `DRAFT`. Bei anderen Status liefert Billomat 422 → `ValidationException`.
+Only allowed as a `DRAFT`. For any other status Billomat responds with 422 → `ValidationException`.
 
-#### Status-Übergänge
+#### Status transitions
 
 ```php
 $billomat->offers->cancel($offer->id);   // OPEN/WON → CANCELED
-$billomat->offers->win($offer->id);      // OPEN          → WON
-$billomat->offers->lose($offer->id);     // OPEN          → LOST
-$billomat->offers->clear($offer->id);    // OPEN          → CLEARED
+$billomat->offers->win($offer->id);      // OPEN     → WON
+$billomat->offers->lose($offer->id);     // OPEN     → LOST
+$billomat->offers->clear($offer->id);    // OPEN     → CLEARED
 $billomat->offers->undo($offer->id);     // {win,lose,clear,cancel} → OPEN
 ```
 
-Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge führen zu `ValidationException` (422) oder `HttpException`.
+All of them return `void`. Invalid transitions throw a `ValidationException` (422) or an `HttpException`.
 
 #### `email(int $id, ?EmailOptions $options = null): void`
 
-Versendet das Angebot per E-Mail. Ohne Options nutzt Billomat alle Defaults (Absender, Betreff, Body, Vorlage); das PDF wird automatisch angehängt.
+Sends the offer by email. Without options Billomat uses all defaults (sender, subject, body, template); the PDF is attached automatically.
 
 ```php
 use Justpilot\Billomat\Api\EmailOptions;
 
 $email = new EmailOptions(
-    to: ['kunde@example.com'],
-    bcc: ['vertrieb@meinefirma.de'],
-    subject: 'Ihr Angebot {NUMBER}',
+    to: ['client@example.com'],
+    bcc: ['sales@mycompany.example'],
+    subject: 'Your offer',
 );
 
 $billomat->offers->email($offer->id, $email);
@@ -170,42 +174,43 @@ $billomat->offers->email($offer->id, $email);
 
 #### `uploadSignature(int $id, string $base64Pdf): void`
 
-Lädt eine unterschriebene PDF-Version hoch. `$base64Pdf` ist der Base64-codierte PDF-Inhalt (ohne `data:`-Prefix).
+Uploads a signed PDF version. `$base64Pdf` is the Base64-encoded PDF content (without a `data:` prefix).
 
 #### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): OfferPdf|string`
 
-Standardmäßig liefert die Methode ein `OfferPdf`-Model mit Base64-Inhalt; mit `$rawPdf = true` umgeht sie die JSON-Schicht und gibt die rohen Binärbytes zurück. Der `$type`-Parameter teilt das `PdfType`-Enum mit dem Rechnungs-PDF (`SIGNED`, `PRINT`).
+By default the method returns an `OfferPdf` model with Base64 content; with `$rawPdf = true` it skips the JSON layer and returns the raw binary bytes. The `$type` parameter shares the `PdfType` enum with the invoice PDF (`SIGNED`, `PRINT`).
 
 ```php
 use Justpilot\Billomat\Model\Enum\PdfType;
 
 $pdf = $billomat->offers->pdf($offer->id);              // OfferPdf
-file_put_contents('angebot.pdf', $pdf->getBinary());
+file_put_contents('offer.pdf', $pdf->getBinary());
 
 $bytes = $billomat->offers->pdf($offer->id, PdfType::SIGNED, rawPdf: true);
 ```
 
-### Offer Items
+### Offer items
+
+`$billomat->offers->items` is the generic `ItemsApi`, as for [invoice items](invoice-items.md).
 
 ```php
 $items = $billomat->offers->items->list($offer->id);
 
-$item = $billomat->offers->items->create(
-    $offer->id,
-    new OfferItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
-);
+$opts = new OfferItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90'));
+$item = $billomat->offers->items->create($offer->id, $opts);
 
-$billomat->offers->items->update($item->id, $opts);
+$billomat->offers->items->update($item->id, $opts->withQuantity(3.0));
 $billomat->offers->items->delete($item->id);
 ```
 
-`create()` injiziert `offer_id` automatisch in den Payload — `OfferItemCreateOptions` selbst hat dieses Feld nicht. `update()` verwendet dieselbe Klasse wie `create()`.
+`create()` injects `offer_id` into the payload automatically; `OfferItemCreateOptions` itself has no such field. `update()` uses the same class as `create()`.
 
-### Offer Comments
+### Offer comments
 
-`list()` kann optional auf bestimmte `actionkey`-Werte gefiltert werden (kommasepariert an die API geschickt):
+`list()` can optionally filter by `actionkey` values (sent to the API comma-separated):
 
 ```php
+use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 
 $comments = $billomat->offers->comments->list(
@@ -214,13 +219,13 @@ $comments = $billomat->offers->comments->list(
 );
 
 $billomat->offers->comments->create(
-    new OfferCommentCreateOptions(offerId: $offer->id, comment: 'Telefonisch zugesagt.'),
+    new OfferCommentCreateOptions(offerId: $offer->id, comment: 'Accepted by phone.'),
 );
 ```
 
-Kommentare zu System-Aktionen (`COMPLETE`, `WIN`, `EMAIL`, …) legt Billomat automatisch an.
+Billomat creates comments for system actions (`COMPLETE`, `WIN`, `EMAIL`, …) automatically. See [invoice comments](invoice-comments.md) for details on the generic `CommentsApi`.
 
-### Offer Tags
+### Offer tags
 
 ```php
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
@@ -230,76 +235,76 @@ $tag = $billomat->offers->tags->create(
 );
 
 $tags  = $billomat->offers->tags->list($offer->id); // list<OfferTag>
-$cloud = $billomat->offers->tags->cloud();                 // list<OfferTagCloudEntry>, aggregiert mit count
+$cloud = $billomat->offers->tags->cloud();          // list<OfferTagCloudEntry>, aggregated with count
 ```
 
-## Write-Modell: `OfferCreateOptions`
+## Write model: `OfferCreateOptions`
 
-Konstruktor: `new OfferCreateOptions(int $clientId, …)` — `clientId` ist Pflicht und erster Parameter. Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argumente übergeben. Das Objekt ist unveränderlich (`final readonly`); jedes Feld hat eine `with*()`-Methode, die eine geänderte Kopie liefert (z. B. `$opts->withTitle('Neu')`).
+Constructor: `new OfferCreateOptions(int $clientId, …)`. `clientId` is required and the first parameter. All other fields are constructor parameters with a default and are passed as named arguments. The object is immutable (`final readonly`); every field has a `with*()` method that returns a modified copy (e.g. `$opts->withTitle('New')`).
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` | Pflicht (Konstruktor) |
+| `clientId` | `client_id` | `int` | Required (constructor) |
 | `contactId` | `contact_id` | `?int` | |
-| `address` | `address` | `?string` | Überschreibt Kundenadresse |
+| `address` | `address` | `?string` | Overrides the client address |
 | `numberPre` | `number_pre` | `?string` | |
 | `number` | `number` | `?int` | |
 | `numberLength` | `number_length` | `?int` | |
-| `date` | `date` | `?\DateTimeImmutable` | als `Y-m-d` serialisiert |
-| `validityDays` | `validity_days` | `?int` | Gültigkeit in Tagen |
+| `date` | `date` | `?\DateTimeImmutable` | Serialized as `Y-m-d` |
+| `validityDays` | `validity_days` | `?int` | Validity in days |
+| `validityDate` | `validity_date` | `?\DateTimeImmutable` | Valid until; Billomat default: `date` + `validity_days` |
 | `discountRate` | `discount_rate` | `?int` | |
 | `discountDays` | `discount_days` | `?int` | |
-| `discountDate` | `discount_date` | `?\DateTimeImmutable` | als `Y-m-d` serialisiert |
+| `discountDate` | `discount_date` | `?\DateTimeImmutable` | Serialized as `Y-m-d` |
 | `title` | `title` | `?string` | |
 | `label` | `label` | `?string` | |
 | `intro` | `intro` | `?string` | |
 | `note` | `note` | `?string` | |
-| `reduction` | `reduction` | `?string` | absolut oder mit `%` |
+| `reduction` | `reduction` | `?string` | Absolute or with `%` |
 | `currencyCode` | `currency_code` | `?string` | ISO 4217 |
 | `netGross` | `net_gross` | `?NetGross` | `NET`/`GROSS`/`SETTINGS` |
-| `quote` | `quote` | `?float` | Währungs-Quote |
+| `quote` | `quote` | `?float` | Exchange rate |
 | `freeTextId` | `free_text_id` | `?int` | |
 | `templateId` | `template_id` | `?int` | |
 
-### Positionen
+### Items
 
-Positionen werden über den Konstruktor-Parameter `items` (`list<OfferItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
+Items are passed via the constructor parameter `items` (`list<OfferItemCreateOptions>`) and are then available in the `$items` property. `withItem()` returns a copy with one more item:
 
 ```php
 $opts = $opts->withItem(new OfferItemCreateOptions(quantity: 1.0, unitPrice: Money::of('99')));
 ```
 
-`toArray()` rendert sie als `offer-items.offer-item`.
+`toArray()` renders them as `offer-items.offer-item`.
 
-## Write-Modell: `OfferUpdateOptions`
+## Write model: `OfferUpdateOptions`
 
-Spiegelt `OfferCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne `items`. `discountRate` ist hier `?float` statt `?int`. `null` heißt „nicht senden“, der Wert bleibt unverändert. Mit `Clear::Field` (`Justpilot\Billomat\Api\Clear`) wird das Feld als JSON-`null` gesendet und von Billomat geleert, z. B. `new OfferUpdateOptions(note: Clear::Field)`.
+Has the same fields as `OfferCreateOptions`, but `clientId` is optional and there is no `items` field. `discountRate` is `float` here instead of `int`. `null` means "don't send", the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null` so Billomat empties it, e.g. `new OfferUpdateOptions(note: Clear::Field)`.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type |
+|---|---|---|
+| `clientId` | `client_id` | `int\|Clear\|null` |
+| `contactId` | `contact_id` | `int\|Clear\|null` |
+| `address` | `address` | `string\|Clear\|null` |
+| `numberPre`, `number`, `numberLength` | same | `string\|Clear\|null` / `int\|Clear\|null` / `int\|Clear\|null` |
+| `date`, `validityDate`, `discountDate` | same | `\DateTimeImmutable\|Clear\|null` |
+| `validityDays` | `validity_days` | `int\|Clear\|null` |
+| `discountRate` | `discount_rate` | `float\|Clear\|null` |
+| `discountDays` | `discount_days` | `int\|Clear\|null` |
+| `title`, `label`, `intro`, `note`, `reduction` | same | `string\|Clear\|null` |
+| `netGross` | `net_gross` | `NetGross\|Clear\|null` |
+| `currencyCode` | `currency_code` | `string\|Clear\|null` |
+| `quote` | `quote` | `float\|Clear\|null` |
+| `freeTextId`, `templateId` | same | `int\|Clear\|null` |
+
+## Write model: `OfferItemCreateOptions`
+
+Constructor: `new OfferItemCreateOptions(float $quantity, Money $unitPrice, …)`. Both values are required and always sent, even if they are `0` (`toArray()` only drops `null` values). The object is `final readonly` with a `with*()` method per field.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `?int` | |
-| `contactId` | `contact_id` | `?int` | |
-| `address` | `address` | `?string` | |
-| `numberPre`, `number`, `numberLength` | analog | `?string`/`?int`/`?int` | |
-| `date` | `date` | `?\DateTimeImmutable` | |
-| `validityDays` | `validity_days` | `?int` | |
-| `discountRate` | `discount_rate` | `?float` | |
-| `discountDays` | `discount_days` | `?int` | |
-| `discountDate` | `discount_date` | `?\DateTimeImmutable` | |
-| `title`, `label`, `intro`, `note`, `reduction` | analog | `?string` | |
-| `netGross` | `net_gross` | `?NetGross` | |
-| `currencyCode` | `currency_code` | `?string` | |
-| `quote` | `quote` | `?float` | |
-| `freeTextId`, `templateId` | analog | `?int` | |
-
-## Write-Modell: `OfferItemCreateOptions`
-
-Konstruktor: `new OfferItemCreateOptions(float $quantity, Money $unitPrice)`. Beide Werte sind Pflicht und werden auch dann mitgeschickt, wenn sie `0` sind (siehe `ARRAY_FILTER_USE_BOTH` in `toArray()`).
-
-| Property | Billomat-Feld | Typ | Notes |
-|---|---|---|---|
-| `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
-| `unitPrice` | `unit_price` | `Money` | Pflicht (Konstruktor) |
+| `quantity` | `quantity` | `float` | Required (constructor) |
+| `unitPrice` | `unit_price` | `Money` | Required (constructor) |
 | `type` | `type` | `?ItemType` | `PRODUCT`/`SERVICE` |
 | `articleId` | `article_id` | `?int` | |
 | `title` | `title` | `?string` | |
@@ -307,58 +312,60 @@ Konstruktor: `new OfferItemCreateOptions(float $quantity, Money $unitPrice)`. Be
 | `unit` | `unit` | `?string` | |
 | `taxName` | `tax_name` | `?string` | |
 | `taxRate` | `tax_rate` | `?float` | |
-| `taxChangedManually` | `tax_changed_manually` | `?bool` | siehe Stolpersteine |
-| `reduction` | `reduction` | `?string` | absolut oder mit `%` |
+| `taxChangedManually` | `tax_changed_manually` | `?bool` | See pitfalls |
+| `reduction` | `reduction` | `?string` | Absolute or with `%` |
 | `position` | `position` | `?int` | |
+| `optional` | `optional` | `?int` | Optional item, not included in the total (`1`/`0`) |
 
-`ItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ. Das heißt: der Konstruktor verlangt `quantity` und `unitPrice` auch dann, wenn du sie gar nicht ändern willst.
+`ItemsApi::update()` uses the same class; there is no separate update type. This means the constructor requires `quantity` and `unitPrice` even if you don't want to change them.
 
-## Write-Modell: `OfferCommentCreateOptions`
+## Write model: `OfferCommentCreateOptions`
 
-Konstruktor: `new OfferCommentCreateOptions(int $offerId, string $comment)` — beide Pflicht.
+Constructor: `new OfferCommentCreateOptions(int $offerId, string $comment, …)`; both are required.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `offerId` | `offer_id` | `int` | Pflicht (Konstruktor) |
-| `comment` | `comment` | `string` | Pflicht (Konstruktor) |
-| `actionkey` | `actionkey` | `?OfferCommentActionKey` | typischerweise nur bei System-Aktionen gesetzt |
+| `offerId` | `offer_id` | `int` | Required (constructor) |
+| `comment` | `comment` | `string` | Required (constructor) |
+| `actionkey` | `actionkey` | `?OfferCommentActionKey` | Usually only set for system actions |
+| `public` | `public` | `?bool` | Visible in the client's activity list |
 
-## Write-Modell: `OfferTagCreateOptions`
+## Write model: `OfferTagCreateOptions`
 
-Konstruktor: `new OfferTagCreateOptions(int $offerId, string $name)` — beide Pflicht.
+Constructor: `new OfferTagCreateOptions(int $offerId, string $name)`; both are required.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
-| `offerId` | `offer_id` | `int` (Pflicht) |
-| `name` | `name` | `string` (Pflicht) |
+| `offerId` | `offer_id` | `int` (required) |
+| `name` | `name` | `string` (required) |
 
-## Write-Modell: `EmailOptions`
+## Write model: `EmailOptions`
 
-Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Mahnungen, Briefe); die vollständige Beschreibung steht bei [Invoices](invoices.md#write-modell-emailoptions). Keine Pflichtfelder; ohne explizite Werte fällt Billomat auf die im Account hinterlegten Defaults zurück.
+Shared class for sending all document types by email (invoices, offers, confirmations, credit notes, delivery notes, reminders, letters); the full description is on the [Invoices](invoices.md#write-model-emailoptions) page. No required fields; without explicit values Billomat falls back to the defaults stored in the account.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `emailTemplateId` | `email_template_id` | `?int` | |
-| `from` | `from` | `?string` | Absender-Override |
-| `to` | `recipients.to` | `list<string>` | leeres Array → weggelassen |
+| `from` | `from` | `?string` | Sender override |
+| `to` | `recipients.to` | `list<string>` | Empty array → omitted |
 | `cc` | `recipients.cc` | `list<string>` | |
 | `bcc` | `recipients.bcc` | `list<string>` | |
 | `subject` | `subject` | `?string` | |
 | `body` | `body` | `?string` | |
-| `filename` | `filename` | `?string` | Anhängender Dateiname |
-| `attachments` | `attachments.attachment[]` | `list<array{filename,mimetype,base64file}>` | zusätzliche Anhänge |
+| `filename` | `filename` | `?string` | File name of the attachment |
+| `attachments` | `attachments.attachment[]` | `list<array{filename,mimetype,base64file}>` | Additional attachments |
 
-## Read-Modell: `Offer`
+## Read model: `Offer`
 
-`final readonly class Offer`. Die wichtigsten Felder:
+`final readonly class Offer`. The main fields:
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `offerNumber` | `?string` — Wird erst beim `complete()` gesetzt |
+| `offerNumber` | `?string`, only set by `complete()` |
 | `number`, `numberPre`, `numberLength` | `?int`, `?string`, `?int` |
 | `status` | `?OfferStatus` |
 | `date` | `?\DateTimeImmutable` |
@@ -371,18 +378,19 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) |
-| `items` | `list<OfferItem>` — eingebettet aus `offer-items.offer-item` |
+| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` as `Money`) |
+| `items` | `list<OfferItem>`, embedded from `offer-items.offer-item` |
 | `updated` | `?\DateTimeImmutable` |
-| `validityDate` | `?\DateTimeImmutable` (Gültig bis, nur Datum) |
+| `validityDate` | `?\DateTimeImmutable` (valid until, date only) |
 | `totalReduction` | `?Money` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
-## Read-Modell: `OfferItem`
+## Read model: `OfferItem`
 
-`final readonly`. Felder analog zu `InvoiceItem`, mit `offerId` statt `invoiceId`.
+`final readonly`. Same fields as `InvoiceItem`, with `offerId` instead of `invoiceId`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id`, `offerId`, `articleId`, `position` | `?int` |
 | `unit` | `?string` |
@@ -393,14 +401,15 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `title`, `description`, `reduction` | `?string` |
 | `type` | `?ItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
-| `optional` | `?bool` (Optionale Position) |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `optional` | `?bool` (optional item) |
+| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `OfferComment`
+## Read model: `OfferComment`
 
 `final readonly`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `offerId` | `int` |
@@ -408,59 +417,60 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
 | `actionkey` | `?OfferCommentActionKey` |
-| `actionkeyRaw` | `?string` — Roh-Wert, falls Billomat einen unbekannten `actionkey` liefert |
+| `actionkeyRaw` | `?string`, the raw value in case Billomat returns an unknown `actionkey` |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `OfferTag`
+## Read model: `OfferTag`
 
-`final readonly`. Felder: `id` (`?int`), `offerId` (`int`), `name` (`string`), `customfield` (`?string`).
+`final readonly`. Fields: `id` (`?int`), `offerId` (`int`), `name` (`string`), `customfield` (`?string`), `extra`.
 
-## Read-Modell: `OfferTagCloudEntry`
+## Read model: `OfferTagCloudEntry`
 
-`final readonly`. Aggregat der Tag-Cloud: `id` (`?int`), `name` (`string`), `count` (`int`).
+`final readonly`. Aggregated tag cloud entry: `id` (`?int`), `name` (`string`), `count` (`int`), `extra`.
 
-## Read-Modell: `OfferPdf`
+## Read model: `OfferPdf`
 
-`final class OfferPdf` (nicht `readonly`, da als Container für Binärdaten gedacht).
+`final class OfferPdf` (not `readonly`).
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `int` |
 | `offerId` | `int` |
 | `created` | `?\DateTimeImmutable` |
 | `filename` | `string` |
-| `mimeType` | `string` — Default `application/pdf` |
+| `mimeType` | `string`, default `application/pdf` |
 | `fileSize` | `int` |
 | `base64file` | `string` |
 
-`getBinary(): string` decodiert `base64file` und liefert die rohen PDF-Bytes (`''` bei ungültigem Base64).
+`getBinary(): string` decodes `base64file` and returns the raw PDF bytes (`''` for invalid Base64).
 
-## Verwendete Enums
+## Enums
 
-- [`OfferStatus`](../../src/Model/Enum/OfferStatus.php): `DRAFT`, `OPEN`, `WON`, `LOST`, `CLEARED`, `CANCELED`. Hat `label()` für deutsche Bezeichnung.
+- [`OfferStatus`](../../src/Model/Enum/OfferStatus.php): `DRAFT`, `OPEN`, `WON`, `LOST`, `CLEARED`, `CANCELED`. Has `label()` for the German name.
 - [`OfferCommentActionKey`](../../src/Model/Enum/OfferCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `WIN`, `LOSE`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`.
-- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
-- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE`, shared with all document items.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`); the wire values are lowercase.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 
-## Stolpersteine
+## Pitfalls
 
-- **Status-Übergänge sind streng.** `win()`/`lose()`/`clear()`/`cancel()` nur aus `OPEN`. Wer aus einem `DRAFT` direkt einen Versuch wagt, bekommt 422. Reihenfolge: erst `complete()`, dann Status setzen.
-- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `offer-items` beim PUT auf `/offers/{id}`. Stets die `$billomat->offers->items` verwenden.
-- **`delete()` nur im `DRAFT`.** Sobald `complete()` gelaufen ist, ist das Angebot nummeriert und nicht mehr löschbar — nur noch `cancel()` ist möglich.
-- **`OfferItemCreateOptions` ist auch der Update-Typ.** Es gibt keinen separaten `OfferItemUpdateOptions`-Typ. Der Konstruktor verlangt also immer `quantity` und `unitPrice`, auch wenn du nur den Titel ändern willst. Werte ggf. aus dem bestehenden `OfferItem` übernehmen.
-- **`array_is_list`-Normalisierung in `list()`.** Bei genau einem Treffer liefert Billomat `offer` als Objekt statt Liste — die Methode erkennt das und packt das Single-Result selbst in ein Array.
-- **`tax_changed_manually` ist Pflicht für manuelle `taxRate`-Werte.** Ohne das Flag ignoriert Billomat den explizit gesetzten Steuersatz und nimmt den Default des Artikels/Kunden.
-- **`pdf()` mit `$rawPdf = true` umgeht JSON komplett.** Die Methode liest den Body per `getRaw()` als Binär-String. HTTP-Fehler kommen trotzdem als SDK-Exceptions (`NotFoundException`, `AuthenticationException`, …), weil `BillomatHttpClient` sie bereits beim Request wirft.
-- **`uploadSignature()` erwartet reines Base64**, kein Data-URI-Prefix. Wer einen `data:application/pdf;base64,...`-String reinwirft, bekommt eine kaputte PDF im Billomat-Backend.
-- **`OfferPdf` ist nicht `readonly`** — alle anderen Read-Models sind es. Pragmatische Ausnahme, damit der Container Binärdaten halten kann.
-- **`OfferCommentActionKey` wird wire-seitig auf Großschreibung erwartet** (`WIN`, `LOSE`, …); das Enum spiegelt die exakten Werte. `tryFrom()` mappt unbekannte Werte auf `null`, der Roh-String landet zusätzlich in `actionkeyRaw`.
+- **Status transitions are strict.** `win()`/`lose()`/`clear()` only work from `OPEN`. Trying them on a `DRAFT` gets you a 422. Order: first `complete()`, then set the status.
+- **`update()` doesn't change items.** Billomat ignores embedded `offer-items` on a PUT to `/offers/{id}`. Always use `$billomat->offers->items`.
+- **`delete()` only as a `DRAFT`.** Once `complete()` has run, the offer is numbered and can't be deleted; only `cancel()` is possible.
+- **`OfferItemCreateOptions` is also the update type.** There is no separate `OfferItemUpdateOptions`. The constructor always requires `quantity` and `unitPrice`, even if you only want to change the title. Copy the values from the existing `OfferItem` if needed.
+- **`array_is_list` normalization in `list()`.** With exactly one match, Billomat returns `offer` as an object instead of a list; the method detects this and wraps the single result in an array.
+- **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat ignores the explicitly set tax rate and uses the article's/client's default.
+- **`pdf()` with `$rawPdf = true` bypasses JSON entirely.** The body is read as a binary string and must start with `%PDF-`, otherwise an `UnexpectedResponseException` is thrown. HTTP errors still arrive as SDK exceptions (`NotFoundException`, `AuthenticationException`, …) because `BillomatHttpClient` throws them during the request.
+- **`uploadSignature()` expects plain Base64**, no data URI prefix. Passing a `data:application/pdf;base64,...` string results in a broken PDF in Billomat.
+- **`OfferPdf` is not `readonly`**, unlike the other read models.
+- **`OfferCommentActionKey` values are uppercase on the wire** (`WIN`, `LOSE`, …); the enum mirrors the exact values. Unknown values map to `null`, and the raw string is stored in `actionkeyRaw` as well.
 
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -469,9 +479,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Api\OfferCreateOptions;
-use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -484,69 +494,71 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Angebot anlegen (Status: DRAFT) mit zwei Positionen
+// 1) Create the offer (status: DRAFT) with two items
 $opts = new OfferCreateOptions(
     clientId: 12345,
-    title: 'Webhosting & Beratung',
+    title: 'Web hosting & consulting',
     date: new DateTimeImmutable('today'),
     validityDays: 30,
-    intro: 'Vielen Dank für Ihre Anfrage.',
+    intro: 'Thank you for your inquiry.',
 );
 
 $setup = new OfferItemCreateOptions(
-    quantity: 1.0, unitPrice: Money::of('250.00'),
-    title: 'Setup-Pauschale',
+    quantity: 1.0,
+    unitPrice: Money::of('250.00'),
+    title: 'Setup fee',
     type: ItemType::SERVICE,
 );
 $opts = $opts->withItem($setup);
 
 $hosting = new OfferItemCreateOptions(
-    quantity: 12.0, unitPrice: Money::of('19.90'),
-    title: 'Hosting Basic (12 Monate)',
-    unit: 'Monat',
+    quantity: 12.0,
+    unitPrice: Money::of('19.90'),
+    title: 'Hosting Basic (12 months)',
+    unit: 'month',
 );
 $opts = $opts->withItem($hosting);
 
 $offer = $billomat->offers->create($opts);
-printf("Angebot #%d (DRAFT) angelegt, Brutto: %s %s\n",
+printf("Offer #%d (DRAFT) created, gross: %s %s\n",
     $offer->id,
-    $offer->totalGross?->format(2, ',', '.') ?? '0,00',
+    $offer->totalGross?->format(2) ?? '0.00',
     $offer->currencyCode ?? 'EUR',
 );
 
-// 2) Tag setzen
+// 2) Add a tag
 $billomat->offers->tags->create(
     new OfferTagCreateOptions(offerId: $offer->id, name: 'hot-lead'),
 );
 
-// 3) Abschließen → OPEN, Nummer wird vergeben
+// 3) Complete → OPEN, the number is assigned
 $billomat->offers->complete($offer->id);
 
-$opened = $billomat->offers->get($offer->id);
-printf("Status: %s, Angebotsnummer: %s\n",
-    $opened?->status?->label() ?? '?',
-    $opened?->offerNumber ?? '?',
+$opened = $billomat->offers->getOrFail($offer->id);
+printf("Status: %s, offer number: %s\n",
+    $opened->status?->value ?? '?',
+    $opened->offerNumber ?? '?',
 );
 
-// 4) Versenden — Defaults vom Billomat-Account
-$email = new EmailOptions(to: ['kunde@example.com'], bcc: ['vertrieb@meinefirma.de']);
+// 4) Send it, with the account defaults for everything else
+$email = new EmailOptions(to: ['client@example.com'], bcc: ['sales@mycompany.example']);
 $billomat->offers->email($offer->id, $email);
 
-// 5) Kunde nimmt an → win()
+// 5) The client accepts → win()
 $billomat->offers->win($offer->id);
 
 $billomat->offers->comments->create(
     new OfferCommentCreateOptions(
         offerId: $offer->id,
-        comment: 'Bestätigung per Telefon am 02.06.',
+        comment: 'Confirmed by phone on 2026-06-02.',
     ),
 );
 
-// 6) PDF herunterladen (signierte Version, falls vorhanden)
+// 6) Download the PDF
 $pdf = $billomat->offers->pdf($offer->id);
-file_put_contents("angebot-{$opened?->offerNumber}.pdf", $pdf->getBinary());
+file_put_contents("offer-{$opened->offerNumber}.pdf", $pdf->getBinary());
 
-// 7) Audit-Trail einsehen — nur Statuswechsel
+// 7) Check the audit trail: status changes only
 $status = $billomat->offers->comments->list(
     $offer->id,
     actionKeys: [

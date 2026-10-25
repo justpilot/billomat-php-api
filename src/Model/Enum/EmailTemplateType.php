@@ -14,6 +14,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum EmailTemplateType: string
 {
+    use FromApi;
+
     case INVOICES = 'INVOICES';
     case OFFERS = 'OFFERS';
     case CONFIRMATIONS = 'CONFIRMATIONS';

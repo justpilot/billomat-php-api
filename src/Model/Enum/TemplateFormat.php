@@ -11,12 +11,9 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum TemplateFormat: string
 {
+    use FromApi;
+
     case DOC = 'doc';
     case DOCX = 'docx';
     case RTF = 'rtf';
-
-    public static function fromApi(?string $value): ?self
-    {
-        return null === $value ? null : (self::tryFrom($value) ?? null);
-    }
 }

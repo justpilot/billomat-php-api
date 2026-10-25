@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Model\Enum;
 
 enum ValueType: string
 {
+    use FromApi;
+
     case SETTINGS = 'SETTINGS';
     case ABSOLUTE = 'ABSOLUTE';
     case RELATIVE = 'RELATIVE';

@@ -14,6 +14,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum FreeTextType: string
 {
+    use FromApi;
+
     case INVOICE = 'INVOICE';
     case CORRECTION = 'CORRECTION';
     case OFFER = 'OFFER';

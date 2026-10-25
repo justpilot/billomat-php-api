@@ -11,6 +11,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum DeliveryNoteCommentActionKey: string
 {
+    use FromApi;
+
     case CREATE = 'CREATE';
     case EDIT = 'EDIT';
     case OPEN = 'OPEN';

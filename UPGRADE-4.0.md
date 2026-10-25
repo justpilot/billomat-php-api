@@ -583,6 +583,19 @@ $acceptsPaypal = in_array(PaymentType::PAYPAL, $invoice->paymentTypes, true);
 An empty list (the default) is not sent. In update options, `Clear::Field` empties the field. Values
 the enum doesn't know are dropped when hydrating.
 
+### `fromApi()` on every enum, no silent fallback
+
+All enums in `Model\Enum` have `fromApi(?string): ?self`; `null`, `""` and unknown values give `null`.
+`RecurringEmailReceiver::$type` is nullable now, because unknown receiver types no longer fall back to `TO`:
+
+```php
+// 3.x
+$receiver->type->value; // 'To' even if Billomat sent something unknown
+
+// 4.0
+$receiver->type?->value; // null for unknown values
+```
+
 ### `InvoiceMailOptions::$paperWeight` is an `int`
 
 ```php

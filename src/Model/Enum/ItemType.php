@@ -10,11 +10,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum ItemType: string
 {
+    use FromApi;
+
     case PRODUCT = 'PRODUCT';
     case SERVICE = 'SERVICE';
-
-    public static function fromApi(?string $value): ?self
-    {
-        return $value ? self::tryFrom($value) : null;
-    }
 }

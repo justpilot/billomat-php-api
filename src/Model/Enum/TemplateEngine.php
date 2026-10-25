@@ -6,10 +6,7 @@ namespace Justpilot\Billomat\Model\Enum;
 
 enum TemplateEngine: string
 {
-    case DEFAULT = 'DEFAULT';
+    use FromApi;
 
-    public static function fromApi(?string $value): ?self
-    {
-        return null !== $value ? self::tryFrom($value) : null;
-    }
+    case DEFAULT = 'DEFAULT';
 }

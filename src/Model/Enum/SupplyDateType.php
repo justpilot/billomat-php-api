@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Model\Enum;
 
 enum SupplyDateType: string
 {
+    use FromApi;
+
     case SUPPLY_DATE = 'SUPPLY_DATE';
     case DELIVERY_DATE = 'DELIVERY_DATE';
     case SUPPLY_TEXT = 'SUPPLY_TEXT';

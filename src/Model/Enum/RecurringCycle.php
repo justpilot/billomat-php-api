@@ -14,6 +14,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum RecurringCycle: string
 {
+    use FromApi;
+
     case DAILY = 'DAILY';
     case WEEKLY = 'WEEKLY';
     case MONTHLY = 'MONTHLY';

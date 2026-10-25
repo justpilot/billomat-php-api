@@ -33,7 +33,7 @@ final readonly class RecurringEmailReceiver
         /** ID der Abo-Rechnung. */
         public int $recurringId,
         /** Empfänger-Typ (To, Cc oder Bcc). */
-        public RecurringEmailReceiverType $type,
+        public ?RecurringEmailReceiverType $type,
         /** E-Mail-Adresse. */
         public string $address,
         /**
@@ -55,7 +55,7 @@ final readonly class RecurringEmailReceiver
         return new self(
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null) ?? 0,
-            type: RecurringEmailReceiverType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: RecurringEmailReceiverType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null) ?? '',
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -74,7 +74,7 @@ final readonly class RecurringEmailReceiver
             ...$this->extra,
             'id' => $this->id,
             'recurring_id' => $this->recurringId,
-            'type' => $this->type->value,
+            'type' => $this->type?->value,
             'address' => $this->address,
         ];
     }

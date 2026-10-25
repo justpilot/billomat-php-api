@@ -13,16 +13,13 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum LetterStatus: string
 {
+    use FromApi;
+
     case DRAFT = 'DRAFT';
     case OPEN = 'OPEN';
     case COMPLETED = 'COMPLETED';
     case CLEARED = 'CLEARED';
     case CANCELED = 'CANCELED';
-
-    public static function fromApi(?string $status): ?self
-    {
-        return null === $status ? null : self::tryFrom($status);
-    }
 
     public function label(): string
     {

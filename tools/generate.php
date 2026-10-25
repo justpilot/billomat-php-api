@@ -179,6 +179,11 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
     foreach ($definitionFields as $name => $field) {
         $specField = $specFields[$name] ?? null;
 
+        // Unbekannte Enum-Werte werden zu null; ein Fallback-Fall würde sie still verfälschen.
+        if (!empty($field['enum']) && !empty($field['model']['nonNull'])) {
+            throw new RuntimeException("Enum-Feld '{$name}' kann nicht 'nonNull' sein ({$source}).");
+        }
+
         if (null === $specField && !isset($field['type'])) {
             throw new RuntimeException("Feld '{$name}' steht nicht in der Spec und braucht einen expliziten 'type' ({$source}).");
         }
@@ -324,9 +329,6 @@ function renderModel(array $definition, array $fields, string $source): string
         if (isListField($field) || $field['enumList']) {
             $out .= ' = []';
         } elseif (empty($field['model']['required'])) {
-            if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
-                throw new RuntimeException("Nicht-nullbares Enum-Feld '{$field['wire']}' braucht 'required' ({$source}).");
-            }
             $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : nonNullFallback(modelType($field)));
         }
         $out .= ",\n";
@@ -513,9 +515,9 @@ function hydrateExpression(array $field): string
     if ($field['enumList']) {
         return "ListCaster::toEnumList({$lookup} ?? null, {$field['enumClass']}::class)";
     }
-    // Nicht-nullbare Enums brauchen ein `fromApi(string): self`, das unbekannte Werte auf einen Default abbildet.
-    if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
-        return $field['enumClass'] . "::fromApi(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
+    // `model.fromApi`: Enum mit eigener Toleranz (z. B. Groß-/Kleinschreibung) über fromApi() hydrieren.
+    if (null !== $field['enumClass'] && !empty($field['model']['fromApi'])) {
+        return $field['enumClass'] . "::fromApi(ScalarCaster::toStringOrNull({$lookup} ?? null))";
     }
     // Unbekannte oder leere Werte werden zu null statt eine Exception zu werfen.
     if (null !== $field['enumClass']) {

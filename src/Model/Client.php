@@ -28,7 +28,74 @@ use const DATE_ATOM;
  */
 final readonly class Client
 {
-    /** @param list<PaymentType> $defaultPaymentTypes */
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'created' => true,
+        'client_number' => true,
+        'number' => true,
+        'number_pre' => true,
+        'number_length' => true,
+        'street' => true,
+        'zip' => true,
+        'city' => true,
+        'state' => true,
+        'country_code' => true,
+        'address' => true,
+        'first_name' => true,
+        'last_name' => true,
+        'salutation' => true,
+        'email' => true,
+        'phone' => true,
+        'fax' => true,
+        'mobile' => true,
+        'www' => true,
+        'note' => true,
+        'locale' => true,
+        'tax_number' => true,
+        'vat_number' => true,
+        'tax_rule' => true,
+        'net_gross' => true,
+        'currency_code' => true,
+        'debitor_account_number' => true,
+        'price_group' => true,
+        'archived' => true,
+        'dunning_run' => true,
+        'reduction' => true,
+        'discount_rate_type' => true,
+        'discount_rate' => true,
+        'discount_days_type' => true,
+        'discount_days' => true,
+        'due_days_type' => true,
+        'due_days' => true,
+        'reminder_due_days_type' => true,
+        'reminder_due_days' => true,
+        'offer_validity_days_type' => true,
+        'offer_validity_days' => true,
+        'bank_account_owner' => true,
+        'bank_number' => true,
+        'bank_name' => true,
+        'bank_account_number' => true,
+        'bank_swift' => true,
+        'bank_iban' => true,
+        'sepa_mandate' => true,
+        'sepa_mandate_date' => true,
+        'default_payment_types' => true,
+        'enable_customerportal' => true,
+        'revenue_gross' => true,
+        'revenue_net' => true,
+        'updated' => true,
+        'customfield' => true,
+        'facturx_identifier' => true,
+        'seller_identifier' => true,
+        'dig_exclude' => true,
+    ];
+
+    /**
+     * @param list<PaymentType>    $defaultPaymentTypes
+     * @param array<string, mixed> $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Kunden. */
         public ?int $id,
@@ -223,6 +290,12 @@ final readonly class Client
         public ?string $sellerIdentifier = null,
         /** Von Billomat geliefert, aber nicht dokumentiert. */
         public ?bool $digExclude = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -294,6 +367,7 @@ final readonly class Client
             facturxIdentifier: ScalarCaster::toStringOrNull($data['facturx_identifier'] ?? null),
             sellerIdentifier: ScalarCaster::toStringOrNull($data['seller_identifier'] ?? null),
             digExclude: ScalarCaster::toBoolOrNull($data['dig_exclude'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -307,6 +381,7 @@ final readonly class Client
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'created' => $this->created?->format(DATE_ATOM),

@@ -21,6 +21,17 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  */
 final readonly class ClientProperty
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'type' => true,
+        'default_value' => true,
+        'is_nvl' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Attributs. */
         public ?int $id,
@@ -38,6 +49,12 @@ final readonly class ClientProperty
         public ?bool $isNvl = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -55,6 +72,7 @@ final readonly class ClientProperty
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
             isNvl: ScalarCaster::toBoolOrNull($data['is_nvl'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -68,6 +86,7 @@ final readonly class ClientProperty
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'type' => $this->type?->value,

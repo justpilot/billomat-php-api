@@ -28,6 +28,22 @@ use const DATE_ATOM;
  */
 final readonly class Template
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'created' => true,
+        'type' => true,
+        'template_type' => true,
+        'name' => true,
+        'format' => true,
+        'base64file' => true,
+        'is_default' => true,
+        'updated' => true,
+        'customfield' => true,
+        'is_background_available' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Vorlage. */
         public ?int $id,
@@ -63,6 +79,12 @@ final readonly class Template
         public ?string $customfield = null,
         /** Ist ein Hintergrundbild für die Vorlage hinterlegt? */
         public ?bool $isBackgroundAvailable = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -85,6 +107,7 @@ final readonly class Template
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             isBackgroundAvailable: ScalarCaster::toBoolOrNull($data['is_background_available'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -98,6 +121,7 @@ final readonly class Template
     public function toArray(): array
     {
         return array_filter([
+            ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
             'type' => $this->type?->value,

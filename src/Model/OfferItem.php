@@ -20,6 +20,31 @@ use Justpilot\Billomat\Model\Enum\ItemType;
  */
 final readonly class OfferItem
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'offer_id' => true,
+        'article_id' => true,
+        'position' => true,
+        'unit' => true,
+        'quantity' => true,
+        'unit_price' => true,
+        'tax_name' => true,
+        'tax_rate' => true,
+        'tax_changed_manually' => true,
+        'title' => true,
+        'description' => true,
+        'reduction' => true,
+        'type' => true,
+        'total_gross' => true,
+        'total_net' => true,
+        'total_gross_unreduced' => true,
+        'total_net_unreduced' => true,
+        'customfield' => true,
+        'optional' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Position. */
         public ?int $id,
@@ -69,6 +94,12 @@ final readonly class OfferItem
         public ?string $customfield = null,
         /** Optionale Position (wird nicht in die Summe eingerechnet). */
         public ?bool $optional = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -100,6 +131,7 @@ final readonly class OfferItem
             totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             optional: ScalarCaster::toBoolOrNull($data['optional'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -113,6 +145,7 @@ final readonly class OfferItem
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'offer_id' => $this->offerId,
             'article_id' => $this->articleId,

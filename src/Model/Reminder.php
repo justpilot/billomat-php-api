@@ -24,7 +24,40 @@ use const DATE_ATOM;
  */
 final readonly class Reminder
 {
-    /** @param list<ReminderItem> $items */
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'invoice_id' => true,
+        'created' => true,
+        'status' => true,
+        'date' => true,
+        'due_days' => true,
+        'due_date' => true,
+        'address' => true,
+        'subject' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'total_gross' => true,
+        'currency_code' => true,
+        'reminder_text_id' => true,
+        'template_id' => true,
+        'reminder-items' => true,
+        'updated' => true,
+        'customfield' => true,
+        'paid_amount' => true,
+        'open_amount' => true,
+        'reminder_level' => true,
+        'reminder_level_name' => true,
+        'is_old' => true,
+    ];
+
+    /**
+     * @param list<ReminderItem>   $items
+     * @param array<string, mixed> $extra
+     */
     public function __construct(
         /** Interne Billomat-ID der Mahnung. */
         public ?int $id,
@@ -82,6 +115,12 @@ final readonly class Reminder
         public ?string $reminderLevelName = null,
         /** Von Billomat geliefert, aber nicht dokumentiert. */
         public ?bool $isOld = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -119,6 +158,7 @@ final readonly class Reminder
             reminderLevel: ScalarCaster::toIntOrNull($data['reminder_level'] ?? null),
             reminderLevelName: ScalarCaster::toStringOrNull($data['reminder_level_name'] ?? null),
             isOld: ScalarCaster::toBoolOrNull($data['is_old'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -132,6 +172,7 @@ final readonly class Reminder
     public function toArray(): array
     {
         $data = [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,

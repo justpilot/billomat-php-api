@@ -155,7 +155,7 @@ Every resource is reachable as a `public readonly` property on `BillomatClient`.
 
 ### Concepts
 
-Deeper topics live under [docs/concepts/](docs/concepts/): [authentication](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API security](docs/concepts/api-security.md), [pagination & filtering](docs/concepts/pagination-and-filtering.md), [custom meta attributes](docs/concepts/custom-meta-attributes.md), [errors & rate limits](docs/concepts/errors-and-rate-limits.md), [money amounts](docs/concepts/money.md) (`Money`), and [webhooks](docs/concepts/webhooks.md) (UI-only — Billomat has no REST endpoint for webhook subscriptions, so the SDK does not expose one either).
+Deeper topics live under [docs/concepts/](docs/concepts/): [authentication](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API security](docs/concepts/api-security.md), [pagination & filtering](docs/concepts/pagination-and-filtering.md), [custom meta attributes](docs/concepts/custom-meta-attributes.md), [errors & rate limits](docs/concepts/errors-and-rate-limits.md), [read models](docs/concepts/models.md) (incl. `extra` for unknown fields), [money amounts](docs/concepts/money.md) (`Money`), and [webhooks](docs/concepts/webhooks.md) (subscriptions only in the Billomat UI; the SDK helps parse incoming webhooks).
 
 ## Configuration
 

@@ -282,15 +282,28 @@ function renderModel(array $definition, array $fields, string $source): string
     $out .= "\n" . classDoc($definition['model']['doc'], $definition['docUrl'], $source, 'Dokumentation:');
     $out .= 'final readonly class ' . $definition['model']['class'] . "\n{\n";
     // Listen-Felder brauchen den Element-Typ als @param am Konstruktor.
-    if ([] !== $typedLists) {
-        $listTypes = array_map(listTypeHint(...), $typedLists);
-        $width = max(array_map(\strlen(...), $listTypes));
-        $out .= docBlock(array_map(
-            static fn (array $f, string $t): string => '@param ' . str_pad($t, $width) . ' $' . $f['property'],
-            $typedLists,
-            $listTypes,
-        ), '    ');
+    // Alle Billomat-Felder, die das Model abbildet; der Rest landet in `extra`.
+    $known = [];
+    foreach ($fields as $field) {
+        foreach ($field['model']['sources'] ?? [$field['wire']] as $wire) {
+            $known[$wire] = true;
+        }
     }
+    $out .= "    /** Billomat-Felder, die das Model abbildet. */\n";
+    $out .= "    private const array FIELDS = [\n";
+    foreach (array_keys($known) as $wire) {
+        $out .= "        '{$wire}' => true,\n";
+    }
+    $out .= "    ];\n\n";
+    // Listen-Felder und `extra` brauchen den Element-Typ als @param am Konstruktor.
+    $paramTypes = [...array_map(listTypeHint(...), $typedLists), 'array<string, mixed>'];
+    $paramNames = [...array_column($typedLists, 'property'), 'extra'];
+    $width = max(array_map(\strlen(...), $paramTypes));
+    $out .= docBlock(array_map(
+        static fn (string $t, string $name): string => '@param ' . str_pad($t, $width) . ' $' . $name,
+        $paramTypes,
+        $paramNames,
+    ), '    ');
     $out .= "    public function __construct(\n";
 
     foreach ($fields as $field) {
@@ -319,13 +332,21 @@ function renderModel(array $definition, array $fields, string $source): string
         $out .= ",\n";
     }
 
+    $out .= docBlock([
+        'Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.',
+        '',
+        'Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.',
+    ], '        ');
+    $out .= "        public array \$extra = [],\n";
     $out .= "    ) {\n    }\n\n";
+
 
     $out .= "    /**\n     * Hydriert das Model aus einem Billomat-Response-Array.\n     *\n     * @param array<string,mixed> \$data\n     */\n";
     $out .= "    public static function fromArray(array \$data): self\n    {\n        return new self(\n";
     foreach ($fields as $field) {
         $out .= '            ' . $field['property'] . ': ' . hydrateExpression($field) . ",\n";
     }
+    $out .= "            extra: array_diff_key(\$data, self::FIELDS),\n";
     $out .= "        );\n    }\n\n";
 
     $out .= "    /**\n     * Exportiert das Model als Array mit Billomat-Feldnamen.\n     *\n     * Praktisch für Debugging oder Log-Ausgaben.\n     *\n     * @return array<string,mixed>\n     */\n";
@@ -335,6 +356,8 @@ function renderModel(array $definition, array $fields, string $source): string
         throw new RuntimeException("'filterNulls' und Listen-Felder lassen sich nicht kombinieren ({$source}).");
     }
     $out .= "    public function toArray(): array\n    {\n        " . ([] !== $listFields ? '$data = ' : 'return ') . ($filterNulls ? 'array_filter(' : '') . "[\n";
+    // Unbekannte Felder zuerst, damit abgebildete Felder sie nie überschreiben.
+    $out .= "            ...\$this->extra,\n";
     $boolAsInt = !empty($definition['model']['boolAsInt']);
     foreach (exportFields($scalarFields, $definition['model']['toArray'] ?? null, $source) as $field) {
         $value = '$this->' . $field['property'];

@@ -23,6 +23,19 @@ use const DATE_ATOM;
  */
 final readonly class TaxRate
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'rate' => true,
+        'is_default' => true,
+        'created' => true,
+        'updated' => true,
+        'customfield' => true,
+        'can_delete' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Steuersatzes. */
         public ?int $id,
@@ -52,6 +65,12 @@ final readonly class TaxRate
          * false, solange er auf Belegen oder Artikeln verwendet wird.
          */
         public ?bool $canDelete = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -71,6 +90,7 @@ final readonly class TaxRate
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             canDelete: ScalarCaster::toBoolOrNull($data['can_delete'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -84,6 +104,7 @@ final readonly class TaxRate
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'rate' => $this->rate,

@@ -155,7 +155,7 @@ Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zu
 
 ### Weitergehende Konzepte
 
-Vertiefende Themen sind unter [docs/concepts/](docs/concepts/) gesammelt: [Authentifizierung](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API-Security](docs/concepts/api-security.md), [Pagination & Filtering](docs/concepts/pagination-and-filtering.md), [Custom Meta Attributes](docs/concepts/custom-meta-attributes.md), [Fehler & Rate-Limits](docs/concepts/errors-and-rate-limits.md), [Geldbeträge](docs/concepts/money.md) (`Money`) sowie [Webhooks](docs/concepts/webhooks.md) (nur UI-konfigurierbar, kein REST-Endpunkt — daher auch im SDK nicht abgebildet).
+Vertiefende Themen sind unter [docs/concepts/](docs/concepts/) gesammelt: [Authentifizierung](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API-Security](docs/concepts/api-security.md), [Pagination & Filtering](docs/concepts/pagination-and-filtering.md), [Custom Meta Attributes](docs/concepts/custom-meta-attributes.md), [Fehler & Rate-Limits](docs/concepts/errors-and-rate-limits.md), [Read-Modelle](docs/concepts/models.md) (inkl. `extra` für unbekannte Felder), [Geldbeträge](docs/concepts/money.md) (`Money`) sowie [Webhooks](docs/concepts/webhooks.md) (Abonnements nur in der Billomat-Oberfläche; das SDK hilft beim Auswerten eingehender Webhooks).
 
 ## Konfiguration
 

@@ -17,6 +17,16 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class Currency
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'code' => true,
+        'currency_code' => true,
+        'name' => true,
+        'symbol' => true,
+        'id' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** ISO-Währungscode (z. B. "EUR"). */
         public string $code,
@@ -26,6 +36,12 @@ final readonly class Currency
         public ?string $symbol = null,
         /** Interne Billomat-ID der Währung. */
         public ?int $id = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -41,6 +57,7 @@ final readonly class Currency
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             symbol: ScalarCaster::toStringOrNull($data['symbol'] ?? null),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -54,6 +71,7 @@ final readonly class Currency
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'code' => $this->code,
             'name' => $this->name,
             'symbol' => $this->symbol,

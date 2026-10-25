@@ -23,6 +23,33 @@ use const DATE_ATOM;
  */
 final readonly class Contact
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'created' => true,
+        'label' => true,
+        'salutation' => true,
+        'first_name' => true,
+        'last_name' => true,
+        'street' => true,
+        'zip' => true,
+        'city' => true,
+        'state' => true,
+        'country_code' => true,
+        'email' => true,
+        'phone' => true,
+        'fax' => true,
+        'mobile' => true,
+        'updated' => true,
+        'customfield' => true,
+        'name' => true,
+        'address' => true,
+        'www' => true,
+        'locale' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Kontakts. */
         public ?int $id,
@@ -80,6 +107,12 @@ final readonly class Contact
          * Beispiel: "de_DE"
          */
         public ?string $locale = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -113,6 +146,7 @@ final readonly class Contact
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             www: ScalarCaster::toStringOrNull($data['www'] ?? null),
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -126,6 +160,7 @@ final readonly class Contact
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'created' => $this->created?->format(DATE_ATOM),

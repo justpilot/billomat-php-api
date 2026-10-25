@@ -19,6 +19,15 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class CreditNoteTag
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'credit_note_id' => true,
+        'name' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Schlagworts. */
         public ?int $id,
@@ -28,6 +37,12 @@ final readonly class CreditNoteTag
         public string $name,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -43,6 +58,7 @@ final readonly class CreditNoteTag
             creditNoteId: ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null) ?? 0,
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -56,6 +72,7 @@ final readonly class CreditNoteTag
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'credit_note_id' => $this->creditNoteId,
             'name' => $this->name,

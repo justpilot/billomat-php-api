@@ -21,6 +21,35 @@ use const DATE_ATOM;
  */
 final readonly class Incoming
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'supplier_id' => true,
+        'created' => true,
+        'date' => true,
+        'due_date' => true,
+        'status' => true,
+        'number' => true,
+        'incoming_number' => true,
+        'address' => true,
+        'label' => true,
+        'note' => true,
+        'total_gross' => true,
+        'total_net' => true,
+        'paid_amount' => true,
+        'open_amount' => true,
+        'currency_code' => true,
+        'quote' => true,
+        'updated' => true,
+        'customfield' => true,
+        'client_number' => true,
+        'expense_account_number' => true,
+        'category' => true,
+        'page_count' => true,
+        'has_attachment' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Eingangsrechnung. */
         public ?int $id,
@@ -68,6 +97,12 @@ final readonly class Incoming
         public ?int $pageCount = null,
         /** Ist ein Belegdokument angehängt? */
         public ?bool $hasAttachment = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -102,6 +137,7 @@ final readonly class Incoming
             category: ScalarCaster::toStringOrNull($data['category'] ?? null),
             pageCount: ScalarCaster::toIntOrNull($data['page_count'] ?? null),
             hasAttachment: ScalarCaster::toBoolOrNull($data['has_attachment'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -115,6 +151,7 @@ final readonly class Incoming
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'supplier_id' => $this->supplierId,
             'created' => $this->created?->format(DATE_ATOM),

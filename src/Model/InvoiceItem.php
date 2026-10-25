@@ -20,6 +20,30 @@ use Justpilot\Billomat\Model\Enum\ItemType;
  */
 final readonly class InvoiceItem
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'invoice_id' => true,
+        'article_id' => true,
+        'position' => true,
+        'unit' => true,
+        'quantity' => true,
+        'unit_price' => true,
+        'tax_name' => true,
+        'tax_rate' => true,
+        'tax_changed_manually' => true,
+        'title' => true,
+        'description' => true,
+        'reduction' => true,
+        'type' => true,
+        'total_gross' => true,
+        'total_net' => true,
+        'total_gross_unreduced' => true,
+        'total_net_unreduced' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Position. */
         public ?int $id,
@@ -67,6 +91,12 @@ final readonly class InvoiceItem
         public ?Money $totalNetUnreduced,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -97,6 +127,7 @@ final readonly class InvoiceItem
             totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -110,6 +141,7 @@ final readonly class InvoiceItem
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'invoice_id' => $this->invoiceId,
             'article_id' => $this->articleId,

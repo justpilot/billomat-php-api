@@ -31,10 +31,61 @@ use const DATE_ATOM;
  */
 final readonly class Invoice
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'created' => true,
+        'invoice_number' => true,
+        'number' => true,
+        'number_pre' => true,
+        'number_length' => true,
+        'status' => true,
+        'date' => true,
+        'supply_date' => true,
+        'supply_date_type' => true,
+        'due_date' => true,
+        'due_days' => true,
+        'address' => true,
+        'discount_rate' => true,
+        'discount_date' => true,
+        'discount_days' => true,
+        'discount_amount' => true,
+        'title' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'total_gross' => true,
+        'total_net' => true,
+        'net_gross' => true,
+        'reduction' => true,
+        'total_gross_unreduced' => true,
+        'total_net_unreduced' => true,
+        'paid_amount' => true,
+        'open_amount' => true,
+        'currency_code' => true,
+        'quote' => true,
+        'invoice_id' => true,
+        'offer_id' => true,
+        'confirmation_id' => true,
+        'recurring_id' => true,
+        'taxes' => true,
+        'payment_types' => true,
+        'template_id' => true,
+        'invoice-items' => true,
+        'updated' => true,
+        'customfield' => true,
+        'facturx_reference' => true,
+        'total_reduction' => true,
+        'dig_proceeded' => true,
+    ];
+
     /**
-     * @param list<TaxSummary>  $taxes
-     * @param list<PaymentType> $paymentTypes
-     * @param list<InvoiceItem> $items
+     * @param list<TaxSummary>     $taxes
+     * @param list<PaymentType>    $paymentTypes
+     * @param list<InvoiceItem>    $items
+     * @param array<string, mixed> $extra
      */
     public function __construct(
         /** Interne Billomat-ID der Rechnung. */
@@ -133,6 +184,12 @@ final readonly class Invoice
         public ?Money $totalReduction = null,
         /** Wurde die Rechnung digital weiterverarbeitet? */
         public ?bool $digProceeded = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -190,6 +247,7 @@ final readonly class Invoice
             facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
             totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
             digProceeded: ScalarCaster::toBoolOrNull($data['dig_proceeded'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -203,6 +261,7 @@ final readonly class Invoice
     public function toArray(): array
     {
         $data = [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,

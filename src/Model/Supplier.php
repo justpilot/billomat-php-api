@@ -23,6 +23,48 @@ use const DATE_ATOM;
  */
 final readonly class Supplier
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'created' => true,
+        'name' => true,
+        'client_number' => true,
+        'salutation' => true,
+        'first_name' => true,
+        'last_name' => true,
+        'street' => true,
+        'zip' => true,
+        'city' => true,
+        'state' => true,
+        'country_code' => true,
+        'address' => true,
+        'note' => true,
+        'email' => true,
+        'phone' => true,
+        'fax' => true,
+        'mobile' => true,
+        'www' => true,
+        'tax_number' => true,
+        'vat_number' => true,
+        'bank_account_number' => true,
+        'bank_account_owner' => true,
+        'bank_number' => true,
+        'bank_name' => true,
+        'bank_iban' => true,
+        'bank_swift' => true,
+        'bank_bic' => true,
+        'currency_code' => true,
+        'updated' => true,
+        'customfield' => true,
+        'is_eu_country' => true,
+        'locale' => true,
+        'creditor_account_number' => true,
+        'creditor_identifier' => true,
+        'costs_gross' => true,
+        'costs_net' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Lieferanten. */
         public ?int $id,
@@ -116,6 +158,12 @@ final readonly class Supplier
         public ?Money $costsGross = null,
         /** Netto-Kosten (read-only Auswertungsfeld). */
         public ?Money $costsNet = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -163,6 +211,7 @@ final readonly class Supplier
             creditorIdentifier: ScalarCaster::toStringOrNull($data['creditor_identifier'] ?? null),
             costsGross: ScalarCaster::toMoneyOrNull($data['costs_gross'] ?? null),
             costsNet: ScalarCaster::toMoneyOrNull($data['costs_net'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -176,6 +225,7 @@ final readonly class Supplier
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
             'name' => $this->name,

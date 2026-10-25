@@ -21,6 +21,25 @@ use const DATE_ATOM;
  */
 final readonly class Letter
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'created' => true,
+        'status' => true,
+        'date' => true,
+        'address' => true,
+        'subject' => true,
+        'label' => true,
+        'intro' => true,
+        'template_id' => true,
+        'updated' => true,
+        'customfield' => true,
+        'supplier_id' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Briefs. */
         public ?int $id,
@@ -58,6 +77,12 @@ final readonly class Letter
          * Wird statt `client_id` verwendet, wenn der Brief an einen Lieferanten geht.
          */
         public ?int $supplierId = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -83,6 +108,7 @@ final readonly class Letter
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -96,6 +122,7 @@ final readonly class Letter
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,

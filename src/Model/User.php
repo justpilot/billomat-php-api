@@ -20,6 +20,23 @@ use const DATE_ATOM;
  */
 final readonly class User
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'email' => true,
+        'first_name' => true,
+        'last_name' => true,
+        'salutation' => true,
+        'role_id' => true,
+        'created' => true,
+        'updated' => true,
+        'customfield' => true,
+        'locale' => true,
+        'timezone' => true,
+        'is_account_owner' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Benutzers. */
         public ?int $id,
@@ -45,6 +62,12 @@ final readonly class User
         public ?string $timezone = null,
         /** Ist der Benutzer Inhaber des Accounts? */
         public ?bool $isAccountOwner = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -68,6 +91,7 @@ final readonly class User
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             timezone: ScalarCaster::toStringOrNull($data['timezone'] ?? null),
             isAccountOwner: ScalarCaster::toBoolOrNull($data['is_account_owner'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -81,6 +105,7 @@ final readonly class User
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'email' => $this->email,
             'first_name' => $this->firstName,

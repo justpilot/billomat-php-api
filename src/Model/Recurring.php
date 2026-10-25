@@ -29,10 +29,71 @@ use const DATE_ATOM;
  */
 final readonly class Recurring
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'created' => true,
+        'address' => true,
+        'supply_date' => true,
+        'supply_date_type' => true,
+        'due_days' => true,
+        'discount_rate' => true,
+        'discount_days' => true,
+        'name' => true,
+        'title' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'currency_code' => true,
+        'net_gross' => true,
+        'quote' => true,
+        'payment_types' => true,
+        'action' => true,
+        'cycle_number' => true,
+        'cycle' => true,
+        'hour' => true,
+        'start_date' => true,
+        'end_date' => true,
+        'last_creation_date' => true,
+        'next_creation_date' => true,
+        'iterations' => true,
+        'counter' => true,
+        'total_gross' => true,
+        'total_net' => true,
+        'reduction' => true,
+        'email_sender' => true,
+        'email_subject' => true,
+        'email_message' => true,
+        'email_template_id' => true,
+        'free_text_id' => true,
+        'template_id' => true,
+        'taxes' => true,
+        'recurring-items' => true,
+        'updated' => true,
+        'customfield' => true,
+        'total_reduction' => true,
+        'total_net_unreduced' => true,
+        'total_gross_unreduced' => true,
+        'discount_amount' => true,
+        'status' => true,
+        'in_progress' => true,
+        'ultimo' => true,
+        'email_filename' => true,
+        'email_bcc' => true,
+        'letter_color' => true,
+        'letter_duplex' => true,
+        'letter_paper_weight' => true,
+        'offer_id' => true,
+        'confirmation_id' => true,
+    ];
+
     /**
-     * @param list<PaymentType>   $paymentTypes
-     * @param list<TaxSummary>    $taxes
-     * @param list<RecurringItem> $items
+     * @param list<PaymentType>    $paymentTypes
+     * @param list<TaxSummary>     $taxes
+     * @param list<RecurringItem>  $items
+     * @param array<string, mixed> $extra
      */
     public function __construct(
         /** Interne Billomat-ID der Abo-Rechnung. */
@@ -155,6 +216,12 @@ final readonly class Recurring
         public ?int $offerId = null,
         /** ID der Quell-Auftragsbestätigung. */
         public ?int $confirmationId = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -222,6 +289,7 @@ final readonly class Recurring
             letterPaperWeight: ScalarCaster::toIntOrNull($data['letter_paper_weight'] ?? null),
             offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -235,6 +303,7 @@ final readonly class Recurring
     public function toArray(): array
     {
         $data = [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,

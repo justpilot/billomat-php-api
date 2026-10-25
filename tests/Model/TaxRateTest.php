@@ -77,6 +77,8 @@ final class TaxRateTest extends TestCase
 
         self::assertSame(
             [
+                // `account_id` bildet das Model nicht mehr ab; es bleibt als unbekanntes Feld erhalten.
+                'account_id' => 99,
                 'id' => 12,
                 'name' => 'MwSt',
                 'rate' => 19.0,

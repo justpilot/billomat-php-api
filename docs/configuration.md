@@ -26,6 +26,8 @@ $billomat = BillomatClient::create(
 | `timeout` | `float` | `10.0` | Timeout in Sekunden für jeden Request. Gilt nur für den Client, den das SDK selbst erzeugt; ein eigener `httpClient` konfiguriert seinen Timeout selbst. |
 | `httpClient` | `?ClientInterface` | `null` | Optionaler eigener PSR-18-Client (`Psr\Http\Client\ClientInterface`). Wenn `null`, nutzt das SDK Symfonys `Psr18Client` mit `timeout`, falls `symfony/http-client` installiert ist, sonst den per `php-http/discovery` gefundenen Client. |
 | `retry` | `RetryPolicy` | `new RetryPolicy()` | Automatische Wiederholungen bei 429 und transienten Fehlern (siehe [Retries](#retries-retrypolicy)). `RetryPolicy::none()` schaltet sie ab. |
+| `logger` | `?LoggerInterface` | `null` | PSR-3-Logger für Antworten, Retries und Fehler (siehe [Logging](#beispiel-request-response-logging)). |
+| `events` | `?EventDispatcherInterface` | `null` | PSR-14-Dispatcher für `RequestStarted`, `ResponseReceived`, `RetryScheduled` und `RequestFailed`. |
 | `language` | `?string` | `'de-de'` | Wert für `Accept-Language`, z. B. `'en-gb'` für englische Fehlermeldungen. `null` sendet den Header nicht. |
 
 Die Methode signiert als:
@@ -40,6 +42,8 @@ public static function create(
     ?ClientInterface $httpClient = null,
     RetryPolicy $retry = new RetryPolicy(),
     ?string $language = 'de-de',
+    ?LoggerInterface $logger = null,
+    ?EventDispatcherInterface $events = null,
 ): self
 ```
 
@@ -138,23 +142,40 @@ $billomat = BillomatClient::create(
 
 ### Beispiel: Request-/Response-Logging
 
+Das SDK loggt selbst über PSR-3 und meldet jeden Request als PSR-14-Event. Übergib dafür `logger` bzw. `events`:
+
 ```php
 use Justpilot\Billomat\BillomatClient;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\Psr18Client;
-
-$logger = /* PSR-3 Logger */;
-$symfony = HttpClient::create(['timeout' => 10.0]);
-$symfony->setLogger($logger); // die Clients aus HttpClient::create() sind LoggerAware
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
-    httpClient: new Psr18Client($symfony), // Symfony-Clients in Psr18Client einwickeln
+    logger: $logger,          // Psr\Log\LoggerInterface
+    events: $eventDispatcher, // Psr\EventDispatcher\EventDispatcherInterface
 );
 ```
 
-Achte beim Loggen darauf, den `X-BillomatApiKey`-Header zu maskieren. Siehe [SECURITY.md](../SECURITY.md).
+| Log-Level | Wann |
+|---|---|
+| `debug` | erfolgreiche Antwort: Methode, Pfad, Status, Dauer |
+| `warning` | Retry: Grund (`HTTP 503`, `network error: …`), Wartezeit, Versuch |
+| `notice` | endgültiger 4xx-Fehler (auch der erwartete 404 aus `get()`) |
+| `error` | endgültiger 5xx- oder Netzwerkfehler |
+
+Der Log-Kontext enthält nur `method`, `path`, `attempt` und je nach Meldung `status`, `duration_ms`, `reason`, `delay_ms`, `message` und `exception` – keine Header, keinen Query-String und keinen Body, also weder API-Key noch Kundendaten.
+
+Events (`Justpilot\Billomat\Event`, alle `final readonly`):
+
+| Event | Inhalt |
+|---|---|
+| `RequestStarted` | `request`, `attempt` (ab 1), einmal pro Versuch |
+| `ResponseReceived` | `request`, `response`, `attempt`, `durationMs` – bei jedem Status |
+| `RetryScheduled` | `request`, `attempt`, `delayMs`, `response` (429/5xx) oder `error` (Netzwerkfehler) |
+| `RequestFailed` | `request`, `exception`, `attempt` – direkt bevor das SDK die Exception wirft |
+
+`$event->request` enthält den Header `X-BillomatApiKey` – maskiere ihn, bevor du Requests ungefiltert loggst. Siehe [SECURITY.md](../SECURITY.md).
+
+Wer zusätzlich die Transport-Ebene loggen will, kann weiterhin einen geloggten Symfony-Client übergeben (`$symfony->setLogger($logger)`, eingewickelt in `Psr18Client`).
 
 ### Beispiel: In Tests einen `MockHttpClient` injizieren
 

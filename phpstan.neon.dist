@@ -5,6 +5,7 @@ parameters:
     level: max
     paths:
         - src
+        - rector
         - tests
         - examples
     excludePaths:

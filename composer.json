@@ -61,11 +61,13 @@
   },
   "suggest": {
     "symfony/http-client": "Default PSR-18 client; the SDK applies BillomatConfig::$timeout to it (needs nyholm/psr7 or another PSR-17 implementation)",
-    "guzzlehttp/guzzle": "Alternative PSR-18 client"
+    "guzzlehttp/guzzle": "Alternative PSR-18 client",
+    "rector/rector": "Runs rector/upgrade-4.0.php, which automates the mechanical parts of the 3.x to 4.0 upgrade"
   },
   "autoload": {
     "psr-4": {
-      "Justpilot\\Billomat\\": "src/"
+      "Justpilot\\Billomat\\": "src/",
+      "Justpilot\\Billomat\\Rector\\": "rector/src/"
     }
   },
   "autoload-dev": {

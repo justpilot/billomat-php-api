@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ReminderText;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Mahn-Textbausteine.
@@ -18,11 +19,13 @@ final class ReminderTextsApi extends AbstractApi
      *
      * @return list<ReminderText>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/reminder-texts', 'reminder-texts', 'reminder-text', ReminderText::fromArray(...), $filters);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ReminderText
     {
         $data = $this->getJsonOrNull("/reminder-texts/{$id}");

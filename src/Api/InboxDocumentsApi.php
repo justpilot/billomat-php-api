@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\InboxDocument;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Posteingangs-Dokumente (Inbox Documents).
@@ -26,6 +27,7 @@ final class InboxDocumentsApi extends AbstractApi
      *
      * @return list<InboxDocument>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/inbox-documents', 'inbox-documents', 'inbox-document', InboxDocument::fromArray(...), $filters);
@@ -42,6 +44,7 @@ final class InboxDocumentsApi extends AbstractApi
      *
      * @return Page<InboxDocument>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/inbox-documents', 'inbox-documents', 'inbox-document', InboxDocument::fromArray(...), $filters);
@@ -59,11 +62,13 @@ final class InboxDocumentsApi extends AbstractApi
      *
      * @return Generator<int, InboxDocument>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/inbox-documents', 'inbox-documents', 'inbox-document', InboxDocument::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?InboxDocument
     {
         $data = $this->getJsonOrNull("/inbox-documents/{$id}");

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Role;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Mitarbeiter-Rollen.
@@ -27,6 +28,7 @@ final class RolesApi extends AbstractApi
      *
      * @return list<Role>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/roles', 'roles', 'role', Role::fromArray(...), $filters);
@@ -37,6 +39,7 @@ final class RolesApi extends AbstractApi
      *
      * @return Page<Role>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/roles', 'roles', 'role', Role::fromArray(...), $filters);
@@ -47,11 +50,13 @@ final class RolesApi extends AbstractApi
      *
      * @return Generator<int, Role>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/roles', 'roles', 'role', Role::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Role
     {
         $data = $this->getJsonOrNull("/roles/{$id}");

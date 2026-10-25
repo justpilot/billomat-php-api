@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ClientTag;
 use Justpilot\Billomat\Model\ClientTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Client-Tags.
@@ -15,6 +16,7 @@ final class ClientTagsApi extends AbstractApi
     /**
      * @return list<ClientTag>
      */
+    #[NoDiscard]
     public function listByClient(int $clientId): array
     {
         return $this->listResource('/client-tags', 'client-tags', 'client-tag', ClientTag::fromArray(...), ['client_id' => $clientId]);
@@ -23,11 +25,13 @@ final class ClientTagsApi extends AbstractApi
     /**
      * @return list<ClientTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/client-tags', 'client-tags', 'tag', ClientTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ClientTag
     {
         $data = $this->getJsonOrNull("/client-tags/{$id}");

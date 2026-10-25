@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\TaxRate;
+use NoDiscard;
 
 /**
  * API-Wrapper für Steuersätze.
@@ -29,6 +30,7 @@ final class TaxesApi extends AbstractApi
      *
      * @return list<TaxRate>
      */
+    #[NoDiscard]
     public function list(array $query = []): array
     {
         $data = $this->getJson('/taxes', $query);
@@ -59,6 +61,7 @@ final class TaxesApi extends AbstractApi
      * Wir nutzen hier getJsonOrNull() und geben null zurück,
      * wenn der Steuersatz nicht existiert (404).
      */
+    #[NoDiscard]
     public function get(int $id): ?TaxRate
     {
         $data = $this->getJsonOrNull("/taxes/{$id}");

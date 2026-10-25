@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\ClientPropertyValue;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Werte von Kunden-Eigenschaften.
@@ -20,6 +21,7 @@ final class ClientPropertyValuesApi extends AbstractApi
      *
      * @return list<ClientPropertyValue>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/client-property-values', 'client-property-values', 'client-property-value', ClientPropertyValue::fromArray(...), $filters);
@@ -32,6 +34,7 @@ final class ClientPropertyValuesApi extends AbstractApi
      *
      * @return Page<ClientPropertyValue>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/client-property-values', 'client-property-values', 'client-property-value', ClientPropertyValue::fromArray(...), $filters);
@@ -44,11 +47,13 @@ final class ClientPropertyValuesApi extends AbstractApi
      *
      * @return Generator<int, ClientPropertyValue>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/client-property-values', 'client-property-values', 'client-property-value', ClientPropertyValue::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ClientPropertyValue
     {
         $data = $this->getJsonOrNull("/client-property-values/{$id}");

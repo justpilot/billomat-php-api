@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\IncomingPayment;
+use NoDiscard;
 
 /**
  * API-Wrapper für Incoming-Payments.
@@ -18,11 +19,13 @@ final class IncomingPaymentsApi extends AbstractApi
      *
      * @return list<IncomingPayment>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/incoming-payments', 'incoming-payments', 'incoming-payment', IncomingPayment::fromArray(...), $filters);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?IncomingPayment
     {
         $data = $this->getJsonOrNull("/incoming-payments/{$id}");

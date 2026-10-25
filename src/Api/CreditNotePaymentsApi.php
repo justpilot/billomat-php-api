@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\CreditNotePayment;
+use NoDiscard;
 
 /**
  * API-Wrapper für Credit-Note-Payments (Auszahlungen einer Gutschrift).
@@ -24,11 +25,13 @@ final class CreditNotePaymentsApi extends AbstractApi
      *
      * @return list<CreditNotePayment>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/credit-note-payments', 'credit-note-payments', 'credit-note-payment', CreditNotePayment::fromArray(...), $filters);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?CreditNotePayment
     {
         $data = $this->getJsonOrNull("/credit-note-payments/{$id}");

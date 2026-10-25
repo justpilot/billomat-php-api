@@ -86,7 +86,7 @@ final class SearchApiTest extends TestCase
         });
 
         $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        new SearchApi($http)->query('foo', ['per_page' => 5]);
+        (void) new SearchApi($http)->query('foo', ['per_page' => 5]);
 
         parse_str(parse_url($capturedUrl, PHP_URL_QUERY) ?? '', $params);
         self::assertSame('foo', $params['query']);

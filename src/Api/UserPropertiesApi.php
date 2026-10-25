@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\UserProperty;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Definitionen von Benutzer-Eigenschaften.
@@ -33,6 +34,7 @@ final class UserPropertiesApi extends AbstractApi
      *
      * @return list<UserProperty>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/user-properties', 'user-properties', 'user-property', UserProperty::fromArray(...), $filters);
@@ -43,6 +45,7 @@ final class UserPropertiesApi extends AbstractApi
      *
      * @return Page<UserProperty>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/user-properties', 'user-properties', 'user-property', UserProperty::fromArray(...), $filters);
@@ -53,11 +56,13 @@ final class UserPropertiesApi extends AbstractApi
      *
      * @return Generator<int, UserProperty>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/user-properties', 'user-properties', 'user-property', UserProperty::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?UserProperty
     {
         $data = $this->getJsonOrNull("/user-properties/{$id}");

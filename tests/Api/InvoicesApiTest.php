@@ -568,7 +568,7 @@ final class InvoicesApiTest extends TestCase
         $http = new BillomatHttpClient($mock, $config);
         $api = new InvoicesApi($http);
 
-        $api->pdf(999, InvoicePdfType::SIGNED);
+        (void) $api->pdf(999, InvoicePdfType::SIGNED);
 
         self::assertNotNull($capturedUrl);
         self::assertStringContainsString(

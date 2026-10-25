@@ -14,6 +14,7 @@ use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoicePdf;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -34,6 +35,7 @@ final class InvoicesApi extends AbstractApi
      *
      * @return list<Invoice>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters);
@@ -50,6 +52,7 @@ final class InvoicesApi extends AbstractApi
      *
      * @return Page<Invoice>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters);
@@ -67,6 +70,7 @@ final class InvoicesApi extends AbstractApi
      *
      * @return Generator<int, Invoice>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters, $pageSize);
@@ -85,6 +89,7 @@ final class InvoicesApi extends AbstractApi
      *
      * @return list<InvoiceGroup>
      */
+    #[NoDiscard]
     public function listGrouped(InvoiceGroupBy|array $groupBy, array $filters = []): array
     {
         $values = \is_array($groupBy) ? $groupBy : [$groupBy];
@@ -102,6 +107,7 @@ final class InvoicesApi extends AbstractApi
      *
      * Entspricht GET /invoices/{id}
      */
+    #[NoDiscard]
     public function get(int $id): ?Invoice
     {
         $data = $this->getJsonOrNull("/invoices/{$id}");
@@ -311,6 +317,7 @@ final class InvoicesApi extends AbstractApi
      *
      * @return InvoicePdf|string InvoicePdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
      */
+    #[NoDiscard]
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string
     {
         $query = [];

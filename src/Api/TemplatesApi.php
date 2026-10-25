@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
+use NoDiscard;
 
 /**
  * API-Wrapper für Vorlagen (Templates).
@@ -25,6 +26,7 @@ final class TemplatesApi extends AbstractApi
      *
      * @return list<Template>
      */
+    #[NoDiscard]
     public function list(array $query = []): array
     {
         $data = $this->getJson('/templates', $query);
@@ -58,6 +60,7 @@ final class TemplatesApi extends AbstractApi
      *
      * - Bei UPLOADED kommt ggf. format/base64file mit
      */
+    #[NoDiscard]
     public function get(int $id): ?Template
     {
         $data = $this->getJsonOrNull("/templates/{$id}");
@@ -139,6 +142,7 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht GET /templates/{id}/thumb
      */
+    #[NoDiscard]
     public function thumb(int $id, TemplateThumbFormat $format = TemplateThumbFormat::PNG): string
     {
         return $this->getRaw("/templates/{$id}/thumb", [

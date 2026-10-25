@@ -12,6 +12,7 @@ use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -40,6 +41,7 @@ final class DeliveryNotesApi extends AbstractApi
      *
      * @return list<DeliveryNote>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters);
@@ -56,6 +58,7 @@ final class DeliveryNotesApi extends AbstractApi
      *
      * @return Page<DeliveryNote>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters);
@@ -73,11 +76,13 @@ final class DeliveryNotesApi extends AbstractApi
      *
      * @return Generator<int, DeliveryNote>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?DeliveryNote
     {
         $data = $this->getJsonOrNull("/delivery-notes/{$id}");
@@ -182,6 +187,7 @@ final class DeliveryNotesApi extends AbstractApi
     /**
      * @return DeliveryNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
+    #[NoDiscard]
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string
     {
         $query = [];

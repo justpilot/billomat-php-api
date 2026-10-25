@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\SupplierTag;
 use Justpilot\Billomat\Model\SupplierTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Supplier-Tags.
@@ -16,6 +17,7 @@ final class SupplierTagsApi extends AbstractApi
     /**
      * @return list<SupplierTag>
      */
+    #[NoDiscard]
     public function listBySupplier(int $supplierId): array
     {
         $data = $this->getJson('/supplier-tags', ['supplier_id' => $supplierId]);
@@ -47,6 +49,7 @@ final class SupplierTagsApi extends AbstractApi
     /**
      * @return list<SupplierTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         $data = $this->getJson('/supplier-tags');
@@ -75,6 +78,7 @@ final class SupplierTagsApi extends AbstractApi
         return $tags;
     }
 
+    #[NoDiscard]
     public function get(int $id): ?SupplierTag
     {
         $data = $this->getJsonOrNull("/supplier-tags/{$id}");

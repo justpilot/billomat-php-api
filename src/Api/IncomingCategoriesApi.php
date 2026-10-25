@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\IncomingCategory;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Eingangsrechnungs-Kategorien.
@@ -23,6 +24,7 @@ final class IncomingCategoriesApi extends AbstractApi
      *
      * @return list<IncomingCategory>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource(
@@ -39,6 +41,7 @@ final class IncomingCategoriesApi extends AbstractApi
      *
      * @return Page<IncomingCategory>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage(
@@ -55,6 +58,7 @@ final class IncomingCategoriesApi extends AbstractApi
      *
      * @return Generator<int, IncomingCategory>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource(
@@ -67,6 +71,7 @@ final class IncomingCategoriesApi extends AbstractApi
         );
     }
 
+    #[NoDiscard]
     public function get(string $id): ?IncomingCategory
     {
         $data = $this->getJsonOrNull("/incoming-categories/{$id}");

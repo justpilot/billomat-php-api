@@ -11,6 +11,7 @@ use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Supplier;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Suppliers-Ressource (Lieferanten).
@@ -31,6 +32,7 @@ final class SuppliersApi extends AbstractApi
      *
      * @return list<Supplier>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         $data = $this->getJson('/suppliers', $filters);
@@ -69,6 +71,7 @@ final class SuppliersApi extends AbstractApi
      *
      * @return Page<Supplier>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters);
@@ -86,11 +89,13 @@ final class SuppliersApi extends AbstractApi
      *
      * @return Generator<int, Supplier>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Supplier
     {
         $data = $this->getJsonOrNull("/suppliers/{$id}");

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\EmailTemplate;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für E-Mail-Vorlagen.
@@ -20,6 +21,7 @@ final class EmailTemplatesApi extends AbstractApi
      *
      * @return list<EmailTemplate>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/email-templates', 'email-templates', 'email-template', EmailTemplate::fromArray(...), $filters);
@@ -36,6 +38,7 @@ final class EmailTemplatesApi extends AbstractApi
      *
      * @return Page<EmailTemplate>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/email-templates', 'email-templates', 'email-template', EmailTemplate::fromArray(...), $filters);
@@ -53,11 +56,13 @@ final class EmailTemplatesApi extends AbstractApi
      *
      * @return Generator<int, EmailTemplate>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/email-templates', 'email-templates', 'email-template', EmailTemplate::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?EmailTemplate
     {
         $data = $this->getJsonOrNull("/email-templates/{$id}");

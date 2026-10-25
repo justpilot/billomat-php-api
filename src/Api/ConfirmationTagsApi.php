@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ConfirmationTag;
 use Justpilot\Billomat\Model\ConfirmationTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Confirmation-Tags.
@@ -17,6 +18,7 @@ final class ConfirmationTagsApi extends AbstractApi
     /**
      * @return list<ConfirmationTag>
      */
+    #[NoDiscard]
     public function listByConfirmation(int $confirmationId): array
     {
         return $this->listResource('/confirmation-tags', 'confirmation-tags', 'confirmation-tag', ConfirmationTag::fromArray(...), ['confirmation_id' => $confirmationId]);
@@ -25,11 +27,13 @@ final class ConfirmationTagsApi extends AbstractApi
     /**
      * @return list<ConfirmationTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/confirmation-tags', 'confirmation-tags', 'tag', ConfirmationTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ConfirmationTag
     {
         $data = $this->getJsonOrNull("/confirmation-tags/{$id}");

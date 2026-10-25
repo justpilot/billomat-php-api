@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Country;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für die Länderliste.
@@ -18,6 +19,7 @@ final class CountriesApi extends AbstractApi
     /**
      * @return list<Country>
      */
+    #[NoDiscard]
     public function list(): array
     {
         return $this->listResource('/countries', 'countries', 'country', Country::fromArray(...));
@@ -34,6 +36,7 @@ final class CountriesApi extends AbstractApi
      *
      * @return Page<Country>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/countries', 'countries', 'country', Country::fromArray(...), $filters);
@@ -51,6 +54,7 @@ final class CountriesApi extends AbstractApi
      *
      * @return Generator<int, Country>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/countries', 'countries', 'country', Country::fromArray(...), $filters, $pageSize);

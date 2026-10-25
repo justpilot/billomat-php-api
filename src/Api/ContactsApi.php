@@ -8,6 +8,7 @@ use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Contact;
+use NoDiscard;
 
 /**
  * API-Wrapper für Kunden-Ansprechpartner (Contacts).
@@ -30,6 +31,7 @@ final class ContactsApi extends AbstractApi
      *
      * @return list<Contact>
      */
+    #[NoDiscard]
     public function listByClient(int $clientId, array $query = []): array
     {
         $params = array_merge(['client_id' => $clientId], $query);
@@ -37,6 +39,7 @@ final class ContactsApi extends AbstractApi
         return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $params);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Contact
     {
         $data = $this->getJsonOrNull("/contacts/{$id}");

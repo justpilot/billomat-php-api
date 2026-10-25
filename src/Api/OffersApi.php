@@ -12,6 +12,7 @@ use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferPdf;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -44,6 +45,7 @@ final class OffersApi extends AbstractApi
      *
      * @return list<Offer>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/offers', 'offers', 'offer', Offer::fromArray(...), $filters);
@@ -60,6 +62,7 @@ final class OffersApi extends AbstractApi
      *
      * @return Page<Offer>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/offers', 'offers', 'offer', Offer::fromArray(...), $filters);
@@ -77,6 +80,7 @@ final class OffersApi extends AbstractApi
      *
      * @return Generator<int, Offer>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/offers', 'offers', 'offer', Offer::fromArray(...), $filters, $pageSize);
@@ -85,6 +89,7 @@ final class OffersApi extends AbstractApi
     /**
      * Holt ein einzelnes Angebot, oder null wenn nicht gefunden.
      */
+    #[NoDiscard]
     public function get(int $id): ?Offer
     {
         $data = $this->getJsonOrNull("/offers/{$id}");
@@ -231,6 +236,7 @@ final class OffersApi extends AbstractApi
      *
      * @return OfferPdf|string OfferPdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
      */
+    #[NoDiscard]
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): OfferPdf|string
     {
         $query = [];

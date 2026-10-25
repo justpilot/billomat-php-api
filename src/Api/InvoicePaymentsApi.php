@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InvoicePayment;
+use NoDiscard;
 
 /**
  * API-Wrapper für Rechnungszahlungen (Invoice Payments).
@@ -33,6 +34,7 @@ final class InvoicePaymentsApi extends AbstractApi
      *
      * @return list<InvoicePayment>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/invoice-payments', 'invoice-payments', 'invoice-payment', InvoicePayment::fromArray(...), $filters);
@@ -41,6 +43,7 @@ final class InvoicePaymentsApi extends AbstractApi
     /**
      * Holt eine einzelne Zahlung.
      */
+    #[NoDiscard]
     public function get(int $id): ?InvoicePayment
     {
         $data = $this->getJsonOrNull("/invoice-payments/{$id}");

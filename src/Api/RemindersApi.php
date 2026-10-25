@@ -12,6 +12,7 @@ use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderPdf;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -38,6 +39,7 @@ final class RemindersApi extends AbstractApi
      *
      * @return list<Reminder>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
@@ -54,6 +56,7 @@ final class RemindersApi extends AbstractApi
      *
      * @return Page<Reminder>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
@@ -71,11 +74,13 @@ final class RemindersApi extends AbstractApi
      *
      * @return Generator<int, Reminder>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Reminder
     {
         $data = $this->getJsonOrNull("/reminders/{$id}");
@@ -166,6 +171,7 @@ final class RemindersApi extends AbstractApi
     /**
      * @return ReminderPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
+    #[NoDiscard]
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ReminderPdf|string
     {
         $query = [];

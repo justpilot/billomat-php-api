@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Rechnungs-Schlagworte (Invoice Tags).
@@ -28,6 +29,7 @@ final class InvoiceTagsApi extends AbstractApi
      *
      * @return list<InvoiceTag>
      */
+    #[NoDiscard]
     public function listByInvoice(int $invoiceId): array
     {
         return $this->listResource('/invoice-tags', 'invoice-tags', 'invoice-tag', InvoiceTag::fromArray(...), ['invoice_id' => $invoiceId]);
@@ -40,11 +42,13 @@ final class InvoiceTagsApi extends AbstractApi
      *
      * @return list<InvoiceTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/invoice-tags', 'invoice-tags', 'tag', InvoiceTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?InvoiceTag
     {
         $data = $this->getJsonOrNull("/invoice-tags/{$id}");

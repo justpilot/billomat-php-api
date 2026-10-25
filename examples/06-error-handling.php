@@ -53,7 +53,7 @@ $brokenBillomat = BillomatClient::create(
 );
 
 try {
-    $brokenBillomat->clients->list(['per_page' => 1]);
+    (void) $brokenBillomat->clients->list(['per_page' => 1]);
     echo "3) Auth-Fehler erwartet, aber kein Fehler geflogen.\n";
 } catch (AuthenticationException $e) {
     printf("3) AuthenticationException %d — wie erwartet.\n", $e->getStatusCode());

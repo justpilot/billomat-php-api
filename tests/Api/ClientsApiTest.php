@@ -601,7 +601,7 @@ final class ClientsApiTest extends TestCase
         $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
         $api = new ClientsApi($http);
 
-        $api->avatar(7);
+        (void) $api->avatar(7);
 
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/7/avatar',

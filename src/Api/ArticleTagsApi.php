@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\ArticleTag;
 use Justpilot\Billomat\Model\ArticleTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Article-Tags.
@@ -15,6 +16,7 @@ final class ArticleTagsApi extends AbstractApi
     /**
      * @return list<ArticleTag>
      */
+    #[NoDiscard]
     public function listByArticle(int $articleId): array
     {
         return $this->listResource('/article-tags', 'article-tags', 'article-tag', ArticleTag::fromArray(...), ['article_id' => $articleId]);
@@ -23,11 +25,13 @@ final class ArticleTagsApi extends AbstractApi
     /**
      * @return list<ArticleTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/article-tags', 'article-tags', 'tag', ArticleTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?ArticleTag
     {
         $data = $this->getJsonOrNull("/article-tags/{$id}");

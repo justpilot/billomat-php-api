@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\OfferComment;
+use NoDiscard;
 
 /**
  * API-Wrapper für Angebotskommentare (Offer Comments).
@@ -25,6 +26,7 @@ final class OfferCommentsApi extends AbstractApi
      *
      * @return list<OfferComment>
      */
+    #[NoDiscard]
     public function listByOffer(int $offerId, ?array $actionKeys = null): array
     {
         $query = ['offer_id' => $offerId];
@@ -39,6 +41,7 @@ final class OfferCommentsApi extends AbstractApi
         return $this->listResource('/offer-comments', 'offer-comments', 'offer-comment', OfferComment::fromArray(...), $query);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?OfferComment
     {
         $data = $this->getJsonOrNull("/offer-comments/{$id}");

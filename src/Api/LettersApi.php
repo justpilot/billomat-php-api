@@ -12,6 +12,7 @@ use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterPdf;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -41,6 +42,7 @@ final class LettersApi extends AbstractApi
      *
      * @return list<Letter>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/letters', 'letters', 'letter', Letter::fromArray(...), $filters);
@@ -57,6 +59,7 @@ final class LettersApi extends AbstractApi
      *
      * @return Page<Letter>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/letters', 'letters', 'letter', Letter::fromArray(...), $filters);
@@ -74,11 +77,13 @@ final class LettersApi extends AbstractApi
      *
      * @return Generator<int, Letter>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/letters', 'letters', 'letter', Letter::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Letter
     {
         $data = $this->getJsonOrNull("/letters/{$id}");
@@ -198,6 +203,7 @@ final class LettersApi extends AbstractApi
     /**
      * @return LetterPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
      */
+    #[NoDiscard]
     public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): LetterPdf|string
     {
         $query = [];

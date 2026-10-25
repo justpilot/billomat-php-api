@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\IncomingTag;
 use Justpilot\Billomat\Model\IncomingTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Incoming-Tags.
@@ -15,6 +16,7 @@ final class IncomingTagsApi extends AbstractApi
     /**
      * @return list<IncomingTag>
      */
+    #[NoDiscard]
     public function listByIncoming(int $incomingId): array
     {
         return $this->listResource('/incoming-tags', 'incoming-tags', 'incoming-tag', IncomingTag::fromArray(...), ['incoming_id' => $incomingId]);
@@ -23,11 +25,13 @@ final class IncomingTagsApi extends AbstractApi
     /**
      * @return list<IncomingTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/incoming-tags', 'incoming-tags', 'tag', IncomingTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?IncomingTag
     {
         $data = $this->getJsonOrNull("/incoming-tags/{$id}");

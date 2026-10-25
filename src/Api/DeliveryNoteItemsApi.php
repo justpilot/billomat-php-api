@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\DeliveryNoteItem;
+use NoDiscard;
 
 /**
  * API-Wrapper für Delivery-Note-Items.
@@ -18,6 +19,7 @@ final class DeliveryNoteItemsApi extends AbstractApi
      *
      * @return list<DeliveryNoteItem>
      */
+    #[NoDiscard]
     public function listByDeliveryNote(int $deliveryNoteId, array $query = []): array
     {
         $params = array_merge(['delivery_note_id' => $deliveryNoteId], $query);
@@ -25,6 +27,7 @@ final class DeliveryNoteItemsApi extends AbstractApi
         return $this->listResource('/delivery-note-items', 'delivery-note-items', 'delivery-note-item', DeliveryNoteItem::fromArray(...), $params);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?DeliveryNoteItem
     {
         $data = $this->getJsonOrNull("/delivery-note-items/{$id}");

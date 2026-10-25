@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Unit;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Einheiten.
@@ -18,6 +19,7 @@ final class UnitsApi extends AbstractApi
      *
      * @return list<Unit>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         $data = $this->getJson('/units', $filters);
@@ -53,6 +55,7 @@ final class UnitsApi extends AbstractApi
      *
      * @return Page<Unit>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/units', 'units', 'unit', Unit::fromArray(...), $filters);
@@ -70,11 +73,13 @@ final class UnitsApi extends AbstractApi
      *
      * @return Generator<int, Unit>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/units', 'units', 'unit', Unit::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Unit
     {
         $data = $this->getJsonOrNull("/units/{$id}");

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\DeliveryNoteTag;
 use Justpilot\Billomat\Model\DeliveryNoteTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Delivery-Note-Tags.
@@ -15,6 +16,7 @@ final class DeliveryNoteTagsApi extends AbstractApi
     /**
      * @return list<DeliveryNoteTag>
      */
+    #[NoDiscard]
     public function listByDeliveryNote(int $deliveryNoteId): array
     {
         return $this->listResource('/delivery-note-tags', 'delivery-note-tags', 'delivery-note-tag', DeliveryNoteTag::fromArray(...), ['delivery_note_id' => $deliveryNoteId]);
@@ -23,11 +25,13 @@ final class DeliveryNoteTagsApi extends AbstractApi
     /**
      * @return list<DeliveryNoteTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/delivery-note-tags', 'delivery-note-tags', 'tag', DeliveryNoteTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?DeliveryNoteTag
     {
         $data = $this->getJsonOrNull("/delivery-note-tags/{$id}");

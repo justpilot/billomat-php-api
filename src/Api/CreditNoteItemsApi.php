@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\CreditNoteItem;
+use NoDiscard;
 
 /**
  * API-Wrapper für Credit-Note-Items.
@@ -16,6 +17,7 @@ final class CreditNoteItemsApi extends AbstractApi
      *
      * @return list<CreditNoteItem>
      */
+    #[NoDiscard]
     public function listByCreditNote(int $creditNoteId, array $query = []): array
     {
         $params = array_merge(['credit_note_id' => $creditNoteId], $query);
@@ -23,6 +25,7 @@ final class CreditNoteItemsApi extends AbstractApi
         return $this->listResource('/credit-note-items', 'credit-note-items', 'credit-note-item', CreditNoteItem::fromArray(...), $params);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?CreditNoteItem
     {
         $data = $this->getJsonOrNull("/credit-note-items/{$id}");

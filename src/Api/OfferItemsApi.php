@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\OfferItem;
+use NoDiscard;
 
 /**
  * API-Wrapper für Angebotspositionen (Offer Items).
@@ -25,6 +26,7 @@ final class OfferItemsApi extends AbstractApi
      *
      * @return list<OfferItem>
      */
+    #[NoDiscard]
     public function listByOffer(int $offerId, array $query = []): array
     {
         $params = array_merge(['offer_id' => $offerId], $query);
@@ -32,6 +34,7 @@ final class OfferItemsApi extends AbstractApi
         return $this->listResource('/offer-items', 'offer-items', 'offer-item', OfferItem::fromArray(...), $params);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?OfferItem
     {
         $data = $this->getJsonOrNull("/offer-items/{$id}");

@@ -8,6 +8,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Changed
 - **BC break: PHP 8.5 is now the minimum version** (`"php": "^8.5"`). CI runs on PHP 8.5 (required) and 8.6 (experimental); Rector uses the PHP 8.5 rule set.
+- **Read-only API methods are marked `#[\NoDiscard]`:** `get()`, `getMyself()`, `list()`, `listPage()`, `listBy*()`, `listGrouped()`, `iterateAll()`, `cloud()`, `pdf()`, `thumb()`, `avatar()` and `SearchApi::query()`. PHP 8.5 emits a warning when their result is ignored; cast to `(void)` to discard it on purpose. Write methods (`create()`, `update()`, `delete()`, …) are not marked.
+- **BC break: `BillomatConfig` validates its input.** The Billomat ID must be a valid subdomain (letters, digits, inner hyphens, at most 63 characters), and the base URI is parsed with PHP 8.5's `Uri\Rfc3986\Uri` and must be absolute. Otherwise the constructor throws an `InvalidArgumentException`, instead of sending requests to a wrong host.
 
 ### Removed
 - **BC break: everything marked `@deprecated since 3.1` is gone.**

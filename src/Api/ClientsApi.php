@@ -11,6 +11,7 @@ use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
@@ -27,6 +28,7 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
  */
 final class ClientsApi extends AbstractApi
 {
+    #[NoDiscard]
     public function getMyself(): Client
     {
         $data = $this->getJson('/clients/myself');
@@ -43,6 +45,7 @@ final class ClientsApi extends AbstractApi
      *
      * @return list<Client>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/clients', 'clients', 'client', Client::fromArray(...), $filters);
@@ -59,6 +62,7 @@ final class ClientsApi extends AbstractApi
      *
      * @return Page<Client>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/clients', 'clients', 'client', Client::fromArray(...), $filters);
@@ -76,6 +80,7 @@ final class ClientsApi extends AbstractApi
      *
      * @return Generator<int, Client>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/clients', 'clients', 'client', Client::fromArray(...), $filters, $pageSize);
@@ -86,6 +91,7 @@ final class ClientsApi extends AbstractApi
      *
      * Entspricht GET /clients/{id}
      */
+    #[NoDiscard]
     public function get(int $id): ?Client
     {
         $data = $this->getJsonOrNull("/clients/{$id}");
@@ -189,6 +195,7 @@ final class ClientsApi extends AbstractApi
      *
      * @param int|null $size optionale Kantenlänge in Pixel
      */
+    #[NoDiscard]
     public function avatar(int $id, ?int $size = null): string
     {
         $query = null !== $size ? ['size' => $size] : [];

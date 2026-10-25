@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
+use NoDiscard;
 
 /**
  * API-Wrapper für Credit-Note-Comments.
@@ -17,6 +18,7 @@ final class CreditNoteCommentsApi extends AbstractApi
      *
      * @return list<CreditNoteComment>
      */
+    #[NoDiscard]
     public function listByCreditNote(int $creditNoteId, ?array $actionKeys = null): array
     {
         $query = ['credit_note_id' => $creditNoteId];
@@ -31,6 +33,7 @@ final class CreditNoteCommentsApi extends AbstractApi
         return $this->listResource('/credit-note-comments', 'credit-note-comments', 'credit-note-comment', CreditNoteComment::fromArray(...), $query);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?CreditNoteComment
     {
         $data = $this->getJsonOrNull("/credit-note-comments/{$id}");

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\LetterTag;
 use Justpilot\Billomat\Model\LetterTagCloudEntry;
+use NoDiscard;
 
 /**
  * API-Wrapper für Letter-Tags.
@@ -15,6 +16,7 @@ final class LetterTagsApi extends AbstractApi
     /**
      * @return list<LetterTag>
      */
+    #[NoDiscard]
     public function listByLetter(int $letterId): array
     {
         return $this->listResource('/letter-tags', 'letter-tags', 'letter-tag', LetterTag::fromArray(...), ['letter_id' => $letterId]);
@@ -23,11 +25,13 @@ final class LetterTagsApi extends AbstractApi
     /**
      * @return list<LetterTagCloudEntry>
      */
+    #[NoDiscard]
     public function cloud(): array
     {
         return $this->listResource('/letter-tags', 'letter-tags', 'tag', LetterTagCloudEntry::fromArray(...));
     }
 
+    #[NoDiscard]
     public function get(int $id): ?LetterTag
     {
         $data = $this->getJsonOrNull("/letter-tags/{$id}");

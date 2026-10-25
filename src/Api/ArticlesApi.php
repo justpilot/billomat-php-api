@@ -10,6 +10,7 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Articles-Ressource (Artikel).
@@ -30,6 +31,7 @@ final class ArticlesApi extends AbstractApi
      *
      * @return list<Article>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/articles', 'articles', 'article', Article::fromArray(...), $filters);
@@ -46,6 +48,7 @@ final class ArticlesApi extends AbstractApi
      *
      * @return Page<Article>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/articles', 'articles', 'article', Article::fromArray(...), $filters);
@@ -63,11 +66,13 @@ final class ArticlesApi extends AbstractApi
      *
      * @return Generator<int, Article>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/articles', 'articles', 'article', Article::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Article
     {
         $data = $this->getJsonOrNull("/articles/{$id}");

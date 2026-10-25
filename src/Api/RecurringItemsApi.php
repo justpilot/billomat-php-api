@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\RecurringItem;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Positionen einer Abo-Rechnung.
@@ -25,6 +26,7 @@ final class RecurringItemsApi extends AbstractApi
      *
      * @return list<RecurringItem>
      */
+    #[NoDiscard]
     public function listByRecurring(int $recurringId, array $query = []): array
     {
         $params = array_merge(['recurring_id' => $recurringId], $query);
@@ -32,6 +34,7 @@ final class RecurringItemsApi extends AbstractApi
         return $this->listResource('/recurring-items', 'recurring-items', 'recurring-item', RecurringItem::fromArray(...), $params);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?RecurringItem
     {
         $data = $this->getJsonOrNull("/recurring-items/{$id}");

@@ -6,6 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [4.0.0-alpha.1] - 2026-10-25
+
+First pre-release of 4.0. The public API may still change before 4.0.0.
+
 See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 
 ### Added

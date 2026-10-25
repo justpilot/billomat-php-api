@@ -173,8 +173,8 @@ Spiegelt `SupplierCreateOptions` exakt, jedoch ist `name` nicht mehr Pflicht und
 | `locale` | `?string` |
 | `creditorAccountNumber` | `?string` |
 | `creditorIdentifier` | `?string` |
-| `costsGross` | `?float` |
-| `costsNet` | `?float` |
+| `costsGross` | `?Money` |
+| `costsNet` | `?Money` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
 ## Supplier Tags

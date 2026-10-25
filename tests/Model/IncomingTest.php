@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Incoming::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(IncomingStatus::class)]
+#[UsesClass(Money::class)]
 final class IncomingTest extends TestCase
 {
     #[Test]
@@ -51,8 +53,8 @@ final class IncomingTest extends TestCase
         self::assertInstanceOf(DateTimeImmutable::class, $incoming->dueDate);
         self::assertSame(IncomingStatus::PAID, $incoming->status);
         self::assertSame('ER-2025-0050', $incoming->incomingNumber);
-        self::assertSame(119.0, $incoming->totalGross);
-        self::assertSame(0.0, $incoming->openAmount);
+        self::assertSame('119', $incoming->totalGross?->toString());
+        self::assertSame('0', $incoming->openAmount?->toString());
     }
 
     #[Test]

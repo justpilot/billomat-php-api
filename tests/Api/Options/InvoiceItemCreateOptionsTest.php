@@ -6,23 +6,26 @@ namespace Justpilot\Billomat\Tests\Api\Options;
 
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoiceItemCreateOptions::class)]
+#[UsesClass(Money::class)]
 final class InvoiceItemCreateOptionsTest extends TestCase
 {
     #[Test]
     public function minimalPayloadAlwaysKeepsQuantityAndUnitPrice(): void
     {
         // quantity/unit_price dürfen nie ausgefiltert werden — selbst bei 0
-        $options = new InvoiceItemCreateOptions(quantity: 0.0, unitPrice: 0.0);
+        $options = new InvoiceItemCreateOptions(quantity: 0.0, unitPrice: Money::of('0'));
 
         $payload = $options->toArray();
 
         self::assertSame(0.0, $payload['quantity']);
-        self::assertSame(0.0, $payload['unit_price']);
+        self::assertSame('0', $payload['unit_price']);
         self::assertArrayNotHasKey('type', $payload);
         self::assertArrayNotHasKey('article_id', $payload);
     }
@@ -32,7 +35,7 @@ final class InvoiceItemCreateOptionsTest extends TestCase
     {
         $options = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: 10.0,
+            unitPrice: Money::of('10'),
             type: InvoiceItemType::PRODUCT,
         );
 
@@ -46,7 +49,7 @@ final class InvoiceItemCreateOptionsTest extends TestCase
     {
         $options = new InvoiceItemCreateOptions(
             quantity: 2.0,
-            unitPrice: 5.5,
+            unitPrice: Money::of('5.5'),
             position: 3,
             title: 'Beratung',
         );
@@ -54,7 +57,7 @@ final class InvoiceItemCreateOptionsTest extends TestCase
         $payload = $options->toArray();
 
         self::assertSame(
-            ['title' => 'Beratung', 'quantity' => 2.0, 'unit_price' => 5.5, 'position' => 3],
+            ['title' => 'Beratung', 'quantity' => 2.0, 'unit_price' => '5.5', 'position' => 3],
             $payload
         );
     }
@@ -64,7 +67,7 @@ final class InvoiceItemCreateOptionsTest extends TestCase
     {
         $options = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: 99.0,
+            unitPrice: Money::of('99'),
             articleId: 7,
             position: 1,
             unit: 'Stunde',

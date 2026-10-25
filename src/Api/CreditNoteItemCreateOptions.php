@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 
 /**
  * Typisierter Payload für POST /credit-note-items gemäß Billomat-API
@@ -36,7 +37,7 @@ final readonly class CreditNoteItemCreateOptions implements WriteOptions
          * Typ: FLOAT
          * Default: 0.0
          */
-        public float $unitPrice,
+        public Money $unitPrice,
         /**
          * ID des Artikels (falls verknüpft).
          *
@@ -120,7 +121,7 @@ final readonly class CreditNoteItemCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `unitPrice`. */
-    public function withUnitPrice(float $unitPrice): self
+    public function withUnitPrice(Money $unitPrice): self
     {
         return clone($this, ['unitPrice' => $unitPrice]);
     }
@@ -198,7 +199,7 @@ final readonly class CreditNoteItemCreateOptions implements WriteOptions
             'title' => $this->title,
             'description' => $this->description,
             'quantity' => $this->quantity,
-            'unit_price' => $this->unitPrice,
+            'unit_price' => $this->unitPrice->toString(),
             'unit' => $this->unit,
             'tax_name' => $this->taxName,
             'tax_rate' => $this->taxRate,

@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\IncomingPayment;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -34,6 +35,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(Money::class)]
 final class IncomingPaymentsApiTest extends TestCase
 {
     #[Test]
@@ -47,7 +49,7 @@ final class IncomingPaymentsApiTest extends TestCase
             $body = json_encode([
                 'incoming-payments' => [
                     'incoming-payment' => [
-                        ['id' => 1, 'incoming_id' => 42, 'amount' => 100.0, 'type' => 'BANK_TRANSFER'],
+                        ['id' => 1, 'incoming_id' => 42, 'amount' => '100', 'type' => 'BANK_TRANSFER'],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -74,7 +76,7 @@ final class IncomingPaymentsApiTest extends TestCase
             $captured = ['method' => $method, 'options' => $options];
 
             $body = json_encode([
-                'incoming-payment' => ['id' => 99, 'incoming_id' => 42, 'amount' => 100.0],
+                'incoming-payment' => ['id' => 99, 'incoming_id' => 42, 'amount' => '100'],
             ], JSON_THROW_ON_ERROR);
 
             return new MockResponse($body, ['http_code' => 201]);
@@ -85,7 +87,7 @@ final class IncomingPaymentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->payments;
 
-        $opts = new IncomingPaymentCreateOptions(incomingId: 42, amount: 100.0, markIncomingAsPaid: true);
+        $opts = new IncomingPaymentCreateOptions(incomingId: 42, amount: Money::of('100'), markIncomingAsPaid: true);
 
         $created = $api->create($opts);
         self::assertSame(99, $created->id);

@@ -13,6 +13,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNoteItem;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -32,6 +33,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class CreditNoteItemsApiTest extends TestCase
 {
     #[Test]
@@ -86,7 +88,7 @@ final class CreditNoteItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new CreditNoteItemCreateOptions(quantity: 2.0, unitPrice: 50.0);
+        $opts = new CreditNoteItemCreateOptions(quantity: 2.0, unitPrice: Money::of('50'));
         self::assertSame(77, $api->create(123, $opts)->id);
         self::assertSame(77, $api->update(77, $opts)->id);
         $api->delete(77);

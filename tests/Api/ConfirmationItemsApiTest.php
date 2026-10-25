@@ -14,6 +14,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ConfirmationItem;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -33,6 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ConfirmationItemsApiTest extends TestCase
 {
     #[Test]
@@ -86,7 +88,7 @@ final class ConfirmationItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: 50.0, title: 'Neu');
+        $opts = new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: Money::of('50'), title: 'Neu');
 
         $created = $api->create(123, $opts);
 
@@ -115,7 +117,7 @@ final class ConfirmationItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new ConfirmationItemCreateOptions(quantity: 3.0, unitPrice: 75.0);
+        $opts = new ConfirmationItemCreateOptions(quantity: 3.0, unitPrice: Money::of('75'));
         self::assertSame(77, $api->update(77, $opts)->id);
         self::assertSame('PUT', $captured['method']);
         self::assertSame('https://mycompany.billomat.net/api/confirmation-items/77', $captured['url']);

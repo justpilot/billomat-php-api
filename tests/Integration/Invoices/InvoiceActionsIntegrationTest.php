@@ -12,6 +12,7 @@ use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -65,7 +66,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Testposition Action',

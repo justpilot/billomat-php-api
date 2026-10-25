@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 
 /**
  * Typisierter Payload für POST /invoice-payments gemäß Billomat-API.
@@ -35,7 +36,7 @@ final readonly class InvoicePaymentCreateOptions implements WriteOptions
          * Billomat-Feld: amount
          * Typ: FLOAT
          */
-        public float $amount,
+        public Money $amount,
         /**
          * Zahlungsdatum.
          *
@@ -84,7 +85,7 @@ final readonly class InvoicePaymentCreateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `amount`. */
-    public function withAmount(float $amount): self
+    public function withAmount(Money $amount): self
     {
         return clone($this, ['amount' => $amount]);
     }
@@ -128,7 +129,7 @@ final readonly class InvoicePaymentCreateOptions implements WriteOptions
     {
         return array_filter([
             'invoice_id' => $this->invoiceId,
-            'amount' => $this->amount,
+            'amount' => $this->amount->toString(),
             'date' => $this->date?->format('Y-m-d'),
             'comment' => $this->comment,
             'transaction_purpose' => $this->transactionPurpose,

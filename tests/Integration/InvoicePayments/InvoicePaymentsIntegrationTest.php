@@ -12,6 +12,7 @@ use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -55,7 +56,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 200),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 200)),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Zahlungstest-Position',
@@ -78,7 +79,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
         self::assertNotSame(InvoiceStatus::DRAFT, $completed->status);
 
         // 4) Zahlung anlegen (voller Rechnungsbetrag, mark_invoice_as_paid = true)
-        $amount = $completed->totalGross ?? $completed->totalNet ?? 10.0;
+        $amount = $completed->totalGross ?? $completed->totalNet ?? Money::of('10');
 
         $paymentOpts = new InvoicePaymentCreateOptions(
             invoiceId: $invoiceId,
@@ -94,7 +95,7 @@ final class InvoicePaymentsIntegrationTest extends AbstractBillomatIntegrationTe
 
         self::assertNotNull($payment->id);
         self::assertSame($invoiceId, $payment->invoiceId);
-        self::assertSame($amount, $payment->amount);
+        self::assertTrue($amount->equals($payment->amount));
 
         // 5) Rechnung erneut laden und sicherstellen, dass sie als bezahlt gilt
         $paidInvoice = $billomat->invoices->get($invoiceId);

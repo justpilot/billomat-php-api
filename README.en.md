@@ -67,6 +67,7 @@ use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -74,7 +75,7 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Create a draft invoice
-$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.00, title: 'Conception');
+$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: Money::of('95.00'), title: 'Conception');
 
 $options = new InvoiceCreateOptions(clientId: 12345, title: 'Web development May 2026', items: [$item]);
 
@@ -98,6 +99,7 @@ Full runnable examples live under [examples/](examples/).
 - One `*Api` class per Billomat resource with consistent verbs (`list`, `get`, `create`, `update`, `delete`) plus resource-specific actions (`complete`, `cancel`, `pdf`, `thumb`, …).
 - Auto-pagination via an `iterateAll()` generator and `listPage()` with metadata.
 - Typed list filters (`InvoiceFilter`, `ClientFilter`, …) with enums, `DateTimeImmutable` and `OrderBy`; plain arrays still work.
+- Monetary amounts as an exact `Money` value object (BcMath, decimal strings just like Billomat) instead of `float` — no rounding errors, with comparison, sums and locale-style formatting; see [docs/concepts/money.md](docs/concepts/money.md) (German).
 - Structured exception hierarchy with mapping to HTTP status codes (401/403, 404, 400/422, 429) and a dedicated `TransportException` for network failures.
 
 ## Resources
@@ -152,7 +154,7 @@ Every resource is reachable as a `public readonly` property on `BillomatClient`.
 
 ### Concepts
 
-Deeper topics live under [docs/concepts/](docs/concepts/): [authentication](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API security](docs/concepts/api-security.md), [pagination & filtering](docs/concepts/pagination-and-filtering.md), [custom meta attributes](docs/concepts/custom-meta-attributes.md), [errors & rate limits](docs/concepts/errors-and-rate-limits.md), and [webhooks](docs/concepts/webhooks.md) (UI-only — Billomat has no REST endpoint for webhook subscriptions, so the SDK does not expose one either).
+Deeper topics live under [docs/concepts/](docs/concepts/): [authentication](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API security](docs/concepts/api-security.md), [pagination & filtering](docs/concepts/pagination-and-filtering.md), [custom meta attributes](docs/concepts/custom-meta-attributes.md), [errors & rate limits](docs/concepts/errors-and-rate-limits.md), [money amounts](docs/concepts/money.md) (`Money`), and [webhooks](docs/concepts/webhooks.md) (UI-only — Billomat has no REST endpoint for webhook subscriptions, so the SDK does not expose one either).
 
 ## Configuration
 

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Enum\ArticleType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Money;
 
 /**
  * Typisierter Payload für PUT /articles/{id} gemäß Billomat-API.
@@ -62,7 +63,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
          * Billomat-Feld: sales_price
          * Typ: FLOAT
          */
-        public float|Clear|null $salesPrice = null,
+        public Money|Clear|null $salesPrice = null,
         /**
          * Währung (ISO-Währungscode).
          *
@@ -80,7 +81,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
          * Billomat-Feld: sales_price2
          * Typ: FLOAT
          */
-        public float|Clear|null $salesPrice2 = null,
+        public Money|Clear|null $salesPrice2 = null,
         /**
          * Preis für Kunden der Preisgruppe 3.
          *
@@ -89,7 +90,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
          * Billomat-Feld: sales_price3
          * Typ: FLOAT
          */
-        public float|Clear|null $salesPrice3 = null,
+        public Money|Clear|null $salesPrice3 = null,
         /**
          * Preis für Kunden der Preisgruppe 4.
          *
@@ -98,7 +99,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
          * Billomat-Feld: sales_price4
          * Typ: FLOAT
          */
-        public float|Clear|null $salesPrice4 = null,
+        public Money|Clear|null $salesPrice4 = null,
         /**
          * Preis für Kunden der Preisgruppe 5.
          *
@@ -107,7 +108,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
          * Billomat-Feld: sales_price5
          * Typ: FLOAT
          */
-        public float|Clear|null $salesPrice5 = null,
+        public Money|Clear|null $salesPrice5 = null,
         /**
          * Bezeichnung der Einheit.
          *
@@ -129,7 +130,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
          * Billomat-Feld: purchase_price
          * Typ: FLOAT
          */
-        public float|Clear|null $purchasePrice = null,
+        public Money|Clear|null $purchasePrice = null,
         /**
          * Währung des Einkaufspreises (ISO-Währungscode).
          *
@@ -204,7 +205,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `salesPrice`. */
-    public function withSalesPrice(float|Clear|null $salesPrice): self
+    public function withSalesPrice(Money|Clear|null $salesPrice): self
     {
         return clone($this, ['salesPrice' => $salesPrice]);
     }
@@ -216,25 +217,25 @@ final readonly class ArticleUpdateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `salesPrice2`. */
-    public function withSalesPrice2(float|Clear|null $salesPrice2): self
+    public function withSalesPrice2(Money|Clear|null $salesPrice2): self
     {
         return clone($this, ['salesPrice2' => $salesPrice2]);
     }
 
     /** Kopie mit geändertem `salesPrice3`. */
-    public function withSalesPrice3(float|Clear|null $salesPrice3): self
+    public function withSalesPrice3(Money|Clear|null $salesPrice3): self
     {
         return clone($this, ['salesPrice3' => $salesPrice3]);
     }
 
     /** Kopie mit geändertem `salesPrice4`. */
-    public function withSalesPrice4(float|Clear|null $salesPrice4): self
+    public function withSalesPrice4(Money|Clear|null $salesPrice4): self
     {
         return clone($this, ['salesPrice4' => $salesPrice4]);
     }
 
     /** Kopie mit geändertem `salesPrice5`. */
-    public function withSalesPrice5(float|Clear|null $salesPrice5): self
+    public function withSalesPrice5(Money|Clear|null $salesPrice5): self
     {
         return clone($this, ['salesPrice5' => $salesPrice5]);
     }
@@ -252,7 +253,7 @@ final readonly class ArticleUpdateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `purchasePrice`. */
-    public function withPurchasePrice(float|Clear|null $purchasePrice): self
+    public function withPurchasePrice(Money|Clear|null $purchasePrice): self
     {
         return clone($this, ['purchasePrice' => $purchasePrice]);
     }
@@ -310,15 +311,15 @@ final readonly class ArticleUpdateOptions implements WriteOptions
                 'number_length' => $this->numberLength,
                 'title' => $this->title,
                 'description' => $this->description,
-                'sales_price' => $this->salesPrice,
+                'sales_price' => $this->salesPrice instanceof Money ? $this->salesPrice->toString() : $this->salesPrice,
                 'currency_code' => $this->currencyCode,
-                'sales_price2' => $this->salesPrice2,
-                'sales_price3' => $this->salesPrice3,
-                'sales_price4' => $this->salesPrice4,
-                'sales_price5' => $this->salesPrice5,
+                'sales_price2' => $this->salesPrice2 instanceof Money ? $this->salesPrice2->toString() : $this->salesPrice2,
+                'sales_price3' => $this->salesPrice3 instanceof Money ? $this->salesPrice3->toString() : $this->salesPrice3,
+                'sales_price4' => $this->salesPrice4 instanceof Money ? $this->salesPrice4->toString() : $this->salesPrice4,
+                'sales_price5' => $this->salesPrice5 instanceof Money ? $this->salesPrice5->toString() : $this->salesPrice5,
                 'unit' => $this->unit,
                 'unit_id' => $this->unitId,
-                'purchase_price' => $this->purchasePrice,
+                'purchase_price' => $this->purchasePrice instanceof Money ? $this->purchasePrice->toString() : $this->purchasePrice,
                 'purchase_price_currency_code' => $this->purchasePriceCurrencyCode,
                 'supplier_id' => $this->supplierId,
                 'tax_id' => $this->taxId,

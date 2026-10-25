@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Internal;
 
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -14,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ListCasterTest extends TestCase
 {
     /**
@@ -45,14 +47,14 @@ final class ListCasterTest extends TestCase
     #[Test]
     public function toTaxListCastsTaxRows(): void
     {
-        self::assertSame(
-            [['name' => 'MwSt', 'rate' => 19.0, 'amount' => 1.9]],
-            ListCaster::toTaxList(['name' => 'MwSt', 'rate' => '19', 'amount' => '1.9']),
-        );
+        $taxes = ListCaster::toTaxList(['name' => 'MwSt', 'rate' => '19', 'amount' => '1.9']);
+        self::assertCount(1, $taxes);
+        self::assertSame(['MwSt', 19.0, '1.9'], [$taxes[0]['name'], $taxes[0]['rate'], $taxes[0]['amount']->toString()]);
 
+        $taxes = ListCaster::toTaxList([[], ['name' => 7, 'rate' => 7, 'amount' => '']]);
         self::assertSame(
-            [['name' => '', 'rate' => 0.0, 'amount' => 0.0], ['name' => '7', 'rate' => 7.0, 'amount' => 0.0]],
-            ListCaster::toTaxList([[], ['name' => 7, 'rate' => 7, 'amount' => '']]),
+            [['', 0.0, '0'], ['7', 7.0, '0']],
+            array_map(static fn (array $tax): array => [$tax['name'], $tax['rate'], $tax['amount']->toString()], $taxes),
         );
     }
 }

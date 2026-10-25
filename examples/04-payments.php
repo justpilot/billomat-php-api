@@ -16,6 +16,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
@@ -36,7 +37,7 @@ $billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
 try {
     // Zahlung anlegen
     $opts = new InvoicePaymentCreateOptions(
-        invoiceId: $invoiceId, amount: 1.00,
+        invoiceId: $invoiceId, amount: Money::of('1'),
         date: new DateTimeImmutable('today'),
         type: InvoicePaymentType::BANK_TRANSFER,
         comment: 'Test-Zahlung aus examples/04-payments.php',

@@ -27,7 +27,7 @@ use const DATE_ATOM;
 final readonly class Offer
 {
     /**
-     * @param list<array{name: string, rate: float, amount: float}> $taxes
+     * @param list<array{name: string, rate: float, amount: Money}> $taxes
      * @param list<OfferItem>                                       $items
      */
     public function __construct(
@@ -64,17 +64,17 @@ final readonly class Offer
         /** Anmerkungstext. */
         public ?string $note = null,
         /** Gesamtbetrag brutto. */
-        public ?float $totalGross = null,
+        public ?Money $totalGross = null,
         /** Gesamtbetrag netto. */
-        public ?float $totalNet = null,
+        public ?Money $totalNet = null,
         /** Preisbasis (Brutto- oder Netto-Preise). */
         public ?NetGross $netGross = null,
         /** Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction = null,
         /** Gesamtbetrag brutto vor Rabatt. */
-        public ?float $totalGrossUnreduced = null,
+        public ?Money $totalGrossUnreduced = null,
         /** Gesamtbetrag netto vor Rabatt. */
-        public ?float $totalNetUnreduced = null,
+        public ?Money $totalNetUnreduced = null,
         /** Währung (ISO-Währungscode). */
         public ?string $currencyCode = null,
         /** Währungskurs (für Umrechnung in die Standard-Währung). */
@@ -98,7 +98,7 @@ final readonly class Offer
          */
         public ?DateTimeImmutable $validityDate = null,
         /** Summe der Rabatte. */
-        public ?float $totalReduction = null,
+        public ?Money $totalReduction = null,
     ) {
     }
 
@@ -126,12 +126,12 @@ final readonly class Offer
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
-            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
-            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
+            totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
@@ -141,7 +141,7 @@ final readonly class Offer
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             validityDate: ScalarCaster::toDateTimeOrNull($data['validity_date'] ?? null),
-            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
+            totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
         );
     }
 
@@ -171,12 +171,12 @@ final readonly class Offer
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
+            'total_gross' => $this->totalGross?->toString(),
+            'total_net' => $this->totalNet?->toString(),
             'net_gross' => $this->netGross?->value,
             'reduction' => $this->reduction,
-            'total_gross_unreduced' => $this->totalGrossUnreduced,
-            'total_net_unreduced' => $this->totalNetUnreduced,
+            'total_gross_unreduced' => $this->totalGrossUnreduced?->toString(),
+            'total_net_unreduced' => $this->totalNetUnreduced?->toString(),
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'free_text_id' => $this->freeTextId,
@@ -184,7 +184,7 @@ final readonly class Offer
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
             'validity_date' => $this->validityDate?->format('Y-m-d'),
-            'total_reduction' => $this->totalReduction,
+            'total_reduction' => $this->totalReduction?->toString(),
         ];
 
         if ([] !== $this->taxes) {

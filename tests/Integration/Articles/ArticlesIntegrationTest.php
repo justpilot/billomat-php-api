@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\ArticleUpdateOptions;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\ArticleTag;
 use Justpilot\Billomat\Model\ArticleTagCloudEntry;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -40,7 +41,7 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $opts = new ArticleCreateOptions(
             title: 'Integrationstest-Artikel '.date('His'),
             description: 'Auto-Test',
-            salesPrice: $faker->randomFloat(2, 5, 250),
+            salesPrice: Money::of((string) $faker->randomFloat(2, 5, 250)),
             currencyCode: 'EUR',
             unit: 'Stück',
         );
@@ -77,7 +78,7 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // Artikel anlegen
         $articleOpts = new ArticleCreateOptions(
             title: 'Tag-Test-Artikel '.date('His'),
-            salesPrice: 9.99,
+            salesPrice: Money::of('9.99'),
             unit: 'Stück',
         );
         $article = $billomat->articles->create($articleOpts);

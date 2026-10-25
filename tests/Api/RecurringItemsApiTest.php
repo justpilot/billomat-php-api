@@ -13,6 +13,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\RecurringItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,6 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class RecurringItemsApiTest extends TestCase
 {
     #[Test]
@@ -46,8 +48,8 @@ final class RecurringItemsApiTest extends TestCase
             $body = json_encode([
                 'recurring-items' => [
                     'recurring-item' => [
-                        ['id' => 1, 'recurring_id' => 42, 'quantity' => 1.0, 'unit_price' => 50.0, 'title' => 'A'],
-                        ['id' => 2, 'recurring_id' => 42, 'quantity' => 2.0, 'unit_price' => 25.0, 'title' => 'B'],
+                        ['id' => 1, 'recurring_id' => 42, 'quantity' => 1.0, 'unit_price' => '50', 'title' => 'A'],
+                        ['id' => 2, 'recurring_id' => 42, 'quantity' => 2.0, 'unit_price' => '25', 'title' => 'B'],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR);
@@ -83,7 +85,7 @@ final class RecurringItemsApiTest extends TestCase
                     'id' => 200,
                     'recurring_id' => 42,
                     'quantity' => 1.5,
-                    'unit_price' => 99.0,
+                    'unit_price' => '99',
                     'title' => 'Setup',
                     'type' => 'SERVICE',
                 ],
@@ -97,7 +99,7 @@ final class RecurringItemsApiTest extends TestCase
 
         $opts = new RecurringItemCreateOptions(
             quantity: 1.5,
-            unitPrice: 99.0,
+            unitPrice: Money::of('99'),
             title: 'Setup',
             type: InvoiceItemType::SERVICE,
         );
@@ -124,7 +126,7 @@ final class RecurringItemsApiTest extends TestCase
             $captured = ['method' => $method, 'url' => $url];
 
             $body = json_encode([
-                'recurring-item' => ['id' => 100, 'recurring_id' => 42, 'quantity' => 2.0, 'unit_price' => 75.0],
+                'recurring-item' => ['id' => 100, 'recurring_id' => 42, 'quantity' => 2.0, 'unit_price' => '75'],
             ], JSON_THROW_ON_ERROR);
 
             return new MockResponse($body, ['http_code' => 200]);
@@ -133,7 +135,7 @@ final class RecurringItemsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http)->items;
 
-        $opts = new RecurringItemCreateOptions(quantity: 2.0, unitPrice: 75.0);
+        $opts = new RecurringItemCreateOptions(quantity: 2.0, unitPrice: Money::of('75'));
 
         $item = $api->update(100, $opts);
 

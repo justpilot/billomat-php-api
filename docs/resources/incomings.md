@@ -107,14 +107,15 @@ Liefert `null` bei 404.
 
 ```php
 use Justpilot\Billomat\Api\IncomingCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new IncomingCreateOptions(
     supplierId: 4711,
     incomingNumber: 'LR-2026-0815',
     date: new DateTimeImmutable('2026-05-30'),
     dueDate: new DateTimeImmutable('2026-06-29'),
-    totalGross: 357.00,
-    totalNet: 300.00,
+    totalGross: Money::of('357.00'),
+    totalNet: Money::of('300.00'),
     currencyCode: 'EUR',
 );
 
@@ -173,10 +174,11 @@ $paymentEvents = $billomat->incomings->comments->list(
 ```php
 use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $payment = new IncomingPaymentCreateOptions(
     incomingId: $incoming->id,
-        amount: 357.00,
+        amount: Money::of('357.00'),
     date: new DateTimeImmutable('2026-06-15'),
     type: InvoicePaymentType::BANK_TRANSFER,
     markIncomingAsPaid: true,
@@ -233,8 +235,8 @@ Konstruktor: `new IncomingCreateOptions(int $supplierId, …)` — `supplierId` 
 | `address` | `address` | `?string` | Rechnungsanschrift (Snapshot) |
 | `label` | `label` | `?string` | |
 | `intro`, `note` | analog | `?string` | |
-| `totalGross` | `total_gross` | `?float` | |
-| `totalNet` | `total_net` | `?float` | |
+| `totalGross` | `total_gross` | `?Money` | |
+| `totalNet` | `total_net` | `?Money` | |
 | `currencyCode` | `currency_code` | `?string` | ISO-4217, z. B. `EUR` |
 | `quote` | `quote` | `?float` | Wechselkurs zur Hauswährung |
 
@@ -259,12 +261,12 @@ Konstruktor: `new IncomingCommentCreateOptions(int $incomingId, string $comment)
 
 ## Write-Modell: `IncomingPaymentCreateOptions`
 
-Konstruktor: `new IncomingPaymentCreateOptions(int $incomingId, float $amount)`. Beide Werte werden auch dann gesendet, wenn sie `0` sind. Zusätzlich wird `mark_incoming_as_paid` immer übertragen — auch bei `false` (als `0`).
+Konstruktor: `new IncomingPaymentCreateOptions(int $incomingId, Money $amount)`. Beide Werte werden auch dann gesendet, wenn sie `0` sind. Zusätzlich wird `mark_incoming_as_paid` immer übertragen — auch bei `false` (als `0`).
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `incomingId` | `incoming_id` | `int` (Pflicht) | |
-| `amount` | `amount` | `float` (Pflicht) | |
+| `amount` | `amount` | `Money` (Pflicht) | |
 | `date` | `date` | `?\DateTimeImmutable` | Zahlungsdatum |
 | `comment` | `comment` | `?string` | |
 | `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck |
@@ -302,7 +304,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `date`, `dueDate` | `?\DateTimeImmutable` |
 | `status` | `?IncomingStatus` |
 | `incomingNumber` (Wire-Feld `number`, Fallback `incoming_number`), `address`, `label`, `note` | `?string` |
-| `totalGross`, `totalNet`, `paidAmount`, `openAmount` | `?float` |
+| `totalGross`, `totalNet`, `paidAmount`, `openAmount` | `?Money` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `updated` | `?\DateTimeImmutable` |
@@ -337,7 +339,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `id` | `?int` |
 | `incomingId` | `int` |
 | `date` | `?\DateTimeImmutable` |
-| `amount` | `float` |
+| `amount` | `Money` |
 | `type` | `?InvoicePaymentType` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
@@ -347,7 +349,7 @@ Konstruktor: `new IncomingPropertyValueCreateOptions(int $incomingId, int $incom
 | `quote` | `?float` |
 | `paymentGroup` | `?string` |
 | `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
-| `finapiTransactionAmount` | `?float` (finAPI-Bankabgleich) |
+| `finapiTransactionAmount` | `?Money` (finAPI-Bankabgleich) |
 | `documentTitle` | `?string` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -428,6 +430,7 @@ use Justpilot\Billomat\Api\IncomingTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -440,8 +443,8 @@ $opts = new IncomingCreateOptions(
     incomingNumber: 'LR-2026-0815',
     date: new DateTimeImmutable('2026-05-30'),
     dueDate: new DateTimeImmutable('2026-06-29'),
-    totalGross: 357.00,
-    totalNet: 300.00,
+    totalGross: Money::of('357.00'),
+    totalNet: Money::of('300.00'),
     currencyCode: 'EUR',
     label: 'Hosting Mai 2026',
 );
@@ -464,7 +467,7 @@ $billomat->incomings->payments->create(
     (function () use ($incoming): IncomingPaymentCreateOptions {
         $p = new IncomingPaymentCreateOptions(
             incomingId: $incoming->id,
-                amount: 357.00,
+                amount: Money::of('357.00'),
             date: new DateTimeImmutable('2026-06-15'),
             type: InvoicePaymentType::BANK_TRANSFER,
             transactionPurpose: 'RG LR-2026-0815',
@@ -499,9 +502,9 @@ foreach ($paymentLog as $entry) {
 
 // 7) Aktuellen Stand prüfen
 $fresh = $billomat->incomings->get($incoming->id);
-printf("Status: %s, offen: %.2f %s\n",
+printf("Status: %s, offen: %s %s\n",
     $fresh?->status?->label() ?? 'unbekannt',
-    $fresh?->openAmount ?? 0.0,
+    $fresh?->openAmount?->format(2, ',', '.') ?? '0,00',
     $fresh?->currencyCode ?? '',
 );
 ```

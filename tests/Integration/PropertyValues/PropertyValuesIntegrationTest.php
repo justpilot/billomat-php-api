@@ -18,6 +18,7 @@ use Justpilot\Billomat\Model\ArticlePropertyValue;
 use Justpilot\Billomat\Model\ClientPropertyValue;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 use Justpilot\Billomat\Model\IncomingPropertyValue;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\SupplierPropertyValue;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -62,7 +63,7 @@ final class PropertyValuesIntegrationTest extends AbstractBillomatIntegrationTes
 
         $articleOpts = new ArticleCreateOptions(
             title: 'IT-PV-Artikel '.date('His'),
-            salesPrice: 9.99,
+            salesPrice: Money::of('9.99'),
             unit: 'Stück',
         );
         $article = $billomat->articles->create($articleOpts);

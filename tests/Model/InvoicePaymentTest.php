@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\InvoicePayment;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(InvoicePayment::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(Money::class)]
 final class InvoicePaymentTest extends TestCase
 {
     #[Test]
@@ -38,7 +40,7 @@ final class InvoicePaymentTest extends TestCase
         self::assertInstanceOf(DateTimeImmutable::class, $payment->date);
         self::assertSame('2025-03-10', $payment->date?->format('Y-m-d'));
 
-        self::assertSame(119.90, $payment->amount);
+        self::assertSame('119.9', $payment->amount->toString());
         self::assertSame(InvoicePaymentType::BANK_TRANSFER, $payment->type);
         self::assertSame('Testzahlung', $payment->comment);
     }
@@ -50,7 +52,7 @@ final class InvoicePaymentTest extends TestCase
             id: 10,
             invoiceId: 200,
             date: new DateTimeImmutable('2025-03-01'),
-            amount: 89.5,
+            amount: Money::of('89.5'),
             type: InvoicePaymentType::CASH,
             comment: 'Barzahlung',
         );
@@ -62,7 +64,7 @@ final class InvoicePaymentTest extends TestCase
         self::assertSame(10, $array['id']);
         self::assertSame(200, $array['invoice_id']);
         self::assertSame('2025-03-01', $array['date']);
-        self::assertSame(89.5, $array['amount']);
+        self::assertSame('89.5', $array['amount']);
         self::assertSame('CASH', $array['type']);
         self::assertSame('Barzahlung', $array['comment']);
     }
@@ -73,7 +75,7 @@ final class InvoicePaymentTest extends TestCase
         $data = [
             'id' => 1,
             'invoice_id' => 2,
-            'amount' => 10.0,
+            'amount' => '10',
             // keine date, type, comment
         ];
 
@@ -81,7 +83,7 @@ final class InvoicePaymentTest extends TestCase
 
         self::assertSame(1, $payment->id);
         self::assertSame(2, $payment->invoiceId);
-        self::assertSame(10.0, $payment->amount);
+        self::assertSame('10', $payment->amount->toString());
 
         self::assertNull($payment->date);
         self::assertNull($payment->type);

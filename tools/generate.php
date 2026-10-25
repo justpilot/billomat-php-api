@@ -23,6 +23,14 @@ use RuntimeException;
 const PROJECT_ROOT = __DIR__ . '/..';
 const SPEC_PATH = PROJECT_ROOT . '/docs/spec/billomat.json';
 const DEFINITIONS_DIR = __DIR__ . '/codegen/definitions';
+// FLOAT-Felder mit diesen Namen sind Geldbeträge und werden zu Money statt float.
+// Mengen, Steuersätze, Skonto-/Rabattsätze und Wechselkurse (`quote`) bleiben float.
+const MONEY_FIELDS = [
+    'amount', 'charge_amount', 'costs_gross', 'costs_net', 'discount_amount', 'finapi_transaction_amount',
+    'open_amount', 'paid_amount', 'purchase_price', 'revenue_gross', 'revenue_net',
+    'sales_price', 'sales_price2', 'sales_price3', 'sales_price4', 'sales_price5',
+    'total', 'total_gross', 'total_gross_unreduced', 'total_net', 'total_net_unreduced', 'total_reduction', 'unit_price',
+];
 
 try {
     main($argv);
@@ -179,6 +187,9 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
         }
 
         $type = $field['type'] ?? phpTypeFromSpec((string) $specField['type']);
+        if ('float' === $type && \in_array($name, MONEY_FIELDS, true)) {
+            $type = 'money';
+        }
         if (\in_array($type, ['taxes', 'list'], true) && empty($field['readOnly'])) {
             throw new RuntimeException("Listen-Feld '{$name}' muss 'readOnly' sein ({$source}).");
         }
@@ -316,6 +327,7 @@ function renderModel(array $definition, array $fields, string $source): string
             null !== $field['enumClass'] => $value . (empty($field['model']['nonNull']) ? '?->value' : '->value'),
             'date' === modelType($field) => $value . "?->format('Y-m-d')",
             'datetime' === modelType($field) => $value . '?->format(DATE_ATOM)',
+            'money' === modelType($field) => $value . (empty($field['model']['nonNull']) ? '?->toString()' : '->toString()'),
             $boolAsInt && 'bool' === modelType($field) => boolAsIntExpression($value, !empty($field['model']['nonNull'])),
             default => $value,
         };
@@ -358,7 +370,7 @@ function isListField(array $field): bool
 function listTypeHint(array $field): string
 {
     return 'taxes' === $field['type']
-        ? 'list<array{name: string, rate: float, amount: float}>'
+        ? 'list<array{name: string, rate: float, amount: Money}>'
         : 'list<' . $field['list']['class'] . '>';
 }
 
@@ -380,6 +392,7 @@ function nonNullFallback(string $type): string
     return match ($type) {
         'int' => '0',
         'float' => '0.0',
+        'money' => 'Money::zero()',
         'bool' => 'false',
         default => "''",
     };
@@ -403,6 +416,7 @@ function modelTypeHint(array $field): string
 
     $type = match (modelType($field)) {
         'date', 'datetime' => 'DateTimeImmutable',
+        'money' => 'Money',
         default => modelType($field),
     };
 
@@ -417,6 +431,7 @@ function hydrateExpression(array $field): string
     $caster = match (modelType($field)) {
         'int' => 'toIntOrNull',
         'float' => 'toFloatOrNull',
+        'money' => 'toMoneyOrNull',
         'bool' => 'toBoolOrNull',
         'date', 'datetime' => 'toDateTimeOrNull',
         default => 'toStringOrNull',
@@ -481,6 +496,9 @@ function renderOptions(array $definition, array $options, array $fields, string 
     $imports = enumImports($writable);
     if ($dateObjects && \in_array('date', array_column($writable, 'type'), true)) {
         $imports[] = 'DateTimeImmutable';
+    }
+    if (\in_array('money', array_column($writable, 'type'), true)) {
+        $imports[] = 'Justpilot\\Billomat\\Model\\Money';
     }
     sort($imports);
     foreach ($imports as $import) {
@@ -790,6 +808,7 @@ function optionsExportExpression(array $field, string $value, bool $isCreate, bo
         return match (true) {
             null !== $field['enumClass'] => "{$value} instanceof {$field['enumClass']} ? {$value}->value : {$value}",
             $isDate => "{$value} instanceof DateTimeImmutable ? {$value}->format('Y-m-d') : {$value}",
+            'money' === $field['type'] => "{$value} instanceof Money ? {$value}->toString() : {$value}",
             $isBool => "\\is_bool({$value}) ? ({$value} ? 1 : 0) : {$value}",
             default => $value,
         };
@@ -800,6 +819,9 @@ function optionsExportExpression(array $field, string $value, bool $isCreate, bo
     }
     if ($isDate) {
         $value .= ($nonNull ? '->' : '?->') . "format('Y-m-d')";
+    }
+    if ('money' === $field['type']) {
+        $value .= ($nonNull ? '->' : '?->') . 'toString()';
     }
     if ($isBool) {
         $value = boolAsIntExpression($value, $nonNull);
@@ -821,7 +843,11 @@ function boolAsIntExpression(string $value, bool $nonNull): string
  */
 function optionsPhpType(array $field, bool $dateObjects = false): string
 {
-    return $field['enumClass'] ?? ('date' === $field['type'] ? ($dateObjects ? 'DateTimeImmutable' : 'string') : $field['type']);
+    return $field['enumClass'] ?? match ($field['type']) {
+        'date' => $dateObjects ? 'DateTimeImmutable' : 'string',
+        'money' => 'Money',
+        default => $field['type'],
+    };
 }
 
 /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Model\Money;
 
 /**
  * Typisierter Payload für PUT /incomings/{id}.
@@ -107,14 +108,14 @@ final readonly class IncomingUpdateOptions implements WriteOptions
          * Billomat-Feld: total_gross
          * Typ: FLOAT
          */
-        public float|Clear|null $totalGross = null,
+        public Money|Clear|null $totalGross = null,
         /**
          * Gesamtbetrag netto.
          *
          * Billomat-Feld: total_net
          * Typ: FLOAT
          */
-        public float|Clear|null $totalNet = null,
+        public Money|Clear|null $totalNet = null,
         /**
          * Währung (ISO-Währungscode).
          *
@@ -227,13 +228,13 @@ final readonly class IncomingUpdateOptions implements WriteOptions
     }
 
     /** Kopie mit geändertem `totalGross`. */
-    public function withTotalGross(float|Clear|null $totalGross): self
+    public function withTotalGross(Money|Clear|null $totalGross): self
     {
         return clone($this, ['totalGross' => $totalGross]);
     }
 
     /** Kopie mit geändertem `totalNet`. */
-    public function withTotalNet(float|Clear|null $totalNet): self
+    public function withTotalNet(Money|Clear|null $totalNet): self
     {
         return clone($this, ['totalNet' => $totalNet]);
     }
@@ -297,8 +298,8 @@ final readonly class IncomingUpdateOptions implements WriteOptions
                 'label' => $this->label,
                 'intro' => $this->intro,
                 'note' => $this->note,
-                'total_gross' => $this->totalGross,
-                'total_net' => $this->totalNet,
+                'total_gross' => $this->totalGross instanceof Money ? $this->totalGross->toString() : $this->totalGross,
+                'total_net' => $this->totalNet instanceof Money ? $this->totalNet->toString() : $this->totalNet,
                 'currency_code' => $this->currencyCode,
                 'quote' => $this->quote,
                 'base64file' => $this->base64file,

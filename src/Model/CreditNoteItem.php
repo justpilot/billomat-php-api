@@ -38,7 +38,7 @@ final readonly class CreditNoteItem
         /** Menge. */
         public float $quantity,
         /** Einzelpreis. */
-        public float $unitPrice,
+        public Money $unitPrice,
         /** Steuerbezeichnung (z. B. "MwSt"). */
         public ?string $taxName,
         /** Steuerrate in Prozent. */
@@ -58,13 +58,13 @@ final readonly class CreditNoteItem
         /** Typ der Position (Produkt/Dienstleistung). */
         public ?InvoiceItemType $type,
         /** Gesamtbetrag brutto. */
-        public ?float $totalGross,
+        public ?Money $totalGross,
         /** Gesamtbetrag netto. */
-        public ?float $totalNet,
+        public ?Money $totalNet,
         /** Unreduzierter Gesamtbetrag brutto. */
-        public ?float $totalGrossUnreduced,
+        public ?Money $totalGrossUnreduced,
         /** Unreduzierter Gesamtbetrag netto. */
-        public ?float $totalNetUnreduced,
+        public ?Money $totalNetUnreduced,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /** Steuerrate bei Reverse-Charge in Prozent. */
@@ -86,7 +86,7 @@ final readonly class CreditNoteItem
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
             quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
-            unitPrice: ScalarCaster::toFloatOrNull($data['unit_price'] ?? null) ?? 0.0,
+            unitPrice: ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null) ?? Money::zero(),
             taxName: ScalarCaster::toStringOrNull($data['tax_name'] ?? null),
             taxRate: ScalarCaster::toFloatOrNull($data['tax_rate'] ?? null),
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),
@@ -94,10 +94,10 @@ final readonly class CreditNoteItem
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
             type: InvoiceItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
-            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
-            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
+            totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             taxRateReverseCharge: ScalarCaster::toFloatOrNull($data['tax_rate_reverse_charge'] ?? null),
         );
@@ -119,7 +119,7 @@ final readonly class CreditNoteItem
             'position' => $this->position,
             'unit' => $this->unit,
             'quantity' => $this->quantity,
-            'unit_price' => $this->unitPrice,
+            'unit_price' => $this->unitPrice->toString(),
             'tax_name' => $this->taxName,
             'tax_rate' => $this->taxRate,
             'tax_changed_manually' => $this->taxChangedManually,
@@ -127,10 +127,10 @@ final readonly class CreditNoteItem
             'description' => $this->description,
             'reduction' => $this->reduction,
             'type' => $this->type?->value,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
-            'total_gross_unreduced' => $this->totalGrossUnreduced,
-            'total_net_unreduced' => $this->totalNetUnreduced,
+            'total_gross' => $this->totalGross?->toString(),
+            'total_net' => $this->totalNet?->toString(),
+            'total_gross_unreduced' => $this->totalGrossUnreduced?->toString(),
+            'total_net_unreduced' => $this->totalNetUnreduced?->toString(),
             'customfield' => $this->customfield,
             'tax_rate_reverse_charge' => $this->taxRateReverseCharge,
         ];

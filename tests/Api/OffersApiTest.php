@@ -19,6 +19,7 @@ use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferPdf;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -45,6 +46,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class OffersApiTest extends TestCase
 {
     #[Test]
@@ -67,8 +69,8 @@ final class OffersApiTest extends TestCase
                             'offer_number' => null,
                             'date' => '2026-01-01',
                             'currency_code' => 'EUR',
-                            'total_gross' => 119.00,
-                            'total_net' => 100.00,
+                            'total_gross' => '119',
+                            'total_net' => '100',
                         ],
                         [
                             'id' => 2,
@@ -77,8 +79,8 @@ final class OffersApiTest extends TestCase
                             'offer_number' => 'AN-2026-0002',
                             'date' => '2026-01-02',
                             'currency_code' => 'EUR',
-                            'total_gross' => 59.50,
-                            'total_net' => 50.00,
+                            'total_gross' => '59.5',
+                            'total_net' => '50',
                         ],
                     ],
                 ],
@@ -120,8 +122,8 @@ final class OffersApiTest extends TestCase
                     'date' => '2026-02-01',
                     'validity_days' => 14,
                     'currency_code' => 'EUR',
-                    'total_gross' => 238.00,
-                    'total_net' => 200.00,
+                    'total_gross' => '238',
+                    'total_net' => '200',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -195,7 +197,7 @@ final class OffersApiTest extends TestCase
             currencyCode: 'EUR',
         );
 
-        $item = new OfferItemCreateOptions(quantity: 2.0, unitPrice: 100.0, title: 'Beratung');
+        $item = new OfferItemCreateOptions(quantity: 2.0, unitPrice: Money::of('100'), title: 'Beratung');
         $opts = $opts->withItem($item);
 
         $created = $api->create($opts);

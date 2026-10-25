@@ -45,9 +45,10 @@ Hängt eine Position an eine bestehende Rechnung. `invoice_id` wird vom SDK in d
 ```php
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 
 $item = new InvoiceItemCreateOptions(
-    quantity: 3.0, unitPrice: 49.90,
+    quantity: 3.0, unitPrice: Money::of('49.90'),
     title: 'Premium-Support (3 Monate)',
     type: InvoiceItemType::SERVICE,
     unit: 'Monat',
@@ -66,7 +67,7 @@ Löscht eine Position. Fehler kommen als Exception.
 
 ## Write-Modell: `InvoiceItemCreateOptions`
 
-Konstruktor: `new InvoiceItemCreateOptions(float $quantity, float $unitPrice)`.
+Konstruktor: `new InvoiceItemCreateOptions(float $quantity, Money $unitPrice)`.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
@@ -75,7 +76,7 @@ Konstruktor: `new InvoiceItemCreateOptions(float $quantity, float $unitPrice)`.
 | `title` | `title` | `?string` | Bezeichnung der Position |
 | `description` | `description` | `?string` | Mehrzeilige Detailbeschreibung |
 | `quantity` | `quantity` | `float` | Pflicht (im Konstruktor) |
-| `unitPrice` | `unit_price` | `float` | Pflicht (im Konstruktor) |
+| `unitPrice` | `unit_price` | `Money` | Pflicht (im Konstruktor) |
 | `unit` | `unit` | `?string` | Frei wählbar, z. B. `Stunde`, `Stück`, `Monat` |
 | `taxName` | `tax_name` | `?string` | Bezeichnung des Steuersatzes, z. B. `MwSt` |
 | `taxRate` | `tax_rate` | `?float` | Prozentwert, z. B. `19.0` |
@@ -97,7 +98,7 @@ Konstruktor: `new InvoiceItemCreateOptions(float $quantity, float $unitPrice)`.
 | `position` | `?int` | Sortierreihenfolge in der Rechnung |
 | `unit` | `?string` | |
 | `quantity` | `float` | |
-| `unitPrice` | `float` | |
+| `unitPrice` | `Money` | |
 | `taxName` | `?string` | |
 | `taxRate` | `?float` | |
 | `taxChangedManually` | `?bool` | |
@@ -105,8 +106,8 @@ Konstruktor: `new InvoiceItemCreateOptions(float $quantity, float $unitPrice)`.
 | `description` | `?string` | |
 | `reduction` | `?string` | |
 | `type` | `?InvoiceItemType` | |
-| `totalGross`, `totalNet` | `?float` | Inkl. Rabatt |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` | Ohne Rabatt |
+| `totalGross`, `totalNet` | `?Money` | Inkl. Rabatt |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` | Ohne Rabatt |
 | `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
 
 ## Verwendete Enums
@@ -133,6 +134,7 @@ use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -144,7 +146,7 @@ $invoice = $billomat->invoices->create(new InvoiceCreateOptions(clientId: 12345)
 
 // Erste Position via Items-API ergänzen
 $first = new InvoiceItemCreateOptions(
-    quantity: 10.0, unitPrice: 12.5,
+    quantity: 10.0, unitPrice: Money::of('12.5'),
     title: 'Lizenzgebühr Modul A',
     type: InvoiceItemType::PRODUCT,
     unit: 'Lizenz',
@@ -154,7 +156,7 @@ $created = $billomat->invoices->items->create($invoice->id, $first);
 
 // Zweite Position
 $second = new InvoiceItemCreateOptions(
-    quantity: 2.5, unitPrice: 110.0,
+    quantity: 2.5, unitPrice: Money::of('110'),
     title: 'Anpassung & Support',
     type: InvoiceItemType::SERVICE,
     unit: 'Stunde',
@@ -164,10 +166,10 @@ $billomat->invoices->items->create($invoice->id, $second);
 
 // Alle Positionen lesen
 foreach ($billomat->invoices->items->list($invoice->id) as $item) {
-    printf("- %s: %.2f x %.2f = %.2f\n", $item->title, $item->quantity, $item->unitPrice, $item->totalNet ?? 0.0);
+    printf("- %s: %.2f x %s = %s\n", $item->title, $item->quantity, $item->unitPrice->format(), ($item->totalNet ?? Money::zero())->format());
 }
 
 // Erste Position aktualisieren (Preis senken) — quantity bleibt gleich
-$update = new InvoiceItemCreateOptions(quantity: $created->quantity, unitPrice: 9.99, title: $created->title);
+$update = new InvoiceItemCreateOptions(quantity: $created->quantity, unitPrice: Money::of('9.99'), title: $created->title);
 $billomat->invoices->items->update($created->id, $update);
 ```

@@ -37,6 +37,7 @@ use Justpilot\Billomat\Model\IncomingPayment;
 use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\InvoicePayment;
 use Justpilot\Billomat\Model\LetterComment;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\OfferComment;
 use Justpilot\Billomat\Model\Supplier;
 use Justpilot\Billomat\Model\TaxRate;
@@ -86,6 +87,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(TemplateFormat::class)]
 #[UsesClass(TemplateType::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class MasterDataFieldsTest extends TestCase
 {
     /**
@@ -129,7 +131,7 @@ final class MasterDataFieldsTest extends TestCase
         yield 'CreditNotePayment' => [
             CreditNotePayment::fromArray(...),
             ['id' => '1', 'currency_code' => 'Text', 'quote' => '12.5', 'payment_group' => 'Text', 'finapi_transaction_id' => 'Text', 'finapi_transaction_amount' => '12.5', 'document_title' => 'Text'],
-            ['currencyCode' => 'Text', 'quote' => 12.5, 'paymentGroup' => 'Text', 'finapiTransactionId' => 'Text', 'finapiTransactionAmount' => 12.5, 'documentTitle' => 'Text'],
+            ['currencyCode' => 'Text', 'quote' => 12.5, 'paymentGroup' => 'Text', 'finapiTransactionId' => 'Text', 'finapiTransactionAmount' => '12.5', 'documentTitle' => 'Text'],
         ];
         yield 'Currency' => [
             Currency::fromArray(...),
@@ -159,7 +161,7 @@ final class MasterDataFieldsTest extends TestCase
         yield 'IncomingPayment' => [
             IncomingPayment::fromArray(...),
             ['id' => '1', 'currency_code' => 'Text', 'quote' => '12.5', 'payment_group' => 'Text', 'finapi_transaction_id' => 'Text', 'finapi_transaction_amount' => '12.5', 'document_title' => 'Text'],
-            ['currencyCode' => 'Text', 'quote' => 12.5, 'paymentGroup' => 'Text', 'finapiTransactionId' => 'Text', 'finapiTransactionAmount' => 12.5, 'documentTitle' => 'Text'],
+            ['currencyCode' => 'Text', 'quote' => 12.5, 'paymentGroup' => 'Text', 'finapiTransactionId' => 'Text', 'finapiTransactionAmount' => '12.5', 'documentTitle' => 'Text'],
         ];
         yield 'InvoiceComment' => [
             InvoiceComment::fromArray(...),
@@ -169,7 +171,7 @@ final class MasterDataFieldsTest extends TestCase
         yield 'InvoicePayment' => [
             InvoicePayment::fromArray(...),
             ['id' => '1', 'currency_code' => 'Text', 'quote' => '12.5', 'payment_group' => 'Text', 'finapi_transaction_id' => 'Text', 'finapi_transaction_amount' => '12.5', 'document_title' => 'Text'],
-            ['currencyCode' => 'Text', 'quote' => 12.5, 'paymentGroup' => 'Text', 'finapiTransactionId' => 'Text', 'finapiTransactionAmount' => 12.5, 'documentTitle' => 'Text'],
+            ['currencyCode' => 'Text', 'quote' => 12.5, 'paymentGroup' => 'Text', 'finapiTransactionId' => 'Text', 'finapiTransactionAmount' => '12.5', 'documentTitle' => 'Text'],
         ];
         yield 'LetterComment' => [
             LetterComment::fromArray(...),
@@ -184,7 +186,7 @@ final class MasterDataFieldsTest extends TestCase
         yield 'Supplier' => [
             Supplier::fromArray(...),
             ['id' => '1', 'is_eu_country' => '1', 'locale' => 'Text', 'creditor_account_number' => 'Text', 'creditor_identifier' => 'Text', 'costs_gross' => '12.5', 'costs_net' => '12.5'],
-            ['isEuCountry' => true, 'locale' => 'Text', 'creditorAccountNumber' => 'Text', 'creditorIdentifier' => 'Text', 'costsGross' => 12.5, 'costsNet' => 12.5],
+            ['isEuCountry' => true, 'locale' => 'Text', 'creditorAccountNumber' => 'Text', 'creditorIdentifier' => 'Text', 'costsGross' => '12.5', 'costsNet' => '12.5'],
         ];
         yield 'TaxRate' => [
             TaxRate::fromArray(...),
@@ -218,6 +220,9 @@ final class MasterDataFieldsTest extends TestCase
             $actual = $props[$property];
             if ($actual instanceof DateTimeImmutable) {
                 $actual = $actual->format('Y-m-d');
+            }
+            if ($actual instanceof Money) {
+                $actual = $actual->toString();
             }
 
             self::assertSame($value, $actual, $property);

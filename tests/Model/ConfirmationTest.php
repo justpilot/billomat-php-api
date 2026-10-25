@@ -11,6 +11,7 @@ use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationItem;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -21,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(ConfirmationItem::class)]
 #[UsesClass(ConfirmationStatus::class)]
+#[UsesClass(Money::class)]
 final class ConfirmationTest extends TestCase
 {
     #[Test]
@@ -66,7 +68,7 @@ final class ConfirmationTest extends TestCase
         self::assertSame(ConfirmationStatus::OPEN, $confirmation->status);
         self::assertInstanceOf(DateTimeImmutable::class, $confirmation->date);
         self::assertSame(NetGross::NET, $confirmation->netGross);
-        self::assertSame(1190.0, $confirmation->totalGross);
+        self::assertSame('1190', $confirmation->totalGross?->toString());
 
         self::assertCount(1, $confirmation->items);
         self::assertContainsOnlyInstancesOf(ConfirmationItem::class, $confirmation->items);

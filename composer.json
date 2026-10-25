@@ -29,6 +29,7 @@
   },
   "require": {
     "php": "^8.5",
+    "ext-bcmath": "*",
     "php-http/discovery": "^1.20",
     "psr/http-client": "^1.0.3",
     "psr/http-client-implementation": "^1.0",

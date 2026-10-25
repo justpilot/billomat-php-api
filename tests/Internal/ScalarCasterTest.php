@@ -6,15 +6,18 @@ namespace Justpilot\Billomat\Tests\Internal;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
 use const DATE_ATOM;
 
 #[CoversClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ScalarCasterTest extends TestCase
 {
     /**
@@ -60,6 +63,32 @@ final class ScalarCasterTest extends TestCase
     public function toFloatOrNullCovers(mixed $value, ?float $expected): void
     {
         self::assertSame($expected, ScalarCaster::toFloatOrNull($value));
+    }
+
+    #[Test]
+    #[DataProvider('moneyCases')]
+    public function toMoneyOrNullCovers(mixed $value, ?string $expected): void
+    {
+        self::assertSame($expected, ScalarCaster::toMoneyOrNull($value)?->toString());
+    }
+
+    /**
+     * @return iterable<string, array{mixed, ?string}>
+     */
+    public static function moneyCases(): iterable
+    {
+        yield 'null' => [null, null];
+        yield 'empty string' => ['', null];
+        yield 'decimal string' => ['33.61', '33.61'];
+        yield 'negative string' => ['-19.90', '-19.9'];
+        yield 'int' => [40, '40'];
+        yield 'float' => [119.9, '119.9'];
+        yield 'negative float' => [-0.5, '-0.5'];
+        yield 'small float without exponent' => [0.0000001, '0.0000001'];
+        yield 'float zero' => [0.0, '0'];
+        yield 'invalid string' => ['n/a', null];
+        yield 'bool' => [true, null];
+        yield 'array' => [[], null];
     }
 
     /**

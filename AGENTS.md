@@ -114,6 +114,7 @@ For endpoints that may return binary (e.g. `GET /invoices/{id}/pdf?format=pdf`),
 - Public `*Api` methods without side effects (`get`, `list*`, `iterateAll`, `pdf`, …) carry `#[NoDiscard]`; write methods don't. In tests, cast intentionally ignored results to `(void)`.
 - Methods without a meaningful result (`delete`, `complete`, `cancel`, `email`, …) return `void`, never an always-`true` bool. Errors are exceptions.
 - List methods take `XFilter|array $filters`; `AbstractApi::filterQuery()` turns a `ListFilter` into query parameters. Sorting goes through `OrderBy`, never a hand-written `'order_by' => 'date+DESC'` in SDK code.
+- Amounts are `Model\Money` (exact decimal on `BcMath\Number`, `ext-bcmath`), never `float`. The generator maps `FLOAT` fields listed in `MONEY_FIELDS` (`tools/generate.php`) to `money`; add new amount fields there. Quantities, tax/discount rates and `quote` stay `float`. Payloads and `toArray()` carry amounts as strings (`Money::toString()`).
 - All write options implement `WriteOptions` and are immutable: no property assignment, use named arguments or `with*()`. PHP-CS-Fixer is configured to write `clone($this, [...])` without a space.
 - `new Foo()->bar` needs no parentheses (PHP 8.4+); don't write `(new Foo())->bar`.
 - All API classes are `final`; models are `final readonly`.

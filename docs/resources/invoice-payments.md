@@ -52,9 +52,10 @@ Liefert `null` bei 404.
 ```php
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new InvoicePaymentCreateOptions(
-    invoiceId: 98765, amount: 1190.00,
+    invoiceId: 98765, amount: Money::of('1190.00'),
     date: new DateTimeImmutable('2026-06-01'),
     type: InvoicePaymentType::BANK_TRANSFER,
     comment: 'Überweisung Eingang vom 01.06.',
@@ -70,12 +71,12 @@ Setzt laut Billomat-Doku den Status der Rechnung zurück auf `OPEN` oder `OVERDU
 
 ## Write-Modell: `InvoicePaymentCreateOptions`
 
-Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, float $amount)`. Beide Werte sind Pflicht.
+Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, Money $amount)`. Beide Werte sind Pflicht.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `invoiceId` | `invoice_id` | `int` | Pflicht (Konstruktor) |
-| `amount` | `amount` | `float` | Pflicht (Konstruktor) |
+| `amount` | `amount` | `Money` | Pflicht (Konstruktor) |
 | `date` | `date` | `?\DateTimeImmutable` | Default: heute |
 | `comment` | `comment` | `?string` | Freitext |
 | `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck |
@@ -93,14 +94,14 @@ Konstruktor: `new InvoicePaymentCreateOptions(int $invoiceId, float $amount)`. B
 | `id` | `?int` |
 | `invoiceId` | `int` |
 | `date` | `?\DateTimeImmutable` |
-| `amount` | `float` |
+| `amount` | `Money` |
 | `type` | `?InvoicePaymentType` |
 | `comment` | `?string` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `paymentGroup` | `?string` |
 | `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
-| `finapiTransactionAmount` | `?float` (finAPI-Bankabgleich) |
+| `finapiTransactionAmount` | `?Money` (finAPI-Bankabgleich) |
 | `documentTitle` | `?string` |
 | `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
 
@@ -141,6 +142,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -151,22 +153,22 @@ $invoiceId = 98765;
 
 // Zahlung anlegen
 $opts = new InvoicePaymentCreateOptions(
-    invoiceId: $invoiceId, amount: 590.00,
+    invoiceId: $invoiceId, amount: Money::of('590.00'),
     type: InvoicePaymentType::BANK_TRANSFER,
     date: new DateTimeImmutable('today'),
     transactionPurpose: 'Rechnung RE-2026-0042',
 );
 
 $payment = $billomat->invoices->payments->create($opts);
-printf("Zahlung #%d angelegt: %.2f EUR per %s\n", $payment->id, $payment->amount, $payment->type?->label());
+printf("Zahlung #%d angelegt: %s EUR per %s\n", $payment->id, $payment->amount->format(2, ',', '.'), $payment->type?->label());
 
 // Alle Zahlungen zur Rechnung listen
 $paymentsForInvoice = $billomat->invoices->payments->list($invoiceId, [
     'order_by' => 'date+ASC',
 ]);
 
-$sum = array_sum(array_map(static fn($p) => $p->amount, $paymentsForInvoice));
-printf("Bislang verbucht: %.2f EUR über %d Eingänge\n", $sum, count($paymentsForInvoice));
+$sum = Money::sum(...array_map(static fn ($p): Money => $p->amount, $paymentsForInvoice));
+printf("Bislang verbucht: %s EUR über %d Eingänge\n", $sum->format(2, ',', '.'), count($paymentsForInvoice));
 
 // Letzte Zahlung wieder entfernen (Storno)
 $billomat->invoices->payments->delete($payment->id);

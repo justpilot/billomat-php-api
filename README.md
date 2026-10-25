@@ -67,6 +67,7 @@ use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -74,7 +75,7 @@ $billomat = BillomatClient::create(
 );
 
 // 1) Rechnung als Entwurf anlegen
-$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.00, title: 'Konzeption');
+$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: Money::of('95.00'), title: 'Konzeption');
 
 $options = new InvoiceCreateOptions(clientId: 12345, title: 'Webentwicklung Mai 2026', items: [$item]);
 
@@ -98,6 +99,7 @@ Vollständige, ausführbare Beispiele liegen unter [examples/](examples/).
 - Eine `*Api`-Klasse je Billomat-Ressource mit einheitlichen Verben (`list`, `get`, `create`, `update`, `delete`) plus ressourcenspezifischen Aktionen (`complete`, `cancel`, `pdf`, `thumb` …).
 - Auto-Pagination via `iterateAll()`-Generator und `listPage()` mit Metadaten.
 - Typisierte List-Filter (`InvoiceFilter`, `ClientFilter`, …) mit Enums, `DateTimeImmutable` und `OrderBy`; einfache Arrays funktionieren weiterhin.
+- Geldbeträge als exaktes `Money`-Value-Object (BcMath, Dezimal-Strings wie bei Billomat) statt `float` — ohne Rundungsfehler, mit Vergleich, Summen und deutscher Formatierung; siehe [docs/concepts/money.md](docs/concepts/money.md).
 - Strukturierte Exception-Hierarchie mit Mapping auf HTTP-Statuscodes (401/403, 404, 400/422, 429) und eigener `TransportException` für Netzwerkfehler.
 
 ## Ressourcen
@@ -152,7 +154,7 @@ Jede Ressource ist als `public readonly`-Eigenschaft auf dem `BillomatClient` zu
 
 ### Weitergehende Konzepte
 
-Vertiefende Themen sind unter [docs/concepts/](docs/concepts/) gesammelt: [Authentifizierung](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API-Security](docs/concepts/api-security.md), [Pagination & Filtering](docs/concepts/pagination-and-filtering.md), [Custom Meta Attributes](docs/concepts/custom-meta-attributes.md), [Fehler & Rate-Limits](docs/concepts/errors-and-rate-limits.md) sowie [Webhooks](docs/concepts/webhooks.md) (nur UI-konfigurierbar, kein REST-Endpunkt — daher auch im SDK nicht abgebildet).
+Vertiefende Themen sind unter [docs/concepts/](docs/concepts/) gesammelt: [Authentifizierung](docs/concepts/authentication.md) (`X-AppId`/`X-AppSecret`), [API-Security](docs/concepts/api-security.md), [Pagination & Filtering](docs/concepts/pagination-and-filtering.md), [Custom Meta Attributes](docs/concepts/custom-meta-attributes.md), [Fehler & Rate-Limits](docs/concepts/errors-and-rate-limits.md), [Geldbeträge](docs/concepts/money.md) (`Money`) sowie [Webhooks](docs/concepts/webhooks.md) (nur UI-konfigurierbar, kein REST-Endpunkt — daher auch im SDK nicht abgebildet).
 
 ## Konfiguration
 

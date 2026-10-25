@@ -16,6 +16,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Justpilot\Billomat\Api\OfferCreateOptions;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
@@ -45,7 +46,7 @@ try {
     );
 
     $workshop = new OfferItemCreateOptions(
-        quantity: 1.0, unitPrice: 980.0,
+        quantity: 1.0, unitPrice: Money::of('980'),
         title: 'Workshop "Discovery"',
         type: InvoiceItemType::SERVICE,
         unit: 'Tag',
@@ -53,7 +54,7 @@ try {
     $opts = $opts->withItem($workshop);
 
     $followUp = new OfferItemCreateOptions(
-        quantity: 4.0, unitPrice: 110.0,
+        quantity: 4.0, unitPrice: Money::of('110'),
         title: 'Nachgespräche & Reporting',
         type: InvoiceItemType::SERVICE,
         unit: 'Stunde',

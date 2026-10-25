@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Internal;
 
+use Justpilot\Billomat\Model\Money;
+
 /**
  * Hilfsklasse für verschachtelte Listen in Billomat-Responses
  * (z. B. `taxes.tax` oder `invoice-items.invoice-item`).
@@ -51,14 +53,14 @@ final class ListCaster
     /**
      * Steuerzeilen eines Dokuments (`taxes.tax`).
      *
-     * @return list<array{name: string, rate: float, amount: float}>
+     * @return list<array{name: string, rate: float, amount: Money}>
      */
     public static function toTaxList(mixed $value): array
     {
         return self::toList($value, 'name', static fn (array $row): array => [
             'name' => ScalarCaster::toStringOrNull($row['name'] ?? null) ?? '',
             'rate' => ScalarCaster::toFloatOrNull($row['rate'] ?? null) ?? 0.0,
-            'amount' => ScalarCaster::toFloatOrNull($row['amount'] ?? null) ?? 0.0,
+            'amount' => ScalarCaster::toMoneyOrNull($row['amount'] ?? null) ?? Money::zero(),
         ]);
     }
 }

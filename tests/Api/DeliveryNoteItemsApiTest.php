@@ -13,6 +13,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\DeliveryNoteItem;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -32,6 +33,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class DeliveryNoteItemsApiTest extends TestCase
 {
     #[Test]
@@ -85,7 +87,7 @@ final class DeliveryNoteItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: 0.0, title: 'Neu');
+        $opts = new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: Money::of('0'), title: 'Neu');
 
         $created = $api->create(123, $opts);
 
@@ -118,7 +120,7 @@ final class DeliveryNoteItemsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->items;
 
-        $opts = new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 0.0);
+        $opts = new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: Money::of('0'));
         self::assertSame(77, $api->update(77, $opts)->id);
         $api->delete(77);
 

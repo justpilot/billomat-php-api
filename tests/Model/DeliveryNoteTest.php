@@ -10,6 +10,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNoteItem;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -20,6 +21,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(DeliveryNoteItem::class)]
 #[UsesClass(DeliveryNoteStatus::class)]
+#[UsesClass(Money::class)]
 final class DeliveryNoteTest extends TestCase
 {
     #[Test]

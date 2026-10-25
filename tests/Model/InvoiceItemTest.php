@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Model;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -14,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoiceItem::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class InvoiceItemTest extends TestCase
 {
     #[Test]
@@ -47,14 +49,14 @@ final class InvoiceItemTest extends TestCase
         self::assertSame(2, $item->position);
         self::assertSame('Stück', $item->unit);
         self::assertSame(3.5, $item->quantity);
-        self::assertSame(49.90, $item->unitPrice);
+        self::assertSame('49.9', $item->unitPrice->toString());
         self::assertSame('MwSt', $item->taxName);
         self::assertSame(19.0, $item->taxRate);
         self::assertTrue($item->taxChangedManually);
         self::assertSame('10%', $item->reduction);
         self::assertSame(InvoiceItemType::SERVICE, $item->type);
-        self::assertSame(208.05, $item->totalGross);
-        self::assertSame(174.83, $item->totalNet);
+        self::assertSame('208.05', $item->totalGross?->toString());
+        self::assertSame('174.83', $item->totalNet?->toString());
     }
 
     #[Test]
@@ -63,7 +65,7 @@ final class InvoiceItemTest extends TestCase
         $item = InvoiceItem::fromArray([]);
 
         self::assertSame(0.0, $item->quantity);
-        self::assertSame(0.0, $item->unitPrice);
+        self::assertSame('0', $item->unitPrice->toString());
     }
 
     #[Test]

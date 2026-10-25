@@ -13,6 +13,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\EmailTemplate;
 use Justpilot\Billomat\Model\FreeText;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\ReminderText;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -34,6 +35,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class TextResourcesApiTest extends TestCase
 {
     #[Test]
@@ -131,6 +133,6 @@ final class TextResourcesApiTest extends TestCase
         self::assertSame(2, $texts[0]->sort);
         self::assertSame('Mahngebühr', $texts[0]->chargeName);
         self::assertSame('Pauschale', $texts[0]->chargeDescription);
-        self::assertSame(5.5, $texts[0]->chargeAmount);
+        self::assertSame('5.5', $texts[0]->chargeAmount?->toString());
     }
 }

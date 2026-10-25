@@ -35,6 +35,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientPropertyValue;
 use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\ReminderItem;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
@@ -82,6 +83,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(OfferCommentCreateOptions::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
 #[UsesClass(OfferItemCreateOptions::class)]
+#[UsesClass(Money::class)]
 final class SubResourceApiTest extends TestCase
 {
     private MockHttpClient $mock;
@@ -130,7 +132,7 @@ final class SubResourceApiTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         /** @phpstan-ignore argument.type (absichtlich falsche Options) */
-        $this->invoices()->items->update(1, new OfferItemCreateOptions(quantity: 1.0, unitPrice: 1.0));
+        $this->invoices()->items->update(1, new OfferItemCreateOptions(quantity: 1.0, unitPrice: Money::of('1')));
     }
 
     #[Test]
@@ -167,9 +169,9 @@ final class SubResourceApiTest extends TestCase
         /** @phpstan-ignore argument.type (absichtlich falsche Options) */
         yield 'tags' => [static fn (InvoicesApi $i): object => $i->tags->create(new OfferTagCreateOptions(offerId: 1, name: 'x'))];
         /** @phpstan-ignore argument.type (absichtlich falsche Options) */
-        yield 'items' => [static fn (InvoicesApi $i): object => $i->items->create(1, new OfferItemCreateOptions(quantity: 1.0, unitPrice: 1.0))];
+        yield 'items' => [static fn (InvoicesApi $i): object => $i->items->create(1, new OfferItemCreateOptions(quantity: 1.0, unitPrice: Money::of('1')))];
         /** @phpstan-ignore argument.type (absichtlich falsche Options) */
-        yield 'payments' => [static fn (InvoicesApi $i): object => $i->payments->create(new CreditNotePaymentCreateOptions(creditNoteId: 1, amount: 1.0))];
+        yield 'payments' => [static fn (InvoicesApi $i): object => $i->payments->create(new CreditNotePaymentCreateOptions(creditNoteId: 1, amount: Money::of('1')))];
         /** @phpstan-ignore argument.type (absichtlich falsche Options) */
         yield 'property values' => [static fn (InvoicesApi $i, ClientsApi $c): object => $c->propertyValues->create(new SupplierPropertyValueCreateOptions(supplierId: 1, supplierPropertyId: 2, value: 'x'))];
     }

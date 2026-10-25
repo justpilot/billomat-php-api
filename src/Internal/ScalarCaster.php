@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Internal;
 
 use DateTimeImmutable;
+use InvalidArgumentException;
+use Justpilot\Billomat\Model\Money;
 use Throwable;
 
 /**
@@ -55,6 +57,28 @@ final class ScalarCaster
         }
 
         return null;
+    }
+
+    /**
+     * Billomat liefert Beträge als Dezimal-String; Floats (z. B. aus Test-Fixtures) werden
+     * ohne Exponent übernommen. Nicht parsebare Werte werden zu null.
+     */
+    public static function toMoneyOrNull(mixed $value): ?Money
+    {
+        if (\is_float($value)) {
+            // Nachgestellte Nullen entfernt Money selbst.
+            $value = \sprintf('%.10F', $value);
+        }
+
+        if (!\is_string($value) && !\is_int($value)) {
+            return null;
+        }
+
+        try {
+            return '' === $value ? null : Money::of($value);
+        } catch (InvalidArgumentException) {
+            return null;
+        }
     }
 
     public static function toBoolOrNull(mixed $value): ?bool

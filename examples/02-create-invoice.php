@@ -16,6 +16,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\BillomatException;
@@ -43,7 +44,7 @@ $opts = new InvoiceCreateOptions(
 );
 
 $item1 = new InvoiceItemCreateOptions(
-    quantity: 5.0, unitPrice: 19.90,
+    quantity: 5.0, unitPrice: Money::of('19.9'),
     title: 'Demo-Artikel A',
     type: InvoiceItemType::PRODUCT,
     unit: 'Stück',
@@ -51,7 +52,7 @@ $item1 = new InvoiceItemCreateOptions(
 $opts = $opts->withItem($item1);
 
 $item2 = new InvoiceItemCreateOptions(
-    quantity: 1.5, unitPrice: 95.00,
+    quantity: 1.5, unitPrice: Money::of('95'),
     title: 'Demo-Dienstleistung',
     type: InvoiceItemType::SERVICE,
     unit: 'Stunde',

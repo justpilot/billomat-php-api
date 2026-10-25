@@ -29,7 +29,7 @@ use const DATE_ATOM;
 final readonly class Recurring
 {
     /**
-     * @param list<array{name: string, rate: float, amount: float}> $taxes
+     * @param list<array{name: string, rate: float, amount: Money}> $taxes
      * @param list<RecurringItem>                                   $items
      */
     public function __construct(
@@ -96,9 +96,9 @@ final readonly class Recurring
         /** Anzahl der bisher erzeugten Rechnungen. */
         public ?int $counter = null,
         /** Gesamtbetrag brutto. */
-        public ?float $totalGross = null,
+        public ?Money $totalGross = null,
         /** Gesamtbetrag netto. */
-        public ?float $totalNet = null,
+        public ?Money $totalNet = null,
         /** Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%"). */
         public ?string $reduction = null,
         /** Absender-Adresse der E-Mail. */
@@ -122,13 +122,13 @@ final readonly class Recurring
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /** Summe der Rabatte. */
-        public ?float $totalReduction = null,
+        public ?Money $totalReduction = null,
         /** Gesamtbetrag netto vor Rabatt. */
-        public ?float $totalNetUnreduced = null,
+        public ?Money $totalNetUnreduced = null,
         /** Gesamtbetrag brutto vor Rabatt. */
-        public ?float $totalGrossUnreduced = null,
+        public ?Money $totalGrossUnreduced = null,
         /** Skontobetrag. */
-        public ?float $discountAmount = null,
+        public ?Money $discountAmount = null,
         /** Status der Abo-Rechnung. */
         public ?string $status = null,
         /** Läuft gerade eine Rechnungserzeugung? */
@@ -189,8 +189,8 @@ final readonly class Recurring
             nextCreationDate: ScalarCaster::toDateTimeOrNull($data['next_creation_date'] ?? null),
             iterations: ScalarCaster::toIntOrNull($data['iterations'] ?? null),
             counter: ScalarCaster::toIntOrNull($data['counter'] ?? null),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
             emailSender: ScalarCaster::toStringOrNull($data['email_sender'] ?? null),
             emailSubject: ScalarCaster::toStringOrNull($data['email_subject'] ?? null),
@@ -202,10 +202,10 @@ final readonly class Recurring
             items: ListCaster::toList($data['recurring-items']['recurring-item'] ?? null, 'id', RecurringItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
-            totalReduction: ScalarCaster::toFloatOrNull($data['total_reduction'] ?? null),
-            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
-            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
-            discountAmount: ScalarCaster::toFloatOrNull($data['discount_amount'] ?? null),
+            totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
+            totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
+            totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
+            discountAmount: ScalarCaster::toMoneyOrNull($data['discount_amount'] ?? null),
             status: ScalarCaster::toStringOrNull($data['status'] ?? null),
             inProgress: ScalarCaster::toBoolOrNull($data['in_progress'] ?? null),
             ultimo: ScalarCaster::toBoolOrNull($data['ultimo'] ?? null),
@@ -258,8 +258,8 @@ final readonly class Recurring
             'next_creation_date' => $this->nextCreationDate?->format('Y-m-d'),
             'iterations' => $this->iterations,
             'counter' => $this->counter,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
+            'total_gross' => $this->totalGross?->toString(),
+            'total_net' => $this->totalNet?->toString(),
             'reduction' => $this->reduction,
             'email_sender' => $this->emailSender,
             'email_subject' => $this->emailSubject,
@@ -269,10 +269,10 @@ final readonly class Recurring
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,
-            'total_reduction' => $this->totalReduction,
-            'total_net_unreduced' => $this->totalNetUnreduced,
-            'total_gross_unreduced' => $this->totalGrossUnreduced,
-            'discount_amount' => $this->discountAmount,
+            'total_reduction' => $this->totalReduction?->toString(),
+            'total_net_unreduced' => $this->totalNetUnreduced?->toString(),
+            'total_gross_unreduced' => $this->totalGrossUnreduced?->toString(),
+            'discount_amount' => $this->discountAmount?->toString(),
             'status' => $this->status,
             'in_progress' => $this->inProgress,
             'ultimo' => $this->ultimo,

@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Article::class)]
 #[UsesClass(ArticleType::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ArticleTest extends TestCase
 {
     #[Test]
@@ -49,13 +51,13 @@ final class ArticleTest extends TestCase
         self::assertInstanceOf(DateTimeImmutable::class, $article->created);
         self::assertSame('A-007', $article->articleNumber);
         self::assertSame('SaaS-Lizenz Pro', $article->title);
-        self::assertSame(199.0, $article->salesPrice);
-        self::assertSame(189.0, $article->salesPrice2);
-        self::assertSame(179.0, $article->salesPrice3);
-        self::assertSame(169.0, $article->salesPrice4);
-        self::assertSame(159.0, $article->salesPrice5);
+        self::assertSame('199', $article->salesPrice?->toString());
+        self::assertSame('189', $article->salesPrice2?->toString());
+        self::assertSame('179', $article->salesPrice3?->toString());
+        self::assertSame('169', $article->salesPrice4?->toString());
+        self::assertSame('159', $article->salesPrice5?->toString());
         self::assertSame(42, $article->unitId);
-        self::assertSame(50.0, $article->purchasePrice);
+        self::assertSame('50', $article->purchasePrice?->toString());
         self::assertSame(11, $article->supplierId);
         self::assertSame(1, $article->taxId);
     }
@@ -104,7 +106,7 @@ final class ArticleTest extends TestCase
             'unit' => 'Stück',
         ])->toArray();
 
-        self::assertSame(99.99, $array['sales_price']);
+        self::assertSame('99.99', $array['sales_price']);
         self::assertSame('EUR', $array['currency_code']);
         self::assertArrayNotHasKey('unit', $array);
     }

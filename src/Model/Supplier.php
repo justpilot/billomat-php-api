@@ -113,9 +113,9 @@ final readonly class Supplier
         /** SEPA-Gläubiger-ID. */
         public ?string $creditorIdentifier = null,
         /** Brutto-Kosten (read-only Auswertungsfeld). */
-        public ?float $costsGross = null,
+        public ?Money $costsGross = null,
         /** Netto-Kosten (read-only Auswertungsfeld). */
-        public ?float $costsNet = null,
+        public ?Money $costsNet = null,
     ) {
     }
 
@@ -161,8 +161,8 @@ final readonly class Supplier
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             creditorAccountNumber: ScalarCaster::toStringOrNull($data['creditor_account_number'] ?? null),
             creditorIdentifier: ScalarCaster::toStringOrNull($data['creditor_identifier'] ?? null),
-            costsGross: ScalarCaster::toFloatOrNull($data['costs_gross'] ?? null),
-            costsNet: ScalarCaster::toFloatOrNull($data['costs_net'] ?? null),
+            costsGross: ScalarCaster::toMoneyOrNull($data['costs_gross'] ?? null),
+            costsNet: ScalarCaster::toMoneyOrNull($data['costs_net'] ?? null),
         );
     }
 
@@ -210,8 +210,8 @@ final readonly class Supplier
             'locale' => $this->locale,
             'creditor_account_number' => $this->creditorAccountNumber,
             'creditor_identifier' => $this->creditorIdentifier,
-            'costs_gross' => $this->costsGross,
-            'costs_net' => $this->costsNet,
+            'costs_gross' => $this->costsGross?->toString(),
+            'costs_net' => $this->costsNet?->toString(),
         ];
     }
 }

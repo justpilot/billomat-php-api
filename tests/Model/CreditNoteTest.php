@@ -11,6 +11,7 @@ use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNoteItem;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -21,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(CreditNoteItem::class)]
 #[UsesClass(CreditNoteStatus::class)]
+#[UsesClass(Money::class)]
 final class CreditNoteTest extends TestCase
 {
     #[Test]
@@ -66,8 +68,8 @@ final class CreditNoteTest extends TestCase
         self::assertSame(CreditNoteStatus::PAID, $note->status);
         self::assertInstanceOf(DateTimeImmutable::class, $note->date);
         self::assertSame(NetGross::NET, $note->netGross);
-        self::assertSame(119.0, $note->paidAmount);
-        self::assertSame(0.0, $note->openAmount);
+        self::assertSame('119', $note->paidAmount?->toString());
+        self::assertSame('0', $note->openAmount?->toString());
 
         self::assertCount(1, $note->items);
         self::assertContainsOnlyInstancesOf(CreditNoteItem::class, $note->items);

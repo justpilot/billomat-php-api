@@ -96,6 +96,7 @@ use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new RecurringCreateOptions(
     clientId: 12345,
@@ -106,7 +107,7 @@ $opts = new RecurringCreateOptions(
     startDate: new DateTimeImmutable('2026-07-01'),
 );
 
-$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90, title: 'Webhosting Basic');
+$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90'), title: 'Webhosting Basic');
 $opts = $opts->withItem($item);
 
 $recurring = $billomat->recurrings->create($opts);
@@ -178,7 +179,7 @@ Konstruktor: `new RecurringCreateOptions(int $clientId, …)` — `clientId` ist
 Positionen werden über den Konstruktor-Parameter `items` (`list<RecurringItemCreateOptions>`) übergeben und stehen danach in der Property `$items`. `withItem()` liefert eine Kopie mit einer zusätzlichen Position:
 
 ```php
-$opts = $opts->withItem(new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90));
+$opts = $opts->withItem(new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90')));
 ```
 
 `toArray()` rendert sie in `recurring-items.recurring-item`.
@@ -208,16 +209,16 @@ Spiegelt `RecurringCreateOptions` ohne `clientId`-Pflicht (jetzt optional, falls
 | `action`, `cycle` | `?RecurringAction`, `?RecurringCycle` |
 | `cycleNumber`, `hour`, `iterations`, `counter` | `?int` |
 | `lastCreationDate`, `nextCreationDate` | `?\DateTimeImmutable` |
-| `totalGross`, `totalNet` | `?float` |
+| `totalGross`, `totalNet` | `?Money` |
 | `emailSender`, `emailSubject`, `emailMessage` | `?string` |
 | `emailTemplateId`, `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
+| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
 | `items` | `list<RecurringItem>` |
 | `updated` | `?\DateTimeImmutable` |
-| `totalReduction` | `?float` |
-| `totalNetUnreduced` | `?float` |
-| `totalGrossUnreduced` | `?float` |
-| `discountAmount` | `?float` |
+| `totalReduction` | `?Money` |
+| `totalNetUnreduced` | `?Money` |
+| `totalGrossUnreduced` | `?Money` |
+| `discountAmount` | `?Money` |
 | `status` | `?string` |
 | `inProgress` | `?bool` |
 | `ultimo` | `?bool` |
@@ -243,7 +244,7 @@ $items = $billomat->recurrings->items->list($recurring->id);
 
 $item = $billomat->recurrings->items->create(
     $recurring->id,
-    new RecurringItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
+    new RecurringItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
 $billomat->recurrings->items->update($item->id, $opts);
@@ -254,12 +255,12 @@ $billomat->recurrings->items->delete($item->id);
 
 ### Write-Modell: `RecurringItemCreateOptions`
 
-Konstruktor: `new RecurringItemCreateOptions(float $quantity, float $unitPrice)`. Beide Werte sind Pflicht und werden auch dann mitgeschickt, wenn sie `0` sind.
+Konstruktor: `new RecurringItemCreateOptions(float $quantity, Money $unitPrice)`. Beide Werte sind Pflicht und werden auch dann mitgeschickt, wenn sie `0` sind.
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
 | `quantity` | `quantity` | `float` (Pflicht) |
-| `unitPrice` | `unit_price` | `float` (Pflicht) |
+| `unitPrice` | `unit_price` | `Money` (Pflicht) |
 | `type` | `type` | `?InvoiceItemType` |
 | `articleId` | `article_id` | `?int` |
 | `title`, `description`, `unit` | analog | `?string` |
@@ -357,6 +358,7 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -375,7 +377,7 @@ $opts = new RecurringCreateOptions(
     dueDays: 14,
 );
 
-$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 19.90, title: 'Webhosting Basic');
+$item = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('19.90'), title: 'Webhosting Basic');
 $opts = $opts->withItem($item);
 
 $recurring = $billomat->recurrings->create($opts);
@@ -408,7 +410,7 @@ $billomat->recurrings->tags->create(
 
 // 4) Position später anpassen — Preis-Update
 foreach ($billomat->recurrings->items->list($recurring->id) as $current) {
-    $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 24.90, title: $current->title);
+    $update = new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('24.90'), title: $current->title);
     $billomat->recurrings->items->update($current->id, $update);
 }
 ```

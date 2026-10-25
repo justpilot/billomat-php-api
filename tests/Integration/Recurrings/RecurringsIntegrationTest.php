@@ -15,6 +15,7 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Model\RecurringEmailReceiver;
 use Justpilot\Billomat\Model\RecurringItem;
@@ -72,7 +73,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
 
         $item = new RecurringItemCreateOptions(
             quantity: 1.0,
-            unitPrice: 50.0,
+            unitPrice: Money::of('50'),
             unit: 'Stück',
             taxRate: 19.0,
             title: 'Abo-Position',
@@ -137,7 +138,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
             // Zusätzliche Position über die ItemsApi anlegen
             $newItem = new RecurringItemCreateOptions(
                 quantity: 2.0,
-                unitPrice: 25.0,
+                unitPrice: Money::of('25'),
                 unit: 'Stück',
                 taxRate: 19.0,
                 title: 'Zusatz-Position',
@@ -150,7 +151,7 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
             // Update der Position
             $updateItem = new RecurringItemCreateOptions(
                 quantity: 3.0,
-                unitPrice: 25.0,
+                unitPrice: Money::of('25'),
                 title: 'Zusatz-Position (geändert)',
             );
             $updated = $billomat->recurrings->items->update($created->id, $updateItem);

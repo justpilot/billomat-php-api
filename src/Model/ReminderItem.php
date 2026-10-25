@@ -37,7 +37,7 @@ final readonly class ReminderItem
         /** Menge. */
         public float $quantity,
         /** Einzelpreis. */
-        public float $unitPrice,
+        public Money $unitPrice,
         /** Titel der Position. */
         public ?string $title,
         /** Beschreibung der Position. */
@@ -45,7 +45,7 @@ final readonly class ReminderItem
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
         /** Gesamtbetrag der Position. */
-        public ?float $total = null,
+        public ?Money $total = null,
         /** Mahngebühr statt Artikelposition? */
         public ?bool $isCharge = null,
     ) {
@@ -65,11 +65,11 @@ final readonly class ReminderItem
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
             quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
-            unitPrice: ScalarCaster::toFloatOrNull($data['unit_price'] ?? null) ?? 0.0,
+            unitPrice: ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null) ?? Money::zero(),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
-            total: ScalarCaster::toFloatOrNull($data['total'] ?? null),
+            total: ScalarCaster::toMoneyOrNull($data['total'] ?? null),
             isCharge: ScalarCaster::toBoolOrNull($data['is_charge'] ?? null),
         );
     }
@@ -90,11 +90,11 @@ final readonly class ReminderItem
             'position' => $this->position,
             'unit' => $this->unit,
             'quantity' => $this->quantity,
-            'unit_price' => $this->unitPrice,
+            'unit_price' => $this->unitPrice->toString(),
             'title' => $this->title,
             'description' => $this->description,
             'customfield' => $this->customfield,
-            'total' => $this->total,
+            'total' => $this->total?->toString(),
             'is_charge' => $this->isCharge,
         ];
     }

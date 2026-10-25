@@ -105,6 +105,7 @@ Positionen können direkt im `create()`-Call über `items: […]` oder `withItem
 ```php
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new DeliveryNoteCreateOptions(
     clientId: 12345,
@@ -112,7 +113,7 @@ $opts = new DeliveryNoteCreateOptions(
     date: new DateTimeImmutable('today'),
     title: 'Lieferschein',
     items: [
-        new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 49.90),
+        new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: Money::of('49.90')),
     ],
 );
 
@@ -167,7 +168,7 @@ $items = $billomat->deliveryNotes->items->list($note->id);
 
 $item = $billomat->deliveryNotes->items->create(
     $note->id,
-    new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
+    new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
 $billomat->deliveryNotes->items->update($item->id, $opts);
@@ -249,12 +250,12 @@ Spiegelt `DeliveryNoteCreateOptions` ohne `clientId`-Pflicht (jetzt optional) un
 
 ## Write-Modell: `DeliveryNoteItemCreateOptions`
 
-Konstruktor: `new DeliveryNoteItemCreateOptions(float $quantity, float $unitPrice)`. Beide Pflicht, werden auch bei `0` mitgeschickt.
+Konstruktor: `new DeliveryNoteItemCreateOptions(float $quantity, Money $unitPrice)`. Beide Pflicht, werden auch bei `0` mitgeschickt.
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
 | `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
-| `unitPrice` | `unit_price` | `float` | Pflicht (Konstruktor) |
+| `unitPrice` | `unit_price` | `Money` | Pflicht (Konstruktor) |
 | `type` | `type` | `?InvoiceItemType` | |
 | `articleId` | `article_id` | `?int` | |
 | `title`, `description`, `unit` | analog | `?string` | |
@@ -310,7 +311,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 | `invoiceId` | `?int` |
 | `confirmationId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
+| `taxes` | `list<array{name:string,rate:float,amount:Money}>` |
 | `items` | `list<DeliveryNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `offerId` | `?int` |
@@ -411,6 +412,7 @@ use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -427,7 +429,7 @@ $opts = new DeliveryNoteCreateOptions(
 );
 
 $item = new DeliveryNoteItemCreateOptions(
-    quantity: 3.0, unitPrice: 49.90,
+    quantity: 3.0, unitPrice: Money::of('49.90'),
     title: 'Hardware-Paket',
     type: InvoiceItemType::PRODUCT,
     unit: 'Stück',

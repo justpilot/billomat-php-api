@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -70,7 +71,7 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
 
         $item = new DeliveryNoteItemCreateOptions(
             1.0,
-            $faker->randomFloat(2, 5, 50),
+            Money::of((string) $faker->randomFloat(2, 5, 50)),
             unit: 'Stück',
             title: 'Lieferposition',
         );

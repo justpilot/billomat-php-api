@@ -12,7 +12,7 @@ Recommended order:
 
 ## PHP 8.5 is required
 
-`composer.json` now requires `"php": "^8.5"`. Composer will not install 4.0 on older PHP versions.
+`composer.json` now requires `"php": "^8.5"` and `ext-bcmath` (for `Money`, see below). Composer will not install 4.0 on older PHP versions or without bcmath.
 
 ## Removed deprecated API
 
@@ -389,3 +389,48 @@ $billomat->invoices->email($id, new EmailOptions(to: ['kunde@example.test'], sub
 
 3.x always sent `dunning_run=0`. 4.0 sends it only when you set it, so Billomat's account default
 applies. Pass `dunningRun: false` to keep the old behaviour.
+
+## Amounts are `Money` instead of `float`
+
+All monetary fields are `Justpilot\Billomat\Model\Money` instead of `float`: totals (`totalGross`, `totalNet`,
+`totalGrossUnreduced`, `totalNetUnreduced`, `totalReduction`), `openAmount`, `paidAmount`, `discountAmount`,
+`unitPrice`, `salesPrice` to `salesPrice5`, `purchasePrice`, the `amount` of payments and tax rows, `chargeAmount`,
+`total`, `revenueGross`/`revenueNet`/`costsGross`/`costsNet`, `finapiTransactionAmount` and the `InvoiceGroup` totals.
+Quantities, tax rates, discount rates and exchange rates (`quote`) stay `float`.
+
+`Money` is exact (no `0.1 + 0.2` errors), keeps Billomat's precision (unit prices have up to four decimals)
+and handles negative amounts. The currency stays on the document (`currencyCode`).
+
+Reading:
+
+```php
+// 3.x
+if ($invoice->openAmount > 0) {
+    echo number_format($invoice->openAmount, 2, ',', '.');
+}
+$open = array_sum(array_map(fn (Invoice $i) => $i->openAmount ?? 0.0, $invoices));
+
+// 4.0
+if ($invoice->openAmount?->isPositive()) {
+    echo $invoice->openAmount->format(2, ',', '.');
+}
+$open = Money::sum(...array_map(fn (Invoice $i) => $i->openAmount, $invoices));
+```
+
+Writing:
+
+```php
+// 3.x
+new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: 49.90);
+new InvoicePaymentCreateOptions(invoiceId: $id, amount: 119.0);
+
+// 4.0
+new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: Money::of('49.90'));
+new InvoicePaymentCreateOptions(invoiceId: $id, amount: Money::of('119'));
+```
+
+`Money::of()` takes a decimal string with a point or an int; `"19,99"` or `"1e3"` throw an `InvalidArgumentException`.
+Where you need a `float` (e.g. for a chart library), use `toFloat()` – precision is lost there.
+
+Payloads send amounts as JSON strings (`"unit_price":"49.9"`), and the models' `toArray()` exports them
+as strings in Billomat's form (`"40"`, `"0.1"`), no longer as floats. `json_encode($money)` gives the string, too.

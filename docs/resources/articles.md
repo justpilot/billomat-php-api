@@ -77,11 +77,12 @@ Liefert `null` bei 404.
 
 ```php
 use Justpilot\Billomat\Api\ArticleCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
 $opts = new ArticleCreateOptions(
     title: 'Webhosting Basic',
     description: 'Shared Hosting, 10 GB SSD',
-    salesPrice: 19.90,
+    salesPrice: Money::of('19.90'),
     currencyCode: 'EUR',
     unit: 'Monat',
     taxId: 12345,
@@ -114,13 +115,13 @@ Konstruktor: `new ArticleCreateOptions(string $title, …)` — `title` ist Pfli
 
 | Property | Billomat-Feld | Typ | Notes |
 |---|---|---|---|
-| `salesPrice` | `sales_price` | `?float` | Standard-Verkaufspreis |
-| `salesPrice2` | `sales_price2` | `?float` | Stufe 2 (z. B. Wiederverkäufer) |
-| `salesPrice3` | `sales_price3` | `?float` | Stufe 3 |
-| `salesPrice4` | `sales_price4` | `?float` | Stufe 4 |
-| `salesPrice5` | `sales_price5` | `?float` | Stufe 5 |
+| `salesPrice` | `sales_price` | `?Money` | Standard-Verkaufspreis |
+| `salesPrice2` | `sales_price2` | `?Money` | Stufe 2 (z. B. Wiederverkäufer) |
+| `salesPrice3` | `sales_price3` | `?Money` | Stufe 3 |
+| `salesPrice4` | `sales_price4` | `?Money` | Stufe 4 |
+| `salesPrice5` | `sales_price5` | `?Money` | Stufe 5 |
 | `currencyCode` | `currency_code` | `?string` | ISO-4217, z. B. `EUR` |
-| `purchasePrice` | `purchase_price` | `?float` | Einkaufspreis |
+| `purchasePrice` | `purchase_price` | `?Money` | Einkaufspreis |
 | `purchasePriceCurrencyCode` | `purchase_price_currency_code` | `?string` | Eigene Währung für den EK |
 
 ### Zuordnungen
@@ -151,11 +152,11 @@ Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und
 | `numberLength` | `?int` |
 | `title` | `?string` |
 | `description` | `?string` |
-| `salesPrice` | `?float` |
-| `salesPrice2` ... `salesPrice5` | `?float` |
+| `salesPrice` | `?Money` |
+| `salesPrice2` ... `salesPrice5` | `?Money` |
 | `currencyCode` | `?string` |
 | `unitId` | `?int` |
-| `purchasePrice` | `?float` |
+| `purchasePrice` | `?Money` |
 | `supplierId` | `?int` |
 | `taxId` | `?int` |
 | `updated` | `?\DateTimeImmutable` |
@@ -285,6 +286,7 @@ use Justpilot\Billomat\Api\ArticlePropertyValueCreateOptions;
 use Justpilot\Billomat\Api\ArticleTagCreateOptions;
 use Justpilot\Billomat\Api\ArticleUpdateOptions;
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
@@ -295,8 +297,8 @@ $billomat = BillomatClient::create(
 $opts = new ArticleCreateOptions(
     title: 'Webhosting Basic',
     description: 'Shared Hosting, 10 GB SSD, tägliches Backup',
-    salesPrice: 19.90,
-    salesPrice2: 17.90, // Stufe für Wiederverkäufer
+    salesPrice: Money::of('19.90'),
+    salesPrice2: Money::of('17.90'), // Stufe für Wiederverkäufer
     currencyCode: 'EUR',
     unit: 'Monat',
     taxId: 12345,
@@ -323,7 +325,7 @@ $billomat->articles->propertyValues->create(
 );
 
 // 4) Preis später anpassen — Partial-Update
-$update = new ArticleUpdateOptions(salesPrice: 24.90);
+$update = new ArticleUpdateOptions(salesPrice: Money::of('24.90'));
 $billomat->articles->update($article->id, $update);
 
 // 5) Cloud-Übersicht aller Artikel-Tags

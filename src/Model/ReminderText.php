@@ -40,7 +40,7 @@ final readonly class ReminderText
         /** Beschreibung der Mahngebühr (falls vorhanden). */
         public ?string $chargeDescription = null,
         /** Höhe der Mahngebühr (falls vorhanden). */
-        public ?float $chargeAmount = null,
+        public ?Money $chargeAmount = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
     ) {
@@ -62,7 +62,7 @@ final readonly class ReminderText
             sort: ScalarCaster::toIntOrNull($data['sorting'] ?? $data['sort'] ?? null),
             chargeName: ScalarCaster::toStringOrNull($data['charge_name'] ?? null),
             chargeDescription: ScalarCaster::toStringOrNull($data['charge_description'] ?? null),
-            chargeAmount: ScalarCaster::toFloatOrNull($data['charge_amount'] ?? null),
+            chargeAmount: ScalarCaster::toMoneyOrNull($data['charge_amount'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
         );
     }
@@ -85,7 +85,7 @@ final readonly class ReminderText
             'sort' => $this->sort,
             'charge_name' => $this->chargeName,
             'charge_description' => $this->chargeDescription,
-            'charge_amount' => $this->chargeAmount,
+            'charge_amount' => $this->chargeAmount?->toString(),
             'customfield' => $this->customfield,
         ];
     }

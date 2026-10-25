@@ -35,6 +35,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          extensions: bcmath
           coverage: xdebug
           tools: composer:v2, flex
           ini-values: memory_limit=512M
@@ -62,6 +63,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
+          extensions: bcmath
           tools: composer:v2
 
       - name: Install dependencies
@@ -85,6 +87,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
+          extensions: bcmath
           tools: composer:v2
           ini-values: memory_limit=512M
 
@@ -119,6 +122,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
+          extensions: bcmath
           coverage: xdebug
           tools: composer:v2
           ini-values: memory_limit=512M

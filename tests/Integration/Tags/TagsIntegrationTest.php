@@ -37,6 +37,7 @@ use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
 use Justpilot\Billomat\Model\LetterTag;
 use Justpilot\Billomat\Model\LetterTagCloudEntry;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\OfferTag;
 use Justpilot\Billomat\Model\OfferTagCloudEntry;
 use Justpilot\Billomat\Model\ReminderTag;
@@ -103,7 +104,7 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
             title: 'IT-TagTest '.date('His'),
             currencyCode: 'EUR',
         );
-        $item = new InvoiceItemCreateOptions(1.0, 10.0, unit: 'Stück', title: 'Pos');
+        $item = new InvoiceItemCreateOptions(1.0, Money::of('10'), unit: 'Stück', title: 'Pos');
         $opts = $opts->withItem($item);
 
         $invoice = $billomat->invoices->create($opts);

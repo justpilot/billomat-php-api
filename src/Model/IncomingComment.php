@@ -29,6 +29,18 @@ use const DATE_ATOM;
  */
 final readonly class IncomingComment
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'incoming_id' => true,
+        'comment' => true,
+        'created' => true,
+        'user_id' => true,
+        'actionkey' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne ID des Kommentars. */
         public ?int $id,
@@ -51,6 +63,12 @@ final readonly class IncomingComment
         public ?string $actionkeyRaw = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -70,6 +88,7 @@ final readonly class IncomingComment
             actionkey: IncomingCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
             actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -83,6 +102,7 @@ final readonly class IncomingComment
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
             'incoming_id' => $this->incomingId,

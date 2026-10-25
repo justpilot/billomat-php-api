@@ -23,6 +23,20 @@ use const DATE_ATOM;
  */
 final readonly class IncomingPropertyValue
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'incoming_id' => true,
+        'incoming_property_id' => true,
+        'type' => true,
+        'name' => true,
+        'value' => true,
+        'created' => true,
+        'updated' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Eigenschaftswerts. */
         public ?int $id,
@@ -42,6 +56,12 @@ final readonly class IncomingPropertyValue
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -62,6 +82,7 @@ final readonly class IncomingPropertyValue
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -75,6 +96,7 @@ final readonly class IncomingPropertyValue
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'incoming_id' => $this->incomingId,
             'incoming_property_id' => $this->incomingPropertyId,

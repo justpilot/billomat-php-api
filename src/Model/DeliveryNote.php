@@ -22,9 +22,38 @@ use const DATE_ATOM;
  */
 final readonly class DeliveryNote
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'created' => true,
+        'delivery_note_number' => true,
+        'number' => true,
+        'number_pre' => true,
+        'number_length' => true,
+        'status' => true,
+        'date' => true,
+        'address' => true,
+        'title' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'invoice_id' => true,
+        'confirmation_id' => true,
+        'free_text_id' => true,
+        'template_id' => true,
+        'taxes' => true,
+        'delivery-note-items' => true,
+        'updated' => true,
+        'customfield' => true,
+        'offer_id' => true,
+    ];
+
     /**
      * @param list<TaxSummary>       $taxes
      * @param list<DeliveryNoteItem> $items
+     * @param array<string, mixed>   $extra
      */
     public function __construct(
         /** Interne Billomat-ID des Lieferscheins. */
@@ -79,6 +108,12 @@ final readonly class DeliveryNote
         public ?string $customfield = null,
         /** ID des Quell-Angebots. */
         public ?int $offerId = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -114,6 +149,7 @@ final readonly class DeliveryNote
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -127,6 +163,7 @@ final readonly class DeliveryNote
     public function toArray(): array
     {
         $data = [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,

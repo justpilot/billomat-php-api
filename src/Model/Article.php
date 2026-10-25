@@ -25,6 +25,36 @@ use const DATE_ATOM;
  */
 final readonly class Article
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'created' => true,
+        'article_number' => true,
+        'number' => true,
+        'number_pre' => true,
+        'number_length' => true,
+        'title' => true,
+        'description' => true,
+        'sales_price' => true,
+        'currency_code' => true,
+        'sales_price2' => true,
+        'sales_price3' => true,
+        'sales_price4' => true,
+        'sales_price5' => true,
+        'unit_id' => true,
+        'purchase_price' => true,
+        'supplier_id' => true,
+        'tax_id' => true,
+        'updated' => true,
+        'customfield' => true,
+        'archived' => true,
+        'type' => true,
+        'revenue_account_number' => true,
+        'cost_center' => true,
+        'purchase_price_net_gross' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Artikels. */
         public ?int $id,
@@ -100,6 +130,12 @@ final readonly class Article
         public ?string $costCenter = null,
         /** Preisbasis des Einkaufspreises (netto oder brutto). */
         public ?NetGross $purchasePriceNetGross = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -136,6 +172,7 @@ final readonly class Article
             revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
             costCenter: ScalarCaster::toStringOrNull($data['cost_center'] ?? null),
             purchasePriceNetGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null) ?? ''),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -149,6 +186,7 @@ final readonly class Article
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
             'article_number' => $this->articleNumber,

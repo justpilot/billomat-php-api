@@ -22,6 +22,22 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class ReminderText
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'subject' => true,
+        'header' => true,
+        'footer' => true,
+        'sorting' => true,
+        'sort' => true,
+        'charge_name' => true,
+        'charge_description' => true,
+        'charge_amount' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Mahnstufe. */
         public ?int $id,
@@ -43,6 +59,12 @@ final readonly class ReminderText
         public ?Money $chargeAmount = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -64,6 +86,7 @@ final readonly class ReminderText
             chargeDescription: ScalarCaster::toStringOrNull($data['charge_description'] ?? null),
             chargeAmount: ScalarCaster::toMoneyOrNull($data['charge_amount'] ?? null),
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -77,6 +100,7 @@ final readonly class ReminderText
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'subject' => $this->subject,

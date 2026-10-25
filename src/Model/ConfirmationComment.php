@@ -29,6 +29,22 @@ use const DATE_ATOM;
  */
 final readonly class ConfirmationComment
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'confirmation_id' => true,
+        'comment' => true,
+        'created' => true,
+        'user_id' => true,
+        'actionkey' => true,
+        'customfield' => true,
+        'public' => true,
+        'by_client' => true,
+        'email_id' => true,
+        'client_id' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne ID des Kommentars. */
         public ?int $id,
@@ -59,6 +75,12 @@ final readonly class ConfirmationComment
         public ?int $emailId = null,
         /** ID des Kunden. */
         public ?int $clientId = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -82,6 +104,7 @@ final readonly class ConfirmationComment
             byClient: ScalarCaster::toBoolOrNull($data['by_client'] ?? null),
             emailId: ScalarCaster::toIntOrNull($data['email_id'] ?? null),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -95,6 +118,7 @@ final readonly class ConfirmationComment
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
             'confirmation_id' => $this->confirmationId,

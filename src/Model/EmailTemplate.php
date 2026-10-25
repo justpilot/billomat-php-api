@@ -26,6 +26,22 @@ use const DATE_ATOM;
  */
 final readonly class EmailTemplate
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'subject' => true,
+        'text' => true,
+        'body' => true,
+        'from' => true,
+        'is_default' => true,
+        'type' => true,
+        'bcc' => true,
+        'created' => true,
+        'updated' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Vorlage. */
         public ?int $id,
@@ -55,6 +71,12 @@ final readonly class EmailTemplate
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -76,6 +98,7 @@ final readonly class EmailTemplate
             bcc: ScalarCaster::toBoolOrNull($data['bcc'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -89,6 +112,7 @@ final readonly class EmailTemplate
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'subject' => $this->subject,

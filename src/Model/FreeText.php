@@ -23,6 +23,21 @@ use const DATE_ATOM;
  */
 final readonly class FreeText
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'title' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'created' => true,
+        'updated' => true,
+        'type' => true,
+        'name' => true,
+        'is_default' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Freitexts. */
         public ?int $id,
@@ -48,6 +63,12 @@ final readonly class FreeText
         public ?string $name = null,
         /** Standard-Freitext für den Dokumenttyp? */
         public ?bool $isDefault = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -69,6 +90,7 @@ final readonly class FreeText
             type: FreeTextType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -82,6 +104,7 @@ final readonly class FreeText
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'title' => $this->title,
             'label' => $this->label,

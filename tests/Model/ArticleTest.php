@@ -98,16 +98,19 @@ final class ArticleTest extends TestCase
     #[Test]
     public function toArrayRoundTrips(): void
     {
-        $array = Article::fromArray([
+        $article = Article::fromArray([
             'id' => '7',
             'title' => 'Test',
             'sales_price' => '99.99',
             'currency_code' => 'EUR',
             'unit' => 'Stück',
-        ])->toArray();
+        ]);
+        $array = $article->toArray();
 
         self::assertSame('99.99', $array['sales_price']);
         self::assertSame('EUR', $array['currency_code']);
-        self::assertArrayNotHasKey('unit', $array);
+        // `unit` bildet das Model seit 4.0 nicht mehr ab; der Rohwert bleibt in `extra`.
+        self::assertSame(['unit' => 'Stück'], $article->extra);
+        self::assertSame('Stück', $array['unit']);
     }
 }

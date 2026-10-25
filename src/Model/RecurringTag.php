@@ -19,6 +19,15 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class RecurringTag
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'recurring_id' => true,
+        'name' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Schlagworts. */
         public ?int $id,
@@ -28,6 +37,12 @@ final readonly class RecurringTag
         public string $name,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customfield = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -43,6 +58,7 @@ final readonly class RecurringTag
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null) ?? 0,
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -56,6 +72,7 @@ final readonly class RecurringTag
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'recurring_id' => $this->recurringId,
             'name' => $this->name,

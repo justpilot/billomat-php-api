@@ -17,6 +17,14 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class IncomingCategory
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'title' => true,
+        'description' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Kennung der Kategorie. */
         public string $id,
@@ -24,6 +32,12 @@ final readonly class IncomingCategory
         public ?string $title = null,
         /** Beschreibung der Kategorie. */
         public ?string $description = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -38,6 +52,7 @@ final readonly class IncomingCategory
             id: ScalarCaster::toStringOrNull($data['id'] ?? null) ?? '',
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -51,6 +66,7 @@ final readonly class IncomingCategory
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,

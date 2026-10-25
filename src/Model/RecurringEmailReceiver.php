@@ -18,6 +18,15 @@ use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
  */
 final readonly class RecurringEmailReceiver
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'recurring_id' => true,
+        'type' => true,
+        'address' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Empfängers. */
         public ?int $id,
@@ -27,6 +36,12 @@ final readonly class RecurringEmailReceiver
         public RecurringEmailReceiverType $type,
         /** E-Mail-Adresse. */
         public string $address,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -42,6 +57,7 @@ final readonly class RecurringEmailReceiver
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null) ?? 0,
             type: RecurringEmailReceiverType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null) ?? '',
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -55,6 +71,7 @@ final readonly class RecurringEmailReceiver
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'recurring_id' => $this->recurringId,
             'type' => $this->type->value,

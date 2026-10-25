@@ -62,6 +62,27 @@ final class ModelRoundTripTest extends TestCase
      */
     #[Test]
     #[DataProvider('generatedModels')]
+    public function unknownFieldsAreKeptInExtra(string $class): void
+    {
+        $known = $this->export($this->sample($class, empty: false));
+        $data = [...$known, 'zz_neues_feld' => 'wert', 'zz_neue_liste' => ['a' => '1']];
+
+        $model = $class::fromArray($data);
+        self::assertIsObject($model);
+        $exported = $this->export($model);
+
+        self::assertSame(['zz_neues_feld' => 'wert', 'zz_neue_liste' => ['a' => '1']], new ReflectionProperty($class, 'extra')->getValue($model));
+        self::assertSame('wert', $exported['zz_neues_feld']);
+        self::assertSame(['a' => '1'], $exported['zz_neue_liste']);
+        // Abgebildete Felder überschreiben gleichnamige Einträge in `extra`.
+        self::assertEquals($known, array_diff_key($exported, ['zz_neues_feld' => true, 'zz_neue_liste' => true]));
+    }
+
+    /**
+     * @param class-string $class
+     */
+    #[Test]
+    #[DataProvider('generatedModels')]
     public function missingFieldsFallBackToEmptyValues(string $class): void
     {
         $model = $class::fromArray([]);

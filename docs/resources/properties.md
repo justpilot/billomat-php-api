@@ -58,20 +58,23 @@ All five APIs offer the same verbs with the same signatures. Path and read model
 
 The examples mostly use the article properties; the other four behave exactly the same.
 
-### `list(array $filters = []): list<TProperty>`
+### `list(SubResourceFilter|array $filters = []): list<TProperty>`
 
-Lists all property definitions. Filters are passed through 1:1 as query parameters; array values are encoded as `key[]=…`.
+Lists all property definitions. `SubResourceFilter` sorts and paginates (`orderBy`, `page`, `perPage`, `extra`); a raw array is passed through 1:1 as query parameters (array values are encoded as `key[]=…`).
 
 ```php
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SubResourceFilter;
+
 $all = $billomat->articles->properties->list();
 
-$paged = $billomat->clients->properties->list([
-    'per_page' => 100,
-    'order_by' => 'position+ASC',
-]);
+$paged = $billomat->clients->properties->list(new SubResourceFilter(
+    orderBy: OrderBy::asc('position'),
+    perPage: 100,
+));
 ```
 
-`listPage(array $filters = [])` additionally returns the pagination metadata; `iterateAll(array $filters = [], int $pageSize = 100)` walks through all pages lazily. See [Pagination](../advanced/pagination.md).
+`listPage(SubResourceFilter|array $filters = [])` additionally returns the pagination metadata; `iterateAll(SubResourceFilter|array $filters = [], int $pageSize = 100)` walks through all pages lazily. See [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?TProperty`
 

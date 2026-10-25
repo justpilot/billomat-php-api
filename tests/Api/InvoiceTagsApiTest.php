@@ -148,7 +148,7 @@ final class InvoiceTagsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoicesApi($http)->tags;
 
-        $tag = $api->create(new InvoiceTagCreateOptions(invoiceId: 100, name: 'wichtig'));
+        $tag = $api->create(100, new InvoiceTagCreateOptions(name: 'wichtig'));
 
         self::assertSame(33, $tag->id);
         self::assertSame('POST', $captured->method);

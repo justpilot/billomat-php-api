@@ -32,40 +32,40 @@ final class PropertiesApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'property';
 
     /**
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TProperty>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(SubResourceFilter|array $filters = []): array
     {
-        return $this->listWhere($filters);
+        return $this->listFor(null, $filters);
     }
 
     /**
      * Liefert eine einzelne Seite samt Pagination-Metadaten.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<TProperty>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(SubResourceFilter|array $filters = []): Page
     {
-        return $this->listResourcePage($this->path, $this->listKey, $this->key, $this->hydrate, $filters);
+        return $this->pageFor(null, $filters);
     }
 
     /**
      * Iteriert lazy durch alle Attribut-Definitionen und yieldet sie einzeln.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, TProperty>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
     {
-        yield from $this->iterateResource($this->path, $this->listKey, $this->key, $this->hydrate, $filters, $pageSize);
+        yield from $this->iterateFor(null, $filters, $pageSize);
     }
 
     /**

@@ -116,7 +116,7 @@ final class DeliveryNoteTagsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->tags;
 
-        $tag = $api->create(new DeliveryNoteTagCreateOptions(deliveryNoteId: 42, name: 'neu'));
+        $tag = $api->create(42, new DeliveryNoteTagCreateOptions(name: 'neu'));
         self::assertSame(99, $tag->id);
         $api->delete(99);
     }

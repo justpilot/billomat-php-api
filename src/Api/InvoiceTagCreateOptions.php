@@ -17,13 +17,6 @@ final readonly class InvoiceTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: invoice_id
-         * Typ: INT
-         */
-        public int $invoiceId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class InvoiceTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `invoiceId`. */
-    public function withInvoiceId(int $invoiceId): self
-    {
-        return clone($this, ['invoiceId' => $invoiceId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class InvoiceTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'invoice_id' => $this->invoiceId,
             'name' => $this->name,
         ];
     }

@@ -47,7 +47,7 @@ $invoice = $billomat->invoices->create(new InvoiceCreateOptions(
 ));
 
 $billomat->invoices->complete($invoice->id);                             // assigns the number
-$pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED, rawPdf: true);
+$pdf = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
 file_put_contents("invoice-{$invoice->id}.pdf", $pdf);
 
 echo $billomat->invoices->getOrFail($invoice->id)->totalGross?->format(2, ',', '.'); // "904,40" with 19 % VAT

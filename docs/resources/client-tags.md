@@ -25,17 +25,18 @@ The two views map to two methods with two separate read models.
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($clientId)` | GET | `/client-tags?client_id={id}` |
+| `list($clientId, $filters?)` | GET | `/client-tags?client_id={id}` |
+| `listPage($clientId, $filters?)` / `iterateAll($clientId, $filters?, $pageSize?)` | GET | `/client-tags?client_id={id}` (paginated) |
 | `cloud()` | GET | `/client-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/client-tags/{id}` |
-| `create($options)` | POST | `/client-tags` |
+| `create($clientId, $options)` | POST | `/client-tags` |
 | `delete($id)` | DELETE | `/client-tags/{id}` |
 
 There is no `update()` method: delete the tag and create a new one.
 
 ## Methods
 
-### `list(int $clientId): list<ClientTag>`
+### `list(int $clientId, SubResourceFilter|array $filters = []): list<ClientTag>`
 
 Lists the tags of a single client.
 
@@ -45,6 +46,15 @@ $tags = $billomat->clients->tags->list(98765);
 foreach ($tags as $tag) {
     echo $tag->name . "\n";
 }
+```
+
+`SubResourceFilter` sorts and paginates (`orderBy`, `page`, `perPage`, `extra`); `listPage()` and `iterateAll()` work the same way. See [Pagination](../advanced/pagination.md).
+
+```php
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SubResourceFilter;
+
+$tags = $billomat->clients->tags->list(98765, new SubResourceFilter(orderBy: OrderBy::asc('name')));
 ```
 
 ### `cloud(): list<ClientTagCloudEntry>`
@@ -61,13 +71,14 @@ foreach ($billomat->clients->tags->cloud() as $entry) {
 
 Returns `null` on 404. `getOrFail(int $id): ClientTag` throws a `NotFoundException` instead.
 
-### `create(ClientTagCreateOptions $options): ClientTag`
+### `create(int $clientId, ClientTagCreateOptions $options): ClientTag`
 
 ```php
 use Justpilot\Billomat\Api\ClientTagCreateOptions;
 
 $tag = $billomat->clients->tags->create(
-    new ClientTagCreateOptions(clientId: 98765, name: 'A-client'),
+    98765,
+    new ClientTagCreateOptions(name: 'A-client'),
 );
 ```
 
@@ -79,14 +90,11 @@ Removes the link between client and tag. Once a tag is no longer used on any cli
 
 ## Write model: `ClientTagCreateOptions`
 
-Constructor: `new ClientTagCreateOptions(int $clientId, string $name)`. Both values are required. The object is `final readonly`; `withClientId()` and `withName()` return a modified copy.
+Constructor: `new ClientTagCreateOptions(string $name)`. The object is `final readonly`; `withName()` returns a modified copy. The client ID is the first argument of `create()`, which adds it to the payload as `client_id`.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` | Required |
 | `name` | `name` | `string` | Required, free text |
-
-`toArray()` strips nothing here, since both fields are always set.
 
 ## Read model: `ClientTag`
 
@@ -145,7 +153,8 @@ $clientId = 98765;
 // 1) Attach tags to a client
 foreach (['A-client', 'regular', '2026-Q2'] as $name) {
     $billomat->clients->tags->create(
-        new ClientTagCreateOptions(clientId: $clientId, name: $name),
+        $clientId,
+        new ClientTagCreateOptions(name: $name),
     );
 }
 

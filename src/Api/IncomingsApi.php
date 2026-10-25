@@ -49,10 +49,10 @@ final class IncomingsApi extends AbstractApi
     /**
      * Zahlungen, siehe {@see PaymentsApi}.
      *
-     * @var PaymentsApi<IncomingPayment, IncomingPaymentCreateOptions>
+     * @var PaymentsApi<IncomingPayment, IncomingPaymentCreateOptions, IncomingPaymentFilter>
      */
     public private(set) PaymentsApi $payments {
-        get => $this->payments ??= new PaymentsApi($this->http, 'incoming', IncomingPayment::fromArray(...), IncomingPaymentCreateOptions::class);
+        get => $this->payments ??= new PaymentsApi($this->http, 'incoming', IncomingPayment::fromArray(...), IncomingPaymentCreateOptions::class, IncomingPaymentFilter::class);
     }
 
     /**
@@ -76,10 +76,10 @@ final class IncomingsApi extends AbstractApi
     /**
      * Attributwerte, siehe {@see PropertyValuesApi}.
      *
-     * @var PropertyValuesApi<IncomingPropertyValue, IncomingPropertyValueCreateOptions>
+     * @var PropertyValuesApi<IncomingPropertyValue, IncomingPropertyValueCreateOptions, IncomingPropertyValueFilter>
      */
     public private(set) PropertyValuesApi $propertyValues {
-        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'incoming', IncomingPropertyValue::fromArray(...), IncomingPropertyValueCreateOptions::class);
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'incoming', IncomingPropertyValue::fromArray(...), IncomingPropertyValueCreateOptions::class, IncomingPropertyValueFilter::class);
     }
 
     /**

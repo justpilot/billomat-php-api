@@ -17,24 +17,12 @@ final readonly class ConfirmationTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: confirmation_id
-         */
-        public int $confirmationId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `confirmationId`. */
-    public function withConfirmationId(int $confirmationId): self
-    {
-        return clone($this, ['confirmationId' => $confirmationId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -51,7 +39,6 @@ final readonly class ConfirmationTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'confirmation_id' => $this->confirmationId,
             'name' => $this->name,
         ];
     }

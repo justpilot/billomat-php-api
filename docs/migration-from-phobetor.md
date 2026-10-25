@@ -233,7 +233,7 @@ file_put_contents("invoice-{$invoiceId}.pdf", (string) $response->getBody());
 use Justpilot\Billomat\Model\Enum\PdfType;
 
 $billomat->invoices->complete($invoiceId);
-$pdf = $billomat->invoices->pdf($invoiceId, PdfType::SIGNED, rawPdf: true);
+$pdf = $billomat->invoices->pdfContent($invoiceId, PdfType::SIGNED);
 file_put_contents("invoice-{$invoiceId}.pdf", $pdf);
 ```
 

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Model\RecurringEmailReceiver;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -36,17 +38,48 @@ final class RecurringEmailReceiversApi extends AbstractSubResourceApi
     /**
      * Listet die E-Mail-Empfänger einer Abo-Rechnung.
      *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
      * @return list<RecurringEmailReceiver>
      */
     #[NoDiscard]
-    public function list(int $recurringId): array
+    public function list(int $recurringId, SubResourceFilter|array $filters = []): array
     {
-        return $this->listWhere(['recurring_id' => $recurringId]);
+        return $this->listFor($recurringId, $filters);
     }
 
-    public function create(RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<RecurringEmailReceiver>
+     */
+    #[NoDiscard]
+    public function listPage(int $recurringId, SubResourceFilter|array $filters = []): Page
     {
-        return $this->createFrom($options->toArray());
+        return $this->pageFor($recurringId, $filters);
+    }
+
+    /**
+     * Iteriert lazy durch alle Treffer und yieldet sie einzeln.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
+     *
+     * @return Generator<int, RecurringEmailReceiver>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $recurringId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateFor($recurringId, $filters, $pageSize);
+    }
+
+    /**
+     * Fügt einer Abo-Rechnung einen E-Mail-Empfänger hinzu.
+     */
+    public function create(int $recurringId, RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
+    {
+        return $this->createFor($recurringId, $options);
     }
 
     public function delete(int $id): void

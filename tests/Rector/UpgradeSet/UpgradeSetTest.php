@@ -7,6 +7,8 @@ namespace Justpilot\Billomat\Tests\Rector\UpgradeSet;
 use Iterator;
 use Justpilot\Billomat\Rector\GetItemsToPropertyRector;
 use Justpilot\Billomat\Rector\NestedSubResourceRector;
+use Justpilot\Billomat\Rector\ParentIdToCreateArgumentRector;
+use Justpilot\Billomat\Rector\PdfContentRector;
 use Justpilot\Billomat\Rector\SubResourceMap;
 use Justpilot\Billomat\Rector\SubResourceMethodRector;
 use Justpilot\Billomat\Tests\Rector\AbstractIsolatedRectorTestCase;
@@ -21,6 +23,8 @@ use PHPUnit\Framework\Attributes\Test;
 #[CoversClass(NestedSubResourceRector::class)]
 #[CoversClass(SubResourceMethodRector::class)]
 #[CoversClass(GetItemsToPropertyRector::class)]
+#[CoversClass(ParentIdToCreateArgumentRector::class)]
+#[CoversClass(PdfContentRector::class)]
 #[CoversClass(SubResourceMap::class)]
 final class UpgradeSetTest extends AbstractIsolatedRectorTestCase
 {

@@ -53,10 +53,10 @@ final class ClientsApi extends AbstractApi
     /**
      * Attributwerte, siehe {@see PropertyValuesApi}.
      *
-     * @var PropertyValuesApi<ClientPropertyValue, ClientPropertyValueCreateOptions>
+     * @var PropertyValuesApi<ClientPropertyValue, ClientPropertyValueCreateOptions, ClientPropertyValueFilter>
      */
     public private(set) PropertyValuesApi $propertyValues {
-        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'client', ClientPropertyValue::fromArray(...), ClientPropertyValueCreateOptions::class);
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'client', ClientPropertyValue::fromArray(...), ClientPropertyValueCreateOptions::class, ClientPropertyValueFilter::class);
     }
 
     #[NoDiscard]

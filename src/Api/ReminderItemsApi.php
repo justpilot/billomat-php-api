@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Model\ReminderItem;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -34,13 +36,39 @@ final class ReminderItemsApi extends AbstractSubResourceApi
     /**
      * Listet die Positionen einer Mahnung.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $query zusätzliche Filter (page, per_page, …)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters Sortierung, Seite, …
      *
      * @return list<ReminderItem>
      */
     #[NoDiscard]
-    public function list(int $reminderId, array $query = []): array
+    public function list(int $reminderId, SubResourceFilter|array $filters = []): array
     {
-        return $this->listWhere(['reminder_id' => $reminderId, ...$query]);
+        return $this->listFor($reminderId, $filters);
+    }
+
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<ReminderItem>
+     */
+    #[NoDiscard]
+    public function listPage(int $reminderId, SubResourceFilter|array $filters = []): Page
+    {
+        return $this->pageFor($reminderId, $filters);
+    }
+
+    /**
+     * Iteriert lazy durch alle Positionen einer Mahnung und yieldet sie einzeln.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
+     *
+     * @return Generator<int, ReminderItem>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $reminderId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateFor($reminderId, $filters, $pageSize);
     }
 }

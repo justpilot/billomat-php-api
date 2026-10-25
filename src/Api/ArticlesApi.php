@@ -52,10 +52,10 @@ final class ArticlesApi extends AbstractApi
     /**
      * Attributwerte, siehe {@see PropertyValuesApi}.
      *
-     * @var PropertyValuesApi<ArticlePropertyValue, ArticlePropertyValueCreateOptions>
+     * @var PropertyValuesApi<ArticlePropertyValue, ArticlePropertyValueCreateOptions, ArticlePropertyValueFilter>
      */
     public private(set) PropertyValuesApi $propertyValues {
-        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'article', ArticlePropertyValue::fromArray(...), ArticlePropertyValueCreateOptions::class);
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'article', ArticlePropertyValue::fromArray(...), ArticlePropertyValueCreateOptions::class, ArticlePropertyValueFilter::class);
     }
 
     /**

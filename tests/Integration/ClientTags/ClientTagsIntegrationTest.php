@@ -59,8 +59,8 @@ final class ClientTagsIntegrationTest extends AbstractBillomatIntegrationTestCas
         $billomat = $this->createBillomatClientOrSkip();
         $clientId = $this->ensureClientId();
 
-        $opts = new ClientTagCreateOptions(clientId: $clientId, name: 'IT-CT-'.date('His'));
-        $tag = $billomat->clients->tags->create($opts);
+        $opts = new ClientTagCreateOptions(name: 'IT-CT-'.date('His'));
+        $tag = $billomat->clients->tags->create($clientId, $opts);
 
         self::assertNotNull($tag->id);
 

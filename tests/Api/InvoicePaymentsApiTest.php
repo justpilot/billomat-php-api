@@ -182,7 +182,6 @@ final class InvoicePaymentsApiTest extends TestCase
         $api = new InvoicesApi($http)->payments;
 
         $opts = new InvoicePaymentCreateOptions(
-            invoiceId: 300,
             amount: Money::of('119'),
             date: new DateTimeImmutable('2025-03-01'),
             type: PaymentType::BANK_TRANSFER,
@@ -191,7 +190,7 @@ final class InvoicePaymentsApiTest extends TestCase
             markInvoiceAsPaid: true,
         );
 
-        $payment = $api->create($opts);
+        $payment = $api->create(300, $opts);
 
         self::assertSame(10, $payment->id);
         self::assertSame(300, $payment->invoiceId);

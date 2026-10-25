@@ -7,6 +7,7 @@ use Justpilot\Billomat\Api\InvoiceCommentsApi;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceEmailOptions;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
+use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\Api\OfferCommentsApi;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
@@ -46,6 +47,8 @@ final class Billomat3xUsage
         $items = $options->getItems();
 
         $pdf = $this->billomat->offers->pdf($id, InvoicePdfType::PRINT);
+        $binary = $this->billomat->invoices->pdf($id, InvoicePdfType::SIGNED, rawPdf: true);
+        $tag = $this->billomat->invoiceTags->create(new InvoiceTagCreateOptions(invoiceId: $id, name: 'VIP'));
         $won = $this->billomat->offers->get($id)?->status === OfferStatus::ACCEPTED;
         $lost = OfferStatus::REJECTED;
         $types = [ArticleType::SERVICE, InvoiceItemType::PRODUCT, InvoicePaymentType::PAYPAL];
@@ -67,6 +70,7 @@ use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\ReminderText;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
+use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
@@ -100,6 +104,8 @@ final class Billomat3xUsage
         $items = $options->items;
 
         $pdf = $this->billomat->offers->pdf($id, PdfType::PRINT);
+        $binary = $this->billomat->invoices->pdfContent($id, PdfType::SIGNED);
+        $tag = $this->billomat->invoices->tags->create($id, new InvoiceTagCreateOptions(name: 'VIP'));
         $won = $this->billomat->offers->get($id)?->status === OfferStatus::WON;
         $lost = OfferStatus::LOST;
         $types = [ItemType::SERVICE, ItemType::PRODUCT, PaymentType::PAYPAL];

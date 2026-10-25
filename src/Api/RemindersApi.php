@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Reminder;
@@ -196,25 +197,27 @@ final class RemindersApi extends AbstractApi
     }
 
     /**
-     * @return ReminderPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Ruft das PDF einer Mahnung als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /reminders/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): ReminderPdf|string
+    public function pdf(int $id, ?PdfType $type = null): ReminderPdf
     {
-        $query = [];
-
-        if ($type instanceof PdfType) {
-            $query['type'] = $type->value;
-        }
-
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
-
-            return $this->getPdf("/reminders/{$id}/pdf", $query);
-        }
-
-        $data = $this->getJson("/reminders/{$id}/pdf", $query);
+        $data = $this->getJson("/reminders/{$id}/pdf", self::pdfQuery($type));
 
         return ReminderPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching reminder PDF'));
+    }
+
+    /**
+     * Ruft das PDF einer Mahnung als binären Inhalt ab (GET /reminders/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/reminders/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
 }

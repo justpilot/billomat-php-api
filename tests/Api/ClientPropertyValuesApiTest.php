@@ -92,8 +92,7 @@ final class ClientPropertyValuesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->propertyValues;
 
-        $value = $api->create(new ClientPropertyValueCreateOptions(
-            clientId: 42,
+        $value = $api->create(42, new ClientPropertyValueCreateOptions(
             clientPropertyId: 7,
             value: 'Logistik',
         ));

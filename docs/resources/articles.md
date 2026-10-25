@@ -42,10 +42,11 @@ An article is a reusable line item that invoices, offers and recurring invoices 
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($articleId)` | GET | `/article-tags?article_id={id}` |
+| `list($articleId, $filters?)` | GET | `/article-tags?article_id={id}` |
+| `listPage($articleId, $filters?)` / `iterateAll($articleId, $filters?, $pageSize?)` | GET | `/article-tags?article_id={id}` (paginated) |
 | `cloud()` | GET | `/article-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/article-tags/{id}` |
-| `create($options)` | POST | `/article-tags` |
+| `create($articleId, $options)` | POST | `/article-tags` |
 | `delete($id)` | DELETE | `/article-tags/{id}` |
 
 ### `/article-property-values`
@@ -56,7 +57,7 @@ An article is a reusable line item that invoices, offers and recurring invoices 
 | `listPage($articleId?, $filters?)` | GET | `/article-property-values` |
 | `iterateAll($articleId?, $filters?, $pageSize?)` | GET | `/article-property-values` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/article-property-values/{id}` |
-| `create($options)` | POST | `/article-property-values` |
+| `create($articleId, $options)` | POST | `/article-property-values` |
 
 ## Articles
 
@@ -193,7 +194,8 @@ Works exactly like [Invoice Tags](invoice-tags.md), but for an article instead o
 use Justpilot\Billomat\Api\ArticleTagCreateOptions;
 
 $tag = $billomat->articles->tags->create(
-    new ArticleTagCreateOptions(articleId: $article->id, name: 'hosting'),
+    $article->id,
+    new ArticleTagCreateOptions(name: 'hosting'),
 );
 
 $tags  = $billomat->articles->tags->list($article->id);
@@ -205,11 +207,12 @@ There is no `update()`: delete the tag and create a new one.
 
 ### Write model: `ArticleTagCreateOptions`
 
+The article ID isn't part of the options: pass it as the first argument of `create()`, which adds `article_id` to the payload.
+
 Both values are required and set via the constructor:
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `articleId` | `article_id` | `int` (required) | — |
 | `name` | `name` | `string` (required) | — |
 
 ### Read model: `ArticleTag`
@@ -237,14 +240,22 @@ Stores the values for the article properties defined in [`properties.md`](proper
 
 ```php
 use Justpilot\Billomat\Api\ArticlePropertyValueCreateOptions;
+use Justpilot\Billomat\Api\ArticlePropertyValueFilter;
+use Justpilot\Billomat\Api\OrderBy;
 
 // List the values of one article
 $values = $billomat->articles->propertyValues->list($article->id);
 
+// Only the values of property 12, typed filter with sorting
+$values = $billomat->articles->propertyValues->list($article->id, new ArticlePropertyValueFilter(
+    articlePropertyId: 12,
+    orderBy: OrderBy::desc('updated'),
+));
+
 // Set the value of the property "Lead time" (id = 42)
 $value = $billomat->articles->propertyValues->create(
+    $article->id,
     new ArticlePropertyValueCreateOptions(
-        articleId: $article->id,
         articlePropertyId: 42,
         value: '3-5 business days',
     ),
@@ -255,11 +266,12 @@ There is neither `update()` nor `delete()`: calling `create()` again with the sa
 
 ### Write model: `ArticlePropertyValueCreateOptions`
 
-All three values are required and set via the constructor:
+The article ID isn't part of the options: pass it as the first argument of `create()`, which adds `article_id` to the payload.
+
+Both values are required and set via the constructor.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `articleId` | `article_id` | `int` (required) | — |
 | `articlePropertyId` | `article_property_id` | `int` (required) | ID of the property definition |
 | `value` | `value` | `mixed` (required) | `CHECKBOX` expects `0`/`1` |
 
@@ -331,16 +343,18 @@ printf("Article #%d (%s) created\n", $article->id, $article->articleNumber);
 
 // 2) Add tags for later filtering
 $billomat->articles->tags->create(
-    new ArticleTagCreateOptions(articleId: $article->id, name: 'hosting'),
+    $article->id,
+    new ArticleTagCreateOptions(name: 'hosting'),
 );
 $billomat->articles->tags->create(
-    new ArticleTagCreateOptions(articleId: $article->id, name: 'subscription'),
+    $article->id,
+    new ArticleTagCreateOptions(name: 'subscription'),
 );
 
 // 3) Set a custom property ("Lead time" = ArticleProperty #42)
 $billomat->articles->propertyValues->create(
+    $article->id,
     new ArticlePropertyValueCreateOptions(
-        articleId: $article->id,
         articlePropertyId: 42,
         value: 'Available immediately',
     ),

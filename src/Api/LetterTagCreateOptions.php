@@ -17,24 +17,12 @@ final readonly class LetterTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: letter_id
-         */
-        public int $letterId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `letterId`. */
-    public function withLetterId(int $letterId): self
-    {
-        return clone($this, ['letterId' => $letterId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -51,7 +39,6 @@ final readonly class LetterTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'letter_id' => $this->letterId,
             'name' => $this->name,
         ];
     }

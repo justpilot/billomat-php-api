@@ -132,14 +132,13 @@ final class CreditNotePaymentsApiTest extends TestCase
         ))->payments;
 
         $opts = new CreditNotePaymentCreateOptions(
-            creditNoteId: 42,
             amount: Money::of('100'),
             date: new DateTimeImmutable('2026-02-01'),
             type: PaymentType::BANK_TRANSFER,
             markCreditNoteAsPaid: true,
         );
 
-        $created = $api->create($opts);
+        $created = $api->create(42, $opts);
 
         self::assertSame(99, $created->id);
 

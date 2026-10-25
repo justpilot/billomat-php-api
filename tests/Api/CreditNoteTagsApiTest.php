@@ -104,7 +104,7 @@ final class CreditNoteTagsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->tags;
 
-        $tag = $api->create(new CreditNoteTagCreateOptions(creditNoteId: 42, name: 'neu'));
+        $tag = $api->create(42, new CreditNoteTagCreateOptions(name: 'neu'));
         self::assertSame(99, $tag->id);
         $api->delete(99);
     }

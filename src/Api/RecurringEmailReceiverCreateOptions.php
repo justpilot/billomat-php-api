@@ -21,13 +21,6 @@ final readonly class RecurringEmailReceiverCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID der Abo-Rechnung.
-         *
-         * Billomat-Feld: recurring_id
-         * Typ: INT
-         */
-        public int $recurringId,
-        /**
          * Empfänger-Typ (To, Cc oder Bcc).
          *
          * Billomat-Feld: type
@@ -42,12 +35,6 @@ final readonly class RecurringEmailReceiverCreateOptions implements WriteOptions
          */
         public string $address,
     ) {
-    }
-
-    /** Kopie mit geändertem `recurringId`. */
-    public function withRecurringId(int $recurringId): self
-    {
-        return clone($this, ['recurringId' => $recurringId]);
     }
 
     /** Kopie mit geändertem `type`. */
@@ -70,7 +57,6 @@ final readonly class RecurringEmailReceiverCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'recurring_id' => $this->recurringId,
             'type' => $this->type->value,
             'address' => $this->address,
         ];

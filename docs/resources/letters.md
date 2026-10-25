@@ -20,6 +20,7 @@ The lifecycle is a single step:
 
 ```
 DRAFT  ── complete() ──▶  COMPLETED
+  └── delete() (any status)
 ```
 
 The API offers no further status transitions for letters: `PUT /letters/{id}/cancel` and `/uncancel` answer 400 ("cancellation not supported"), `/clear`, `/unclear` and `/undo` answer 404. A completed letter can't be moved back to `DRAFT`. The enum still knows `OPEN`, `CLEARED` and `CANCELED`, which Billomat may report for letters changed in the web app.
@@ -39,7 +40,8 @@ The API offers no further status transitions for letters: `PUT /letters/{id}/can
 | `delete($id)` | DELETE | `/letters/{id}` |
 | `complete($id, $templateId?)` | PUT | `/letters/{id}/complete` |
 | `email($id, $options?)` | POST | `/letters/{id}/email` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/letters/{id}/pdf` |
+| `pdf($id, $type?)` | GET | `/letters/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/letters/{id}/pdf?format=pdf` |
 | `upload($id, $base64Pdf)` | PUT | `/letters/{id}/upload` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/letters/{id}/upload-signature` |
 
@@ -47,19 +49,21 @@ The API offers no further status transitions for letters: `PUT /letters/{id}/can
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($letterId, $actionKeys?)` | GET | `/letter-comments?letter_id={id}` |
+| `list($letterId, $actionKeys?, $filters?)` | GET | `/letter-comments?letter_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/letter-comments?letter_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/letter-comments/{id}` |
-| `create($options)` | POST | `/letter-comments` |
+| `create($letterId, $options)` | POST | `/letter-comments` |
 | `delete($id)` | DELETE | `/letter-comments/{id}` |
 
 ### `/letter-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($letterId)` | GET | `/letter-tags?letter_id={id}` |
+| `list($letterId, $filters?)` | GET | `/letter-tags?letter_id={id}` |
+| `listPage($letterId, $filters?)` / `iterateAll($letterId, $filters?, $pageSize?)` | GET | `/letter-tags?letter_id={id}` (paginated) |
 | `cloud()` | GET | `/letter-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/letter-tags/{id}` |
-| `create($options)` | POST | `/letter-tags` |
+| `create($letterId, $options)` | POST | `/letter-tags` |
 | `delete($id)` | DELETE | `/letter-tags/{id}` |
 
 ## Methods
@@ -131,13 +135,13 @@ $mail = new EmailOptions(
 $billomat->letters->email($letter->id, $mail);
 ```
 
-#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): LetterPdf|string`
+#### `pdf(int $id, ?PdfType $type = null): LetterPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-Returns a `LetterPdf` model by default. With `$rawPdf = true`, `?format=pdf` is appended and the binary PDF is returned.
+`pdf()` returns a `LetterPdf` model. `pdfContent()` appends `?format=pdf` and returns the binary PDF (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 $pdf = $billomat->letters->pdf($letter->id);                 // model
-$raw = $billomat->letters->pdf($letter->id, rawPdf: true);   // string (PDF binary)
+$raw = $billomat->letters->pdfContent($letter->id);        // string (PDF binary)
 ```
 
 #### `upload(int $id, string $base64Pdf): void`
@@ -159,8 +163,8 @@ use Justpilot\Billomat\Api\LetterCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 
 $comment = $billomat->letters->comments->create(
+    $letter->id,
     new LetterCommentCreateOptions(
-        letterId: $letter->id,
         comment: 'Letter sent by post on 2026-06-03.',
     ),
 );
@@ -180,7 +184,8 @@ As with credit notes, the endpoint mixes free-form user comments with system aud
 use Justpilot\Billomat\Api\LetterTagCreateOptions;
 
 $billomat->letters->tags->create(
-    new LetterTagCreateOptions(letterId: $letter->id, name: 'privacy'),
+    $letter->id,
+    new LetterTagCreateOptions(name: 'privacy'),
 );
 
 $tags = $billomat->letters->tags->list($letter->id);
@@ -216,19 +221,19 @@ Mirrors `LetterCreateOptions`, but `clientId` is optional (nullable). Fields lef
 
 ## Write model: `LetterCommentCreateOptions`
 
-Constructor: `new LetterCommentCreateOptions(int $letterId, string $comment)`.
+Constructor: `new LetterCommentCreateOptions(string $comment)`. The letter ID isn't part of the options: pass it as the first argument of `create()`, which adds `letter_id` to the payload.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `letterId` | `letter_id` | `int` (required) | |
 | `comment` | `comment` | `string` (required) | |
 | `actionkey` | `actionkey` | `?LetterCommentActionKey` | usually set by Billomat |
 
 ## Write model: `LetterTagCreateOptions`
 
+The letter ID isn't part of the options: pass it as the first argument of `create()`, which adds `letter_id` to the payload.
+
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `letterId` | `letter_id` | `int` (required) | |
 | `name` | `name` | `string` (required) | |
 
 ## Write model: `EmailOptions`
@@ -327,6 +332,7 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 
 ## Pitfalls
 
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes letters in any status, also completed ones.
 - **No line items.** Unlike invoices, offers, confirmations and credit notes, letters have no list of line items. To show amounts or tables, put them as formatted text into `note` or upload a finished PDF via `upload()`.
 - **`upload()` replaces the layout completely.** The uploaded PDF is used as is when sending; `templateId` and `subject` are then ignored for the PDF. This doesn't apply to the accompanying email texts.
 - **No status transitions after `complete()`.** The SDK has no `cancel()`, `clear()` or `undo()` for letters because Billomat's API doesn't support them (400/404). Up to 3.x the SDK had these methods; they always failed.
@@ -378,7 +384,8 @@ printf("Letter #%d created (status: %s)\n",
 
 // 2) Add a tag
 $billomat->letters->tags->create(
-    new LetterTagCreateOptions(letterId: $letter->id, name: 'privacy'),
+    $letter->id,
+    new LetterTagCreateOptions(name: 'privacy'),
 );
 
 // 3) Complete the draft
@@ -394,13 +401,13 @@ $billomat->letters->email($letter->id, $mail);
 
 // 5) Add an audit note
 $billomat->letters->comments->create(
+    $letter->id,
     new LetterCommentCreateOptions(
-        letterId: $letter->id,
         comment: 'Sent on ' . new DateTimeImmutable()->format('Y-m-d') . ' to the main contact.',
     ),
 );
 
 // 6) Save the PDF locally
-$pdfBinary = $billomat->letters->pdf($letter->id, rawPdf: true);
+$pdfBinary = $billomat->letters->pdfContent($letter->id);
 file_put_contents("letter-{$letter->id}.pdf", $pdfBinary);
 ```

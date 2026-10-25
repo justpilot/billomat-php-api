@@ -17,13 +17,6 @@ final readonly class OfferTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: offer_id
-         * Typ: INT
-         */
-        public int $offerId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class OfferTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `offerId`. */
-    public function withOfferId(int $offerId): self
-    {
-        return clone($this, ['offerId' => $offerId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class OfferTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'offer_id' => $this->offerId,
             'name' => $this->name,
         ];
     }

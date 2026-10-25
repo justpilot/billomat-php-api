@@ -31,7 +31,8 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Empfängers.'],
-        'recurring_id' => ['model' => ['nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID der Abo-Rechnung.'],
+        // Die Eltern-ID übergibt `RecurringEmailReceiversApi::create()` als eigenes Argument.
+        'recurring_id' => ['type' => 'int', 'readOnly' => true, 'model' => ['nonNull' => true], 'doc' => 'ID der Abo-Rechnung.'],
         // Billomat liefert „To“/„Cc“/„Bcc“, die Doku nennt Kleinbuchstaben; fromApi() toleriert beides.
         'type' => ['enum' => 'RecurringEmailReceiverType', 'model' => ['fromApi' => true], 'create' => ['constructor' => true], 'doc' => 'Empfänger-Typ (To, Cc oder Bcc).'],
         'address' => ['model' => ['nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'E-Mail-Adresse.'],

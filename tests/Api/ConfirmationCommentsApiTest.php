@@ -88,7 +88,7 @@ final class ConfirmationCommentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->comments;
 
-        $created = $api->create(new ConfirmationCommentCreateOptions(confirmationId: 42, comment: 'Hallo'));
+        $created = $api->create(42, new ConfirmationCommentCreateOptions(comment: 'Hallo'));
 
         self::assertSame(99, $created->id);
         self::assertSame('POST', $captured->method);

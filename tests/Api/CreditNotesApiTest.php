@@ -280,7 +280,6 @@ final class CreditNotesApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(CreditNotePdf::class, $pdf);
         self::assertSame(240, $pdf->creditNoteId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
         self::assertSame('https://mycompany.billomat.net/api/credit-notes/240/pdf', $captured->url);
@@ -302,7 +301,7 @@ final class CreditNotesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, PdfType::SIGNED, rawPdf: true);
+        $result = $api->pdfContent(777, PdfType::SIGNED);
 
         self::assertIsString($result);
         self::assertStringContainsString('format=pdf', $captured->url);

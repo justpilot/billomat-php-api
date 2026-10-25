@@ -91,8 +91,7 @@ final class RecurringEmailReceiversApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringEmailReceiversApi($http);
 
-        $receiver = $api->create(new RecurringEmailReceiverCreateOptions(
-            recurringId: 42,
+        $receiver = $api->create(42, new RecurringEmailReceiverCreateOptions(
             type: RecurringEmailReceiverType::BCC,
             address: 'log@example.com',
         ));

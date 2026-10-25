@@ -84,8 +84,8 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         try {
             // Tag erstellen
-            $tagOpts = new ArticleTagCreateOptions(articleId: $article->id, name: 'IT-Tag-'.date('His'));
-            $tag = $billomat->articles->tags->create($tagOpts);
+            $tagOpts = new ArticleTagCreateOptions(name: 'IT-Tag-'.date('His'));
+            $tag = $billomat->articles->tags->create($article->id, $tagOpts);
 
             self::assertNotNull($tag->id);
 

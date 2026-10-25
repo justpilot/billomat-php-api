@@ -26,8 +26,8 @@ $invoice = $billomat->invoices->getOrFail($invoiceId);
 
 printf("Abgeschlossen: %s, Status %s\n", $invoice->invoiceNumber ?? '?', $invoice->status?->label() ?? '?');
 
-// rawPdf: true liefert den binären PDF-Inhalt statt des JSON-Modells
-$pdf = $billomat->invoices->pdf($invoiceId, PdfType::SIGNED, rawPdf: true);
+// pdfContent() liefert den binären PDF-Inhalt, pdf() das JSON-Modell mit base64-Inhalt
+$pdf = $billomat->invoices->pdfContent($invoiceId, PdfType::SIGNED);
 
 $outputFile = sprintf('rechnung-%d.pdf', $invoiceId);
 $bytes = file_put_contents($outputFile, $pdf);

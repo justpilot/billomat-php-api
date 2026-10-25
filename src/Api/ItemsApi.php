@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Closure;
+use Generator;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -14,7 +16,7 @@ use NoDiscard;
  * Erreichbar über die Eltern-Ressource, z. B. `$billomat->invoices->items`.
  *
  * Endpoints (am Beispiel Rechnungen):
- *  - GET    /invoice-items?invoice_id={id}
+ *  - GET    /invoice-items?invoice_id={id} (sortier- und paginierbar, siehe {@see SubResourceFilter})
  *  - GET    /invoice-items/{id}
  *  - POST   /invoice-items
  *  - PUT    /invoice-items/{id}
@@ -52,14 +54,40 @@ final class ItemsApi extends AbstractSubResourceApi
     /**
      * Listet die Positionen eines Dokuments.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $query zusätzliche Filter (page, per_page, …)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters Sortierung, Seite, …
      *
      * @return list<TItem>
      */
     #[NoDiscard]
-    public function list(int $parentId, array $query = []): array
+    public function list(int $parentId, SubResourceFilter|array $filters = []): array
     {
-        return $this->listWhere([$this->parentKey => $parentId, ...$query]);
+        return $this->listFor($parentId, $filters);
+    }
+
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<TItem>
+     */
+    #[NoDiscard]
+    public function listPage(int $parentId, SubResourceFilter|array $filters = []): Page
+    {
+        return $this->pageFor($parentId, $filters);
+    }
+
+    /**
+     * Iteriert lazy durch alle Positionen eines Dokuments und yieldet sie einzeln.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
+     *
+     * @return Generator<int, TItem>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateFor($parentId, $filters, $pageSize);
     }
 
     /**
@@ -73,7 +101,7 @@ final class ItemsApi extends AbstractSubResourceApi
     {
         $this->assertOptions($options, $this->optionsClass);
 
-        return $this->createFrom([...$options->toArray(), $this->parentKey => $parentId]);
+        return $this->createFor($parentId, $options);
     }
 
     /**

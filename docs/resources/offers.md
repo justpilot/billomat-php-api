@@ -50,13 +50,15 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON  ─�
 | `unclear($id)` | PUT | `/offers/{id}/unclear` |
 | `email($id, $options?)` | POST | `/offers/{id}/email` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/offers/{id}/upload-signature` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/offers/{id}/pdf` |
+| `pdf($id, $type?)` | GET | `/offers/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/offers/{id}/pdf?format=pdf` |
 
 ### `/offer-items`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($offerId, $query?)` | GET | `/offer-items?offer_id={id}` |
+| `list($offerId, $filters?)` | GET | `/offer-items?offer_id={id}` |
+| `listPage($offerId, $filters?)` / `iterateAll($offerId, $filters?, $pageSize?)` | GET | `/offer-items?offer_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/offer-items/{id}` |
 | `create($offerId, $options)` | POST | `/offer-items` |
 | `update($id, $options)` | PUT | `/offer-items/{id}` |
@@ -66,19 +68,21 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON  ─�
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($offerId, $actionKeys?)` | GET | `/offer-comments?offer_id={id}` |
+| `list($offerId, $actionKeys?, $filters?)` | GET | `/offer-comments?offer_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/offer-comments?offer_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/offer-comments/{id}` |
-| `create($options)` | POST | `/offer-comments` |
+| `create($offerId, $options)` | POST | `/offer-comments` |
 | `delete($id)` | DELETE | `/offer-comments/{id}` |
 
 ### `/offer-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($offerId)` | GET | `/offer-tags?offer_id={id}` |
+| `list($offerId, $filters?)` | GET | `/offer-tags?offer_id={id}` |
+| `listPage($offerId, $filters?)` / `iterateAll($offerId, $filters?, $pageSize?)` | GET | `/offer-tags?offer_id={id}` (paginated) |
 | `cloud()` | GET | `/offer-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/offer-tags/{id}` |
-| `create($options)` | POST | `/offer-tags` |
+| `create($offerId, $options)` | POST | `/offer-tags` |
 | `delete($id)` | DELETE | `/offer-tags/{id}` |
 
 ## Methods
@@ -179,9 +183,9 @@ $billomat->offers->email($offer->id, $email);
 
 Uploads a signed PDF version. `$base64Pdf` is the Base64-encoded PDF content (without a `data:` prefix).
 
-#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): OfferPdf|string`
+#### `pdf(int $id, ?PdfType $type = null): OfferPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-By default the method returns an `OfferPdf` model with Base64 content; with `$rawPdf = true` it skips the JSON layer and returns the raw binary bytes. The `$type` parameter shares the `PdfType` enum with the invoice PDF (`SIGNED`, `PRINT`).
+`pdf()` returns an `OfferPdf` model with Base64 content; `pdfContent()` skips the JSON layer and returns the raw binary bytes. The `$type` parameter shares the `PdfType` enum with the invoice PDF (`SIGNED`, `PRINT`).
 
 ```php
 use Justpilot\Billomat\Model\Enum\PdfType;
@@ -189,7 +193,7 @@ use Justpilot\Billomat\Model\Enum\PdfType;
 $pdf = $billomat->offers->pdf($offer->id);              // OfferPdf
 file_put_contents('offer.pdf', $pdf->getBinary());
 
-$bytes = $billomat->offers->pdf($offer->id, PdfType::SIGNED, rawPdf: true);
+$bytes = $billomat->offers->pdfContent($offer->id, PdfType::SIGNED);
 ```
 
 ### Offer items
@@ -222,7 +226,8 @@ $comments = $billomat->offers->comments->list(
 );
 
 $billomat->offers->comments->create(
-    new OfferCommentCreateOptions(offerId: $offer->id, comment: 'Accepted by phone.'),
+    $offer->id,
+    new OfferCommentCreateOptions(comment: 'Accepted by phone.'),
 );
 ```
 
@@ -234,7 +239,8 @@ Billomat creates comments for system actions (`COMPLETE`, `WIN`, `EMAIL`, …) a
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
 
 $tag = $billomat->offers->tags->create(
-    new OfferTagCreateOptions(offerId: $offer->id, name: 'hot-lead'),
+    $offer->id,
+    new OfferTagCreateOptions(name: 'hot-lead'),
 );
 
 $tags  = $billomat->offers->tags->list($offer->id); // list<OfferTag>
@@ -324,22 +330,20 @@ For `ItemsApi::update()` there is `OfferItemUpdateOptions`: every field is optio
 
 ## Write model: `OfferCommentCreateOptions`
 
-Constructor: `new OfferCommentCreateOptions(int $offerId, string $comment, …)`; both are required.
+Constructor: `new OfferCommentCreateOptions(string $comment, …)`. The offer ID isn't part of the options: pass it as the first argument of `create()`, which adds `offer_id` to the payload.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `offerId` | `offer_id` | `int` | Required (constructor) |
 | `comment` | `comment` | `string` | Required (constructor) |
 | `actionkey` | `actionkey` | `?OfferCommentActionKey` | Usually only set for system actions |
 | `public` | `public` | `?bool` | Visible in the client's activity list |
 
 ## Write model: `OfferTagCreateOptions`
 
-Constructor: `new OfferTagCreateOptions(int $offerId, string $name)`; both are required.
+Constructor: `new OfferTagCreateOptions(string $name)`. The offer ID isn't part of the options: pass it as the first argument of `create()`, which adds `offer_id` to the payload.
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `offerId` | `offer_id` | `int` (required) |
 | `name` | `name` | `string` (required) |
 
 ## Write model: `EmailOptions`
@@ -464,11 +468,11 @@ Shared class for sending all document types by email (invoices, offers, confirma
 
 - **Status transitions are strict.** `win()` only works from `OPEN`, `clear()` only from `WON` (not from `OPEN`). Trying them in the wrong status gets you a 400 → `ValidationException`. Order: first `complete()`, then `win()`, then `clear()`.
 - **`update()` doesn't change items.** Billomat ignores embedded `offer-items` on a PUT to `/offers/{id}`. Always use `$billomat->offers->items`.
-- **`delete()` only as a `DRAFT`.** Once `complete()` has run, the offer is numbered and can't be deleted; only `cancel()` is possible.
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes offers in any status (the sandbox returns 200 for completed, won, lost and canceled offers). Once `complete()` has run, the offer is numbered; prefer `cancel()` to keep the number sequence without gaps.
 - **Item updates are partial.** `OfferItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
 - **`array_is_list` normalization in `list()`.** With exactly one match, Billomat returns `offer` as an object instead of a list; the method detects this and wraps the single result in an array.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat ignores the explicitly set tax rate and uses the article's/client's default.
-- **`pdf()` with `$rawPdf = true` bypasses JSON entirely.** The body is read as a binary string and must start with `%PDF-`, otherwise an `UnexpectedResponseException` is thrown. HTTP errors still arrive as SDK exceptions (`NotFoundException`, `AuthenticationException`, …) because `BillomatHttpClient` throws them during the request.
+- **`pdfContent()` bypasses JSON entirely.** The body is read as a binary string and must start with `%PDF-`, otherwise an `UnexpectedResponseException` is thrown. HTTP errors still arrive as SDK exceptions (`NotFoundException`, `AuthenticationException`, …) because `BillomatHttpClient` throws them during the request.
 - **`uploadSignature()` expects plain Base64**, no data URI prefix. Passing a `data:application/pdf;base64,...` string results in a broken PDF in Billomat.
 - **`OfferPdf` is not `readonly`**, unlike the other read models.
 - **`OfferCommentActionKey` values are uppercase on the wire** (`WIN`, `LOSE`, …); the enum mirrors the exact values. Unknown values map to `null`, and the raw string is stored in `actionkeyRaw` as well.
@@ -531,7 +535,8 @@ printf("Offer #%d (DRAFT) created, gross: %s %s\n",
 
 // 2) Add a tag
 $billomat->offers->tags->create(
-    new OfferTagCreateOptions(offerId: $offer->id, name: 'hot-lead'),
+    $offer->id,
+    new OfferTagCreateOptions(name: 'hot-lead'),
 );
 
 // 3) Complete → OPEN, the number is assigned
@@ -551,8 +556,8 @@ $billomat->offers->email($offer->id, $email);
 $billomat->offers->win($offer->id);
 
 $billomat->offers->comments->create(
+    $offer->id,
     new OfferCommentCreateOptions(
-        offerId: $offer->id,
         comment: 'Confirmed by phone on 2026-06-02.',
     ),
 );

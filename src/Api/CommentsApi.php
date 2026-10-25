@@ -6,8 +6,10 @@ namespace Justpilot\Billomat\Api;
 
 use BackedEnum;
 use Closure;
+use Generator;
 use InvalidArgumentException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -55,14 +57,75 @@ final class CommentsApi extends AbstractSubResourceApi
      *
      * Über `$actionKeys` lässt sich auf bestimmte ActionKey-Typen filtern.
      *
-     * @param list<TActionKey>|null $actionKeys
+     * @param list<TActionKey>|null                                           $actionKeys
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters    Sortierung, Seite, …
      *
      * @return list<TComment>
      */
     #[NoDiscard]
-    public function list(int $parentId, ?array $actionKeys = null): array
+    public function list(int $parentId, ?array $actionKeys = null, SubResourceFilter|array $filters = []): array
     {
-        $query = [$this->parentKey => $parentId];
+        return $this->listFor($parentId, $this->withActionKeys($actionKeys, $filters));
+    }
+
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * @param list<TActionKey>|null                                           $actionKeys
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<TComment>
+     */
+    #[NoDiscard]
+    public function listPage(int $parentId, ?array $actionKeys = null, SubResourceFilter|array $filters = []): Page
+    {
+        return $this->pageFor($parentId, $this->withActionKeys($actionKeys, $filters));
+    }
+
+    /**
+     * Iteriert lazy durch alle Kommentare eines Dokuments und yieldet sie einzeln.
+     *
+     * @param list<TActionKey>|null                                           $actionKeys
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters    `page`/`per_page` werden überschrieben
+     *
+     * @return Generator<int, TComment>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $parentId, ?array $actionKeys = null, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateFor($parentId, $this->withActionKeys($actionKeys, $filters), $pageSize);
+    }
+
+    /**
+     * Legt einen Kommentar an einem Dokument an.
+     *
+     * @param TCreate $options
+     *
+     * @return TComment
+     */
+    public function create(int $parentId, WriteOptions $options): object
+    {
+        $this->assertOptions($options, $this->optionsClass);
+
+        return $this->createFor($parentId, $options);
+    }
+
+    public function delete(int $id): void
+    {
+        $this->deleteById($id);
+    }
+
+    /**
+     * Ergänzt den Query um `actionkey` (kommasepariert).
+     *
+     * @param list<TActionKey>|null                                           $actionKeys
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return array<string, scalar|array<scalar|null>|null>
+     */
+    private function withActionKeys(?array $actionKeys, SubResourceFilter|array $filters): array
+    {
+        $query = self::filterQuery($filters);
 
         if (null !== $actionKeys && [] !== $actionKeys) {
             $query['actionkey'] = implode(',', array_map(
@@ -77,23 +140,6 @@ final class CommentsApi extends AbstractSubResourceApi
             ));
         }
 
-        return $this->listWhere($query);
-    }
-
-    /**
-     * @param TCreate $options
-     *
-     * @return TComment
-     */
-    public function create(WriteOptions $options): object
-    {
-        $this->assertOptions($options, $this->optionsClass);
-
-        return $this->createFrom($options->toArray());
-    }
-
-    public function delete(int $id): void
-    {
-        $this->deleteById($id);
+        return $query;
     }
 }

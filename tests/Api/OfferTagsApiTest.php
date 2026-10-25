@@ -118,8 +118,8 @@ final class OfferTagsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->tags;
 
-        $opts = new OfferTagCreateOptions(offerId: 42, name: 'neu');
-        $tag = $api->create($opts);
+        $opts = new OfferTagCreateOptions(name: 'neu');
+        $tag = $api->create(42, $opts);
 
         self::assertSame(99, $tag->id);
         self::assertSame('POST', $captured->method);

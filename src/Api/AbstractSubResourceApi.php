@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Closure;
+use Generator;
 use InvalidArgumentException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -88,13 +90,39 @@ abstract class AbstractSubResourceApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * Listet Datensätze, optional nur die eines Eltern-Datensatzes.
+     *
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TModel>
      */
-    protected function listWhere(array $filters): array
+    protected function listFor(?int $parentId, ListFilter|array $filters = []): array
     {
-        return $this->listResource($this->path, $this->listKey, $this->key, $this->hydrate, $filters);
+        return $this->listResource($this->path, $this->listKey, $this->key, $this->hydrate, $this->parentQuery($parentId, $filters));
+    }
+
+    /**
+     * Wie {@see listFor()}, liefert aber eine Seite samt Pagination-Metadaten.
+     *
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<TModel>
+     */
+    protected function pageFor(?int $parentId, ListFilter|array $filters = []): Page
+    {
+        return $this->listResourcePage($this->path, $this->listKey, $this->key, $this->hydrate, $this->parentQuery($parentId, $filters));
+    }
+
+    /**
+     * Wie {@see listFor()}, iteriert aber lazy über alle Seiten.
+     *
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Generator<int, TModel>
+     */
+    protected function iterateFor(?int $parentId, ListFilter|array $filters, int $pageSize): Generator
+    {
+        yield from $this->iterateResource($this->path, $this->listKey, $this->key, $this->hydrate, $this->parentQuery($parentId, $filters), $pageSize);
     }
 
     /**
@@ -109,6 +137,16 @@ abstract class AbstractSubResourceApi extends AbstractApi
         $data = $this->postJson($this->path, [$this->key => $body]);
 
         return ($this->hydrate)($this->unwrapEnvelope($data, $this->key, 'creating '.$this->label()));
+    }
+
+    /**
+     * Legt einen Datensatz an einem Eltern-Datensatz an; die Eltern-ID ergänzt den Payload.
+     *
+     * @return TModel
+     */
+    protected function createFor(int $parentId, WriteOptions $options): object
+    {
+        return $this->createFrom([...$options->toArray(), $this->parentKey => $parentId]);
     }
 
     /**
@@ -140,9 +178,39 @@ abstract class AbstractSubResourceApi extends AbstractApi
         }
     }
 
+    /**
+     * Stellt sicher, dass ein typisierter Filter zur Ressource passt (z. B. kein
+     * CreditNotePaymentFilter an `$billomat->invoices->payments`); Arrays gehen durch.
+     *
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters
+     * @param class-string<ListFilter>                                 $expected
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function assertFilter(ListFilter|array $filters, string $expected): void
+    {
+        if ($filters instanceof ListFilter && !$filters instanceof $expected) {
+            throw new InvalidArgumentException(\sprintf('Expected %s, got %s.', $expected, $filters::class));
+        }
+    }
+
     protected function deleteById(int $id): void
     {
         $this->deleteVoid("{$this->path}/{$id}");
+    }
+
+    /**
+     * Query aus Filter und Eltern-ID; die Eltern-ID hat Vorrang vor einem gleichnamigen Filter.
+     *
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return array<string, scalar|array<scalar|null>|null>
+     */
+    private function parentQuery(?int $parentId, ListFilter|array $filters): array
+    {
+        $query = self::filterQuery($filters);
+
+        return null === $parentId ? $query : [$this->parentKey => $parentId] + $query;
     }
 
     /**

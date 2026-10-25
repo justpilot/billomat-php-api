@@ -109,7 +109,7 @@ final class RecurringTagsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http)->tags;
 
-        $tag = $api->create(new RecurringTagCreateOptions(recurringId: 42, name: 'wichtig'));
+        $tag = $api->create(42, new RecurringTagCreateOptions(name: 'wichtig'));
         self::assertSame(17, $tag->id);
 
         $api->delete(17);

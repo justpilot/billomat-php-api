@@ -17,13 +17,6 @@ final readonly class SupplierTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: supplier_id
-         * Typ: INT
-         */
-        public int $supplierId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class SupplierTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `supplierId`. */
-    public function withSupplierId(int $supplierId): self
-    {
-        return clone($this, ['supplierId' => $supplierId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class SupplierTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'supplier_id' => $this->supplierId,
             'name' => $this->name,
         ];
     }

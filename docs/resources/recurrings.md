@@ -41,7 +41,8 @@ Over time, a recurring invoice produces regular invoices; they reference their r
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($recurringId, $query?)` | GET | `/recurring-items?recurring_id={id}` |
+| `list($recurringId, $filters?)` | GET | `/recurring-items?recurring_id={id}` |
+| `listPage($recurringId, $filters?)` / `iterateAll($recurringId, $filters?, $pageSize?)` | GET | `/recurring-items?recurring_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/recurring-items/{id}` |
 | `create($recurringId, $options)` | POST | `/recurring-items` |
 | `update($id, $options)` | PUT | `/recurring-items/{id}` |
@@ -51,19 +52,21 @@ Over time, a recurring invoice produces regular invoices; they reference their r
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($recurringId)` | GET | `/recurring-tags?recurring_id={id}` |
+| `list($recurringId, $filters?)` | GET | `/recurring-tags?recurring_id={id}` |
+| `listPage($recurringId, $filters?)` / `iterateAll($recurringId, $filters?, $pageSize?)` | GET | `/recurring-tags?recurring_id={id}` (paginated) |
 | `cloud()` | GET | `/recurring-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/recurring-tags/{id}` |
-| `create($options)` | POST | `/recurring-tags` |
+| `create($recurringId, $options)` | POST | `/recurring-tags` |
 | `delete($id)` | DELETE | `/recurring-tags/{id}` |
 
 ### `/recurring-email-receivers`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($recurringId)` | GET | `/recurring-email-receivers?recurring_id={id}` |
+| `list($recurringId, $filters?)` | GET | `/recurring-email-receivers?recurring_id={id}` |
+| `listPage($recurringId, $filters?)` / `iterateAll($recurringId, $filters?, $pageSize?)` | GET | `/recurring-email-receivers?recurring_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/recurring-email-receivers/{id}` |
-| `create($options)` | POST | `/recurring-email-receivers` |
+| `create($recurringId, $options)` | POST | `/recurring-email-receivers` |
 | `delete($id)` | DELETE | `/recurring-email-receivers/{id}` |
 
 ## Recurrings
@@ -299,7 +302,8 @@ Works exactly like [invoice tags](invoice-tags.md), but for a recurring invoice 
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 
 $tag = $billomat->recurrings->tags->create(
-    new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'auto-paid'),
+    $recurring->id,
+    new RecurringTagCreateOptions(name: 'auto-paid'),
 );
 
 $tags = $billomat->recurrings->tags->list($recurring->id);
@@ -317,16 +321,16 @@ use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
 
 $billomat->recurrings->emailReceivers->create(
+    $recurring->id,
     new RecurringEmailReceiverCreateOptions(
-        recurringId: $recurring->id,
         type: RecurringEmailReceiverType::TO,
         address: 'client@example.com',
     ),
 );
 
 $billomat->recurrings->emailReceivers->create(
+    $recurring->id,
     new RecurringEmailReceiverCreateOptions(
-        recurringId: $recurring->id,
         type: RecurringEmailReceiverType::BCC,
         address: 'log@example.com',
     ),
@@ -335,7 +339,7 @@ $billomat->recurrings->emailReceivers->create(
 
 ### Write model: `RecurringEmailReceiverCreateOptions`
 
-All three values are required constructor parameters: `recurringId` (`int`), `type` (`RecurringEmailReceiverType`), `address` (`string`). The object is `final readonly` with `with*()` methods.
+Both values are required constructor parameters: `type` (`RecurringEmailReceiverType`) and `address` (`string`). The object is `final readonly` with `with*()` methods. The recurring invoice ID is the first argument of `create()`, which adds `recurring_id` to the payload. `list($recurringId, $filters?)`, `listPage()` and `iterateAll()` take a `SubResourceFilter` for sorting and pagination.
 
 ### Read model: `RecurringEmailReceiver`
 
@@ -409,16 +413,16 @@ printf("Recurring invoice #%d created, next run: %s\n",
 
 // 2) Add email recipients
 $billomat->recurrings->emailReceivers->create(
+    $recurring->id,
     new RecurringEmailReceiverCreateOptions(
-        recurringId: $recurring->id,
         type: RecurringEmailReceiverType::TO,
         address: 'client@example.com',
     ),
 );
 
 $billomat->recurrings->emailReceivers->create(
+    $recurring->id,
     new RecurringEmailReceiverCreateOptions(
-        recurringId: $recurring->id,
         type: RecurringEmailReceiverType::BCC,
         address: 'accounting@mycompany.example',
     ),
@@ -426,7 +430,8 @@ $billomat->recurrings->emailReceivers->create(
 
 // 3) Add a tag to make filtering easier
 $billomat->recurrings->tags->create(
-    new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'hosting'),
+    $recurring->id,
+    new RecurringTagCreateOptions(name: 'hosting'),
 );
 
 // 4) Change an item later: only the price is sent, the other fields stay

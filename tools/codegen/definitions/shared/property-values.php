@@ -34,6 +34,15 @@ return static function (string $prefix, string $label, string $parentField, stri
             ],
         ],
 
+        // Die Eltern-ID ist ein eigenes Argument von `PropertyValuesApi::list()`.
+        'filter' => [
+            'class' => $prefix . 'PropertyValueFilter',
+            'endpoint' => "GET /api/{$path}",
+            'fields' => [
+                $parentField => ['omit' => true],
+            ],
+        ],
+
         'createOptions' => [
             'class' => $prefix . 'PropertyValueCreateOptions',
             'endpoint' => "POST /api/{$path}",
@@ -43,10 +52,12 @@ return static function (string $prefix, string $label, string $parentField, stri
         // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
         'fields' => [
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Eigenschaftswerts.'],
+            // Die Eltern-ID übergibt `PropertyValuesApi::create()` als eigenes Argument.
             $parentField => [
+                'type' => 'int',
+                'readOnly' => true,
                 'doc' => 'ID des Datensatzes, zu dem der Wert gehört.',
                 'model' => ['nonNull' => true],
-                'create' => ['constructor' => true],
             ],
             "{$resource}_property_id" => [
                 'doc' => 'ID der Eigenschaft.',

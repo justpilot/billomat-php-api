@@ -21,13 +21,6 @@ final readonly class InvoiceCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: invoice_id
-         * Typ: INT
-         */
-        public int $invoiceId,
-        /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
@@ -52,12 +45,6 @@ final readonly class InvoiceCommentCreateOptions implements WriteOptions
          */
         public ?bool $public = null,
     ) {
-    }
-
-    /** Kopie mit geändertem `invoiceId`. */
-    public function withInvoiceId(int $invoiceId): self
-    {
-        return clone($this, ['invoiceId' => $invoiceId]);
     }
 
     /** Kopie mit geändertem `comment`. */
@@ -86,7 +73,6 @@ final readonly class InvoiceCommentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'invoice_id' => $this->invoiceId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
             'public' => $this->public,

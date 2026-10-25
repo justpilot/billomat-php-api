@@ -36,7 +36,7 @@ $supplierId = $supplier->id;
 printf("Lieferant #%d angelegt: %s\n", $supplierId, $supplier->name);
 
 // 2) Schlagwort anhängen
-$billomat->suppliers->tags->create(new SupplierTagCreateOptions(supplierId: $supplierId, name: 'IT-Dienstleister'));
+$billomat->suppliers->tags->create($supplierId, new SupplierTagCreateOptions(name: 'IT-Dienstleister'));
 
 // 3) Property-Wert anlegen, nur wenn eine Property vorgegeben wurde
 if (null === optionalEnv('BILLOMAT_SUPPLIER_PROPERTY_ID')) {
@@ -45,8 +45,7 @@ if (null === optionalEnv('BILLOMAT_SUPPLIER_PROPERTY_ID')) {
 }
 
 $propertyId = envId('BILLOMAT_SUPPLIER_PROPERTY_ID');
-$value = $billomat->suppliers->propertyValues->create(new SupplierPropertyValueCreateOptions(
-    supplierId: $supplierId,
+$value = $billomat->suppliers->propertyValues->create($supplierId, new SupplierPropertyValueCreateOptions(
     supplierPropertyId: $propertyId,
     value: 'Premium',
 ));

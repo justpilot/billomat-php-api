@@ -418,7 +418,6 @@ final class OffersApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(OfferPdf::class, $pdf);
         self::assertSame(4882, $pdf->id);
         self::assertSame(240, $pdf->offerId);
         self::assertSame('offer_123.pdf', $pdf->filename);
@@ -445,7 +444,7 @@ final class OffersApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(id: 777, type: PdfType::PRINT, rawPdf: true);
+        $result = $api->pdfContent(id: 777, type: PdfType::PRINT);
 
         self::assertIsString($result);
         self::assertStringStartsWith('%PDF-1.4', $result);

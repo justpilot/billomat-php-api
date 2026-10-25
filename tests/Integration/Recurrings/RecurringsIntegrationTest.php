@@ -175,8 +175,8 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
         $recurring = $billomat->recurrings->create($this->buildSafeDraft($billomat));
 
         try {
-            $tagOpts = new RecurringTagCreateOptions(recurringId: $recurring->id, name: 'IT-Tag-'.date('His'));
-            $tag = $billomat->recurrings->tags->create($tagOpts);
+            $tagOpts = new RecurringTagCreateOptions(name: 'IT-Tag-'.date('His'));
+            $tag = $billomat->recurrings->tags->create($recurring->id, $tagOpts);
             self::assertNotNull($tag->id);
 
             $tags = $billomat->recurrings->tags->list($recurring->id);
@@ -210,11 +210,10 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
 
         try {
             $receiverOpts = new RecurringEmailReceiverCreateOptions(
-                recurringId: $recurring->id,
                 type: RecurringEmailReceiverType::CC,
                 address: 'integration-test-'.date('His').'@example.com',
             );
-            $receiver = $billomat->recurrings->emailReceivers->create($receiverOpts);
+            $receiver = $billomat->recurrings->emailReceivers->create($recurring->id, $receiverOpts);
             self::assertSame(RecurringEmailReceiverType::CC, $receiver->type);
 
             $receivers = $billomat->recurrings->emailReceivers->list($recurring->id);

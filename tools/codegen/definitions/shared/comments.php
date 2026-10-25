@@ -27,12 +27,12 @@ return static function (string $prefix, string $label, string $parentField, ?str
 
     $fields = [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne ID des Kommentars.'],
+        // Die Eltern-ID übergibt `CommentsApi::create()` als eigenes Argument.
         $parentField => [
-            ...$writable,
             'type' => 'int',
+            'readOnly' => true,
             'doc' => 'ID des Dokuments, an dem der Kommentar hängt.',
             'model' => ['nonNull' => true],
-            'create' => ['constructor' => true],
         ],
         'comment' => [...$writable, 'doc' => 'Kommentartext.', 'create' => ['constructor' => true]],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt.'],

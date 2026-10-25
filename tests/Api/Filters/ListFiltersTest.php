@@ -7,19 +7,27 @@ namespace Justpilot\Billomat\Tests\Api\Filters;
 use BackedEnum;
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\ArticleFilter;
+use Justpilot\Billomat\Api\ArticlePropertyValueFilter;
 use Justpilot\Billomat\Api\ClientFilter;
+use Justpilot\Billomat\Api\ClientPropertyValueFilter;
 use Justpilot\Billomat\Api\ConfirmationFilter;
 use Justpilot\Billomat\Api\CreditNoteFilter;
+use Justpilot\Billomat\Api\CreditNotePaymentFilter;
 use Justpilot\Billomat\Api\DeliveryNoteFilter;
 use Justpilot\Billomat\Api\IncomingFilter;
+use Justpilot\Billomat\Api\IncomingPaymentFilter;
+use Justpilot\Billomat\Api\IncomingPropertyValueFilter;
 use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\InvoicePaymentFilter;
 use Justpilot\Billomat\Api\LetterFilter;
 use Justpilot\Billomat\Api\ListFilter;
 use Justpilot\Billomat\Api\OfferFilter;
 use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Api\RecurringFilter;
 use Justpilot\Billomat\Api\ReminderFilter;
+use Justpilot\Billomat\Api\SubResourceFilter;
 use Justpilot\Billomat\Api\SupplierFilter;
+use Justpilot\Billomat\Api\SupplierPropertyValueFilter;
 use Justpilot\Billomat\Api\TemplateFilter;
 use Justpilot\Billomat\Api\UserFilter;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
@@ -40,17 +48,25 @@ use ReflectionUnionType;
 use UnitEnum;
 
 #[CoversClass(ArticleFilter::class)]
+#[CoversClass(ArticlePropertyValueFilter::class)]
 #[CoversClass(ClientFilter::class)]
+#[CoversClass(ClientPropertyValueFilter::class)]
 #[CoversClass(ConfirmationFilter::class)]
 #[CoversClass(CreditNoteFilter::class)]
+#[CoversClass(CreditNotePaymentFilter::class)]
 #[CoversClass(DeliveryNoteFilter::class)]
 #[CoversClass(IncomingFilter::class)]
+#[CoversClass(IncomingPaymentFilter::class)]
+#[CoversClass(IncomingPropertyValueFilter::class)]
 #[CoversClass(InvoiceFilter::class)]
+#[CoversClass(InvoicePaymentFilter::class)]
 #[CoversClass(LetterFilter::class)]
 #[CoversClass(OfferFilter::class)]
 #[CoversClass(RecurringFilter::class)]
 #[CoversClass(ReminderFilter::class)]
+#[CoversClass(SubResourceFilter::class)]
 #[CoversClass(SupplierFilter::class)]
+#[CoversClass(SupplierPropertyValueFilter::class)]
 #[CoversClass(TemplateFilter::class)]
 #[CoversClass(UserFilter::class)]
 #[UsesClass(OrderBy::class)]
@@ -100,6 +116,33 @@ final class ListFiltersTest extends TestCase
         self::assertSame(['is_default' => 1], new TemplateFilter(isDefault: true)->toQuery());
         self::assertSame(['is_default' => 0], new TemplateFilter(isDefault: false)->toQuery());
         self::assertSame(['type' => 'INVOICE,OFFER'], new TemplateFilter(type: [TemplateDocumentType::INVOICE, TemplateDocumentType::OFFER])->toQuery());
+    }
+
+    #[Test]
+    public function serializesSubResourceFilters(): void
+    {
+        self::assertSame([
+            'from' => '2026-01-01',
+            'type' => 'CASH,PAYPAL',
+            'user_id' => 3,
+            'order_by' => 'date+DESC',
+            'per_page' => 10,
+        ], new InvoicePaymentFilter(
+            from: new DateTimeImmutable('2026-01-01'),
+            type: [PaymentType::CASH, PaymentType::PAYPAL],
+            userId: 3,
+            orderBy: OrderBy::desc('date'),
+            perPage: 10,
+        )->toQuery());
+        self::assertSame(
+            ['client_property_id' => 12, 'value' => 'Logistik'],
+            new ClientPropertyValueFilter(clientPropertyId: 12, value: 'Logistik')->toQuery(),
+        );
+        self::assertSame(
+            ['order_by' => 'position+ASC', 'page' => 2, 'per_page' => 50, 'x' => 1],
+            new SubResourceFilter(orderBy: OrderBy::asc('position'), page: 2, perPage: 50, extra: ['x' => 1])->toQuery(),
+        );
+        self::assertSame(['page' => 'override'], new SubResourceFilter(page: 1, extra: ['page' => 'override'])->toQuery());
     }
 
     #[Test]

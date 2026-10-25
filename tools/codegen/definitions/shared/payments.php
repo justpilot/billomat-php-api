@@ -41,6 +41,16 @@ return static function (string $prefix, string $label, string $parentField, stri
             ],
         ],
 
+        // Die Eltern-ID ist ein eigenes Argument von `PaymentsApi::list()`.
+        'filter' => [
+            'class' => $prefix . 'PaymentFilter',
+            'endpoint' => "GET /api/{$path}",
+            'fields' => [
+                $parentField => ['omit' => true],
+                'type' => ['enum' => 'PaymentType'],
+            ],
+        ],
+
         'createOptions' => [
             'class' => $prefix . 'PaymentCreateOptions',
             'endpoint' => "POST /api/{$path}",
@@ -48,7 +58,7 @@ return static function (string $prefix, string $label, string $parentField, stri
             'boolAsInt' => true,
             // BC: das Zahlungsdatum war schon immer ein DateTimeImmutable.
             'dateObjects' => true,
-            'toArray' => [$parentField, 'amount', 'date', 'comment', 'transaction_purpose', 'type', $markAsPaid],
+            'toArray' => ['amount', 'date', 'comment', 'transaction_purpose', 'type', $markAsPaid],
             'doc' => [
                 "Typisierter Payload für POST /{$path} gemäß Billomat-API.",
                 '',
@@ -60,10 +70,12 @@ return static function (string $prefix, string $label, string $parentField, stri
         // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
         'fields' => [
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne ID der Zahlung.'],
+            // Die Eltern-ID übergibt `PaymentsApi::create()` als eigenes Argument.
             $parentField => [
+                'type' => 'int',
+                'readOnly' => true,
                 'doc' => 'ID des Dokuments, zu dem die Zahlung gehört.',
                 'model' => ['nonNull' => true],
-                'create' => ['constructor' => true],
             ],
             'date' => ['doc' => 'Zahlungsdatum.'],
             'amount' => [

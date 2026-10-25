@@ -8,6 +8,7 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
@@ -44,10 +45,10 @@ final class InvoicesApi extends AbstractApi
     /**
      * Zahlungen, siehe {@see PaymentsApi}.
      *
-     * @var PaymentsApi<InvoicePayment, InvoicePaymentCreateOptions>
+     * @var PaymentsApi<InvoicePayment, InvoicePaymentCreateOptions, InvoicePaymentFilter>
      */
     public private(set) PaymentsApi $payments {
-        get => $this->payments ??= new PaymentsApi($this->http, 'invoice', InvoicePayment::fromArray(...), InvoicePaymentCreateOptions::class);
+        get => $this->payments ??= new PaymentsApi($this->http, 'invoice', InvoicePayment::fromArray(...), InvoicePaymentCreateOptions::class, InvoicePaymentFilter::class);
     }
 
     /**
@@ -336,40 +337,27 @@ final class InvoicesApi extends AbstractApi
     }
 
     /**
-     * Ruft das PDF einer Rechnung ab.
+     * Ruft das PDF einer Rechnung als JSON ab (Metadaten und base64-kodierter Inhalt).
      *
-     * Entspricht GET /invoices/{id}/pdf
-     *
-     * - Optionaler Typ:
-     *   - PdfType::SIGNED → type=signed
-     *   - PdfType::PRINT  → type=print
-     *
-     * - Raw-PDF-Modus:
-     *   - $rawPdf = true → format=pdf, Rückgabe ist der binäre PDF-String
-     *   - $rawPdf = false (Default) → JSON-Response mit base64file, Rückgabe ist InvoicePdf-Model
-     *
-     * @return InvoicePdf|string InvoicePdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
+     * Entspricht GET /invoices/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): InvoicePdf|string
+    public function pdf(int $id, ?PdfType $type = null): InvoicePdf
     {
-        $query = [];
-
-        if ($type instanceof PdfType) {
-            // Enum → API-String (signed / print)
-            $query['type'] = $type->value;
-        }
-
-        // Raw-PDF-Modus: format=pdf → direkt application/pdf
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
-
-            return $this->getPdf("/invoices/{$id}/pdf", $query);
-        }
-
-        // Standard-Modus: JSON → { "pdf": { ... } }
-        $data = $this->getJson("/invoices/{$id}/pdf", $query);
+        $data = $this->getJson("/invoices/{$id}/pdf", self::pdfQuery($type));
 
         return InvoicePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching invoice PDF'));
+    }
+
+    /**
+     * Ruft das PDF einer Rechnung als binären Inhalt ab (GET /invoices/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/invoices/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
 }

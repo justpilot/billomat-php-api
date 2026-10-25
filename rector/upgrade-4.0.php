@@ -24,6 +24,8 @@ use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\ReminderText;
 use Justpilot\Billomat\Rector\GetItemsToPropertyRector;
 use Justpilot\Billomat\Rector\NestedSubResourceRector;
+use Justpilot\Billomat\Rector\ParentIdToCreateArgumentRector;
+use Justpilot\Billomat\Rector\PdfContentRector;
 use Justpilot\Billomat\Rector\SubResourceMap;
 use Justpilot\Billomat\Rector\SubResourceMethodRector;
 use Rector\Config\RectorConfig;
@@ -40,6 +42,8 @@ return static function (RectorConfig $rectorConfig): void {
         SubResourceMethodRector::class,
         NestedSubResourceRector::class,
         GetItemsToPropertyRector::class,
+        ParentIdToCreateArgumentRector::class,
+        PdfContentRector::class,
     ]);
 
     $rectorConfig->ruleWithConfiguration(RenameMethodRector::class, [

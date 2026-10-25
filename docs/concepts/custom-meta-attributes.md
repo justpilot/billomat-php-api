@@ -68,11 +68,13 @@ See [`docs/resources/properties.md`](../resources/properties.md) for the shared 
 
 ### Querying values
 
-`propertyValues->list(?int $parentId = null, array $filters = [])` returns a flat list of value assignments, optionally limited to one record; `listPage()` and `iterateAll()` take the same arguments. Further filters are `{parent}_property_id` and `value`:
+`propertyValues->list(?int $parentId = null, XPropertyValueFilter|array $filters = [])` returns a flat list of value assignments, optionally limited to one record; `listPage()` and `iterateAll()` take the same arguments. The typed filters (`ArticlePropertyValueFilter`, `ClientPropertyValueFilter`, …) filter by property and value and sort and paginate:
 
 ```php
-$values = $billomat->articles->propertyValues->list(42);                                  // all values of article 42
-$values = $billomat->articles->propertyValues->list(filters: ['article_property_id' => 7]); // all values of property 7
+use Justpilot\Billomat\Api\ArticlePropertyValueFilter;
+
+$values = $billomat->articles->propertyValues->list(42);                                                 // all values of article 42
+$values = $billomat->articles->propertyValues->list(filters: new ArticlePropertyValueFilter(articlePropertyId: 7)); // all values of property 7
 ```
 
 ### Filtering the parent list by value

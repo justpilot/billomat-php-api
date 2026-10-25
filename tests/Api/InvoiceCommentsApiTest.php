@@ -136,7 +136,7 @@ final class InvoiceCommentsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoicesApi($http)->comments;
 
-        $comment = $api->create(new InvoiceCommentCreateOptions(invoiceId: 100, comment: 'Anruf vom Kunden.'));
+        $comment = $api->create(100, new InvoiceCommentCreateOptions(comment: 'Anruf vom Kunden.'));
 
         self::assertSame(99, $comment->id);
         self::assertSame(100, $comment->invoiceId);

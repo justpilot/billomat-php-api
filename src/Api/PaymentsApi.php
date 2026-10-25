@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Closure;
+use Generator;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -23,6 +25,7 @@ use NoDiscard;
  *
  * @template TPayment of object
  * @template TCreate of WriteOptions
+ * @template TFilter of ListFilter
  *
  * @extends AbstractSubResourceApi<TPayment>
  */
@@ -33,14 +36,16 @@ final class PaymentsApi extends AbstractSubResourceApi
 
     /**
      * @param string                                 $parent       Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
-     * @param Closure(array<string,mixed>): TPayment $hydrate      Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoiceComment::fromArray()}
+     * @param Closure(array<string,mixed>): TPayment $hydrate      Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoicePayment::fromArray()}
      * @param class-string<TCreate>                  $optionsClass erwartete Create-Options
+     * @param class-string<TFilter>                  $filterClass  erwarteter Listen-Filter, z. B. {@see InvoicePaymentFilter}
      */
     public function __construct(
         BillomatHttpClientInterface $http,
         string $parent,
         Closure $hydrate,
         private readonly string $optionsClass,
+        private readonly string $filterClass,
     ) {
         parent::__construct($http, $parent, $hydrate);
     }
@@ -48,32 +53,60 @@ final class PaymentsApi extends AbstractSubResourceApi
     /**
      * Listet Zahlungen, optional nur die eines Dokuments.
      *
-     * Weitere Filter laut Doku: from, to (YYYY-MM-DD), type (Komma-separiert), user_id.
-     *
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param TFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TPayment>
      */
     #[NoDiscard]
-    public function list(?int $parentId = null, array $filters = []): array
+    public function list(?int $parentId = null, ListFilter|array $filters = []): array
     {
-        if (null !== $parentId) {
-            $filters = [$this->parentKey => $parentId] + $filters;
-        }
+        $this->assertFilter($filters, $this->filterClass);
 
-        return $this->listWhere($filters);
+        return $this->listFor($parentId, $filters);
     }
 
     /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * @param TFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<TPayment>
+     */
+    #[NoDiscard]
+    public function listPage(?int $parentId = null, ListFilter|array $filters = []): Page
+    {
+        $this->assertFilter($filters, $this->filterClass);
+
+        return $this->pageFor($parentId, $filters);
+    }
+
+    /**
+     * Iteriert lazy durch alle Treffer und yieldet sie einzeln.
+     *
+     * @param TFilter|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
+     *
+     * @return Generator<int, TPayment>
+     */
+    #[NoDiscard]
+    public function iterateAll(?int $parentId = null, ListFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        $this->assertFilter($filters, $this->filterClass);
+
+        yield from $this->iterateFor($parentId, $filters, $pageSize);
+    }
+
+    /**
+     * Erfasst eine Zahlung zu einem Dokument.
+     *
      * @param TCreate $options
      *
      * @return TPayment
      */
-    public function create(WriteOptions $options): object
+    public function create(int $parentId, WriteOptions $options): object
     {
         $this->assertOptions($options, $this->optionsClass);
 
-        return $this->createFrom($options->toArray());
+        return $this->createFor($parentId, $options);
     }
 
     public function delete(int $id): void

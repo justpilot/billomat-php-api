@@ -24,13 +24,6 @@ final readonly class CreditNotePaymentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, zu dem die Zahlung gehört.
-         *
-         * Billomat-Feld: credit_note_id
-         * Typ: INT
-         */
-        public int $creditNoteId,
-        /**
          * Zahlungsbetrag.
          *
          * Billomat-Feld: amount
@@ -78,12 +71,6 @@ final readonly class CreditNotePaymentCreateOptions implements WriteOptions
     ) {
     }
 
-    /** Kopie mit geändertem `creditNoteId`. */
-    public function withCreditNoteId(int $creditNoteId): self
-    {
-        return clone($this, ['creditNoteId' => $creditNoteId]);
-    }
-
     /** Kopie mit geändertem `amount`. */
     public function withAmount(Money $amount): self
     {
@@ -128,7 +115,6 @@ final readonly class CreditNotePaymentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'credit_note_id' => $this->creditNoteId,
             'amount' => $this->amount->toString(),
             'date' => $this->date?->format('Y-m-d'),
             'comment' => $this->comment,

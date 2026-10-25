@@ -24,6 +24,7 @@ use NoDiscard;
  *
  * @template TValue of object
  * @template TCreate of WriteOptions
+ * @template TFilter of ListFilter
  *
  * @extends AbstractSubResourceApi<TValue>
  */
@@ -34,14 +35,16 @@ final class PropertyValuesApi extends AbstractSubResourceApi
 
     /**
      * @param string                               $parent       Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
-     * @param Closure(array<string,mixed>): TValue $hydrate      Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoiceComment::fromArray()}
+     * @param Closure(array<string,mixed>): TValue $hydrate      Hydrator, z. B. {@see \Justpilot\Billomat\Model\ClientPropertyValue::fromArray()}
      * @param class-string<TCreate>                $optionsClass erwartete Create-Options
+     * @param class-string<TFilter>                $filterClass  erwarteter Listen-Filter, z. B. {@see ClientPropertyValueFilter}
      */
     public function __construct(
         BillomatHttpClientInterface $http,
         string $parent,
         Closure $hydrate,
         private readonly string $optionsClass,
+        private readonly string $filterClass,
     ) {
         parent::__construct($http, $parent, $hydrate);
     }
@@ -49,42 +52,46 @@ final class PropertyValuesApi extends AbstractSubResourceApi
     /**
      * Listet Attributwerte, optional nur die eines Datensatzes.
      *
-     * Weitere Filter laut Doku: `{parent}_property_id`, `value`.
-     *
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param TFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TValue>
      */
     #[NoDiscard]
-    public function list(?int $parentId = null, array $filters = []): array
+    public function list(?int $parentId = null, ListFilter|array $filters = []): array
     {
-        return $this->listWhere($this->withParent($parentId, $filters));
+        $this->assertFilter($filters, $this->filterClass);
+
+        return $this->listFor($parentId, $filters);
     }
 
     /**
      * Liefert eine einzelne Seite samt Pagination-Metadaten.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param TFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<TValue>
      */
     #[NoDiscard]
-    public function listPage(?int $parentId = null, array $filters = []): Page
+    public function listPage(?int $parentId = null, ListFilter|array $filters = []): Page
     {
-        return $this->listResourcePage($this->path, $this->listKey, $this->key, $this->hydrate, $this->withParent($parentId, $filters));
+        $this->assertFilter($filters, $this->filterClass);
+
+        return $this->pageFor($parentId, $filters);
     }
 
     /**
-     * Iteriert lazy durch alle Attributwerte und yieldet sie einzeln.
+     * Iteriert lazy durch alle Treffer und yieldet sie einzeln.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param TFilter|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
      *
      * @return Generator<int, TValue>
      */
     #[NoDiscard]
-    public function iterateAll(?int $parentId = null, array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(?int $parentId = null, ListFilter|array $filters = [], int $pageSize = 100): Generator
     {
-        yield from $this->iterateResource($this->path, $this->listKey, $this->key, $this->hydrate, $this->withParent($parentId, $filters), $pageSize);
+        $this->assertFilter($filters, $this->filterClass);
+
+        yield from $this->iterateFor($parentId, $filters, $pageSize);
     }
 
     /**
@@ -94,20 +101,10 @@ final class PropertyValuesApi extends AbstractSubResourceApi
      *
      * @return TValue
      */
-    public function create(WriteOptions $options): object
+    public function create(int $parentId, WriteOptions $options): object
     {
         $this->assertOptions($options, $this->optionsClass);
 
-        return $this->createFrom($options->toArray());
-    }
-
-    /**
-     * @param array<string, scalar|array<scalar|null>|null> $filters
-     *
-     * @return array<string, scalar|array<scalar|null>|null>
-     */
-    private function withParent(?int $parentId, array $filters): array
-    {
-        return null === $parentId ? $filters : [$this->parentKey => $parentId] + $filters;
+        return $this->createFor($parentId, $options);
     }
 }

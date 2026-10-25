@@ -39,13 +39,15 @@ Unlike [confirmations](confirmations.md), the API offers no further status trans
 | `complete($id, $templateId?)` | PUT | `/delivery-notes/{id}/complete` |
 | `email($id, $options?)` | POST | `/delivery-notes/{id}/email` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/delivery-notes/{id}/upload-signature` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/delivery-notes/{id}/pdf` |
+| `pdf($id, $type?)` | GET | `/delivery-notes/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/delivery-notes/{id}/pdf?format=pdf` |
 
 ### `/delivery-note-items`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($deliveryNoteId, $query?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
+| `list($deliveryNoteId, $filters?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
+| `listPage($deliveryNoteId, $filters?)` / `iterateAll($deliveryNoteId, $filters?, $pageSize?)` | GET | `/delivery-note-items?delivery_note_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/delivery-note-items/{id}` |
 | `create($deliveryNoteId, $options)` | POST | `/delivery-note-items` |
 | `update($id, $options)` | PUT | `/delivery-note-items/{id}` |
@@ -55,19 +57,21 @@ Unlike [confirmations](confirmations.md), the API offers no further status trans
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($deliveryNoteId, $actionKeys?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
+| `list($deliveryNoteId, $actionKeys?, $filters?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/delivery-note-comments?delivery_note_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/delivery-note-comments/{id}` |
-| `create($options)` | POST | `/delivery-note-comments` |
+| `create($deliveryNoteId, $options)` | POST | `/delivery-note-comments` |
 | `delete($id)` | DELETE | `/delivery-note-comments/{id}` |
 
 ### `/delivery-note-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($deliveryNoteId)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
+| `list($deliveryNoteId, $filters?)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
+| `listPage($deliveryNoteId, $filters?)` / `iterateAll($deliveryNoteId, $filters?, $pageSize?)` | GET | `/delivery-note-tags?delivery_note_id={id}` (paginated) |
 | `cloud()` | GET | `/delivery-note-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/delivery-note-tags/{id}` |
-| `create($options)` | POST | `/delivery-note-tags` |
+| `create($deliveryNoteId, $options)` | POST | `/delivery-note-tags` |
 | `delete($id)` | DELETE | `/delivery-note-tags/{id}` |
 
 ## Methods
@@ -139,9 +143,9 @@ Sends the delivery note by email. Without options, Billomat uses the account def
 
 Uploads a signed PDF version. Typical use case: the driver photographs the signed proof of delivery, and the PDF is uploaded base64-encoded.
 
-#### `pdf(int $id, ?PdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string`
+#### `pdf(int $id, ?PdfType $type = null): DeliveryNotePdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-Returns a `DeliveryNotePdf` (base64 container), or the raw bytes with `$rawPdf = true`.
+`pdf()` returns a `DeliveryNotePdf` (base64 container), `pdfContent()` the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 use Justpilot\Billomat\Model\Enum\PdfType;
@@ -178,8 +182,8 @@ $comments = $billomat->deliveryNotes->comments->list(
 );
 
 $billomat->deliveryNotes->comments->create(
+    $note->id,
     new DeliveryNoteCommentCreateOptions(
-        deliveryNoteId: $note->id,
         comment: 'Handed over to warehouse South.',
     ),
 );
@@ -191,7 +195,8 @@ $billomat->deliveryNotes->comments->create(
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 
 $tag = $billomat->deliveryNotes->tags->create(
-    new DeliveryNoteTagCreateOptions(deliveryNoteId: $note->id, name: 'freight-shipping'),
+    $note->id,
+    new DeliveryNoteTagCreateOptions(name: 'freight-shipping'),
 );
 
 $tags  = $billomat->deliveryNotes->tags->list($note->id);
@@ -259,17 +264,19 @@ For `ItemsApi::update()` there is `DeliveryNoteItemUpdateOptions`: every field i
 
 ## Write model: `DeliveryNoteCommentCreateOptions`
 
+The delivery note ID isn't part of the options: pass it as the first argument of `create()`, which adds `delivery_note_id` to the payload.
+
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `deliveryNoteId` | `delivery_note_id` | `int` | required (constructor) |
 | `comment` | `comment` | `string` | required (constructor) |
 | `actionkey` | `actionkey` | `?DeliveryNoteCommentActionKey` | usually only for system actions |
 
 ## Write model: `DeliveryNoteTagCreateOptions`
 
+The delivery note ID isn't part of the options: pass it as the first argument of `create()`, which adds `delivery_note_id` to the payload.
+
 | Property | Billomat field | Type |
 |---|---|---|
-| `deliveryNoteId` | `delivery_note_id` | `int` (required) |
 | `name` | `name` | `string` (required) |
 
 ## Write model: `EmailOptions`
@@ -383,6 +390,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 - **No `discount`/`validity`.** Unlike `OfferCreateOptions`/`ConfirmationCreateOptions`, `DeliveryNoteCreateOptions` has no `discountRate`/`discountDays`/`discountDate`/`validityDays` fields. Don't look for them out of copy-paste habit.
 - **`update()` doesn't change line items.** Billomat ignores embedded `delivery-note-items` on PUT. Always use `$billomat->deliveryNotes->items`.
 - **No status transitions after `complete()`.** The SDK has no `cancel()`, `clear()` or `undo()` for delivery notes because Billomat's API doesn't support them (400/404). Up to 3.x the SDK had these methods; they always failed.
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes delivery notes in any status. Think twice before deleting a completed one: it is numbered, and deleting it leaves a gap in the number sequence.
 - **Item updates are partial.** `DeliveryNoteItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `delivery-note` as an object; the SDK wraps it in a list.
 - **Multiple source references are possible.** `invoiceId`, `confirmationId` and `offerId` can all be set at the same time, but Billomat does **not** synchronize the status of the linked documents automatically.
@@ -437,7 +445,8 @@ printf("Delivery note #%d created (DRAFT)\n", $note->id);
 
 // 2) Add a tag
 $billomat->deliveryNotes->tags->create(
-    new DeliveryNoteTagCreateOptions(deliveryNoteId: $note->id, name: 'freight-shipping'),
+    $note->id,
+    new DeliveryNoteTagCreateOptions(name: 'freight-shipping'),
 );
 
 // 3) Complete: the number is assigned
@@ -461,8 +470,8 @@ if (false !== $signed) {
 
 // 6) Add a note
 $billomat->deliveryNotes->comments->create(
+    $note->id,
     new DeliveryNoteCommentCreateOptions(
-        deliveryNoteId: $note->id,
         comment: 'Receipt confirmed by warehouse South on June 2.',
     ),
 );

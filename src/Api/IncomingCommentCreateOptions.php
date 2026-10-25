@@ -21,13 +21,6 @@ final readonly class IncomingCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: incoming_id
-         * Typ: INT
-         */
-        public int $incomingId,
-        /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
@@ -44,12 +37,6 @@ final readonly class IncomingCommentCreateOptions implements WriteOptions
          */
         public ?IncomingCommentActionKey $actionkey = null,
     ) {
-    }
-
-    /** Kopie mit geändertem `incomingId`. */
-    public function withIncomingId(int $incomingId): self
-    {
-        return clone($this, ['incomingId' => $incomingId]);
     }
 
     /** Kopie mit geändertem `comment`. */
@@ -72,7 +59,6 @@ final readonly class IncomingCommentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'incoming_id' => $this->incomingId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
         ], static fn (mixed $v): bool => null !== $v);

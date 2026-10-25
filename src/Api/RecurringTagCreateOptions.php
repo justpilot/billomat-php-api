@@ -17,13 +17,6 @@ final readonly class RecurringTagCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: recurring_id
-         * Typ: INT
-         */
-        public int $recurringId,
-        /**
          * Name des Schlagworts.
          *
          * Billomat-Feld: name
@@ -31,12 +24,6 @@ final readonly class RecurringTagCreateOptions implements WriteOptions
          */
         public string $name,
     ) {
-    }
-
-    /** Kopie mit geändertem `recurringId`. */
-    public function withRecurringId(int $recurringId): self
-    {
-        return clone($this, ['recurringId' => $recurringId]);
     }
 
     /** Kopie mit geändertem `name`. */
@@ -53,7 +40,6 @@ final readonly class RecurringTagCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'recurring_id' => $this->recurringId,
             'name' => $this->name,
         ];
     }

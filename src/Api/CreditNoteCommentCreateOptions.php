@@ -21,13 +21,6 @@ final readonly class CreditNoteCommentCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: credit_note_id
-         * Typ: INT
-         */
-        public int $creditNoteId,
-        /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
@@ -52,12 +45,6 @@ final readonly class CreditNoteCommentCreateOptions implements WriteOptions
          */
         public ?bool $public = null,
     ) {
-    }
-
-    /** Kopie mit geändertem `creditNoteId`. */
-    public function withCreditNoteId(int $creditNoteId): self
-    {
-        return clone($this, ['creditNoteId' => $creditNoteId]);
     }
 
     /** Kopie mit geändertem `comment`. */
@@ -86,7 +73,6 @@ final readonly class CreditNoteCommentCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'credit_note_id' => $this->creditNoteId,
             'comment' => $this->comment,
             'actionkey' => $this->actionkey?->value,
             'public' => $this->public,

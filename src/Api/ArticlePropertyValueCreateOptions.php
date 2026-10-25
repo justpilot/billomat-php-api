@@ -17,13 +17,6 @@ final readonly class ArticlePropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: article_id
-         * Typ: INT
-         */
-        public int $articleId,
-        /**
          * ID der Eigenschaft.
          *
          * Billomat-Feld: article_property_id
@@ -38,12 +31,6 @@ final readonly class ArticlePropertyValueCreateOptions implements WriteOptions
          */
         public mixed $value,
     ) {
-    }
-
-    /** Kopie mit geändertem `articleId`. */
-    public function withArticleId(int $articleId): self
-    {
-        return clone($this, ['articleId' => $articleId]);
     }
 
     /** Kopie mit geändertem `articlePropertyId`. */
@@ -66,7 +53,6 @@ final readonly class ArticlePropertyValueCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return [
-            'article_id' => $this->articleId,
             'article_property_id' => $this->articlePropertyId,
             'value' => $this->value,
         ];

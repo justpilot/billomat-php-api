@@ -327,18 +327,26 @@ Stores the values for the client properties defined in [`properties.md`](propert
 | `listPage($clientId?, $filters?)` | GET | `/client-property-values` |
 | `iterateAll($clientId?, $filters?, $pageSize?)` | GET | `/client-property-values` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/client-property-values/{id}` |
-| `create($options)` | POST | `/client-property-values` |
+| `create($clientId, $options)` | POST | `/client-property-values` |
 
 ```php
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
+use Justpilot\Billomat\Api\ClientPropertyValueFilter;
+use Justpilot\Billomat\Api\OrderBy;
 
 // List the values of one client
 $values = $billomat->clients->propertyValues->list($client->id);
 
+// Only the values of property 12, typed filter with sorting
+$values = $billomat->clients->propertyValues->list($client->id, new ClientPropertyValueFilter(
+    clientPropertyId: 12,
+    orderBy: OrderBy::desc('updated'),
+));
+
 // Set the value of the property "Industry" (id = 12)
 $value = $billomat->clients->propertyValues->create(
+    $client->id,
     new ClientPropertyValueCreateOptions(
-        clientId: $client->id,
         clientPropertyId: 12,
         value: 'Logistics',
     ),
@@ -349,9 +357,10 @@ Calling `create()` again with the same `clientPropertyId` overwrites the existin
 
 ### Write model: `ClientPropertyValueCreateOptions`
 
+The client ID isn't part of the options: pass it as the first argument of `create()`, which adds `client_id` to the payload.
+
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` (required) | — |
 | `clientPropertyId` | `client_property_id` | `int` (required) | ID of the property definition |
 | `value` | `value` | `mixed` (required) | `CHECKBOX` expects `0`/`1` |
 

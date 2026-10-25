@@ -92,4 +92,21 @@ final class BillomatClientTest extends TestCase
 
         // zusätzliche Sicherstellung: weitere APIs sind verdrahtet
     }
+
+    #[Test]
+    public function createPassesTheLanguage(): void
+    {
+        $headers = [];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$headers): MockResponse {
+            $headers = $options['headers'] ?? [];
+
+            return new MockResponse('{}');
+        });
+        $client = BillomatClient::create(billomatId: 'mycompany', apiKey: 'k', httpClient: new Psr18Client($mock), language: 'en-gb');
+
+        $client->getHttpClient()->request('GET', '/clients');
+
+        self::assertIsArray($headers);
+        self::assertContains('Accept-Language: en-gb', $headers);
+    }
 }

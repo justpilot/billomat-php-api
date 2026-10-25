@@ -189,7 +189,7 @@ Pro Dokumenttyp gibt es `xLabel`, `xIntro`, `xNote`, `xFilename`:
 - **`printVersion` als `?bool`.** Billomat erwartet `1`/`0` — das SDK macht das Mapping automatisch.
 - **`priceGroups` ist zur Lesezeit aufgebaut.** Billomat schickt sie als Einzelfelder `price_group2`, `price_group3`, … `Settings::fromArray()` aggregiert sie in ein assoziatives Array, wobei der Schlüssel die Preisgruppen-Nummer ist.
 - **`bccAddresses` als CSV.** Billomat liefert die Liste mal als kommagetrennten String, mal als verschachtelte `bcc_address`-Knoten. Das Modell normalisiert beides zu `list<string>`.
-- **`locale`-Konsistenz.** Wenn du `locale` änderst, ändert sich nichts an `Accept-Language` im HTTP-Header des SDK — der ist fix auf `de-de`. Das ist meist OK, kann aber bei Sprachvergleichen relevant werden.
+- **`locale`-Konsistenz.** Wenn du `locale` änderst, ändert sich nichts an `Accept-Language` im HTTP-Header des SDK — den steuert `BillomatConfig::$language` (Standard `de-de`).
 
 ## End-to-End-Beispiel
 

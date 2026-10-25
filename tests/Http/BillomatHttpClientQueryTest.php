@@ -206,6 +206,28 @@ final class BillomatHttpClientQueryTest extends TestCase
         self::assertSame('de-de', $headers['accept-language'] ?? null);
     }
 
+    #[Test]
+    public function itSendsTheConfiguredLanguage(): void
+    {
+        $captured = [];
+        $client = new BillomatHttpClient(new Psr18Client($this->captureMock($captured)), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: 'en-gb'));
+
+        $client->request('GET', '/clients');
+
+        self::assertSame('en-gb', $this->normaliseHeaders($captured['options']['headers'] ?? [])['accept-language'] ?? null);
+    }
+
+    #[Test]
+    public function itOmitsAcceptLanguageWithoutLanguage(): void
+    {
+        $captured = [];
+        $client = new BillomatHttpClient(new Psr18Client($this->captureMock($captured)), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: null));
+
+        $client->request('GET', '/clients');
+
+        self::assertArrayNotHasKey('accept-language', $this->normaliseHeaders($captured['options']['headers'] ?? []));
+    }
+
     /**
      * @param array<int|string, mixed> $captured
      */

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Api;
 
 use Closure;
 use InvalidArgumentException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use NoDiscard;
 
@@ -71,6 +72,19 @@ abstract class AbstractSubResourceApi extends AbstractApi
         }
 
         return ($this->hydrate)($this->unwrapEnvelope($data, $this->key, 'fetching '.$this->label()));
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @return TModel
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): object
+    {
+        return $this->get($id) ?? throw $this->notFound("{$this->path}/{$id}");
     }
 
     /**

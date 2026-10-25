@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
@@ -77,6 +78,17 @@ final class TemplatesApi extends AbstractApi
 
         /** @var array<string,mixed> $tpl */
         return Template::fromArray($tpl);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Template
+    {
+        return $this->get($id) ?? throw $this->notFound("/templates/{$id}");
     }
 
     /**

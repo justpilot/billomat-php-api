@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\ReminderText;
 use NoDiscard;
 
@@ -40,5 +41,16 @@ final class ReminderTextsApi extends AbstractApi
         }
 
         return ReminderText::fromArray($row);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): ReminderText
+    {
+        return $this->get($id) ?? throw $this->notFound("/reminder-texts/{$id}");
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Model\RecurringItem;
 use Justpilot\Billomat\Model\RecurringTag;
@@ -117,6 +118,17 @@ final class RecurringsApi extends AbstractApi
         }
 
         return Recurring::fromArray($row);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Recurring
+    {
+        return $this->get($id) ?? throw $this->notFound("/recurrings/{$id}");
     }
 
     public function create(RecurringCreateOptions $options): Recurring

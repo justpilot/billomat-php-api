@@ -64,6 +64,14 @@ abstract class AbstractApi
     }
 
     /**
+     * Exception für {@see getOrFail()}, wenn {@see getJsonOrNull()} null geliefert hat.
+     */
+    protected function notFound(string $path): NotFoundException
+    {
+        return new NotFoundException(\sprintf('Billomat responded with HTTP 404 to GET /%s.', ltrim($path, '/')), 404);
+    }
+
+    /**
      * Führt einen POST-Request mit JSON-Body aus und gibt den JSON-Body als Array zurück.
      *
      * @param array<string,mixed> $body

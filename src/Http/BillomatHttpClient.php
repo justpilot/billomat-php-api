@@ -129,8 +129,11 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
 
         $request = $this->requestFactory->createRequest($method, $url)
             ->withHeader('X-BillomatApiKey', $this->config->apiKey)
-            ->withHeader('Accept', 'application/json')
-            ->withHeader('Accept-Language', 'de-de');
+            ->withHeader('Accept', 'application/json');
+
+        if (null !== $this->config->language) {
+            $request = $request->withHeader('Accept-Language', $this->config->language);
+        }
 
         if (null !== $this->config->appId && null !== $this->config->appSecret) {
             $request = $request

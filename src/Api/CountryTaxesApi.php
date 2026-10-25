@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\CountryTax;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
@@ -71,5 +72,16 @@ final class CountryTaxesApi extends AbstractApi
         }
 
         return CountryTax::fromArray($row);
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): CountryTax
+    {
+        return $this->get($id) ?? throw $this->notFound("/country-taxes/{$id}");
     }
 }

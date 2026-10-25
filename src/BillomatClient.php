@@ -146,6 +146,7 @@ final readonly class BillomatClient
         float $timeout = 10.0,
         ?ClientInterface $httpClient = null,
         RetryPolicy $retry = new RetryPolicy(),
+        ?string $language = 'de-de',
     ): self {
         $config = new BillomatConfig(
             billomatId: $billomatId,
@@ -154,6 +155,7 @@ final readonly class BillomatClient
             appSecret: $appSecret,
             timeout: $timeout,
             retry: $retry,
+            language: $language,
         );
 
         return new self($config, $httpClient);

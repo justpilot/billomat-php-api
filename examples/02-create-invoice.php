@@ -13,63 +13,41 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/bootstrap.php';
 
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
-use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
 
-$billomatId = getenv('BILLOMAT_ID') ?: null;
-$apiKey = getenv('BILLOMAT_API_KEY') ?: null;
-$clientIdRaw = getenv('BILLOMAT_CLIENT_ID') ?: null;
-
-if (!$billomatId || !$apiKey || !$clientIdRaw) {
-    fwrite(STDERR, "BILLOMAT_ID, BILLOMAT_API_KEY und BILLOMAT_CLIENT_ID müssen gesetzt sein.\n");
-    exit(1);
-}
-
-$clientId = (int)$clientIdRaw;
-
-$billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
-
-$opts = new InvoiceCreateOptions(
-    clientId: $clientId,
-    title: 'Beispiel-Rechnung ' . date('Y-m-d'),
+$options = new InvoiceCreateOptions(
+    clientId: envId('BILLOMAT_CLIENT_ID'),
     date: new DateTimeImmutable('today'),
     dueDays: 14,
+    title: 'Beispiel-Rechnung '.date('Y-m-d'),
     intro: 'vielen Dank für Ihren Auftrag.',
-);
+)
+    ->withItem(new InvoiceItemCreateOptions(
+        quantity: 5.0,
+        unitPrice: Money::of('19.90'),
+        unit: 'Stück',
+        title: 'Demo-Artikel A',
+        type: ItemType::PRODUCT,
+    ))
+    ->withItem(new InvoiceItemCreateOptions(
+        quantity: 1.5,
+        unitPrice: Money::of('95.00'),
+        unit: 'Stunde',
+        title: 'Demo-Dienstleistung',
+        type: ItemType::SERVICE,
+    ));
 
-$item1 = new InvoiceItemCreateOptions(
-    quantity: 5.0, unitPrice: Money::of('19.9'),
-    title: 'Demo-Artikel A',
-    type: ItemType::PRODUCT,
-    unit: 'Stück',
-);
-$opts = $opts->withItem($item1);
-
-$item2 = new InvoiceItemCreateOptions(
-    quantity: 1.5, unitPrice: Money::of('95'),
-    title: 'Demo-Dienstleistung',
-    type: ItemType::SERVICE,
-    unit: 'Stunde',
-);
-$opts = $opts->withItem($item2);
-
-try {
-    $invoice = $billomat->invoices->create($opts);
-} catch (BillomatException $e) {
-    fwrite(STDERR, sprintf("Anlage fehlgeschlagen: %s\n", $e->getMessage()));
-    exit(1);
-}
+$invoice = billomat()->invoices->create($options);
 
 printf(
-    "Entwurf angelegt: #%d, Status %s, Brutto: %.2f %s\n",
-    $invoice->id,
+    "Entwurf angelegt: #%d, Status %s, Brutto %s %s\n",
+    requireId($invoice->id),
     $invoice->status?->label() ?? '?',
-    $invoice->totalGross ?? 0.0,
+    $invoice->totalGross?->format(2, ',', '.') ?? '?',
     $invoice->currencyCode ?? '',
 );

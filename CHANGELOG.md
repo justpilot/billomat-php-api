@@ -65,6 +65,7 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 - **Documentation website** at [billomat-php.justpilot.io](https://billomat-php.justpilot.io), built with VitePress from `docs/` (local search, edit links, sidebar from the page titles) and deployed to GitHub Pages by `.github/workflows/docs.yml`; links to files outside `docs/` point to GitHub.
 - **README is an English landing page** (≈100 lines: dynamic badges, install, quickstart, features, documentation map, supported versions); `README.en.md` is gone, the resource table moved to `docs/resources/README.md` with the nested 4.x access paths.
 - `CONTRIBUTING.md`, `SECURITY.md`, the pull request template and the issue templates are in English and describe the 4.x workflow (PRs against `4.x`, generated code, PSR-only dependencies, supported versions 4.x/3.x). Packagist keywords drop `symfony`/`http-client` and add `psr-3`, `psr-14`, `money` and `e-invoice`.
+- **The examples in `examples/` follow the 4.x API and are checked in CI:** PHPStan (level max), PHP-CS-Fixer and Rector cover them like `src/` and `tests/`. A shared `examples/bootstrap.php` reads the environment variables and builds the client; the scripts use `getOrFail()`, `Money`, `OrderBy` and the enums, and `examples/README.md` is in English.
 
 ### Removed
 - **BC break: everything marked `@deprecated since 3.1` is gone.**

@@ -4,9 +4,9 @@
  * Beispiel 11: Lieferant mit Tag und Property-Wert anlegen.
  *
  * Voraussetzungen:
- *  - BILLOMAT_ID, BILLOMAT_API_KEY gesetzt.
- *  - Optional: BILLOMAT_SUPPLIER_PROPERTY_ID — ID einer existierenden
- *    Supplier-Property-Definition. Wenn gesetzt, wird ein Wert angelegt.
+ *  - BILLOMAT_ID und BILLOMAT_API_KEY gesetzt.
+ *  - Optional BILLOMAT_SUPPLIER_PROPERTY_ID: ID einer bestehenden
+ *    Lieferanten-Property. Wenn gesetzt, wird ein Wert angelegt.
  *
  * Aufruf:
  *  php examples/11-supplier.php
@@ -15,57 +15,40 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/bootstrap.php';
 
 use Justpilot\Billomat\Api\SupplierCreateOptions;
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\SupplierTagCreateOptions;
-use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Exception\BillomatException;
 
-$billomatId = getenv('BILLOMAT_ID') ?: null;
-$apiKey = getenv('BILLOMAT_API_KEY') ?: null;
-$propertyIdRaw = getenv('BILLOMAT_SUPPLIER_PROPERTY_ID') ?: null;
+$billomat = billomat();
 
-if (!$billomatId || !$apiKey) {
-    fwrite(STDERR, "BILLOMAT_ID und BILLOMAT_API_KEY müssen gesetzt sein.\n");
-    exit(1);
+// 1) Lieferant anlegen
+$supplier = $billomat->suppliers->create(new SupplierCreateOptions(
+    name: sprintf('Beispiel-Lieferant %s', date('Ymd-His')),
+    countryCode: 'DE',
+    note: 'Angelegt durch examples/11-supplier.php',
+    email: 'lieferant@example.com',
+    bankIban: 'DE89370400440532013000',
+));
+$supplierId = requireId($supplier->id);
+
+printf("Lieferant #%d angelegt: %s\n", $supplierId, $supplier->name);
+
+// 2) Schlagwort anhängen
+$billomat->suppliers->tags->create(new SupplierTagCreateOptions(supplierId: $supplierId, name: 'IT-Dienstleister'));
+
+// 3) Property-Wert anlegen, nur wenn eine Property vorgegeben wurde
+if (null === optionalEnv('BILLOMAT_SUPPLIER_PROPERTY_ID')) {
+    echo "Hinweis: BILLOMAT_SUPPLIER_PROPERTY_ID nicht gesetzt, Property-Wert übersprungen.\n";
+    exit(0);
 }
 
-$billomat = BillomatClient::create(billomatId: $billomatId, apiKey: $apiKey);
+$propertyId = envId('BILLOMAT_SUPPLIER_PROPERTY_ID');
+$value = $billomat->suppliers->propertyValues->create(new SupplierPropertyValueCreateOptions(
+    supplierId: $supplierId,
+    supplierPropertyId: $propertyId,
+    value: 'Premium',
+));
 
-try {
-    // 1) Lieferant anlegen
-    $opts = new SupplierCreateOptions(
-        name: sprintf('Beispiel-Lieferant %s', date('Ymd-His')),
-        countryCode: 'DE',
-        email: 'lieferant@example.com',
-        note: 'Angelegt durch examples/11-supplier.php',
-        bankIban: 'DE89370400440532013000',
-    );
-
-    $supplier = $billomat->suppliers->create($opts);
-    printf("Lieferant #%d angelegt: %s\n", $supplier->id, $supplier->name ?? '?');
-
-    // 2) Schlagwort anhängen
-    $billomat->suppliers->tags->create(
-        new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'IT-Dienstleister'),
-    );
-
-    // 3) Property-Wert anlegen (nur wenn eine Property-Definition vorgegeben wurde)
-    if ($propertyIdRaw !== null) {
-        $value = $billomat->suppliers->propertyValues->create(
-            new SupplierPropertyValueCreateOptions(
-                supplierId: $supplier->id,
-                supplierPropertyId: (int)$propertyIdRaw,
-                value: 'Premium',
-            ),
-        );
-        printf("Property-Wert #%d gesetzt (Property %d).\n", $value->id, (int)$propertyIdRaw);
-    } else {
-        echo "Hinweis: BILLOMAT_SUPPLIER_PROPERTY_ID nicht gesetzt — Property-Wert übersprungen.\n";
-    }
-} catch (BillomatException $e) {
-    fwrite(STDERR, sprintf("Fehler: %s\n", $e->getMessage()));
-    exit(1);
-}
+printf("Property-Wert #%d gesetzt (Property %d).\n", requireId($value->id), $propertyId);

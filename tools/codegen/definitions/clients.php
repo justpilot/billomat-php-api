@@ -23,6 +23,8 @@ declare(strict_types=1);
  *   writable    true = in den Options, obwohl die Spec das Feld nicht beim Anlegen nennt.
  *   deprecated  Text für @deprecated am Read-Model.
  *   enum        Name eines Enums aus src/Model/Enum/ (z. B. 'NetGross') als Typ in Model und Options.
+ *               Pflicht, wenn die Spec eine feste Wertemenge nennt; false = bewusst String.
+ *   enumList    true = kommaseparierte Werte (z. B. Zahlarten) als list<Enum>.
  *   model       ['required' => true]  → Konstruktor-Parameter ohne Default
  *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
  *                                       (Enums: über Enum::fromApi(), braucht zusätzlich 'required')
@@ -124,8 +126,8 @@ return [
         'locale' => ['doc' => 'Gebietsschema des Kunden.', 'details' => ['Beispiel: "de_DE"']],
         'tax_number' => ['doc' => 'Steuernummer.'],
         'vat_number' => ['doc' => 'Umsatzsteuer-ID (USt-IdNr.).'],
-        'tax_rule' => ['doc' => 'Steuerregel.'],
-        'net_gross' => ['doc' => 'Preisbasis.'],
+        'tax_rule' => ['doc' => 'Steuerregel.', 'enum' => 'TaxRule'],
+        'net_gross' => ['doc' => 'Preisbasis.', 'enum' => 'NetGross'],
         'currency_code' => ['doc' => 'Währung des Kunden (ISO-Währungscode).', 'details' => ['Beispiel: "EUR"']],
         'debitor_account_number' => ['doc' => 'Debitorennummer.', 'details' => ['Wird häufig als Referenz zur FIBU verwendet.']],
         'price_group' => [
@@ -138,15 +140,15 @@ return [
             'details' => ['true = Kunde wird in automatischem Mahnlauf berücksichtigt.'],
         ],
         'reduction' => ['doc' => 'Rabatt in Prozent.'],
-        'discount_rate_type' => ['doc' => 'Typ des Skonto-Satzes.'],
+        'discount_rate_type' => ['doc' => 'Typ des Skonto-Satzes.', 'enum' => 'ValueType'],
         'discount_rate' => ['doc' => 'Skonto-Satz.'],
-        'discount_days_type' => ['doc' => 'Typ des Skonto-Zeitraums.'],
+        'discount_days_type' => ['doc' => 'Typ des Skonto-Zeitraums.', 'enum' => 'ValueType'],
         'discount_days' => ['doc' => 'Skonto-Tage.'],
-        'due_days_type' => ['doc' => 'Typ der Fälligkeit.'],
+        'due_days_type' => ['doc' => 'Typ der Fälligkeit.', 'enum' => 'ValueType'],
         'due_days' => ['doc' => 'Fälligkeit in Tagen nach Rechnungsdatum.'],
-        'reminder_due_days_type' => ['doc' => 'Typ der Mahnfälligkeit.'],
+        'reminder_due_days_type' => ['doc' => 'Typ der Mahnfälligkeit.', 'enum' => 'ValueType'],
         'reminder_due_days' => ['doc' => 'Mahnfälligkeit in Tagen.'],
-        'offer_validity_days_type' => ['doc' => 'Typ der Angebotsgültigkeit.'],
+        'offer_validity_days_type' => ['doc' => 'Typ der Angebotsgültigkeit.', 'enum' => 'ValueType'],
         'offer_validity_days' => ['doc' => 'Angebotsgültigkeit in Tagen.'],
         'bank_account_owner' => ['doc' => 'Kontoinhaber.'],
         'bank_number' => ['doc' => 'Bankleitzahl.'],
@@ -156,7 +158,12 @@ return [
         'bank_iban' => ['doc' => 'IBAN.'],
         'sepa_mandate' => ['doc' => 'SEPA-Mandatsreferenz.'],
         'sepa_mandate_date' => ['doc' => 'Ausstelldatum des SEPA-Mandats.'],
-        'default_payment_types' => ['doc' => 'Standard-Zahlarten (CSV).', 'details' => ['Beispiel: "CASH,BANK_TRANSFER"']],
+        'default_payment_types' => [
+            'doc' => 'Standard-Zahlarten.',
+            'details' => ['Billomat überträgt sie kommasepariert, z. B. "CASH,BANK_TRANSFER".'],
+            'enum' => 'InvoicePaymentType',
+            'enumList' => true,
+        ],
         'enable_customerportal' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Kundenportal aktiviert?'],
         'revenue_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Brutto-Umsatz (read-only Auswertungsfeld).'],
         'revenue_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Netto-Umsatz (read-only Auswertungsfeld).'],

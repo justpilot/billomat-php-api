@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 
@@ -230,15 +231,17 @@ final readonly class InvoiceCreateOptions implements WriteOptions
          */
         public ?int $recurringId = null,
         /**
-         * Akzeptierte Zahlungsarten (kommasepariert).
+         * Akzeptierte Zahlungsarten.
          *
-         * Beispiel: "BANK_TRANSFER,CASH"
+         * Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".
          *
          * Billomat-Feld: payment_types
          * Typ: ALNUM
          * Default: Wert aus den Einstellungen
+         *
+         * @var list<InvoicePaymentType>
          */
-        public ?string $paymentTypes = null,
+        public array $paymentTypes = [],
         /**
          * ID der Vorlage, mit der die Rechnung abgeschlossen wird.
          *
@@ -419,8 +422,12 @@ final readonly class InvoiceCreateOptions implements WriteOptions
         return clone($this, ['recurringId' => $recurringId]);
     }
 
-    /** Kopie mit geändertem `paymentTypes`. */
-    public function withPaymentTypes(?string $paymentTypes): self
+    /**
+     * Kopie mit geändertem `paymentTypes`.
+     *
+     * @param list<InvoicePaymentType> $paymentTypes
+     */
+    public function withPaymentTypes(array $paymentTypes): self
     {
         return clone($this, ['paymentTypes' => $paymentTypes]);
     }
@@ -473,7 +480,7 @@ final readonly class InvoiceCreateOptions implements WriteOptions
             'currency_code' => $this->currencyCode,
             'net_gross' => $this->netGross?->value,
             'quote' => $this->quote,
-            'payment_types' => $this->paymentTypes,
+            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes)),
             'invoice_id' => $this->invoiceId,
             'offer_id' => $this->offerId,
             'confirmation_id' => $this->confirmationId,

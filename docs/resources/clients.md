@@ -174,8 +174,8 @@ Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argum
 |---|---|---|
 | `taxNumber` | `tax_number` | `?string` |
 | `vatNumber` | `vat_number` | `?string` |
-| `taxRule` | `tax_rule` | `?string` (`TAX`, `NO_TAX`, `COUNTRY` — siehe Enum [TaxRule](#verwendete-enums)) |
-| `netGross` | `net_gross` | `?string` (`NET`, `GROSS`, `SETTINGS`) |
+| `taxRule` | `tax_rule` | `?TaxRule` (`TAX`, `NO_TAX`, `COUNTRY`) |
+| `netGross` | `net_gross` | `?NetGross` (`NET`, `GROSS`, `SETTINGS`) |
 | `currencyCode` | `currency_code` | `?string` (ISO-Währungscode) |
 
 ### Debitor & Preisgruppe
@@ -207,17 +207,17 @@ Alle Felder sind Konstruktor-Parameter mit Default und werden als benannte Argum
 
 | Property | Billomat-Feld | Typ |
 |---|---|---|
-| `defaultPaymentTypes` | `default_payment_types` | `?string` (CSV, z. B. `CASH,BANK_TRANSFER`) |
+| `defaultPaymentTypes` | `default_payment_types` | `list<InvoicePaymentType>` (Billomat: kommasepariert, z. B. `CASH,BANK_TRANSFER`) |
 | `reduction` | `reduction` | `?float` (Rabatt in %) |
-| `discountRateType` | `discount_rate_type` | `?string` (`SETTINGS`, `ABSOLUTE`, `RELATIVE`) |
+| `discountRateType` | `discount_rate_type` | `?ValueType` (`SETTINGS`, `ABSOLUTE`, `RELATIVE`) |
 | `discountRate` | `discount_rate` | `?float` |
-| `discountDaysType` | `discount_days_type` | `?string` |
+| `discountDaysType` | `discount_days_type` | `?ValueType` |
 | `discountDays` | `discount_days` | `?float` |
-| `dueDaysType` | `due_days_type` | `?string` |
+| `dueDaysType` | `due_days_type` | `?ValueType` |
 | `dueDays` | `due_days` | `?int` |
-| `reminderDueDaysType` | `reminder_due_days_type` | `?string` |
+| `reminderDueDaysType` | `reminder_due_days_type` | `?ValueType` |
 | `reminderDueDays` | `reminder_due_days` | `?int` |
-| `offerValidityDaysType` | `offer_validity_days_type` | `?string` |
+| `offerValidityDaysType` | `offer_validity_days_type` | `?ValueType` |
 | `offerValidityDays` | `offer_validity_days` | `?int` |
 | `dunningRun` | `dunning_run` | `?bool` (nur gesendet, wenn gesetzt; sonst gilt der Billomat-Default) |
 
@@ -252,7 +252,9 @@ Schmaler Subset für Partial-Updates, aufgebaut wie `ClientCreateOptions`. Nur F
 | `note`, `locale` | `?string` | |
 | `facturxIdentifier`, `sellerIdentifier` | `?string` | E-Rechnung (ZUGFeRD/Factur-X), siehe Stolpersteine |
 | `taxNumber`, `vatNumber` | `?string` | |
-| `taxRule`, `netGross`, `currencyCode` | `?string` | Werte spiegeln die Enum-Cases als String. |
+| `taxRule` | `?TaxRule` | |
+| `netGross` | `?NetGross` | |
+| `currencyCode` | `?string` | |
 | `debitorAccountNumber`, `priceGroup` | `?int` | |
 | `archived`, `dunningRun` | `?bool` | |
 | `reduction`, `discountRate`, `discountDays` | `?float` | |

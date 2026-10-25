@@ -18,9 +18,9 @@ $billomat->offers->tags       // Schlagworte
 Ein Angebot durchläuft einen festen Status-Lebenszyklus:
 
 ```
-DRAFT  ──complete()──▶  OPEN  ──win()─────▶  ACCEPTED
+DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON
                          │
-                         ├──lose()────▶  REJECTED
+                         ├──lose()────▶  LOST
                          ├──clear()───▶  CLEARED
                          └──cancel()──▶  CANCELED
 ```
@@ -93,7 +93,7 @@ use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
 
 $open = $billomat->offers->list(new OfferFilter(
-    status: [OfferStatus::OPEN, OfferStatus::ACCEPTED],
+    status: [OfferStatus::OPEN, OfferStatus::WON],
     orderBy: OrderBy::desc('date'),
 ));
 ```
@@ -143,9 +143,9 @@ Erlaubt nur im Status `DRAFT`. Bei anderen Status liefert Billomat 422 → `Vali
 #### Status-Übergänge
 
 ```php
-$billomat->offers->cancel($offer->id);   // OPEN/ACCEPTED → CANCELED
-$billomat->offers->win($offer->id);      // OPEN          → ACCEPTED
-$billomat->offers->lose($offer->id);     // OPEN          → REJECTED
+$billomat->offers->cancel($offer->id);   // OPEN/WON → CANCELED
+$billomat->offers->win($offer->id);      // OPEN          → WON
+$billomat->offers->lose($offer->id);     // OPEN          → LOST
 $billomat->offers->clear($offer->id);    // OPEN          → CLEARED
 $billomat->offers->undo($offer->id);     // {win,lose,clear,cancel} → OPEN
 ```
@@ -441,7 +441,7 @@ Gemeinsame Klasse für den E-Mail-Versand aller Dokumenttypen (Rechnungen, Angeb
 
 ## Verwendete Enums
 
-- [`OfferStatus`](../../src/Model/Enum/OfferStatus.php): `DRAFT`, `OPEN`, `ACCEPTED`, `REJECTED`, `CLEARED`, `CANCELED`. Hat `label()` für deutsche Bezeichnung.
+- [`OfferStatus`](../../src/Model/Enum/OfferStatus.php): `DRAFT`, `OPEN`, `WON`, `LOST`, `CLEARED`, `CANCELED`. Hat `label()` für deutsche Bezeichnung.
 - [`OfferCommentActionKey`](../../src/Model/Enum/OfferCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `WIN`, `LOSE`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`.
 - [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
 - [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.

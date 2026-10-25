@@ -261,13 +261,20 @@ final class GeneratedOptionsTest extends TestCase
     }
 
     /**
-     * @return list<WriteOptions>
+     * Positionen bzw. Enum-Listen (z. B. Zahlarten) laut `@var list<…>`.
+     *
+     * @return list<WriteOptions>|list<BackedEnum>
      */
     private function sampleItems(string $class, string $property): array
     {
         $docComment = (string) new ReflectionProperty($class, $property)->getDocComment();
         if (1 !== preg_match('/@var list<(\w+)>/', $docComment, $match)) {
             self::fail($class.'::$'.$property.' hat keinen Listentyp.');
+        }
+        $enumClass = 'Justpilot\\Billomat\\Model\\Enum\\'.$match[1];
+        if (is_subclass_of($enumClass, BackedEnum::class)) {
+            // Zwei Werte, damit die Kommatrennung geprüft wird.
+            return array_values(array_filter([array_first($enumClass::cases()), array_last($enumClass::cases())]));
         }
         /** @var class-string<WriteOptions> $itemClass */
         $itemClass = 'Justpilot\\Billomat\\Api\\'.$match[1];
@@ -285,6 +292,10 @@ final class GeneratedOptionsTest extends TestCase
             $value instanceof Money => $value->toString(),
             $value instanceof BackedEnum => $value->value,
             $value instanceof DateTimeImmutable => $value->format('Y-m-d'),
+            \is_array($value) && [] !== $value && $value[0] instanceof BackedEnum => implode(',', array_map(
+                static fn (BackedEnum $case): string => (string) $case->value,
+                $value,
+            )),
             \is_array($value) && [] !== $value && $value[0] instanceof WriteOptions => [
                 $this->kebab(substr(new ReflectionClass($value[0])->getShortName(), 0, -\strlen('CreateOptions'))) => array_map(
                     static fn (WriteOptions $item): array => $item->toArray(),

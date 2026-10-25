@@ -174,6 +174,7 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
     }
 
     $resolved = [];
+    $unmapped = [];
 
     foreach ($definitionFields as $name => $field) {
         $specField = $specFields[$name] ?? null;
@@ -193,7 +194,14 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
         if (\in_array($type, ['taxes', 'list'], true) && empty($field['readOnly'])) {
             throw new RuntimeException("Listen-Feld '{$name}' muss 'readOnly' sein ({$source}).");
         }
+        if (!empty($field['enumList']) && empty($field['enum'])) {
+            throw new RuntimeException("Feld '{$name}' mit 'enumList' braucht eine Enum-Klasse in 'enum' ({$source}).");
+        }
         $enum = $specField['enum'] ?? null;
+        // Feste Wertemenge in der Spec: Enum-Klasse angeben oder bewusst mit `'enum' => false` beim String bleiben.
+        if (null !== $enum && !\array_key_exists('enum', $field)) {
+            $unmapped[] = $name;
+        }
 
         $resolved[] = [
             'wire' => $name,
@@ -202,7 +210,9 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
             'doc' => $field['doc'] ?? ($specField['description_de'] ?? null) ?? throw new RuntimeException("Feld '{$name}' hat keine Doku ({$source})."),
             'details' => $field['details'] ?? [],
             'enum' => $enum,
-            'enumClass' => $field['enum'] ?? null,
+            'enumClass' => ($field['enum'] ?? null) ?: null,
+            // `enumList`: kommaseparierte Werte (z. B. Zahlarten) als list<Enum>.
+            'enumList' => !empty($field['enumList']),
             'specType' => null !== $specField ? (null !== $enum ? implode(' | ', $enum) : (string) $specField['type']) : null,
             'specDefault' => $specField['default'] ?? null,
             'writable' => empty($field['readOnly']),
@@ -213,6 +223,10 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
             'create' => $field['create'] ?? [],
             'update' => $field['update'] ?? [],
         ];
+    }
+
+    if ([] !== $unmapped) {
+        throw new RuntimeException('Spec-Felder mit fester Wertemenge brauchen \'enum\' in der Definition (' . $source . '): ' . implode(', ', $unmapped));
     }
 
     return $resolved;
@@ -251,7 +265,8 @@ function renderModel(array $definition, array $fields, string $source): string
     if ($usesDate) {
         $imports[] = 'DateTimeImmutable';
     }
-    if ([] !== $listFields) {
+    $typedLists = array_values(array_filter($fields, static fn (array $f): bool => isListField($f) || $f['enumList']));
+    if ([] !== $typedLists) {
         $imports[] = 'Justpilot\\Billomat\\Internal\\ListCaster';
     }
     sort($imports);
@@ -267,12 +282,12 @@ function renderModel(array $definition, array $fields, string $source): string
     $out .= "\n" . classDoc($definition['model']['doc'], $definition['docUrl'], $source, 'Dokumentation:');
     $out .= 'final readonly class ' . $definition['model']['class'] . "\n{\n";
     // Listen-Felder brauchen den Element-Typ als @param am Konstruktor.
-    if ([] !== $listFields) {
-        $listTypes = array_map(listTypeHint(...), $listFields);
+    if ([] !== $typedLists) {
+        $listTypes = array_map(listTypeHint(...), $typedLists);
         $width = max(array_map(\strlen(...), $listTypes));
         $out .= docBlock(array_map(
             static fn (array $f, string $t): string => '@param ' . str_pad($t, $width) . ' $' . $f['property'],
-            $listFields,
+            $typedLists,
             $listTypes,
         ), '    ');
     }
@@ -293,7 +308,7 @@ function renderModel(array $definition, array $fields, string $source): string
 
         $out .= docBlock($lines, '        ');
         $out .= '        public ' . modelTypeHint($field) . ' $' . $field['property'];
-        if (isListField($field)) {
+        if (isListField($field) || $field['enumList']) {
             $out .= ' = []';
         } elseif (empty($field['model']['required'])) {
             if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
@@ -324,6 +339,7 @@ function renderModel(array $definition, array $fields, string $source): string
     foreach (exportFields($scalarFields, $definition['model']['toArray'] ?? null, $source) as $field) {
         $value = '$this->' . $field['property'];
         $value = match (true) {
+            $field['enumList'] => enumListExpression($field, $value),
             null !== $field['enumClass'] => $value . (empty($field['model']['nonNull']) ? '?->value' : '->value'),
             'date' === modelType($field) => $value . "?->format('Y-m-d')",
             'datetime' === modelType($field) => $value . '?->format(DATE_ATOM)',
@@ -369,9 +385,21 @@ function isListField(array $field): bool
  */
 function listTypeHint(array $field): string
 {
-    return 'taxes' === $field['type']
-        ? 'list<TaxSummary>'
-        : 'list<' . $field['list']['class'] . '>';
+    return match (true) {
+        $field['enumList'] => 'list<' . $field['enumClass'] . '>',
+        'taxes' === $field['type'] => 'list<TaxSummary>',
+        default => 'list<' . $field['list']['class'] . '>',
+    };
+}
+
+/**
+ * Kommaseparierter Billomat-String aus einer Enum-Liste; eine leere Liste wird zu null.
+ *
+ * @param array<string, mixed> $field
+ */
+function enumListExpression(array $field, string $value): string
+{
+    return "[] === {$value} ? null : implode(',', array_map(static fn ({$field['enumClass']} \$v): string => \$v->value, {$value}))";
 }
 
 /**
@@ -403,6 +431,9 @@ function nonNullFallback(string $type): string
  */
 function modelTypeHint(array $field): string
 {
+    if ($field['enumList']) {
+        return 'array';
+    }
     if (null !== $field['enumClass']) {
         return (empty($field['model']['nonNull']) ? '?' : '') . $field['enumClass'];
     }
@@ -455,6 +486,10 @@ function hydrateExpression(array $field): string
         return $lookup . ' ?? null';
     }
 
+    // Unbekannte Werte fallen aus der Liste heraus.
+    if ($field['enumList']) {
+        return "ListCaster::toEnumList({$lookup} ?? null, {$field['enumClass']}::class)";
+    }
     // Nicht-nullbare Enums brauchen ein `fromApi(string): self`, das unbekannte Werte auf einen Default abbildet.
     if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
         return $field['enumClass'] . "::fromApi(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
@@ -521,7 +556,11 @@ function renderOptions(array $definition, array $options, array $fields, string 
 
     $out .= "    public function __construct(\n";
     foreach ($ordered as $field) {
-        $out .= docBlock(optionsDocLines($field, $isCreate), '        ');
+        $lines = optionsDocLines($field, $isCreate);
+        if ($field['enumList']) {
+            $lines = [...$lines, '', '@var ' . optionsListDocType($field, $isCreate)];
+        }
+        $out .= docBlock($lines, '        ');
         $out .= '        public ' . optionsParamType($field, $isCreate, $dateObjects) . ' $' . $field['property'] . optionsDefault($field, $isCreate) . ",\n";
     }
     if (null !== $items) {
@@ -533,7 +572,9 @@ function renderOptions(array $definition, array $options, array $fields, string 
     // Wither: Kopie mit einem geänderten Feld (clone with, PHP 8.5).
     foreach ($ordered as $field) {
         $property = $field['property'];
-        $out .= "    /** Kopie mit geändertem `{$property}`. */\n";
+        $out .= $field['enumList']
+            ? "    /**\n     * Kopie mit geändertem `{$property}`.\n     *\n     * @param " . optionsListDocType($field, $isCreate) . " \${$property}\n     */\n"
+            : "    /** Kopie mit geändertem `{$property}`. */\n";
         $out .= '    public function with' . ucfirst($property) . '(' . optionsParamType($field, $isCreate, $dateObjects) . " \${$property}): self\n";
         $out .= "    {\n        return clone(\$this, ['{$property}' => \${$property}]);\n    }\n\n";
     }
@@ -766,6 +807,10 @@ function filterExportExpression(array $field, string $value): string
  */
 function optionsParamType(array $field, bool $isCreate, bool $dateObjects): string
 {
+    // Enum-Listen: eine leere Liste wird nicht gesendet, deshalb ohne null.
+    if ($field['enumList']) {
+        return $isCreate ? 'array' : 'array|Clear';
+    }
     $type = optionsPhpType($field, $dateObjects);
     if ('mixed' === $type) {
         return 'mixed';
@@ -778,10 +823,23 @@ function optionsParamType(array $field, bool $isCreate, bool $dateObjects): stri
 }
 
 /**
+ * PHPDoc-Typ einer Enum-Liste in Options; Update-Felder können zusätzlich {@see Clear} sein.
+ *
+ * @param array<string, mixed> $field
+ */
+function optionsListDocType(array $field, bool $isCreate): string
+{
+    return 'list<' . $field['enumClass'] . '>' . ($isCreate ? '' : '|Clear');
+}
+
+/**
  * @param array<string, mixed> $field
  */
 function optionsDefault(array $field, bool $isCreate): string
 {
+    if ($field['enumList']) {
+        return ' = []';
+    }
     if ($isCreate && !empty($field['create']['constructor'])) {
         return \array_key_exists('default', $field['create']) ? ' = ' . var_export($field['create']['default'], true) : '';
     }
@@ -803,6 +861,10 @@ function optionsExportExpression(array $field, string $value, bool $isCreate, bo
 {
     $isDate = $dateObjects && 'date' === $field['type'];
     $isBool = $boolAsInt && 'bool' === $field['type'];
+
+    if ($field['enumList']) {
+        return $isCreate ? enumListExpression($field, $value) : "{$value} instanceof Clear ? {$value} : (" . enumListExpression($field, $value) . ')';
+    }
 
     if (!$isCreate) {
         return match (true) {

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Model;
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
@@ -31,8 +32,9 @@ use const DATE_ATOM;
 final readonly class Invoice
 {
     /**
-     * @param list<TaxSummary>  $taxes
-     * @param list<InvoiceItem> $items
+     * @param list<TaxSummary>         $taxes
+     * @param list<InvoicePaymentType> $paymentTypes
+     * @param list<InvoiceItem>        $items
      */
     public function __construct(
         /** Interne Billomat-ID der Rechnung. */
@@ -112,11 +114,11 @@ final readonly class Invoice
         /** Steuerzeilen der Rechnung (Zusammenfassung pro Steuersatz). */
         public array $taxes = [],
         /**
-         * Akzeptierte Zahlungsarten (kommasepariert).
+         * Akzeptierte Zahlungsarten.
          *
-         * Beispiel: "BANK_TRANSFER,CASH"
+         * Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".
          */
-        public ?string $paymentTypes = null,
+        public array $paymentTypes = [],
         /** ID der Vorlage, mit der die Rechnung abgeschlossen wird. */
         public ?int $templateId = null,
         /** Positionen der Rechnung (nur bei GET /invoices/{id}). */
@@ -180,7 +182,7 @@ final readonly class Invoice
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
             taxes: ListCaster::toList($data['taxes']['tax'] ?? null, 'name', TaxSummary::fromArray(...)),
-            paymentTypes: ScalarCaster::toStringOrNull($data['payment_types'] ?? null),
+            paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, InvoicePaymentType::class),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toList($data['invoice-items']['invoice-item'] ?? null, 'id', InvoiceItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -238,7 +240,7 @@ final readonly class Invoice
             'offer_id' => $this->offerId,
             'confirmation_id' => $this->confirmationId,
             'recurring_id' => $this->recurringId,
-            'payment_types' => $this->paymentTypes,
+            'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (InvoicePaymentType $v): string => $v->value, $this->paymentTypes)),
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customfield,

@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\PropertyType;
 
 use const DATE_ATOM;
 
@@ -29,8 +30,8 @@ final readonly class ClientPropertyValue
         public int $clientId,
         /** ID der Eigenschaft. */
         public int $clientPropertyId,
-        /** Typ der Eigenschaft (z. B. TEXTFIELD, CHECKBOX). */
-        public ?string $type,
+        /** Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX). */
+        public ?PropertyType $type,
         /** Name der Eigenschaft. */
         public ?string $name,
         /** Wert der Eigenschaft. */
@@ -55,7 +56,7 @@ final readonly class ClientPropertyValue
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
             clientPropertyId: ScalarCaster::toIntOrNull($data['client_property_id'] ?? null) ?? 0,
-            type: ScalarCaster::toStringOrNull($data['type'] ?? null),
+            type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
@@ -77,7 +78,7 @@ final readonly class ClientPropertyValue
             'id' => $this->id,
             'client_id' => $this->clientId,
             'client_property_id' => $this->clientPropertyId,
-            'type' => $this->type,
+            'type' => $this->type?->value,
             'name' => $this->name,
             'value' => $this->value,
             'created' => $this->created?->format(DATE_ATOM),

@@ -63,13 +63,13 @@ Liefert `null` bei 404.
 | `body` | `text` (Fallback `body`) | `?string` |
 | `fromAddress` | `from` | `?string` |
 | `isDefault` | `is_default` | `?bool` |
-| `type` | `type` | `?string` |
+| `type` | `type` | `?EmailTemplateType` |
 | `bcc` | `bcc` | `?bool` |
 | `created`, `updated` | `?\DateTimeImmutable` |  |
 
 > Billomat liefert den Nachrichtentext im Feld `text`; das SDK stellt ihn weiterhin als `$body` bereit. Ein Feld `from` liefert die API nicht mehr — `fromAddress` ist daher in der Regel `null` und bleibt nur aus Kompatibilitätsgründen erhalten.
 
-## Dokumenttypen (laut Spec)
+## Dokumenttypen (`EmailTemplateType`)
 
 | Wert | Verwendung |
 |---|---|

@@ -50,6 +50,7 @@ return [
         'type' => [
             'doc' => 'Dokumenttyp, für den die Vorlage gilt.',
             'details' => ['Mögliche Werte: INVOICES, OFFERS, CONFIRMATIONS, CREDIT_NOTES, DELIVERY_NOTES, REMINDERS, PAYMENT_THANKS'],
+            'enum' => 'EmailTemplateType',
         ],
         'bcc' => ['doc' => 'Erhält der Absender eine BCC-Kopie?'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Vorlage.'],

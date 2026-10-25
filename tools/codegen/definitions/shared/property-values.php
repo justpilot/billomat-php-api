@@ -53,7 +53,7 @@ return static function (string $prefix, string $label, string $parentField, stri
                 'model' => ['required' => true, 'nonNull' => true],
                 'create' => ['constructor' => true],
             ],
-            'type' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Typ der Eigenschaft (z. B. TEXTFIELD, CHECKBOX).'],
+            'type' => ['type' => 'string', 'enum' => 'PropertyType', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX).'],
             'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Name der Eigenschaft.'],
             // Der Typ des Werts hängt von der Eigenschaft ab (Text, Checkbox, …), deshalb `mixed`.
             'value' => [

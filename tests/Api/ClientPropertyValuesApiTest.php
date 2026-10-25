@@ -14,6 +14,7 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientPropertyValue;
+use Justpilot\Billomat\Model\Enum\PropertyType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -120,7 +121,7 @@ final class ClientPropertyValuesApiTest extends TestCase
         self::assertNotNull($value);
         self::assertSame(42, $value->clientId);
         self::assertSame(7, $value->clientPropertyId);
-        self::assertSame('CHECKBOX', $value->type);
+        self::assertSame(PropertyType::CHECKBOX, $value->type);
 
         self::assertNull($api->get(6));
     }

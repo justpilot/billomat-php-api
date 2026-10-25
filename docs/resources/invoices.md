@@ -123,7 +123,7 @@ Welche Felder im `InvoiceGroup` gefüllt sind, hängt vom `group_by`-Parameter a
 | `group_by` | Gefülltes Identifier-Feld |
 |---|---|
 | `client` | `clientId` |
-| `status` | `status` |
+| `status` | `status` (`?InvoiceStatus`) |
 | `day` / `week` / `month` / `year` | `day` / `week` / `month` / `year` (jeweils `?string`) |
 
 `totalGross` und `totalNet` enthalten die Aggregat-Summen.
@@ -214,7 +214,7 @@ Verschickt die Rechnung postalisch über den Pixelletter-Service. **Kostenpflich
 ```php
 use Justpilot\Billomat\Api\InvoiceMailOptions;
 
-$opts = new InvoiceMailOptions(color: true, duplex: true, paperWeight: '90');
+$opts = new InvoiceMailOptions(color: true, duplex: true, paperWeight: 90);
 
 $billomat->invoices->mail($invoice->id, $opts);
 ```
@@ -312,7 +312,7 @@ Konstruktor: `new InvoiceCreateOptions(int $clientId, …)` — `clientId` ist P
 | `currencyCode` | `currency_code` | `?string` |
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` (Währungskurs) |
-| `paymentTypes` | `payment_types` | `?string` (CSV, z. B. `BANK_TRANSFER,CASH`) |
+| `paymentTypes` | `payment_types` | `list<InvoicePaymentType>` (Billomat: kommasepariert, z. B. `BANK_TRANSFER,CASH`) |
 
 ### Verknüpfungen
 
@@ -349,7 +349,7 @@ Schmaler Subset für Partial-Updates, aufgebaut wie `InvoiceCreateOptions` (bena
 | `netGross` | `net_gross` | `?NetGross` |
 | `currencyCode` | `currency_code` | `?string` |
 | `quote` | `quote` | `?float` |
-| `paymentTypes` | `payment_types` | `?string` |
+| `paymentTypes` | `payment_types` | `list<InvoicePaymentType>\|Clear` |
 
 ## Write-Modell: `EmailOptions`
 
@@ -377,7 +377,7 @@ Payload für `mail()` (Pixelletter), wie die übrigen Options `final readonly` m
 |---|---|---|---|
 | `color` | `color` | `?bool` | Wird als `1`/`0` serialisiert |
 | `duplex` | `duplex` | `?bool` | Doppelseitiger Druck |
-| `paperWeight` | `paper_weight` | `?string` | g/m² als String, z. B. `"80"` |
+| `paperWeight` | `paper_weight` | `?int` | g/m², 80 oder 90 |
 | `attachments` | `attachments.attachment[]` | `list<array{filename:string,mimetype:string,base64file:string}>` | |
 
 ## Read-Modell: `Invoice`
@@ -403,7 +403,8 @@ Payload für `mail()` (Pixelletter), wie die übrigen Options `final readonly` m
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `paidAmount`, `openAmount` | `?Money` |
 | `netGross` | `?NetGross` |
-| `currencyCode`, `paymentTypes` | `?string` |
+| `currencyCode` | `?string` |
+| `paymentTypes` | `list<InvoicePaymentType>` (unbekannte Werte fallen heraus) |
 | `quote` | `?float` |
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | `?int` |
 | `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` als `Money`) — Steuer-Zusammenfassung |

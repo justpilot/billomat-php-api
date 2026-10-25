@@ -38,7 +38,7 @@ final class OfferTest extends TestCase
             'number' => '7',
             'number_pre' => 'AN-',
             'number_length' => '4',
-            'status' => 'ACCEPTED',
+            'status' => 'WON',
             'date' => '2025-04-01',
             'validity_days' => '30',
             'discount_rate' => '2.5',
@@ -87,7 +87,7 @@ final class OfferTest extends TestCase
         self::assertSame(42, $offer->clientId);
         self::assertSame(100, $offer->contactId);
         self::assertSame('AN-2025-0007', $offer->offerNumber);
-        self::assertSame(OfferStatus::ACCEPTED, $offer->status);
+        self::assertSame(OfferStatus::WON, $offer->status);
         self::assertInstanceOf(DateTimeImmutable::class, $offer->date);
         self::assertSame(30, $offer->validityDays);
         self::assertSame('Angebot Web-Relaunch', $offer->title);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 
 /**
  * Aggregat-Eintrag aus GET /invoices?group_by=...
@@ -28,7 +29,7 @@ final readonly class InvoiceGroup
         public ?Money $totalGross,
         public ?Money $totalNet,
         public ?int $clientId = null,
-        public ?string $status = null,
+        public ?InvoiceStatus $status = null,
         public ?string $day = null,
         public ?string $week = null,
         public ?string $month = null,
@@ -55,7 +56,7 @@ final readonly class InvoiceGroup
             totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
             totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null),
-            status: ScalarCaster::toStringOrNull($data['status'] ?? null),
+            status: InvoiceStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             day: ScalarCaster::toStringOrNull($data['day'] ?? null),
             week: ScalarCaster::toStringOrNull($data['week'] ?? null),
             month: ScalarCaster::toStringOrNull($data['month'] ?? null),

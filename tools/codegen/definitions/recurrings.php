@@ -92,7 +92,12 @@ return [
         'currency_code' => ['doc' => 'Währung (ISO-Währungscode).'],
         'net_gross' => ['enum' => 'NetGross', 'doc' => 'Preisbasis (Brutto- oder Netto-Preise).'],
         'quote' => ['doc' => 'Währungskurs (für Umrechnung in die Standard-Währung).'],
-        'payment_types' => ['doc' => 'Akzeptierte Zahlungsarten (kommasepariert).'],
+        'payment_types' => [
+            'doc' => 'Akzeptierte Zahlungsarten.',
+            'details' => ['Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".'],
+            'enum' => 'InvoicePaymentType',
+            'enumList' => true,
+        ],
         'action' => ['enum' => 'RecurringAction', 'doc' => 'Aktion, die bei jedem Lauf ausgeführt wird.'],
         'cycle_number' => ['doc' => 'Anzahl der Intervall-Einheiten zwischen zwei Läufen.'],
         'cycle' => ['enum' => 'RecurringCycle', 'doc' => 'Intervall-Einheit (z. B. monatlich).'],

@@ -12,6 +12,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\EmailTemplate;
+use Justpilot\Billomat\Model\Enum\EmailTemplateType;
 use Justpilot\Billomat\Model\FreeText;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\ReminderText;
@@ -69,7 +70,7 @@ final class TextResourcesApiTest extends TestCase
         $templates = $api->list();
         self::assertCount(1, $templates);
         self::assertSame('Standard Rechnung', $templates[0]->name);
-        self::assertSame('INVOICES', $templates[0]->type);
+        self::assertSame(EmailTemplateType::INVOICES, $templates[0]->type);
         self::assertSame('Im Anhang Ihre Rechnung.', $templates[0]->body);
         self::assertTrue($templates[0]->bcc);
         self::assertTrue($templates[0]->isDefault);

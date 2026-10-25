@@ -21,6 +21,7 @@ use Justpilot\Billomat\Model\Enum\ArticleType;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
+use Justpilot\Billomat\Model\Enum\FreeTextType;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
@@ -145,8 +146,8 @@ final class MasterDataFieldsTest extends TestCase
         ];
         yield 'FreeText' => [
             FreeText::fromArray(...),
-            ['id' => '1', 'type' => 'Text', 'name' => 'Text', 'is_default' => '1'],
-            ['type' => 'Text', 'name' => 'Text', 'isDefault' => true],
+            ['id' => '1', 'type' => 'CORRECTION', 'name' => 'Text', 'is_default' => '1'],
+            ['type' => FreeTextType::CORRECTION, 'name' => 'Text', 'isDefault' => true],
         ];
         yield 'InboxDocument' => [
             InboxDocument::fromArray(...),

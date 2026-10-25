@@ -7,15 +7,15 @@ namespace Justpilot\Billomat\Tests\Rector\SubResourceMethodRector;
 use Iterator;
 use Justpilot\Billomat\Rector\SubResourceMap;
 use Justpilot\Billomat\Rector\SubResourceMethodRector;
+use Justpilot\Billomat\Tests\Rector\AbstractIsolatedRectorTestCase;
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Rector\Testing\PHPUnit\AbstractRectorTestCase;
 
 #[CoversClass(SubResourceMethodRector::class)]
 #[CoversClass(SubResourceMap::class)]
-final class SubResourceMethodRectorTest extends AbstractRectorTestCase
+final class SubResourceMethodRectorTest extends AbstractIsolatedRectorTestCase
 {
     #[Test]
     #[DataProvider('provideFixtures')]

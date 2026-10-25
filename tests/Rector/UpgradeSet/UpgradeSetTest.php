@@ -9,11 +9,11 @@ use Justpilot\Billomat\Rector\GetItemsToPropertyRector;
 use Justpilot\Billomat\Rector\NestedSubResourceRector;
 use Justpilot\Billomat\Rector\SubResourceMap;
 use Justpilot\Billomat\Rector\SubResourceMethodRector;
+use Justpilot\Billomat\Tests\Rector\AbstractIsolatedRectorTestCase;
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Rector\Testing\PHPUnit\AbstractRectorTestCase;
 
 /**
  * Ende-zu-Ende: das ausgelieferte Set `rector/upgrade-4.0.php` auf 3.x-Code.
@@ -22,7 +22,7 @@ use Rector\Testing\PHPUnit\AbstractRectorTestCase;
 #[CoversClass(SubResourceMethodRector::class)]
 #[CoversClass(GetItemsToPropertyRector::class)]
 #[CoversClass(SubResourceMap::class)]
-final class UpgradeSetTest extends AbstractRectorTestCase
+final class UpgradeSetTest extends AbstractIsolatedRectorTestCase
 {
     #[Test]
     #[DataProvider('provideFixtures')]

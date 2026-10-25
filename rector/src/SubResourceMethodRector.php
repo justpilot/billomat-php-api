@@ -55,7 +55,7 @@ final class SubResourceMethodRector extends AbstractRector
 
         // Neue Knoten statt Änderungen am Original: so bleibt der Aufruf unverändert, wenn die Regel null liefert.
         $newMethod = SubResourceMap::hasListByParent($newClass) && str_starts_with($method, 'listBy') ? 'list' : $method;
-        $args = array_values($node->getArgs());
+        $args = $node->getArgs();
 
         if (SubResourceMap::hasGenericParentId($newClass)) {
             $args = array_map($this->renameParentIdArgument(...), $args);
@@ -105,9 +105,9 @@ final class SubResourceMethodRector extends AbstractRector
     /**
      * Benennt die positionalen Argumente nach den 3.x-Parametern; Aufrufe mit `...$args` bleiben unverändert.
      *
-     * @param list<Arg> $args
+     * @param array<Arg> $args
      *
-     * @return list<Arg>
+     * @return array<Arg>
      */
     private function nameFilterArguments(array $args): array
     {

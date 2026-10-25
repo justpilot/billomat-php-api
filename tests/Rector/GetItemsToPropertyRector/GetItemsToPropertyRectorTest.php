@@ -6,14 +6,14 @@ namespace Justpilot\Billomat\Tests\Rector\GetItemsToPropertyRector;
 
 use Iterator;
 use Justpilot\Billomat\Rector\GetItemsToPropertyRector;
+use Justpilot\Billomat\Tests\Rector\AbstractIsolatedRectorTestCase;
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Rector\Testing\PHPUnit\AbstractRectorTestCase;
 
 #[CoversClass(GetItemsToPropertyRector::class)]
-final class GetItemsToPropertyRectorTest extends AbstractRectorTestCase
+final class GetItemsToPropertyRectorTest extends AbstractIsolatedRectorTestCase
 {
     #[Test]
     #[DataProvider('provideFixtures')]

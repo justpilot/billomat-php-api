@@ -144,6 +144,10 @@ final class ListFiltersTest extends TestCase
         self::assertNotSame($original, $copy);
         self::assertSame($expected, $reflectionProperty->getValue($copy));
         self::assertSame($before, $reflectionProperty->getValue($original));
+        if ($parameter->isVariadic()) {
+            // Benannte Argumente landen mit String-Schlüssel im Variadic – gespeichert wird trotzdem eine Liste.
+            self::assertSame($expected, $reflectionProperty->getValue($wither->invokeArgs($original, ['beliebig' => $value])));
+        }
         // Ein leerer Filter sendet nichts, die Kopie genau den geänderten Parameter.
         $wire = 'extra' === $property ? 'extra_param' : strtolower((string) preg_replace('/[A-Z]/', '_$0', $property));
         self::assertSame([], $original->toQuery());

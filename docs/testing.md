@@ -148,7 +148,7 @@ composer lint:fix    # PHP-CS-Fixer automatisch anwenden
 composer analyse     # PHPStan Level max
 composer refactor:dry # Rector zeigt Vorschläge
 composer refactor    # Rector wendet Vorschläge an
-composer mutate      # Infection Mutation-Testing (langsam)
+composer mutate      # Infection Mutation-Testing (~3 Minuten)
 
 composer ci          # Lint + Analyse + Refactor-Dry + alle Tests
 ```
@@ -165,6 +165,6 @@ composer analyse:baseline
 
 1. **Tests** auf PHP 8.5 (Pflicht) und 8.6 (experimentell, `continue-on-error`).
 2. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer audit`.
-3. **Mutation Testing** (nur PRs) — `composer mutate`.
+3. **Mutation Testing** — im PR nur die geänderten Zeilen (`--git-diff-lines`, 90 % MSI), auf `main`/`4.x` der volle Lauf mit den Schwellen aus `infection.json5`.
 
 Integrationstests laufen in CI **nicht** automatisch, da keine Sandbox-Credentials hinterlegt sind. Bei Bedarf können `BILLOMAT_ID`/`BILLOMAT_API_KEY` als GitHub-Secrets eingerichtet und ein separater Workflow getriggert werden.

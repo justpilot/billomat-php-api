@@ -10,11 +10,20 @@
         text: "build/infection/infection.log",
         html: "build/infection/infection.html",
         summary: "build/infection/summary.log",
+        // Badge nur für vollständige Läufe auf den Haupt-Branches (Push), nicht für PR-Diffs.
+        stryker: {
+            badge: "/^(main|4\\.x)$/",
+        },
     },
     tmpDir: "build/infection/tmp",
-    minMsi: 60,
-    minCoveredMsi: 60,
+    // Stand 4.0: 97 % Covered MSI; die Schwelle fängt Regressionen ab, ohne bei jedem
+    // äquivalenten Mutanten zu brechen. PRs prüfen geänderte Zeilen mit 90 % (ci.yml).
+    minMsi: 95,
+    minCoveredMsi: 95,
     mutators: {
         "@default": true,
+        // Sichtbarkeit prüfen PHPStan und die Reflection-Tests; die Mutanten kosten nur Laufzeit.
+        PublicVisibility: false,
+        ProtectedVisibility: false,
     },
 }

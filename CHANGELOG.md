@@ -39,6 +39,7 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 - **BC break: `ClientCreateOptions::$dunningRun` defaults to `null`** and is only sent when set, so Billomat's account default applies. Before, `dunning_run=0` was always sent.
 - Sub-resource `get()` throws `UnexpectedResponseException` when the response lacks the expected envelope; some classes returned `null` before.
 - Array query parameters go out as `key%5B%5D=v` (PSR-7 URIs encode the brackets per RFC 3986, which servers decode to the same `key[]`).
+- Mutation testing covers the generated code on purpose: reflection-based tests check every read model's `fromArray()`/`toArray()` round trip and every write option's payload against the `Billomat-Feld` in its docblock. Covered MSI rises from 77 % to 97 % (generated code 73 % → 99.7 %), `minMsi`/`minCoveredMsi` from 60 to 95. `PublicVisibility`/`ProtectedVisibility` are disabled (about 1,500 mutants that never survived). CI mutates only the changed lines on pull requests (`--git-diff-lines`, 90 %) and all code on pushes to `main`/`4.x`.
 
 ### Removed
 - **BC break: everything marked `@deprecated since 3.1` is gone.**

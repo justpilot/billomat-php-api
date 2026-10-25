@@ -260,7 +260,7 @@ Notes on handling API keys and responsibly disclosing vulnerabilities live in [S
 
 ## Changelog
 
-Version history and release notes follow [Keep a Changelog](https://keepachangelog.com/) in [CHANGELOG.md](CHANGELOG.md). The project follows [Semantic Versioning](https://semver.org/).
+Version history and release notes follow [Keep a Changelog](https://keepachangelog.com/) in [CHANGELOG.md](CHANGELOG.md). The project follows [Semantic Versioning](https://semver.org/). Upgrading from 3.x to 4.0: [UPGRADE-4.0.md](UPGRADE-4.0.md).
 
 ## License
 

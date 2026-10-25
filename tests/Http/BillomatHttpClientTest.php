@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 #[CoversClass(BillomatHttpClient::class)]
@@ -40,7 +41,7 @@ final class BillomatHttpClientTest extends TestCase
             appSecret: 'app-secret',
         );
 
-        $client = new BillomatHttpClient($mock, $config);
+        $client = new BillomatHttpClient(new Psr18Client($mock), $config);
 
         $response = $client->request('GET', '/clients');
 

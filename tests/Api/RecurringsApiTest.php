@@ -23,6 +23,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -76,7 +77,7 @@ final class RecurringsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $recurrings = $api->list(['client_id' => 5, 'cycle' => 'MONTHLY']);
@@ -102,7 +103,7 @@ final class RecurringsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $recurrings = $api->list();
@@ -115,7 +116,7 @@ final class RecurringsApiTest extends TestCase
     {
         $mock = new MockHttpClient([new MockResponse('', ['http_code' => 404])]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         self::assertNull($api->get(999));
@@ -149,7 +150,7 @@ final class RecurringsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $recurring = $api->get(42);
@@ -187,7 +188,7 @@ final class RecurringsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $opts = new RecurringCreateOptions(clientId: 5);
@@ -236,7 +237,7 @@ final class RecurringsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $opts = new RecurringUpdateOptions();
@@ -265,7 +266,7 @@ final class RecurringsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         self::assertTrue($api->delete(99));

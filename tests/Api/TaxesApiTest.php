@@ -16,6 +16,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -68,7 +69,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $result = $api->list(['page' => 1, 'per_page' => 50]);
@@ -107,7 +108,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $tax = $api->get(5);
@@ -132,7 +133,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $tax = $api->get(999999);
@@ -168,7 +169,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $options = new TaxRateCreateOptions(
@@ -233,7 +234,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $options = new TaxRateCreateOptions(
@@ -274,7 +275,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $result = $api->delete(10);
@@ -306,7 +307,7 @@ final class TaxesApiTest extends TestCase
         ));
 
         $api = new TaxesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig(billomatId: 'x', apiKey: 'k'),
         ));
 
@@ -326,7 +327,7 @@ final class TaxesApiTest extends TestCase
         ));
 
         $api = new TaxesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig(billomatId: 'x', apiKey: 'k'),
         ));
 

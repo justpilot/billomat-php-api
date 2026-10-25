@@ -20,6 +20,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -77,7 +78,7 @@ final class TemplatesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR)),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
         $list = $api->list(['per_page' => 10]);
@@ -112,7 +113,7 @@ final class TemplatesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR)),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
         $tpl = $api->get(11);
@@ -143,7 +144,7 @@ final class TemplatesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 201]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
         $opts = new TemplateCreateOptions(TemplateDocumentType::INVOICE);
@@ -185,7 +186,7 @@ final class TemplatesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
         $u = new TemplateUpdateOptions();
@@ -218,7 +219,7 @@ final class TemplatesApiTest extends TestCase
             new MockResponse('', ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
         self::assertTrue($api->delete(10));
@@ -240,7 +241,7 @@ final class TemplatesApiTest extends TestCase
             ]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret'));
         $api = new TemplatesApi($http);
 
         $raw = $api->thumb(7, TemplateThumbFormat::PNG);
@@ -268,7 +269,7 @@ final class TemplatesApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $api = new TemplatesApi(new BillomatHttpClient($mock, new BillomatConfig('x', 'k')));
+        $api = new TemplatesApi(new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('x', 'k')));
 
         $templates = $api->list();
 
@@ -285,7 +286,7 @@ final class TemplatesApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $api = new TemplatesApi(new BillomatHttpClient($mock, new BillomatConfig('x', 'k')));
+        $api = new TemplatesApi(new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('x', 'k')));
 
         self::assertSame([], $api->list());
     }

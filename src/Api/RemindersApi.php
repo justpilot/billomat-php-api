@@ -13,7 +13,6 @@ use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderPdf;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Reminders-Ressource (Mahnungen).
@@ -183,13 +182,7 @@ final class RemindersApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            $response = $this->http->request('GET', "/reminders/{$id}/pdf", $query);
-
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
+            return $this->getRaw("/reminders/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/reminders/{$id}/pdf", $query);

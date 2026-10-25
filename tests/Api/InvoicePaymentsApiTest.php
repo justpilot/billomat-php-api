@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -74,7 +75,7 @@ final class InvoicePaymentsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicePaymentsApi($http);
 
         $payments = $api->list([
@@ -124,7 +125,7 @@ final class InvoicePaymentsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicePaymentsApi($http);
 
         $payment = $api->get(5);
@@ -168,7 +169,7 @@ final class InvoicePaymentsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicePaymentsApi($http);
 
         $opts = new InvoicePaymentCreateOptions(
@@ -234,7 +235,7 @@ final class InvoicePaymentsApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new InvoicePaymentsApi($http);
 
         $result = $api->delete(42);

@@ -16,6 +16,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -49,7 +50,7 @@ final class BillomatClientTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $client = new BillomatClient($config, $mockHttp);
+        $client = new BillomatClient($config, new Psr18Client($mockHttp));
 
         $result = $client->clients->list(['per_page' => 1]);
 
@@ -76,7 +77,7 @@ final class BillomatClientTest extends TestCase
         $client = BillomatClient::create(
             billomatId: 'mycompany',
             apiKey: 'secret-key',
-            httpClient: $mockHttp,
+            httpClient: new Psr18Client($mockHttp),
         );
 
         // Smoke-Test: Clients-API funktioniert und liefert ein Array von Client-Objekten

@@ -28,12 +28,18 @@
   },
   "require": {
     "php": "^8.5",
-    "symfony/http-client": "^8.1"
+    "php-http/discovery": "^1.20",
+    "psr/http-client": "^1.0.3",
+    "psr/http-client-implementation": "*",
+    "psr/http-factory": "^1.1",
+    "psr/http-factory-implementation": "*",
+    "psr/http-message": "^2.0"
   },
   "require-dev": {
     "fakerphp/faker": "^1.24",
     "friendsofphp/php-cs-fixer": "^3.95",
     "infection/infection": "^0.35",
+    "nyholm/psr7": "^1.8",
     "phpstan/extension-installer": "^1.4",
     "phpstan/phpstan": "^2.3",
     "phpstan/phpstan-phpunit": "^2.1",
@@ -44,6 +50,7 @@
     "symfony/css-selector": "^8.1",
     "symfony/dom-crawler": "^8.1",
     "symfony/dotenv": "^8.1",
+    "symfony/http-client": "^8.1",
     "symfony/var-dumper": "^8.1"
   },
   "autoload": {
@@ -65,7 +72,8 @@
   "config": {
     "allow-plugins": {
       "infection/extension-installer": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "php-http/discovery": false
     },
     "sort-packages": true
   },

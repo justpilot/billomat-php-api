@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat;
 
+use Http\Discovery\Psr18ClientDiscovery;
 use Justpilot\Billomat\Api\AccountApi;
 use Justpilot\Billomat\Api\ActivitiesApi;
 use Justpilot\Billomat\Api\ArticlePropertiesApi;
@@ -74,9 +75,13 @@ use Justpilot\Billomat\Api\UnitsApi;
 use Justpilot\Billomat\Api\UserPropertiesApi;
 use Justpilot\Billomat\Api\UsersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\HttpClient\Psr18Client;
 
 final readonly class BillomatClient
 {
@@ -166,13 +171,23 @@ final readonly class BillomatClient
     public ActivitiesApi $activities;
     public SearchApi $search;
 
+    /**
+     * @param ClientInterface|null         $httpClient     beliebiger PSR-18-Client; ohne Angabe sucht das SDK einen per php-http/discovery
+     * @param RequestFactoryInterface|null $requestFactory PSR-17-Factory; ohne Angabe per php-http/discovery
+     * @param StreamFactoryInterface|null  $streamFactory  PSR-17-Factory; ohne Angabe per php-http/discovery
+     */
     public function __construct(
         BillomatConfig $config,
-        ?HttpClientInterface $httpClient = null,
+        ?ClientInterface $httpClient = null,
+        ?RequestFactoryInterface $requestFactory = null,
+        ?StreamFactoryInterface $streamFactory = null,
     ) {
-        $httpClient ??= HttpClient::create();
-
-        $this->http = new BillomatHttpClient($httpClient, $config);
+        $this->http = new BillomatHttpClient(
+            $httpClient ?? $this->discoverHttpClient($config),
+            $config,
+            $requestFactory,
+            $streamFactory,
+        );
 
         // APIs
         $this->settings = new SettingsApi($this->http);
@@ -253,7 +268,8 @@ final readonly class BillomatClient
         ?string $appId = null,
         ?string $appSecret = null,
         float $timeout = 10.0,
-        ?HttpClientInterface $httpClient = null,
+        ?ClientInterface $httpClient = null,
+        RetryPolicy $retry = new RetryPolicy(),
     ): self {
         $config = new BillomatConfig(
             billomatId: $billomatId,
@@ -261,6 +277,7 @@ final readonly class BillomatClient
             appId: $appId,
             appSecret: $appSecret,
             timeout: $timeout,
+            retry: $retry,
         );
 
         return new self($config, $httpClient);
@@ -269,5 +286,20 @@ final readonly class BillomatClient
     public function getHttpClient(): BillomatHttpClient
     {
         return $this->http;
+    }
+
+    /**
+     * Sucht einen installierten PSR-18-Client.
+     *
+     * Symfony HttpClient wird bevorzugt, weil sich dort der Timeout aus der Config setzen lässt;
+     * andere Clients (Guzzle, …) laufen mit ihrer eigenen Timeout-Einstellung.
+     */
+    private function discoverHttpClient(BillomatConfig $config): ClientInterface
+    {
+        if (class_exists(Psr18Client::class)) {
+            return new Psr18Client(HttpClient::create(['timeout' => $config->timeout]));
+        }
+
+        return Psr18ClientDiscovery::find();
     }
 }

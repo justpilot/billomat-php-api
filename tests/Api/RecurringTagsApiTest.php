@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -51,7 +52,7 @@ final class RecurringTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringTagsApi($http);
 
         $tags = $api->listByRecurring(42);
@@ -78,7 +79,7 @@ final class RecurringTagsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringTagsApi($http);
 
         $cloud = $api->cloud();
@@ -98,7 +99,7 @@ final class RecurringTagsApiTest extends TestCase
             new MockResponse('', ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringTagsApi($http);
 
         $tag = $api->create(new RecurringTagCreateOptions(recurringId: 42, name: 'wichtig'));
@@ -112,7 +113,7 @@ final class RecurringTagsApiTest extends TestCase
     {
         $mock = new MockHttpClient([new MockResponse('', ['http_code' => 404])]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringTagsApi($http);
 
         self::assertNull($api->get(999));

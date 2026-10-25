@@ -13,7 +13,6 @@ use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferPdf;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Offers-Ressource (Angebote / Estimates).
@@ -248,13 +247,7 @@ final class OffersApi extends AbstractApi
         if ($rawPdf) {
             $query['format'] = 'pdf';
 
-            $response = $this->http->request('GET', "/offers/{$id}/pdf", $query);
-
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
+            return $this->getRaw("/offers/{$id}/pdf", $query);
         }
 
         $data = $this->getJson("/offers/{$id}/pdf", $query);

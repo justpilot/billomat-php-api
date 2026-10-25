@@ -12,7 +12,6 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 /**
  * API-Wrapper für die Billomat-Clients-Ressource.
@@ -200,12 +199,6 @@ final class ClientsApi extends AbstractApi
     {
         $query = null !== $size ? ['size' => $size] : [];
 
-        $response = $this->http->request('GET', "/clients/{$id}/avatar", $query);
-
-        try {
-            return $response->getContent();
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
-        }
+        return $this->getRaw("/clients/{$id}/avatar", $query);
     }
 }

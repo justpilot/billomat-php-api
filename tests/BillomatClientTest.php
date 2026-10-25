@@ -20,7 +20,10 @@ use Justpilot\Billomat\Tests\Support\RecordingLogger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesNamespace;
 use PHPUnit\Framework\TestCase;
+use ReflectionObject;
+use ReflectionProperty;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -29,6 +32,7 @@ use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(BillomatClient::class)]
 #[UsesClass(AbstractApi::class)]
+#[UsesNamespace('Justpilot\\Billomat\\Api')]
 #[UsesClass(ClientsApi::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -97,6 +101,24 @@ final class BillomatClientTest extends TestCase
         self::assertContainsOnlyInstancesOf(Client::class, $clients);
 
         // zusätzliche Sicherstellung: weitere APIs sind verdrahtet
+    }
+
+    #[Test]
+    public function apisAreCreatedOnFirstAccessAndReused(): void
+    {
+        $client = BillomatClient::create(billomatId: 'mycompany', apiKey: 'k', httpClient: new Psr18Client(new MockHttpClient()));
+        $properties = new ReflectionObject($client)->getProperties(ReflectionProperty::IS_PUBLIC);
+
+        self::assertCount(30, $properties);
+        foreach ($properties as $property) {
+            // Vor dem ersten Zugriff existiert die API noch nicht.
+            self::assertFalse($property->isInitialized($client), $property->name);
+
+            $api = $property->getValue($client);
+            self::assertInstanceOf(AbstractApi::class, $api, $property->name);
+            self::assertSame($api, $property->getValue($client), $property->name);
+            self::assertTrue($property->isPrivateSet(), $property->name);
+        }
     }
 
     #[Test]

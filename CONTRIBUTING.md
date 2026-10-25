@@ -40,7 +40,7 @@ Every Billomat resource follows the same pattern; look at `ClientsApi`, `ClientC
 ## Adding a resource
 
 1. Add a codegen definition (or the handwritten classes for resources that don't fit) and run `composer generate`.
-2. Write the `*Api` class by hand and register it as a `public readonly` property on `BillomatClient`.
+2. Write the `*Api` class by hand and add it as a lazy property hook on `BillomatClient` (same pattern as the other APIs).
 3. New enums go into `src/Model/Enum/` (`enum X: string { use FromApi; case … }`, optionally `label()`).
 4. Add unit tests in `tests/Api/{Resource}ApiTest.php` (see below) and optionally an integration test under `tests/Integration/{Resource}/`.
 5. Add a documentation page under `docs/resources/<resource-name>.md` and link it from the README.

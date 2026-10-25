@@ -46,7 +46,7 @@ CI runs via `.github/workflows/ci.yml` on PHP 8.5 (required) and 8.6 (experiment
 ## Architecture
 
 ### Entry point: `BillomatClient`
-`src/BillomatClient.php` is a thin façade exposing each resource as a public readonly property:
+`src/BillomatClient.php` is a thin façade exposing each resource as a lazy property hook (`public private(set) ClientsApi $clients { get => $this->clients ??= new ClientsApi($this->http); }`):
 
 ```php
 $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: '…');
@@ -56,7 +56,7 @@ $billomat->invoices->pdf($id, PdfType::SIGNED);
 $billomat->invoices->comments->list($invoiceId);
 ```
 
-Construction wires `BillomatHttpClient` into every `*Api` instance. The transport is PSR-18: any `Psr\Http\Client\ClientInterface` can be injected; without one, `BillomatClient` uses Symfony's `Psr18Client` (with `BillomatConfig::$timeout`) if `symfony/http-client` is installed, otherwise `php-http/discovery`. PSR-17 factories come from discovery unless passed in.
+Construction builds `BillomatHttpClient`; each `*Api` is created on first access with it. The transport is PSR-18: any `Psr\Http\Client\ClientInterface` can be injected; without one, `BillomatClient` uses Symfony's `Psr18Client` (with `BillomatConfig::$timeout`) if `symfony/http-client` is installed, otherwise `php-http/discovery`. PSR-17 factories come from discovery unless passed in.
 
 ### Three-layer pattern per resource
 
@@ -66,7 +66,7 @@ Every Billomat resource follows the same triad:
 2. **`src/Api/{Resource}CreateOptions.php` / `{Resource}UpdateOptions.php`** — typed write models, `final readonly` with every field as a promoted constructor parameter (named arguments) and a `with*()` wither per field (`clone($this, [...])`). `toArray()` snake-cases keys to Billomat's wire format and strips nulls with `array_filter`; in update options `Clear::Field` is sent as `null` to empty a field. Document positions are the `items:` parameter plus `withItem()`.
 3. **`src/Model/{Resource}.php`** — `final readonly` read model with `fromArray()` hydration and `toArray()` for debug/log output. Snake_case ↔ camelCase mapping lives in `fromArray`/`toArray`.
 
-When adding a new resource, register it as a public readonly property on `BillomatClient` and instantiate it in the constructor.
+When adding a new resource, add it as a lazy property hook on `BillomatClient` (same pattern as the others); `tests/BillomatClientTest.php` counts them.
 
 ### Sub-resources
 

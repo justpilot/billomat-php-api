@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Model;
 use Closure;
 use DateTimeImmutable;
 use Generator;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\Client;
@@ -89,6 +90,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(TemplateType::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(ListCaster::class)]
 final class MasterDataFieldsTest extends TestCase
 {
     /**

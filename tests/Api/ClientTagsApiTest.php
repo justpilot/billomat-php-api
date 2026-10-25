@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientTag;
 use Justpilot\Billomat\Model\ClientTagCloudEntry;
@@ -34,6 +35,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(ListCaster::class)]
 final class ClientTagsApiTest extends TestCase
 {
     #[Test]

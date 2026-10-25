@@ -14,6 +14,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
@@ -48,6 +49,7 @@ use const PHP_URL_QUERY;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(ListCaster::class)]
 final class ClientsApiTest extends TestCase
 {
     #[Test]

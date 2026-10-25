@@ -12,6 +12,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientPropertyValue;
 use Justpilot\Billomat\Model\Enum\PropertyType;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(ListCaster::class)]
 final class ClientPropertyValuesApiTest extends TestCase
 {
     #[Test]

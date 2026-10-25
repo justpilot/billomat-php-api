@@ -31,6 +31,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientPropertyValue;
 use Justpilot\Billomat\Model\CreditNoteComment;
@@ -84,6 +85,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(InvoiceItemCreateOptions::class)]
 #[UsesClass(OfferItemCreateOptions::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(ListCaster::class)]
 final class SubResourceApiTest extends TestCase
 {
     private MockHttpClient $mock;

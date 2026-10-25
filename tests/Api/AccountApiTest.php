@@ -8,6 +8,7 @@ use Justpilot\Billomat\Api\AccountApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
@@ -30,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(ListCaster::class)]
 final class AccountApiTest extends TestCase
 {
     #[Test]

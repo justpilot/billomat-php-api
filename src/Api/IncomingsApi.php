@@ -82,12 +82,12 @@ final class IncomingsApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param IncomingFilter|array<string, scalar|array|null> $filters
      *
      * @return list<Incoming>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(IncomingFilter|array $filters = []): array
     {
         return $this->listResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters);
     }
@@ -99,12 +99,12 @@ final class IncomingsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param IncomingFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<Incoming>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(IncomingFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters);
     }
@@ -117,12 +117,12 @@ final class IncomingsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param IncomingFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, Incoming>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(IncomingFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters, $pageSize);
     }

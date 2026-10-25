@@ -24,22 +24,43 @@ Die Antwort einer Listen-Ressource enthält auf dem Root-Element drei Pagination
 - `iterateAll($filters)` — `Generator<T>`, der über alle Seiten transparent durchläuft und intern `page` hochzählt.
 
 ```php
-foreach ($billomat->invoices->iterateAll(['per_page' => 200]) as $invoice) {
+foreach ($billomat->invoices->iterateAll(new InvoiceFilter(status: [InvoiceStatus::OPEN]), pageSize: 200) as $invoice) {
     // …
 }
 ```
+
+`iterateAll()` setzt `page` und `per_page` selbst; die Seitengröße kommt aus `pageSize`.
 
 Siehe `AbstractApi::listResource()`, `listResourcePage()` und `iterateResource()` in `src/Api/AbstractApi.php`.
 
 ## Filterung
 
-Die unterstützten Filterparameter sind pro Ressource in `docs/resources/<resource>.md` und in den jeweiligen `*Api`-PHPDocs aufgeführt. Filter werden als Query-Parameter mitgegeben:
+Die unterstützten Filterparameter sind pro Ressource in `docs/resources/<resource>.md` aufgeführt. Für die großen Ressourcen gibt es typisierte Filter-Klassen, generiert aus der Billomat-Doku: `ClientFilter`, `SupplierFilter`, `ArticleFilter`, `UserFilter`, `InvoiceFilter`, `OfferFilter`, `ConfirmationFilter`, `CreditNoteFilter`, `DeliveryNoteFilter`, `LetterFilter`, `ReminderFilter`, `IncomingFilter`, `RecurringFilter` und `TemplateFilter`.
 
 ```php
-$billomat->clients->list([
-    'name' => 'Acme',
-    'country_code' => 'DE',
-]);
+use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+
+$invoices = $billomat->invoices->list(new InvoiceFilter(
+    clientId: 42,
+    status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE],
+    from: new DateTimeImmutable('2026-01-01'),
+    orderBy: OrderBy::desc('date'),
+    perPage: 50,
+));
+```
+
+- Alle Felder sind optionale benannte Argumente; nicht gesetzte Felder (null bzw. leere Liste) fehlen im Query.
+- Mehrfachwerte (`status`, `tags`, ID-Listen wie `ClientFilter::$invoiceId`) sind Listen und werden kommasepariert gesendet (`status=OPEN,OVERDUE`); Billomat verknüpft sie mit ODER.
+- `from`/`to` sind `DateTimeImmutable` und gehen als `YYYY-MM-DD` raus; Status, Zahlarten und Intervalle sind Enums.
+- Die Filter sind unveränderlich: `$filter->withStatus(InvoiceStatus::PAID)` oder `$filter->withPage(2)` liefert eine geänderte Kopie.
+- Jeder Filter hat `orderBy`, `page`, `perPage` und `extra`. Über `extra` gehen weitere Query-Parameter mit, etwa [benutzerdefinierte Attribute](custom-meta-attributes.md); sie überschreiben gleichnamige Felder.
+
+Ein Array funktioniert weiterhin überall, auch bei Ressourcen ohne Filter-Klasse:
+
+```php
+$billomat->clients->list(['name' => 'Acme', 'country_code' => 'DE']);
 ```
 
 ### Schnelles Zählen via HEAD
@@ -50,11 +71,13 @@ Dieses SDK exponiert HEAD aktuell nicht direkt; bei Bedarf lässt sich `Billomat
 
 ## Sortierung — `order_by`
 
-Format: `<feld> <ASC|DESC>`, mehrere Sortierungen kommasepariert.
+Format: `<feld> <ASC|DESC>`, mehrere Sortierungen kommasepariert. Im SDK baut `OrderBy` den Wert:
 
+```php
+OrderBy::desc('date')->thenAsc('invoice_number'); // order_by=date+DESC,invoice_number+ASC
 ```
-?order_by=date DESC,invoice_number ASC
-```
+
+`OrderBy` prüft, dass der Feldname snake_case ist, und wirft sonst eine `InvalidArgumentException`.
 
 ### Quirk: `+` statt Space
 

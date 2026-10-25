@@ -47,6 +47,14 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'IncomingFilter',
+        'endpoint' => 'GET /api/incomings',
+        'fields' => [
+            'status' => ['enum' => 'IncomingStatus'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Eingangsrechnung.'],
         'supplier_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Lieferanten.'],

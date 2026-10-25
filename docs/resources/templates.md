@@ -25,10 +25,20 @@ $billomat->templates
 
 ## Methoden
 
-### `list(array $query = []): list<Template>`
+### `list(TemplateFilter|array $query = []): list<Template>`
+
+Optional filterbar über den typisierten Filter `TemplateFilter`: `type` (Dokumenttyp, `list<TemplateDocumentType>`, kommasepariert gesendet → Billomat-Filter `type`), `templateType` (`TemplateType::DEFINED`/`UPLOADED` → `template_type`) und `isDefault` (→ `is_default`), dazu `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter. Ein einfaches Array funktioniert weiterhin.
 
 ```php
+use Justpilot\Billomat\Api\TemplateFilter;
+use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
+
 $templates = $billomat->templates->list();
+
+// Nur Rechnungsvorlagen
+$invoiceTemplates = $billomat->templates->list(new TemplateFilter(
+    type: [TemplateDocumentType::INVOICE],
+));
 
 foreach ($templates as $tpl) {
     printf("[#%d] %s (%s)\n",

@@ -22,6 +22,12 @@ return [
         'doc' => ['Benutzer/Mitarbeiter aus der Billomat-API.'],
     ],
 
+    'filter' => [
+        'class' => 'UserFilter',
+        'specResource' => 'benutzer',
+        'endpoint' => 'GET /api/users',
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Benutzers.'],
         'email' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'E-Mail-Adresse (Login).'],

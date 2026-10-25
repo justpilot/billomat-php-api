@@ -57,12 +57,12 @@ final class RecurringsApi extends AbstractApi
      * Unterstützte Filter laut Doku: client_id, contact_id, name, payment_type,
      * cycle_number, cycle, label, intro, note, tags, article_id.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param RecurringFilter|array<string, scalar|array|null> $filters
      *
      * @return list<Recurring>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(RecurringFilter|array $filters = []): array
     {
         return $this->listResource('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters);
     }
@@ -74,12 +74,12 @@ final class RecurringsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param RecurringFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<Recurring>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(RecurringFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters);
     }
@@ -92,12 +92,12 @@ final class RecurringsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param RecurringFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, Recurring>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(RecurringFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters, $pageSize);
     }

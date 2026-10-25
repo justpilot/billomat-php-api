@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Api\ClientFilter;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -34,6 +36,8 @@ use const PHP_URL_QUERY;
 #[CoversClass(Page::class)]
 #[CoversClass(PageInfo::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(ClientFilter::class)]
+#[UsesClass(OrderBy::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
@@ -168,6 +172,29 @@ final class ClientsApiTest extends TestCase
         }
 
         self::assertSame(50, (int) ($query['per_page'] ?? 0));
+    }
+
+    #[Test]
+    public function itSendsTypedFilterAsQuery(): void
+    {
+        $urls = [];
+        $mock = new MockHttpClient(static function (string $method, string $url) use (&$urls): MockResponse {
+            $urls[] = $url;
+
+            return new MockResponse('{"clients":{"client":[],"@page":"1","@per_page":"10","@total":"0"}}', ['http_code' => 200]);
+        });
+        $api = new ClientsApi(new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key')));
+        $filter = new ClientFilter(name: 'ACME', invoiceId: [1, 2], orderBy: OrderBy::desc('date')->thenAsc('name'), perPage: 10);
+
+        (void) $api->list($filter);
+        (void) $api->listPage($filter->withPage(3));
+        iterator_to_array($api->iterateAll($filter->withPage(9), pageSize: 25));
+
+        // `+` bleibt wörtlich, das Komma wird kodiert.
+        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date+DESC%2Cname+ASC&per_page=10', parse_url($urls[0], PHP_URL_QUERY));
+        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date+DESC%2Cname+ASC&page=3&per_page=10', parse_url($urls[1], PHP_URL_QUERY));
+        // iterateAll() überschreibt page/per_page.
+        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date+DESC%2Cname+ASC&page=1&per_page=25', parse_url($urls[2], PHP_URL_QUERY));
     }
 
     #[Test]

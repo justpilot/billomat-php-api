@@ -17,9 +17,11 @@ Das SDK exponiert dazu drei Stufen, geordnet nach Bequemlichkeit:
 
 | Methode | Wann nutzen? |
 |---|---|
-| `list(array $filters)` | Du brauchst nur die erste Seite (oder gibst `page`/`per_page` selbst mit). Verhalten wie vor v2.1. |
-| `listPage(array $filters)` | Du brauchst Pagination-Metadaten für klassische UI ("Seite 1/12, 234 Treffer"). |
-| `iterateAll(array $filters, int $pageSize = 100)` | Du willst über alle Einträge eines Filters laufen, ohne dich um Page-Indizes zu kümmern. |
+| `list($filters)` | Du brauchst nur die erste Seite (oder gibst `page`/`perPage` selbst mit). Verhalten wie vor v2.1. |
+| `listPage($filters)` | Du brauchst Pagination-Metadaten für klassische UI ("Seite 1/12, 234 Treffer"). |
+| `iterateAll($filters, int $pageSize = 100)` | Du willst über alle Einträge eines Filters laufen, ohne dich um Page-Indizes zu kümmern. |
+
+`$filters` ist bei Kunden, Lieferanten, Artikeln, Benutzern und allen Dokumenttypen (Rechnungen, Angebote, Auftragsbestätigungen, Gutschriften, Lieferscheine, Briefe, Mahnungen, Eingangsrechnungen, Abo-Rechnungen) die typisierte Filterklasse (`ClientFilter`, `InvoiceFilter`, …) oder wie bisher ein Array (`ClientFilter|array`). `templates->list()` nimmt entsprechend `TemplateFilter|array`. Die übrigen List-APIs nehmen weiterhin ein Array.
 
 `listPage()` und `iterateAll()` sind auf allen 26 List-APIs verfügbar: `clients`, `invoices`, `offers`, `confirmations`, `creditNotes`, `deliveryNotes`, `reminders`, `letters`, `articles`, `suppliers`, `incomings`, `inboxDocuments`, `recurrings`, `contacts` sowie auf den Lookup-/Property-APIs (`articleProperties`, `clientProperties`, `incomingProperties`, `supplierProperties` plus deren `*PropertyValues`-Geschwister) und den globalen Stammdaten (`countries`, `currencies`, `units`, `users`, `emailTemplates`, `freeTexts`).
 
@@ -28,23 +30,28 @@ Das SDK exponiert dazu drei Stufen, geordnet nach Bequemlichkeit:
 Lazy Generator nach dem Vorbild des Stripe-SDK (`auto_paging_iter()`). Holt seitenweise nach Bedarf und stoppt automatisch, sobald die letzte Seite erreicht ist.
 
 ```php
+use Justpilot\Billomat\Api\ClientFilter;
 use Justpilot\Billomat\BillomatClient;
 
 $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: '…');
 
-foreach ($billomat->clients->iterateAll(['country_code' => 'DE']) as $client) {
+foreach ($billomat->clients->iterateAll(new ClientFilter(countryCode: 'DE')) as $client) {
     echo $client->id, ' ', $client->name, PHP_EOL;
 }
 ```
 
-Filter werden bei jeder Page-Anfrage mitgesendet; `page` und `per_page` darin werden überschrieben (das SDK steuert sie selbst).
+Filter werden bei jeder Page-Anfrage mitgesendet; `page`/`perPage` (bzw. `page`/`per_page` im Array) darin werden überschrieben (das SDK steuert sie selbst).
 
 ### `pageSize` justieren
 
 Default ist 100. Größere Pages reduzieren Round-Trips, kleinere Pages senken Peak-Memory:
 
 ```php
-foreach ($billomat->invoices->iterateAll(filters: ['date_from' => '2026-01-01'], pageSize: 500) as $invoice) {
+use Justpilot\Billomat\Api\InvoiceFilter;
+
+$filter = new InvoiceFilter(from: new DateTimeImmutable('2026-01-01'));
+
+foreach ($billomat->invoices->iterateAll(filters: $filter, pageSize: 500) as $invoice) {
     // …
 }
 ```
@@ -63,9 +70,10 @@ Beide Fälle sind sicher und brechen bei leeren Endpunkten nach der ersten Anfra
 Identisch zu `list()`, gibt aber zusätzlich Page-Metadaten als `Page<Model>` zurück:
 
 ```php
+use Justpilot\Billomat\Api\ClientFilter;
 use Justpilot\Billomat\Pagination\Page;
 
-$result = $billomat->clients->listPage(['per_page' => 50, 'page' => 3]);
+$result = $billomat->clients->listPage(new ClientFilter(page: 3, perPage: 50));
 // $result instanceof Page
 
 foreach ($result->items as $client) {
@@ -111,6 +119,9 @@ final readonly class PageInfo
 `list()` bleibt unverändert. Wer manuell paginieren will (z. B. zur Wiederaufnahme nach Abbruch), kann das wie bisher:
 
 ```php
+$pageTwo = $billomat->clients->list(new ClientFilter(page: 2, perPage: 50));
+
+// gleichwertig als Array
 $pageTwo = $billomat->clients->list(['page' => 2, 'per_page' => 50]);
 ```
 

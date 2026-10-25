@@ -22,14 +22,14 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht GET /templates
      *
-     * @param array<string, scalar|array|null> $query
+     * @param TemplateFilter|array<string, scalar|array|null> $query
      *
      * @return list<Template>
      */
     #[NoDiscard]
-    public function list(array $query = []): array
+    public function list(TemplateFilter|array $query = []): array
     {
-        $data = $this->getJson('/templates', $query);
+        $data = $this->getJson('/templates', self::filterQuery($query));
 
         $raw = $data['templates']['template'] ?? [];
 

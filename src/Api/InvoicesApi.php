@@ -72,12 +72,12 @@ final class InvoicesApi extends AbstractApi
      *
      * Entspricht GET /invoices
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array|null> $filters
      *
      * @return list<Invoice>
      */
     #[NoDiscard]
-    public function list(array $filters = []): array
+    public function list(InvoiceFilter|array $filters = []): array
     {
         return $this->listResource('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters);
     }
@@ -89,12 +89,12 @@ final class InvoicesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array|null> $filters
      *
      * @return Page<Invoice>
      */
     #[NoDiscard]
-    public function listPage(array $filters = []): Page
+    public function listPage(InvoiceFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters);
     }
@@ -107,12 +107,12 @@ final class InvoicesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array|null> $filters
      *
      * @return Generator<int, Invoice>
      */
     #[NoDiscard]
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(InvoiceFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters, $pageSize);
     }
@@ -125,19 +125,19 @@ final class InvoicesApi extends AbstractApi
      * Mehrere Werte werden in der Reihenfolge der Aggregation als CSV gesendet
      * ("client,year" gruppiert zuerst nach Kunde, dann nach Jahr).
      *
-     * @param InvoiceGroupBy|non-empty-list<InvoiceGroupBy> $groupBy
-     * @param array<string, scalar|array|null>              $filters optionale zusätzliche Filter (analog zu list())
+     * @param InvoiceGroupBy|non-empty-list<InvoiceGroupBy>  $groupBy
+     * @param InvoiceFilter|array<string, scalar|array|null> $filters optionale zusätzliche Filter (analog zu list())
      *
      * @return list<InvoiceGroup>
      */
     #[NoDiscard]
-    public function listGrouped(InvoiceGroupBy|array $groupBy, array $filters = []): array
+    public function listGrouped(InvoiceGroupBy|array $groupBy, InvoiceFilter|array $filters = []): array
     {
         $values = \is_array($groupBy) ? $groupBy : [$groupBy];
 
         $csv = implode(',', array_map(static fn (InvoiceGroupBy $g): string => $g->value, $values));
 
-        $query = $filters;
+        $query = self::filterQuery($filters);
         $query['group_by'] = $csv;
 
         return $this->listResource('/invoices', 'invoice-groups', 'invoice-group', InvoiceGroup::fromArray(...), $query);

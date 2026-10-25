@@ -25,26 +25,44 @@ $billomat->clients->propertyValues  // Werte benutzerdefinierter Kunden-Eigensch
 
 ## Methoden
 
-### `list(array $filters = []): list<Client>`
+### `list(ClientFilter|array $filters = []): list<Client>`
 
 Listet Kunden mit optionalen Filtern.
 
 ```php
-public function list(array $filters = []): array
+public function list(ClientFilter|array $filters = []): array
 ```
 
-Beliebige Filter aus der Billomat-Doku können übergeben werden (`per_page`, `page`, `name`, `client_number`, `email`, `order_by` …). Array-Werte werden als `key[]=…` serialisiert.
+Empfohlen ist der typisierte Filter `ClientFilter` (alle Felder optionale benannte Argumente, dazu `with*()`-Wither). Ein einfaches Array mit Billomat-Parametern funktioniert weiterhin, z. B. für Parameter, die der Filter nicht abdeckt; Array-Werte werden dort als `key[]=…` serialisiert.
 
 ```php
-$clients = $billomat->clients->list([
-    'per_page' => 50,
-    'order_by' => 'name+ASC',
-]);
+use Justpilot\Billomat\Api\ClientFilter;
+use Justpilot\Billomat\Api\OrderBy;
+
+$clients = $billomat->clients->list(new ClientFilter(
+    orderBy: OrderBy::asc('name'),
+    perPage: 50,
+));
 
 foreach ($clients as $client) {
     echo $client->id . ': ' . $client->name . PHP_EOL;
 }
 ```
+
+| Billomat-Filter | `ClientFilter`-Feld |
+|---|---|
+| `name` | `name` |
+| `client_number` | `clientNumber` |
+| `email` | `email` |
+| `first_name` / `last_name` | `firstName` / `lastName` |
+| `country_code` | `countryCode` |
+| `note` | `note` |
+| `invoice_id` | `invoiceId` (Liste, kommasepariert) |
+| `tags` | `tags` (Liste, kommasepariert) |
+| `order_by` | `orderBy` (`OrderBy::asc('name')->thenDesc('id')`) |
+| `page` / `per_page` | `page` / `perPage` |
+
+Weitere Query-Parameter (z. B. Filter auf benutzerdefinierte Attribute) gehen über `extra: [...]`; sie überschreiben gleichnamige Felder.
 
 **Exceptions:** `AuthenticationException`, `HttpException`.
 
@@ -321,7 +339,9 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Api\ClientFilter;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Exception\ValidationException;
 
@@ -351,10 +371,10 @@ $update = new ClientUpdateOptions(note: 'Erstkontakt: ' . date('Y-m-d'));
 $billomat->clients->update($client->id, $update);
 
 // Listen (z. B. nach Anlage)
-$recent = $billomat->clients->list([
-    'per_page' => 5,
-    'order_by' => 'id+DESC',
-]);
+$recent = $billomat->clients->list(new ClientFilter(
+    orderBy: OrderBy::desc('id'),
+    perPage: 5,
+));
 foreach ($recent as $c) {
     printf("- #%d %s\n", $c->id, $c->name);
 }

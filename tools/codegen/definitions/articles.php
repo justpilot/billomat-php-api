@@ -45,6 +45,11 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'ArticleFilter',
+        'endpoint' => 'GET /api/articles',
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Artikels.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Erstellungszeitpunkt des Artikels.'],

@@ -44,6 +44,11 @@ return [
         ],
     ],
 
+    'filter' => [
+        'class' => 'SupplierFilter',
+        'endpoint' => 'GET /api/suppliers',
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Lieferanten.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Erstellungszeitpunkt des Lieferanten.'],

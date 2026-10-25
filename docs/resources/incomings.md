@@ -82,15 +82,21 @@ Lifecycle in der Praxis: `create()` legt einen Beleg im Status `OPEN` (oder `DRA
 
 ### Incomings
 
-#### `list(array $filters = []): list<Incoming>`
+#### `list(IncomingFilter|array $filters = []): list<Incoming>`
 
-Filter laut Billomat-Doku: `supplier_id`, `incoming_number`, `status`, `from`, `to`, `label`, `intro`, `note`, `tags`. Mehrere Status werden als Array übergeben und automatisch als `status[]=OPEN&status[]=OVERDUE` codiert.
+Filter laut Billomat-Doku: `supplier_id`, `incoming_number`, `status`, `from`, `to`, `label`, `intro`, `note`, `tags`.
+
+Empfohlen ist der typisierte Filter `IncomingFilter` mit den camelCase-Feldern `supplierId`, `incomingNumber`, `status` (`list<IncomingStatus>`), `from`/`to` (`DateTimeImmutable`), `note` und `tags`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `label`, `intro`). Ein einfaches Array funktioniert weiterhin. Mehrere Status werden dort als Array übergeben und als `status[]=OPEN&status[]=OVERDUE` codiert.
 
 ```php
-$open = $billomat->incomings->list([
-    'status' => ['OPEN', 'OVERDUE'],
-    'order_by' => 'date+DESC',
-]);
+use Justpilot\Billomat\Api\IncomingFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\IncomingStatus;
+
+$open = $billomat->incomings->list(new IncomingFilter(
+    status: [IncomingStatus::OPEN, IncomingStatus::OVERDUE],
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
 #### `get(int $id): ?Incoming`

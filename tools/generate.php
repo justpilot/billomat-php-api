@@ -117,6 +117,12 @@ function renderResource(array $definition, array $spec, string $source): array
     if (isset($definition['updateOptions'])) {
         $files['src/Api/' . $definition['updateOptions']['class'] . '.php'] = renderOptions($definition, $definition['updateOptions'], $fields, $source, false);
     }
+    if (isset($definition['filter'])) {
+        // `filter.specResource`: Spec-Ressource des Listen-Endpunkts, falls die Definition selbst keine hat.
+        $filterSlug = $definition['filter']['specResource'] ?? $slug ?? throw new RuntimeException("Filter ohne Spec-Ressource ({$source}).");
+        $filterResource = $spec['resources'][$filterSlug] ?? throw new RuntimeException("Spec-Ressource '{$filterSlug}' nicht gefunden ({$source}).");
+        $files['src/Api/' . $definition['filter']['class'] . '.php'] = renderFilter($definition, $definition['filter'], $filterResource['endpoints'], $source);
+    }
 
     return $files;
 }
@@ -551,6 +557,188 @@ function renderOptions(array $definition, array $options, array $fields, string 
     $out .= "            ];\n        }\n\n        return \$data;\n    }\n}\n";
 
     return $out;
+}
+
+/**
+ * Filter-Felder eines Listen-Endpunkts aus der Spec, mit Typ aus Name/Beschreibung bzw. Definition.
+ *
+ * Typen: int, string, bool, date, enum, list<int>, list<string>, list<enum>.
+ *
+ * @param list<array<string, mixed>> $endpoints
+ * @param array<string, mixed>       $filter
+ *
+ * @return list<array<string, mixed>>
+ */
+function resolveFilterFields(array $endpoints, array $filter, string $source): array
+{
+    $specFilters = null;
+    foreach ($endpoints as $endpoint) {
+        if (($endpoint['method'] ?? null) . ' ' . ($endpoint['path'] ?? '') === $filter['endpoint']) {
+            $specFilters = $endpoint['filters'] ?? [];
+        }
+    }
+    if (null === $specFilters) {
+        throw new RuntimeException("Filter-Endpunkt '{$filter['endpoint']}' nicht in der Spec gefunden ({$source}).");
+    }
+
+    $overrides = $filter['fields'] ?? [];
+    $unknown = array_diff(array_keys($overrides), array_column($specFilters, 'name'));
+    if ([] !== $unknown) {
+        throw new RuntimeException('Filter-Felder stehen nicht in der Spec (' . $source . '): ' . implode(', ', $unknown));
+    }
+
+    $resolved = [];
+    foreach ($specFilters as $specFilter) {
+        $name = (string) $specFilter['name'];
+        $override = $overrides[$name] ?? [];
+        if (!empty($override['omit'])) {
+            continue;
+        }
+        $doc = (string) ($override['doc'] ?? $specFilter['description_de'] ?? throw new RuntimeException("Filter '{$name}' hat keine Doku ({$source})."));
+        // „mehrere Werte kommasepariert“ / „Mehrere Stati können per Komma getrennt werden“
+        $multiple = 1 === preg_match('/kommasepariert|per Komma getrennt/i', $doc);
+        $enum = $override['enum'] ?? null;
+
+        $type = $override['type'] ?? match (true) {
+            null !== $enum => $multiple ? 'list<enum>' : 'enum',
+            \in_array($name, ['from', 'to'], true) => 'date',
+            'tags' === $name => 'list<string>',
+            str_ends_with($name, '_id') => $multiple ? 'list<int>' : 'int',
+            str_starts_with($name, 'is_') => 'bool',
+            default => 'string',
+        };
+
+        $resolved[] = [
+            'wire' => $name,
+            'property' => lcfirst(str_replace('_', '', ucwords($name, '_'))),
+            'type' => $type,
+            'enumClass' => $enum,
+            'doc' => $doc,
+        ];
+    }
+
+    return $resolved;
+}
+
+/**
+ * Erzeugt eine `*Filter`-Klasse (implements ListFilter) für einen Listen-Endpunkt.
+ *
+ * @param array<string, mixed>       $definition
+ * @param array<string, mixed>       $filter
+ * @param list<array<string, mixed>> $endpoints
+ */
+function renderFilter(array $definition, array $filter, array $endpoints, string $source): string
+{
+    $fields = [
+        ...resolveFilterFields($endpoints, $filter, $source),
+        ['wire' => 'order_by', 'property' => 'orderBy', 'type' => 'orderBy', 'enumClass' => null, 'doc' => 'Sortierung, z. B. `OrderBy::desc(\'date\')->thenAsc(\'name\')`.'],
+        ['wire' => 'page', 'property' => 'page', 'type' => 'int', 'enumClass' => null, 'doc' => 'Seite (ab 1); `iterateAll()` setzt sie selbst.'],
+        ['wire' => 'per_page', 'property' => 'perPage', 'type' => 'int', 'enumClass' => null, 'doc' => 'Einträge pro Seite (Billomat: Standard 100, maximal 1000).'],
+    ];
+
+    $out = "<?php\n\ndeclare(strict_types=1);\n\nnamespace Justpilot\\Billomat\\Api;\n\n";
+    $imports = enumImports($fields);
+    if (\in_array('date', array_column($fields, 'type'), true)) {
+        $imports[] = 'DateTimeImmutable';
+    }
+    sort($imports);
+    foreach ($imports as $import) {
+        $out .= "use {$import};\n";
+    }
+    if ([] !== $imports) {
+        $out .= "\n";
+    }
+    $out .= classDoc([
+        "Typisierter Filter für {$filter['endpoint']}.",
+        '',
+        'Nicht gesetzte Felder (null bzw. leere Liste) fehlen im Query; Mehrfachwerte',
+        'werden kommasepariert gesendet und von Billomat ODER-verknüpft. Weitere',
+        'Query-Parameter (z. B. benutzerdefinierte Attribute) gehen über `extra`.',
+    ], $definition['docUrl'], $source, 'Doku:');
+    $out .= 'final readonly class ' . $filter['class'] . " implements ListFilter\n{\n";
+
+    $out .= "    public function __construct(\n";
+    foreach ($fields as $field) {
+        // Die Zusammenfassung endet mit Punkt (PHP-CS-Fixer: phpdoc_summary).
+        $summary = 1 === preg_match('/[.!?]$/u', $field['doc']) ? $field['doc'] : $field['doc'] . '.';
+        $lines = [$summary, ...('orderBy' === $field['type'] ? [] : ['', 'Billomat-Filter: ' . $field['wire']])];
+        if (str_starts_with($field['type'], 'list<')) {
+            $lines = [...$lines, '', '@var list<' . filterElementType($field) . '>'];
+        }
+        $out .= docBlock($lines, '        ');
+        $out .= '        public ' . filterParamType($field) . ' $' . $field['property'] . (str_starts_with($field['type'], 'list<') ? ' = []' : ' = null') . ",\n";
+    }
+    $out .= "        /**\n         * Weitere Query-Parameter; überschreiben gleichnamige Felder.\n         *\n         * @var array<string, scalar|array<scalar>>\n         */\n";
+    $out .= "        public array \$extra = [],\n";
+    $out .= "    ) {\n    }\n\n";
+
+    // Wither: Kopie mit einem geänderten Feld; Listen-Felder nehmen die Werte variadisch.
+    foreach ($fields as $field) {
+        $property = $field['property'];
+        $out .= "    /** Kopie mit geändertem `{$property}`. */\n";
+        if (str_starts_with($field['type'], 'list<')) {
+            $out .= '    public function with' . ucfirst($property) . '(' . filterElementType($field) . " ...\${$property}): self\n";
+            $out .= "    {\n        return clone(\$this, ['{$property}' => array_values(\${$property})]);\n    }\n\n";
+        } else {
+            $out .= '    public function with' . ucfirst($property) . '(' . filterParamType($field) . " \${$property}): self\n";
+            $out .= "    {\n        return clone(\$this, ['{$property}' => \${$property}]);\n    }\n\n";
+        }
+    }
+    $out .= "    /**\n     * Kopie mit weiteren Query-Parametern.\n     *\n     * @param array<string, scalar|array<scalar>> \$extra\n     */\n";
+    $out .= "    public function withExtra(array \$extra): self\n    {\n        return clone(\$this, ['extra' => \$extra]);\n    }\n\n";
+
+    $out .= "    public function toQuery(): array\n    {\n        return [\n            ...array_filter([\n";
+    foreach ($fields as $field) {
+        $out .= "                '" . $field['wire'] . "' => " . filterExportExpression($field, '$this->' . $field['property']) . ",\n";
+    }
+    $out .= "            ], static fn (mixed \$v): bool => null !== \$v),\n            ...\$this->extra,\n        ];\n    }\n}\n";
+
+    return $out;
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function filterElementType(array $field): string
+{
+    return match ($field['type']) {
+        'list<int>' => 'int',
+        'list<string>' => 'string',
+        'list<enum>' => $field['enumClass'],
+        default => throw new LogicException("Kein Listen-Typ: {$field['type']}"),
+    };
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function filterParamType(array $field): string
+{
+    return match ($field['type']) {
+        'int', 'string', 'bool' => '?' . $field['type'],
+        'date' => '?DateTimeImmutable',
+        'enum' => '?' . $field['enumClass'],
+        'orderBy' => '?OrderBy',
+        'list<int>', 'list<string>', 'list<enum>' => 'array',
+        default => throw new LogicException("Unbekannter Filter-Typ: {$field['type']}"),
+    };
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function filterExportExpression(array $field, string $value): string
+{
+    return match ($field['type']) {
+        'int', 'string' => $value,
+        'bool' => "null === {$value} ? null : ({$value} ? 1 : 0)",
+        'date' => "{$value}?->format('Y-m-d')",
+        'enum' => "{$value}?->value",
+        'orderBy' => "{$value}?->toQuery()",
+        'list<int>', 'list<string>' => "[] === {$value} ? null : implode(',', {$value})",
+        'list<enum>' => "[] === {$value} ? null : implode(',', array_map(static fn ({$field['enumClass']} \$v): string => \$v->value, {$value}))",
+        default => throw new LogicException("Unbekannter Filter-Typ: {$field['type']}"),
+    };
 }
 
 /**

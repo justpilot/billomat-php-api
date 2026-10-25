@@ -87,15 +87,21 @@ Nur Gutschriften im Status `DRAFT` sind voll editierbar — `update()` an einer 
 
 ### Credit Notes
 
-#### `list(array $filters = []): list<CreditNote>`
+#### `list(CreditNoteFilter|array $filters = []): list<CreditNote>`
 
-Filter werden 1:1 als Query-String an Billomat durchgereicht (`client_id`, `contact_id`, `status`, `from`, `to`, `tags`, `invoice_id`, …). Array-Werte landen als `key[]=…`.
+Billomat filtert u. a. nach `client_id`, `contact_id`, `status`, `from`, `to`, `tags`, `invoice_id`, …
+
+Empfohlen ist der typisierte Filter `CreditNoteFilter` mit den camelCase-Feldern `clientId`, `contactId`, `creditNoteNumber`, `status` (`list<CreditNoteStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` und `articleId`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `invoice_id`). Ein einfaches Array funktioniert weiterhin. Arrays werden 1:1 als Query-String durchgereicht, Array-Werte landen als `key[]=…`.
 
 ```php
-$drafts = $billomat->creditNotes->list([
-    'status' => 'DRAFT',
-    'order_by' => 'created+DESC',
-]);
+use Justpilot\Billomat\Api\CreditNoteFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
+
+$drafts = $billomat->creditNotes->list(new CreditNoteFilter(
+    status: [CreditNoteStatus::DRAFT],
+    orderBy: OrderBy::desc('created'),
+));
 ```
 
 #### `get(int $id): ?CreditNote`

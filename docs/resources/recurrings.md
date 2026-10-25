@@ -66,15 +66,21 @@ Aus einem Recurring entstehen mit der Zeit „echte“ Rechnungen — diese refe
 
 ## Recurrings
 
-### `list(array $filters = []): list<Recurring>`
+### `list(RecurringFilter|array $filters = []): list<Recurring>`
 
-Filter laut Billomat-Doku: `client_id`, `contact_id`, `name`, `payment_type`, `cycle_number`, `cycle`, `label`, `intro`, `note`, `tags`, `article_id`. Array-Werte werden als `key[]=…` codiert.
+Filter laut Billomat-Doku: `client_id`, `contact_id`, `name`, `payment_type`, `cycle_number`, `cycle`, `label`, `intro`, `note`, `tags`, `article_id`.
+
+Empfohlen ist der typisierte Filter `RecurringFilter` mit den camelCase-Feldern `clientId`, `contactId`, `name`, `paymentType` (`list<InvoicePaymentType>`), `cycle` (`RecurringCycle`), `label`, `intro`, `note` und `tags`; Mehrfachwerte sind Listen und werden kommasepariert gesendet, dazu kommen `orderBy`, `page`, `perPage` und `extra` für weitere Query-Parameter (z. B. `cycle_number`, `article_id`). Ein einfaches Array funktioniert weiterhin. Array-Werte werden dort als `key[]=…` codiert.
 
 ```php
-$monthly = $billomat->recurrings->list([
-    'cycle' => 'MONTHLY',
-    'order_by' => 'next_creation_date+ASC',
-]);
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\RecurringFilter;
+use Justpilot\Billomat\Model\Enum\RecurringCycle;
+
+$monthly = $billomat->recurrings->list(new RecurringFilter(
+    cycle: RecurringCycle::MONTHLY,
+    orderBy: OrderBy::asc('next_creation_date'),
+));
 ```
 
 ### `get(int $id): ?Recurring`

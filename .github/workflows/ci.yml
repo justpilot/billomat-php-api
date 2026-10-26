@@ -109,6 +109,35 @@ jobs:
       - name: Composer audit
         run: composer audit
 
+  bc-check:
+    name: Backward compatibility
+    runs-on: ubuntu-latest
+    # Bis 4.0.0-beta.1 nur zur Information; ab der Beta bricht der Job bei jedem BC-Bruch ab.
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Das Tool vergleicht Git-Referenzen und braucht dafür Historie und Tags.
+          fetch-depth: 0
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath
+          tools: composer:v2
+
+      # Eigenes Verzeichnis statt require-dev: Das Tool braucht symfony/console 7, wir sind auf Symfony 8.
+      - name: Install roave/backward-compatibility-check
+        run: composer global require --no-progress roave/backward-compatibility-check:^8.26
+
+      - name: Compare against the latest 4.x tag
+        run: |
+          base=$(git -c versionsort.suffix=- tag --list 'v4.*' --sort=-v:refname | head -n 1)
+          echo "Comparing against ${base}"
+          "$(composer global config bin-dir --absolute)/roave-backward-compatibility-check" --from="${base}" --format=github-actions
+
   mutation:
     name: Mutation Testing
     runs-on: ubuntu-latest

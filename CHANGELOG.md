@@ -6,6 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Changed
+
+- **Retries are logged at `info` instead of `warning`.** A retry that succeeds is expected behaviour and should not trigger alerting that fires at `warning`. Final failures keep their levels (`notice` for 4xx, `error` for 5xx and network errors). Listen for `RetryScheduled` if you want to count retries.
+
 ## [4.0.0-alpha.1] - 2026-10-25
 
 First pre-release of 4.0. The public API may still change before 4.0.0.

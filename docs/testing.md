@@ -196,10 +196,19 @@ PHPStan runs without a baseline: every finding fails CI and is fixed in the code
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs three jobs on every push/PR:
+`.github/workflows/ci.yml` runs these jobs on every push/PR:
 
 1. **Tests** on PHP 8.5 (required) and 8.6 (experimental, `continue-on-error`).
-2. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer audit`.
-3. **Mutation testing** — on PRs only the changed lines (`--git-diff-lines`, 90 % MSI); on `main`/`4.x` the full run with the thresholds from `infection.json5`.
+2. **PSR-18 compat** — a smoke test with Guzzle and without Symfony (`.github/compat/guzzle`).
+3. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer generate:check`, `composer audit`.
+4. **Backward compatibility** — [`roave/backward-compatibility-check`](https://github.com/Roave/BackwardCompatibilityCheck) compares the public API against the latest `v4.*` tag. Accepted findings go into `.roave-backward-compatibility-check.xml`. Until 4.0.0-beta.1 the job is informational (`continue-on-error`).
+5. **Mutation testing** — on PRs only the changed lines (`--git-diff-lines`, 90 % MSI); on `main`/`4.x` the full run with the thresholds from `infection.json5`.
+
+To run the BC check locally, install the tool outside the project (it needs Symfony 7 components) and call it from the repository root:
+
+```bash
+composer global require roave/backward-compatibility-check
+"$(composer global config bin-dir --absolute)"/roave-backward-compatibility-check --from=v4.0.0-alpha.1
+```
 
 Integration tests do **not** run automatically in CI, because no sandbox credentials are configured. If needed, `BILLOMAT_ID`/`BILLOMAT_API_KEY` can be set up as GitHub secrets and a separate workflow triggered.

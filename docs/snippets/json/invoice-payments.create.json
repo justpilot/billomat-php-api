@@ -1,0 +1,9 @@
+{
+    "invoice-payment": {
+        "amount": "118.76",
+        "date": "2026-11-02",
+        "type": "BANK_TRANSFER",
+        "mark_invoice_as_paid": 1,
+        "invoice_id": 2001
+    }
+}

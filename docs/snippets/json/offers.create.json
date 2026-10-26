@@ -1,0 +1,19 @@
+{
+    "offer": {
+        "client_id": 1001,
+        "date": "2026-11-02",
+        "validity_days": 30,
+        "title": "Offer for the website relaunch",
+        "offer-items": {
+            "offer-item": [
+                {
+                    "title": "Consulting",
+                    "quantity": 2,
+                    "unit_price": "49.9",
+                    "unit": "hours",
+                    "tax_rate": 19
+                }
+            ]
+        }
+    }
+}

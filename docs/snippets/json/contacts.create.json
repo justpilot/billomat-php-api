@@ -1,0 +1,8 @@
+{
+    "contact": {
+        "client_id": 1001,
+        "first_name": "Erika",
+        "last_name": "Mustermann",
+        "email": "erika@example.com"
+    }
+}

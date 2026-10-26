@@ -199,6 +199,20 @@ final class CreditNotesApi extends AbstractApi
         $this->postJson("/credit-notes/{$id}/email", $payload);
     }
 
+    /**
+     * Versendet eine Gutschrift postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /credit-notes/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postJson("/credit-notes/{$id}/mail", $payload);
+    }
+
     public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];

@@ -101,4 +101,20 @@ final class UsersApi extends AbstractApi
     {
         return User::fromArray($this->unwrapEnvelope($this->getJson('/users/myself'), 'user', 'fetching own user via /users/myself'));
     }
+
+    /**
+     * Lädt das Avatar (binäres Bild) eines Benutzers.
+     *
+     * Entspricht GET /users/{id}/avatar?size={size}. Billomat liefert kein JSON, sondern direkt
+     * das Bild (i. d. R. PNG); Rückgabe ist der rohe Body.
+     *
+     * @param int|null $size optionale Kantenlänge in Pixel
+     */
+    #[NoDiscard]
+    public function avatar(int $id, ?int $size = null): string
+    {
+        $query = null !== $size ? ['size' => $size] : [];
+
+        return $this->getRaw("/users/{$id}/avatar", $query);
+    }
 }

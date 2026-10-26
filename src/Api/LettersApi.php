@@ -169,6 +169,20 @@ final class LettersApi extends AbstractApi
     }
 
     /**
+     * Versendet einen Brief postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /letters/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postJson("/letters/{$id}/mail", $payload);
+    }
+
+    /**
      * Lädt das komplette Brief-PDF hoch (z.B. wenn das Layout extern erzeugt wurde).
      *
      * Entspricht PUT /letters/{id}/upload.

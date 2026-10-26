@@ -291,7 +291,7 @@ final class InvoicesApi extends AbstractApi
      *
      * ⚠️ Kostenpflichtige Aktion.
      */
-    public function mail(int $id, ?InvoiceMailOptions $options = null): void
+    public function mail(int $id, ?MailOptions $options = null): void
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 

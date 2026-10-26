@@ -177,6 +177,20 @@ final class DeliveryNotesApi extends AbstractApi
         $this->postJson("/delivery-notes/{$id}/email", $payload);
     }
 
+    /**
+     * Versendet einen Lieferschein postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /delivery-notes/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postJson("/delivery-notes/{$id}/mail", $payload);
+    }
+
     public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];

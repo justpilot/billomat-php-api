@@ -177,6 +177,20 @@ final class RemindersApi extends AbstractApi
         $this->postJson("/reminders/{$id}/email", $payload);
     }
 
+    /**
+     * Versendet eine Mahnung postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /reminders/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postJson("/reminders/{$id}/mail", $payload);
+    }
+
     public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];

@@ -24,6 +24,7 @@ use NoDiscard;
  *  - POST   /contacts
  *  - PUT    /contacts/{id}
  *  - DELETE /contacts/{id}
+ *  - GET    /contacts/{id}/avatar
  *
  * `client_id` ist beim Listen Pflicht.
  */
@@ -111,6 +112,22 @@ final class ContactsApi extends AbstractApi
     public function delete(int $id): void
     {
         $this->deleteVoid("/contacts/{$id}");
+    }
+
+    /**
+     * Lädt das Avatar (binäres Bild) eines Ansprechpartners.
+     *
+     * Entspricht GET /contacts/{id}/avatar?size={size}. Billomat liefert kein JSON, sondern direkt
+     * das Bild (i. d. R. PNG); Rückgabe ist der rohe Body.
+     *
+     * @param int|null $size optionale Kantenlänge in Pixel
+     */
+    #[NoDiscard]
+    public function avatar(int $id, ?int $size = null): string
+    {
+        $query = null !== $size ? ['size' => $size] : [];
+
+        return $this->getRaw("/contacts/{$id}/avatar", $query);
     }
 
     /**

@@ -219,14 +219,14 @@ Requirements:
 - The invoice must be completed with `complete()` (otherwise there is no PDF).
 - `from` must be configured as a sender in the Billomat account, otherwise the API responds with a `ValidationException`.
 
-### `mail(int $id, ?InvoiceMailOptions $options = null): void`
+### `mail(int $id, ?MailOptions $options = null): void`
 
 Sends the invoice by post via the Pixelletter service. **This costs money**: Billomat charges postage and printing.
 
 ```php
-use Justpilot\Billomat\Api\InvoiceMailOptions;
+use Justpilot\Billomat\Api\MailOptions;
 
-$opts = new InvoiceMailOptions(color: true, duplex: true, paperWeight: 90);
+$opts = new MailOptions(color: true, duplex: true, paperWeight: 90);
 
 $billomat->invoices->mail($invoice->id, $opts);
 ```
@@ -386,9 +386,9 @@ Payload for `email()`. One class shared by all document types: offers, confirmat
 
 `toArray()` drops empty recipient lists and `null` fields.
 
-## Write model: `InvoiceMailOptions`
+## Write model: `MailOptions`
 
-Payload for `mail()` (Pixelletter). Like the other options classes it is `final readonly` with named constructor arguments. The recipient address always comes from the invoice address, so there is no `to` field.
+Payload for `mail()` (Pixelletter), shared by all document types (invoices, offers, confirmations, credit notes, delivery notes, letters, reminders). Like the other options classes it is `final readonly` with named constructor arguments. The recipient address always comes from the document's address, so there is no `to` field.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|

@@ -48,6 +48,7 @@ An open reminder can be followed by further dunning levels: Billomat increments 
 | `cancel($id)` | PUT | `/reminders/{id}/cancel` |
 | `uncancel($id)` | PUT | `/reminders/{id}/uncancel` |
 | `email($id, $options?)` | POST | `/reminders/{id}/email` |
+| `mail($id, $options?)` | POST | `/reminders/{id}/mail` |
 | `pdf($id, $type?)` | GET | `/reminders/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/reminders/{id}/pdf?format=pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/reminders/{id}/upload-signature` |
@@ -139,6 +140,17 @@ use Justpilot\Billomat\Api\EmailOptions;
 $mail = new EmailOptions(to: ['client@example.com'], subject: 'Reminder: open invoice 2026-0042');
 
 $billomat->reminders->email($reminder->id, $mail);
+```
+
+
+#### `mail(int $id, ?MailOptions $options = null): void`
+
+Sends the reminder by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
+
+```php
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->reminders->mail($id, new MailOptions(duplex: true));
 ```
 
 #### `pdf(int $id, ?PdfType $type = null): ReminderPdf` / `pdfContent(int $id, ?PdfType $type = null): string`

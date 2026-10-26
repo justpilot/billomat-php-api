@@ -48,7 +48,6 @@ use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemUpdateOptions;
-use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
@@ -56,6 +55,7 @@ use Justpilot\Billomat\Api\LetterCommentCreateOptions;
 use Justpilot\Billomat\Api\LetterCreateOptions;
 use Justpilot\Billomat\Api\LetterTagCreateOptions;
 use Justpilot\Billomat\Api\LetterUpdateOptions;
+use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Api\OfferCreateOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
@@ -65,6 +65,7 @@ use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
+use Justpilot\Billomat\Api\RecurringEmailReceiverUpdateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemUpdateOptions;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
@@ -143,7 +144,7 @@ use UnitEnum;
 #[CoversClass(InvoiceCreateOptions::class)]
 #[CoversClass(InvoiceItemCreateOptions::class)]
 #[CoversClass(InvoiceItemUpdateOptions::class)]
-#[CoversClass(InvoiceMailOptions::class)]
+#[CoversClass(MailOptions::class)]
 #[CoversClass(InvoicePaymentCreateOptions::class)]
 #[CoversClass(InvoiceTagCreateOptions::class)]
 #[CoversClass(InvoiceUpdateOptions::class)]
@@ -160,6 +161,7 @@ use UnitEnum;
 #[CoversClass(PropertyCreateOptions::class)]
 #[CoversClass(RecurringCreateOptions::class)]
 #[CoversClass(RecurringEmailReceiverCreateOptions::class)]
+#[CoversClass(RecurringEmailReceiverUpdateOptions::class)]
 #[CoversClass(RecurringItemCreateOptions::class)]
 #[CoversClass(RecurringItemUpdateOptions::class)]
 #[CoversClass(RecurringTagCreateOptions::class)]

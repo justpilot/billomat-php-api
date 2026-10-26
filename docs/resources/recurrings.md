@@ -36,6 +36,7 @@ Over time, a recurring invoice produces regular invoices; they reference their r
 | `create($options)` | POST | `/recurrings` |
 | `update($id, $options)` | PUT | `/recurrings/{id}` |
 | `delete($id)` | DELETE | `/recurrings/{id}` |
+| `stop($id)` | PUT | `/recurrings/{id}/stop` |
 
 ### `/recurring-items`
 
@@ -67,6 +68,7 @@ Over time, a recurring invoice produces regular invoices; they reference their r
 | `listPage($recurringId, $filters?)` / `iterateAll($recurringId, $filters?, $pageSize?)` | GET | `/recurring-email-receivers?recurring_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/recurring-email-receivers/{id}` |
 | `create($recurringId, $options)` | POST | `/recurring-email-receivers` |
+| `update($id, $options)` | PUT | `/recurring-email-receivers/{id}` |
 | `delete($id)` | DELETE | `/recurring-email-receivers/{id}` |
 
 ## Recurrings
@@ -127,6 +129,14 @@ For partial updates. According to the Billomat docs, items **cannot** be changed
 ### `delete(int $id): void`
 
 Deletes a recurring invoice. Errors are thrown as exceptions.
+
+### `stop(int $id): void`
+
+Stops a recurring invoice without deleting it: Billomat sets `nextCreationDate` to `null` and creates no further invoices. To resume, set a new `nextCreationDate` with `update()`.
+
+```php
+$billomat->recurrings->stop($recurring->id);
+```
 
 ## Write model: `RecurringCreateOptions`
 
@@ -335,6 +345,14 @@ $billomat->recurrings->emailReceivers->create(
         address: 'log@example.com',
     ),
 );
+```
+
+`update($id, RecurringEmailReceiverUpdateOptions $options)` changes the type or the address of a receiver; only the fields you set are sent. The recurring invoice of a receiver can't be changed.
+
+```php
+use Justpilot\Billomat\Api\RecurringEmailReceiverUpdateOptions;
+
+$billomat->recurrings->emailReceivers->update($receiverId, new RecurringEmailReceiverUpdateOptions(type: RecurringEmailReceiverType::CC));
 ```
 
 ### Write model: `RecurringEmailReceiverCreateOptions`

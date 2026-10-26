@@ -44,6 +44,7 @@ Only credit notes in status `DRAFT` are fully editable. `update()` on a complete
 | `cancel($id)` | PUT | `/credit-notes/{id}/cancel` |
 | `uncancel($id)` | PUT | `/credit-notes/{id}/uncancel` |
 | `email($id, $options?)` | POST | `/credit-notes/{id}/email` |
+| `mail($id, $options?)` | POST | `/credit-notes/{id}/mail` |
 | `pdf($id, $type?)` | GET | `/credit-notes/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/credit-notes/{id}/pdf?format=pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/credit-notes/{id}/upload-signature` |
@@ -170,6 +171,17 @@ $mail = new EmailOptions(
 );
 
 $billomat->creditNotes->email($creditNote->id, $mail);
+```
+
+
+#### `mail(int $id, ?MailOptions $options = null): void`
+
+Sends the credit note by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
+
+```php
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->creditNotes->mail($id, new MailOptions(duplex: true));
 ```
 
 #### `pdf(int $id, ?PdfType $type = null): CreditNotePdf` / `pdfContent(int $id, ?PdfType $type = null): string`

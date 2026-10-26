@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
+use Justpilot\Billomat\Api\RecurringEmailReceiverUpdateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemUpdateOptions;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
@@ -220,7 +221,30 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
             self::assertContainsOnlyInstancesOf(RecurringEmailReceiver::class, $receivers);
             self::assertGreaterThanOrEqual(1, \count($receivers));
 
+            $updated = $billomat->recurrings->emailReceivers->update($receiver->id, new RecurringEmailReceiverUpdateOptions(type: RecurringEmailReceiverType::BCC));
+            self::assertSame($receiver->id, $updated->id);
+            self::assertSame(RecurringEmailReceiverType::BCC, $billomat->recurrings->emailReceivers->getOrFail($receiver->id)->type);
+
             $billomat->recurrings->emailReceivers->delete($receiver->id);
+        } finally {
+            $billomat->recurrings->delete($recurring->id);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function canStopRecurringInSandbox(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $recurring = $billomat->recurrings->create($this->buildSafeDraft($billomat));
+
+        try {
+            self::assertNotNull($recurring->nextCreationDate);
+
+            $billomat->recurrings->stop($recurring->id);
+
+            self::assertNull($billomat->recurrings->getOrFail($recurring->id)->nextCreationDate);
         } finally {
             $billomat->recurrings->delete($recurring->id);
         }

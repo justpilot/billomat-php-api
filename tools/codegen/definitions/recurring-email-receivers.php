@@ -29,6 +29,17 @@ return [
         ],
     ],
 
+    'updateOptions' => [
+        'class' => 'RecurringEmailReceiverUpdateOptions',
+        'endpoint' => 'PUT /api/recurring-email-receivers/{id}',
+        'doc' => [
+            'Typisierter Payload für PUT /recurring-email-receivers/{id}.',
+            '',
+            'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update).',
+            'Die Abo-Rechnung eines Empfängers lässt sich nicht ändern.',
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Empfängers.'],
         // Die Eltern-ID übergibt `RecurringEmailReceiversApi::create()` als eigenes Argument.

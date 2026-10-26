@@ -22,8 +22,7 @@ $billomat->users
 | `get($id)` | GET | `/users/{id}` |
 | `getOrFail($id)` | GET | `/users/{id}` |
 | `getMyself()` | GET | `/users/myself` |
-
-The avatar endpoint (`GET /users/{id}/avatar`) is not implemented in the SDK; call it via `$billomat->getHttpClient()` if needed.
+| `avatar($id, $size?)` | GET | `/users/{id}/avatar` |
 
 Custom field definitions for users are available as the sub-resource `$billomat->users->properties` (`PropertiesApi` with `UserProperty`); see [properties.md](properties.md).
 
@@ -100,6 +99,14 @@ Returns the currently authenticated user (`GET /users/myself`). There always is 
 ```php
 $me = $billomat->users->getMyself();
 echo $me->email;
+```
+
+### `avatar(int $id, ?int $size = null): string`
+
+Returns the user's avatar as raw image bytes (usually PNG), not JSON. `$size` is the edge length in pixels.
+
+```php
+file_put_contents('me.png', $billomat->users->avatar($billomat->users->getMyself()->id, 64));
 ```
 
 ## Pitfalls

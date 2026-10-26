@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\EmailOptions;
+use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
 use Justpilot\Billomat\Model\Enum\PaymentType;
@@ -58,6 +59,7 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->ruleWithConfiguration(RenameClassRector::class, [
         'Justpilot\Billomat\Model\Enum\InvoicePaymentType' => PaymentType::class,
+        'Justpilot\Billomat\Api\InvoiceMailOptions' => MailOptions::class,
         'Justpilot\Billomat\Model\Enum\InvoicePdfType' => PdfType::class,
         'Justpilot\Billomat\Model\Enum\InvoiceItemType' => ItemType::class,
         'Justpilot\Billomat\Model\Enum\ArticleType' => ItemType::class,

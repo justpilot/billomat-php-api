@@ -23,6 +23,7 @@ $billomat->contacts
 | `create($options)` | POST | `/contacts` |
 | `update($id, $options)` | PUT | `/contacts/{id}` |
 | `delete($id)` | DELETE | `/contacts/{id}` |
+| `avatar($id, $size?)` | GET | `/contacts/{id}/avatar` |
 
 There is **no** unfiltered `list()`: Billomat's `GET /contacts` requires a `client_id` filter. The SDK reflects this in the method signature.
 
@@ -85,6 +86,10 @@ $billomat->contacts->update($contactId, $patch);
 ### `delete(int $id): void`
 
 Removes the contact. Errors are thrown as exceptions.
+
+### `avatar(int $id, ?int $size = null): string`
+
+Returns the contact's avatar as raw image bytes (usually PNG), not JSON. `$size` is the edge length in pixels. Billomat returns a placeholder image if none was uploaded.
 
 ## Write model: `ContactCreateOptions`
 

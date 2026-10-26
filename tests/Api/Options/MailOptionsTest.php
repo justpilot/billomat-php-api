@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api\Options;
 
-use Justpilot\Billomat\Api\InvoiceMailOptions;
+use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Tests\Support\Payload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(InvoiceMailOptions::class)]
-final class InvoiceMailOptionsTest extends TestCase
+#[CoversClass(MailOptions::class)]
+final class MailOptionsTest extends TestCase
 {
     #[Test]
     public function emptyOptionsProduceEmptyPayload(): void
     {
-        self::assertSame([], new InvoiceMailOptions()->toArray());
+        self::assertSame([], new MailOptions()->toArray());
     }
 
     #[Test]
     public function itConvertsBoolColorAndDuplexToOneZero(): void
     {
-        $options = new InvoiceMailOptions(color: true, duplex: false);
+        $options = new MailOptions(color: true, duplex: false);
 
         $payload = $options->toArray();
 
@@ -33,7 +33,7 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itPassesPaperWeightThroughUntouched(): void
     {
-        $options = new InvoiceMailOptions(paperWeight: 90);
+        $options = new MailOptions(paperWeight: 90);
 
         $payload = $options->toArray();
 
@@ -43,7 +43,7 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itStripsNullFields(): void
     {
-        $options = new InvoiceMailOptions(color: true);
+        $options = new MailOptions(color: true);
 
         $payload = $options->toArray();
 
@@ -53,7 +53,7 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itWrapsAttachmentsInAttachmentEnvelope(): void
     {
-        $options = new InvoiceMailOptions(
+        $options = new MailOptions(
             attachments: [
                 ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
                 ['filename' => 'flyer.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'WFla'],
@@ -72,7 +72,7 @@ final class InvoiceMailOptionsTest extends TestCase
     #[Test]
     public function itOmitsAttachmentsKeyWhenEmpty(): void
     {
-        $options = new InvoiceMailOptions();
+        $options = new MailOptions();
 
         self::assertArrayNotHasKey('attachments', $options->toArray());
     }

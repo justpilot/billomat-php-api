@@ -103,19 +103,7 @@ final class RemindersApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Reminder
     {
-        $data = $this->getJsonOrNull("/reminders/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['reminder'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Reminder::fromArray($row);
+        return $this->getResource("/reminders/{$id}", 'reminder', Reminder::fromArray(...), 'fetching reminder');
     }
 
     /**

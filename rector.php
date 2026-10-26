@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\Php55\Rector\String_\StringClassNameToClassConstantRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
@@ -21,6 +22,8 @@ return RectorConfig::configure()
         __DIR__ . '/graphify-out',
         // Bewusste Stilentscheidung: PHPUnit-Assertions werden statisch aufgerufen (self::assert*).
         PreferPHPUnitThisCallRector::class,
+        // Im Upgrade-Set steht AbstractApi bewusst als String: Die Klasse ist @internal.
+        StringClassNameToClassConstantRector::class => [__DIR__ . '/rector/upgrade-4.0.php'],
     ])
     ->withPhpSets(php85: true)
     ->withSets([

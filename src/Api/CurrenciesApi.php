@@ -17,12 +17,14 @@ use NoDiscard;
 final class CurrenciesApi extends AbstractApi
 {
     /**
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
      * @return list<Currency>
      */
     #[NoDiscard]
-    public function list(): array
+    public function list(array $filters = []): array
     {
-        return $this->listResource('/currencies', 'currencies', 'currency', Currency::fromArray(...));
+        return $this->listResource('/currencies', 'currencies', 'currency', Currency::fromArray(...), $filters);
     }
 
     /**

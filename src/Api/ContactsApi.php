@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Contact;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -28,34 +30,48 @@ use NoDiscard;
 final class ContactsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array<scalar|null>|null> $query
+     * Listet die Ansprechpartner eines Kunden.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Contact>
      */
     #[NoDiscard]
-    public function list(int $clientId, array $query = []): array
+    public function list(int $clientId, array $filters = []): array
     {
-        $params = array_merge(['client_id' => $clientId], $query);
+        return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($clientId, $filters));
+    }
 
-        return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $params);
+    /**
+     * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<Contact>
+     */
+    #[NoDiscard]
+    public function listPage(int $clientId, array $filters = []): Page
+    {
+        return $this->listResourcePage('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($clientId, $filters));
+    }
+
+    /**
+     * Iteriert lazy über alle Ansprechpartner eines Kunden.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Generator<int, Contact>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $clientId, array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($clientId, $filters), $pageSize);
     }
 
     #[NoDiscard]
     public function get(int $id): ?Contact
     {
-        $data = $this->getJsonOrNull("/contacts/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['contact'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Contact::fromArray($row);
+        return $this->getResource("/contacts/{$id}", 'contact', Contact::fromArray(...), 'fetching contact');
     }
 
     /**
@@ -95,5 +111,17 @@ final class ContactsApi extends AbstractApi
     public function delete(int $id): void
     {
         $this->deleteVoid("/contacts/{$id}");
+    }
+
+    /**
+     * `client_id` ist beim Listen Pflicht und hat Vorrang vor einem gleichnamigen Filter.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return array<string, scalar|array<scalar|null>|null>
+     */
+    private function clientFilter(int $clientId, array $filters): array
+    {
+        return ['client_id' => $clientId] + $filters;
     }
 }

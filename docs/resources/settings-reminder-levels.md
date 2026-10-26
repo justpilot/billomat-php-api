@@ -23,6 +23,8 @@ $billomat->reminderTexts   // Justpilot\Billomat\Api\ReminderTextsApi
 | Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/reminder-texts` |
+| `listPage($filters?)` | GET | `/reminder-texts` (page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/reminder-texts` (lazy over all pages) |
 | `get($id)` | GET | `/reminder-texts/{id}` |
 | `getOrFail($id)` | GET | `/reminder-texts/{id}` |
 

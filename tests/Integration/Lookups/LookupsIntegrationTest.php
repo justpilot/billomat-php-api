@@ -40,7 +40,7 @@ final class LookupsIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $me = $billomat->users->getMyself();
 
-        self::assertInstanceOf(User::class, $me);
+        self::assertGreaterThan(0, $me->id);
     }
 
     #[Group('integration')]

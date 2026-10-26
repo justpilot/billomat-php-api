@@ -9,6 +9,8 @@ namespace Justpilot\Billomat\Model\Enum;
  *
  * Billomat liefert leere Felder als "" und erweitert Wertemengen gelegentlich; beides wird
  * zu null statt einen `ValueError` zu werfen.
+ *
+ * @internal `fromApi()` auf den Enums ist öffentlich, der Trait selbst ist es nicht
  */
 trait FromApi
 {

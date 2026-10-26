@@ -61,7 +61,7 @@ try {
 
 ## `get($id)` and 404
 
-`AbstractApi::getJsonOrNull()` swallows `NotFoundException` and returns `null`. In practice:
+`get()` turns a 404 into `null`; a 2xx response without the expected envelope throws `UnexpectedResponseException`. In practice:
 
 ```php
 $invoice = $billomat->invoices->get(999_999); // null instead of an exception

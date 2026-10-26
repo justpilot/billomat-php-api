@@ -107,19 +107,7 @@ final class ArticlesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Article
     {
-        $data = $this->getJsonOrNull("/articles/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['article'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Article::fromArray($row);
+        return $this->getResource("/articles/{$id}", 'article', Article::fromArray(...), 'fetching article');
     }
 
     /**

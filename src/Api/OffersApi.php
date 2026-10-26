@@ -126,19 +126,7 @@ final class OffersApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Offer
     {
-        $data = $this->getJsonOrNull("/offers/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $offerData = $data['offer'] ?? null;
-
-        if (!self::isRecord($offerData)) {
-            return null;
-        }
-
-        return Offer::fromArray($offerData);
+        return $this->getResource("/offers/{$id}", 'offer', Offer::fromArray(...), 'fetching offer');
     }
 
     /**

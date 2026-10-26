@@ -21,6 +21,8 @@ use NoDiscard;
  * und den Konstanten {@see self::PLURAL}/{@see self::SINGULAR} ab.
  *
  * @template TModel of object
+ *
+ * @internal Basis der SDK-eigenen Sub-Ressourcen, kein Erweiterungspunkt
  */
 abstract class AbstractSubResourceApi extends AbstractApi
 {
@@ -67,13 +69,7 @@ abstract class AbstractSubResourceApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?object
     {
-        $data = $this->getJsonOrNull("{$this->path}/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        return ($this->hydrate)($this->unwrapEnvelope($data, $this->key, 'fetching '.$this->label()));
+        return $this->getResource("{$this->path}/{$id}", $this->key, $this->hydrate, 'fetching '.$this->label());
     }
 
     /**

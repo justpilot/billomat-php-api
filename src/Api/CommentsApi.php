@@ -37,6 +37,8 @@ final class CommentsApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'comment';
 
     /**
+     * @internal Instanzen kommen über die Eltern-API, z. B. `$billomat->invoices->comments`
+     *
      * @param string                                 $parent        Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
      * @param Closure(array<string,mixed>): TComment $hydrate       Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoiceComment::fromArray()}
      * @param class-string<TCreate>                  $optionsClass  erwartete Create-Options

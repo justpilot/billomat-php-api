@@ -224,6 +224,17 @@ return $this->getRaw("/invoices/{$id}/pdf", $query);
 // or: (string) $this->http->request('GET', $path, $query)->getBody();
 ```
 
+`AbstractApi` and `AbstractSubResourceApi` are `@internal` in 4.0: they still work as a base class, but
+their protected methods may change in any release. For an endpoint the SDK doesn't cover, call the
+HTTP client directly; it already adds authentication, retries and error mapping:
+
+```php
+$response = $billomat->getHttpClient()->request('GET', '/units/7');
+$unit = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+```
+
+See [Backward compatibility](docs/concepts/backward-compatibility.md) for what the BC promise covers.
+
 ### Retries are on by default
 
 4.0 retries 429 responses (after the wait Billomat announces, up to 10 seconds) and GET requests that fail
@@ -304,6 +315,42 @@ if ('' === $pdf || !str_starts_with($pdf, '%PDF-')) {
 // 4.0
 $pdf = $billomat->invoices->pdfContent($id); // throws UnexpectedResponseException
 ```
+
+## `get()`, `getMyself()` and list parameters
+
+### `get()` throws on an unexpected response
+
+In 3.x most `get()` methods returned `null` when Billomat answered with 2xx but without the expected
+envelope, so a broken response looked like a missing record. In 4.0 only a 404 returns `null`;
+everything else throws `UnexpectedResponseException` (a `BillomatException`).
+
+### `users->getMyself()` returns `User`
+
+```php
+// 3.x
+$me = $billomat->users->getMyself(); // ?User
+echo $me?->email;
+
+// 4.0
+$me = $billomat->users->getMyself(); // User, NotFoundException/UnexpectedResponseException otherwise
+echo $me->email;
+```
+
+### `$query` is `$filters`
+
+`contacts->list()`, `taxes->list()` and `templates->list()` called their filter parameter `$query`;
+it is `$filters` now, as on every other list method. This only matters if you pass it by name:
+
+```php
+// 3.x
+$billomat->taxes->list(query: ['per_page' => 50]);
+
+// 4.0
+$billomat->taxes->list(filters: ['per_page' => 50]);
+```
+
+These three and `reminderTexts` also have `listPage()` and `iterateAll()` now, and `countries->list()`
+and `currencies->list()` accept filters (`list(['code' => 'DE'])`).
 
 ## Read-only methods are `#[\NoDiscard]`
 

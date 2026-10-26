@@ -106,19 +106,7 @@ final class LettersApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Letter
     {
-        $data = $this->getJsonOrNull("/letters/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['letter'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Letter::fromArray($row);
+        return $this->getResource("/letters/{$id}", 'letter', Letter::fromArray(...), 'fetching letter');
     }
 
     /**

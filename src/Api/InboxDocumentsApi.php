@@ -72,19 +72,7 @@ final class InboxDocumentsApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?InboxDocument
     {
-        $data = $this->getJsonOrNull("/inbox-documents/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['inbox-document'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return InboxDocument::fromArray($row);
+        return $this->getResource("/inbox-documents/{$id}", 'inbox-document', InboxDocument::fromArray(...), 'fetching inbox document');
     }
 
     /**

@@ -14,7 +14,6 @@ declare(strict_types=1);
  * Automatisiert nur mechanische Änderungen; was Urteilsvermögen braucht (float → Money, Options mit
  * Property-Zuweisung, `if ($api->delete(…))`), listet UPGRADE-4.0.md als manuelle Schritte.
  */
-use Justpilot\Billomat\Api\AbstractApi;
 use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Model\Enum\ItemType;
@@ -48,7 +47,8 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->ruleWithConfiguration(RenameMethodRector::class, [
         new MethodCallRename(ContactsApi::class, 'listByClient', 'list'),
-        new MethodCallRename(AbstractApi::class, 'putEmptyResponse', 'putVoid'),
+        // Als String: AbstractApi ist ab 4.0 @internal, die Umbenennung betrifft eigene Unterklassen aus 3.x.
+        new MethodCallRename('Justpilot\Billomat\Api\AbstractApi', 'putEmptyResponse', 'putVoid'),
     ]);
 
     $rectorConfig->ruleWithConfiguration(RenameClassConstFetchRector::class, [

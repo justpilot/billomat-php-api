@@ -131,19 +131,7 @@ final class IncomingsApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Incoming
     {
-        $data = $this->getJsonOrNull("/incomings/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['incoming'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Incoming::fromArray($row);
+        return $this->getResource("/incomings/{$id}", 'incoming', Incoming::fromArray(...), 'fetching incoming');
     }
 
     /**

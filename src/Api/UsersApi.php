@@ -76,18 +76,7 @@ final class UsersApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?User
     {
-        $data = $this->getJsonOrNull("/users/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['user'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return User::fromArray($row);
+        return $this->getResource("/users/{$id}", 'user', User::fromArray(...), 'fetching user');
     }
 
     /**
@@ -101,21 +90,15 @@ final class UsersApi extends AbstractApi
         return $this->get($id) ?? throw $this->notFound("/users/{$id}");
     }
 
-    /** Gibt den aktuell authentifizierten Benutzer zurück. */
+    /**
+     * Gibt den aktuell authentifizierten Benutzer zurück.
+     *
+     * Den gibt es bei gültigem API-Key immer; anders als bei {@see get()} ist ein 404 hier ein
+     * echter Fehler und kommt als {@see NotFoundException} durch.
+     */
     #[NoDiscard]
-    public function getMyself(): ?User
+    public function getMyself(): User
     {
-        $data = $this->getJsonOrNull('/users/myself');
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['user'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return User::fromArray($row);
+        return User::fromArray($this->unwrapEnvelope($this->getJson('/users/myself'), 'user', 'fetching own user via /users/myself'));
     }
 }

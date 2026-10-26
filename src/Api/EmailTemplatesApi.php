@@ -66,18 +66,7 @@ final class EmailTemplatesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?EmailTemplate
     {
-        $data = $this->getJsonOrNull("/email-templates/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['email-template'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return EmailTemplate::fromArray($row);
+        return $this->getResource("/email-templates/{$id}", 'email-template', EmailTemplate::fromArray(...), 'fetching email template');
     }
 
     /**

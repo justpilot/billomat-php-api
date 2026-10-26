@@ -30,6 +30,9 @@ final class RecurringEmailReceiversApi extends AbstractSubResourceApi
     protected const string PLURAL = 'email-receivers';
     protected const string SINGULAR = 'email-receiver';
 
+    /**
+     * @internal Instanzen kommen über `$billomat->recurrings->emailReceivers`
+     */
     public function __construct(BillomatHttpClientInterface $http)
     {
         parent::__construct($http, 'recurring', RecurringEmailReceiver::fromArray(...));

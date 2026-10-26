@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -23,7 +24,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 use const PHP_URL_PATH;
 
 /**
- * Prüft `getOrFail()` auf allen Ressourcen und Sub-Ressourcen von {@see BillomatClient}.
+ * Prüft `get()` und `getOrFail()` auf allen Ressourcen und Sub-Ressourcen von {@see BillomatClient}.
  */
 #[CoversNamespace('Justpilot\\Billomat\\Api')]
 #[UsesClass(BillomatClient::class)]
@@ -98,6 +99,21 @@ final class GetOrFailTest extends TestCase
 
         self::assertNotNull($expected);
         self::assertEquals($expected, $actual);
+    }
+
+    #[Test]
+    #[DataProvider('apis')]
+    public function getThrowsOnUnexpectedEnvelope(string $resource, string $subResource): void
+    {
+        // 200 ohne passende Hülle ist kein „nicht gefunden“: get() darf hier nicht null liefern.
+        $billomat = self::client(new MockResponse('{"something-else":{"id":"7"}}'));
+        $api = $this->api($billomat, $resource, $subResource);
+        $id = 'incomingCategories' === $resource ? 'abc' : 7;
+
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageMatches('/^Unexpected response from Billomat when fetching [a-z ]+\.$/');
+
+        new ReflectionMethod($api, 'get')->invoke($api, $id);
     }
 
     #[Test]

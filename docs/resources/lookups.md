@@ -31,13 +31,13 @@ Each of these resources provides master data that other models refer to only by 
 
 | API | HTTP | Path | Methods |
 |---|---|---|---|
-| `countries` | GET | `/countries` | `list()`, `listPage($filters?)`, `iterateAll()` |
-| `currencies` | GET | `/currencies` | `list()`, `listPage($filters?)`, `iterateAll()` |
+| `countries` | GET | `/countries` | `list($filters?)`, `listPage($filters?)`, `iterateAll()` |
+| `currencies` | GET | `/currencies` | `list($filters?)`, `listPage($filters?)`, `iterateAll()` |
 | `units` | GET | `/units`, `/units/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
 | `users` | GET | `/users`, `/users/{id}`, `/users/myself` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `getMyself()` |
 | `emailTemplates` | GET | `/email-templates`, `/email-templates/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
 | `freeTexts` | GET | `/free-texts`, `/free-texts/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
-| `reminderTexts` | GET | `/reminder-texts`, `/reminder-texts/{id}` | `list($filters?)`, `get($id)`, `getOrFail($id)` |
+| `reminderTexts` | GET | `/reminder-texts`, `/reminder-texts/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
 | `roles` | GET | `/roles`, `/roles/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
 | `countryTaxes` | GET | `/country-taxes`, `/country-taxes/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
 | `incomingCategories` | GET | `/incoming-categories`, `/incoming-categories/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
@@ -279,7 +279,7 @@ Unknown values become `null`.
 ## Pitfalls
 
 - **Everything is read-only.** None of these ten APIs has `create`/`update`/`delete`. To create a new user or e-mail template, use the Billomat web UI (the API has no write endpoint for users; for the others the SDK doesn't expose one).
-- **`countries` and `currencies` have no `get()`.** To get a single country or currency, pass `code` to `listPage()` or load the list and filter on the client side. The lists are small (~250 countries, ~170 currencies).
+- **`countries` and `currencies` have no `get()`.** To get a single country or currency, pass `code` as a filter (`list(['code' => 'DE'])`) or load the list and filter on the client side. The lists are small (~250 countries, ~170 currencies).
 - **`code` is the key, not `id`.** `Country` and `Currency` have an optional `id`, but all references (`Client::$countryCode`, `Invoice::$currencyCode`) use the ISO code.
 - **Billomat is inconsistent.** Some endpoints return `code`, others `country_code`/`currency_code`; the read models accept both. Don't build logic around which field comes back.
 - **`from` is called `fromAddress` in the PHP model.** `toArray()` renders it as `from` again.

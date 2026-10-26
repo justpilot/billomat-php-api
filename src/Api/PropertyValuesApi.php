@@ -34,6 +34,8 @@ final class PropertyValuesApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'property-value';
 
     /**
+     * @internal Instanzen kommen über die Eltern-API, z. B. `$billomat->clients->propertyValues`
+     *
      * @param string                               $parent       Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
      * @param Closure(array<string,mixed>): TValue $hydrate      Hydrator, z. B. {@see \Justpilot\Billomat\Model\ClientPropertyValue::fromArray()}
      * @param class-string<TCreate>                $optionsClass erwartete Create-Options

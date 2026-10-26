@@ -153,19 +153,7 @@ final class InvoicesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Invoice
     {
-        $data = $this->getJsonOrNull("/invoices/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $invoiceData = $data['invoice'] ?? null;
-
-        if (!self::isRecord($invoiceData)) {
-            return null;
-        }
-
-        return Invoice::fromArray($invoiceData);
+        return $this->getResource("/invoices/{$id}", 'invoice', Invoice::fromArray(...), 'fetching invoice');
     }
 
     /**

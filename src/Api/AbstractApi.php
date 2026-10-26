@@ -25,6 +25,9 @@ use const JSON_THROW_ON_ERROR;
  *  - GET mit JSON-Response
  *  - GET, der bei 404 null zurückgibt
  *  - POST mit JSON-Body und JSON-Response
+ *
+ * @internal Basis der SDK-eigenen APIs, kein Erweiterungspunkt; die Methoden fallen nicht unter die
+ *           BC-Zusage. Endpunkte ohne SDK-Methode gehen über {@see \Justpilot\Billomat\BillomatClient::getHttpClient()}.
  */
 abstract class AbstractApi
 {
@@ -62,6 +65,29 @@ abstract class AbstractApi
             // gewolltes Verhalten: Ressource existiert nicht
             return null;
         }
+    }
+
+    /**
+     * Holt einen Einzeldatensatz: null bei 404, sonst das hydrierte Model.
+     *
+     * Eine 2xx-Antwort ohne die erwartete Hülle ist kein „nicht gefunden“, sondern eine
+     * {@see UnexpectedResponseException}.
+     *
+     * @template T of object
+     *
+     * @param string                           $key     erwarteter Wrapper-Key, z. B. "client"
+     * @param Closure(array<string, mixed>): T $hydrate
+     * @param string                           $context beschreibt den Aufrufkontext für die Exception-Message
+     *
+     * @return T|null
+     *
+     * @throws UnexpectedResponseException
+     */
+    protected function getResource(string $path, string $key, Closure $hydrate, string $context): ?object
+    {
+        $data = $this->getJsonOrNull($path);
+
+        return null === $data ? null : $hydrate($this->unwrapEnvelope($data, $key, $context));
     }
 
     /**

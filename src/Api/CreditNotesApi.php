@@ -127,19 +127,7 @@ final class CreditNotesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?CreditNote
     {
-        $data = $this->getJsonOrNull("/credit-notes/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['credit-note'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return CreditNote::fromArray($row);
+        return $this->getResource("/credit-notes/{$id}", 'credit-note', CreditNote::fromArray(...), 'fetching credit note');
     }
 
     /**

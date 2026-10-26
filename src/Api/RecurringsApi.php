@@ -106,18 +106,7 @@ final class RecurringsApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Recurring
     {
-        $data = $this->getJsonOrNull("/recurrings/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['recurring'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Recurring::fromArray($row);
+        return $this->getResource("/recurrings/{$id}", 'recurring', Recurring::fromArray(...), 'fetching recurring');
     }
 
     /**

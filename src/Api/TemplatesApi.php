@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -23,14 +25,40 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht GET /templates
      *
-     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $query
+     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Template>
      */
     #[NoDiscard]
-    public function list(TemplateFilter|array $query = []): array
+    public function list(TemplateFilter|array $filters = []): array
     {
-        return $this->listResource('/templates', 'templates', 'template', Template::fromArray(...), $query);
+        return $this->listResource('/templates', 'templates', 'template', Template::fromArray(...), $filters);
+    }
+
+    /**
+     * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
+     *
+     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<Template>
+     */
+    #[NoDiscard]
+    public function listPage(TemplateFilter|array $filters = []): Page
+    {
+        return $this->listResourcePage('/templates', 'templates', 'template', Template::fromArray(...), $filters);
+    }
+
+    /**
+     * Iteriert lazy über alle Seiten.
+     *
+     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Generator<int, Template>
+     */
+    #[NoDiscard]
+    public function iterateAll(TemplateFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/templates', 'templates', 'template', Template::fromArray(...), $filters, $pageSize);
     }
 
     /**
@@ -43,20 +71,7 @@ final class TemplatesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Template
     {
-        $data = $this->getJsonOrNull("/templates/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $tpl = $data['template'] ?? null;
-
-        if (!self::isRecord($tpl)) {
-            throw new UnexpectedResponseException('Unexpected response from Billomat when fetching template.');
-        }
-
-        /** @var array<string,mixed> $tpl */
-        return Template::fromArray($tpl);
+        return $this->getResource("/templates/{$id}", 'template', Template::fromArray(...), 'fetching template');
     }
 
     /**

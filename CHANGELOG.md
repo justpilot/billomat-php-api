@@ -11,6 +11,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - **Missing actions:** `mail()` (Pixelletter) on offers, confirmations, credit notes, delivery notes, letters and reminders; `recurrings->stop()`; `recurrings->emailReceivers->update()` with `RecurringEmailReceiverUpdateOptions`; `contacts->avatar()` and `users->avatar()`.
 - **`listPage()` and `iterateAll()`** on `contacts` (with the client ID as the first argument), `taxes`, `templates` and `reminderTexts`. `countries->list()` and `currencies->list()` accept filters, e.g. `list(['code' => 'DE'])`.
 - **Backward compatibility promise:** [docs/concepts/backward-compatibility.md](docs/concepts/backward-compatibility.md) says what is covered from 4.0.0-beta.1 on. `AbstractApi`, `AbstractSubResourceApi`, the sub-resource API constructors and the `FromApi` trait are marked `@internal`.
+- **JSON examples in the docs:** the resource pages have a "JSON on the wire" section with the request body the SDK sends (captured from the SDK, kept up to date by `composer docs:json:check` in CI) and real, anonymized sandbox responses from the contract fixtures. Billomat's own API docs only show XML.
 - `Page` is covariant in its item type, so a `Page<Invoice>` can be passed where a `Page<object>` is expected.
 
 ### Changed

@@ -1,0 +1,9 @@
+{
+    "invoice-item": {
+        "type": "SERVICE",
+        "title": "Travel expenses",
+        "quantity": 1,
+        "unit_price": "15",
+        "invoice_id": 2001
+    }
+}

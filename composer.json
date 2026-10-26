@@ -115,12 +115,15 @@
       "@analyse",
       "@refactor:dry",
       "@generate:check",
+      "@docs:json:check",
       "@test:all"
     ],
     "extract:spec": "php tools/extract-billomat-spec.php",
     "audit:spec": "php tools/audit-spec-vs-code.php",
     "generate": "php tools/generate.php",
     "generate:check": "php tools/generate.php --check",
+    "docs:json": "php tools/generate-json-examples.php",
+    "docs:json:check": "php tools/generate-json-examples.php --check",
     "fixtures:record": [
       "Composer\\Config::disableProcessTimeout",
       "php tools/record-fixtures.php"
@@ -143,6 +146,8 @@
     "audit:spec": "Vergleicht docs/spec/billomat.json gegen src/ und schreibt docs/audit.md",
     "generate": "Erzeugt Models und Options aus docs/spec/billomat.json + tools/codegen/definitions/",
     "generate:check": "Prüft, ob die generierten Dateien unter src/ aktuell sind",
+    "docs:json": "Schreibt die JSON-Beispiele der Ressourcen-Doku (docs/snippets/json/ und die Abschnitte „JSON on the wire“)",
+    "docs:json:check": "Prüft, ob die JSON-Beispiele der Doku aktuell sind",
     "fixtures:record": "Nimmt anonymisierte Contract-Fixtures per GET gegen die Billomat-Sandbox auf (benötigt .env.test.local)"
   }
 }

@@ -1,0 +1,7 @@
+{
+    "supplier": {
+        "name": "Office Supplies AG",
+        "country_code": "DE",
+        "email": "invoices@supplier.example"
+    }
+}

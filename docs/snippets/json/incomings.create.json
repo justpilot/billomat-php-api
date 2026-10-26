@@ -1,0 +1,11 @@
+{
+    "incoming": {
+        "supplier_id": 3001,
+        "number": "R-778",
+        "date": "2026-11-02",
+        "due_days": 30,
+        "total_gross": "119",
+        "total_net": "100",
+        "currency_code": "EUR"
+    }
+}

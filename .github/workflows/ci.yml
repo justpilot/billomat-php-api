@@ -106,6 +106,9 @@ jobs:
       - name: Generated code up to date
         run: composer generate:check
 
+      - name: JSON examples in the docs up to date
+        run: composer docs:json:check
+
       - name: Composer audit
         run: composer audit
 

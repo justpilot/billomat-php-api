@@ -1,0 +1,20 @@
+{
+    "invoice": {
+        "client_id": 1001,
+        "date": "2026-11-02",
+        "due_days": 14,
+        "title": "Invoice for November",
+        "payment_types": "BANK_TRANSFER,PAYPAL",
+        "invoice-items": {
+            "invoice-item": [
+                {
+                    "title": "Consulting",
+                    "quantity": 2,
+                    "unit_price": "49.9",
+                    "unit": "hours",
+                    "tax_rate": 19
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "confirmation": {
+        "client_id": 1001,
+        "date": "2026-11-02",
+        "confirmation-items": {
+            "confirmation-item": [
+                {
+                    "title": "Consulting",
+                    "quantity": 2,
+                    "unit_price": "49.9",
+                    "unit": "hours",
+                    "tax_rate": 19
+                }
+            ]
+        }
+    }
+}

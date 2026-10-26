@@ -1,0 +1,21 @@
+{
+    "recurring": {
+        "client_id": 1001,
+        "name": "Hosting",
+        "action": "EMAIL",
+        "cycle_number": 1,
+        "cycle": "MONTHLY",
+        "start_date": "2026-11-02",
+        "recurring-items": {
+            "recurring-item": [
+                {
+                    "title": "Consulting",
+                    "quantity": 2,
+                    "unit_price": "49.9",
+                    "unit": "hours",
+                    "tax_rate": 19
+                }
+            ]
+        }
+    }
+}

@@ -17,6 +17,7 @@ use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesNamespace;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
@@ -31,6 +32,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(ListCaster::class)]
+#[UsesNamespace('Justpilot\\Billomat\\Exception')]
 final class UsersApiTest extends TestCase
 {
     #[Test]

@@ -109,6 +109,30 @@ final class ListPagingTest extends TestCase
         self::assertSame('x', $this->requests[1]->query()['name'] ?? null);
     }
 
+    /**
+     * @return iterable<string, array{string, string, Closure(BillomatClient): Generator<int, object>}>
+     */
+    public static function defaultIterators(): iterable
+    {
+        yield 'contacts' => ['contacts', 'contact', static fn (BillomatClient $b): Generator => $b->contacts->iterateAll(9)];
+        yield 'taxes' => ['taxes', 'tax', static fn (BillomatClient $b): Generator => $b->taxes->iterateAll()];
+        yield 'templates' => ['templates', 'template', static fn (BillomatClient $b): Generator => $b->templates->iterateAll()];
+        yield 'reminder texts' => ['reminder-texts', 'reminder-text', static fn (BillomatClient $b): Generator => $b->reminderTexts->iterateAll()];
+    }
+
+    /**
+     * @param Closure(BillomatClient): Generator<int, object> $iterateAll
+     */
+    #[Test]
+    #[DataProvider('defaultIterators')]
+    public function iterateAllUsesPagesOfHundredByDefault(string $outer, string $inner, Closure $iterateAll): void
+    {
+        $billomat = $this->client($this->page($outer, $inner, [1], page: 1, perPage: 100, total: 1));
+
+        self::assertCount(1, iterator_to_array($iterateAll($billomat), false));
+        self::assertSame('100', $this->requests[0]->query()['per_page'] ?? null);
+    }
+
     #[Test]
     public function contactsAlwaysSendTheClientId(): void
     {

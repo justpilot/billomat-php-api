@@ -332,6 +332,7 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingPropertyId, mi
 | `pageCount` | `?int` |
 | `hasAttachment` | `?bool` |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `propertyValues` | `list<IncomingPropertyValue>` (custom property values, embedded by Billomat in `get()` and `list()`) |
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
 `paidAmount` and `openAmount` are calculated server-side from the payments. Amounts are [`Money`](../concepts/money.md) values.
@@ -435,6 +436,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/incomings.create.json [POST /incomings]
+<<< @/../tests/Fixtures/Contract/incomings/get.json [GET /incomings/{id} (response)]
+<<< @/../tests/Fixtures/Contract/incomings/list.json [GET /incomings (response)]
 :::
 <!-- json-examples:end -->
 

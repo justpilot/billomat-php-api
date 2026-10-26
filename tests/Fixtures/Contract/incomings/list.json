@@ -1,7 +1,45 @@
 {
     "incomings": {
+        "incoming": {
+            "id": "2063418",
+            "created": "2026-10-26T16:59:09+01:00",
+            "updated": "2026-10-26T16:59:10+01:00",
+            "supplier_id": "392662",
+            "number": "SDK-778",
+            "client_number": "",
+            "date": "2026-10-26",
+            "due_date": "",
+            "address": "Firma 7 GmbH\nMusterstraße 7\n10007 Musterstadt 7",
+            "status": "OPEN",
+            "label": "",
+            "note": "",
+            "total_net": "100",
+            "total_gross": "119",
+            "currency_code": "EUR",
+            "quote": "1",
+            "paid_amount": "50",
+            "open_amount": "69",
+            "expense_account_number": "",
+            "category": "",
+            "page_count": "0",
+            "customfield": "",
+            "incoming-property-values": {
+                "incoming-property-value": {
+                    "id": "1879135",
+                    "created": "2026-10-26T16:59:10+01:00",
+                    "updated": "2026-10-26T16:59:10+01:00",
+                    "incoming_id": "2063418",
+                    "incoming_property_id": "1386",
+                    "type": "TEXTFIELD",
+                    "name": "Name 15",
+                    "value": "Text 44",
+                    "customfield": ""
+                }
+            },
+            "has_attachment": "0"
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

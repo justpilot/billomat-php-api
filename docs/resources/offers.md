@@ -483,6 +483,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/offers.create.json [POST /offers]
+<<< @/../tests/Fixtures/Contract/offers/get.json [GET /offers/{id} (response)]
+<<< @/../tests/Fixtures/Contract/offers/list.json [GET /offers (response)]
 :::
 <!-- json-examples:end -->
 

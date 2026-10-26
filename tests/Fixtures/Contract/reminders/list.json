@@ -1,7 +1,34 @@
 {
     "reminders": {
+        "reminder": {
+            "id": "3375689",
+            "created": "2026-10-26T16:59:00+01:00",
+            "updated": "2026-10-26T16:59:01+01:00",
+            "invoice_id": "25279655",
+            "client_id": "10651661",
+            "contact_id": "",
+            "date": "2026-10-26",
+            "due_date": "2026-11-02",
+            "due_days": "7",
+            "address": "Firma 9 GmbH\nMusterstraße 9\n10009 Musterstadt 9",
+            "status": "DRAFT",
+            "label": "",
+            "subject": "",
+            "intro": "",
+            "note": "",
+            "total_gross": "100",
+            "currency_code": "EUR",
+            "paid_amount": "0",
+            "open_amount": "100",
+            "reminder_text_id": "",
+            "reminder_level": "1",
+            "reminder_level_name": "",
+            "is_old": "0",
+            "template_id": "971610",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

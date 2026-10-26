@@ -1,0 +1,24 @@
+{
+    "offer-item": {
+        "id": "9306074",
+        "article_id": "",
+        "offer_id": "1834409",
+        "position": "1",
+        "unit": "Stunden",
+        "quantity": "2",
+        "type": "",
+        "unit_price": "49.9",
+        "tax_name": "USt",
+        "tax_rate": "19",
+        "title": "Text 14",
+        "description": "",
+        "total_net": "99.8",
+        "total_gross": "118.762",
+        "reduction": "",
+        "total_net_unreduced": "99.8",
+        "total_gross_unreduced": "118.762",
+        "optional": "0",
+        "tax_changed_manually": "0",
+        "customfield": ""
+    }
+}

@@ -1,7 +1,18 @@
 {
     "article-property-values": {
+        "article-property-value": {
+            "id": "4605801",
+            "created": "2026-10-26T16:58:57+01:00",
+            "updated": "2026-10-26T16:58:57+01:00",
+            "article_id": "1755418",
+            "article_property_id": "6031",
+            "type": "TEXTFIELD",
+            "name": "Name 10",
+            "value": "Text 2",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

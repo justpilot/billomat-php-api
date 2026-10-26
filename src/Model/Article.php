@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
@@ -52,9 +53,13 @@ final readonly class Article
         'revenue_account_number' => true,
         'cost_center' => true,
         'purchase_price_net_gross' => true,
+        'article-property-values' => true,
     ];
 
-    /** @param array<string, mixed> $extra */
+    /**
+     * @param list<ArticlePropertyValue> $propertyValues
+     * @param array<string, mixed>       $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Artikels. */
         public int $id,
@@ -131,6 +136,12 @@ final readonly class Article
         /** Preisbasis des Einkaufspreises (netto oder brutto). */
         public ?NetGross $purchasePriceNetGross = null,
         /**
+         * Attributwerte des Artikels.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert (leer: "").
+         */
+        public array $propertyValues = [],
+        /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
          * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
@@ -172,6 +183,7 @@ final readonly class Article
             revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
             costCenter: ScalarCaster::toStringOrNull($data['cost_center'] ?? null),
             purchasePriceNetGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null) ?? ''),
+            propertyValues: ListCaster::toNestedList($data['article-property-values'] ?? null, 'article-property-value', 'id', ArticlePropertyValue::fromArray(...)),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -185,7 +197,7 @@ final readonly class Article
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
@@ -213,5 +225,13 @@ final readonly class Article
             'cost_center' => $this->costCenter,
             'purchase_price_net_gross' => $this->purchasePriceNetGross?->value,
         ];
+
+        if ([] !== $this->propertyValues) {
+            $data['article-property-values'] = [
+                'article-property-value' => array_map(static fn (ArticlePropertyValue $item): array => $item->toArray(), $this->propertyValues),
+            ];
+        }
+
+        return $data;
     }
 }

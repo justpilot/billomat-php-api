@@ -1,20 +1,35 @@
 {
     "delivery-note-comments": {
-        "delivery-note-comment": {
-            "id": "1976646",
-            "created": "2026-10-20T20:37:38+02:00",
-            "comment": "Text 25",
-            "actionkey": "CREATE",
-            "public": "0",
-            "by_client": "0",
-            "user_id": "136536",
-            "email_id": "",
-            "client_id": "",
-            "delivery_note_id": "889201",
-            "customfield": ""
-        },
+        "delivery-note-comment": [
+            {
+                "id": "1978341",
+                "created": "2026-10-26T16:59:04+01:00",
+                "comment": "Text 36",
+                "actionkey": "CREATE",
+                "public": "0",
+                "by_client": "0",
+                "user_id": "136536",
+                "email_id": "",
+                "client_id": "",
+                "delivery_note_id": "890065",
+                "customfield": ""
+            },
+            {
+                "id": "1978342",
+                "created": "2026-10-26T16:59:04+01:00",
+                "comment": "Text 16",
+                "actionkey": "COMMENT",
+                "public": "0",
+                "by_client": "0",
+                "user_id": "136536",
+                "email_id": "",
+                "client_id": "",
+                "delivery_note_id": "890065",
+                "customfield": ""
+            }
+        ],
         "@page": "1",
         "@per_page": "3",
-        "@total": "1"
+        "@total": "2"
     }
 }

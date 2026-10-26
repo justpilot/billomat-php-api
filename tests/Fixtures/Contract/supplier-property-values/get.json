@@ -1,0 +1,13 @@
+{
+    "supplier-property-value": {
+        "id": "66191",
+        "created": "2026-10-26T16:58:56+01:00",
+        "updated": "2026-10-26T16:58:56+01:00",
+        "supplier_id": "392662",
+        "supplier_property_id": "560",
+        "type": "TEXTFIELD",
+        "name": "Name 9",
+        "value": "Text 3",
+        "customfield": ""
+    }
+}

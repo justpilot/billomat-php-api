@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 
@@ -47,9 +48,13 @@ final readonly class Incoming
         'category' => true,
         'page_count' => true,
         'has_attachment' => true,
+        'incoming-property-values' => true,
     ];
 
-    /** @param array<string, mixed> $extra */
+    /**
+     * @param list<IncomingPropertyValue> $propertyValues
+     * @param array<string, mixed>        $extra
+     */
     public function __construct(
         /** Interne Billomat-ID der Eingangsrechnung. */
         public int $id,
@@ -98,6 +103,12 @@ final readonly class Incoming
         /** Ist ein Belegdokument angehängt? */
         public ?bool $hasAttachment = null,
         /**
+         * Attributwerte der Eingangsrechnung.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert (leer: "").
+         */
+        public array $propertyValues = [],
+        /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
          * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
@@ -137,6 +148,7 @@ final readonly class Incoming
             category: ScalarCaster::toStringOrNull($data['category'] ?? null),
             pageCount: ScalarCaster::toIntOrNull($data['page_count'] ?? null),
             hasAttachment: ScalarCaster::toBoolOrNull($data['has_attachment'] ?? null),
+            propertyValues: ListCaster::toNestedList($data['incoming-property-values'] ?? null, 'incoming-property-value', 'id', IncomingPropertyValue::fromArray(...)),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -150,7 +162,7 @@ final readonly class Incoming
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             ...$this->extra,
             'id' => $this->id,
             'supplier_id' => $this->supplierId,
@@ -176,5 +188,13 @@ final readonly class Incoming
             'page_count' => $this->pageCount,
             'has_attachment' => $this->hasAttachment,
         ];
+
+        if ([] !== $this->propertyValues) {
+            $data['incoming-property-values'] = [
+                'incoming-property-value' => array_map(static fn (IncomingPropertyValue $item): array => $item->toArray(), $this->propertyValues),
+            ];
+        }
+
+        return $data;
     }
 }

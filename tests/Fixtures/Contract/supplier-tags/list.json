@@ -1,7 +1,13 @@
 {
     "supplier-tags": {
+        "supplier-tag": {
+            "id": "1157",
+            "name": "Name 3",
+            "supplier_id": "392662",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

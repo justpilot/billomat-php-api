@@ -14,6 +14,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - **JSON examples in the docs:** the resource pages have a "JSON on the wire" section with the request body the SDK sends (captured from the SDK, kept up to date by `composer docs:json:check` in CI) and real, anonymized sandbox responses from the contract fixtures. Billomat's own API docs only show XML.
 - `Page` is covariant in its item type, so a `Page<Invoice>` can be passed where a `Page<object>` is expected.
 
+### Fixed
+
+- **Fields Billomat sends that the models didn't map** (found with new sandbox fixtures): `Article::$propertyValues` and `Incoming::$propertyValues` (embedded `article-property-values`/`incoming-property-values`, like `Client`/`Supplier`), `CountryTax::$created`, `$updated` and `$customfield`. Until now they ended up in `$extra`.
+
 ### Changed
 
 - **`InvoiceMailOptions` is `MailOptions`**, since every document type takes the same Pixelletter options. The Rector set renames it.

@@ -126,6 +126,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/inbox-documents.create.json [POST /inbox-documents]
+<<< @/../tests/Fixtures/Contract/inbox-documents/get.json [GET /inbox-documents/{id} (response)]
+<<< @/../tests/Fixtures/Contract/inbox-documents/list.json [GET /inbox-documents (response)]
 :::
 <!-- json-examples:end -->
 

@@ -1,0 +1,10 @@
+{
+    "incoming-property": {
+        "id": "1386",
+        "name": "Name 15",
+        "default_value": "",
+        "is_nvl": "",
+        "type": "TEXTFIELD",
+        "customfield": ""
+    }
+}

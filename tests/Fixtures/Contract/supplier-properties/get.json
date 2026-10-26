@@ -1,0 +1,10 @@
+{
+    "supplier-property": {
+        "id": "560",
+        "name": "Name 9",
+        "default_value": "",
+        "is_nvl": "",
+        "type": "TEXTFIELD",
+        "customfield": ""
+    }
+}

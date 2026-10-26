@@ -6,11 +6,11 @@
                 "created": "2025-12-24T22:59:58+01:00",
                 "updated": "2025-12-24T22:59:58+01:00",
                 "type": "INVOICE",
-                "name": "Name 8",
+                "name": "Name 16",
                 "title": "",
                 "label": "",
-                "intro": "Text 32",
-                "note": "Text 33",
+                "intro": "Text 42",
+                "note": "Text 43",
                 "is_default": "1"
             },
             {
@@ -18,11 +18,11 @@
                 "created": "2025-12-24T22:59:58+01:00",
                 "updated": "2025-12-24T22:59:58+01:00",
                 "type": "OFFER",
-                "name": "Name 8",
+                "name": "Name 16",
                 "title": "",
                 "label": "",
-                "intro": "Text 34",
-                "note": "Text 35",
+                "intro": "Text 19",
+                "note": "Text 20",
                 "is_default": "1"
             },
             {
@@ -30,11 +30,11 @@
                 "created": "2025-12-24T22:59:58+01:00",
                 "updated": "2025-12-24T22:59:58+01:00",
                 "type": "CREDIT_NOTE",
-                "name": "Name 8",
+                "name": "Name 16",
                 "title": "",
                 "label": "",
-                "intro": "Text 36",
-                "note": "Text 37",
+                "intro": "Text 30",
+                "note": "Text 31",
                 "is_default": "1"
             }
         ],

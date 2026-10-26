@@ -1,7 +1,15 @@
 {
     "user-properties": {
+        "user-property": {
+            "id": "1986",
+            "name": "Name 24",
+            "default_value": "",
+            "is_nvl": "",
+            "type": "TEXTFIELD",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

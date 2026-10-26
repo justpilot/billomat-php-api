@@ -515,6 +515,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/credit-notes.create.json [POST /credit-notes]
+<<< @/../tests/Fixtures/Contract/credit-notes/get.json [GET /credit-notes/{id} (response)]
+<<< @/../tests/Fixtures/Contract/credit-notes/list.json [GET /credit-notes (response)]
 :::
 <!-- json-examples:end -->
 

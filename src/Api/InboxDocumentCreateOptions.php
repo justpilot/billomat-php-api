@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Api;
 /**
  * Payload für POST /inbox-documents.
  *
- * Doku: https://www.billomat.com/en/api/inbox-documents/
+ * Doku: https://www.billomat.com/api/eingangsrechnungen/inbox/
  */
 final readonly class InboxDocumentCreateOptions implements WriteOptions
 {

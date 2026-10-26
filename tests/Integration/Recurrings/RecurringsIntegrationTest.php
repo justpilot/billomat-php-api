@@ -199,9 +199,9 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        // E-Mail-Empfänger setzen ein Recurring voraus, das überhaupt Mails verschickt.
-        // Daher action=EMAIL mit minimalen E-Mail-Feldern. startDate weit in der Zukunft
-        // verhindert ungewollten Versand.
+        // Billomat nimmt Empfänger bei jeder action an (auch CREATE), wirksam werden sie aber nur
+        // beim Versand. Der Test nutzt daher action=EMAIL mit minimalen E-Mail-Feldern; startDate
+        // weit in der Zukunft verhindert ungewollten Versand.
         $opts = $this->buildSafeDraft($billomat)
             ->withAction(RecurringAction::EMAIL)
             ->withEmailSubject('Integrationstest Abo-Versand')

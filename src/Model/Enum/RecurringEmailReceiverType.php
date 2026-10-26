@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Model\Enum;
 /**
  * Typ eines E-Mail-Empfängers bei einer Abo-Rechnung.
  *
- * Doku: https://www.billomat.com/api/abo-rechnungen/email-empfaenger/
+ * Doku: https://www.billomat.com/api/abo-rechnungen/empfaenger/
  */
 enum RecurringEmailReceiverType: string
 {

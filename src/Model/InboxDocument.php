@@ -12,7 +12,7 @@ use const DATE_ATOM;
 /**
  * Posteingangs-Dokument (Inbox Document).
  *
- * Doku: https://www.billomat.com/en/api/inbox-documents/
+ * Doku: https://www.billomat.com/api/eingangsrechnungen/inbox/
  */
 final readonly class InboxDocument
 {

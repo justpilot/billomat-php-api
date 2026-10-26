@@ -13,7 +13,7 @@ use Justpilot\Billomat\Model\Enum\ItemType;
  * Dieses Model bildet die Struktur von GET /delivery-note-items?delivery_note_id={id} bzw. GET /delivery-note-items/{id} ab.
  *
  * Dokumentation:
- * https://www.billomat.com/en/api/delivery-notes/items/
+ * https://www.billomat.com/api/lieferscheine/
  *
  * Generiert aus tools/codegen/definitions/delivery-note-items.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

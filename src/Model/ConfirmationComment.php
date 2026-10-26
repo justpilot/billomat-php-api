@@ -22,7 +22,7 @@ use const DATE_ATOM;
  *    enthält den ursprünglichen String aus der API.
  *
  * Dokumentation:
- * https://www.billomat.com/en/api/confirmations/comments/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

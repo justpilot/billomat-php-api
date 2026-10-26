@@ -15,5 +15,5 @@ return (require __DIR__ . '/shared/comments.php')(
     label: 'einem Lieferschein',
     parentField: 'delivery_note_id',
     specResource: null,
-    docUrl: 'https://www.billomat.com/en/api/delivery-notes/comments/',
+    docUrl: 'https://www.billomat.com/api/lieferscheine/',
 );

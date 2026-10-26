@@ -12,7 +12,7 @@ use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
  *
  * Doku:
- * https://www.billomat.com/en/api/confirmations/comments/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

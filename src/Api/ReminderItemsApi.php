@@ -19,7 +19,7 @@ use NoDiscard;
  *  - GET /reminder-items?reminder_id={id}
  *  - GET /reminder-items/{id}
  *
- * Doku: https://www.billomat.com/en/api/reminders/items/
+ * Doku: https://www.billomat.com/api/mahnungen/positionen/
  *
  * @extends AbstractSubResourceApi<ReminderItem>
  */

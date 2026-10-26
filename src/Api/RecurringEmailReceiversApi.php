@@ -22,7 +22,7 @@ use NoDiscard;
  *  - PUT    /recurring-email-receivers/{id}
  *  - DELETE /recurring-email-receivers/{id}
  *
- * Doku: https://www.billomat.com/api/abo-rechnungen/email-empfaenger/
+ * Doku: https://www.billomat.com/api/abo-rechnungen/empfaenger/
  *
  * @extends AbstractSubResourceApi<RecurringEmailReceiver>
  */

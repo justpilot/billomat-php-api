@@ -8,7 +8,7 @@ namespace Justpilot\Billomat\Api;
  * Typisierter Payload für POST /confirmation-tags gemäß Billomat-API.
  *
  * Doku:
- * https://www.billomat.com/en/api/confirmations/tags/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

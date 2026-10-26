@@ -12,7 +12,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  * Jedes Schlagwort wird einmal mit seiner Häufigkeit geliefert.
  *
  * Dokumentation:
- * https://www.billomat.com/en/api/confirmations/tags/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

@@ -14,7 +14,7 @@ use Justpilot\Billomat\Model\Money;
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
  *
  * Doku:
- * https://www.billomat.com/en/api/confirmations/items/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-items.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

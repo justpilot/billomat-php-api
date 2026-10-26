@@ -13,7 +13,7 @@ use NoDiscard;
 /**
  * API-Wrapper für Posteingangs-Dokumente (Inbox Documents).
  *
- * Doku: https://www.billomat.com/en/api/inbox-documents/
+ * Doku: https://www.billomat.com/api/eingangsrechnungen/inbox/
  *
  * Endpoints:
  *  - GET    /inbox-documents

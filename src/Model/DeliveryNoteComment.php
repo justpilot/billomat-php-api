@@ -22,7 +22,7 @@ use const DATE_ATOM;
  *    enthält den ursprünglichen String aus der API.
  *
  * Dokumentation:
- * https://www.billomat.com/en/api/delivery-notes/comments/
+ * https://www.billomat.com/api/lieferscheine/
  *
  * Generiert aus tools/codegen/definitions/delivery-note-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

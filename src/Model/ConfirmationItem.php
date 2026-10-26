@@ -13,7 +13,7 @@ use Justpilot\Billomat\Model\Enum\ItemType;
  * Dieses Model bildet die Struktur von GET /confirmation-items?confirmation_id={id} bzw. GET /confirmation-items/{id} ab.
  *
  * Dokumentation:
- * https://www.billomat.com/en/api/confirmations/items/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-items.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

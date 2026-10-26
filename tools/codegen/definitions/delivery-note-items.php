@@ -15,6 +15,6 @@ return (require __DIR__ . '/shared/items.php')(
     label: 'Lieferscheinposition',
     parentField: 'delivery_note_id',
     specResource: null,
-    docUrl: 'https://www.billomat.com/en/api/delivery-notes/items/',
+    docUrl: 'https://www.billomat.com/api/lieferscheine/',
     optionsOnly: ['unit_price', 'tax_name', 'tax_rate', 'reduction', 'total_gross', 'total_net', 'total_gross_unreduced', 'total_net_unreduced', 'created'],
 );

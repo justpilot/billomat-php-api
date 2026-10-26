@@ -12,7 +12,7 @@ use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
  *
  * Doku:
- * https://www.billomat.com/en/api/delivery-notes/comments/
+ * https://www.billomat.com/api/lieferscheine/
  *
  * Generiert aus tools/codegen/definitions/delivery-note-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

@@ -1,0 +1,28 @@
+# Link-Check (lychee) für Doku, README, CHANGELOG und die Billomat-Links in den Docblocks.
+# Läuft in .github/workflows/links.yml; lokal: lychee 'docs/**/*.md' '*.md' 'src/**/*.php' 'tools/codegen/definitions/*.php'
+
+exclude_path = [
+    "docs/node_modules",
+    "docs/.vitepress",
+    "docs/spec",
+    "docs/audit.md",
+    "docs/roadmap-v4.md",
+    "vendor",
+    "build",
+    "graphify-out",
+]
+
+# Platzhalter aus Beispielen, keine echten Ziele.
+exclude = [
+    '^https?://([a-z0-9-]+\.)?example\.(com|org|net)',
+    '^https?://mycompany\.billomat\.net',
+    '^https?://localhost',
+]
+
+max_concurrency = 8
+max_retries = 3
+# 429: der Server lebt, er drosselt nur.
+accept = ["200..=299", "429"]
+
+cache = true
+max_cache_age = "1d"

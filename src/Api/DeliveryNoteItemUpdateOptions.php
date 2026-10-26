@@ -14,7 +14,7 @@ use Justpilot\Billomat\Model\Money;
  * Billomat lässt nicht gesendete Felder unverändert.
  *
  * Doku:
- * https://www.billomat.com/en/api/delivery-notes/items/
+ * https://www.billomat.com/api/lieferscheine/
  *
  * Generiert aus tools/codegen/definitions/delivery-note-items.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.

@@ -35,6 +35,8 @@ final class PaymentsApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'payment';
 
     /**
+     * @internal Instanzen kommen über die Eltern-API, z. B. `$billomat->invoices->payments`
+     *
      * @param string                                 $parent       Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
      * @param Closure(array<string,mixed>): TPayment $hydrate      Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoicePayment::fromArray()}
      * @param class-string<TCreate>                  $optionsClass erwartete Create-Options

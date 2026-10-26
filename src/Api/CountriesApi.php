@@ -17,12 +17,14 @@ use NoDiscard;
 final class CountriesApi extends AbstractApi
 {
     /**
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
      * @return list<Country>
      */
     #[NoDiscard]
-    public function list(): array
+    public function list(array $filters = []): array
     {
-        return $this->listResource('/countries', 'countries', 'country', Country::fromArray(...));
+        return $this->listResource('/countries', 'countries', 'country', Country::fromArray(...), $filters);
     }
 
     /**

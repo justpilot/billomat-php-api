@@ -64,18 +64,7 @@ final class UnitsApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Unit
     {
-        $data = $this->getJsonOrNull("/units/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['unit'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Unit::fromArray($row);
+        return $this->getResource("/units/{$id}", 'unit', Unit::fromArray(...), 'fetching unit');
     }
 
     /**

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\ReminderText;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -26,21 +28,36 @@ final class ReminderTextsApi extends AbstractApi
         return $this->listResource('/reminder-texts', 'reminder-texts', 'reminder-text', ReminderText::fromArray(...), $filters);
     }
 
+    /**
+     * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<ReminderText>
+     */
+    #[NoDiscard]
+    public function listPage(array $filters = []): Page
+    {
+        return $this->listResourcePage('/reminder-texts', 'reminder-texts', 'reminder-text', ReminderText::fromArray(...), $filters);
+    }
+
+    /**
+     * Iteriert lazy über alle Seiten.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Generator<int, ReminderText>
+     */
+    #[NoDiscard]
+    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/reminder-texts', 'reminder-texts', 'reminder-text', ReminderText::fromArray(...), $filters, $pageSize);
+    }
+
     #[NoDiscard]
     public function get(int $id): ?ReminderText
     {
-        $data = $this->getJsonOrNull("/reminder-texts/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['reminder-text'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return ReminderText::fromArray($row);
+        return $this->getResource("/reminder-texts/{$id}", 'reminder-text', ReminderText::fromArray(...), 'fetching reminder text');
     }
 
     /**

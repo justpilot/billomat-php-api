@@ -36,6 +36,8 @@ final class TagsApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'tag';
 
     /**
+     * @internal Instanzen kommen über die Eltern-API, z. B. `$billomat->invoices->tags`
+     *
      * @param Closure(array<string,mixed>): TTag        $hydrate           Hydrator für einzelne Tags
      * @param Closure(array<string,mixed>): TCloudEntry $hydrateCloudEntry Hydrator für Einträge der Tag-Cloud
      * @param class-string<TCreate>                     $optionsClass      erwartete Create-Options

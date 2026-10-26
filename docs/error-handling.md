@@ -52,7 +52,7 @@ Every `HttpException` (including subclasses) carries:
 
 ## Special case: `get($id)` returns `null` instead of throwing on 404
 
-Methods like `ClientsApi::get(int $id)` or `InvoicesApi::get(int $id)` use `AbstractApi::getJsonOrNull()` internally. It catches a 404 response and returns `null` instead. You don't need `try/catch` for "record doesn't exist":
+Methods like `ClientsApi::get(int $id)` or `InvoicesApi::get(int $id)` catch a 404 response and return `null` instead. Only a 404 does that: a 2xx response without the expected envelope throws `UnexpectedResponseException`. You don't need `try/catch` for "record doesn't exist":
 
 ```php
 $client = $billomat->clients->get(99999);

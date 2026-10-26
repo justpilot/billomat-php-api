@@ -28,6 +28,9 @@ final class ReminderItemsApi extends AbstractSubResourceApi
     protected const string PLURAL = 'items';
     protected const string SINGULAR = 'item';
 
+    /**
+     * @internal Instanzen kommen über `$billomat->reminders->items`
+     */
     public function __construct(BillomatHttpClientInterface $http)
     {
         parent::__construct($http, 'reminder', ReminderItem::fromArray(...));

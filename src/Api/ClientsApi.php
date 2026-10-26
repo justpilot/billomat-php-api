@@ -125,19 +125,7 @@ final class ClientsApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Client
     {
-        $data = $this->getJsonOrNull("/clients/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $clientData = $data['client'] ?? null;
-
-        if (!self::isRecord($clientData)) {
-            return null;
-        }
-
-        return Client::fromArray($clientData);
+        return $this->getResource("/clients/{$id}", 'client', Client::fromArray(...), 'fetching client');
     }
 
     /**

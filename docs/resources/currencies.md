@@ -16,7 +16,7 @@ $billomat->currencies
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list()` | GET | `/currencies` |
+| `list($filters?)` | GET | `/currencies` |
 | `listPage()` | GET | `/currencies` (page with metadata) |
 | `iterateAll()` | GET | `/currencies` (lazy over all pages) |
 
@@ -24,7 +24,7 @@ Fetching a single currency by ID (`GET /currencies/{id}`) is not implemented in 
 
 ## Methods
 
-### `list(): list<Currency>`
+### `list(array $filters = []): list<Currency>`
 
 Lists all currencies.
 
@@ -36,11 +36,10 @@ foreach ($currencies as $currency) {
 }
 ```
 
-`list()` takes no filters. To look up a single currency (e.g. `EUR`), pass `code` to `listPage()` or filter the list on the client side:
+To look up a single currency (e.g. `EUR`), pass `code` as a filter:
 
 ```php
-$page = $billomat->currencies->listPage(['code' => 'EUR']);
-$eur  = $page->items[0] ?? null;
+$eur = $billomat->currencies->list(['code' => 'EUR'])[0] ?? null;
 ```
 
 **Exceptions:** `AuthenticationException`, `HttpException`.

@@ -119,19 +119,7 @@ final class ConfirmationsApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Confirmation
     {
-        $data = $this->getJsonOrNull("/confirmations/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['confirmation'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Confirmation::fromArray($row);
+        return $this->getResource("/confirmations/{$id}", 'confirmation', Confirmation::fromArray(...), 'fetching confirmation');
     }
 
     /**

@@ -66,18 +66,7 @@ final class FreeTextsApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?FreeText
     {
-        $data = $this->getJsonOrNull("/free-texts/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['free-text'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return FreeText::fromArray($row);
+        return $this->getResource("/free-texts/{$id}", 'free-text', FreeText::fromArray(...), 'fetching free text');
     }
 
     /**

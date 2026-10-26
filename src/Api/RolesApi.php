@@ -60,18 +60,7 @@ final class RolesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Role
     {
-        $data = $this->getJsonOrNull("/roles/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['role'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Role::fromArray($row);
+        return $this->getResource("/roles/{$id}", 'role', Role::fromArray(...), 'fetching role');
     }
 
     /**

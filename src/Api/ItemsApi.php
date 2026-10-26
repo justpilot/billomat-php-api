@@ -36,6 +36,8 @@ final class ItemsApi extends AbstractSubResourceApi
     protected const string SINGULAR = 'item';
 
     /**
+     * @internal Instanzen kommen über die Eltern-API, z. B. `$billomat->invoices->items`
+     *
      * @param string                              $parent             Slug der Eltern-Ressource, z. B. "invoice" oder "credit-note"
      * @param Closure(array<string,mixed>): TItem $hydrate            Hydrator, z. B. {@see \Justpilot\Billomat\Model\InvoiceComment::fromArray()}
      * @param class-string<TCreate>               $optionsClass       erwartete Create-Options

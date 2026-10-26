@@ -16,7 +16,9 @@ $billomat->taxes
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($query?)` | GET | `/taxes` |
+| `list($filters?)` | GET | `/taxes` |
+| `listPage($filters?)` | GET | `/taxes` (page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/taxes` (lazy over all pages) |
 | `get($id)` | GET | `/taxes/{id}` |
 | `getOrFail($id)` | GET | `/taxes/{id}` |
 | `create($options)` | POST | `/taxes` |
@@ -25,7 +27,7 @@ $billomat->taxes
 
 ## Methods
 
-### `list(array $query = []): list<TaxRate>`
+### `list(array $filters = []): list<TaxRate>`
 
 ```php
 $rates = $billomat->taxes->list();
@@ -40,7 +42,7 @@ foreach ($rates as $rate) {
 }
 ```
 
-`$query` takes pagination parameters (`page`, `per_page`).
+`$filters` takes pagination parameters (`page`, `per_page`). `listPage()` and `iterateAll()` work as described in [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?TaxRate`
 

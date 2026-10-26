@@ -7,6 +7,8 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\UsersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
@@ -77,8 +79,34 @@ final class UsersApiTest extends TestCase
         ));
 
         $user = $api->getMyself();
-        self::assertInstanceOf(User::class, $user);
         self::assertSame(42, $user->id);
         self::assertSame('https://mycompany.billomat.net/api/users/myself', $captured->url);
+    }
+
+    #[Test]
+    public function getMyselfThrowsInsteadOfReturningNull(): void
+    {
+        $api = new UsersApi(new BillomatHttpClient(
+            new Psr18Client(new MockHttpClient(new MockResponse('', ['http_code' => 404]))),
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(NotFoundException::class);
+
+        (void) $api->getMyself();
+    }
+
+    #[Test]
+    public function getMyselfRejectsAnUnexpectedEnvelope(): void
+    {
+        $api = new UsersApi(new BillomatHttpClient(
+            new Psr18Client(new MockHttpClient(new MockResponse('{"client":{"id":"1"}}'))),
+            new BillomatConfig('mycompany', 'secret-key'),
+        ));
+
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('Unexpected response from Billomat when fetching own user via /users/myself.');
+
+        (void) $api->getMyself();
     }
 }

@@ -122,4 +122,4 @@ $invoice = $billomat->invoices->getOrFail(42);  // NotFoundException on 404
 
 `getOrFail()` exists on all resources and sub-resources that have `get()`; it saves the `null` check when a missing record is an error.
 
-`AbstractApi::getJsonOrNull()` swallows `NotFoundException` and returns `null`. Other errors are mapped to typed exceptions (see [Errors and rate limits](errors-and-rate-limits.md)).
+`get()` turns a 404 into `null`. Other errors are mapped to typed exceptions (see [Errors and rate limits](errors-and-rate-limits.md)).

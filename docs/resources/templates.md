@@ -16,7 +16,9 @@ $billomat->templates
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($query?)` | GET | `/templates` |
+| `list($filters?)` | GET | `/templates` |
+| `listPage($filters?)` | GET | `/templates` (page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/templates` (lazy over all pages) |
 | `get($id)` | GET | `/templates/{id}` |
 | `getOrFail($id)` | GET | `/templates/{id}` |
 | `create($options)` | POST | `/templates` |
@@ -26,9 +28,9 @@ $billomat->templates
 
 ## Methods
 
-### `list(TemplateFilter|array $query = []): list<Template>`
+### `list(TemplateFilter|array $filters = []): list<Template>`
 
-Can be filtered with the typed `TemplateFilter`: `type` (document type, `list<TemplateDocumentType>`, sent comma-separated → Billomat filter `type`), `templateType` (`TemplateType::DEFINED`/`UPLOADED` → `template_type`) and `isDefault` (→ `is_default`), plus `orderBy`, `page`, `perPage` and `extra` for further query parameters. A plain array still works.
+Can be filtered with the typed `TemplateFilter`: `type` (document type, `list<TemplateDocumentType>`, sent comma-separated → Billomat filter `type`), `templateType` (`TemplateType::DEFINED`/`UPLOADED` → `template_type`) and `isDefault` (→ `is_default`), plus `orderBy`, `page`, `perPage` and `extra` for further query parameters. A plain array still works. `listPage()` and `iterateAll()` take the same filter, see [Pagination](../advanced/pagination.md).
 
 ```php
 use Justpilot\Billomat\Api\TemplateFilter;

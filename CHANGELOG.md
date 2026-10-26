@@ -6,7 +6,17 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Added
+
+- **`listPage()` and `iterateAll()`** on `contacts` (with the client ID as the first argument), `taxes`, `templates` and `reminderTexts`. `countries->list()` and `currencies->list()` accept filters, e.g. `list(['code' => 'DE'])`.
+- **Backward compatibility promise:** [docs/concepts/backward-compatibility.md](docs/concepts/backward-compatibility.md) says what is covered from 4.0.0-beta.1 on. `AbstractApi`, `AbstractSubResourceApi`, the sub-resource API constructors and the `FromApi` trait are marked `@internal`.
+- `Page` is covariant in its item type, so a `Page<Invoice>` can be passed where a `Page<object>` is expected.
+
 ### Changed
+
+- **`get()` throws `UnexpectedResponseException` on a 2xx response without the expected envelope** instead of returning `null`; only a 404 returns `null`. All `get()` methods share one implementation now.
+- **`users->getMyself()` returns `User` instead of `?User`.** It throws like `clients->getMyself()`.
+- **The `$query` parameter of `contacts->list()`, `taxes->list()` and `templates->list()` is `$filters`**, as on every other list method. Only relevant for named arguments.
 
 - **Retries are logged at `info` instead of `warning`.** A retry that succeeds is expected behaviour and should not trigger alerting that fires at `warning`. Final failures keep their levels (`notice` for 4xx, `error` for 5xx and network errors). Listen for `RetryScheduled` if you want to count retries.
 

@@ -75,18 +75,7 @@ final class IncomingCategoriesApi extends AbstractApi
     #[NoDiscard]
     public function get(string $id): ?IncomingCategory
     {
-        $data = $this->getJsonOrNull("/incoming-categories/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['incoming-category'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return IncomingCategory::fromArray($row);
+        return $this->getResource("/incoming-categories/{$id}", 'incoming-category', IncomingCategory::fromArray(...), 'fetching incoming category');
     }
 
     /**

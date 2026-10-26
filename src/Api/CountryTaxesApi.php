@@ -60,18 +60,7 @@ final class CountryTaxesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?CountryTax
     {
-        $data = $this->getJsonOrNull("/country-taxes/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['country-tax'] ?? null;
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return CountryTax::fromArray($row);
+        return $this->getResource("/country-taxes/{$id}", 'country-tax', CountryTax::fromArray(...), 'fetching country tax');
     }
 
     /**

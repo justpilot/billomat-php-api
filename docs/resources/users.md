@@ -93,13 +93,13 @@ $user = $billomat->users->get(123);
 
 Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
-### `getMyself(): ?User`
+### `getMyself(): User`
 
-Returns the currently authenticated user (`GET /users/myself`).
+Returns the currently authenticated user (`GET /users/myself`). There always is one for a valid API key, so unlike `get()` the method never returns `null`; a 404 comes through as `NotFoundException`.
 
 ```php
 $me = $billomat->users->getMyself();
-echo $me?->email;
+echo $me->email;
 ```
 
 ## Pitfalls

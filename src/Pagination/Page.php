@@ -11,7 +11,7 @@ namespace Justpilot\Billomat\Pagination;
  * `*Api::listPage()`-Methoden zurückgegeben. Für lazy Iteration über alle
  * Seiten siehe stattdessen `*Api::iterateAll()`.
  *
- * @template T of object
+ * @template-covariant T of object
  */
 final readonly class Page
 {

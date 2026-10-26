@@ -108,19 +108,7 @@ final class SuppliersApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?Supplier
     {
-        $data = $this->getJsonOrNull("/suppliers/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['supplier'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return Supplier::fromArray($row);
+        return $this->getResource("/suppliers/{$id}", 'supplier', Supplier::fromArray(...), 'fetching supplier');
     }
 
     /**

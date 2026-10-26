@@ -16,7 +16,9 @@ $billomat->contacts
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($clientId, $query?)` | GET | `/contacts?client_id={id}` |
+| `list($clientId, $filters?)` | GET | `/contacts?client_id={id}` |
+| `listPage($clientId, $filters?)` | GET | `/contacts?client_id={id}` (page with metadata) |
+| `iterateAll($clientId, $filters?, $pageSize?)` | GET | `/contacts?client_id={id}` (lazy over all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/contacts/{id}` |
 | `create($options)` | POST | `/contacts` |
 | `update($id, $options)` | PUT | `/contacts/{id}` |
@@ -26,7 +28,7 @@ There is **no** unfiltered `list()`: Billomat's `GET /contacts` requires a `clie
 
 ## Methods
 
-### `list(int $clientId, array $query = []): list<Contact>`
+### `list(int $clientId, array $filters = []): list<Contact>`
 
 Lists all contacts of a client.
 
@@ -43,7 +45,9 @@ foreach ($contacts as $contact) {
 }
 ```
 
-`$query` takes additional parameters such as `page` and `per_page`.
+`$filters` takes additional query parameters such as `page` and `per_page`. `client_id` always comes from `$clientId`.
+
+`listPage(int $clientId, array $filters = []): Page<Contact>` returns one page with `PageInfo`, `iterateAll(int $clientId, array $filters = [], int $pageSize = 100): Generator<Contact>` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?Contact`
 

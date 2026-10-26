@@ -16,7 +16,7 @@ $billomat->countries
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list()` | GET | `/countries` |
+| `list($filters?)` | GET | `/countries` |
 | `listPage()` | GET | `/countries` (page with metadata) |
 | `iterateAll()` | GET | `/countries` (lazy over all pages) |
 
@@ -24,7 +24,7 @@ Fetching a single country by ID (`GET /countries/{id}`) is not implemented in th
 
 ## Methods
 
-### `list(): list<Country>`
+### `list(array $filters = []): list<Country>`
 
 Lists all countries.
 
@@ -36,11 +36,10 @@ foreach ($countries as $country) {
 }
 ```
 
-Note: unlike `users->list()`, `list()` takes no filters. The Billomat endpoint does support the query parameter `code` (ISO 3166 alpha-2). To look up a single country, pass it to `listPage()` or filter the list on the client side:
+The Billomat endpoint supports the query parameter `code` (ISO 3166 alpha-2). To look up a single country, pass it as a filter:
 
 ```php
-$page = $billomat->countries->listPage(['code' => 'DE']);
-$de   = $page->items[0] ?? null;
+$de = $billomat->countries->list(['code' => 'DE'])[0] ?? null;
 ```
 
 **Exceptions:** `AuthenticationException`, `HttpException`.

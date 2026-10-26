@@ -115,19 +115,7 @@ final class DeliveryNotesApi extends AbstractApi
     #[NoDiscard]
     public function get(int $id): ?DeliveryNote
     {
-        $data = $this->getJsonOrNull("/delivery-notes/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['delivery-note'] ?? null;
-
-        if (!self::isRecord($row)) {
-            return null;
-        }
-
-        return DeliveryNote::fromArray($row);
+        return $this->getResource("/delivery-notes/{$id}", 'delivery-note', DeliveryNote::fromArray(...), 'fetching delivery note');
     }
 
     /**

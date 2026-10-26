@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\TaxRate;
+use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
@@ -27,38 +29,49 @@ final class TaxesApi extends AbstractApi
     /**
      * Listet alle Steuersätze auf.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $query (z.B. page, per_page)
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TaxRate>
      */
     #[NoDiscard]
-    public function list(array $query = []): array
+    public function list(array $filters = []): array
     {
-        return $this->listResource('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $query);
+        return $this->listResource('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $filters);
     }
 
     /**
-     * Holt einen einzelnen Steuersatz.
+     * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
      *
-     * Wir nutzen hier getJsonOrNull() und geben null zurück,
-     * wenn der Steuersatz nicht existiert (404).
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<TaxRate>
+     */
+    #[NoDiscard]
+    public function listPage(array $filters = []): Page
+    {
+        return $this->listResourcePage('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $filters);
+    }
+
+    /**
+     * Iteriert lazy über alle Seiten.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Generator<int, TaxRate>
+     */
+    #[NoDiscard]
+    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $filters, $pageSize);
+    }
+
+    /**
+     * Holt einen einzelnen Steuersatz; null, wenn es ihn nicht gibt (404).
      */
     #[NoDiscard]
     public function get(int $id): ?TaxRate
     {
-        $data = $this->getJsonOrNull("/taxes/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $taxData = $data['tax'] ?? null;
-
-        if (!self::isRecord($taxData)) {
-            throw new UnexpectedResponseException('Unexpected response from Billomat when fetching tax rate.');
-        }
-
-        return TaxRate::fromArray($taxData);
+        return $this->getResource("/taxes/{$id}", 'tax', TaxRate::fromArray(...), 'fetching tax');
     }
 
     /**

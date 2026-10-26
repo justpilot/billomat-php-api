@@ -13,6 +13,7 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Incoming;
@@ -33,6 +34,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(IncomingUpdateOptions::class)]
 #[CoversClass(Incoming::class)]
 #[CoversClass(IncomingStatus::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]

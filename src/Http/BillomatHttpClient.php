@@ -52,7 +52,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
      * @param RequestFactoryInterface|null  $requestFactory Default: per php-http/discovery gefunden
      * @param StreamFactoryInterface|null   $streamFactory  Default: per php-http/discovery gefunden
      * @param (Closure(int): void)|null     $sleep          wartet die übergebenen Millisekunden (für Tests austauschbar)
-     * @param LoggerInterface|null          $logger         PSR-3: Antworten (debug), Retries (warning), Fehler (notice/error)
+     * @param LoggerInterface|null          $logger         PSR-3: Antworten (debug), Retries (info), Fehler (notice/error)
      * @param EventDispatcherInterface|null $events         PSR-14: {@see RequestStarted}, {@see ResponseReceived}, {@see RetryScheduled}, {@see RequestFailed}
      */
     public function __construct(
@@ -143,11 +143,14 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
 
     /**
      * Meldet den Retry (Event, Log) und wartet die Verzögerung ab.
+     *
+     * Ein Retry ist erwartetes Verhalten und geht als `info` ins Log; erst ein endgültiger Fehler
+     * ist eine Warnung wert (siehe {@see fail()}).
      */
     private function scheduleRetry(RequestInterface $request, int $attempt, int $delayMs, string $reason, ?ResponseInterface $response = null, ?ClientExceptionInterface $error = null): void
     {
         $this->events?->dispatch(new RetryScheduled($request, $attempt, $delayMs, $response, $error));
-        $this->logger?->warning('Billomat {method} {path}: {reason}, retrying in {delay_ms} ms (attempt {attempt})', [
+        $this->logger?->info('Billomat {method} {path}: {reason}, retrying in {delay_ms} ms (attempt {attempt})', [
             ...$this->logContext($request, $attempt),
             'reason' => $reason,
             'delay_ms' => $delayMs,

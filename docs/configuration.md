@@ -165,7 +165,7 @@ $billomat = BillomatClient::create(
 | Log level | When |
 |---|---|
 | `debug` | successful response: method, path, status, duration |
-| `warning` | retry: reason (`HTTP 503`, `network error: …`), delay, attempt |
+| `info` | retry: reason (`HTTP 503`, `network error: …`), delay, attempt |
 | `notice` | final 4xx error (including the expected 404 from `get()`) |
 | `error` | final 5xx or network error |
 

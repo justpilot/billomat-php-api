@@ -112,7 +112,7 @@ final class BillomatHttpClientObservabilityTest extends TestCase
     }
 
     #[Test]
-    public function retryAfterServerErrorIsDispatchedAndLoggedAsWarning(): void
+    public function retryAfterServerErrorIsDispatchedAndLoggedAsInfo(): void
     {
         $this->client([new MockResponse('', ['http_code' => 503]), new MockResponse('{}')])->request('GET', '/clients');
 
@@ -129,7 +129,7 @@ final class BillomatHttpClientObservabilityTest extends TestCase
         self::assertInstanceOf(RequestStarted::class, $this->dispatcher->events[3]);
         self::assertSame(2, $this->dispatcher->events[3]->attempt);
 
-        self::assertSame(['warning', 'debug'], $this->logger->levels());
+        self::assertSame(['info', 'debug'], $this->logger->levels());
         self::assertSame('Billomat {method} {path}: {reason}, retrying in {delay_ms} ms (attempt {attempt})', $this->logger->logs[0]['message']);
         self::assertSame('HTTP 503', $this->logger->logs[0]['context']['reason']);
         self::assertSame($this->sleeps[0], $this->logger->logs[0]['context']['delay_ms']);

@@ -3,7 +3,7 @@
         "article-property": [
             {
                 "id": "6031",
-                "name": "Name 5",
+                "name": "Name 10",
                 "default_value": "",
                 "is_nvl": "",
                 "type": "TEXTFIELD",
@@ -11,7 +11,7 @@
             },
             {
                 "id": "6033",
-                "name": "Name 6",
+                "name": "Name 11",
                 "default_value": "",
                 "is_nvl": "",
                 "type": "TEXTFIELD",

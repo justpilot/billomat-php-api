@@ -1,7 +1,13 @@
 {
     "delivery-note-tags": {
+        "delivery-note-tag": {
+            "id": "37965",
+            "name": "Name 3",
+            "delivery_note_id": "890065",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

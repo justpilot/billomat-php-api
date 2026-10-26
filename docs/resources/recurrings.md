@@ -381,6 +381,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/recurrings.create.json [POST /recurrings]
+<<< @/../tests/Fixtures/Contract/recurrings/get.json [GET /recurrings/{id} (response)]
+<<< @/../tests/Fixtures/Contract/recurrings/list.json [GET /recurrings (response)]
 :::
 <!-- json-examples:end -->
 

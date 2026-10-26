@@ -4,11 +4,11 @@
             {
                 "id": "9340866",
                 "created": "2025-12-24T22:59:58+01:00",
-                "updated": "2026-10-25T17:29:56+01:00",
+                "updated": "2026-10-26T16:33:08+01:00",
                 "archived": "0",
                 "dig_exclude": "0",
                 "facturx_identifier": "",
-                "client_number": "KD1",
+                "client_number": "KD00001",
                 "number": "1",
                 "number_pre": "KD",
                 "number_length": "0",
@@ -59,8 +59,8 @@
                 "offer_validity_days": "28",
                 "dunning_run": "1",
                 "note": "Text 1",
-                "revenue_gross": "24653.07",
-                "revenue_net": "20716.83",
+                "revenue_gross": "25767.15",
+                "revenue_net": "21653.03",
                 "customfield": "",
                 "client-property-values": ""
             },
@@ -71,7 +71,7 @@
                 "archived": "0",
                 "dig_exclude": "0",
                 "facturx_identifier": "",
-                "client_number": "PAT44473",
+                "client_number": "KD00002",
                 "number": "44473",
                 "number_pre": "PAT",
                 "number_length": "5",
@@ -134,7 +134,7 @@
                 "archived": "0",
                 "dig_exclude": "0",
                 "facturx_identifier": "",
-                "client_number": "PAT44473",
+                "client_number": "KD00002",
                 "number": "44473",
                 "number_pre": "PAT",
                 "number_length": "5",
@@ -193,6 +193,6 @@
         ],
         "@page": "1",
         "@per_page": "3",
-        "@total": "12574"
+        "@total": "12777"
     }
 }

@@ -1,0 +1,36 @@
+{
+    "incoming-comments": {
+        "incoming-comment": [
+            {
+                "id": "4296848",
+                "created": "2026-10-26T16:59:09+01:00",
+                "comment": "Text 45",
+                "actionkey": "CREATE",
+                "user_id": "136536",
+                "incoming_id": "2063418",
+                "customfield": ""
+            },
+            {
+                "id": "4296849",
+                "created": "2026-10-26T16:59:09+01:00",
+                "comment": "Text 16",
+                "actionkey": "COMMENT",
+                "user_id": "136536",
+                "incoming_id": "2063418",
+                "customfield": ""
+            },
+            {
+                "id": "4296850",
+                "created": "2026-10-26T16:59:09+01:00",
+                "comment": "Text 46",
+                "actionkey": "PAYMENT",
+                "user_id": "136536",
+                "incoming_id": "2063418",
+                "customfield": ""
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "3"
+    }
+}

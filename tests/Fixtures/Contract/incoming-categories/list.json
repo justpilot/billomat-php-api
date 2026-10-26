@@ -3,18 +3,18 @@
         "incoming-category": [
             {
                 "id": "accommodation_costs_employee",
-                "title": "Text 26",
-                "description": "Text 27"
+                "title": "Text 47",
+                "description": "Text 48"
             },
             {
                 "id": "accommodation_costs_owner",
-                "title": "Text 28",
-                "description": "Text 29"
+                "title": "Text 49",
+                "description": "Text 50"
             },
             {
                 "id": "accounting_costs",
-                "title": "Text 30",
-                "description": "Text 31"
+                "title": "Text 51",
+                "description": "Text 52"
             }
         ],
         "@page": "1",

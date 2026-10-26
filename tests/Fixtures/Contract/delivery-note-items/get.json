@@ -1,12 +1,12 @@
 {
     "delivery-note-item": {
-        "id": "3490922",
+        "id": "3493379",
         "article_id": "",
-        "delivery_note_id": "889201",
+        "delivery_note_id": "890065",
         "position": "1",
-        "unit": "Stück",
-        "quantity": "5",
-        "title": "Text 24",
+        "unit": "Stunden",
+        "quantity": "2",
+        "title": "Text 14",
         "description": "",
         "tax_changed_manually": "0",
         "customfield": ""

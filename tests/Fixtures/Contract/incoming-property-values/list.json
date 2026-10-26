@@ -1,7 +1,18 @@
 {
     "incoming-property-values": {
+        "incoming-property-value": {
+            "id": "1879135",
+            "created": "2026-10-26T16:59:10+01:00",
+            "updated": "2026-10-26T16:59:10+01:00",
+            "incoming_id": "2063418",
+            "incoming_property_id": "1386",
+            "type": "TEXTFIELD",
+            "name": "Name 15",
+            "value": "Text 44",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

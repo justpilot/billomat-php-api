@@ -43,7 +43,7 @@ const PROJECT_ROOT = __DIR__.'/..';
 const FIXTURE_DIR = PROJECT_ROOT.'/tests/Fixtures/Contract';
 
 // Obergrenze pro Lauf; das Sandbox-Limit liegt bei 1000 Requests / 15 Minuten.
-const MAX_REQUESTS = 150;
+const MAX_REQUESTS = 200;
 
 // Einträge pro Listen-Request: klein halten, aber genug für Varianten.
 const PER_PAGE = 3;
@@ -96,6 +96,29 @@ const RESOURCES = [
 ];
 
 /*
+ * Sub-Ressourcen werden am frei erfundenen Beispieldatensatz („SDK-Beispiel …“) aufgenommen
+ * statt am ersten Listeneintrag: Die Sandbox enthält echte Kundendaten, und an die soll nichts
+ * angehängt werden. `client`/`supplier` steht für die ID des Beispielkunden bzw. -lieferanten.
+ * Fehlt der Beispieldatensatz, gilt der erste Listeneintrag.
+ */
+const SEED_CLIENT = 'SDK-Beispiel GmbH';
+const SEED_SUPPLIER = 'SDK-Beispiel Lieferant AG';
+const SEED_PARENTS = [
+    'clients' => ['name' => SEED_CLIENT],
+    'suppliers' => ['name' => SEED_SUPPLIER],
+    'articles' => ['title' => 'SDK-Beispiel Beratungsstunde'],
+    'invoices' => ['client_id' => 'client'],
+    'offers' => ['client_id' => 'client'],
+    'confirmations' => ['client_id' => 'client'],
+    'credit-notes' => ['client_id' => 'client'],
+    'delivery-notes' => ['client_id' => 'client'],
+    'reminders' => ['client_id' => 'client'],
+    'letters' => ['client_id' => 'client'],
+    'recurrings' => ['client_id' => 'client'],
+    'incomings' => ['supplier_id' => 'supplier'],
+];
+
+/*
  * Feldnamen → Art des Ersatzwerts. Gilt auf jeder Ebene (auch in Positionen,
  * Steuerzeilen und Einstellungen); nicht aufgeführte Strings durchlaufen nur
  * den allgemeinen Scan nach E-Mails, IBANs, URLs und der Billomat-ID.
@@ -111,6 +134,8 @@ const FIELD_KINDS = [
     'bank_name' => 'bank_name', 'bank_iban' => 'iban', 'iban' => 'iban', 'bank_swift' => 'bic', 'bic' => 'bic', 'swift' => 'bic',
     'bank_account_number' => 'digits', 'bank_number' => 'digits', 'creditor_identifier' => 'creditor_id', 'sepa_mandate' => 'text',
     'tax_number' => 'tax_number', 'vat_number' => 'vat_number',
+    // Kundennummern tragen in der Sandbox teils Patientennummern (z. B. „PAT…“).
+    'client_number' => 'client_number',
     'note' => 'text', 'notes' => 'text', 'intro' => 'text', 'description' => 'text', 'comment' => 'text', 'text' => 'text',
     'subject' => 'text', 'body' => 'text', 'title' => 'text', 'label' => 'text', 'message' => 'text', 'signature' => 'text',
     'customfield' => 'text', 'value' => 'text', 'reference' => 'text', 'filename' => 'filename', 'file_name' => 'filename',
@@ -173,6 +198,11 @@ function main(array $argv): void
     $recorder = new Recorder(new BillomatHttpClient(new Psr18Client(), $config), $cacheDir);
     $anonymizer = new Anonymizer($billomatId);
 
+    $seedIds = [
+        'client' => seedId($recorder, 'clients', 'client', ['name' => SEED_CLIENT]),
+        'supplier' => seedId($recorder, 'suppliers', 'supplier', ['name' => SEED_SUPPLIER]),
+    ];
+
     foreach (RESOURCES as $resource => $definition) {
         if (false === ($definition['list'] ?? true)) {
             $body = $recorder->fetch("/{$resource}");
@@ -203,6 +233,11 @@ function main(array $argv): void
             }
         }
 
+        if (isset($definition['children'], SEED_PARENTS[$resource])) {
+            $filter = array_map(static fn (string $value): string => $seedIds[$value] ?? $value, SEED_PARENTS[$resource]);
+            $id = \in_array(null, $filter, true) ? $id : (seedId($recorder, $resource, $definition['key'], $filter) ?? $id);
+        }
+
         $parentKey = str_replace('-', '_', $definition['key']).'_id';
         foreach ($definition['children'] ?? [] as $child => $childKey) {
             $childList = $recorder->fetch("/{$child}", [$parentKey => $id, 'per_page' => PER_PAGE]);
@@ -222,6 +257,18 @@ function main(array $argv): void
     }
 
     echo "Fertig: {$recorder->requests} Requests.\n";
+}
+
+/**
+ * ID des ersten Eintrags, der auf den Filter passt; null, wenn es keinen gibt.
+ *
+ * @param array<string, string|null> $filter
+ */
+function seedId(Recorder $recorder, string $resource, string $key, array $filter): ?string
+{
+    $list = $recorder->fetch("/{$resource}", [...$filter, 'per_page' => 1]);
+
+    return null === $list ? null : firstId($list, $resource, $key);
 }
 
 /**
@@ -442,6 +489,7 @@ final class Anonymizer
             'creditor_id' => \sprintf('DE00ZZZ%011d', $i),
             'tax_number' => \sprintf('000/000/%05d', $i),
             'vat_number' => \sprintf('DE%09d', $i),
+            'client_number' => \sprintf('KD%05d', $i),
             'filename' => "dokument-{$n}".(preg_match('/\.[a-z0-9]{2,4}$/i', $original, $m) ? strtolower($m[0]) : ''),
             'base64' => base64_encode(FAKE_PDF),
             default => "Text {$n}",

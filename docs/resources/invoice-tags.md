@@ -126,6 +126,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/invoice-tags.create.json [POST /invoice-tags]
+<<< @/../tests/Fixtures/Contract/invoice-tags/list.json [GET /invoice-tags (response)]
 :::
 <!-- json-examples:end -->
 

@@ -1,7 +1,13 @@
 {
     "invoice-tags": {
+        "invoice-tag": {
+            "id": "3419334",
+            "name": "Name 3",
+            "invoice_id": "25279655",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

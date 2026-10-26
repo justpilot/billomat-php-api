@@ -1,7 +1,13 @@
 {
     "client-tags": {
+        "client-tag": {
+            "id": "1099489",
+            "name": "Name 3",
+            "client_id": "10651661",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

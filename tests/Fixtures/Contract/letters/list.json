@@ -1,7 +1,23 @@
 {
     "letters": {
+        "letter": {
+            "id": "131474",
+            "created": "2026-10-26T16:59:07+01:00",
+            "updated": "2026-10-26T16:59:08+01:00",
+            "client_id": "10651661",
+            "contact_id": "",
+            "supplier_id": "",
+            "date": "2026-10-26",
+            "address": "Firma 9 GmbH\nMusterstraße 9\n10009 Musterstadt 9",
+            "status": "DRAFT",
+            "label": "",
+            "subject": "Text 38",
+            "intro": "Text 39",
+            "template_id": "971614",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

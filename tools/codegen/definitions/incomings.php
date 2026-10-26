@@ -90,5 +90,13 @@ return [
         'page_count' => ['type' => 'int', 'readOnly' => true, 'doc' => 'Seitenzahl des Belegdokuments.'],
         'has_attachment' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Ist ein Belegdokument angehängt?'],
         'base64file' => ['optionsOnly' => true, 'doc' => 'Base64-codiertes Belegdokument (PDF oder Bild).'],
+        'incoming-property-values' => [
+            'type' => 'list',
+            'readOnly' => true,
+            'list' => ['class' => 'IncomingPropertyValue', 'item' => 'incoming-property-value'],
+            'model' => ['property' => 'propertyValues'],
+            'doc' => 'Attributwerte der Eingangsrechnung.',
+            'details' => ['Von Billomat geliefert, aber nicht dokumentiert (leer: "").'],
+        ],
     ],
 ];

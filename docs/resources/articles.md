@@ -182,6 +182,7 @@ Mirrors `ArticleCreateOptions`, but `title` is no longer required and every fiel
 | `costCenter` | `?string` |
 | `purchasePriceNetGross` | `?NetGross` (whether `purchasePrice` is net or gross) |
 | `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `propertyValues` | `list<ArticlePropertyValue>` (custom property values, embedded by Billomat in `get()` and `list()`) |
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
 ## Article tags
@@ -302,6 +303,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/articles.create.json [POST /articles]
+<<< @/../tests/Fixtures/Contract/articles/get.json [GET /articles/{id} (response)]
+<<< @/../tests/Fixtures/Contract/articles/list.json [GET /articles (response)]
 :::
 <!-- json-examples:end -->
 

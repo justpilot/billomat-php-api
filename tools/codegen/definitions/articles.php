@@ -101,5 +101,13 @@ return [
         'revenue_account_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Erlöskonto.'],
         'cost_center' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Kostenstelle.'],
         'purchase_price_net_gross' => ['enum' => 'NetGross', 'doc' => 'Preisbasis des Einkaufspreises (netto oder brutto).'],
+        'article-property-values' => [
+            'type' => 'list',
+            'readOnly' => true,
+            'list' => ['class' => 'ArticlePropertyValue', 'item' => 'article-property-value'],
+            'model' => ['property' => 'propertyValues'],
+            'doc' => 'Attributwerte des Artikels.',
+            'details' => ['Von Billomat geliefert, aber nicht dokumentiert (leer: "").'],
+        ],
     ],
 ];

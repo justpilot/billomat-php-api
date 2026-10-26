@@ -7,7 +7,7 @@
                 "updated": "2025-12-29T10:43:03+01:00",
                 "type": "INVOICE",
                 "template_type": "DEFINED",
-                "name": "Name 8",
+                "name": "Name 16",
                 "is_background_available": "0",
                 "is_default": "1",
                 "customfield": ""
@@ -18,7 +18,7 @@
                 "updated": "2025-12-29T10:43:03+01:00",
                 "type": "OFFER",
                 "template_type": "DEFINED",
-                "name": "Name 8",
+                "name": "Name 16",
                 "is_background_available": "0",
                 "is_default": "1",
                 "customfield": ""
@@ -29,7 +29,7 @@
                 "updated": "2025-12-29T10:43:04+01:00",
                 "type": "REMINDER",
                 "template_type": "DEFINED",
-                "name": "Name 8",
+                "name": "Name 16",
                 "is_background_available": "0",
                 "is_default": "1",
                 "customfield": ""

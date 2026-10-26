@@ -1,7 +1,15 @@
 {
     "incoming-properties": {
+        "incoming-property": {
+            "id": "1386",
+            "name": "Name 15",
+            "default_value": "",
+            "is_nvl": "",
+            "type": "TEXTFIELD",
+            "customfield": ""
+        },
         "@page": "1",
         "@per_page": "3",
-        "@total": "0"
+        "@total": "1"
     }
 }

@@ -19,6 +19,7 @@ use NoDiscard;
  *  - GET    /recurring-email-receivers?recurring_id={id}
  *  - GET    /recurring-email-receivers/{id}
  *  - POST   /recurring-email-receivers
+ *  - PUT    /recurring-email-receivers/{id}
  *  - DELETE /recurring-email-receivers/{id}
  *
  * Doku: https://www.billomat.com/api/abo-rechnungen/email-empfaenger/
@@ -83,6 +84,14 @@ final class RecurringEmailReceiversApi extends AbstractSubResourceApi
     public function create(int $recurringId, RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
     {
         return $this->createFor($recurringId, $options);
+    }
+
+    /**
+     * Ändert Typ oder Adresse eines Empfängers; die Abo-Rechnung lässt sich nicht ändern.
+     */
+    public function update(int $id, RecurringEmailReceiverUpdateOptions $options): RecurringEmailReceiver
+    {
+        return $this->updateFrom($id, $options->toArray());
     }
 
     public function delete(int $id): void

@@ -205,6 +205,20 @@ final class ConfirmationsApi extends AbstractApi
         $this->postJson("/confirmations/{$id}/email", $payload);
     }
 
+    /**
+     * Versendet eine Auftragsbestätigung postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /confirmations/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postJson("/confirmations/{$id}/mail", $payload);
+    }
+
     public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];

@@ -51,6 +51,7 @@ Run your code style fixer afterwards; Rector does not sort imports.
 | `new InvoiceCommentsApi($http)` and the other removed sub-resource classes | `new InvoicesApi($http)->comments` |
 | Type hints on `InvoiceCommentsApi`, `ClientTagsApi`, … | `CommentsApi`, `TagsApi`, … |
 | `InvoiceEmailOptions`, `OfferEmailOptions`, … | `EmailOptions` |
+| `InvoiceMailOptions` | `MailOptions` |
 | `InvoicePaymentType`, `InvoicePdfType`, `InvoiceItemType`, `ArticleType` | `PaymentType`, `PdfType`, `ItemType` |
 | `OfferStatus::ACCEPTED`, `OfferStatus::REJECTED` | `OfferStatus::WON`, `OfferStatus::LOST` |
 | `$options->getItems()` on document create options | `$options->items` |
@@ -70,7 +71,7 @@ These changes need a decision and are not automated. The sections below describe
 - Amounts are `Money` instead of `float`, tax rows are `TaxSummary` objects.
 - Options are immutable: property assignments and `addItem()` become named arguments or `with*()`.
 - Enums instead of strings (`taxRule: 'NO_TAX'` → `TaxRule::NO_TAX`), payment types as `list<PaymentType>`,
-  `InvoiceMailOptions::$paperWeight` as `int`.
+  `MailOptions::$paperWeight` as `int`.
 - Methods that returned `true` return `void`: rewrite `if ($api->complete($id))` and similar.
 - Removed read-model properties, including the fields of `DunningLevel` that `ReminderText` doesn't have
   (`$position`, `$dueDays`, `$charge`, `$interest`).
@@ -546,7 +547,7 @@ $billomat->confirmations->unclear($id);
 
 ## Options are immutable
 
-All `*CreateOptions`/`*UpdateOptions`, `EmailOptions`, `InvoiceMailOptions`,
+All `*CreateOptions`/`*UpdateOptions`, `EmailOptions`, `MailOptions`,
 `InboxDocumentCreateOptions` and `SettingsUpdateOptions` are `final readonly` classes. Every field
 is a constructor parameter with a default, so pass named arguments instead of assigning properties.
 Required fields (e.g. `clientId` on `InvoiceCreateOptions`) are still the first positional
@@ -875,12 +876,14 @@ $role->toArray()['articles']; // 'DELETE'
 
 `User::$rights` is new and uses the same type.
 
-### `InvoiceMailOptions::$paperWeight` is an `int`
+### `InvoiceMailOptions` is `MailOptions`, `$paperWeight` is an `int`
+
+Every document type takes the same Pixelletter options, so the class lost its prefix (the Rector set renames it). `paperWeight` is an `int` (80 or 90):
 
 ```php
 // 3.x
 new InvoiceMailOptions(paperWeight: '90');
 
 // 4.0
-new InvoiceMailOptions(paperWeight: 90);
+new MailOptions(paperWeight: 90);
 ```

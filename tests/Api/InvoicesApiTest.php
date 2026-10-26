@@ -8,9 +8,9 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
+use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -44,7 +44,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(InvoiceGroupBy::class)]
 #[UsesClass(EmailOptions::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
-#[UsesClass(InvoiceMailOptions::class)]
+#[UsesClass(MailOptions::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
@@ -759,7 +759,7 @@ final class InvoicesApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new InvoiceMailOptions(
+        $opts = new MailOptions(
             color: true,
             duplex: false,
             paperWeight: 90,

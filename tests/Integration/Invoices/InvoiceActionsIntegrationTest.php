@@ -8,7 +8,7 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Api\InvoiceMailOptions;
+use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Invoice;
@@ -169,7 +169,7 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         $billomat = $this->createBillomatClientOrSkip();
         $invoiceId = $this->createCompletedInvoice($billomat);
 
-        $opts = new InvoiceMailOptions(color: false, duplex: true, paperWeight: 80);
+        $opts = new MailOptions(color: false, duplex: true, paperWeight: 80);
 
         $billomat->invoices->mail($invoiceId, $opts);
     }

@@ -83,6 +83,9 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertInstanceOf(Contact::class, $fetched);
         self::assertSame('Berlin', $fetched->city);
 
+        // Avatar: Billomat liefert ein Platzhalterbild, solange keins hochgeladen ist.
+        self::assertNotSame('', $billomat->contacts->avatar($contact->id, 32));
+
         // Cleanup
         $billomat->contacts->delete($contact->id);
         self::assertNull($billomat->contacts->get($contact->id));

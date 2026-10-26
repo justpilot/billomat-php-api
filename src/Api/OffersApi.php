@@ -245,6 +245,20 @@ final class OffersApi extends AbstractApi
     }
 
     /**
+     * Versendet ein Angebot postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /offers/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postJson("/offers/{$id}/mail", $payload);
+    }
+
+    /**
      * Lädt eine unterschriebene PDF-Version des Angebots hoch.
      */
     public function uploadSignature(int $id, string $base64Pdf): void

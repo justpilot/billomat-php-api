@@ -6,6 +6,7 @@ use Justpilot\Billomat\Api\ArticleTagsApi;
 use Justpilot\Billomat\Api\InvoiceCommentsApi;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceEmailOptions;
+use Justpilot\Billomat\Api\InvoiceMailOptions;
 use Justpilot\Billomat\Api\InvoicePaymentsApi;
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\Api\OfferCommentsApi;
@@ -52,6 +53,7 @@ final class Billomat3xUsage
         $won = $this->billomat->offers->get($id)?->status === OfferStatus::ACCEPTED;
         $lost = OfferStatus::REJECTED;
         $types = [ArticleType::SERVICE, InvoiceItemType::PRODUCT, InvoicePaymentType::PAYPAL];
+        $this->billomat->invoices->mail($id, new InvoiceMailOptions(color: true));
     }
 }
 ?>
@@ -68,6 +70,7 @@ use Justpilot\Billomat\Api\ArticlesApi;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Model\ReminderText;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
@@ -109,6 +112,7 @@ final class Billomat3xUsage
         $won = $this->billomat->offers->get($id)?->status === OfferStatus::WON;
         $lost = OfferStatus::LOST;
         $types = [ItemType::SERVICE, ItemType::PRODUCT, PaymentType::PAYPAL];
+        $this->billomat->invoices->mail($id, new MailOptions(color: true));
     }
 }
 ?>

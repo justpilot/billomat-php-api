@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 /**
- * Typisierter Payload für POST /invoices/{id}/mail.
+ * Typisierter Payload für POST /{dokumenttyp}/{id}/mail.
  *
- * Versendet eine Rechnung postalisch über den Pixelletter-Service.
+ * Versendet ein Dokument postalisch über den Pixelletter-Service. Rechnungen, Angebote,
+ * Auftragsbestätigungen, Gutschriften, Lieferscheine, Briefe und Mahnungen nehmen dieselben
+ * Felder an.
  *
  * Doku: https://www.billomat.com/en/api/invoices/ (Abschnitt "Send invoice by post")
  *
  * Hinweise:
  * - Diese Aktion ist kostenpflichtig (Pixelletter-Versand).
  */
-final readonly class InvoiceMailOptions implements WriteOptions
+final readonly class MailOptions implements WriteOptions
 {
     /**
      * @param bool|null                                                           $color       farbiger Druck? (`color`)

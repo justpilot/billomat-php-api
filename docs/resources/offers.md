@@ -49,6 +49,7 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON  ─�
 | `clear($id)` | PUT | `/offers/{id}/clear` |
 | `unclear($id)` | PUT | `/offers/{id}/unclear` |
 | `email($id, $options?)` | POST | `/offers/{id}/email` |
+| `mail($id, $options?)` | POST | `/offers/{id}/mail` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/offers/{id}/upload-signature` |
 | `pdf($id, $type?)` | GET | `/offers/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/offers/{id}/pdf?format=pdf` |
@@ -177,6 +178,17 @@ $email = new EmailOptions(
 );
 
 $billomat->offers->email($offer->id, $email);
+```
+
+
+#### `mail(int $id, ?MailOptions $options = null): void`
+
+Sends the offer by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
+
+```php
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->offers->mail($id, new MailOptions(duplex: true));
 ```
 
 #### `uploadSignature(int $id, string $base64Pdf): void`

@@ -142,4 +142,15 @@ final class RecurringsApi extends AbstractApi
     {
         $this->deleteVoid("/recurrings/{$id}");
     }
+
+    /**
+     * Stoppt die Abo-Rechnung: Billomat setzt `next_creation_date` auf null und erzeugt keine
+     * weiteren Rechnungen. Die Abo-Rechnung selbst bleibt erhalten.
+     *
+     * Entspricht PUT /recurrings/{id}/stop.
+     */
+    public function stop(int $id): void
+    {
+        $this->putVoid("/recurrings/{$id}/stop");
+    }
 }

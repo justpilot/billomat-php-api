@@ -46,6 +46,7 @@ DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEAR
 | `clear($id)` | PUT | `/confirmations/{id}/clear` |
 | `unclear($id)` | PUT | `/confirmations/{id}/unclear` |
 | `email($id, $options?)` | POST | `/confirmations/{id}/email` |
+| `mail($id, $options?)` | POST | `/confirmations/{id}/mail` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/confirmations/{id}/upload-signature` |
 | `pdf($id, $type?)` | GET | `/confirmations/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/confirmations/{id}/pdf?format=pdf` |
@@ -163,6 +164,17 @@ use Justpilot\Billomat\Api\EmailOptions;
 
 $email = new EmailOptions(to: ['client@example.com']);
 $billomat->confirmations->email($conf->id, $email);
+```
+
+
+#### `mail(int $id, ?MailOptions $options = null): void`
+
+Sends the confirmation by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
+
+```php
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->confirmations->mail($id, new MailOptions(duplex: true));
 ```
 
 #### `uploadSignature(int $id, string $base64Pdf): void`

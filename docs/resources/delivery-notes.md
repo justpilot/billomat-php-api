@@ -38,6 +38,7 @@ Unlike [confirmations](confirmations.md), the API offers no further status trans
 | `delete($id)` | DELETE | `/delivery-notes/{id}` |
 | `complete($id, $templateId?)` | PUT | `/delivery-notes/{id}/complete` |
 | `email($id, $options?)` | POST | `/delivery-notes/{id}/email` |
+| `mail($id, $options?)` | POST | `/delivery-notes/{id}/mail` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/delivery-notes/{id}/upload-signature` |
 | `pdf($id, $type?)` | GET | `/delivery-notes/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/delivery-notes/{id}/pdf?format=pdf` |
@@ -138,6 +139,17 @@ Deletes the delivery note. There is no `cancel()` for delivery notes; in the san
 #### `email(int $id, ?EmailOptions $options = null): void`
 
 Sends the delivery note by email. Without options, Billomat uses the account defaults; the PDF is attached automatically.
+
+
+#### `mail(int $id, ?MailOptions $options = null): void`
+
+Sends the delivery note by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
+
+```php
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->deliveryNotes->mail($id, new MailOptions(duplex: true));
+```
 
 #### `uploadSignature(int $id, string $base64Pdf): void`
 

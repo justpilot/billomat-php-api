@@ -6,6 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [4.0.0-alpha.2] - 2026-10-26
+
+Second pre-release of 4.0, the candidate for 4.0.0-beta.1. From the beta on, the public API is frozen (see [Backward compatibility](docs/concepts/backward-compatibility.md)).
+
 ### Added
 
 - **Missing actions:** `mail()` (Pixelletter) on offers, confirmations, credit notes, delivery notes, letters and reminders; `recurrings->stop()`; `recurrings->emailReceivers->update()` with `RecurringEmailReceiverUpdateOptions`; `contacts->avatar()` and `users->avatar()`.
@@ -24,7 +28,6 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - **`get()` throws `UnexpectedResponseException` on a 2xx response without the expected envelope** instead of returning `null`; only a 404 returns `null`. All `get()` methods share one implementation now.
 - **`users->getMyself()` returns `User` instead of `?User`.** It throws like `clients->getMyself()`.
 - **The `$query` parameter of `contacts->list()`, `taxes->list()` and `templates->list()` is `$filters`**, as on every other list method. Only relevant for named arguments.
-
 - **Retries are logged at `info` instead of `warning`.** A retry that succeeds is expected behaviour and should not trigger alerting that fires at `warning`. Final failures keep their levels (`notice` for 4xx, `error` for 5xx and network errors). Listen for `RetryScheduled` if you want to count retries.
 
 ## [4.0.0-alpha.1] - 2026-10-25

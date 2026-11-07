@@ -11,9 +11,12 @@ use Justpilot\Billomat\Api\InvoiceFilter;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\TemplateFilter;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Model\Template;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -222,6 +225,40 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         if (null !== $invoice->invoiceNumber) {
             self::assertIsString($invoice->invoiceNumber);
         }
+    }
+
+    /**
+     * complete() mit template_id: Billomat übernimmt die Vorlage nur, wenn sie in einem Objekt steckt
+     * ({"invoice": {"template_id": …}}); ein flaches {"template_id": …} würde still ignoriert.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function completeAppliesTheGivenTemplate(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $templates = $billomat->templates->list(new TemplateFilter(type: [TemplateDocumentType::INVOICE]));
+        $nonDefault = array_find($templates, static fn (Template $template): bool => !$template->isDefault);
+        if (null === $nonDefault) {
+            self::markTestSkipped('Die Sandbox braucht eine zweite Rechnungsvorlage neben der Standardvorlage.');
+        }
+
+        $clients = $billomat->clients->list(['per_page' => 1]);
+        if ([] === $clients) {
+            self::markTestSkipped('Die Sandbox braucht mindestens einen Kunden.');
+        }
+
+        $draft = $billomat->invoices->create(
+            new InvoiceCreateOptions(clientId: $clients[0]->id, title: 'Complete mit Vorlage', label: 'Integrationstest complete(templateId)')
+                ->withItem(new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: Money::of('10.00'), title: 'Testposition')),
+        );
+        self::assertNotSame($nonDefault->id, $draft->templateId);
+
+        $billomat->invoices->complete($draft->id, $nonDefault->id);
+
+        $completed = $billomat->invoices->getOrFail($draft->id);
+        self::assertNotSame(InvoiceStatus::DRAFT, $completed->status);
+        self::assertSame($nonDefault->id, $completed->templateId);
     }
 
     #[Group('integration')]

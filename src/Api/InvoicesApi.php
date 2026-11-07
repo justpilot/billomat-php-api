@@ -226,8 +226,8 @@ final class InvoicesApi extends AbstractApi
         $body = [];
 
         if (null !== $templateId) {
-            // laut Doku: optionaler Parameter template_id
-            // Wir senden ihn im invoice-Block
+            // In der Sandbox geprüft: Billomat liest template_id aus dem ersten Objekt, der Schlüssel ist egal
+            // ({"invoice": …} wie {"complete": …}); ein flaches {"template_id": …} wird still ignoriert.
             $body['template_id'] = $templateId;
         }
 

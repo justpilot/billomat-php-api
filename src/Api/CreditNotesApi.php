@@ -157,7 +157,7 @@ final class CreditNotesApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/credit-notes/{$id}/email", $payload);
+        $this->postVoid("/credit-notes/{$id}/email", $payload);
 
         return true;
     }

@@ -166,7 +166,7 @@ final class LettersApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/letters/{$id}/email", $payload);
+        $this->postVoid("/letters/{$id}/email", $payload);
 
         return true;
     }

@@ -165,7 +165,7 @@ final class DeliveryNotesApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/delivery-notes/{$id}/email", $payload);
+        $this->postVoid("/delivery-notes/{$id}/email", $payload);
 
         return true;
     }

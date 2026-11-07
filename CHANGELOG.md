@@ -6,6 +6,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Fixed
+- **`email()` und `mail()` werfen nach erfolgreichem Versand keine Exception mehr.** Billomat beantwortet `POST /{dokumente}/{id}/email` und `/mail` mit `200 OK` und leerem Body (`text/html`); das SDK hat ihn als JSON dekodiert und eine `JsonException` geworfen, obwohl die E-Mail bzw. der Brief verschickt war. Wer daraufhin erneut gesendet hat, hat das Dokument doppelt verschickt. Betrifft `email()` bei Rechnungen, Angeboten, Auftragsbestätigungen, Gutschriften, Lieferscheinen, Briefen und Mahnungen sowie `invoices->mail()`. HTTP-Fehler werden weiterhin als Exception geworfen.
+
 ## [3.4.0] - 2026-10-24
 
 ### Changed

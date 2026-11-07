@@ -6,6 +6,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Fixed
+- **`email()` und `mail()` werfen nach erfolgreichem Versand keine Exception mehr.** Billomat beantwortet `POST /{dokumente}/{id}/email` und `/mail` mit `200 OK` und leerem Body (`text/html`); das SDK hat ihn als JSON dekodiert und eine `JsonException` geworfen, obwohl die E-Mail bzw. der Brief verschickt war. Wer daraufhin erneut gesendet hat, hat das Dokument doppelt verschickt. Betrifft `email()` bei Rechnungen, Angeboten, Auftragsbestätigungen, Gutschriften, Lieferscheinen, Briefen und Mahnungen sowie `invoices->mail()`. HTTP-Fehler werden weiterhin als Exception geworfen.
+- **Ein `+` in Filterwerten wird als `%2B` gesendet.** Bisher ging es unkodiert raus, und Billomat liest ein unkodiertes `+` als Leerzeichen: `clients->list(['email' => 'plus+test@example.com'])` fand nichts, aus `+49 …` wurde ` 49 …`. In `order_by` wird das `+` zwischen Feld und Richtung (`date+DESC`) jetzt als Leerzeichen gesendet (`date%20DESC`), das akzeptiert Billomat; `%2B` lehnt es dort ab. `'order_by' => 'date+DESC'` funktioniert weiter.
+- **`0000-00-00` und ungültige Datumswerte wie `2024-02-30` ergeben `null`.** PHP lehnt sie nicht ab, sondern rollt auf `-0001-11-30` bzw. `2024-03-01` über; jedes Datumsfeld der Read-Models bekam so ein falsches Datum.
+- **`iterateAll()` bricht nicht mehr nach der ersten Seite ab, wenn Billomat die Seitengröße kappt.** Verglichen wurde die Anzahl der Einträge mit dem angefragten `$pageSize` statt mit dem `@per_page` der Antwort, `iterateAll(pageSize: 2000)` lieferte so nur die ersten 1000 Einträge. `$pageSize` wird jetzt auf 1–1000 begrenzt, eine leere Seite beendet die Iteration.
+
+### Security
+- **`symfony/http-client` mindestens `^8.1.11`.** Die Version behebt GHSA-gq53-v8w2-gjhj (`ScopingHttpClient` schickt Zugangsdaten an fremde Origins) und GHSA-c7hm-wqwp-f9v8 (`NoPrivateNetworkHttpClient`, DNS-Rebinding). Das SDK nutzt keinen der beiden Clients, die Untergrenze verhindert aber, dass Projekte eine betroffene Version installieren.
+
 ## [3.4.0] - 2026-10-24
 
 ### Changed

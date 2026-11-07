@@ -149,7 +149,7 @@ final class RemindersApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/reminders/{$id}/email", $payload);
+        $this->postVoid("/reminders/{$id}/email", $payload);
 
         return true;
     }

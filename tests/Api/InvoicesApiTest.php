@@ -722,8 +722,8 @@ final class InvoicesApiTest extends TestCase
         $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
             $captured = ['method' => $method, 'url' => $url, 'options' => $options];
 
-            // Billomat antwortet i. d. R. mit leerem Body oder Bestätigungsobjekt
-            return new MockResponse('{"@status":"OK"}', ['http_code' => 200]);
+            // Billomat antwortet mit 200 OK und leerem Body (in der Sandbox gemessen).
+            return new MockResponse('', ['http_code' => 200, 'response_headers' => ['content-type' => 'text/html; charset=UTF-8']]);
         });
 
         $api = new InvoicesApi(new BillomatHttpClient(

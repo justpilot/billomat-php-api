@@ -101,8 +101,11 @@ final class ScalarCaster
      *
      * Akzeptiert sowohl reine Datumsstrings ("2026-06-02") als auch
      * ISO-8601-Zeitstempel ("2026-06-02T10:15:00+02:00"). Liefert null,
-     * wenn der Wert leer oder nicht parsebar ist (statt Throwable
-     * durchzureichen — Billomat liefert gelegentlich "0000-00-00" o. Ä.).
+     * wenn der Wert leer, nicht parsebar oder kein gültiges Datum ist.
+     *
+     * PHP wirft bei "0000-00-00" oder "2024-02-30" nicht, sondern rollt still auf
+     * "-0001-11-30" bzw. "2024-03-01" über und meldet nur eine Warnung
+     * ("The parsed date was invalid"). Solche Werte ergeben null statt eines falschen Datums.
      */
     public static function toDateTimeOrNull(mixed $value): ?DateTimeImmutable
     {
@@ -111,9 +114,11 @@ final class ScalarCaster
         }
 
         try {
-            return new DateTimeImmutable($value);
+            $date = new DateTimeImmutable($value);
         } catch (Throwable) {
             return null;
         }
+
+        return false === DateTimeImmutable::getLastErrors() ? $date : null;
     }
 }

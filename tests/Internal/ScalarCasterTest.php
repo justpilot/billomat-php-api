@@ -143,4 +143,31 @@ final class ScalarCasterTest extends TestCase
     {
         self::assertNull(ScalarCaster::toDateTimeOrNull('definitely not a date'));
     }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidDates(): iterable
+    {
+        // PHP wirft hier nicht, sondern rollt auf "-0001-11-30" bzw. den Folgemonat über.
+        yield 'Null-Datum' => ['0000-00-00'];
+        yield 'Null-Zeitstempel' => ['0000-00-00 00:00:00'];
+        yield '30. Februar' => ['2024-02-30'];
+        yield '31. April mit Uhrzeit' => ['2026-04-31T10:00:00+02:00'];
+    }
+
+    #[Test]
+    #[DataProvider('invalidDates')]
+    public function toDateTimeOrNullRejectsInvalidDatesInsteadOfRollingOver(string $value): void
+    {
+        self::assertNull(ScalarCaster::toDateTimeOrNull($value));
+    }
+
+    #[Test]
+    public function aValidDateAfterAnInvalidOneIsParsed(): void
+    {
+        // getLastErrors() bezieht sich nur auf den letzten Parse-Vorgang.
+        self::assertNull(ScalarCaster::toDateTimeOrNull('0000-00-00'));
+        self::assertSame('2026-01-02 10:00:00', ScalarCaster::toDateTimeOrNull('2026-01-02 10:00:00')?->format('Y-m-d H:i:s'));
+    }
 }

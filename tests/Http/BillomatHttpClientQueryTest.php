@@ -19,7 +19,8 @@ use Symfony\Component\HttpClient\Response\MockResponse;
  *
  * Hintergrund (siehe CLAUDE.md): Billomat erwartet:
  *  - Arrays als `key[]=v1&key[]=v2`
- *  - `+` literal (z. B. `order_by=date+DESC`), nicht `%2B`
+ *  - in `order_by` ein Leerzeichen zwischen Feld und Richtung (`date%20DESC`), nicht `%2B`
+ *  - `+` in allen anderen Werten als `%2B` (ein unkodiertes `+` liest Billomat als Leerzeichen)
  *  - keine leeren Werte
  */
 #[CoversClass(BillomatHttpClient::class)]
@@ -75,9 +76,25 @@ final class BillomatHttpClientQueryTest extends TestCase
             '?ids[]=1&ids[]=3',
         ];
 
-        yield 'Plus-Zeichen bleibt literal (date+DESC)' => [
+        yield 'order_by: Plus zwischen Feld und Richtung wird ein Leerzeichen' => [
             ['order_by' => 'date+DESC'],
-            '?order_by=date+DESC',
+            '?order_by=date%20DESC',
+        ];
+
+        yield 'order_by: mehrere Felder' => [
+            ['order_by' => 'date+DESC,invoice_number+ASC'],
+            '?order_by=date%20DESC%2Cinvoice_number%20ASC',
+        ];
+
+        // In der Sandbox gemessen: `email=plus+test%40…` findet nichts, `email=plus%2Btest%40…` den Kunden.
+        yield 'Plus in einem Filterwert wird %2B' => [
+            ['email' => 'plus+test@example.com', 'phone' => '+49 30 123'],
+            '?email=plus%2Btest%40example.com&phone=%2B49%2030%20123',
+        ];
+
+        yield 'Plus in Array-Werten wird %2B' => [
+            ['tags' => ['a+b']],
+            '?tags[]=a%2Bb',
         ];
 
         yield 'bool true wird zu 1' => [

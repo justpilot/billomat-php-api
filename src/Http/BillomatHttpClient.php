@@ -61,8 +61,10 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
      *
      * - null-Werte werden übersprungen
      * - Arrays werden als "key[]=v1&key[]=v2" serialisiert
-     * - Werte werden RFC-konform encoded, ABER:
-     *   - "+" bleibt ein Literal (z. B. "date+DESC"), weil Billomat "%2B" nicht versteht.
+     * - Werte werden RFC-konform encoded ("+" in Filterwerten wird "%2B", Leerzeichen "%20")
+     * - `order_by`: das "+" zwischen Feld und Richtung ("date+DESC") wird ein Leerzeichen
+     *   ("date%20DESC"). Billomat versteht "date%2BDESC" nicht; ein unkodiertes "+"
+     *   würde dagegen in jedem anderen Wert als Leerzeichen gelesen ("a+b@x.de").
      *
      * @param array<string, scalar|array|null> $query
      */
@@ -97,6 +99,10 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
                 continue;
             }
 
+            if ('order_by' === $key && \is_string($value)) {
+                $value = str_replace('+', ' ', $value);
+            }
+
             $parts[] = \sprintf(
                 '%s=%s',
                 $encodedKey,
@@ -116,10 +122,7 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
      *
      * - bool → "1"/"0"
      * - alles andere → String
-     * - rawurlencode für sauberes Encoding
-     * - "%2B" wird wieder in "+" zurückverwandelt,
-     *   weil Billomat z. B. "date+DESC" erwartet
-     *   und "date%2BDESC" als unbekanntes Feld interpretiert.
+     * - rawurlencode für sauberes Encoding ("+" → "%2B", Leerzeichen → "%20")
      */
     private function encodeBillomatQueryValue(int|float|string|bool $value): string
     {
@@ -128,10 +131,6 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
             default => (string) $value,
         };
 
-        $encoded = rawurlencode($string);
-
-        // Billomat erwartet "+" literal (z. B. "date+DESC"),
-        // versteht aber "%2B" nicht → wieder zurückwandeln.
-        return str_replace('%2B', '+', $encoded);
+        return rawurlencode($string);
     }
 }

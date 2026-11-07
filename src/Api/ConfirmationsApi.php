@@ -167,7 +167,7 @@ final class ConfirmationsApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/confirmations/{$id}/email", $payload);
+        $this->postVoid("/confirmations/{$id}/email", $payload);
 
         return true;
     }

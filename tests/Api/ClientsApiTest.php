@@ -200,10 +200,10 @@ final class ClientsApiTest extends TestCase
         iterator_to_array($api->iterateAll($filter->withPage(9), pageSize: 25));
 
         // `+` bleibt wörtlich, das Komma wird kodiert.
-        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date+DESC%2Cname+ASC&per_page=10', parse_url($urls[0], PHP_URL_QUERY));
-        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date+DESC%2Cname+ASC&page=3&per_page=10', parse_url($urls[1], PHP_URL_QUERY));
+        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date%20DESC%2Cname%20ASC&per_page=10', parse_url($urls[0], PHP_URL_QUERY));
+        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date%20DESC%2Cname%20ASC&page=3&per_page=10', parse_url($urls[1], PHP_URL_QUERY));
         // iterateAll() überschreibt page/per_page.
-        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date+DESC%2Cname+ASC&page=1&per_page=25', parse_url($urls[2], PHP_URL_QUERY));
+        self::assertSame('name=ACME&invoice_id=1%2C2&order_by=date%20DESC%2Cname%20ASC&page=1&per_page=25', parse_url($urls[2], PHP_URL_QUERY));
     }
 
     #[Test]

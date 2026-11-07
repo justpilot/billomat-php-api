@@ -213,6 +213,6 @@ More in [docs/testing.md](testing.md).
 Billomat expects some query string formats that `http_build_query` doesn't produce. The SDK handles these quirks in `BillomatHttpClient::buildBillomatQuery()`:
 
 - Array values are serialized as `key[]=v1&key[]=v2` (percent-encoded on the wire as `key%5B%5D=v1`, which Billomat accepts as well).
-- `+` stays literal in values (e.g. `order_by=date+DESC`), because Billomat doesn't interpret `%2B` as `+`.
+- In `order_by`, the `+` between field and direction (`date+DESC`) is sent as a space (`%20`), because Billomat rejects `%2B` there. In every other value a `+` is sent as `%2B`, so `email` filters with `a+b@example.com` work.
 
 Both are transparent when you pass filters to `list($filters)`. Background: [docs/advanced/http-layer.md](advanced/http-layer.md).

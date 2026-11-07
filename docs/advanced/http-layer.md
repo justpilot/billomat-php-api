@@ -67,17 +67,17 @@ $config = new BillomatConfig(
 
 Once all attempts are used up, the client throws the exception for the last response (see [Error handling](../error-handling.md)); network errors surface as `TransportException` with the PSR-18 exception as `getPrevious()`.
 
-## Quirk 1: `+` stays literal in the query string
+## Quirk 1: the `+` in `order_by`
 
-`http_build_query` (standard PHP) always converts `+` to `%2B`. Billomat doesn't accept `%2B` as a separator in compound values — the typical example is sorting with `order_by=date+DESC`. If the SDK sent `%2B`, Billomat would ignore the parameter.
+Billomat documents sorting as `order_by=<field>+ASC|DESC`. The `+` there stands for a space: Billomat accepts `date+DESC` and `date%20DESC`, but rejects `date%2BDESC`. For every other value, an unencoded `+` is read as a space as well, so `email=plus+test@example.com` finds nothing while `email=plus%2Btest%40example.com` finds the client.
 
-Solution: `BillomatHttpClient::buildBillomatQuery()` builds the query string by hand. Values are encoded with `rawurlencode()`, then `%2B` is turned back into `+`. Result:
+Solution: `BillomatHttpClient::buildBillomatQuery()` builds the query string by hand and encodes every value with `rawurlencode()`. Only in `order_by` the `+` between field and direction is replaced by a space first. Result:
 
 ```text
-?order_by=date+DESC&per_page=50
+?order_by=date%20DESC&per_page=50&email=plus%2Btest%40example.com
 ```
 
-This way every sort parameter documented by Billomat as `<field>+ASC` or `<field>+DESC` works without a workaround. In SDK code, build the value with `OrderBy` (`OrderBy::desc('date')`) instead of writing the string by hand.
+This way the sort values documented by Billomat (`date+DESC`), the values `OrderBy` builds (`OrderBy::desc('date')`) and filter values containing a `+` (email addresses, phone numbers) all arrive as meant.
 
 ## Quirk 2: arrays as `key[]=v1&key[]=v2`
 
@@ -111,7 +111,7 @@ The typed filters (`InvoiceFilter`, `ClientFilter`, …) don't use this form: th
 | `int`, `float` | `(string)` |
 | `string` | unchanged |
 
-Then `rawurlencode`, followed by the `%2B` → `+` correction.
+Then `rawurlencode` (`+` → `%2B`, space → `%20`); in `order_by` a `+` is replaced by a space first.
 
 Other types (objects such as `DateTimeImmutable`, enums) are not accepted in raw array filters; convert them to a string first. The typed filters do this for you (`from`/`to` as `YYYY-MM-DD`, enums as their value).
 

@@ -201,7 +201,7 @@ PHPStan runs without a baseline: every finding fails CI and is fixed in the code
 1. **Tests** on PHP 8.5 (required) and 8.6 (experimental, `continue-on-error`).
 2. **PSR-18 compat** — a smoke test with Guzzle and without Symfony (`.github/compat/guzzle`).
 3. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer generate:check`, `composer audit`.
-4. **Backward compatibility** — [`roave/backward-compatibility-check`](https://github.com/Roave/BackwardCompatibilityCheck) compares the public API against the latest `v4.*` tag. Accepted findings go into `.roave-backward-compatibility-check.xml`. Until 4.0.0-beta.1 the job is informational (`continue-on-error`).
+4. **Backward compatibility** — [`roave/backward-compatibility-check`](https://github.com/Roave/BackwardCompatibilityCheck) compares the public API against the latest `v4.*` tag. Accepted findings go into `.roave-backward-compatibility-check.xml`. While the latest tag is an alpha the findings are informational; from `v4.0.0-beta.1` on every BC break fails the job.
 5. **Links** (`.github/workflows/links.yml`, separate workflow) — [lychee](https://lychee.cli.rs) checks the links in `docs/`, the root Markdown files and the Billomat links in the docblocks (`src/`, `tools/codegen/definitions/`), configured in `lychee.toml`. It also runs weekly to catch links that break without a change on our side.
 6. **Mutation testing** — on PRs only the changed lines (`--git-diff-lines`, 90 % MSI); on `main`/`4.x` the full run with the thresholds from `infection.json5`.
 
@@ -209,7 +209,7 @@ To run the BC check locally, install the tool outside the project (it needs Symf
 
 ```bash
 composer global require roave/backward-compatibility-check
-"$(composer global config bin-dir --absolute)"/roave-backward-compatibility-check --from=v4.0.0-alpha.1
+"$(composer global config bin-dir --absolute)"/roave-backward-compatibility-check --from="$(git -c versionsort.suffix=- tag --list 'v4.*' --sort=-v:refname | head -n 1)"
 ```
 
 Integration tests do **not** run automatically in CI, because no sandbox credentials are configured. If needed, `BILLOMAT_ID`/`BILLOMAT_API_KEY` can be set up as GitHub secrets and a separate workflow triggered.

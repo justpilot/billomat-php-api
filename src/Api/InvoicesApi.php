@@ -281,7 +281,7 @@ final class InvoicesApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/invoices/{$id}/email", $payload);
+        $this->postVoid("/invoices/{$id}/email", $payload);
     }
 
     /**
@@ -295,7 +295,7 @@ final class InvoicesApi extends AbstractApi
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 
-        $this->postJson("/invoices/{$id}/mail", $payload);
+        $this->postVoid("/invoices/{$id}/mail", $payload);
     }
 
     /**

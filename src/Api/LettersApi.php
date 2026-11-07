@@ -165,7 +165,7 @@ final class LettersApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/letters/{$id}/email", $payload);
+        $this->postVoid("/letters/{$id}/email", $payload);
     }
 
     /**
@@ -179,7 +179,7 @@ final class LettersApi extends AbstractApi
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 
-        $this->postJson("/letters/{$id}/mail", $payload);
+        $this->postVoid("/letters/{$id}/mail", $payload);
     }
 
     /**

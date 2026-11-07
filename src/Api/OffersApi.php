@@ -241,7 +241,7 @@ final class OffersApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/offers/{$id}/email", $payload);
+        $this->postVoid("/offers/{$id}/email", $payload);
     }
 
     /**
@@ -255,7 +255,7 @@ final class OffersApi extends AbstractApi
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 
-        $this->postJson("/offers/{$id}/mail", $payload);
+        $this->postVoid("/offers/{$id}/mail", $payload);
     }
 
     /**

@@ -174,7 +174,7 @@ final class DeliveryNotesApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/delivery-notes/{$id}/email", $payload);
+        $this->postVoid("/delivery-notes/{$id}/email", $payload);
     }
 
     /**
@@ -188,7 +188,7 @@ final class DeliveryNotesApi extends AbstractApi
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 
-        $this->postJson("/delivery-notes/{$id}/mail", $payload);
+        $this->postVoid("/delivery-notes/{$id}/mail", $payload);
     }
 
     public function uploadSignature(int $id, string $base64Pdf): void

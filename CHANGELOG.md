@@ -9,6 +9,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ### Fixed
 
 - **`TaxSummary` maps every field of a tax row.** Besides `name`, `rate` and `amount`, Billomat sends the net and gross amount per rate, each unrounded and rounded: `amountPlain`, `amountRounded`, `amountNet`, `amountNetPlain`, `amountNetRounded`, `amountGross`, `amountGrossPlain`, `amountGrossRounded` (all `?Money`). They were dropped silently until now. Like the generated models, `TaxSummary` now also has `$extra` for fields the SDK doesn't map yet.
+- **`email()` and `mail()` no longer throw after a successful send.** Billomat answers `POST /{documents}/{id}/email` and `/mail` with `200 OK` and an empty body (`text/html`); the SDK tried to decode it as JSON and threw `UnexpectedResponseException`, although the email or letter had been sent. Callers retrying on that exception sent documents twice. Affects invoices, offers, confirmations, credit notes, delivery notes, letters and reminders.
 
 ## [4.0.0-alpha.2] - 2026-10-26
 

@@ -20,7 +20,7 @@ A Billomat API key has the same read and write access as the user it belongs to.
 
 | Version | Supported |
 |---|---|
-| 4.x | Yes (in development, pre-releases) |
+| 4.x | Yes (beta, public API frozen) |
 | 3.x | Security fixes until 4.0.0 is released |
 | < 3.0 | No |
 

@@ -10,7 +10,7 @@ export default {
       'layout-top': () =>
         h('div', { class: 'version-banner' }, [
           h('span', [
-            'Documentation for 4.0 (pre-release). Using 3.x? See the ',
+            'Documentation for 4.0 (beta, API frozen). Using 3.x? See the ',
             h('a', { href: 'https://github.com/justpilot/billomat-php-api/tree/main#readme' }, 'README on main'),
             '.',
           ]),

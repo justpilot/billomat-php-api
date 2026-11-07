@@ -7,6 +7,7 @@
 /build                  export-ignore
 /.github                export-ignore
 /graphify-out           export-ignore
+/tools                  export-ignore
 
 # Tooling configs
 /.gitattributes         export-ignore
@@ -19,6 +20,7 @@
 /lychee.toml            export-ignore
 /.roave-backward-compatibility-check.xml export-ignore
 /.env.test              export-ignore
+/composer.lock          export-ignore
 
 # Agent / contributor docs (kept in repo, excluded from dist)
 /AGENTS.md              export-ignore

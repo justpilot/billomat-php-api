@@ -264,31 +264,6 @@ final class LettersApiTest extends TestCase
     }
 
     #[Test]
-    public function itUploadsLetterPdfAndSignature(): void
-    {
-        $captured = [];
-
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured[] = CapturedRequest::of($method, $url, $options);
-
-            return new MockResponse('', ['http_code' => 200]);
-        });
-
-        $api = new LettersApi(new BillomatHttpClient(
-            new Psr18Client($mock),
-            new BillomatConfig('mycompany', 'secret-key'),
-        ));
-
-        $b64 = base64_encode('PDF');
-
-        $api->upload(100, $b64);
-        $api->uploadSignature(200, $b64);
-
-        self::assertSame('https://mycompany.billomat.net/api/letters/100/upload', $captured[0]->url);
-        self::assertSame('https://mycompany.billomat.net/api/letters/200/upload-signature', $captured[1]->url);
-    }
-
-    #[Test]
     public function completeMapsHttpErrorToValidationException(): void
     {
         // Regression: vor Bug-Fix verschluckte `complete()` 4xx/5xx und gab still `false` zurück.

@@ -35,7 +35,6 @@ use NoDiscard;
  *  - PUT    /delivery-notes/{id}/complete
  *  - POST   /delivery-notes/{id}/email
  *  - GET    /delivery-notes/{id}/pdf
- *  - PUT    /delivery-notes/{id}/upload-signature
  */
 final class DeliveryNotesApi extends AbstractApi
 {
@@ -189,13 +188,6 @@ final class DeliveryNotesApi extends AbstractApi
         $payload = ['mail' => $options?->toArray() ?? []];
 
         $this->postVoid("/delivery-notes/{$id}/mail", $payload);
-    }
-
-    public function uploadSignature(int $id, string $base64Pdf): void
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/delivery-notes/{$id}/upload-signature", $payload);
     }
 
     /**

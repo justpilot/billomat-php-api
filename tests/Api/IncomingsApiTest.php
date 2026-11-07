@@ -15,6 +15,7 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Incoming;
 use Justpilot\Billomat\Model\Money;
@@ -41,6 +42,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(DocumentPdf::class)]
 final class IncomingsApiTest extends TestCase
 {
     #[Test]
@@ -137,8 +139,8 @@ final class IncomingsApiTest extends TestCase
     {
         $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
-            $captured->record($method, $url);
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'incoming' => ['id' => 777, 'supplier_id' => 42, 'label' => 'Geändert'],
@@ -157,10 +159,35 @@ final class IncomingsApiTest extends TestCase
         $updated = $api->update(777, $opts);
         self::assertSame('Geändert', $updated->label);
         self::assertSame('PUT', $captured->method);
+        self::assertSame(['incoming' => ['label' => 'Geändert']], $captured->json());
     }
 
     #[Test]
-    public function itPerformsStatusActionsAndUpload(): void
+    public function itFetchesThePdfAsJsonAndAsBytes(): void
+    {
+        $captured = [];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
+
+            return str_contains($url, 'format=pdf')
+                ? new MockResponse("%PDF-1.7\n…")
+                : new MockResponse('{"pdf":{"id":"9","incoming_id":"5","filename":"beleg.pdf","mimetype":"application/pdf","base64file":"JVBERi0="}}');
+        });
+
+        $api = new IncomingsApi(new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key')));
+
+        $pdf = $api->pdf(5);
+        self::assertSame(5, $pdf->documentId);
+        self::assertSame('beleg.pdf', $pdf->filename);
+        self::assertSame("%PDF-1.7\n…", $api->pdfContent(5));
+
+        self::assertSame('GET', $captured[0]->method);
+        self::assertSame('https://mycompany.billomat.net/api/incomings/5/pdf', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/incomings/5/pdf?format=pdf', $captured[1]->url);
+    }
+
+    #[Test]
+    public function itDeletesAnIncoming(): void
     {
         $captured = [];
 
@@ -175,23 +202,17 @@ final class IncomingsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $api->cancel(1);
-        $api->uncancel(2);
-        $api->upload(3, base64_encode('PDF'));
         $api->delete(4);
 
-        self::assertSame('https://mycompany.billomat.net/api/incomings/1/cancel', $captured[0]->url);
-        self::assertSame('https://mycompany.billomat.net/api/incomings/2/uncancel', $captured[1]->url);
-        self::assertSame('https://mycompany.billomat.net/api/incomings/3/upload', $captured[2]->url);
-        self::assertSame('DELETE', $captured[3]->method);
+        self::assertSame('DELETE', $captured[0]->method);
+        self::assertSame('https://mycompany.billomat.net/api/incomings/4', $captured[0]->url);
     }
 
     #[Test]
-    public function cancelMapsHttpErrorToValidationException(): void
+    public function deleteMapsHttpErrorToValidationException(): void
     {
-        // Regression: vor Bug-Fix verschluckte `cancel()` 4xx/5xx und gab still `false` zurück.
         $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse(
-            json_encode(['errors' => ['error' => 'Incoming cannot be cancelled.']], JSON_THROW_ON_ERROR),
+            json_encode(['errors' => ['error' => 'Incoming cannot be deleted.']], JSON_THROW_ON_ERROR),
             ['http_code' => 422],
         ));
 
@@ -202,6 +223,6 @@ final class IncomingsApiTest extends TestCase
 
         $this->expectException(ValidationException::class);
 
-        $api->cancel(12);
+        $api->delete(12);
     }
 }

@@ -314,30 +314,6 @@ final class DeliveryNotesApiTest extends TestCase
     }
 
     #[Test]
-    public function itUploadsSignaturePdf(): void
-    {
-        $captured = new CapturedRequest();
-
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
-            $captured->record($method, $url, $options);
-
-            return new MockResponse('', ['http_code' => 200]);
-        });
-
-        $api = new DeliveryNotesApi(new BillomatHttpClient(
-            new Psr18Client($mock),
-            new BillomatConfig('mycompany', 'secret-key'),
-        ));
-
-        $base64 = base64_encode('PDF-FAKE');
-        $api->uploadSignature(555, $base64);
-
-        self::assertSame('PUT', $captured->method);
-        self::assertSame('https://mycompany.billomat.net/api/delivery-notes/555/upload-signature', $captured->url);
-        self::assertSame(['upload' => ['base64file' => $base64]], $captured->json());
-    }
-
-    #[Test]
     public function completeMapsHttpErrorToValidationException(): void
     {
         // Regression: Status-Aktionen dürfen 4xx/5xx nicht verschlucken.

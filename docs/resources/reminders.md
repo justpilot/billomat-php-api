@@ -164,7 +164,7 @@ $raw = $billomat->reminders->pdfContent($reminder->id);        // string (PDF bi
 
 #### `uploadSignature(int $id, string $base64Pdf): void`
 
-Attaches a PDF signed by the client to the reminder.
+Attaches a signed PDF to the reminder. Billomat keeps it next to its own PDF: `pdf($id, PdfType::SIGNED)` returns the uploaded file, `pdf($id)` still the generated one. Before an upload the signed variant answers 404, so `pdf(..., PdfType::SIGNED)` throws a `NotFoundException`. The document must not be a draft any more.
 
 #### `delete(int $id): void`
 

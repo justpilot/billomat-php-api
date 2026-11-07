@@ -21,7 +21,7 @@ An incoming is a supplier invoice: a document someone else issued to your compan
 
 - **Origin**: the required field `supplierId` points to a [supplier](suppliers.md).
 - **Status**: `IncomingStatus` (`DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`). Billomat derives it from the due date, cancellation and the sum of payments; you can't write it directly.
-- **Attachment**: optionally via `upload()` or the `base64File` option on create/update. Alternatively, a file already uploaded as an [inbox document](inbox-documents.md) can serve as the source.
+- **Attachment**: optionally via the `base64File` option on create/update (Billomat checks the file: it has to be a real PDF or image); `pdf()` reads it back. Alternatively, a file already uploaded as an [inbox document](inbox-documents.md) can serve as the source.
 - **Payments**: via `IncomingPayment` entries. The sum of payments goes into `paidAmount`, the remainder into `openAmount`.
 - **History**: every state change (creation, payment, cancellation, upload, …) automatically creates an `IncomingComment` with the matching `actionkey`.
 
@@ -40,9 +40,8 @@ Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRA
 | `create($options)` | POST | `/incomings` |
 | `update($id, $options)` | PUT | `/incomings/{id}` |
 | `delete($id)` | DELETE | `/incomings/{id}` |
-| `cancel($id)` | PUT | `/incomings/{id}/cancel` |
-| `uncancel($id)` | PUT | `/incomings/{id}/uncancel` |
-| `upload($id, $base64Pdf)` | PUT | `/incomings/{id}/upload` |
+| `pdf($id)` | GET | `/incomings/{id}/pdf` |
+| `pdfContent($id)` | GET | `/incomings/{id}/pdf?format=pdf` |
 
 ### `/incoming-comments`
 
@@ -139,24 +138,15 @@ Partial update: only set fields are sent.
 
 Deletes the incoming invoice.
 
-#### `cancel(int $id): void`
+#### `pdf(int $id): DocumentPdf` / `pdfContent(int $id): string`
 
-Sets the status to `CANCELED`. Errors are thrown as exceptions.
-
-#### `uncancel(int $id): void`
-
-Reverts a cancellation.
-
-#### `upload(int $id, string $base64Pdf): void`
-
-Attaches a PDF to the document. Expects content that is **already Base64-encoded**; the method doesn't encode it.
+Returns the file stored with the incoming: `pdf()` as a [`DocumentPdf`](invoices.md) (metadata plus Base64 content, `documentId` is the incoming's ID), `pdfContent()` as raw bytes. Without a stored file Billomat answers 404, so both throw a `NotFoundException`. Billomat stores the file anew, so the bytes differ from the uploaded ones.
 
 ```php
-$billomat->incomings->upload(
-    $incoming->id,
-    base64_encode(file_get_contents('/tmp/invoice.pdf')),
-);
+file_put_contents('/tmp/receipt.pdf', $billomat->incomings->pdfContent($incoming->id));
 ```
+
+The file itself is attached with the `base64File` option of `create()` or `update()`; Billomat has no separate upload endpoint, and no cancel/uncancel for incomings either.
 
 ### Incoming comments
 
@@ -444,7 +434,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ## Pitfalls
 
-- **`upload()` doesn't encode.** The string must already be Base64-encoded; passing `file_get_contents()` directly results in broken PDFs on the server. Always use `base64_encode(file_get_contents(...))`. The same applies to the `base64File` option.
+- **`base64File` isn't encoded for you.** The string must already be Base64-encoded; passing `file_get_contents()` directly is rejected. Always use `base64_encode(file_get_contents(...))`.
 - **Status is read-only.** You can't set `IncomingStatus` via `IncomingCreateOptions`/`IncomingUpdateOptions`; Billomat derives it from the due date, cancellation and the sum of payments. Status changes happen only via `cancel()`/`uncancel()` and `markIncomingAsPaid` on payments.
 - **`markIncomingAsPaid` is always sent.** Unlike the other optional fields, `IncomingPaymentCreateOptions::toArray()` doesn't filter it out; `false` ends up as `mark_incoming_as_paid=0` in the payload. Leave it unset (`false`) for partial payments.
 - **`tag` node in `cloud()`.** For `GET /incoming-tags` without `incoming_id`, Billomat returns the node `tag` (with `count`), not `incoming-tag`. `$billomat->incomings->tags` handles both paths internally; cloud entries have a different shape than single tags and are hydrated into a separate read model.
@@ -488,15 +478,11 @@ $opts = new IncomingCreateOptions(
     totalNet: Money::of('300.00'),
     currencyCode: 'EUR',
     label: 'Hosting May 2026',
+    // 2) Attach the PDF right away
+    base64File: base64_encode((string) file_get_contents('/tmp/invoice-may-2026.pdf')),
 );
 
 $incoming = $billomat->incomings->create($opts);
-
-// 2) Attach the PDF
-$billomat->incomings->upload(
-    $incoming->id,
-    base64_encode((string) file_get_contents('/tmp/invoice-may-2026.pdf')),
-);
 
 // 3) Add a tag to make filtering easier
 $billomat->incomings->tags->create(

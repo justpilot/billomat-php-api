@@ -23,7 +23,7 @@ $billomat = BillomatClient::create(
 | `apiKey` | `string` | — | API key from `https://<billomatId>.billomat.net/app/settings/api`. Required. Sent as the `X-BillomatApiKey` header. |
 | `appId` | `?string` | `null` | Only for registered third-party apps. Header `X-AppId`. |
 | `appSecret` | `?string` | `null` | Only for registered third-party apps. Header `X-AppSecret`. Sent only when both `appId` and `appSecret` are set. |
-| `timeout` | `float` | `10.0` | Timeout in seconds per request. Applies only to the client the SDK creates itself; a custom `httpClient` configures its own timeout. |
+| `timeout` | `float` | `30.0` | Timeout in seconds per request (some Billomat endpoints, e.g. uploading a template, take over 10 s). Applies only to the client the SDK creates itself; a custom `httpClient` configures its own timeout. |
 | `httpClient` | `?ClientInterface` | `null` | Optional custom PSR-18 client (`Psr\Http\Client\ClientInterface`). If `null`, the SDK uses Symfony's `Psr18Client` with `timeout` when `symfony/http-client` is installed, otherwise the client found by `php-http/discovery`. |
 | `retry` | `RetryPolicy` | `new RetryPolicy()` | Automatic retries on 429 and transient errors (see [Retries](#retries-retrypolicy)). `RetryPolicy::none()` disables them. |
 | `language` | `?string` | `'de-de'` | Value of the `Accept-Language` header, e.g. `'en-gb'` for English error messages. `null` omits the header. |
@@ -38,7 +38,7 @@ public static function create(
     string $apiKey,
     ?string $appId = null,
     ?string $appSecret = null,
-    float $timeout = 10.0,
+    float $timeout = 30.0,
     ?ClientInterface $httpClient = null,
     RetryPolicy $retry = new RetryPolicy(),
     ?string $language = 'de-de',

@@ -6,6 +6,11 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Added
+
+- **`incomings->pdf()` and `pdfContent()`** for `GET /incomings/{id}/pdf`: the file stored with an incoming, as `DocumentPdf` (`documentId` is the incoming's ID) or raw bytes. Without a stored file Billomat answers 404 (`NotFoundException`).
+- **`InvoiceGroup` has `$extra` and `toArray()`** like the other read models.
+
 ### Fixed
 
 - **`TaxSummary` maps every field of a tax row.** Besides `name`, `rate` and `amount`, Billomat sends the net and gross amount per rate, each unrounded and rounded: `amountPlain`, `amountRounded`, `amountNet`, `amountNetPlain`, `amountNetRounded`, `amountGross`, `amountGrossPlain`, `amountGrossRounded` (all `?Money`). They were dropped silently until now. Like the generated models, `TaxSummary` now also has `$extra` for fields the SDK doesn't map yet.
@@ -23,7 +28,12 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - **Comment action keys go into `CommentFilter`.** `comments->list($parentId, $actionKeys, $filters)` is `list($parentId, $filters)` like every other list; the new `CommentFilter` carries `actionKeys` besides sorting and pagination: `list($id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT]))`. Same for `listPage()` and `iterateAll()`. The Rector set converts 3.x `listByInvoice($id, $actionKeys)`.
 - **Attachments are `Attachment` objects.** `EmailOptions::$attachments` and `MailOptions::$attachments` are `list<Attachment>` instead of arrays with the wire keys `mimetype`/`base64file`; `Attachment::fromFile()` and `fromBinary()` encode the content, `withAttachment()` appends one.
 - **Parent ID parameters are `$parentId` everywhere.** `contacts->list()`/`listPage()`/`iterateAll()` (was `$clientId`), `reminders->items` (was `$reminderId`) and `recurrings->emailReceivers` (was `$recurringId`) now match the other sub-resources. `search->query()` takes `$filters` instead of `$extraFilters`. Only relevant for named arguments; the Rector set renames them, including 3.x `query:`.
+- **The default timeout is 30 seconds instead of 10.** Uploading a template takes Billomat about 11 seconds (measured in the sandbox); with 10 seconds the SDK threw a `TransportException` although Billomat created the template. Only applies to the HTTP client the SDK creates itself.
 - **`BillomatHttpClient`'s `$sleep` test hook is the last constructor parameter** and marked internal; `$logger` and `$events` move up one position. `AbstractApi::__construct()` is `@internal`, and `BillomatHttpClientInterface` says that own implementations are not covered by the BC promise.
+
+### Removed
+
+- **Endpoints Billomat doesn't have.** Checked against the API docs and the sandbox: `uploadSignature()` on offers, confirmations, delivery notes and letters (Billomat: "no signature upload supported for this document type"; only invoices, credit notes and reminders accept signed PDFs), `letters->upload()` and `incomings->upload()` ("method not found"), `incomings->cancel()` and `uncancel()` ("cancellation not supported"). Every call failed with an exception. Attach the file of an incoming with the `base64File` option of `create()`/`update()` instead. See [UPGRADE-4.0.md](UPGRADE-4.0.md#methods-for-endpoints-billomat-doesnt-have-are-gone).
 
 ## [4.0.0-alpha.2] - 2026-10-26
 

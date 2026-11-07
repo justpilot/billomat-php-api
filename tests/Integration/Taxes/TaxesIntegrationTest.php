@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\Taxes;
 
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
+use Justpilot\Billomat\Api\TaxRateUpdateOptions;
 use Justpilot\Billomat\Model\TaxRate;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -73,10 +74,15 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($name, $fetched->name);
         self::assertSame($rate, $fetched->rate);
 
-        // 3) löschen
+        // 3) Teil-Update: nur der Name, der Satz muss bleiben
+        $renamed = $billomat->taxes->update($taxId, new TaxRateUpdateOptions(name: $name.' (umbenannt)'));
+        self::assertSame($name.' (umbenannt)', $renamed->name);
+        self::assertSame($rate, $billomat->taxes->getOrFail($taxId)->rate);
+
+        // 4) löschen
         $billomat->taxes->delete($taxId);
 
-        // 4) sicherstellen, dass er weg ist (get() gibt null zurück)
+        // 5) sicherstellen, dass er weg ist (get() gibt null zurück)
         $afterDelete = $billomat->taxes->get($taxId);
         self::assertNull($afterDelete);
     }

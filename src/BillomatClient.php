@@ -178,7 +178,7 @@ final class BillomatClient
         string $apiKey,
         ?string $appId = null,
         ?string $appSecret = null,
-        float $timeout = 10.0,
+        float $timeout = 30.0,
         ?ClientInterface $httpClient = null,
         RetryPolicy $retry = new RetryPolicy(),
         ?string $language = 'de-de',

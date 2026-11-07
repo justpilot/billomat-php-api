@@ -28,7 +28,7 @@ final readonly class BillomatConfig
         public ?string $appId = null,
         public ?string $appSecret = null,
         public string $baseUri = 'https://%s.billomat.net/api/',
-        public float $timeout = 10.0,
+        public float $timeout = 30.0,
         public RetryPolicy $retry = new RetryPolicy(),
         public ?string $language = 'de-de',
     ) {

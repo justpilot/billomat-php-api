@@ -8,7 +8,9 @@ use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\Incoming;
 use Justpilot\Billomat\Model\IncomingComment;
@@ -31,9 +33,7 @@ use NoDiscard;
  *  - POST   /incomings
  *  - PUT    /incomings/{id}
  *  - DELETE /incomings/{id}
- *  - PUT    /incomings/{id}/cancel
- *  - PUT    /incomings/{id}/uncancel
- *  - PUT    /incomings/{id}/upload  (PDF des Belegs hochladen)
+ *  - GET    /incomings/{id}/pdf
  */
 final class IncomingsApi extends AbstractApi
 {
@@ -173,23 +173,28 @@ final class IncomingsApi extends AbstractApi
         $this->deleteVoid("/incomings/{$id}");
     }
 
-    public function cancel(int $id): void
+    /**
+     * Ruft das hinterlegte PDF einer Eingangsrechnung als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /incomings/{id}/pdf. Ohne hinterlegte Datei antwortet Billomat mit 404
+     * ({@see NotFoundException}). Die rohen Bytes liefert {@see pdfContent()}.
+     */
+    #[NoDiscard]
+    public function pdf(int $id): DocumentPdf
     {
-        $this->putVoid("/incomings/{$id}/cancel");
-    }
+        $data = $this->getJson("/incomings/{$id}/pdf");
 
-    public function uncancel(int $id): void
-    {
-        $this->putVoid("/incomings/{$id}/uncancel");
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching incoming PDF'));
     }
 
     /**
-     * Lädt ein PDF zur Eingangsrechnung hoch.
+     * Ruft das hinterlegte PDF einer Eingangsrechnung als binären Inhalt ab (GET /incomings/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
      */
-    public function upload(int $id, string $base64Pdf): void
+    #[NoDiscard]
+    public function pdfContent(int $id): string
     {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/incomings/{$id}/upload", $payload);
+        return $this->getPdf("/incomings/{$id}/pdf", ['format' => 'pdf']);
     }
 }

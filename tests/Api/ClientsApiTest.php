@@ -16,6 +16,7 @@ use Justpilot\Billomat\Model\Client;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
@@ -723,5 +724,84 @@ final class ClientsApiTest extends TestCase
 
         self::assertCount(3, $collected);
         self::assertSame(2, $requests);
+    }
+
+    #[Test]
+    public function iterateAllKeepsGoingWhenBillomatCapsThePageSize(): void
+    {
+        // Angefragt werden 5 pro Seite, Billomat liefert (und meldet) nur 3.
+        // Früher brach die Iteration nach Seite 1 ab, weil 3 < 5.
+        $perPage = [];
+
+        $mock = new MockHttpClient(static function (string $method, string $url) use (&$perPage): MockResponse {
+            $query = [];
+            parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+            $page = (int) ($query['page'] ?? 1);
+            $perPage[] = $query['per_page'] ?? null;
+
+            $ids = \array_slice(range(1, 7), ($page - 1) * 3, 3);
+
+            return new MockResponse(json_encode(['clients' => [
+                'client' => array_map(static fn (int $id): array => ['id' => $id, 'name' => "C{$id}"], $ids),
+                '@page' => (string) $page,
+                '@per_page' => '3',
+                '@total' => '7',
+            ]], JSON_THROW_ON_ERROR));
+        });
+
+        $api = new ClientsApi(new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key')));
+
+        $ids = array_map(static fn (Client $c): ?int => $c->id, iterator_to_array($api->iterateAll(pageSize: 5), preserve_keys: false));
+
+        self::assertSame([1, 2, 3, 4, 5, 6, 7], $ids);
+        self::assertSame(['5', '5', '5'], $perPage);
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function pageSizes(): iterable
+    {
+        yield 'über dem Billomat-Maximum' => [5000, '1000'];
+        yield 'genau das Maximum' => [1000, '1000'];
+        yield 'null' => [0, '1'];
+        yield 'negativ' => [-3, '1'];
+    }
+
+    #[Test]
+    #[DataProvider('pageSizes')]
+    public function iterateAllClampsThePageSizeToBillomatsLimits(int $pageSize, string $expected): void
+    {
+        $perPage = null;
+
+        $mock = new MockHttpClient(static function (string $method, string $url) use (&$perPage): MockResponse {
+            $query = [];
+            parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+            $perPage = $query['per_page'] ?? null;
+
+            return new MockResponse('{"clients":{"client":[],"@page":"1","@per_page":"1","@total":"0"}}');
+        });
+
+        $api = new ClientsApi(new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key')));
+
+        self::assertSame([], iterator_to_array($api->iterateAll(pageSize: $pageSize)));
+        self::assertSame($expected, $perPage);
+    }
+
+    #[Test]
+    public function iterateAllStopsOnAnEmptyPageWithoutMetadata(): void
+    {
+        $requests = 0;
+
+        $mock = new MockHttpClient(static function () use (&$requests): MockResponse {
+            ++$requests;
+
+            return new MockResponse($requests > 5 ? '{"clients":{"client":[{"id":"9"}]}}' : '{"clients":""}');
+        });
+
+        $api = new ClientsApi(new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key')));
+
+        self::assertSame([], iterator_to_array($api->iterateAll()));
+        self::assertSame(1, $requests);
     }
 }

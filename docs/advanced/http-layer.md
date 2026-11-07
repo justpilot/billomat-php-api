@@ -37,17 +37,17 @@ $billomat = BillomatClient::create(
 
 Mit diesem Pattern bekommst du Logging, Tracing, Retry, Auth-Decoration etc., ohne SDK-internen Code zu ändern.
 
-## Eigenheit 1: `+` bleibt im Query-String literal
+## Eigenheit 1: das `+` in `order_by`
 
-`http_build_query` (PHP-Standard) konvertiert `+` immer zu `%2B`. Billomat akzeptiert `%2B` aber nicht als Trennzeichen in zusammengesetzten Werten — typisches Beispiel: Sortierung mit `order_by=date+DESC`. Würde das SDK `%2B` schicken, würde Billomat den Filter ignorieren.
+Billomat dokumentiert die Sortierung als `order_by=<feld>+ASC|DESC`. Das `+` steht dabei für ein Leerzeichen: Billomat akzeptiert `date+DESC` und `date%20DESC`, lehnt `date%2BDESC` aber ab. In jedem anderen Wert liest Billomat ein unkodiertes `+` ebenfalls als Leerzeichen: `email=plus+test@example.com` findet nichts, `email=plus%2Btest%40example.com` findet den Kunden.
 
-Lösung: `BillomatHttpClient::buildBillomatQuery()` baut den Query-String von Hand. Werte werden mit `rawurlencode()` codiert, anschließend wird `%2B` wieder durch `+` ersetzt. Resultat:
+Lösung: `BillomatHttpClient::buildBillomatQuery()` baut den Query-String von Hand und codiert jeden Wert mit `rawurlencode()`. Nur in `order_by` wird das `+` zwischen Feld und Richtung vorher durch ein Leerzeichen ersetzt. Resultat:
 
 ```text
-?order_by=date+DESC&per_page=50
+?order_by=date%20DESC&per_page=50&email=plus%2Btest%40example.com
 ```
 
-So funktionieren alle Filter, die auf der Billomat-Doku `<feld>+ASC` oder `<feld>+DESC` heißen, ohne Workaround.
+So kommen die von Billomat dokumentierten Sortierwerte (`date+DESC`) und Filterwerte mit `+` (E-Mail-Adressen, Telefonnummern) so an, wie sie gemeint sind.
 
 ## Eigenheit 2: Arrays als `key[]=v1&key[]=v2`
 
@@ -77,7 +77,7 @@ Ergibt:
 | `int`, `float` | `(string)` |
 | `string` | unverändert |
 
-Anschließend `rawurlencode`, danach die `%2B`-→-`+`-Korrektur.
+Anschließend `rawurlencode` (`+` → `%2B`, Leerzeichen → `%20`); in `order_by` wird ein `+` vorher durch ein Leerzeichen ersetzt.
 
 Wenn du strukturierte Daten serialisieren willst (z. B. `DateTimeImmutable`), wandle sie vorher in einen String — sonst landet ein PHP-Object-Cast im Query-String.
 

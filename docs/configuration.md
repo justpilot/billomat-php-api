@@ -142,6 +142,6 @@ Mehr dazu in [docs/testing.md](testing.md).
 Billomat erwartet einige Query-String-Formate, die `http_build_query` nicht standardkonform abbilden würde. Das SDK behandelt diese Quirks in `BillomatHttpClient::buildBillomatQuery()`:
 
 - Array-Werte werden als `key[]=v1&key[]=v2` serialisiert.
-- `+` bleibt im Wert literal (z. B. `order_by=date+DESC`), weil Billomat `%2B` nicht als `+` interpretiert.
+- In `order_by` wird das `+` zwischen Feld und Richtung (`date+DESC`) als Leerzeichen (`%20`) gesendet, weil Billomat dort `%2B` ablehnt. In allen anderen Werten wird ein `+` als `%2B` gesendet, damit z. B. `email`-Filter mit `a+b@example.com` funktionieren.
 
 Wenn du eigene Filter über `list($filters)` weitergibst, ist beides transparent. Hintergrund: [docs/advanced/http-layer.md](advanced/http-layer.md).

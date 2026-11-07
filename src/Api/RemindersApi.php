@@ -174,7 +174,7 @@ final class RemindersApi extends AbstractApi
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
-        $this->postJson("/reminders/{$id}/email", $payload);
+        $this->postVoid("/reminders/{$id}/email", $payload);
     }
 
     /**
@@ -188,7 +188,7 @@ final class RemindersApi extends AbstractApi
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 
-        $this->postJson("/reminders/{$id}/mail", $payload);
+        $this->postVoid("/reminders/{$id}/mail", $payload);
     }
 
     public function uploadSignature(int $id, string $base64Pdf): void

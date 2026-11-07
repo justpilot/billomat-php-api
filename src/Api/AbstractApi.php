@@ -129,6 +129,21 @@ abstract class AbstractApi
     }
 
     /**
+     * Führt einen POST-Request aus, dessen Response-Body uns nicht interessiert
+     * (z. B. POST /invoices/{id}/email, /mail).
+     *
+     * Billomat antwortet auf diese Aktionen mit 200 OK und leerem Body (Content-Type
+     * `text/html`); die Doku beschreibt keine Antwort. HTTP-Fehler wirft bereits
+     * {@see BillomatHttpClientInterface::request()}.
+     *
+     * @param array<string,mixed> $body
+     */
+    protected function postVoid(string $path, array $body): void
+    {
+        $this->http->request('POST', $path, [], $body);
+    }
+
+    /**
      * Führt einen PUT-Request aus, dessen Response-Body uns nicht interessiert
      * (z. B. PUT /invoices/{id}/complete, /cancel, /uncancel, …).
      *

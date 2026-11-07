@@ -9,6 +9,8 @@ use Justpilot\Billomat\Api\ConfirmationsApi;
 use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
+use Justpilot\Billomat\Api\EmailOptions;
+use Justpilot\Billomat\Api\InvoicesApi;
 use Justpilot\Billomat\Api\LettersApi;
 use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Api\OffersApi;
@@ -35,6 +37,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
  * Aktionen, die vor 4.0.0-beta.1 dazugekommen sind: Pixelletter-Versand aller Dokumenttypen,
  * `recurrings->stop()`, `emailReceivers->update()` und die Avatare von Kontakten und Benutzern.
  */
+#[CoversClass(InvoicesApi::class)]
 #[CoversClass(OffersApi::class)]
 #[CoversClass(ConfirmationsApi::class)]
 #[CoversClass(CreditNotesApi::class)]
@@ -80,7 +83,7 @@ final class ActionEndpointsTest extends TestCase
     #[DataProvider('mailers')]
     public function mailSendsThePixelletterOptions(string $slug, Closure $mail): void
     {
-        $mail($this->client('{}'), new MailOptions(color: true, duplex: false, paperWeight: 90));
+        $mail($this->client(''), new MailOptions(color: true, duplex: false, paperWeight: 90));
 
         self::assertSame('POST', $this->request->method);
         self::assertSame("https://mycompany.billomat.net/api/{$slug}/7/mail", $this->request->url);
@@ -94,10 +97,50 @@ final class ActionEndpointsTest extends TestCase
     #[DataProvider('mailers')]
     public function mailWithoutOptionsSendsAnEmptyEnvelope(string $slug, Closure $mail): void
     {
-        $mail($this->client('{}'), null);
+        $mail($this->client(''), null);
 
         self::assertSame("https://mycompany.billomat.net/api/{$slug}/7/mail", $this->request->url);
         self::assertSame(['mail' => []], $this->request->json());
+    }
+
+    /**
+     * @return iterable<string, array{string, Closure(BillomatClient): void}>
+     */
+    public static function senders(): iterable
+    {
+        $email = new EmailOptions(to: ['kunde@example.com']);
+
+        yield 'invoices email' => ['invoices/7/email', static fn (BillomatClient $b) => $b->invoices->email(7, $email)];
+        yield 'offers email' => ['offers/7/email', static fn (BillomatClient $b) => $b->offers->email(7, $email)];
+        yield 'confirmations email' => ['confirmations/7/email', static fn (BillomatClient $b) => $b->confirmations->email(7, $email)];
+        yield 'credit notes email' => ['credit-notes/7/email', static fn (BillomatClient $b) => $b->creditNotes->email(7, $email)];
+        yield 'delivery notes email' => ['delivery-notes/7/email', static fn (BillomatClient $b) => $b->deliveryNotes->email(7, $email)];
+        yield 'letters email' => ['letters/7/email', static fn (BillomatClient $b) => $b->letters->email(7, $email)];
+        yield 'reminders email' => ['reminders/7/email', static fn (BillomatClient $b) => $b->reminders->email(7, $email)];
+        yield 'invoices mail' => ['invoices/7/mail', static fn (BillomatClient $b) => $b->invoices->mail(7)];
+        yield 'offers mail' => ['offers/7/mail', static fn (BillomatClient $b) => $b->offers->mail(7)];
+        yield 'confirmations mail' => ['confirmations/7/mail', static fn (BillomatClient $b) => $b->confirmations->mail(7)];
+        yield 'credit notes mail' => ['credit-notes/7/mail', static fn (BillomatClient $b) => $b->creditNotes->mail(7)];
+        yield 'delivery notes mail' => ['delivery-notes/7/mail', static fn (BillomatClient $b) => $b->deliveryNotes->mail(7)];
+        yield 'letters mail' => ['letters/7/mail', static fn (BillomatClient $b) => $b->letters->mail(7)];
+        yield 'reminders mail' => ['reminders/7/mail', static fn (BillomatClient $b) => $b->reminders->mail(7)];
+    }
+
+    /**
+     * Billomat beantwortet `email` und `mail` mit 200 OK, leerem Body und `text/html`
+     * (in der Sandbox gemessen, die Doku beschreibt keine Antwort). Der Versand ist dann
+     * erfolgt; eine Exception würde Aufrufer zu einem doppelten Versand verleiten.
+     *
+     * @param Closure(BillomatClient): void $send
+     */
+    #[Test]
+    #[DataProvider('senders')]
+    public function sendingAcceptsBillomatsEmptyResponse(string $path, Closure $send): void
+    {
+        $send($this->client('', ['content-type' => 'text/html; charset=UTF-8']));
+
+        self::assertSame('POST', $this->request->method);
+        self::assertSame("https://mycompany.billomat.net/api/{$path}", $this->request->url);
     }
 
     #[Test]
@@ -147,13 +190,16 @@ final class ActionEndpointsTest extends TestCase
         self::assertSame("https://mycompany.billomat.net/api/{$slug}/4/avatar", $this->request->url);
     }
 
-    private function client(string $body): BillomatClient
+    /**
+     * @param array<string, string> $headers
+     */
+    private function client(string $body, array $headers = []): BillomatClient
     {
         $request = $this->request;
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($request, $body): MockResponse {
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($request, $body, $headers): MockResponse {
             $request->record($method, $url, $options);
 
-            return new MockResponse($body);
+            return new MockResponse($body, ['response_headers' => $headers]);
         });
 
         return new BillomatClient(new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'), new Psr18Client($mock));

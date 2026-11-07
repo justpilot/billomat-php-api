@@ -104,7 +104,7 @@ final readonly class Reminder
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Bereits bezahlter Betrag der Rechnung. */
         public ?Money $paidAmount = null,
         /** Offener Betrag der Rechnung. */
@@ -152,7 +152,7 @@ final readonly class Reminder
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toNestedList($data['reminder-items'] ?? null, 'reminder-item', 'id', ReminderItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             paidAmount: ScalarCaster::toMoneyOrNull($data['paid_amount'] ?? null),
             openAmount: ScalarCaster::toMoneyOrNull($data['open_amount'] ?? null),
             reminderLevel: ScalarCaster::toIntOrNull($data['reminder_level'] ?? null),
@@ -192,7 +192,7 @@ final readonly class Reminder
             'reminder_text_id' => $this->reminderTextId,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'paid_amount' => $this->paidAmount?->toString(),
             'open_amount' => $this->openAmount?->toString(),
             'reminder_level' => $this->reminderLevel,

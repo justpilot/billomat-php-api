@@ -103,7 +103,7 @@ $piece = $billomat->units->get(42);
 | `id` | `int` |
 | `name` | `string` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 
 ### `users`
 
@@ -128,7 +128,7 @@ $all = $billomat->users->list();
 | `salutation` | `?string` |
 | `roleId` | `?int` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `locale` | `?string` |
 | `timezone` | `?string` |
 | `isAccountOwner` | `?bool` (account owner) |
@@ -211,7 +211,7 @@ $texts = $billomat->reminderTexts->list(['order_by' => OrderBy::asc('sorting')->
 | `chargeName` | `?string` |
 | `chargeDescription` | `?string` |
 | `chargeAmount` | `?Money` |
-| `customfield` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 
 ### `roles`
 

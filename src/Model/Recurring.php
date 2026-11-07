@@ -187,7 +187,7 @@ final readonly class Recurring
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Summe der Rabatte. */
         public ?Money $totalReduction = null,
         /** Gesamtbetrag netto vor Rabatt. */
@@ -196,7 +196,11 @@ final readonly class Recurring
         public ?Money $totalGrossUnreduced = null,
         /** Skontobetrag. */
         public ?Money $discountAmount = null,
-        /** Status der Abo-Rechnung. */
+        /**
+         * Status der Abo-Rechnung, z. B. "STARTED".
+         *
+         * Billomat dokumentiert die möglichen Werte nicht, deshalb ein String statt eines Enums.
+         */
         public ?string $status = null,
         /** Läuft gerade eine Rechnungserzeugung? */
         public ?bool $inProgress = null,
@@ -274,7 +278,7 @@ final readonly class Recurring
             taxes: ListCaster::toNestedList($data['taxes'] ?? null, 'tax', 'name', TaxSummary::fromArray(...)),
             items: ListCaster::toNestedList($data['recurring-items'] ?? null, 'recurring-item', 'id', RecurringItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
             totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
             totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
@@ -343,7 +347,7 @@ final readonly class Recurring
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'total_reduction' => $this->totalReduction?->toString(),
             'total_net_unreduced' => $this->totalNetUnreduced?->toString(),
             'total_gross_unreduced' => $this->totalGrossUnreduced?->toString(),

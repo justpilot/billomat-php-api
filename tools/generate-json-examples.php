@@ -208,7 +208,7 @@ function requests(): array
         'inbox-documents.create' => static fn (BillomatClient $b): object => $b->inboxDocuments->create(new InboxDocumentCreateOptions(
             filename: 'receipt.pdf',
             mimeType: 'application/pdf',
-            base64file: 'JVBERi0xLjQK…',
+            base64File: 'JVBERi0xLjQK…',
         )),
         'taxes.create' => static fn (BillomatClient $b): object => $b->taxes->create(new TaxRateCreateOptions(name: 'VAT reduced', rate: 7.0)),
         'templates.create' => static fn (BillomatClient $b): object => $b->templates->create(new TemplateCreateOptions(

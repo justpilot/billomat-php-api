@@ -74,16 +74,19 @@ final class PdfResponseTest extends TestCase
     public function pdfReturnsTheJsonModel(string $class, string $path): void
     {
         $url = null;
-        $api = new $class($this->http(static function (string $method, string $requested) use (&$url): MockResponse {
+        // invoices → invoice_id, credit-notes → credit_note_id, …
+        $documentIdField = str_replace('-', '_', substr($path, 0, -1)).'_id';
+        $api = new $class($this->http(static function (string $method, string $requested) use (&$url, $documentIdField): MockResponse {
             $url = $requested;
 
-            return new MockResponse('{"pdf":{"id":"9","filename":"x.pdf","mimetype":"application/pdf","base64file":"JVBERi0="}}');
+            return new MockResponse('{"pdf":{"id":"9","'.$documentIdField.'":"5","filename":"x.pdf","mimetype":"application/pdf","base64file":"JVBERi0="}}');
         }));
 
         $pdf = $api->pdf(5, PdfType::PRINT);
 
         self::assertSame(9, $pdf->id);
-        self::assertSame('JVBERi0=', $pdf->base64file);
+        self::assertSame(5, $pdf->documentId);
+        self::assertSame('JVBERi0=', $pdf->base64File);
         self::assertSame('https://mycompany.billomat.net/api/'.$path.'/5/pdf?type=print', $url);
     }
 

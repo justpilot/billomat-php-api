@@ -13,9 +13,9 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Confirmation;
 use Justpilot\Billomat\Model\ConfirmationComment;
 use Justpilot\Billomat\Model\ConfirmationItem;
-use Justpilot\Billomat\Model\ConfirmationPdf;
 use Justpilot\Billomat\Model\ConfirmationTag;
 use Justpilot\Billomat\Model\ConfirmationTagCloudEntry;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
@@ -233,11 +233,11 @@ final class ConfirmationsApi extends AbstractApi
      * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null): ConfirmationPdf
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
         $data = $this->getJson("/confirmations/{$id}/pdf", self::pdfQuery($type));
 
-        return ConfirmationPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching confirmation PDF'));
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching confirmation PDF'));
     }
 
     /**

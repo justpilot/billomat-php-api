@@ -40,22 +40,22 @@ A supplier is the counterpart of a [client](clients.md) on the purchasing side: 
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($supplierId, $filters?)` | GET | `/supplier-tags?supplier_id={id}` |
-| `listPage($supplierId, $filters?)` / `iterateAll($supplierId, $filters?, $pageSize?)` | GET | `/supplier-tags?supplier_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/supplier-tags?supplier_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/supplier-tags?supplier_id={id}` (paginated) |
 | `cloud()` | GET | `/supplier-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/supplier-tags/{id}` |
-| `create($supplierId, $options)` | POST | `/supplier-tags` |
+| `create($parentId, $options)` | POST | `/supplier-tags` |
 | `delete($id)` | DELETE | `/supplier-tags/{id}` |
 
 ### `/supplier-property-values`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($supplierId?, $filters?)` | GET | `/supplier-property-values` |
-| `listPage($supplierId?, $filters?)` | GET | `/supplier-property-values` |
-| `iterateAll($supplierId?, $filters?, $pageSize?)` | GET | `/supplier-property-values` (all pages) |
+| `list($parentId?, $filters?)` | GET | `/supplier-property-values` |
+| `listPage($parentId?, $filters?)` | GET | `/supplier-property-values` |
+| `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/supplier-property-values` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/supplier-property-values/{id}` |
-| `create($supplierId, $options)` | POST | `/supplier-property-values` |
+| `create($parentId, $options)` | POST | `/supplier-property-values` |
 
 ## Suppliers
 
@@ -187,7 +187,7 @@ Mirrors `SupplierCreateOptions`, but `name` is no longer required and every fiel
 | `creditorIdentifier` | `?string` |
 | `costsGross` | `?Money` (read-only, see [Money](../concepts/money.md)) |
 | `costsNet` | `?Money` (read-only) |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
 ## Supplier tags
@@ -226,7 +226,7 @@ The supplier ID isn't part of the options: pass it as the first argument of `cre
 | `id` | `int` |
 | `supplierId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ### Read model: `SupplierTagCloudEntry`
@@ -290,7 +290,7 @@ Both values are required and set via the constructor.
 | `name` | `?string` (name from the property definition) |
 | `value` | `mixed` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Enums used

@@ -312,7 +312,7 @@ Same fields as `ClientCreateOptions`, all optional. Only fields that are not `nu
 | `defaultPaymentTypes` | `list<PaymentType>` | |
 | `revenueGross`, `revenueNet` | `?Money` | Revenue with this client (read-only), see [Money](../concepts/money.md) |
 | `facturxIdentifier`, `sellerIdentifier` | `?string` | E-invoicing (ZUGFeRD/Factur-X), see Pitfalls |
-| `customfield` | `?string` | Free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `customField` | `?string` | Free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
 | `extra` | `array<string, mixed>` | Fields Billomat returns that the SDK doesn't map (yet), see [Models](../concepts/models.md) |
 
 `Client::fromArray(array $data): self` hydrates a model from the `client` node of the API response. `toArray()` renders the model back with Billomat field names (snake_case). It's meant for debugging and logging, **not** for update calls.
@@ -323,11 +323,11 @@ Stores the values for the client properties defined in [`properties.md`](propert
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($clientId?, $filters?)` | GET | `/client-property-values` |
-| `listPage($clientId?, $filters?)` | GET | `/client-property-values` |
-| `iterateAll($clientId?, $filters?, $pageSize?)` | GET | `/client-property-values` (all pages) |
+| `list($parentId?, $filters?)` | GET | `/client-property-values` |
+| `listPage($parentId?, $filters?)` | GET | `/client-property-values` |
+| `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/client-property-values` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/client-property-values/{id}` |
-| `create($clientId, $options)` | POST | `/client-property-values` |
+| `create($parentId, $options)` | POST | `/client-property-values` |
 
 ```php
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
@@ -375,7 +375,7 @@ The client ID isn't part of the options: pass it as the first argument of `creat
 | `name` | `?string` (name from the property definition) |
 | `value` | `mixed` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Enums used

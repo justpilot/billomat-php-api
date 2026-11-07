@@ -52,7 +52,7 @@ return static function (string $prefix, string $label, string $parentField, ?str
             'type' => 'string',
             'readOnly' => true,
             'doc' => 'Roher ActionKey-String aus der API (auch wenn das Enum den Wert nicht kennt).',
-            'model' => ['property' => 'actionkeyRaw', 'sources' => ['actionkey'], 'key' => 'actionkey'],
+            'model' => ['property' => 'actionKeyRaw', 'sources' => ['actionkey'], 'key' => 'actionkey'],
         ],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
     ];
@@ -84,7 +84,7 @@ return static function (string $prefix, string $label, string $parentField, ?str
                 'Hinweis zum `actionkey`:',
                 ' - Bei System-Kommentaren (Statuswechsel, Versand, Zahlung) ist das Feld gesetzt.',
                 ' - Bei manuell angelegten Kommentaren ist das Feld typischerweise leer.',
-                ' - Unbekannte Werte werden über das Enum als null geparst; `actionkeyRaw`',
+                ' - Unbekannte Werte werden über das Enum als null geparst; `actionKeyRaw`',
                 '   enthält den ursprünglichen String aus der API.',
             ],
             // BC: toArray() gibt den rohen ActionKey unter `actionkey` aus und war schon immer so sortiert.

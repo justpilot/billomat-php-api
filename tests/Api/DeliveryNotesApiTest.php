@@ -18,7 +18,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\DeliveryNote;
-use Justpilot\Billomat\Model\DeliveryNotePdf;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
@@ -38,7 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(DeliveryNoteUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
 #[CoversClass(DeliveryNote::class)]
-#[CoversClass(DeliveryNotePdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(DeliveryNoteStatus::class)]
 #[UsesClass(DeliveryNoteItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -285,7 +285,7 @@ final class DeliveryNotesApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertSame(240, $pdf->deliveryNoteId);
+        self::assertSame(240, $pdf->documentId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
         self::assertSame('https://mycompany.billomat.net/api/delivery-notes/240/pdf', $captured->url);
     }

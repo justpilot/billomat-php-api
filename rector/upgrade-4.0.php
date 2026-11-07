@@ -17,6 +17,7 @@ declare(strict_types=1);
 use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\MailOptions;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
 use Justpilot\Billomat\Model\Enum\PaymentType;
@@ -26,6 +27,7 @@ use Justpilot\Billomat\Rector\GetItemsToPropertyRector;
 use Justpilot\Billomat\Rector\NestedSubResourceRector;
 use Justpilot\Billomat\Rector\ParentIdToCreateArgumentRector;
 use Justpilot\Billomat\Rector\PdfContentRector;
+use Justpilot\Billomat\Rector\RenamedMemberRector;
 use Justpilot\Billomat\Rector\SubResourceMap;
 use Justpilot\Billomat\Rector\SubResourceMethodRector;
 use Rector\Config\RectorConfig;
@@ -44,6 +46,7 @@ return static function (RectorConfig $rectorConfig): void {
         GetItemsToPropertyRector::class,
         ParentIdToCreateArgumentRector::class,
         PdfContentRector::class,
+        RenamedMemberRector::class,
     ]);
 
     $rectorConfig->ruleWithConfiguration(RenameMethodRector::class, [
@@ -71,6 +74,13 @@ return static function (RectorConfig $rectorConfig): void {
         'Justpilot\Billomat\Api\DeliveryNoteEmailOptions' => EmailOptions::class,
         'Justpilot\Billomat\Api\ReminderEmailOptions' => EmailOptions::class,
         'Justpilot\Billomat\Api\LetterEmailOptions' => EmailOptions::class,
+        'Justpilot\Billomat\Model\InvoicePdf' => DocumentPdf::class,
+        'Justpilot\Billomat\Model\OfferPdf' => DocumentPdf::class,
+        'Justpilot\Billomat\Model\ConfirmationPdf' => DocumentPdf::class,
+        'Justpilot\Billomat\Model\CreditNotePdf' => DocumentPdf::class,
+        'Justpilot\Billomat\Model\DeliveryNotePdf' => DocumentPdf::class,
+        'Justpilot\Billomat\Model\LetterPdf' => DocumentPdf::class,
+        'Justpilot\Billomat\Model\ReminderPdf' => DocumentPdf::class,
         ...SubResourceMap::classRenames(),
     ]);
 };

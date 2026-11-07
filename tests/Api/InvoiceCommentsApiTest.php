@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 use Justpilot\Billomat\Api\InvoicesApi;
@@ -36,6 +37,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class InvoiceCommentsApiTest extends TestCase
 {
     #[Test]
@@ -63,11 +65,11 @@ final class InvoiceCommentsApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new InvoicesApi($http)->comments;
 
-        $comments = $api->list(100, [InvoiceCommentActionKey::CREATE, InvoiceCommentActionKey::COMPLETE]);
+        $comments = $api->list(100, new CommentFilter(actionKeys: [InvoiceCommentActionKey::CREATE, InvoiceCommentActionKey::COMPLETE]));
 
         self::assertCount(2, $comments);
         self::assertContainsOnlyInstancesOf(InvoiceComment::class, $comments);
-        self::assertSame(InvoiceCommentActionKey::CREATE, $comments[0]->actionkey);
+        self::assertSame(InvoiceCommentActionKey::CREATE, $comments[0]->actionKey);
 
         $parts = parse_url($captured->url);
         self::assertSame('/api/invoice-comments', $parts['path'] ?? null);

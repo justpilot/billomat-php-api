@@ -40,7 +40,7 @@ final class InboxDocumentsIntegrationTest extends AbstractBillomatIntegrationTes
         $opts = new InboxDocumentCreateOptions(
             filename: 'it-test-'.date('His').'.pdf',
             mimeType: 'application/pdf',
-            base64file: base64_encode(self::MINIMAL_PDF),
+            base64File: base64_encode(self::MINIMAL_PDF),
         );
 
         $doc = $billomat->inboxDocuments->create($opts);

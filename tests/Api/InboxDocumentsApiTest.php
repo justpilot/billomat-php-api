@@ -111,7 +111,7 @@ final class InboxDocumentsApiTest extends TestCase
         $opts = new InboxDocumentCreateOptions(
             filename: 'beleg.pdf',
             mimeType: 'application/pdf',
-            base64file: base64_encode('PDF'),
+            base64File: base64_encode('PDF'),
         );
 
         $created = $api->create($opts);

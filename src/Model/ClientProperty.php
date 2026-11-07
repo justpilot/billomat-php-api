@@ -48,7 +48,7 @@ final readonly class ClientProperty
         /** Standardwert verwenden, wenn kein anderer Wert gesetzt ist? */
         public ?bool $isNvl = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -71,7 +71,7 @@ final readonly class ClientProperty
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
             isNvl: ScalarCaster::toBoolOrNull($data['is_nvl'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -92,7 +92,7 @@ final readonly class ClientProperty
             'type' => $this->type?->value,
             'default_value' => $this->defaultValue,
             'is_nvl' => $this->isNvl,
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
         ];
     }
 }

@@ -42,48 +42,51 @@ final class RecurringEmailReceiversApi extends AbstractSubResourceApi
     /**
      * Listet die E-Mail-Empfänger einer Abo-Rechnung.
      *
+     * @param int                                                             $parentId ID der Abo-Rechnung (`recurring_id`)
      * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<RecurringEmailReceiver>
      */
     #[NoDiscard]
-    public function list(int $recurringId, SubResourceFilter|array $filters = []): array
+    public function list(int $parentId, SubResourceFilter|array $filters = []): array
     {
-        return $this->listFor($recurringId, $filters);
+        return $this->listFor($parentId, $filters);
     }
 
     /**
      * Liefert eine einzelne Seite samt Pagination-Metadaten.
      *
+     * @param int                                                             $parentId ID der Abo-Rechnung (`recurring_id`)
      * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<RecurringEmailReceiver>
      */
     #[NoDiscard]
-    public function listPage(int $recurringId, SubResourceFilter|array $filters = []): Page
+    public function listPage(int $parentId, SubResourceFilter|array $filters = []): Page
     {
-        return $this->pageFor($recurringId, $filters);
+        return $this->pageFor($parentId, $filters);
     }
 
     /**
      * Iteriert lazy durch alle Treffer und yieldet sie einzeln.
      *
-     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
+     * @param int                                                             $parentId ID der Abo-Rechnung (`recurring_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  `page`/`per_page` werden überschrieben
      *
      * @return Generator<int, RecurringEmailReceiver>
      */
     #[NoDiscard]
-    public function iterateAll(int $recurringId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
     {
-        yield from $this->iterateFor($recurringId, $filters, $pageSize);
+        yield from $this->iterateFor($parentId, $filters, $pageSize);
     }
 
     /**
      * Fügt einer Abo-Rechnung einen E-Mail-Empfänger hinzu.
      */
-    public function create(int $recurringId, RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
+    public function create(int $parentId, RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
     {
-        return $this->createFor($recurringId, $options);
+        return $this->createFor($parentId, $options);
     }
 
     /**

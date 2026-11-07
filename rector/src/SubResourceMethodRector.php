@@ -4,21 +4,32 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Rector;
 
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\BillomatClient;
 use Override;
 use PhpParser\Node;
 use PhpParser\Node\Arg;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\BinaryOp\Coalesce;
+use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Identifier;
+use PhpParser\Node\Name\FullyQualified;
 use PHPStan\Type\ObjectType;
+use PHPStan\Type\TypeCombinator;
 use Rector\Rector\AbstractRector;
 
 /**
  * Passt Aufrufe auf 3.x-Sub-Ressourcen an die Signaturen der 4.0-Klassen an.
  *
  * - `listByInvoice($id)`, `listByOffer($id)`, … werden `list($id)`.
- * - Benannte Parent-ID-Argumente (`invoiceId: $id`) heißen bei Kommentaren, Tags und Positionen `parentId:`.
+ * - Benannte Parent-ID-Argumente (`invoiceId: $id`) heißen bei Kommentaren, Tags, Positionen,
+ *   Mahnungspositionen und E-Mail-Empfängern `parentId:`, `query:` heißt `filters:`.
+ * - Die ActionKeys von `listByInvoice($id, $actionKeys)` auf Kommentaren wandern in einen `CommentFilter`:
+ *   `list($id, new CommentFilter(actionKeys: $actionKeys))`; ein `null` fällt weg.
  * - `list($filters)`, `listPage($filters)` und `iterateAll($filters, $pageSize)` auf Zahlungen und
  *   Property-Werten bekommen benannte Argumente, weil die Parent-ID jetzt der erste Parameter ist.
  *
@@ -61,6 +72,10 @@ final class SubResourceMethodRector extends AbstractRector
             $args = array_map($this->renameParentIdArgument(...), $args);
         }
 
+        if (SubResourceMap::hasActionKeys($newClass) && str_starts_with($method, 'listBy')) {
+            $args = $this->wrapActionKeys($args);
+        }
+
         if (SubResourceMap::hasOptionalParent($newClass) && \in_array($method, self::OPTIONAL_PARENT_METHODS, true)) {
             $args = $this->nameFilterArguments($args);
         }
@@ -95,11 +110,61 @@ final class SubResourceMethodRector extends AbstractRector
     private function renameParentIdArgument(Arg $arg): Arg
     {
         $name = $arg->name?->toString();
-        if (null === $name || 'parentId' === $name || !str_ends_with($name, 'Id')) {
-            return $arg;
+        $new = match (true) {
+            null === $name, 'parentId' === $name => null,
+            'query' === $name => 'filters',
+            str_ends_with($name, 'Id') => 'parentId',
+            default => null,
+        };
+
+        return null === $new ? $arg : new Arg($arg->value, $arg->byRef, $arg->unpack, [], new Identifier($new));
+    }
+
+    /**
+     * Ersetzt das ActionKey-Argument (zweites oder `actionKeys:`) durch `new CommentFilter(actionKeys: …)`.
+     *
+     * @param array<Arg> $args
+     *
+     * @return array<Arg>
+     */
+    private function wrapActionKeys(array $args): array
+    {
+        if (array_any($args, static fn (Arg $arg): bool => $arg->unpack)) {
+            return $args;
         }
 
-        return new Arg($arg->value, $arg->byRef, $arg->unpack, [], new Identifier('parentId'));
+        $wrapped = [];
+        foreach (array_values($args) as $position => $arg) {
+            $isActionKeys = null === $arg->name ? 1 === $position : 'actionKeys' === $arg->name->toString();
+            if (!$isActionKeys) {
+                $wrapped[] = $arg;
+
+                continue;
+            }
+
+            if ($arg->value instanceof ConstFetch && $this->isName($arg->value, 'null')) {
+                continue;
+            }
+
+            $filter = new New_(new FullyQualified(CommentFilter::class), [
+                new Arg($this->nonNullActionKeys($arg->value), name: new Identifier('actionKeys')),
+            ]);
+            $wrapped[] = new Arg($filter, name: null === $arg->name ? null : new Identifier('filters'));
+        }
+
+        return $wrapped;
+    }
+
+    /**
+     * 3.x nahm `?array`, der Filter eine Liste: ein möglicherweise null-wertiger Ausdruck bekommt `?? []`.
+     */
+    private function nonNullActionKeys(Expr $value): Expr
+    {
+        if ($value instanceof Array_ || !TypeCombinator::containsNull($this->getType($value))) {
+            return $value;
+        }
+
+        return new Coalesce($value, new Array_());
     }
 
     /**

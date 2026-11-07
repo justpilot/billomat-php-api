@@ -139,7 +139,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 | `salutation` | `?string` | `salutation` |
 | `roleId` | `?int` | `role_id` |
 | `created`, `updated` | `?\DateTimeImmutable` | `created`, `updated` |
-| `customfield` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `customField` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
 | `locale` | `?string` | `locale` |
 | `timezone` | `?string` | `timezone` |
 | `isAccountOwner` | `?bool` | Account owner |

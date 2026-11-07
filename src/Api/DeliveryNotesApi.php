@@ -13,9 +13,9 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\DeliveryNoteComment;
 use Justpilot\Billomat\Model\DeliveryNoteItem;
-use Justpilot\Billomat\Model\DeliveryNotePdf;
 use Justpilot\Billomat\Model\DeliveryNoteTag;
 use Justpilot\Billomat\Model\DeliveryNoteTagCloudEntry;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
@@ -205,11 +205,11 @@ final class DeliveryNotesApi extends AbstractApi
      * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null): DeliveryNotePdf
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
         $data = $this->getJson("/delivery-notes/{$id}/pdf", self::pdfQuery($type));
 
-        return DeliveryNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching delivery note PDF'));
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching delivery note PDF'));
     }
 
     /**

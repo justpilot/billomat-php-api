@@ -51,18 +51,18 @@ final readonly class BillomatHttpClient implements BillomatHttpClientInterface
     /**
      * @param RequestFactoryInterface|null  $requestFactory Default: per php-http/discovery gefunden
      * @param StreamFactoryInterface|null   $streamFactory  Default: per php-http/discovery gefunden
-     * @param (Closure(int): void)|null     $sleep          wartet die übergebenen Millisekunden (für Tests austauschbar)
      * @param LoggerInterface|null          $logger         PSR-3: Antworten (debug), Retries (info), Fehler (notice/error)
      * @param EventDispatcherInterface|null $events         PSR-14: {@see RequestStarted}, {@see ResponseReceived}, {@see RetryScheduled}, {@see RequestFailed}
+     * @param (Closure(int): void)|null     $sleep          @internal Test-Hook: wartet die übergebenen Millisekunden; nicht Teil der BC-Zusage
      */
     public function __construct(
         private ClientInterface $client,
         private BillomatConfig $config,
         ?RequestFactoryInterface $requestFactory = null,
         ?StreamFactoryInterface $streamFactory = null,
-        ?Closure $sleep = null,
         private ?LoggerInterface $logger = null,
         private ?EventDispatcherInterface $events = null,
+        ?Closure $sleep = null,
     ) {
         $this->requestFactory = $requestFactory ?? Psr17FactoryDiscovery::findRequestFactory();
         $this->streamFactory = $streamFactory ?? Psr17FactoryDiscovery::findStreamFactory();

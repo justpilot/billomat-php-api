@@ -23,23 +23,23 @@ For each invoice, Billomat records a stream of comments: some are system-generat
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($invoiceId, $actionKeys?, $filters?)` | GET | `/invoice-comments?invoice_id={id}` |
+| `list($parentId, $filters?)` | GET | `/invoice-comments?invoice_id={id}` |
 | `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/invoice-comments?invoice_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-comments/{id}` |
-| `create($invoiceId, $options)` | POST | `/invoice-comments` |
+| `create($parentId, $options)` | POST | `/invoice-comments` |
 | `delete($id)` | DELETE | `/invoice-comments/{id}` |
 
 There is intentionally no `list()` without `invoice_id`; Billomat requires the filter.
 
 ## Methods
 
-### `list(int $invoiceId, ?array $actionKeys = null, SubResourceFilter|array $filters = []): list<InvoiceComment>`
+### `list(int $parentId, CommentFilter|array $filters = []): list<InvoiceComment>`
 
-Lists all comments of an invoice. You can optionally filter by `InvoiceCommentActionKey` values; the list is sent to Billomat comma-separated. Passing a different enum throws an `InvalidArgumentException`.
+Lists all comments of an invoice. `CommentFilter` can optionally filter by `InvoiceCommentActionKey` values (`actionKeys`); the list is sent to Billomat comma-separated (`actionkey=PAYMENT,DUNNING`). Passing a different enum throws an `InvalidArgumentException`.
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\OrderBy;
-use Justpilot\Billomat\Api\SubResourceFilter;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 
 // All comments
@@ -48,23 +48,23 @@ $all = $billomat->invoices->comments->list(98765);
 // Only payment and dunning entries
 $financial = $billomat->invoices->comments->list(
     98765,
-    [InvoiceCommentActionKey::PAYMENT, InvoiceCommentActionKey::DUNNING],
+    new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT, InvoiceCommentActionKey::DUNNING]),
 );
 
 // Newest first, 20 per page
 $latest = $billomat->invoices->comments->list(
     98765,
-    filters: new SubResourceFilter(orderBy: OrderBy::desc('created'), perPage: 20),
+    new CommentFilter(orderBy: OrderBy::desc('created'), perPage: 20),
 );
 ```
 
-`SubResourceFilter` (`orderBy`, `page`, `perPage`, `extra`) sorts and paginates. `listPage()` and `iterateAll()` take the same arguments (`iterateAll()` additionally `$pageSize`); see [Pagination](../advanced/pagination.md).
+`CommentFilter` (`actionKeys`, `orderBy`, `page`, `perPage`, `extra`, plus `withActionKeys(...)` and the other withers) filters, sorts and paginates. `listPage()` and `iterateAll()` take the same arguments (`iterateAll()` additionally `$pageSize`); see [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?InvoiceComment` / `getOrFail(int $id): InvoiceComment`
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
-### `create(int $invoiceId, InvoiceCommentCreateOptions $options): InvoiceComment`
+### `create(int $parentId, InvoiceCommentCreateOptions $options): InvoiceComment`
 
 ```php
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
@@ -77,7 +77,7 @@ $comment = $billomat->invoices->comments->create(
 );
 ```
 
-`actionkey` is optional and should be left empty for manual comments; Billomat fills it automatically for system actions.
+`actionKey` is optional and should be left empty for manual comments; Billomat fills it automatically for system actions.
 
 ### `delete(int $id): void`
 
@@ -90,7 +90,7 @@ Constructor: `new InvoiceCommentCreateOptions(string $comment, …)`. The object
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `comment` | `comment` | `string` | Required (constructor) |
-| `actionkey` | `actionkey` | `?InvoiceCommentActionKey` | Rarely set manually |
+| `actionKey` | `actionkey` | `?InvoiceCommentActionKey` | Rarely set manually |
 | `public` | `public` | `?bool` | Visible in the client's activity list (Billomat default: `false`) |
 
 `toArray()` drops `null` values.
@@ -106,13 +106,13 @@ Constructor: `new InvoiceCommentCreateOptions(string $comment, …)`. The object
 | `comment` | `?string` | |
 | `created` | `?\DateTimeImmutable` | |
 | `userId` | `?int` | `null` for system comments |
-| `actionkey` | `?InvoiceCommentActionKey` | `null` for an unknown or missing value |
-| `actionkeyRaw` | `?string` | Original API string, even if the enum doesn't know the value |
+| `actionKey` | `?InvoiceCommentActionKey` | `null` for an unknown or missing value |
+| `actionKeyRaw` | `?string` | Original API string, even if the enum doesn't know the value |
 | `public` | `?bool` | |
 | `byClient` | `?bool` | |
 | `emailId` | `?int` | |
 | `clientId` | `?int` | |
-| `customfield` | `?string` | Free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `customField` | `?string` | Free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md) |
 | `extra` | `array<string, mixed>` | Fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
 ## Enum: `InvoiceCommentActionKey`
@@ -134,7 +134,7 @@ Constructor: `new InvoiceCommentCreateOptions(string $comment, …)`. The object
 | `DUNNING` | `DUNNING` |
 | `COMMENT` | `COMMENT` |
 
-Billomat doesn't document a closed list. If new values show up, the SDK parses `actionkey` to `null` and fills `actionkeyRaw` with the original string, so nothing is lost.
+Billomat doesn't document a closed list. If new values show up, the SDK sets `actionKey` to `null` and fills `actionKeyRaw` with the original string, so nothing is lost.
 
 <!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
 ## JSON on the wire
@@ -163,6 +163,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
@@ -187,7 +188,7 @@ foreach ($billomat->invoices->comments->list($invoiceId) as $c) {
     printf(
         "[%s] %s: %s\n",
         $c->created?->format('Y-m-d H:i') ?? '???',
-        $c->actionkey?->value ?? ($c->actionkeyRaw ?? 'manual'),
+        $c->actionKey?->value ?? ($c->actionKeyRaw ?? 'manual'),
         $c->comment ?? '',
     );
 }
@@ -195,7 +196,7 @@ foreach ($billomat->invoices->comments->list($invoiceId) as $c) {
 // 3) Only the dunning history
 $dunning = $billomat->invoices->comments->list(
     $invoiceId,
-    [InvoiceCommentActionKey::DUNNING],
+    new CommentFilter(actionKeys: [InvoiceCommentActionKey::DUNNING]),
 );
 printf("Dunning entries: %d\n", count($dunning));
 ```

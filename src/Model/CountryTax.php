@@ -46,7 +46,7 @@ final readonly class CountryTax
          */
         public ?string $countryCode = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -68,7 +68,7 @@ final readonly class CountryTax
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             countryCode: ScalarCaster::toStringOrNull($data['country_code'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -88,7 +88,7 @@ final readonly class CountryTax
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
             'country_code' => $this->countryCode,
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
         ];
     }
 }

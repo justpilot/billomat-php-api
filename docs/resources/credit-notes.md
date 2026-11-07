@@ -53,10 +53,10 @@ Only credit notes in status `DRAFT` are fully editable. `update()` on a complete
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($creditNoteId, $filters?)` | GET | `/credit-note-items?credit_note_id={id}` |
-| `listPage($creditNoteId, $filters?)` / `iterateAll($creditNoteId, $filters?, $pageSize?)` | GET | `/credit-note-items?credit_note_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/credit-note-items?credit_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/credit-note-items?credit_note_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/credit-note-items/{id}` |
-| `create($creditNoteId, $options)` | POST | `/credit-note-items` |
+| `create($parentId, $options)` | POST | `/credit-note-items` |
 | `update($id, $options)` | PUT | `/credit-note-items/{id}` |
 | `delete($id)` | DELETE | `/credit-note-items/{id}` |
 
@@ -64,31 +64,31 @@ Only credit notes in status `DRAFT` are fully editable. `update()` on a complete
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($creditNoteId, $actionKeys?, $filters?)` | GET | `/credit-note-comments?credit_note_id={id}` |
+| `list($parentId, $filters?)` | GET | `/credit-note-comments?credit_note_id={id}` |
 | `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/credit-note-comments?credit_note_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/credit-note-comments/{id}` |
-| `create($creditNoteId, $options)` | POST | `/credit-note-comments` |
+| `create($parentId, $options)` | POST | `/credit-note-comments` |
 | `delete($id)` | DELETE | `/credit-note-comments/{id}` |
 
 ### `/credit-note-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($creditNoteId, $filters?)` | GET | `/credit-note-tags?credit_note_id={id}` |
-| `listPage($creditNoteId, $filters?)` / `iterateAll($creditNoteId, $filters?, $pageSize?)` | GET | `/credit-note-tags?credit_note_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/credit-note-tags?credit_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/credit-note-tags?credit_note_id={id}` (paginated) |
 | `cloud()` | GET | `/credit-note-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/credit-note-tags/{id}` |
-| `create($creditNoteId, $options)` | POST | `/credit-note-tags` |
+| `create($parentId, $options)` | POST | `/credit-note-tags` |
 | `delete($id)` | DELETE | `/credit-note-tags/{id}` |
 
 ### `/credit-note-payments`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($creditNoteId?, $filters?)` | GET | `/credit-note-payments` |
-| `listPage($creditNoteId?, $filters?)` / `iterateAll($creditNoteId?, $filters?, $pageSize?)` | GET | `/credit-note-payments` (paginated) |
+| `list($parentId?, $filters?)` | GET | `/credit-note-payments` |
+| `listPage($parentId?, $filters?)` / `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/credit-note-payments` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/credit-note-payments/{id}` |
-| `create($creditNoteId, $options)` | POST | `/credit-note-payments` |
+| `create($parentId, $options)` | POST | `/credit-note-payments` |
 | `delete($id)` | DELETE | `/credit-note-payments/{id}` |
 
 ## Methods
@@ -184,9 +184,9 @@ use Justpilot\Billomat\Api\MailOptions;
 $billomat->creditNotes->mail($id, new MailOptions(duplex: true));
 ```
 
-#### `pdf(int $id, ?PdfType $type = null): CreditNotePdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-`pdf()` returns a `CreditNotePdf` model (metadata plus base64 body). `pdfContent()` appends `?format=pdf` and returns the binary PDF content (`UnexpectedResponseException` if the body isn't a PDF).
+`pdf()` returns a `DocumentPdf` model (metadata plus base64 body). `pdfContent()` appends `?format=pdf` and returns the binary PDF content (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 $pdf = $billomat->creditNotes->pdf($creditNote->id);                 // model
@@ -223,6 +223,7 @@ $billomat->creditNotes->items->delete($item->id);
 ### Credit note comments
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 
@@ -236,11 +237,11 @@ $comment = $billomat->creditNotes->comments->create(
 // Only EMAIL/PAYMENT entries of the activity log
 $entries = $billomat->creditNotes->comments->list(
     $creditNote->id,
-    [CreditNoteCommentActionKey::EMAIL, CreditNoteCommentActionKey::PAYMENT],
+    new CommentFilter(actionKeys: [CreditNoteCommentActionKey::EMAIL, CreditNoteCommentActionKey::PAYMENT]),
 );
 ```
 
-Billomat keeps both free-form user comments and system audit entries (status changes, payments, emails sent) in the same endpoint. `$actionKeys` filters by type; the values are sent comma-separated (`actionkey=EMAIL,PAYMENT`).
+Billomat keeps both free-form user comments and system audit entries (status changes, payments, emails sent) in the same endpoint. `CommentFilter::$actionKeys` filters by type; the values are sent comma-separated (`actionkey=EMAIL,PAYMENT`).
 
 ### Credit note tags
 
@@ -336,7 +337,7 @@ Constructor: `new CreditNoteCommentCreateOptions(string $comment)`. The credit n
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `comment` | `comment` | `string` (required) | |
-| `actionkey` | `actionkey` | `?CreditNoteCommentActionKey` | usually set by Billomat; set manually only for audit markers |
+| `actionKey` | `actionkey` | `?CreditNoteCommentActionKey` | usually set by Billomat; set manually only for audit markers |
 
 ## Write model: `CreditNoteTagCreateOptions`
 
@@ -373,7 +374,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `subject` | `subject` | `?string` | |
 | `body` | `body` | `?string` | |
 | `filename` | `filename` | `?string` | name of the attached PDF |
-| `attachments` | `attachments.attachment` | `list<array{filename,mimetype,base64file}>` | additional attachments |
+| `attachments` | `attachments.attachment` | `list<Attachment>` | additional attachments |
 
 Empty recipient arrays are left out of the payload so Billomat falls back to the email template's defaults.
 
@@ -405,7 +406,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 | `items` | `list<CreditNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
 ## Read model: `CreditNoteItem`
@@ -424,7 +425,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 | `totalGross`, `totalNet` | `?Money` |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `taxRateReverseCharge` | `?float` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `CreditNoteComment`
@@ -436,13 +437,13 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?CreditNoteCommentActionKey` |
-| `actionkeyRaw` | `?string` (raw value in case Billomat sends an unknown key) |
+| `actionKey` | `?CreditNoteCommentActionKey` |
+| `actionKeyRaw` | `?string` (raw value in case Billomat sends an unknown key) |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `CreditNoteTag`
@@ -452,7 +453,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 | `id` | `int` |
 | `creditNoteId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `CreditNoteTagCloudEntry`
@@ -482,22 +483,25 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 | `finapiTransactionId` | `?string` (finAPI bank reconciliation) |
 | `finapiTransactionAmount` | `?Money` (finAPI bank reconciliation) |
 | `documentTitle` | `?string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
-## Read model: `CreditNotePdf`
+## Read model: `DocumentPdf`
 
-`final class CreditNotePdf` (not `readonly`, since it is designed as a wrapper).
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
 | Property | Type |
 |---|---|
-| `id`, `creditNoteId` | `int` |
+| `id` | `int` |
+| `documentId` | `int` (Billomat field `credit_note_id`) |
 | `created` | `?\DateTimeImmutable` |
-| `filename`, `mimeType` | `string` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `filename` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodes `base64file` back into raw bytes.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `credit_note_id`, `filename` or `base64file` is missing.
 
 ## Enums used
 
@@ -530,7 +534,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **Negative amounts on items.** A credit note offsets an invoice; the usual practice is a negative `unitPrice` (e.g. `-19.90`). Billomat accepts that directly.
 - **Setting `number` manually conflicts with auto-numbering.** If the account uses automatic numbers, a manual `number` leads to a `ValidationException` on `complete()`.
 - **`uncancel()` reverts to `OPEN`, not to `DRAFT`.** An accidentally canceled credit note can be reactivated, but it is not editable afterwards.
-- **`actionkey` in the comment filter is CSV, not an array.** `list($id, [...])` sends multiple action keys as a comma-separated string, not as `actionkey[]=…`.
+- **`actionkey` in the comment filter is CSV, not an array.** `list($id, new CommentFilter(actionKeys: [...]))` sends multiple action keys as a comma-separated string, not as `actionkey[]=…`.
 - **Tag cloud and list share the same endpoint.** `GET /credit-note-tags` without `credit_note_id` returns the aggregated cloud (`tag` wrapper); with `credit_note_id` it returns the actual tags (`credit-note-tag` wrapper). The SDK splits this into `cloud()` and `list()`.
 
 ## End-to-end example

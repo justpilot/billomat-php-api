@@ -292,7 +292,7 @@ final class MetadataFieldsTest extends TestCase
             self::assertSame($data[$key], $array[$key]);
 
             if ('customfield' === $key) {
-                self::assertSame('crm-4711', $props['customfield']);
+                self::assertSame('crm-4711', $props['customField']);
 
                 continue;
             }

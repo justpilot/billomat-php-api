@@ -42,22 +42,22 @@ An article is a reusable line item that invoices, offers and recurring invoices 
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($articleId, $filters?)` | GET | `/article-tags?article_id={id}` |
-| `listPage($articleId, $filters?)` / `iterateAll($articleId, $filters?, $pageSize?)` | GET | `/article-tags?article_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/article-tags?article_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/article-tags?article_id={id}` (paginated) |
 | `cloud()` | GET | `/article-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/article-tags/{id}` |
-| `create($articleId, $options)` | POST | `/article-tags` |
+| `create($parentId, $options)` | POST | `/article-tags` |
 | `delete($id)` | DELETE | `/article-tags/{id}` |
 
 ### `/article-property-values`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($articleId?, $filters?)` | GET | `/article-property-values` |
-| `listPage($articleId?, $filters?)` | GET | `/article-property-values` |
-| `iterateAll($articleId?, $filters?, $pageSize?)` | GET | `/article-property-values` (all pages) |
+| `list($parentId?, $filters?)` | GET | `/article-property-values` |
+| `listPage($parentId?, $filters?)` | GET | `/article-property-values` |
+| `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/article-property-values` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/article-property-values/{id}` |
-| `create($articleId, $options)` | POST | `/article-property-values` |
+| `create($parentId, $options)` | POST | `/article-property-values` |
 
 ## Articles
 
@@ -181,7 +181,7 @@ Mirrors `ArticleCreateOptions`, but `title` is no longer required and every fiel
 | `revenueAccountNumber` | `?string` |
 | `costCenter` | `?string` |
 | `purchasePriceNetGross` | `?NetGross` (whether `purchasePrice` is net or gross) |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `propertyValues` | `list<ArticlePropertyValue>` (custom property values, embedded by Billomat in `get()` and `list()`) |
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
@@ -223,7 +223,7 @@ Both values are required and set via the constructor:
 | `id` | `int` |
 | `articleId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ### Read model: `ArticleTagCloudEntry`
@@ -287,7 +287,7 @@ Both values are required and set via the constructor.
 | `name` | `?string` (name from the property definition) |
 | `value` | `mixed` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Enums used

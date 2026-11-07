@@ -34,7 +34,7 @@ final readonly class LetterCommentCreateOptions implements WriteOptions
          *
          * Billomat-Feld: actionkey
          */
-        public ?LetterCommentActionKey $actionkey = null,
+        public ?LetterCommentActionKey $actionKey = null,
     ) {
     }
 
@@ -44,10 +44,10 @@ final readonly class LetterCommentCreateOptions implements WriteOptions
         return clone($this, ['comment' => $comment]);
     }
 
-    /** Kopie mit geändertem `actionkey`. */
-    public function withActionkey(?LetterCommentActionKey $actionkey): self
+    /** Kopie mit geändertem `actionKey`. */
+    public function withActionKey(?LetterCommentActionKey $actionKey): self
     {
-        return clone($this, ['actionkey' => $actionkey]);
+        return clone($this, ['actionKey' => $actionKey]);
     }
 
     /**
@@ -59,7 +59,7 @@ final readonly class LetterCommentCreateOptions implements WriteOptions
     {
         return array_filter([
             'comment' => $this->comment,
-            'actionkey' => $this->actionkey?->value,
+            'actionkey' => $this->actionKey?->value,
         ], static fn (mixed $v): bool => null !== $v);
     }
 }

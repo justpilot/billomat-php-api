@@ -14,7 +14,7 @@ final readonly class InboxDocumentCreateOptions implements WriteOptions
     /**
      * @param string                    $filename     Dateiname
      * @param string                    $mimeType     MIME-Typ (`mimetype`)
-     * @param string                    $base64file   Dateiinhalt, Base64-kodiert
+     * @param string                    $base64File   Dateiinhalt, Base64-kodiert
      * @param string|null               $documentType Dokumenttyp laut Billomat-Klassifikation (z. B. "other", "invoice",
      *                                                "credit_note"); Default laut Billomat: "other"
      * @param array<string, mixed>|null $metadata     frei strukturierte Zusatzdaten (Schlüssel-Wert-Paare),
@@ -23,7 +23,7 @@ final readonly class InboxDocumentCreateOptions implements WriteOptions
     public function __construct(
         public string $filename,
         public string $mimeType,
-        public string $base64file,
+        public string $base64File,
         public ?string $documentType = null,
         public ?array $metadata = null,
     ) {
@@ -53,7 +53,7 @@ final readonly class InboxDocumentCreateOptions implements WriteOptions
         $data = [
             'filename' => $this->filename,
             'mimetype' => $this->mimeType,
-            'base64file' => $this->base64file,
+            'base64file' => $this->base64File,
             'document_type' => $this->documentType,
             'metadata' => $this->metadata,
         ];

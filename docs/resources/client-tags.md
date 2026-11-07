@@ -25,18 +25,18 @@ The two views map to two methods with two separate read models.
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($clientId, $filters?)` | GET | `/client-tags?client_id={id}` |
-| `listPage($clientId, $filters?)` / `iterateAll($clientId, $filters?, $pageSize?)` | GET | `/client-tags?client_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/client-tags?client_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/client-tags?client_id={id}` (paginated) |
 | `cloud()` | GET | `/client-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/client-tags/{id}` |
-| `create($clientId, $options)` | POST | `/client-tags` |
+| `create($parentId, $options)` | POST | `/client-tags` |
 | `delete($id)` | DELETE | `/client-tags/{id}` |
 
 There is no `update()` method: delete the tag and create a new one.
 
 ## Methods
 
-### `list(int $clientId, SubResourceFilter|array $filters = []): list<ClientTag>`
+### `list(int $parentId, SubResourceFilter|array $filters = []): list<ClientTag>`
 
 Lists the tags of a single client.
 
@@ -71,7 +71,7 @@ foreach ($billomat->clients->tags->cloud() as $entry) {
 
 Returns `null` on 404. `getOrFail(int $id): ClientTag` throws a `NotFoundException` instead.
 
-### `create(int $clientId, ClientTagCreateOptions $options): ClientTag`
+### `create(int $parentId, ClientTagCreateOptions $options): ClientTag`
 
 ```php
 use Justpilot\Billomat\Api\ClientTagCreateOptions;
@@ -105,7 +105,7 @@ Constructor: `new ClientTagCreateOptions(string $name)`. The object is `final re
 | `id` | `int` |
 | `clientId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
 ## Read model: `ClientTagCloudEntry`

@@ -91,7 +91,7 @@ final readonly class CreditNoteItem
         /** Unreduzierter Gesamtbetrag netto. */
         public ?Money $totalNetUnreduced = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Steuerrate bei Reverse-Charge in Prozent. */
         public ?float $taxRateReverseCharge = null,
         /**
@@ -129,7 +129,7 @@ final readonly class CreditNoteItem
             totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             taxRateReverseCharge: ScalarCaster::toFloatOrNull($data['tax_rate_reverse_charge'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -164,7 +164,7 @@ final readonly class CreditNoteItem
             'total_net' => $this->totalNet?->toString(),
             'total_gross_unreduced' => $this->totalGrossUnreduced?->toString(),
             'total_net_unreduced' => $this->totalNetUnreduced?->toString(),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'tax_rate_reverse_charge' => $this->taxRateReverseCharge,
         ];
     }

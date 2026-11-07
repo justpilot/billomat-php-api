@@ -53,7 +53,7 @@ final readonly class TemplateCreateOptions implements WriteOptions
          * Billomat-Feld: base64file
          * Typ: ENUM
          */
-        public ?string $base64file = null,
+        public ?string $base64File = null,
         /**
          * Standard-Vorlage für den Dokumenttyp?
          *
@@ -83,10 +83,10 @@ final readonly class TemplateCreateOptions implements WriteOptions
         return clone($this, ['format' => $format]);
     }
 
-    /** Kopie mit geändertem `base64file`. */
-    public function withBase64file(?string $base64file): self
+    /** Kopie mit geändertem `base64File`. */
+    public function withBase64File(?string $base64File): self
     {
-        return clone($this, ['base64file' => $base64file]);
+        return clone($this, ['base64File' => $base64File]);
     }
 
     /** Kopie mit geändertem `isDefault`. */
@@ -106,7 +106,7 @@ final readonly class TemplateCreateOptions implements WriteOptions
             'type' => $this->type->value,
             'name' => $this->name,
             'format' => $this->format?->value,
-            'base64file' => $this->base64file,
+            'base64file' => $this->base64File,
             'is_default' => null === $this->isDefault ? null : ($this->isDefault ? 1 : 0),
         ], static fn (mixed $v): bool => null !== $v);
     }

@@ -29,7 +29,7 @@ final class CreditNoteCommentCreateOptionsTest extends TestCase
     {
         $options = new CreditNoteCommentCreateOptions(
             comment: 'x',
-            actionkey: CreditNoteCommentActionKey::COMMENT,
+            actionKey: CreditNoteCommentActionKey::COMMENT,
         );
 
         self::assertSame('COMMENT', $options->toArray()['actionkey']);

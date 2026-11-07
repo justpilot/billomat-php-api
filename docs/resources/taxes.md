@@ -103,7 +103,7 @@ All fields are optional named arguments (`?string $name`, `?float $rate`, `?bool
 | `isDefault` | `bool` | |
 | `created`, `updated` | `?\DateTimeImmutable` |  |
 | `canDelete` | `?bool` | Whether the tax rate can be deleted; `false` while it is used on documents or articles |
-| `customfield` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `customField` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
 | `extra` | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
 ## Enums

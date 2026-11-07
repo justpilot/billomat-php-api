@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\IncomingCommentCreateOptions;
 use Justpilot\Billomat\Api\IncomingsApi;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class IncomingCommentsApiTest extends TestCase
 {
     #[Test]
@@ -75,9 +77,9 @@ final class IncomingCommentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->comments;
 
-        $comments = $api->list(42, [IncomingCommentActionKey::CREATE]);
+        $comments = $api->list(42, new CommentFilter(actionKeys: [IncomingCommentActionKey::CREATE]));
         self::assertCount(1, $comments);
-        self::assertSame(IncomingCommentActionKey::CREATE, $comments[0]->actionkey);
+        self::assertSame(IncomingCommentActionKey::CREATE, $comments[0]->actionKey);
 
         $created = $api->create(42, new IncomingCommentCreateOptions(comment: 'Hallo'));
         self::assertSame(99, $created->id);

@@ -50,21 +50,21 @@ The API offers no further status transitions for letters: `PUT /letters/{id}/can
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($letterId, $actionKeys?, $filters?)` | GET | `/letter-comments?letter_id={id}` |
+| `list($parentId, $filters?)` | GET | `/letter-comments?letter_id={id}` |
 | `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/letter-comments?letter_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/letter-comments/{id}` |
-| `create($letterId, $options)` | POST | `/letter-comments` |
+| `create($parentId, $options)` | POST | `/letter-comments` |
 | `delete($id)` | DELETE | `/letter-comments/{id}` |
 
 ### `/letter-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($letterId, $filters?)` | GET | `/letter-tags?letter_id={id}` |
-| `listPage($letterId, $filters?)` / `iterateAll($letterId, $filters?, $pageSize?)` | GET | `/letter-tags?letter_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/letter-tags?letter_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/letter-tags?letter_id={id}` (paginated) |
 | `cloud()` | GET | `/letter-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/letter-tags/{id}` |
-| `create($letterId, $options)` | POST | `/letter-tags` |
+| `create($parentId, $options)` | POST | `/letter-tags` |
 | `delete($id)` | DELETE | `/letter-tags/{id}` |
 
 ## Methods
@@ -147,9 +147,9 @@ use Justpilot\Billomat\Api\MailOptions;
 $billomat->letters->mail($id, new MailOptions(duplex: true));
 ```
 
-#### `pdf(int $id, ?PdfType $type = null): LetterPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-`pdf()` returns a `LetterPdf` model. `pdfContent()` appends `?format=pdf` and returns the binary PDF (`UnexpectedResponseException` if the body isn't a PDF).
+`pdf()` returns a `DocumentPdf` model. `pdfContent()` appends `?format=pdf` and returns the binary PDF (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 $pdf = $billomat->letters->pdf($letter->id);                 // model
@@ -171,6 +171,7 @@ Only works on letters in status `DRAFT`.
 ### Letter comments
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\LetterCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 
@@ -184,7 +185,7 @@ $comment = $billomat->letters->comments->create(
 // Show only EMAIL and UPLOAD entries
 $entries = $billomat->letters->comments->list(
     $letter->id,
-    [LetterCommentActionKey::EMAIL, LetterCommentActionKey::UPLOAD],
+    new CommentFilter(actionKeys: [LetterCommentActionKey::EMAIL, LetterCommentActionKey::UPLOAD]),
 );
 ```
 
@@ -238,7 +239,7 @@ Constructor: `new LetterCommentCreateOptions(string $comment)`. The letter ID is
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `comment` | `comment` | `string` (required) | |
-| `actionkey` | `actionkey` | `?LetterCommentActionKey` | usually set by Billomat |
+| `actionKey` | `actionkey` | `?LetterCommentActionKey` | usually set by Billomat |
 
 ## Write model: `LetterTagCreateOptions`
 
@@ -262,7 +263,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `subject` | `subject` | `?string` | |
 | `body` | `body` | `?string` | email text (not the letter content) |
 | `filename` | `filename` | `?string` | name of the PDF attachment |
-| `attachments` | `attachments.attachment` | `list<array{filename,mimetype,base64file}>` | additional attachments |
+| `attachments` | `attachments.attachment` | `list<Attachment>` | additional attachments |
 
 Empty recipient arrays are left out, so Billomat falls back to the template.
 
@@ -282,7 +283,7 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 | `templateId` | `?int` |
 | `updated` | `?\DateTimeImmutable` |
 | `supplierId` | `?int` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
 ## Read model: `LetterComment`
@@ -294,13 +295,13 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?LetterCommentActionKey` |
-| `actionkeyRaw` | `?string` (raw value for unknown keys) |
+| `actionKey` | `?LetterCommentActionKey` |
+| `actionKeyRaw` | `?string` (raw value for unknown keys) |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `LetterTag`
@@ -310,7 +311,7 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 | `id` | `int` |
 | `letterId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `LetterTagCloudEntry`
@@ -322,19 +323,22 @@ Empty recipient arrays are left out, so Billomat falls back to the template.
 | `count` | `int` |
 | `extra` | `array<string, mixed>` |
 
-## Read model: `LetterPdf`
+## Read model: `DocumentPdf`
 
-`final class LetterPdf`.
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
 | Property | Type |
 |---|---|
-| `id`, `letterId` | `int` |
+| `id` | `int` |
+| `documentId` | `int` (Billomat field `letter_id`) |
 | `created` | `?\DateTimeImmutable` |
-| `filename`, `mimeType` | `string` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `filename` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodes `base64file` back into raw bytes.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `letter_id`, `filename` or `base64file` is missing.
 
 ## Enums used
 
@@ -362,7 +366,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **No status transitions after `complete()`.** The SDK has no `cancel()`, `clear()` or `undo()` for letters because Billomat's API doesn't support them (400/404). Up to 3.x the SDK had these methods; they always failed.
 - **`update()` only in DRAFT.** Once the letter is completed, Billomat ignores most fields, and there is no way back to `DRAFT`. Check the letter before calling `complete()`.
 - **Setting `number` manually conflicts with auto-numbering.** If the account uses automatic numbers, `complete()` fails with a `ValidationException`.
-- **`actionkey` in the comment filter is CSV, not an array.** `list($id, [...])` sends multiple action keys as a comma-separated string, not as `actionkey[]=…`.
+- **`actionkey` in the comment filter is CSV, not an array.** `list($id, new CommentFilter(actionKeys: [...]))` sends multiple action keys as a comma-separated string, not as `actionkey[]=…`.
 - **Tag cloud and list share the same endpoint.** `GET /letter-tags` without `letter_id` returns the aggregated cloud (`tag` wrapper); with `letter_id` it returns the actual tags (`letter-tag` wrapper). The SDK splits this into `cloud()` and `list()`.
 
 ## End-to-end example

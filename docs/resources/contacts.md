@@ -16,9 +16,9 @@ $billomat->contacts
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($clientId, $filters?)` | GET | `/contacts?client_id={id}` |
-| `listPage($clientId, $filters?)` | GET | `/contacts?client_id={id}` (page with metadata) |
-| `iterateAll($clientId, $filters?, $pageSize?)` | GET | `/contacts?client_id={id}` (lazy over all pages) |
+| `list($parentId, $filters?)` | GET | `/contacts?client_id={id}` |
+| `listPage($parentId, $filters?)` | GET | `/contacts?client_id={id}` (page with metadata) |
+| `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/contacts?client_id={id}` (lazy over all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/contacts/{id}` |
 | `create($options)` | POST | `/contacts` |
 | `update($id, $options)` | PUT | `/contacts/{id}` |
@@ -29,7 +29,7 @@ There is **no** unfiltered `list()`: Billomat's `GET /contacts` requires a `clie
 
 ## Methods
 
-### `list(int $clientId, array $filters = []): list<Contact>`
+### `list(int $parentId, array $filters = []): list<Contact>`
 
 Lists all contacts of a client.
 
@@ -48,7 +48,7 @@ foreach ($contacts as $contact) {
 
 `$filters` takes additional query parameters such as `page` and `per_page`. `client_id` always comes from `$clientId`.
 
-`listPage(int $clientId, array $filters = []): Page<Contact>` returns one page with `PageInfo`, `iterateAll(int $clientId, array $filters = [], int $pageSize = 100): Generator<Contact>` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
+`listPage(int $parentId, array $filters = []): Page<Contact>` returns one page with `PageInfo`, `iterateAll(int $parentId, array $filters = [], int $pageSize = 100): Generator<Contact>` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?Contact`
 
@@ -155,7 +155,7 @@ Same fields as `ContactCreateOptions`, **without** `clientId`: Billomat doesn't 
 | `address` | `?string` |
 | `www` | `?string` |
 | `locale` | `?string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
 `created` and `updated` are parsed from Billomat's date string; an invalid value leaves the field `null`.

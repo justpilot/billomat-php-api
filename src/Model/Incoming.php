@@ -91,7 +91,7 @@ final readonly class Incoming
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Kundennummer beim Lieferanten (z. B. eigene Vertragsnummer). */
         public ?string $clientNumber = null,
         /** Aufwandskonto laut SKR/Konten-Mapping. */
@@ -142,7 +142,7 @@ final readonly class Incoming
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             clientNumber: ScalarCaster::toStringOrNull($data['client_number'] ?? null),
             expenseAccountNumber: ScalarCaster::toStringOrNull($data['expense_account_number'] ?? null),
             category: ScalarCaster::toStringOrNull($data['category'] ?? null),
@@ -181,7 +181,7 @@ final readonly class Incoming
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'client_number' => $this->clientNumber,
             'expense_account_number' => $this->expenseAccountNumber,
             'category' => $this->category,

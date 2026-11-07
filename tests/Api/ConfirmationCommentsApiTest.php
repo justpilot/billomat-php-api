@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationsApi;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class ConfirmationCommentsApiTest extends TestCase
 {
     #[Test]
@@ -61,10 +63,10 @@ final class ConfirmationCommentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->comments;
 
-        $comments = $api->list(42, [ConfirmationCommentActionKey::CREATE]);
+        $comments = $api->list(42, new CommentFilter(actionKeys: [ConfirmationCommentActionKey::CREATE]));
 
         self::assertCount(1, $comments);
-        self::assertSame(ConfirmationCommentActionKey::CREATE, $comments[0]->actionkey);
+        self::assertSame(ConfirmationCommentActionKey::CREATE, $comments[0]->actionKey);
         self::assertStringContainsString('confirmation_id=42', $captured->url);
     }
 

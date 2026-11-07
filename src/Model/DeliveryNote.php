@@ -105,7 +105,7 @@ final readonly class DeliveryNote
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** ID des Quell-Angebots. */
         public ?int $offerId = null,
         /**
@@ -147,7 +147,7 @@ final readonly class DeliveryNote
             taxes: ListCaster::toNestedList($data['taxes'] ?? null, 'tax', 'name', TaxSummary::fromArray(...)),
             items: ListCaster::toNestedList($data['delivery-note-items'] ?? null, 'delivery-note-item', 'id', DeliveryNoteItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -184,7 +184,7 @@ final readonly class DeliveryNote
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'offer_id' => $this->offerId,
         ];
 

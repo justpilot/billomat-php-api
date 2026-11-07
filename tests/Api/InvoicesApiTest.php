@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\Attachment;
 use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
@@ -18,12 +19,12 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceGroup;
-use Justpilot\Billomat\Model\InvoicePdf;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -42,6 +43,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Invoice::class)]
 #[CoversClass(InvoiceGroup::class)]
 #[CoversClass(InvoiceGroupBy::class)]
+#[UsesClass(Attachment::class)]
 #[UsesClass(EmailOptions::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
 #[UsesClass(MailOptions::class)]
@@ -52,7 +54,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoiceStatus::class)]
-#[UsesClass(InvoicePdf::class)]
+#[UsesClass(DocumentPdf::class)]
 #[UsesClass(Money::class)]
 final class InvoicesApiTest extends TestCase
 {
@@ -493,7 +495,7 @@ final class InvoicesApiTest extends TestCase
         $pdf = $api->pdf(240);
 
         self::assertSame(4882, $pdf->id);
-        self::assertSame(240, $pdf->invoiceId);
+        self::assertSame(240, $pdf->documentId);
         self::assertSame('invoice_123.pdf', $pdf->filename);
         self::assertSame('application/pdf', $pdf->mimeType);
         self::assertSame(70137, $pdf->fileSize);
@@ -689,7 +691,7 @@ final class InvoicesApiTest extends TestCase
             body: 'Anbei …',
             filename: 'rechnung-2026-001',
             attachments: [
-                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+                new Attachment('agb.pdf', 'application/pdf', 'QUJD'),
             ],
         );
 
@@ -764,7 +766,7 @@ final class InvoicesApiTest extends TestCase
             duplex: false,
             paperWeight: 90,
             attachments: [
-                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+                new Attachment('agb.pdf', 'application/pdf', 'QUJD'),
             ],
         );
 

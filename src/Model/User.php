@@ -61,7 +61,7 @@ final readonly class User
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Sprache der Oberfläche (z. B. "de_DE"). */
         public ?string $locale = null,
         /** Zeitzone (z. B. "Europe/Berlin"). */
@@ -99,7 +99,7 @@ final readonly class User
             roleId: ScalarCaster::toIntOrNull($data['role_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             timezone: ScalarCaster::toStringOrNull($data['timezone'] ?? null),
             isAccountOwner: ScalarCaster::toBoolOrNull($data['is_account_owner'] ?? null),
@@ -127,7 +127,7 @@ final readonly class User
             'role_id' => $this->roleId,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'locale' => $this->locale,
             'timezone' => $this->timezone,
             'is_account_owner' => $this->isAccountOwner,

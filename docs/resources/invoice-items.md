@@ -16,17 +16,17 @@ The generic `Justpilot\Billomat\Api\ItemsApi`, typed for `InvoiceItem`, `Invoice
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($invoiceId, $filters?)` | GET | `/invoice-items?invoice_id={id}` |
-| `listPage($invoiceId, $filters?)` | GET | `/invoice-items?invoice_id={id}` (one page with metadata) |
-| `iterateAll($invoiceId, $filters?, $pageSize?)` | GET | `/invoice-items?invoice_id={id}` (all pages) |
+| `list($parentId, $filters?)` | GET | `/invoice-items?invoice_id={id}` |
+| `listPage($parentId, $filters?)` | GET | `/invoice-items?invoice_id={id}` (one page with metadata) |
+| `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/invoice-items?invoice_id={id}` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-items/{id}` |
-| `create($invoiceId, $options)` | POST | `/invoice-items` |
+| `create($parentId, $options)` | POST | `/invoice-items` |
 | `update($id, $options)` | PUT | `/invoice-items/{id}` |
 | `delete($id)` | DELETE | `/invoice-items/{id}` |
 
 ## Methods
 
-### `list(int $invoiceId, SubResourceFilter|array $filters = []): list<InvoiceItem>`
+### `list(int $parentId, SubResourceFilter|array $filters = []): list<InvoiceItem>`
 
 Lists all items of an invoice. `invoice_id` is set from `$invoiceId` automatically. Billomat filters items only by the invoice, but sorts and paginates them like any list: `SubResourceFilter` carries `orderBy`, `page`, `perPage` and `extra`.
 
@@ -39,7 +39,7 @@ $items = $billomat->invoices->items->list(98765, new SubResourceFilter(
 ));
 ```
 
-### `listPage(int $invoiceId, SubResourceFilter|array $filters = []): Page<InvoiceItem>` / `iterateAll(int $invoiceId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator<int, InvoiceItem>`
+### `listPage(int $parentId, SubResourceFilter|array $filters = []): Page<InvoiceItem>` / `iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator<int, InvoiceItem>`
 
 Like `list()`, with pagination metadata or as a lazy iterator over all pages. See [Pagination](../advanced/pagination.md).
 
@@ -47,7 +47,7 @@ Like `list()`, with pagination metadata or as a lazy iterator over all pages. Se
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
-### `create(int $invoiceId, InvoiceItemCreateOptions $options): InvoiceItem`
+### `create(int $parentId, InvoiceItemCreateOptions $options): InvoiceItem`
 
 Adds an item to an existing invoice. The SDK inserts `invoice_id` into the payload.
 
@@ -128,7 +128,7 @@ Same fields as `InvoiceItemCreateOptions`, but all of them optional: `new Invoic
 | `type` | `?ItemType` | |
 | `totalGross`, `totalNet` | `?Money` | Including discount |
 | `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` | Without discount |
-| `customfield` | `?string` | Free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `customField` | `?string` | Free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md) |
 | `extra` | `array<string, mixed>` | Fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
 ## Enums

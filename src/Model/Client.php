@@ -277,7 +277,7 @@ final readonly class Client
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Kennung für E-Rechnungen (ZUGFeRD/Factur-X).
          *
@@ -371,7 +371,7 @@ final readonly class Client
             revenueGross: ScalarCaster::toMoneyOrNull($data['revenue_gross'] ?? null),
             revenueNet: ScalarCaster::toMoneyOrNull($data['revenue_net'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             facturxIdentifier: ScalarCaster::toStringOrNull($data['facturx_identifier'] ?? null),
             sellerIdentifier: ScalarCaster::toStringOrNull($data['seller_identifier'] ?? null),
             digExclude: ScalarCaster::toBoolOrNull($data['dig_exclude'] ?? null),
@@ -447,7 +447,7 @@ final readonly class Client
             'revenue_gross' => $this->revenueGross?->toString(),
             'revenue_net' => $this->revenueNet?->toString(),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'facturx_identifier' => $this->facturxIdentifier,
             'seller_identifier' => $this->sellerIdentifier,
             'dig_exclude' => $this->digExclude,

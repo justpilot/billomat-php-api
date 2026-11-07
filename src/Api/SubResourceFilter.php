@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Api;
 /**
  * Sortierung und Pagination für Sub-Ressourcen ohne eigene Filterfelder.
  *
- * Gilt für Positionen, Kommentare, Schlagworte und E-Mail-Empfänger: Billomat filtert
+ * Gilt für Positionen, Schlagworte und E-Mail-Empfänger: Billomat filtert
  * diese Listen nur nach der Eltern-ID (eigenes Argument von `list()`), sortiert und
  * paginiert sie aber wie jede andere Liste.
  *
@@ -15,7 +15,7 @@ namespace Justpilot\Billomat\Api;
  * $billomat->invoices->items->list($invoiceId, new SubResourceFilter(orderBy: OrderBy::asc('position')));
  * ```
  *
- * Zahlungen und Attributwerte haben eigene Filter (`InvoicePaymentFilter`,
+ * Kommentare, Zahlungen und Attributwerte haben eigene Filter (`CommentFilter`, `InvoicePaymentFilter`,
  * `ClientPropertyValueFilter`, …).
  *
  * Doku: https://www.billomat.com/en/api/basics/read-data/

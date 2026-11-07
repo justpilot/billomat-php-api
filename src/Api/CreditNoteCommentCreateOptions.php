@@ -35,7 +35,7 @@ final readonly class CreditNoteCommentCreateOptions implements WriteOptions
          *
          * Billomat-Feld: actionkey
          */
-        public ?CreditNoteCommentActionKey $actionkey = null,
+        public ?CreditNoteCommentActionKey $actionKey = null,
         /**
          * Sichtbarkeit für die Aktivitäten-Liste des Kunden.
          *
@@ -53,10 +53,10 @@ final readonly class CreditNoteCommentCreateOptions implements WriteOptions
         return clone($this, ['comment' => $comment]);
     }
 
-    /** Kopie mit geändertem `actionkey`. */
-    public function withActionkey(?CreditNoteCommentActionKey $actionkey): self
+    /** Kopie mit geändertem `actionKey`. */
+    public function withActionKey(?CreditNoteCommentActionKey $actionKey): self
     {
-        return clone($this, ['actionkey' => $actionkey]);
+        return clone($this, ['actionKey' => $actionKey]);
     }
 
     /** Kopie mit geändertem `public`. */
@@ -74,7 +74,7 @@ final readonly class CreditNoteCommentCreateOptions implements WriteOptions
     {
         return array_filter([
             'comment' => $this->comment,
-            'actionkey' => $this->actionkey?->value,
+            'actionkey' => $this->actionKey?->value,
             'public' => $this->public,
         ], static fn (mixed $v): bool => null !== $v);
     }

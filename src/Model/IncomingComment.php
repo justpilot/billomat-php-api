@@ -18,7 +18,7 @@ use const DATE_ATOM;
  * Hinweis zum `actionkey`:
  *  - Bei System-Kommentaren (Statuswechsel, Versand, Zahlung) ist das Feld gesetzt.
  *  - Bei manuell angelegten Kommentaren ist das Feld typischerweise leer.
- *  - Unbekannte Werte werden über das Enum als null geparst; `actionkeyRaw`
+ *  - Unbekannte Werte werden über das Enum als null geparst; `actionKeyRaw`
  *    enthält den ursprünglichen String aus der API.
  *
  * Dokumentation:
@@ -58,11 +58,11 @@ final readonly class IncomingComment
          * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
          * bei system-getriebenen Kommentaren selbst.
          */
-        public ?IncomingCommentActionKey $actionkey = null,
+        public ?IncomingCommentActionKey $actionKey = null,
         /** Roher ActionKey-String aus der API (auch wenn das Enum den Wert nicht kennt). */
-        public ?string $actionkeyRaw = null,
+        public ?string $actionKeyRaw = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -85,9 +85,9 @@ final readonly class IncomingComment
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
-            actionkey: IncomingCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
-            actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            actionKey: IncomingCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
+            actionKeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -108,8 +108,8 @@ final readonly class IncomingComment
             'incoming_id' => $this->incomingId,
             'user_id' => $this->userId,
             'comment' => $this->comment,
-            'actionkey' => $this->actionkeyRaw,
-            'customfield' => $this->customfield,
+            'actionkey' => $this->actionKeyRaw,
+            'customfield' => $this->customField,
         ];
     }
 }

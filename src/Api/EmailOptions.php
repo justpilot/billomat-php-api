@@ -17,15 +17,15 @@ namespace Justpilot\Billomat\Api;
 final readonly class EmailOptions implements WriteOptions
 {
     /**
-     * @param int|null                                                            $emailTemplateId ID der E-Mail-Vorlage aus den Billomat-Einstellungen (`email_template_id`)
-     * @param string|null                                                         $from            Absender-Adresse; muss im Account verifiziert sein
-     * @param list<string>                                                        $to              Empfänger (TO)
-     * @param list<string>                                                        $cc              Empfänger (CC)
-     * @param list<string>                                                        $bcc             Empfänger (BCC)
-     * @param string|null                                                         $subject         Betreff
-     * @param string|null                                                         $body            Nachrichtentext
-     * @param string|null                                                         $filename        Dateiname des angehängten PDFs (ohne Endung)
-     * @param list<array{filename: string, mimetype: string, base64file: string}> $attachments     zusätzliche Anhänge
+     * @param int|null         $emailTemplateId ID der E-Mail-Vorlage aus den Billomat-Einstellungen (`email_template_id`)
+     * @param string|null      $from            Absender-Adresse; muss im Account verifiziert sein
+     * @param list<string>     $to              Empfänger (TO)
+     * @param list<string>     $cc              Empfänger (CC)
+     * @param list<string>     $bcc             Empfänger (BCC)
+     * @param string|null      $subject         Betreff
+     * @param string|null      $body            Nachrichtentext
+     * @param string|null      $filename        Dateiname des angehängten PDFs (ohne Endung)
+     * @param list<Attachment> $attachments     zusätzliche Anhänge
      */
     public function __construct(
         public ?int $emailTemplateId = null,
@@ -103,11 +103,17 @@ final readonly class EmailOptions implements WriteOptions
     /**
      * Kopie mit geänderten Anhängen.
      *
-     * @param list<array{filename: string, mimetype: string, base64file: string}> $attachments
+     * @param list<Attachment> $attachments
      */
     public function withAttachments(array $attachments): self
     {
         return clone($this, ['attachments' => $attachments]);
+    }
+
+    /** Kopie mit einem zusätzlichen Anhang. */
+    public function withAttachment(Attachment $attachment): self
+    {
+        return clone($this, ['attachments' => [...$this->attachments, $attachment]]);
     }
 
     /**
@@ -132,14 +138,7 @@ final readonly class EmailOptions implements WriteOptions
 
         if ([] !== $this->attachments) {
             $data['attachments'] = [
-                'attachment' => array_map(
-                    static fn (array $a): array => [
-                        'filename' => $a['filename'],
-                        'mimetype' => $a['mimetype'],
-                        'base64file' => $a['base64file'],
-                    ],
-                    $this->attachments,
-                ),
+                'attachment' => array_map(static fn (Attachment $a): array => $a->toArray(), $this->attachments),
             ];
         }
 

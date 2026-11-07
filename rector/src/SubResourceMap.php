@@ -23,7 +23,7 @@ final class SubResourceMap
     private const array GENERIC_LIST_BY_PARENT = ['CommentsApi', 'TagsApi', 'ItemsApi'];
 
     /**
-     * Klassen, die ihren Namen behalten, deren `listBy{Parent}()` aber `list()` heißt (Parameternamen unverändert).
+     * Klassen, die ihren Namen behalten, deren `listBy{Parent}()` aber `list()` und deren Parent-ID-Parameter `$parentId` heißt.
      */
     private const array KEPT_LIST_BY_PARENT = ['ReminderItemsApi', 'RecurringEmailReceiversApi'];
 
@@ -160,7 +160,15 @@ final class SubResourceMap
      */
     public static function hasGenericParentId(string $newClass): bool
     {
-        return \in_array(self::shortName($newClass), self::GENERIC_LIST_BY_PARENT, true);
+        return self::hasListByParent($newClass);
+    }
+
+    /**
+     * `listBy{Parent}()` bekam die ActionKeys als zweites Argument, `list()` nimmt sie in einem `CommentFilter`.
+     */
+    public static function hasActionKeys(string $newClass): bool
+    {
+        return 'CommentsApi' === self::shortName($newClass);
     }
 
     /**

@@ -14,9 +14,9 @@ use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\CreditNoteItem;
 use Justpilot\Billomat\Model\CreditNotePayment;
-use Justpilot\Billomat\Model\CreditNotePdf;
 use Justpilot\Billomat\Model\CreditNoteTag;
 use Justpilot\Billomat\Model\CreditNoteTagCloudEntry;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
@@ -227,11 +227,11 @@ final class CreditNotesApi extends AbstractApi
      * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null): CreditNotePdf
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
         $data = $this->getJson("/credit-notes/{$id}/pdf", self::pdfQuery($type));
 
-        return CreditNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching credit note PDF'));
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching credit note PDF'));
     }
 
     /**

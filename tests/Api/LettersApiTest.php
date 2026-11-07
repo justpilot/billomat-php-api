@@ -15,10 +15,10 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Letter;
-use Justpilot\Billomat\Model\LetterPdf;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -35,7 +35,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(LetterUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
 #[CoversClass(Letter::class)]
-#[CoversClass(LetterPdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(LetterStatus::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -238,7 +238,7 @@ final class LettersApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertSame(240, $pdf->letterId);
+        self::assertSame(240, $pdf->documentId);
     }
 
     #[Test]

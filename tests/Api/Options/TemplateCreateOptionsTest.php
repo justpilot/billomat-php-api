@@ -28,7 +28,7 @@ final class TemplateCreateOptionsTest extends TestCase
         $options = new TemplateCreateOptions(
             TemplateDocumentType::OFFER,
             format: TemplateFormat::DOCX,
-            base64file: 'BASE64==',
+            base64File: 'BASE64==',
         );
 
         $payload = $options->toArray();

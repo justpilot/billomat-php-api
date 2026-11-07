@@ -250,7 +250,7 @@ Hands an invoice over to Billomat's debt collection service (Inkasso). According
 $billomat->invoices->encash($invoice->id);
 ```
 
-### `pdf(int $id, ?PdfType $type = null): InvoicePdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
 Two methods for the same endpoint:
 
@@ -259,7 +259,7 @@ use Justpilot\Billomat\Model\Enum\PdfType;
 
 // 1) pdf(): JSON with a Base64 PDF
 $pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED);
-// $pdf is an InvoicePdf; getBinary() decodes it
+// $pdf is a DocumentPdf; getBinary() decodes it
 file_put_contents('invoice.pdf', $pdf->getBinary());
 
 // 2) pdfContent(): application/pdf directly, returns the binary content as a string
@@ -271,6 +271,8 @@ file_put_contents('invoice.pdf', $binary);
 
 - `PdfType::SIGNED` (`signed`): signed version
 - `PdfType::PRINT` (`print`): print version without background
+
+`DocumentPdf` (`final readonly`, shared by every document type) has `id`, `documentId` (Billomat field `invoice_id`), `created`, `filename`, `mimeType`, `fileSize` (`?int`), `base64File` and `extra`. `getBinary()` throws an `UnexpectedResponseException` for invalid Base64.
 
 Without `type`, Billomat returns the standard PDF. In `pdfContent()`, an empty body or a body without the `%PDF-` header throws an `UnexpectedResponseException`.
 
@@ -382,9 +384,19 @@ Payload for `email()`. One class shared by all document types: offers, confirmat
 | `subject` | `subject` | `?string` | |
 | `body` | `body` | `?string` | Plain-text body |
 | `filename` | `filename` | `?string` | File name of the PDF attachment, without `.pdf` |
-| `attachments` | `attachments.attachment[]` | `list<array{filename:string,mimetype:string,base64file:string}>` | Additional attachments |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | Additional attachments |
 
 `toArray()` drops empty recipient lists and `null` fields.
+
+Attachments are `Justpilot\Billomat\Api\Attachment` objects (`filename`, `mimeType`, `base64File`; wire fields `filename`, `mimetype`, `base64file`). `Attachment::fromFile($path, $filename = null, $mimeType = 'application/pdf')` and `Attachment::fromBinary($filename, $content, $mimeType = 'application/pdf')` do the Base64 encoding; `new Attachment(...)` takes content that is already encoded. `withAttachment()` appends one attachment, `withAttachments()` replaces the list. The same applies to `MailOptions`.
+
+```php
+use Justpilot\Billomat\Api\Attachment;
+use Justpilot\Billomat\Api\EmailOptions;
+
+$options = new EmailOptions(to: ['kunde@example.com'])
+    ->withAttachment(Attachment::fromFile('/path/to/terms.pdf', 'AGB.pdf'));
+```
 
 ## Write model: `MailOptions`
 
@@ -395,7 +407,7 @@ Payload for `mail()` (Pixelletter), shared by all document types (invoices, offe
 | `color` | `color` | `?bool` | Serialized as `1`/`0` |
 | `duplex` | `duplex` | `?bool` | Double-sided printing |
 | `paperWeight` | `paper_weight` | `?int` | g/m², 80 or 90 |
-| `attachments` | `attachments.attachment[]` | `list<array{filename:string,mimetype:string,base64file:string}>` | Printed along with the invoice |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | Printed along with the invoice |
 
 ## Read model: `Invoice`
 
@@ -431,7 +443,7 @@ Payload for `mail()` (Pixelletter), shared by all document types (invoices, offe
 | `facturxReference` | `?string` (e-invoice, read-only, not documented by Billomat) |
 | `totalReduction` | `?Money` |
 | `digProceeded` | `?bool` |
-| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
 `Invoice::fromArray()` normalizes the `taxes` structure (Billomat returns single entries sometimes as an object, sometimes as a list) and the embedded `invoice-items`.

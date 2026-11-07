@@ -91,7 +91,7 @@ final readonly class OfferItem
         /** Unreduzierter Gesamtbetrag netto. */
         public ?Money $totalNetUnreduced = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Optionale Position (wird nicht in die Summe eingerechnet). */
         public ?bool $optional = null,
         /**
@@ -129,7 +129,7 @@ final readonly class OfferItem
             totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             totalGrossUnreduced: ScalarCaster::toMoneyOrNull($data['total_gross_unreduced'] ?? null),
             totalNetUnreduced: ScalarCaster::toMoneyOrNull($data['total_net_unreduced'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             optional: ScalarCaster::toBoolOrNull($data['optional'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -164,7 +164,7 @@ final readonly class OfferItem
             'total_net' => $this->totalNet?->toString(),
             'total_gross_unreduced' => $this->totalGrossUnreduced?->toString(),
             'total_net_unreduced' => $this->totalNetUnreduced?->toString(),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'optional' => $this->optional,
         ];
     }

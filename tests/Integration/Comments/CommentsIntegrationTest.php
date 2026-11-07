@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\Comments;
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
@@ -25,6 +26,7 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\ConfirmationComment;
 use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\DeliveryNoteComment;
+use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\IncomingComment;
 use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\LetterComment;
@@ -99,6 +101,12 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             $comments = $billomat->invoices->comments->list($invoice->id);
             self::assertContainsOnlyInstancesOf(InvoiceComment::class, $comments);
             self::assertGreaterThanOrEqual(1, \count($comments));
+
+            // Billomat legt beim Erstellen einen CREATE-Kommentar an; der manuelle hat den ActionKey COMMENT.
+            $manual = $billomat->invoices->comments->list($invoice->id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::COMMENT]));
+            self::assertSame([$comment->id], array_map(static fn (InvoiceComment $c): int => $c->id, $manual));
+            $created = $billomat->invoices->comments->list($invoice->id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::CREATE]));
+            self::assertNotContains($comment->id, array_map(static fn (InvoiceComment $c): int => $c->id, $created));
 
             $billomat->invoices->comments->delete($comment->id);
         } finally {

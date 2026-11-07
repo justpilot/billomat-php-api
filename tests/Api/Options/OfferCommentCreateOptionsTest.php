@@ -29,7 +29,7 @@ final class OfferCommentCreateOptionsTest extends TestCase
     {
         $options = new OfferCommentCreateOptions(
             comment: 'x',
-            actionkey: OfferCommentActionKey::COMMENT,
+            actionKey: OfferCommentActionKey::COMMENT,
         );
 
         self::assertSame('COMMENT', $options->toArray()['actionkey']);

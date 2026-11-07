@@ -350,7 +350,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `quote` | `?float` |
 | `offerId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` as `Money`) |
+| `taxes` | `list<TaxSummary>`: tax summary per rate (`name`, `rate`, `amount`, `amountNet`, `amountGross`, the latter each also as `*Plain`/`*Rounded`; amounts as `Money`) |
 | `items` | `list<ConfirmationItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |

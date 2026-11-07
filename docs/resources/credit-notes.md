@@ -401,7 +401,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 | `quote` | `?float` |
 | `invoiceId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` as `Money`) |
+| `taxes` | `list<TaxSummary>`: tax summary per rate (`name`, `rate`, `amount`, `amountNet`, `amountGross`, the latter each also as `*Plain`/`*Rounded`; amounts as `Money`) |
 | `items` | `list<CreditNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |

@@ -397,7 +397,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` as `Money`) |
+| `taxes` | `list<TaxSummary>`: tax summary per rate (`name`, `rate`, `amount`, `amountNet`, `amountGross`, the latter each also as `*Plain`/`*Rounded`; amounts as `Money`) |
 | `items` | `list<OfferItem>`, embedded from `offer-items.offer-item` |
 | `updated` | `?\DateTimeImmutable` |
 | `validityDate` | `?\DateTimeImmutable` (valid until, date only) |

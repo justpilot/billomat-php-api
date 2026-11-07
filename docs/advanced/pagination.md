@@ -50,7 +50,7 @@ Filters are sent with every page request; `page`/`perPage` (or `page`/`per_page`
 
 ### Tuning `pageSize`
 
-The default is 100 (Billomat's maximum is 1000). Larger pages mean fewer round trips, smaller pages lower peak memory:
+The default is 100 (Billomat's maximum is 1000; larger values are clamped to 1000, values below 1 to 1). Larger pages mean fewer round trips, smaller pages lower peak memory:
 
 ```php
 use Justpilot\Billomat\Api\InvoiceFilter;

@@ -13,6 +13,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - **A `+` in a filter value is sent as `%2B`.** The query builder sent it unencoded, and Billomat reads an unencoded `+` as a space: `clients->list(['email' => 'plus+test@example.com'])` found nothing, a phone number `+49 …` became ` 49 …`. In `order_by` the `+` between field and direction (`date+DESC`, also what `OrderBy` builds) is now sent as a space (`date%20DESC`), which Billomat accepts; `%2B` it rejects there. Hand-written `'order_by' => 'date+DESC'` keeps working.
 - **`0000-00-00` and invalid dates like `2024-02-30` hydrate as `null`.** PHP doesn't reject them but rolls over to `-0001-11-30` or `2024-03-01`; every date field of the read models got such a wrong date.
 - **`taxes->update()` no longer resets the default flag.** See *Changed*.
+- **`iterateAll()` no longer stops after the first page when Billomat caps the page size.** The last-page check compared the number of items with the requested `$pageSize` instead of the `@per_page` Billomat reports, so `iterateAll(pageSize: 2000)` returned only the first 1000 items. `$pageSize` is now clamped to 1–1000, and an empty page ends the iteration.
 
 ### Changed
 

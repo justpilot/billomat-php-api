@@ -52,12 +52,12 @@
     "phpstan/phpstan-phpunit": "^2.1",
     "phpstan/phpstan-strict-rules": "^2.1",
     "phpstan/phpstan-symfony": "^2.1",
-    "phpunit/phpunit": "^13.4",
+    "phpunit/phpunit": "^13.4.4",
     "rector/rector": "^2.7",
     "symfony/css-selector": "^8.1",
     "symfony/dom-crawler": "^8.1",
     "symfony/dotenv": "^8.1",
-    "symfony/http-client": "^8.1",
+    "symfony/http-client": "^8.1.11",
     "symfony/var-dumper": "^8.1"
   },
   "suggest": {

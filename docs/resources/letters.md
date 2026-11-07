@@ -43,8 +43,6 @@ The API offers no further status transitions for letters: `PUT /letters/{id}/can
 | `mail($id, $options?)` | POST | `/letters/{id}/mail` |
 | `pdf($id, $type?)` | GET | `/letters/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/letters/{id}/pdf?format=pdf` |
-| `upload($id, $base64Pdf)` | PUT | `/letters/{id}/upload` |
-| `uploadSignature($id, $base64Pdf)` | PUT | `/letters/{id}/upload-signature` |
 
 ### `/letter-comments`
 
@@ -155,14 +153,6 @@ $billomat->letters->mail($id, new MailOptions(duplex: true));
 $pdf = $billomat->letters->pdf($letter->id);                 // model
 $raw = $billomat->letters->pdfContent($letter->id);        // string (PDF binary)
 ```
-
-#### `upload(int $id, string $base64Pdf): void`
-
-**Letter-specific**: uploads a complete, externally generated letter PDF into the letter. Useful when the layout isn't built with Billomat templates (e.g. finished Word or InDesign exports). This method has **no** counterpart for invoices, credit notes or reminders.
-
-#### `uploadSignature(int $id, string $base64Pdf): void`
-
-Attaches a version signed by the recipient.
 
 #### `delete(int $id): void`
 

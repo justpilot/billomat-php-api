@@ -39,7 +39,6 @@ use NoDiscard;
  *  - PUT    /confirmations/{id}/unclear (Erledigt-Markierung zurücknehmen)
  *  - POST   /confirmations/{id}/email
  *  - GET    /confirmations/{id}/pdf
- *  - PUT    /confirmations/{id}/upload-signature
  */
 final class ConfirmationsApi extends AbstractApi
 {
@@ -217,13 +216,6 @@ final class ConfirmationsApi extends AbstractApi
         $payload = ['mail' => $options?->toArray() ?? []];
 
         $this->postVoid("/confirmations/{$id}/mail", $payload);
-    }
-
-    public function uploadSignature(int $id, string $base64Pdf): void
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/confirmations/{$id}/upload-signature", $payload);
     }
 
     /**

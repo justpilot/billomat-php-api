@@ -78,6 +78,13 @@ final class BillomatConfigTest extends TestCase
         self::assertSame('de-de', new BillomatConfig(billomatId: 'mycompany', apiKey: 'k')->language);
     }
 
+    #[Test]
+    public function itWaitsThirtySecondsByDefault(): void
+    {
+        // Eine Vorlage hochladen dauert bei Billomat über 10 s (in der Sandbox gemessen).
+        self::assertSame(30.0, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k')->timeout);
+    }
+
     /**
      * @return iterable<string, array{string}>
      */

@@ -621,6 +621,29 @@ $billomat->confirmations->unclear($id);
 
 `RemindersApi` gains `uncancel()` as well.
 
+## Methods for endpoints Billomat doesn't have are gone
+
+These methods called endpoints that are neither in Billomat's API docs nor accepted by Billomat; every
+call failed (checked in the sandbox). They are removed without replacement, except for the incoming's file:
+
+| Removed | Billomat's answer | Replacement |
+|---|---|---|
+| `OffersApi::uploadSignature()`, `ConfirmationsApi::uploadSignature()`, `DeliveryNotesApi::uploadSignature()`, `LettersApi::uploadSignature()` | 400 "no signature upload supported for this document type" | none; only invoices, credit notes and reminders accept signed PDFs |
+| `LettersApi::upload()` | 404 "method not found" | none |
+| `IncomingsApi::upload()` | 404 "method not found" | `base64File` option of `IncomingCreateOptions`/`IncomingUpdateOptions` |
+| `IncomingsApi::cancel()`, `uncancel()` | 400 "cancellation not supported" | none |
+
+```php
+// 3.x
+$billomat->incomings->upload($incomingId, base64_encode($pdf));   // HTTP 404
+
+// 4.0
+$billomat->incomings->update($incomingId, new IncomingUpdateOptions(base64File: base64_encode($pdf)));
+// or right away: new IncomingCreateOptions(..., base64File: base64_encode($pdf))
+```
+
+The stored file is readable with the new `incomings->pdf()`/`pdfContent()`.
+
 ## Options are immutable
 
 All `*CreateOptions`/`*UpdateOptions`, `EmailOptions`, `MailOptions`,

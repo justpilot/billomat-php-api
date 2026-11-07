@@ -34,8 +34,6 @@ use NoDiscard;
  *  - PUT    /letters/{id}/complete
  *  - POST   /letters/{id}/email
  *  - GET    /letters/{id}/pdf
- *  - PUT    /letters/{id}/upload-signature
- *  - PUT    /letters/{id}/upload         (kompletten Brief-PDF hochladen)
  */
 final class LettersApi extends AbstractApi
 {
@@ -180,26 +178,6 @@ final class LettersApi extends AbstractApi
         $payload = ['mail' => $options?->toArray() ?? []];
 
         $this->postVoid("/letters/{$id}/mail", $payload);
-    }
-
-    /**
-     * Lädt das komplette Brief-PDF hoch (z.B. wenn das Layout extern erzeugt wurde).
-     *
-     * Entspricht PUT /letters/{id}/upload.
-     */
-    public function upload(int $id, string $base64Pdf): void
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/letters/{$id}/upload", $payload);
-    }
-
-    /** Lädt eine unterschriebene PDF-Version des Briefs hoch. */
-    public function uploadSignature(int $id, string $base64Pdf): void
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/letters/{$id}/upload-signature", $payload);
     }
 
     /**

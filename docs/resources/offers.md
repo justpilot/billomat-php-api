@@ -50,7 +50,6 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON  ─�
 | `unclear($id)` | PUT | `/offers/{id}/unclear` |
 | `email($id, $options?)` | POST | `/offers/{id}/email` |
 | `mail($id, $options?)` | POST | `/offers/{id}/mail` |
-| `uploadSignature($id, $base64Pdf)` | PUT | `/offers/{id}/upload-signature` |
 | `pdf($id, $type?)` | GET | `/offers/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/offers/{id}/pdf?format=pdf` |
 
@@ -191,10 +190,6 @@ use Justpilot\Billomat\Api\MailOptions;
 $billomat->offers->mail($id, new MailOptions(duplex: true));
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): void`
-
-Uploads a signed PDF version. `$base64Pdf` is the Base64-encoded PDF content (without a `data:` prefix).
-
 #### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
 `pdf()` returns a `DocumentPdf` model with Base64 content; `pdfContent()` skips the JSON layer and returns the raw binary bytes. The `$type` parameter shares the `PdfType` enum with the invoice PDF (`SIGNED`, `PRINT`).
@@ -205,7 +200,7 @@ use Justpilot\Billomat\Model\Enum\PdfType;
 $pdf = $billomat->offers->pdf($offer->id);              // DocumentPdf
 file_put_contents('offer.pdf', $pdf->getBinary());
 
-$bytes = $billomat->offers->pdfContent($offer->id, PdfType::SIGNED);
+$bytes = $billomat->offers->pdfContent($offer->id, PdfType::PRINT);
 ```
 
 ### Offer items
@@ -499,7 +494,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **`array_is_list` normalization in `list()`.** With exactly one match, Billomat returns `offer` as an object instead of a list; the method detects this and wraps the single result in an array.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat ignores the explicitly set tax rate and uses the article's/client's default.
 - **`pdfContent()` bypasses JSON entirely.** The body is read as a binary string and must start with `%PDF-`, otherwise an `UnexpectedResponseException` is thrown. HTTP errors still arrive as SDK exceptions (`NotFoundException`, `AuthenticationException`, …) because `BillomatHttpClient` throws them during the request.
-- **`uploadSignature()` expects plain Base64**, no data URI prefix. Passing a `data:application/pdf;base64,...` string results in a broken PDF in Billomat.
+- **No signature upload.** Billomat only accepts signed PDFs for invoices, credit notes and reminders (`uploadSignature()` there); for offers it answers "no signature upload supported for this document type".
 - **`OfferCommentActionKey` values are uppercase on the wire** (`WIN`, `LOSE`, …); the enum mirrors the exact values. Unknown values map to `null`, and the raw string is stored in `actionKeyRaw` as well.
 
 ## End-to-end example

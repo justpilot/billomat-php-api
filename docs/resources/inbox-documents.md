@@ -18,7 +18,7 @@ Inbox documents are raw attachments: Billomat stores only file metadata (`filena
 
 - **Relation to incomings**: inbox documents are the typical first step towards an [incoming invoice](incomings.md). The Billomat web UI has a "convert to incoming invoice" workflow; the API offers **no** dedicated endpoint for it. The conversion therefore takes two steps:
   1. Read the inbox document (`get($id)` with Base64 content).
-  2. Create a new incoming, attach the same Base64 string via `$billomat->incomings->upload($incomingId, $base64)`, then call `$billomat->inboxDocuments->delete($id)`.
+  2. Create a new incoming with the same Base64 string as `base64File` (`new IncomingCreateOptions(..., base64File: $base64)`), then call `$billomat->inboxDocuments->delete($id)`.
 - **Relation to suppliers**: none directly. Inbox documents don't know a supplier; the assignment happens only when the incoming is created.
 
 ## Endpoint overview
@@ -137,7 +137,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **`base64File` only via `get()`.** `list()` returns the metadata without binary content to keep responses small. To process the PDF content, load each document individually via `get($id)`.
 - **The wire field is `mimetype`, not `mime_type`.** Unlike most other resources, there's no snake_case with an underscore here; Billomat expects `mimetype` as one word. The PHP property is still called `mimeType` (camelCase).
 - **`metadata` has different types.** You write it as an array; the read model returns it as a raw `?string`.
-- **No conversion to an incoming via the API.** The Billomat API has no `/inbox-documents/{id}/convert` or similar. To replicate the web UI behavior, call `$billomat->incomings->create()` plus `$billomat->incomings->upload()` yourself and delete the inbox document afterwards.
+- **No conversion to an incoming via the API.** The Billomat API has no `/inbox-documents/{id}/convert` or similar. To replicate the web UI behavior, call `$billomat->incomings->create()` with the document's Base64 content as `base64File` yourself and delete the inbox document afterwards.
 - **Base64-encode beforehand.** `InboxDocumentCreateOptions` doesn't encode the content; the string must already be Base64. Passing raw bytes produces an upload whose PDF is broken on download.
 - **No update.** Corrections (e.g. a typo in the file name) are only possible by deleting and creating the document again.
 - **`mimeType` fallback on broken responses.** `InboxDocument::fromArray()` falls back to `application/octet-stream` if Billomat leaves the field empty. It doesn't crash, but it's a warning sign worth logging.
@@ -180,17 +180,15 @@ foreach ($billomat->inboxDocuments->list(['order_by' => 'created+ASC']) as $pend
         continue;
     }
 
-    // 2a) Create the incoming (you have to know supplier and amount yourself)
-    $incomingOpts = new IncomingCreateOptions(supplierId: 4711, label: $full->filename);
+    // 2a) Create the incoming with the PDF from the inbox (you have to know supplier and amount yourself)
+    $incomingOpts = new IncomingCreateOptions(
+        supplierId: 4711,
+        label: $full->filename,
+        base64File: $full->base64File,
+    );
     $incoming = $billomat->incomings->create($incomingOpts);
 
-    // 2b) Attach the PDF from the inbox to the incoming (pass the Base64 string through)
-    $billomat->incomings->upload(
-        $incoming->id,
-        $full->base64File ?? '',
-    );
-
-    // 2c) Remove the document from the inbox
+    // 2b) Remove the document from the inbox
     $billomat->inboxDocuments->delete($full->id);
 
     printf("→ #%d moved to incoming #%d\n", $full->id, $incoming->id);

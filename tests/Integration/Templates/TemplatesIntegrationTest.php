@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Integration\Templates;
 
+use Justpilot\Billomat\Api\TemplateCreateOptions;
+use Justpilot\Billomat\Api\TemplateUpdateOptions;
+use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
+use Justpilot\Billomat\Model\Enum\TemplateFormat;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -94,5 +98,39 @@ final class TemplatesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         self::assertIsString($raw);
         self::assertNotSame('', $raw, 'Thumb response should not be empty.');
+    }
+
+    /**
+     * Anlegen dauert bei Billomat über 10 s (Konvertierung der Vorlage); der SDK-Standard-Timeout ist 30 s.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function canCreateUpdateAndDeleteTemplateInSandbox(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $rtf = '{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Arial;}}\\f0\\fs24 SDK-Integrationstest\\par}';
+
+        $template = $billomat->templates->create(new TemplateCreateOptions(
+            type: TemplateDocumentType::INVOICE,
+            name: 'SDK-Integrationstest '.date('His'),
+            format: TemplateFormat::RTF,
+            base64File: base64_encode($rtf),
+        ));
+
+        try {
+            self::assertSame(TemplateDocumentType::INVOICE, $template->type);
+            self::assertFalse($template->isDefault);
+
+            $fetched = $billomat->templates->getOrFail($template->id);
+            self::assertSame(TemplateFormat::RTF, $fetched->format);
+            self::assertNotSame('', (string) $fetched->base64File);
+
+            $updated = $billomat->templates->update($template->id, new TemplateUpdateOptions(name: 'SDK-Integrationstest umbenannt'));
+            self::assertSame('SDK-Integrationstest umbenannt', $updated->name);
+        } finally {
+            $billomat->templates->delete($template->id);
+        }
+
+        self::assertNull($billomat->templates->get($template->id));
     }
 }

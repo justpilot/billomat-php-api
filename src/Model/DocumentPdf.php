@@ -12,9 +12,9 @@ use const DATE_ATOM;
 
 /**
  * PDF eines Billomat-Dokuments als JSON: GET /invoices/{id}/pdf, /offers/{id}/pdf, /confirmations/{id}/pdf,
- * /credit-notes/{id}/pdf, /delivery-notes/{id}/pdf, /letters/{id}/pdf und /reminders/{id}/pdf.
+ * /credit-notes/{id}/pdf, /delivery-notes/{id}/pdf, /letters/{id}/pdf, /reminders/{id}/pdf und /incomings/{id}/pdf.
  *
- * Alle Dokumenttypen liefern dieselbe Struktur; nur der Name des ID-Felds des Dokuments
+ * Alle Dokumenttypen liefern dieselbe Struktur (in der Sandbox geprüft); nur der Name des ID-Felds des Dokuments
  * (`invoice_id`, `offer_id`, …) unterscheidet sich und landet in `$documentId`.
  *
  * Erwartete Struktur (Wrapper "pdf" schon entfernt):
@@ -36,7 +36,7 @@ final readonly class DocumentPdf
      * Ausgabe von {@see toArray()} zurück.
      */
     private const array DOCUMENT_ID_FIELDS = [
-        'invoice_id', 'offer_id', 'confirmation_id', 'credit_note_id', 'delivery_note_id', 'letter_id', 'reminder_id', 'document_id',
+        'invoice_id', 'offer_id', 'confirmation_id', 'credit_note_id', 'delivery_note_id', 'letter_id', 'reminder_id', 'incoming_id', 'document_id',
     ];
 
     private const array FIELDS = ['id', 'created', 'filename', 'mimetype', 'filesize', 'base64file', ...self::DOCUMENT_ID_FIELDS];

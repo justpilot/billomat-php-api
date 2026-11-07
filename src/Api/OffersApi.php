@@ -41,7 +41,6 @@ use NoDiscard;
  *  - PUT    /offers/{id}/unclear
  *  - POST   /offers/{id}/email
  *  - GET    /offers/{id}/pdf
- *  - PUT    /offers/{id}/upload-signature
  */
 final class OffersApi extends AbstractApi
 {
@@ -256,16 +255,6 @@ final class OffersApi extends AbstractApi
         $payload = ['mail' => $options?->toArray() ?? []];
 
         $this->postVoid("/offers/{$id}/mail", $payload);
-    }
-
-    /**
-     * Lädt eine unterschriebene PDF-Version des Angebots hoch.
-     */
-    public function uploadSignature(int $id, string $base64Pdf): void
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/offers/{$id}/upload-signature", $payload);
     }
 
     /**

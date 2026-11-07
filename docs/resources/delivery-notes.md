@@ -39,7 +39,6 @@ Unlike [confirmations](confirmations.md), the API offers no further status trans
 | `complete($id, $templateId?)` | PUT | `/delivery-notes/{id}/complete` |
 | `email($id, $options?)` | POST | `/delivery-notes/{id}/email` |
 | `mail($id, $options?)` | POST | `/delivery-notes/{id}/mail` |
-| `uploadSignature($id, $base64Pdf)` | PUT | `/delivery-notes/{id}/upload-signature` |
 | `pdf($id, $type?)` | GET | `/delivery-notes/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/delivery-notes/{id}/pdf?format=pdf` |
 
@@ -151,18 +150,12 @@ use Justpilot\Billomat\Api\MailOptions;
 $billomat->deliveryNotes->mail($id, new MailOptions(duplex: true));
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): void`
-
-Uploads a signed PDF version. Typical use case: the driver photographs the signed proof of delivery, and the PDF is uploaded base64-encoded.
-
 #### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
 `pdf()` returns a `DocumentPdf` (base64 container), `pdfContent()` the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
-use Justpilot\Billomat\Model\Enum\PdfType;
-
-$pdf = $billomat->deliveryNotes->pdf($note->id, PdfType::SIGNED);
+$pdf = $billomat->deliveryNotes->pdf($note->id);
 file_put_contents('delivery-note.pdf', $pdf->getBinary());
 ```
 
@@ -421,7 +414,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `delivery-note` as an object; the SDK wraps it in a list.
 - **Multiple source references are possible.** `invoiceId`, `confirmationId` and `offerId` can all be set at the same time, but Billomat does **not** synchronize the status of the linked documents automatically.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.
-- **`uploadSignature()` expects plain base64**, without a `data:` prefix. Typical use case: sending a PDF signed by the driver back from a mobile workflow.
+- **No signature upload.** Billomat only accepts signed PDFs for invoices, credit notes and reminders (`uploadSignature()` there); for delivery notes it answers "no signature upload supported for this document type".
 
 ## End-to-end example
 
@@ -487,13 +480,7 @@ printf("Status: %s, delivery note number: %s\n",
 $email = new EmailOptions(to: ['carrier@example.com'], subject: 'Delivery note {NUMBER}');
 $billomat->deliveryNotes->email($note->id, $email);
 
-// 5) Upload the signed proof of delivery (e.g. from a mobile workflow)
-$signed = file_get_contents('/var/spool/scans/' . $opened->deliveryNoteNumber . '.pdf');
-if (false !== $signed) {
-    $billomat->deliveryNotes->uploadSignature($note->id, base64_encode($signed));
-}
-
-// 6) Add a note
+// 5) Add a note
 $billomat->deliveryNotes->comments->create(
     $note->id,
     new DeliveryNoteCommentCreateOptions(
@@ -501,7 +488,7 @@ $billomat->deliveryNotes->comments->create(
     ),
 );
 
-// 7) Archive the signed PDF version
-$pdf = $billomat->deliveryNotes->pdf($note->id, PdfType::SIGNED);
+// 6) Archive the PDF
+$pdf = $billomat->deliveryNotes->pdf($note->id);
 file_put_contents("delivery-note-{$opened->deliveryNoteNumber}.pdf", $pdf->getBinary());
 ```

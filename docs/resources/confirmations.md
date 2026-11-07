@@ -47,7 +47,6 @@ DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEAR
 | `unclear($id)` | PUT | `/confirmations/{id}/unclear` |
 | `email($id, $options?)` | POST | `/confirmations/{id}/email` |
 | `mail($id, $options?)` | POST | `/confirmations/{id}/mail` |
-| `uploadSignature($id, $base64Pdf)` | PUT | `/confirmations/{id}/upload-signature` |
 | `pdf($id, $type?)` | GET | `/confirmations/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/confirmations/{id}/pdf?format=pdf` |
 
@@ -176,10 +175,6 @@ use Justpilot\Billomat\Api\MailOptions;
 
 $billomat->confirmations->mail($id, new MailOptions(duplex: true));
 ```
-
-#### `uploadSignature(int $id, string $base64Pdf): void`
-
-Uploads a signed PDF version. `$base64Pdf` is the plain base64-encoded PDF content.
 
 #### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
@@ -450,7 +445,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `confirmation` as an object; the SDK wraps it in a list.
 - **The `offerId` link is informational.** The confirmation is not synchronized with the offer status automatically; set `OfferStatus::WON` separately via `$billomat->offers->win()`.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.
-- **`uploadSignature()` expects plain base64**, without a `data:` prefix.
+- **No signature upload.** Billomat only accepts signed PDFs for invoices, credit notes and reminders (`uploadSignature()` there); for confirmations it answers "no signature upload supported for this document type".
 
 ## End-to-end example
 

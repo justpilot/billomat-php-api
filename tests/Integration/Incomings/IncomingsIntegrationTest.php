@@ -7,7 +7,10 @@ namespace Justpilot\Billomat\Tests\Integration\Incomings;
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
 use Justpilot\Billomat\Api\IncomingUpdateOptions;
+use Justpilot\Billomat\Api\InvoiceFilter;
 use Justpilot\Billomat\Api\SupplierCreateOptions;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Incoming;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -79,5 +82,48 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         // Cleanup
         $billomat->incomings->delete($incoming->id);
         self::assertNull($billomat->incomings->get($incoming->id));
+    }
+
+    /**
+     * GET /incomings/{id}/pdf liefert die per base64File hinterlegte Datei (neu abgelegt, nicht bytegleich). Billomat prüft die Datei,
+     * deshalb dient das PDF einer abgeschlossenen Sandbox-Rechnung als Beleg.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function canFetchTheUploadedPdfOfAnIncoming(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $invoices = $billomat->invoices->list(new InvoiceFilter(status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE, InvoiceStatus::PAID], perPage: 1));
+        if ([] === $invoices) {
+            self::markTestSkipped('Die Sandbox braucht eine abgeschlossene Rechnung als Beleg-PDF.');
+        }
+        $content = $billomat->invoices->pdfContent($invoices[0]->id);
+
+        $incoming = $billomat->incomings->create(new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId(),
+            date: new DateTimeImmutable('today'),
+            incomingNumber: 'IT-PDF-'.date('His'),
+        ));
+
+        try {
+            // Ohne Datei gibt es kein PDF.
+            try {
+                (void) $billomat->incomings->pdf($incoming->id);
+                self::fail('Eine Eingangsrechnung ohne Datei hat kein PDF.');
+            } catch (NotFoundException) {
+            }
+
+            // Ersatz für das frühere upload(): die Datei per update() nachreichen.
+            $billomat->incomings->update($incoming->id, new IncomingUpdateOptions(base64File: base64_encode($content)));
+
+            $pdf = $billomat->incomings->pdf($incoming->id);
+            self::assertSame($incoming->id, $pdf->documentId);
+            self::assertSame([], $pdf->extra);
+            // Billomat legt die Datei neu ab; der Inhalt ist ein PDF, aber nicht bytegleich.
+            self::assertStringStartsWith('%PDF-', $pdf->getBinary());
+            self::assertSame($pdf->getBinary(), $billomat->incomings->pdfContent($incoming->id));
+        } finally {
+            $billomat->incomings->delete($incoming->id);
+        }
     }
 }

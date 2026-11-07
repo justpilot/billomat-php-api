@@ -23,18 +23,16 @@ use PHPUnit\Framework\Attributes\Test;
  * Integrationstests für die in den Konformitäts-Fixes ergänzten Invoice-Aktionen:
  *  - POST /invoices/{id}/email
  *  - POST /invoices/{id}/mail              (Pixelletter, KOSTENPFLICHTIG)
- *  - PUT  /invoices/{id}/upload-signature
  *  - PUT  /invoices/{id}/encash            (Inkasso, reale Nebenwirkungen)
  *
- * Alle vier Tests sind standardmäßig deaktiviert, weil sie entweder
+ * Alle drei Tests sind standardmäßig deaktiviert, weil sie entweder
  *   (a) real Geld kosten (mail, evtl. email),
- *   (b) reale Nebenwirkungen haben (encash sendet Forderung an Inkasso-Dienst),
- * oder
- *   (c) Datei-Uploads in den Account einspielen (upload-signature).
+ *   (b) reale Nebenwirkungen haben (encash sendet Forderung an Inkasso-Dienst).
+ *
+ * upload-signature deckt DocumentLifecycleIntegrationTest ab (ohne Freischaltung).
  *
  * Jeweils per einzelner Umgebungsvariable freischaltbar:
  *   BILLOMAT_TEST_EMAIL=1                  (zusätzlich: BILLOMAT_TEST_EMAIL_RECIPIENT)
- *   BILLOMAT_TEST_UPLOAD_SIGNATURE=1
  *   BILLOMAT_TEST_MAIL=1                   ⚠ Pixelletter-Versand wird ausgelöst
  *   BILLOMAT_TEST_ENCASH=1                 ⚠ Forderung wird ans Inkasso übergeben
  */
@@ -116,41 +114,6 @@ final class InvoiceActionsIntegrationTest extends AbstractBillomatIntegrationTes
         );
 
         $billomat->invoices->email($invoiceId, $opts);
-    }
-
-    #[Group('integration')]
-    #[Test]
-    public function canUploadSignatureInSandboxWhenExplicitlyEnabled(): void
-    {
-        if ('1' !== getenv('BILLOMAT_TEST_UPLOAD_SIGNATURE')) {
-            self::markTestSkipped(
-                'Set BILLOMAT_TEST_UPLOAD_SIGNATURE=1 to enable PUT /invoices/{id}/upload-signature '
-                .'integration test. (Der Test lädt ein Dummy-PDF in die Rechnung und mutiert deren Zustand.)'
-            );
-        }
-
-        $billomat = $this->createBillomatClientOrSkip();
-        $invoiceId = $this->createCompletedInvoice($billomat);
-
-        // Minimal-PDF (1.4 header + EOF) – akzeptiert von Billomat als gültige PDF-Datei.
-        $minimalPdf = "%PDF-1.4\n"
-            ."1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
-            ."2 0 obj<</Type/Pages/Count 0>>endobj\n"
-            ."xref\n0 3\n"
-            ."0000000000 65535 f\n"
-            ."0000000009 00000 n\n"
-            ."0000000052 00000 n\n"
-            ."trailer<</Size 3/Root 1 0 R>>\n"
-            ."startxref\n92\n%%EOF";
-
-        $base64 = base64_encode($minimalPdf);
-
-        $billomat->invoices->uploadSignature($invoiceId, $base64);
-
-        // Sanity-Check: Rechnung existiert weiterhin und ist nicht zerstört.
-        $afterUpload = $billomat->invoices->get($invoiceId);
-        self::assertInstanceOf(Invoice::class, $afterUpload);
-        self::assertSame($invoiceId, $afterUpload->id);
     }
 
     #[Group('integration')]

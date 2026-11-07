@@ -12,9 +12,11 @@ use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Api\TemplateFilter;
+use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Template;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -619,5 +621,36 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $fetched = $billomat->invoices->get($draft->id);
         self::assertNotNull($fetched);
         self::assertSame($newDate->format('Y-m-d'), $fetched->date?->format('Y-m-d'));
+    }
+
+    /**
+     * Jeder group_by-Wert liefert Gruppen mit Summen; das passende Identifier-Feld ist gesetzt,
+     * nur die Gruppe ohne Datum (Entwürfe) hat bei Zeit-Gruppierungen null.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function listGroupedReturnsGroupsForEveryGroupBy(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        foreach (InvoiceGroupBy::cases() as $groupBy) {
+            $groups = $billomat->invoices->listGrouped($groupBy);
+            self::assertNotSame([], $groups, $groupBy->value);
+
+            $identifiers = array_map(static fn (InvoiceGroup $group): mixed => match ($groupBy) {
+                InvoiceGroupBy::CLIENT => $group->clientId,
+                InvoiceGroupBy::STATUS => $group->status,
+                InvoiceGroupBy::DAY => $group->day,
+                InvoiceGroupBy::WEEK => $group->week,
+                InvoiceGroupBy::MONTH => $group->month,
+                InvoiceGroupBy::YEAR => $group->year,
+            }, $groups);
+
+            self::assertNotSame([], array_filter($identifiers, static fn (mixed $value): bool => null !== $value), $groupBy->value);
+            foreach ($groups as $group) {
+                self::assertNotNull($group->totalGross, $groupBy->value);
+                self::assertSame([], $group->extra, $groupBy->value);
+            }
+        }
     }
 }

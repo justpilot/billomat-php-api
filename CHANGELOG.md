@@ -6,6 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Fixed
+
+- **`TaxSummary` maps every field of a tax row.** Besides `name`, `rate` and `amount`, Billomat sends the net and gross amount per rate, each unrounded and rounded: `amountPlain`, `amountRounded`, `amountNet`, `amountNetPlain`, `amountNetRounded`, `amountGross`, `amountGrossPlain`, `amountGrossRounded` (all `?Money`). They were dropped silently until now. Like the generated models, `TaxSummary` now also has `$extra` for fields the SDK doesn't map yet.
+
 ## [4.0.0-alpha.2] - 2026-10-26
 
 Second pre-release of 4.0, the candidate for 4.0.0-beta.1. From the beta on, the public API is frozen (see [Backward compatibility](docs/concepts/backward-compatibility.md)).

@@ -245,7 +245,7 @@ Has the same fields as `RecurringCreateOptions`, but `clientId` is optional (for
 | `totalGross`, `totalNet` | `?Money` |
 | `emailSender`, `emailSubject`, `emailMessage` | `?string` |
 | `emailTemplateId`, `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` as `Money`) |
+| `taxes` | `list<TaxSummary>`: tax summary per rate (`name`, `rate`, `amount`, `amountNet`, `amountGross`, the latter each also as `*Plain`/`*Rounded`; amounts as `Money`) |
 | `items` | `list<RecurringItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |

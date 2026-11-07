@@ -424,7 +424,7 @@ Payload for `mail()` (Pixelletter), shared by all document types (invoices, offe
 | `paymentTypes` | `list<PaymentType>` (unknown values are dropped) |
 | `quote` | `?float` |
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | `?int` |
-| `taxes` | `list<TaxSummary>` (`name`, `rate`, `amount` as `Money`): tax summary per rate |
+| `taxes` | `list<TaxSummary>`: tax summary per rate with `name`, `rate`, the tax `amount` and the net/gross amounts it applies to (`amountNet`, `amountGross`, each also as `*Plain` unrounded and `*Rounded`), all `Money` |
 | `templateId` | `?int` |
 | `items` | `list<InvoiceItem>`, if the API includes the items (only `GET /invoices/{id}`) |
 | `updated` | `?\DateTimeImmutable` |

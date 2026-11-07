@@ -27,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(TaxesApi::class)]
 #[CoversClass(TaxRate::class)]
 #[UsesClass(TaxRateCreateOptions::class)]
+#[UsesClass(TaxRateUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]

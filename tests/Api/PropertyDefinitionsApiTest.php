@@ -38,6 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(IncomingsApi::class)]
 #[UsesClass(SuppliersApi::class)]
 #[CoversClass(PropertyCreateOptions::class)]
+#[UsesClass(PropertyUpdateOptions::class)]
 #[CoversClass(ClientProperty::class)]
 #[CoversClass(IncomingProperty::class)]
 #[CoversClass(SupplierProperty::class)]

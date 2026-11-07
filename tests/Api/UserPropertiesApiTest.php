@@ -31,6 +31,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(UsersApi::class)]
 #[CoversClass(UserProperty::class)]
 #[CoversClass(PropertyCreateOptions::class)]
+#[UsesClass(PropertyUpdateOptions::class)]
 #[CoversClass(PropertyType::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]

@@ -63,6 +63,7 @@ use Justpilot\Billomat\Api\OfferItemUpdateOptions;
 use Justpilot\Billomat\Api\OfferTagCreateOptions;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverUpdateOptions;
@@ -79,6 +80,7 @@ use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\SupplierTagCreateOptions;
 use Justpilot\Billomat\Api\SupplierUpdateOptions;
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
+use Justpilot\Billomat\Api\TaxRateUpdateOptions;
 use Justpilot\Billomat\Api\TemplateCreateOptions;
 use Justpilot\Billomat\Api\TemplateUpdateOptions;
 use Justpilot\Billomat\Api\WriteOptions;
@@ -159,6 +161,7 @@ use UnitEnum;
 #[CoversClass(OfferTagCreateOptions::class)]
 #[CoversClass(OfferUpdateOptions::class)]
 #[CoversClass(PropertyCreateOptions::class)]
+#[CoversClass(PropertyUpdateOptions::class)]
 #[CoversClass(RecurringCreateOptions::class)]
 #[CoversClass(RecurringEmailReceiverCreateOptions::class)]
 #[CoversClass(RecurringEmailReceiverUpdateOptions::class)]
@@ -175,6 +178,7 @@ use UnitEnum;
 #[CoversClass(SupplierTagCreateOptions::class)]
 #[CoversClass(SupplierUpdateOptions::class)]
 #[CoversClass(TaxRateCreateOptions::class)]
+#[CoversClass(TaxRateUpdateOptions::class)]
 #[CoversClass(TemplateCreateOptions::class)]
 #[CoversClass(TemplateUpdateOptions::class)]
 #[UsesClass(Money::class)]

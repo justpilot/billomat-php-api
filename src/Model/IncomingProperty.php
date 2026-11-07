@@ -11,7 +11,7 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  * Definition einer Eigenschaft für Eingangsrechnungen.
  *
  * Dieses Model bildet die Struktur von GET /incoming-properties bzw. GET /incoming-properties/{id} ab.
- * Anlegen und Ändern erfolgen über PropertyCreateOptions.
+ * Anlegen über PropertyCreateOptions, Ändern über PropertyUpdateOptions.
  *
  * Dokumentation:
  * https://www.billomat.com/en/api/settings/incoming-properties/

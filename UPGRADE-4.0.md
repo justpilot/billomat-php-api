@@ -77,6 +77,8 @@ These changes need a decision and are not automated. The sections below describe
   (`$position`, `$dueDays`, `$charge`, `$interest`).
 - `@template` types for the generic sub-resource classes (`CommentsApi<InvoiceComment, …>`) in your PHPDoc.
 - `pdf(rawPdf: $flag)` with a flag that is only known at runtime: split it into `pdf()` and `pdfContent()`.
+- `taxes->update()` and `properties->update()` take `TaxRateUpdateOptions`/`PropertyUpdateOptions`
+  instead of the create options.
 - Payment, comment, tag, property value and e-mail receiver options built outside the `create()` call
   (`$options = new InvoiceTagCreateOptions(invoiceId: $id, …)`): move the ID into `create($id, $options)`.
 - The parent filter of payments and property values: `list(filters: ['invoice_id' => $id])` keeps
@@ -628,6 +630,22 @@ $billomat->invoices->items->update($item->id, new InvoiceItemUpdateOptions(unitP
 ```
 
 Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
+
+### Tax rate and property updates take `TaxRateUpdateOptions`/`PropertyUpdateOptions`
+
+`taxes->update()` takes `TaxRateUpdateOptions`, the `update()` of the five property definition APIs
+(`articles`, `clients`, `suppliers`, `incomings`, `users` → `properties`) takes `PropertyUpdateOptions`.
+All fields are optional and only the ones you set are sent. With `TaxRateCreateOptions`, whose
+`$isDefault` defaults to `false`, every update sent `is_default: 0` and removed the default flag:
+
+```php
+// 3.x: renaming the default tax rate made it a normal one
+$billomat->taxes->update($id, new TaxRateCreateOptions(name: 'MwSt 19 %', rate: 19.0));
+
+// 4.0
+$billomat->taxes->update($id, new TaxRateUpdateOptions(name: 'MwSt 19 %'));
+$billomat->clients->properties->update($id, new PropertyUpdateOptions(defaultValue: 'nein'));
+```
 
 ### One `EmailOptions` class
 

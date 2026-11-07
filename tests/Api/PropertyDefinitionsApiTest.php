@@ -9,6 +9,7 @@ use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\IncomingsApi;
 use Justpilot\Billomat\Api\PropertiesApi;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
 use Justpilot\Billomat\Api\SuppliersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
@@ -37,6 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(IncomingsApi::class)]
 #[UsesClass(SuppliersApi::class)]
 #[CoversClass(PropertyCreateOptions::class)]
+#[UsesClass(PropertyUpdateOptions::class)]
 #[CoversClass(ClientProperty::class)]
 #[CoversClass(IncomingProperty::class)]
 #[CoversClass(SupplierProperty::class)]
@@ -189,7 +191,7 @@ final class PropertyDefinitionsApiTest extends TestCase
 
         $api = new ClientsApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Geändert', type: PropertyType::TEXTFIELD);
+        $opts = new PropertyUpdateOptions(name: 'Geändert', type: PropertyType::TEXTFIELD);
 
         $updated = $api->update(42, $opts);
 
@@ -388,7 +390,7 @@ final class PropertyDefinitionsApiTest extends TestCase
 
         $api = new SuppliersApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Geändert');
+        $opts = new PropertyUpdateOptions(name: 'Geändert');
 
         $updated = $api->update(21, $opts);
 

@@ -91,14 +91,15 @@ OrderBy::desc('date')->thenAsc('invoice_number'); // order_by=date+DESC,invoice_
 
 `OrderBy` checks that the field name is snake_case and throws an `InvalidArgumentException` otherwise.
 
-### Quirk: `+` instead of a space
+### Quirk: `+` in `order_by`
 
-Billomat expects the separator as a **literal `+`**, not as `%20` or `%2B`. `BillomatHttpClient::buildBillomatQuery()` therefore builds the query string by hand:
+Billomat writes the separator as `+` (`date+DESC`), meaning a space; `%2B` is rejected. `BillomatHttpClient::buildBillomatQuery()` builds the query string by hand:
 
 - Array values are serialized as `key[]=v1&key[]=v2`.
-- After `rawurlencode`, `%2B` sequences are turned back into `+`.
+- In `order_by`, a `+` becomes a space and goes out as `%20` (`order_by=date%20DESC`). A hand-written `'order_by' => 'date+DESC'` keeps working.
+- Every other value is `rawurlencode`d, so a `+` in a filter value (an email address, a phone number) goes out as `%2B` and arrives as `+`.
 
-`http_build_query()` would get both wrong.
+`http_build_query()` would get the arrays wrong.
 
 ## Language — `Accept-Language`
 

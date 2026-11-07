@@ -61,9 +61,15 @@ $opts = new TaxRateCreateOptions(name: 'Ermäßigt 7%', rate: 7.0, isDefault: fa
 $created = $billomat->taxes->create($opts);
 ```
 
-### `update(int $id, TaxRateCreateOptions $options): TaxRate`
+### `update(int $id, TaxRateUpdateOptions $options): TaxRate`
 
-Uses the **same** options class as `create()`. There is no partial update: you always send a complete tax rate.
+Partial update: only the fields you set are sent, so renaming a rate leaves `is_default` untouched.
+
+```php
+use Justpilot\Billomat\Api\TaxRateUpdateOptions;
+
+$billomat->taxes->update(10, new TaxRateUpdateOptions(name: 'MwSt 19 %'));
+```
 
 ### `delete(int $id): void`
 
@@ -78,6 +84,10 @@ Constructor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefaul
 | `name` | `name` | `string` | Required (e.g. `MwSt`) |
 | `rate` | `rate` | `float` | Required, percentage (e.g. `19.0`) |
 | `isDefault` | `is_default` | `bool` | Defaults to `false`. Serialized as `1`/`0`. |
+
+## Write model: `TaxRateUpdateOptions`
+
+All fields are optional named arguments (`?string $name`, `?float $rate`, `?bool $isDefault`); `null` fields are not sent. Like every update options class it accepts `Clear::Field` to send an empty value, which Billomat rejects for these required fields.
 
 `toArray()` doesn't filter anything here — all three fields are always set.
 
@@ -128,6 +138,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
+use Justpilot\Billomat\Api\TaxRateUpdateOptions;
 use Justpilot\Billomat\BillomatClient;
 
 $billomat = BillomatClient::create(
@@ -153,11 +164,8 @@ $new = $billomat->taxes->create(new TaxRateCreateOptions(
 ));
 printf("Created: #%d %s\n", $new->id, $new->name);
 
-// Make it the default (full payload, no partial update)
-$updated = $billomat->taxes->update(
-    $new->id,
-    new TaxRateCreateOptions(name: $new->name, rate: $new->rate)->withIsDefault(true),
-);
+// Make it the default (partial update: only is_default is sent)
+$updated = $billomat->taxes->update($new->id, new TaxRateUpdateOptions(isDefault: true));
 var_dump($updated->isDefault); // true
 
 // Delete

@@ -5,8 +5,9 @@ declare(strict_types=1);
 /*
  * Codegen-Definition für die Ressource „Steuersätze“ (/taxes).
  *
- * Aufbau und Feld-Schlüssel: siehe clients.php. TaxRateCreateOptions dient
- * sowohl für POST als auch für PUT; alle Felder sind Konstruktor-Parameter.
+ * Aufbau und Feld-Schlüssel: siehe clients.php. TaxRateCreateOptions für POST
+ * (Pflichtfelder als Konstruktor-Parameter), TaxRateUpdateOptions für PUT
+ * (alle Felder optional, nur gesetzte werden gesendet).
  *
  * Nach Änderungen: composer generate
  */
@@ -23,7 +24,7 @@ return [
             'Repräsentiert einen Steuersatz aus der Billomat-API.',
             '',
             'Dieses Model bildet die Struktur von GET /taxes bzw. GET /taxes/{id} ab.',
-            'Es ist als Read-Model gedacht: Anlegen und Ändern erfolgen über TaxRateCreateOptions.',
+            'Es ist als Read-Model gedacht: Anlegen über TaxRateCreateOptions, Ändern über TaxRateUpdateOptions.',
         ],
     ],
 
@@ -33,7 +34,20 @@ return [
         // Billomat erwartet 1/0 statt true/false.
         'boolAsInt' => true,
         'doc' => [
-            'Typisierter Payload für POST /taxes und PUT /taxes/{id} gemäß Billomat-API.',
+            'Typisierter Payload für POST /taxes gemäß Billomat-API.',
+        ],
+    ],
+
+    'updateOptions' => [
+        'class' => 'TaxRateUpdateOptions',
+        'endpoint' => 'PUT /api/taxes/{id}',
+        // Billomat erwartet 1/0 statt true/false.
+        'boolAsInt' => true,
+        'doc' => [
+            'Typisierter Payload für PUT /taxes/{id} gemäß Billomat-API.',
+            '',
+            'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update):',
+            'ein Umbenennen setzt `is_default` nicht zurück.',
         ],
     ],
 

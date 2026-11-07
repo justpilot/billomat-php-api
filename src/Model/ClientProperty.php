@@ -11,7 +11,7 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  * Definition einer Kunden-Eigenschaft.
  *
  * Dieses Model bildet die Struktur von GET /client-properties bzw. GET /client-properties/{id} ab.
- * Anlegen und Ändern erfolgen über PropertyCreateOptions.
+ * Anlegen über PropertyCreateOptions, Ändern über PropertyUpdateOptions.
  *
  * Dokumentation:
  * https://www.billomat.com/en/api/settings/client-properties/

@@ -285,7 +285,7 @@ Unknown values become `null`.
 - **`from` is called `fromAddress` in the PHP model.** `toArray()` renders it as `from` again.
 - **`User::$roleId`** refers to a role configured in the Billomat account; resolve it via [`$billomat->roles->get($roleId)`](settings-roles.md).
 - **`getMyself()`** is the only way to identify the current user programmatically, useful for "created by" fields in audit logs.
-- **Don't URL-encode filter strings yourself.** `order_by=sorting+ASC` is passed through correctly by the HTTP layer; Billomat rejects `%2B` instead of `+` (see `BillomatHttpClient::buildBillomatQuery`). Build sort values with `OrderBy` instead of writing them by hand.
+- **Don't URL-encode filter strings yourself.** The HTTP layer encodes every value and sends the `+` of `order_by=sorting+ASC` as a space, which is what Billomat expects (see `BillomatHttpClient::buildBillomatQuery`). Build sort values with `OrderBy` instead of writing them by hand.
 
 ## End-to-end example
 

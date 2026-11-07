@@ -31,6 +31,9 @@ use const JSON_THROW_ON_ERROR;
  */
 abstract class AbstractApi
 {
+    /** Größte Seitengröße, die Billomat für `per_page` akzeptiert. */
+    private const int MAX_PAGE_SIZE = 1000;
+
     public function __construct(
         protected readonly BillomatHttpClientInterface $http,
     ) {
@@ -235,9 +238,12 @@ abstract class AbstractApi
      * yieldet ihre Items; sobald {@see PageInfo::hasNextPage()} `false` ist,
      * stoppt der Generator.
      *
-     * Sicherheitsnetz gegen Endlos-Loops: liefert eine Seite weniger Items als
-     * `per_page` erwartet (typischer Indikator für die letzte Seite, auch wenn
-     * `@total` fehlt), wird ebenfalls abgebrochen.
+     * Sicherheitsnetz gegen Endlos-Loops: eine leere Seite oder eine Seite mit
+     * weniger Items als das `@per_page` der Response (typischer Indikator für die
+     * letzte Seite, auch wenn `@total` fehlt) beendet die Iteration ebenfalls.
+     * Verglichen wird mit dem `@per_page` der Response, nicht mit `$pageSize`:
+     * kappt Billomat die Seitengröße, liefert jede Seite weniger als angefragt.
+     * `$pageSize` wird auf Billomats Maximum von 1000 begrenzt.
      *
      * @template T of object
      *
@@ -246,14 +252,14 @@ abstract class AbstractApi
      * @param string                                                   $innerKey innerer Wrapper-Key, z. B. "client"
      * @param Closure(array<string,mixed>): T                          $hydrate  Hydrator, z. B. Client::fromArray(...)
      * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
-     * @param int                                                      $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit)
+     * @param int                                                      $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit), Werte außerhalb werden begrenzt
      *
      * @return Generator<int, T>
      */
     protected function iterateResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, ListFilter|array $filters = [], int $pageSize = 100): Generator
     {
         $filters = self::filterQuery($filters);
-        $pageSize = max(1, $pageSize);
+        $pageSize = min(self::MAX_PAGE_SIZE, max(1, $pageSize));
         $page = 1;
 
         while (true) {
@@ -269,7 +275,9 @@ abstract class AbstractApi
                 yield $item;
             }
 
-            if (!$pageData->info->hasNextPage() || \count($pageData->items) < $pageSize) {
+            $count = \count($pageData->items);
+
+            if (0 === $count || $count < $pageData->info->perPage || !$pageData->info->hasNextPage()) {
                 return;
             }
 

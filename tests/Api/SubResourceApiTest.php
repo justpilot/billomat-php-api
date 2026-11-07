@@ -28,6 +28,7 @@ use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Api\PaymentsApi;
 use Justpilot\Billomat\Api\PropertiesApi;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
 use Justpilot\Billomat\Api\PropertyValuesApi;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiversApi;
@@ -237,7 +238,7 @@ final class SubResourceApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessageIsOrContains('Unexpected response from Billomat when updating client property.');
 
-        new ClientsApi($this->http())->properties->update(1, new PropertyCreateOptions(name: 'x'));
+        new ClientsApi($this->http())->properties->update(1, new PropertyUpdateOptions(name: 'x'));
     }
 
     #[Test]
@@ -292,8 +293,8 @@ final class SubResourceApiTest extends TestCase
      */
     public static function sortedLists(): iterable
     {
-        $sorted = 'order_by=id+DESC&page=2';
-        $iterated = 'order_by=id+DESC&page=1&per_page=100';
+        $sorted = 'order_by=id%20DESC&page=2';
+        $iterated = 'order_by=id%20DESC&page=1&per_page=100';
 
         yield 'items list' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): array => new InvoicesApi($h)->items->list(7, $f), 'invoice-items', 'invoice-items', 'invoice_id=7&'.$sorted];
         yield 'items page' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Page => new InvoicesApi($h)->items->listPage(7, $f), 'invoice-items', 'invoice-items', 'invoice_id=7&'.$sorted];
@@ -328,9 +329,9 @@ final class SubResourceApiTest extends TestCase
         iterator_to_array($api->iterateAll(7, $filter));
 
         self::assertSame([
-            'https://mycompany.billomat.net/api/invoice-payments?invoice_id=7&type=CASH&order_by=date+DESC',
-            'https://mycompany.billomat.net/api/invoice-payments?type=CASH&order_by=date+DESC&page=3',
-            'https://mycompany.billomat.net/api/invoice-payments?invoice_id=7&type=CASH&order_by=date+DESC&page=1&per_page=100',
+            'https://mycompany.billomat.net/api/invoice-payments?invoice_id=7&type=CASH&order_by=date%20DESC',
+            'https://mycompany.billomat.net/api/invoice-payments?type=CASH&order_by=date%20DESC&page=3',
+            'https://mycompany.billomat.net/api/invoice-payments?invoice_id=7&type=CASH&order_by=date%20DESC&page=1&per_page=100',
         ], $this->urls);
     }
 

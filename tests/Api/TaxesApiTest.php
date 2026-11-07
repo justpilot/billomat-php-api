@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\TaxesApi;
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
+use Justpilot\Billomat\Api\TaxRateUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
@@ -26,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(TaxesApi::class)]
 #[CoversClass(TaxRate::class)]
 #[UsesClass(TaxRateCreateOptions::class)]
+#[UsesClass(TaxRateUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
@@ -233,7 +235,7 @@ final class TaxesApiTest extends TestCase
         $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
-        $options = new TaxRateCreateOptions(
+        $options = new TaxRateUpdateOptions(
             name: 'USt 7% (neu)',
             rate: 7.0,
             isDefault: true,
@@ -251,6 +253,27 @@ final class TaxesApiTest extends TestCase
             'https://mycompany.billomat.net/api/taxes/10',
             $captured->url
         );
+    }
+
+    #[Test]
+    public function renamingATaxRateSendsOnlyTheName(): void
+    {
+        // Vor 4.0.0-beta.1 nahm update() TaxRateCreateOptions mit `isDefault = false`
+        // und setzte damit den Standard-Steuersatz bei jedem Umbenennen zurück.
+        $captured = new CapturedRequest();
+
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
+
+            return new MockResponse('{"tax":{"id":"10","name":"USt 19 %","rate":"19","is_default":"1"}}');
+        });
+
+        $api = new TaxesApi(new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key')));
+
+        $updated = $api->update(10, new TaxRateUpdateOptions(name: 'USt 19 %'));
+
+        self::assertSame(['tax' => ['name' => 'USt 19 %']], $captured->json());
+        self::assertTrue($updated->isDefault);
     }
 
     #[Test]

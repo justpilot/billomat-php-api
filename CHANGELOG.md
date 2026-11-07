@@ -9,6 +9,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ### Fixed
 - **`email()` und `mail()` werfen nach erfolgreichem Versand keine Exception mehr.** Billomat beantwortet `POST /{dokumente}/{id}/email` und `/mail` mit `200 OK` und leerem Body (`text/html`); das SDK hat ihn als JSON dekodiert und eine `JsonException` geworfen, obwohl die E-Mail bzw. der Brief verschickt war. Wer daraufhin erneut gesendet hat, hat das Dokument doppelt verschickt. Betrifft `email()` bei Rechnungen, Angeboten, Auftragsbestätigungen, Gutschriften, Lieferscheinen, Briefen und Mahnungen sowie `invoices->mail()`. HTTP-Fehler werden weiterhin als Exception geworfen.
 
+### Security
+- **`symfony/http-client` mindestens `^8.1.11`.** Die Version behebt GHSA-gq53-v8w2-gjhj (`ScopingHttpClient` schickt Zugangsdaten an fremde Origins) und GHSA-c7hm-wqwp-f9v8 (`NoPrivateNetworkHttpClient`, DNS-Rebinding). Das SDK nutzt keinen der beiden Clients, die Untergrenze verhindert aber, dass Projekte eine betroffene Version installieren.
+
 ## [3.4.0] - 2026-10-24
 
 ### Changed

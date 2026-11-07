@@ -6,6 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [4.0.0-beta.1] - 2026-11-07
+
+First beta of 4.0. The public API is frozen: further betas only get fixes and additions, a break is only made to fix a bug and is listed here and in [UPGRADE-4.0.md](UPGRADE-4.0.md) (see [Backward compatibility](docs/concepts/backward-compatibility.md)). Before the freeze every action was checked against the Billomat sandbox; methods for endpoints Billomat doesn't have are removed. Install with `composer require justpilot/billomat-php-api:^4.0@beta`.
+
 ### Added
 
 - **`incomings->pdf()` and `pdfContent()`** for `GET /incomings/{id}/pdf`: the file stored with an incoming, as `DocumentPdf` (`documentId` is the incoming's ID) or raw bytes. Without a stored file Billomat answers 404 (`NotFoundException`).
@@ -28,6 +32,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - **Comment action keys go into `CommentFilter`.** `comments->list($parentId, $actionKeys, $filters)` is `list($parentId, $filters)` like every other list; the new `CommentFilter` carries `actionKeys` besides sorting and pagination: `list($id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT]))`. Same for `listPage()` and `iterateAll()`. The Rector set converts 3.x `listByInvoice($id, $actionKeys)`.
 - **Attachments are `Attachment` objects.** `EmailOptions::$attachments` and `MailOptions::$attachments` are `list<Attachment>` instead of arrays with the wire keys `mimetype`/`base64file`; `Attachment::fromFile()` and `fromBinary()` encode the content, `withAttachment()` appends one.
 - **Parent ID parameters are `$parentId` everywhere.** `contacts->list()`/`listPage()`/`iterateAll()` (was `$clientId`), `reminders->items` (was `$reminderId`) and `recurrings->emailReceivers` (was `$recurringId`) now match the other sub-resources. `search->query()` takes `$filters` instead of `$extraFilters`. Only relevant for named arguments; the Rector set renames them, including 3.x `query:`.
+- **The dist archive no longer contains `tools/` and `composer.lock`.** Both are only needed to develop the SDK.
 - **The default timeout is 30 seconds instead of 10.** Uploading a template takes Billomat about 11 seconds (measured in the sandbox); with 10 seconds the SDK threw a `TransportException` although Billomat created the template. Only applies to the HTTP client the SDK creates itself.
 - **`BillomatHttpClient`'s `$sleep` test hook is the last constructor parameter** and marked internal; `$logger` and `$events` move up one position. `AbstractApi::__construct()` is `@internal`, and `BillomatHttpClientInterface` says that own implementations are not covered by the BC promise.
 

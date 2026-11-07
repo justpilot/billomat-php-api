@@ -1,7 +1,7 @@
 # Upgrading from 3.x to 4.0
 
 This guide lists every backward-incompatible change in 4.0 with a before/after example.
-It grows with each 4.0 pre-release; the [CHANGELOG](CHANGELOG.md) has the full list of changes.
+From 4.0.0-beta.1 on the public API is frozen; a later break is only made to fix a bug and is added here. The [CHANGELOG](CHANGELOG.md) has the full list of changes.
 
 Recommended order:
 
@@ -19,7 +19,7 @@ run the set **before** you change anything by hand:
 
 ```bash
 composer require --dev rector/rector
-composer require justpilot/billomat-php-api:^4.0
+composer require justpilot/billomat-php-api:^4.0@beta   # ^4.0 once 4.0.0 is released
 
 vendor/bin/rector process src tests --config vendor/justpilot/billomat-php-api/rector/upgrade-4.0.php --dry-run
 vendor/bin/rector process src tests --config vendor/justpilot/billomat-php-api/rector/upgrade-4.0.php

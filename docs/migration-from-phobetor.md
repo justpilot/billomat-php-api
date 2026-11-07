@@ -19,7 +19,7 @@ return plain arrays. This SDK uses one `*Api` class per resource and returns
   conflict.
 
 ```bash
-composer require justpilot/billomat-php-api
+composer require justpilot/billomat-php-api:^4.0@beta
 # Once migrated:
 composer remove vrok/billomat-client    # or: phobetor/billomat
 ```

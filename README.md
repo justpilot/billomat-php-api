@@ -18,8 +18,10 @@ A modern, fully typed PHP 8.5 SDK for the [Billomat API](https://www.billomat.co
 ## Installation
 
 ```bash
-composer require justpilot/billomat-php-api
+composer require justpilot/billomat-php-api:^4.0@beta
 ```
+
+4.0 is in beta (API frozen); without the constraint Composer installs the latest stable 3.x release.
 
 The SDK needs a PSR-18 client and PSR-17 factories. `php-http/discovery` installs one if none is present; otherwise pick one:
 
@@ -86,7 +88,7 @@ The full documentation is also published at [billomat-php.justpilot.io](https://
 
 | SDK | PHP | HTTP client | Status |
 |---|---|---|---|
-| 4.x | 8.5+ | any PSR-18 client | in development (pre-releases) |
+| 4.x | 8.5+ | any PSR-18 client | beta, public API frozen |
 | 3.x | 8.4+ | Symfony HttpClient 8.1+ | security fixes until 4.0.0 |
 
 ## Contributing

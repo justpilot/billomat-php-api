@@ -13,7 +13,7 @@ use const DATE_ATOM;
  * Repräsentiert einen Steuersatz aus der Billomat-API.
  *
  * Dieses Model bildet die Struktur von GET /taxes bzw. GET /taxes/{id} ab.
- * Es ist als Read-Model gedacht: Anlegen und Ändern erfolgen über TaxRateCreateOptions.
+ * Es ist als Read-Model gedacht: Anlegen über TaxRateCreateOptions, Ändern über TaxRateUpdateOptions.
  *
  * Dokumentation:
  * https://www.billomat.com/api/einstellungen/steuersaetze/

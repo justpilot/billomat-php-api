@@ -7,7 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 
 /**
- * Geteilte Options-Klasse für POST und PUT der Attribut-Definitionen
+ * Geteilte Options-Klasse für POST der Attribut-Definitionen
  * (article-properties, client-properties, supplier-properties,
  * incoming-properties, user-properties).
  *

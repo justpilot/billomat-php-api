@@ -11,7 +11,7 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  * Definition einer Lieferanten-Eigenschaft.
  *
  * Dieses Model bildet die Struktur von GET /supplier-properties bzw. GET /supplier-properties/{id} ab.
- * Anlegen und Ändern erfolgen über PropertyCreateOptions.
+ * Anlegen über PropertyCreateOptions, Ändern über PropertyUpdateOptions.
  *
  * Dokumentation:
  * https://www.billomat.com/en/api/settings/supplier-properties/

@@ -79,7 +79,7 @@ final class PropertiesApi extends AbstractSubResourceApi
     /**
      * @return TProperty
      */
-    public function update(int $id, PropertyCreateOptions $options): object
+    public function update(int $id, PropertyUpdateOptions $options): object
     {
         return $this->updateFrom($id, $options->toArray());
     }

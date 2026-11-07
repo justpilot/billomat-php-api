@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 /**
- * Typisierter Payload für POST /taxes und PUT /taxes/{id} gemäß Billomat-API.
+ * Typisierter Payload für POST /taxes gemäß Billomat-API.
  *
  * Doku:
  * https://www.billomat.com/api/einstellungen/steuersaetze/

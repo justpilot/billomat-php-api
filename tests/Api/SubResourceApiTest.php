@@ -28,6 +28,7 @@ use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Api\PaymentsApi;
 use Justpilot\Billomat\Api\PropertiesApi;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
 use Justpilot\Billomat\Api\PropertyValuesApi;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiversApi;
@@ -237,7 +238,7 @@ final class SubResourceApiTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessageIsOrContains('Unexpected response from Billomat when updating client property.');
 
-        new ClientsApi($this->http())->properties->update(1, new PropertyCreateOptions(name: 'x'));
+        new ClientsApi($this->http())->properties->update(1, new PropertyUpdateOptions(name: 'x'));
     }
 
     #[Test]

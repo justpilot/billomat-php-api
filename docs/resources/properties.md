@@ -28,7 +28,7 @@ The actual **values** on a record are managed through separate sub-resources, wi
 - Values on an incoming invoice: `$billomat->incomings->propertyValues` (see [Incomings](incomings.md))
 - Values on a user: **no dedicated values endpoint**; Billomat stores user property values directly on the user record.
 
-The five property definition APIs are structurally identical (same verbs, same payload structure). They differ only in the endpoint path and the read model. The write class `PropertyCreateOptions` is shared by all five.
+The five property definition APIs are structurally identical (same verbs, same payload structure). They differ only in the endpoint path and the read model. The write classes `PropertyCreateOptions` and `PropertyUpdateOptions` are shared by all five.
 
 ## Endpoint overview
 
@@ -105,12 +105,14 @@ $opts = new PropertyCreateOptions(
 $prop = $billomat->articles->properties->create($opts);
 ```
 
-### `update(int $id, PropertyCreateOptions $options): TProperty`
+### `update(int $id, PropertyUpdateOptions $options): TProperty`
 
-Updates an existing definition. The options class is the same as for `create()`: set fields are overwritten, unset (`null`) fields stay unchanged.
+Updates an existing definition: set fields are overwritten, unset (`null`) fields stay unchanged, `Clear::Field` empties a field (e.g. `defaultValue`). Unlike `PropertyCreateOptions`, `name` is optional.
 
 ```php
-$opts = new PropertyCreateOptions(name: 'Lead time', defaultValue: '5 business days');
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
+
+$opts = new PropertyUpdateOptions(defaultValue: '5 business days');
 
 $billomat->articles->properties->update(42, $opts);
 ```
@@ -125,7 +127,7 @@ $billomat->incomings->properties->delete(42);
 
 ## Write model: `PropertyCreateOptions`
 
-Shared options class for all five APIs, used for both `create()` and `update()`. Constructor: `new PropertyCreateOptions(string $name, …)`. `name` is required and the first parameter; all other fields are named arguments. The object is `final readonly`; `with*()` methods (e.g. `$opts->withName('New')`) return a modified copy.
+Shared options class for `create()` of all five APIs; `update()` takes `PropertyUpdateOptions` with the same fields, all optional. Constructor: `new PropertyCreateOptions(string $name, …)`. `name` is required and the first parameter; all other fields are named arguments. The object is `final readonly`; `with*()` methods (e.g. `$opts->withName('New')`) return a modified copy.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
@@ -170,12 +172,12 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 ## Pitfalls
 
 - **Don't confuse definitions and values.** `$billomat->articles->properties` only defines the schema ("there is a field called *Lead time*"). To assign the value `5 business days` to a specific article, use `$billomat->articles->propertyValues`.
-- **One options class for all five APIs.** `PropertyCreateOptions` lives in the `Justpilot\Billomat\Api` namespace and is reused. Don't duplicate it per resource when refactoring.
+- **One pair of options classes for all five APIs.** `PropertyCreateOptions` and `PropertyUpdateOptions` live in the `Justpilot\Billomat\Api` namespace and are reused. Don't duplicate it per resource when refactoring.
 - **User properties have no values endpoint.** Unlike the other four parents, Billomat stores user property values directly on the user record, not through a separate sub-resource.
 - **`type` is optional.** If `type` is omitted, Billomat treats the field as free text. For `CHECKBOX` fields, `defaultValue` is a string; typical wire values are `"0"` and `"1"`.
 - **Billomat doesn't return `position` on read.** You can set the field via `PropertyCreateOptions`, but it's missing from the read models; it's not a uniqueness constraint.
 - **Deleting is destructive.** Deleting a definition also loses the values stored for it on records. There's no API way to "just hide" a field; your application has to model that itself.
-- **`update()` takes the same class as `create()`.** There's no separate `PropertyUpdateOptions` type. A PUT without `type` keeps the previous type.
+- **`update()` takes `PropertyUpdateOptions`.** Only set fields are sent; a PUT without `type` keeps the previous type.
 
 ## End-to-end example
 
@@ -187,6 +189,7 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\PropertyCreateOptions;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 
@@ -220,7 +223,7 @@ foreach ($billomat->articles->properties->list(['per_page' => 100]) as $def) {
 // 3) Raise the default value later
 $billomat->articles->properties->update(
     $leadTimeDef->id,
-    $opts->withDefaultValue('5 business days'),
+    new PropertyUpdateOptions(defaultValue: '5 business days'),
 );
 
 // 4) Parallel definition for clients: same API shape, different resource

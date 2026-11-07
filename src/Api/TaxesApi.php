@@ -106,11 +106,12 @@ final class TaxesApi extends AbstractApi
     }
 
     /**
-     * Aktualisiert einen bestehenden Steuersatz.
+     * Aktualisiert einen bestehenden Steuersatz (PUT /taxes/{id}).
      *
-     * Laut Doku: PUT /taxes/{id} mit gleichen Feldern wie beim Anlegen.
+     * Nur die in den Options gesetzten Felder werden gesendet; ein Umbenennen
+     * lässt `is_default` unverändert.
      */
-    public function update(int $id, TaxRateCreateOptions $options): TaxRate
+    public function update(int $id, TaxRateUpdateOptions $options): TaxRate
     {
         $payload = [
             'tax' => $options->toArray(),

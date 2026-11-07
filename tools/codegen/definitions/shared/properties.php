@@ -7,8 +7,8 @@ declare(strict_types=1);
  * (article-, client-, supplier-, incoming- und user-properties).
  *
  * Billomat beschreibt alle fünf mit denselben Feldern. Jede Ressource bekommt ein
- * eigenes Read-Model; die geteilten PropertyCreateOptions (POST und PUT) entstehen
- * nur einmal, über client-properties.php. Liegt in einem Unterordner, damit der
+ * eigenes Read-Model; die geteilten PropertyCreateOptions (POST) und
+ * PropertyUpdateOptions (PUT) entstehen nur einmal, über client-properties.php. Liegt in einem Unterordner, damit der
  * Generator die Datei nicht selbst als Definition lädt.
  *
  * Aufbau und Feld-Schlüssel: siehe clients.php.
@@ -25,7 +25,7 @@ return static fn (string $class, string $label, string $specResource, string $pa
             "Definition einer {$label}.",
             '',
             "Dieses Model bildet die Struktur von GET /{$path} bzw. GET /{$path}/{id} ab.",
-            'Anlegen und Ändern erfolgen über PropertyCreateOptions.',
+            'Anlegen über PropertyCreateOptions, Ändern über PropertyUpdateOptions.',
         ],
     ],
 
@@ -36,11 +36,24 @@ return static fn (string $class, string $label, string $specResource, string $pa
             // Billomat erwartet 1/0 statt true/false.
             'boolAsInt' => true,
             'doc' => [
-                'Geteilte Options-Klasse für POST und PUT der Attribut-Definitionen',
+                'Geteilte Options-Klasse für POST der Attribut-Definitionen',
                 '(article-properties, client-properties, supplier-properties,',
                 'incoming-properties, user-properties).',
                 '',
                 'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.',
+            ],
+        ],
+        'updateOptions' => [
+            'class' => 'PropertyUpdateOptions',
+            'endpoint' => 'PUT /api/' . $path . '/{id}',
+            // Billomat erwartet 1/0 statt true/false.
+            'boolAsInt' => true,
+            'doc' => [
+                'Geteilte Options-Klasse für PUT der Attribut-Definitionen',
+                '(article-properties, client-properties, supplier-properties,',
+                'incoming-properties, user-properties).',
+                '',
+                'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update).',
             ],
         ],
     ] : []),

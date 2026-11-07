@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\PropertiesApi;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
 use Justpilot\Billomat\Api\UsersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
@@ -155,7 +156,7 @@ final class UserPropertiesApiTest extends TestCase
 
         $api = new UsersApi($this->client($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'private Anschrift', type: PropertyType::TEXTAREA);
+        $opts = new PropertyUpdateOptions(name: 'private Anschrift', type: PropertyType::TEXTAREA);
 
         $updated = $api->update(11, $opts);
 

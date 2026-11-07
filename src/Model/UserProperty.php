@@ -11,7 +11,7 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  * Definition einer Benutzer-Eigenschaft.
  *
  * Dieses Model bildet die Struktur von GET /user-properties bzw. GET /user-properties/{id} ab.
- * Anlegen und Ändern erfolgen über PropertyCreateOptions.
+ * Anlegen über PropertyCreateOptions, Ändern über PropertyUpdateOptions.
  *
  * Dokumentation:
  * https://www.billomat.com/api/einstellungen/benutzer-attribute/

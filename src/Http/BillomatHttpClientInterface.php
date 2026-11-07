@@ -8,6 +8,12 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\TransportException;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * HTTP-Client des SDK, erreichbar über {@see \Justpilot\Billomat\BillomatClient::getHttpClient()}.
+ *
+ * Zum Aufrufen gedacht, etwa für Endpunkte ohne SDK-Methode. Eigene Implementierungen fallen nicht unter
+ * die BC-Zusage: In einem Minor-Release können Methoden hinzukommen.
+ */
 interface BillomatHttpClientInterface
 {
     /**

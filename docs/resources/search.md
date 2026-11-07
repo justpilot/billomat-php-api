@@ -20,11 +20,11 @@ Billomat offers a full-text search across resources that returns slim hits (reso
 
 | Method | HTTP | Path |
 |---|---|---|
-| `query($query, $extraFilters?)` | GET | `/search?query={query}` |
+| `query($query, $filters?)` | GET | `/search?query={query}` |
 
 ## Method
 
-### `query(string $query, array $extraFilters = []): list<SearchResult>`
+### `query(string $query, array $filters = []): list<SearchResult>`
 
 Runs the search.
 
@@ -36,7 +36,7 @@ foreach ($hits as $hit) {
 }
 ```
 
-Pass further query parameters (e.g. `per_page`) via `$extraFilters`.
+Pass further query parameters (e.g. `per_page`) via `$filters`.
 
 ## Model `SearchResult`
 
@@ -68,7 +68,7 @@ foreach ($billomat->search->query('Hans Wurst') as $hit) {
 - **Docs typo `sublineline`.** The HTML docs list the field as `sublineline`; the API actually returns `subline`, which is what the SDK reads.
 - **`resource` is a slug.** `delivery-notes` (with a hyphen), not `deliveryNotes`. Map it to SDK APIs with a `match` as shown above.
 - **Slim hits.** No date, status or amount fields. For filtered lists use `*Api::list($filters)`; the search is optimized for type-ahead.
-- **Pagination is barely documented.** The spec only lists `query`. You can pass `page`/`per_page` via `$extraFilters` in case Billomat accepts them.
+- **Pagination is barely documented.** The spec only lists `query`. You can pass `page`/`per_page` via `$filters` in case Billomat accepts them.
 
 ## End-to-end
 

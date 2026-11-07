@@ -58,7 +58,7 @@ final readonly class TaxRate
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Kann der Steuersatz gelöscht werden?
          *
@@ -88,7 +88,7 @@ final readonly class TaxRate
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             canDelete: ScalarCaster::toBoolOrNull($data['can_delete'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -111,7 +111,7 @@ final readonly class TaxRate
             'is_default' => ($this->isDefault ? 1 : 0),
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'can_delete' => null === $this->canDelete ? null : ($this->canDelete ? 1 : 0),
         ];
     }

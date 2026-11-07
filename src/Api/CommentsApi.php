@@ -57,45 +57,48 @@ final class CommentsApi extends AbstractSubResourceApi
     /**
      * Listet die Kommentare eines Dokuments.
      *
-     * Über `$actionKeys` lässt sich auf bestimmte ActionKey-Typen filtern.
+     * Auf bestimmte ActionKeys filtert {@see CommentFilter}: `new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT])`.
      *
-     * @param list<TActionKey>|null                                           $actionKeys
-     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters    Sortierung, Seite, …
+     * @param CommentFilter<TActionKey>|array<string, scalar|array<scalar|null>|null> $filters ActionKeys, Sortierung, Seite, …
      *
      * @return list<TComment>
+     *
+     * @throws InvalidArgumentException wenn ein ActionKey nicht zur Ressource passt
      */
     #[NoDiscard]
-    public function list(int $parentId, ?array $actionKeys = null, SubResourceFilter|array $filters = []): array
+    public function list(int $parentId, CommentFilter|array $filters = []): array
     {
-        return $this->listFor($parentId, $this->withActionKeys($actionKeys, $filters));
+        return $this->listFor($parentId, $this->checkedFilters($filters));
     }
 
     /**
      * Liefert eine einzelne Seite samt Pagination-Metadaten.
      *
-     * @param list<TActionKey>|null                                           $actionKeys
-     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     * @param CommentFilter<TActionKey>|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<TComment>
+     *
+     * @throws InvalidArgumentException wenn ein ActionKey nicht zur Ressource passt
      */
     #[NoDiscard]
-    public function listPage(int $parentId, ?array $actionKeys = null, SubResourceFilter|array $filters = []): Page
+    public function listPage(int $parentId, CommentFilter|array $filters = []): Page
     {
-        return $this->pageFor($parentId, $this->withActionKeys($actionKeys, $filters));
+        return $this->pageFor($parentId, $this->checkedFilters($filters));
     }
 
     /**
      * Iteriert lazy durch alle Kommentare eines Dokuments und yieldet sie einzeln.
      *
-     * @param list<TActionKey>|null                                           $actionKeys
-     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters    `page`/`per_page` werden überschrieben
+     * @param CommentFilter<TActionKey>|array<string, scalar|array<scalar|null>|null> $filters `page`/`per_page` werden überschrieben
      *
      * @return Generator<int, TComment>
+     *
+     * @throws InvalidArgumentException wenn ein ActionKey nicht zur Ressource passt
      */
     #[NoDiscard]
-    public function iterateAll(int $parentId, ?array $actionKeys = null, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(int $parentId, CommentFilter|array $filters = [], int $pageSize = 100): Generator
     {
-        yield from $this->iterateFor($parentId, $this->withActionKeys($actionKeys, $filters), $pageSize);
+        yield from $this->iterateFor($parentId, $this->checkedFilters($filters), $pageSize);
     }
 
     /**
@@ -118,30 +121,22 @@ final class CommentsApi extends AbstractSubResourceApi
     }
 
     /**
-     * Ergänzt den Query um `actionkey` (kommasepariert).
+     * Prüft, dass die ActionKeys des Filters zur Ressource passen.
      *
-     * @param list<TActionKey>|null                                           $actionKeys
-     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     * @param CommentFilter<TActionKey>|array<string, scalar|array<scalar|null>|null> $filters
      *
-     * @return array<string, scalar|array<scalar|null>|null>
+     * @return CommentFilter<TActionKey>|array<string, scalar|array<scalar|null>|null>
      */
-    private function withActionKeys(?array $actionKeys, SubResourceFilter|array $filters): array
+    private function checkedFilters(CommentFilter|array $filters): CommentFilter|array
     {
-        $query = self::filterQuery($filters);
-
-        if (null !== $actionKeys && [] !== $actionKeys) {
-            $query['actionkey'] = implode(',', array_map(
-                function (BackedEnum $a): string {
-                    if (!$a instanceof $this->actionKeyEnum) {
-                        throw new InvalidArgumentException(\sprintf('Expected %s, got %s.', $this->actionKeyEnum, $a::class));
-                    }
-
-                    return (string) $a->value;
-                },
-                $actionKeys,
-            ));
+        if ($filters instanceof CommentFilter) {
+            foreach ($filters->actionKeys as $actionKey) {
+                if (!$actionKey instanceof $this->actionKeyEnum) {
+                    throw new InvalidArgumentException(\sprintf('Expected %s, got %s.', $this->actionKeyEnum, $actionKey::class));
+                }
+            }
         }
 
-        return $query;
+        return $filters;
     }
 }

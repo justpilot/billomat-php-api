@@ -22,9 +22,9 @@ final readonly class InboxDocument
         public string $filename,
         public string $mimeType,
         public int $fileSize,
-        public ?string $base64file = null,
+        public ?string $base64File = null,
         public ?DateTimeImmutable $updated = null,
-        public ?string $customfield = null,
+        public ?string $customField = null,
         public ?int $xrechnungExtractionsId = null,
         public ?int $userId = null,
         public ?string $documentType = null,
@@ -45,9 +45,9 @@ final readonly class InboxDocument
             filename: ScalarCaster::toStringOrNull($data['filename'] ?? null) ?? '',
             mimeType: ScalarCaster::toStringOrNull($data['mimetype'] ?? null) ?? 'application/octet-stream',
             fileSize: ScalarCaster::toIntOrNull($data['filesize'] ?? null) ?? 0,
-            base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
+            base64File: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             xrechnungExtractionsId: ScalarCaster::toIntOrNull($data['xrechnung_extractions_id'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
             documentType: ScalarCaster::toStringOrNull($data['document_type'] ?? null),
@@ -68,9 +68,9 @@ final readonly class InboxDocument
             'filename' => $this->filename,
             'mimetype' => $this->mimeType,
             'filesize' => $this->fileSize,
-            'base64file' => $this->base64file,
+            'base64file' => $this->base64File,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'xrechnung_extractions_id' => $this->xrechnungExtractionsId,
             'user_id' => $this->userId,
             'document_type' => $this->documentType,
@@ -82,11 +82,11 @@ final readonly class InboxDocument
 
     public function getBinary(): string
     {
-        if (null === $this->base64file || '' === $this->base64file) {
+        if (null === $this->base64File || '' === $this->base64File) {
             return '';
         }
 
-        $decoded = base64_decode($this->base64file, true);
+        $decoded = base64_decode($this->base64File, true);
 
         return false === $decoded ? '' : $decoded;
     }

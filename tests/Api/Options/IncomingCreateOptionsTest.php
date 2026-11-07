@@ -21,7 +21,7 @@ final class IncomingCreateOptionsTest extends TestCase
             clientNumber: 'AC-42',
             expenseAccountNumber: 4980,
             category: 'Software',
-            base64file: 'JVBERi0xLg==',
+            base64File: 'JVBERi0xLg==',
         );
 
         $payload = $options->toArray();

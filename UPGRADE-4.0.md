@@ -46,7 +46,11 @@ Run your code style fixer afterwards; Rector does not sort imports.
 | `$billomat->invoiceComments`, `$billomat->clientTags`, … (all 39 flat sub-resources) | `$billomat->invoices->comments`, `$billomat->clients->tags`, … |
 | `$billomat->dunningLevels`, `DunningLevelsApi`, `DunningLevel` | `$billomat->reminderTexts`, `ReminderTextsApi`, `ReminderText` |
 | `listByInvoice($id)`, `listByOffer($id)`, … on sub-resources, `ContactsApi::listByClient()` | `list($id)` |
-| Named arguments `invoiceId:`, `offerId:`, … on comments, tags and items | `parentId:` |
+| Named arguments `invoiceId:`, `offerId:`, `reminderId:`, `recurringId:`, … on comments, tags, items and e-mail receivers, `clientId:` on contacts | `parentId:` |
+| Named arguments `query:` on item, contact, tax and template lists, `extraFilters:` on `search->query()` | `filters:` |
+| `listByInvoice($id, $actionKeys)` and the other comment lists | `list($id, new CommentFilter(actionKeys: $actionKeys))` |
+| `InvoicePdf`, `OfferPdf`, … (all seven PDF models), `$pdf->invoiceId`, `$pdf->offerId`, … | `DocumentPdf`, `$pdf->documentId` |
+| `->actionkey`, `->actionkeyRaw`, `->customfield`, `->base64file` and the same named arguments, `withActionkey()`, `withBase64file()` | `->actionKey`, `->actionKeyRaw`, `->customField`, `->base64File`, `withActionKey()`, `withBase64File()` |
 | `list($filters)`, `listPage($filters)`, `iterateAll($filters, $size)` on payments and property values | `list(filters: $filters)`, … |
 | `new InvoiceCommentsApi($http)` and the other removed sub-resource classes | `new InvoicesApi($http)->comments` |
 | Type hints on `InvoiceCommentsApi`, `ClientTagsApi`, … | `CommentsApi`, `TagsApi`, … |
@@ -83,6 +87,8 @@ These changes need a decision and are not automated. The sections below describe
   (`$options = new InvoiceTagCreateOptions(invoiceId: $id, …)`): move the ID into `create($id, $options)`.
 - The parent filter of payments and property values: `list(filters: ['invoice_id' => $id])` keeps
   working, `list($id)` is the 4.0 way.
+- E-mail and Pixelletter attachments: the arrays become `Attachment` objects.
+- `DocumentPdf` throws on missing fields and invalid base64 where the PDF models fell back to `0`/`''`.
 - PSR-18 setup, `MockHttpClient` in tests, exception handling, `#[\NoDiscard]`, `BillomatConfig` validation.
 
 ## PHP 8.5 is required
@@ -149,6 +155,27 @@ in the matching `*CreateOptions`/`*UpdateOptions`.
 If you construct models yourself (for example in tests), switch to named arguments;
 positional constructor calls break wherever a removed parameter was in between.
 
+### Properties are camelCase throughout
+
+Four Billomat fields are single words on the wire and were lower-case properties in 3.x. They follow the
+camelCase of every other property now; the wire names don't change:
+
+| 3.x | 4.0 | On |
+|---|---|---|
+| `$actionkey`, `$actionkeyRaw`, `withActionkey()` | `$actionKey`, `$actionKeyRaw`, `withActionKey()` | comments and their create options |
+| `$customfield` | `$customField` | most read models |
+| `$base64file`, `withBase64file()` | `$base64File`, `withBase64File()` | `InboxDocument`, `InboxDocumentCreateOptions`, `IncomingCreateOptions`, PDF models |
+
+```php
+// 3.x
+if (InvoiceCommentActionKey::PAYMENT === $comment->actionkey) { … }
+
+// 4.0
+if (InvoiceCommentActionKey::PAYMENT === $comment->actionKey) { … }
+```
+
+The Rector set renames property reads, named arguments and the withers on SDK types.
+
 ## `BillomatConfig` validates its input
 
 The constructor (and therefore `BillomatClient::create()`) throws an `InvalidArgumentException` when
@@ -206,7 +233,8 @@ $http = new BillomatHttpClient(new Psr18Client(new MockHttpClient($responses)), 
 ```
 
 The mock callback receives the JSON payload in `$options['body']` (a string); `$options['json']` is no longer set.
-Array query parameters arrive as `key%5B%5D=value`.
+Array query parameters arrive as `key%5B%5D=value`. Pass `logger:` and `events:` by name: the constructor's
+last parameter is an internal test hook that isn't covered by the BC promise.
 
 ### Custom `AbstractApi` subclasses and `BillomatHttpClientInterface`
 
@@ -290,7 +318,7 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry:
 ### `pdf(rawPdf: true)` is `pdfContent()`
 
 The document APIs (invoices, offers, confirmations, credit notes, delivery notes, letters and reminders)
-split `pdf()` into two methods: `pdf()` always returns the `*Pdf` model (metadata plus base64 content),
+split `pdf()` into two methods: `pdf()` always returns the `DocumentPdf` model (metadata plus base64 content),
 `pdfContent()` the binary PDF. The `bool $rawPdf` flag is gone, and so is the `InvoicePdf|string` return
 type you had to narrow:
 
@@ -301,7 +329,7 @@ $model = $billomat->invoices->pdf($id);                              // InvoiceP
 
 // 4.0
 $pdf = $billomat->invoices->pdfContent($id, PdfType::SIGNED); // string
-$model = $billomat->invoices->pdf($id);                       // InvoicePdf
+$model = $billomat->invoices->pdf($id);                       // DocumentPdf
 ```
 
 `pdfContent()` also throws `UnexpectedResponseException` when Billomat answers 2xx with an empty body or a
@@ -318,6 +346,29 @@ if ('' === $pdf || !str_starts_with($pdf, '%PDF-')) {
 // 4.0
 $pdf = $billomat->invoices->pdfContent($id); // throws UnexpectedResponseException
 ```
+
+### One `DocumentPdf` instead of seven PDF models
+
+`InvoicePdf`, `OfferPdf`, `ConfirmationPdf`, `CreditNotePdf`, `DeliveryNotePdf`, `LetterPdf` and
+`ReminderPdf` had the same fields. Every `pdf()` returns a `Model\DocumentPdf` now; the ID of the
+document is `$documentId` for all types, and the content is `$base64File`:
+
+```php
+// 3.x
+$pdf = $billomat->invoices->pdf($id); // InvoicePdf
+$invoiceId = $pdf->invoiceId;
+$content = base64_decode($pdf->base64file);
+
+// 4.0
+$pdf = $billomat->invoices->pdf($id); // DocumentPdf
+$invoiceId = $pdf->documentId;
+$content = $pdf->getBinary();
+```
+
+`DocumentPdf` is `readonly`. It throws `UnexpectedResponseException` when `id`, the document ID, `filename`
+or `base64file` is missing, where the old models fell back to `0` or `''`; `$fileSize` is `?int`, and
+`getBinary()` throws on invalid base64 instead of returning `''`. The Rector set renames the classes,
+`$pdf->invoiceId` & co. and `$pdf->base64file`.
 
 ## `get()`, `getMyself()` and list parameters
 
@@ -339,17 +390,24 @@ $me = $billomat->users->getMyself(); // User, NotFoundException/UnexpectedRespon
 echo $me->email;
 ```
 
-### `$query` is `$filters`
+### `$query` is `$filters`, parent IDs are `$parentId`
 
-`contacts->list()`, `taxes->list()` and `templates->list()` called their filter parameter `$query`;
-it is `$filters` now, as on every other list method. This only matters if you pass it by name:
+`contacts->list()`, `taxes->list()`, `templates->list()` and the item lists called their filter parameter
+`$query`, `search->query()` called it `$extraFilters`; it is `$filters` now, as on every other list
+method. The parent ID is `$parentId` on every sub-resource and on `contacts` (3.x: `$clientId`,
+`$invoiceId`, `$reminderId`, `$recurringId`, …). This only matters if you pass them by name, and the
+Rector set renames them:
 
 ```php
 // 3.x
 $billomat->taxes->list(query: ['per_page' => 50]);
+$billomat->contacts->listByClient(clientId: $id);
+$billomat->search->query('ACME', extraFilters: ['per_page' => 5]);
 
 // 4.0
 $billomat->taxes->list(filters: ['per_page' => 50]);
+$billomat->contacts->list(parentId: $id);
+$billomat->search->query('ACME', filters: ['per_page' => 5]);
 ```
 
 These three and `reminderTexts` also have `listPage()` and `iterateAll()` now, and `countries->list()`
@@ -444,7 +502,8 @@ The `@template` types tell PHPStan and IDEs which model `get()`/`list()` return.
 and `update()` throw an `InvalidArgumentException` if they get the options of another resource, and
 `CommentsApi::list()` does the same for another resource's `*CommentActionKey`. Code that constructed
 the old classes directly (`new InvoiceCommentsApi($http)`) uses the parent instead:
-`new InvoicesApi($http)->comments`. `ReminderItemsApi` and `RecurringEmailReceiversApi` keep their names.
+`new InvoicesApi($http)->comments`. `ReminderItemsApi` and `RecurringEmailReceiversApi` keep their names;
+their parent ID parameter is `$parentId` like everywhere else.
 
 ### `listBy{Parent}()` is `list()`
 
@@ -476,8 +535,23 @@ pagination, and all of them have `listPage()` and `iterateAll()`:
 
 ```php
 $billomat->invoices->items->list($invoiceId, new SubResourceFilter(orderBy: OrderBy::asc('position')));
-$billomat->invoices->comments->list($invoiceId, filters: new SubResourceFilter(perPage: 20));
+$billomat->invoices->comments->list($invoiceId, new CommentFilter(perPage: 20));
 ```
+
+### Comment action keys are part of `CommentFilter`
+
+3.x filtered comments by action key with a second argument of `listByInvoice()`. In 4.0 the comment lists
+take the same two arguments as every other list, and the action keys are a field of `CommentFilter`:
+
+```php
+// 3.x
+$billomat->invoiceComments->listByInvoice($invoiceId, [InvoiceCommentActionKey::PAYMENT]);
+
+// 4.0
+$billomat->invoices->comments->list($invoiceId, new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT]));
+```
+
+The Rector set converts the 3.x calls; `null` as action keys is dropped.
 
 ### The parent ID is an argument of `create()`
 
@@ -659,6 +733,21 @@ $billomat->invoices->email($id, $invoiceEmailOptions);
 
 // 4.0
 $billomat->invoices->email($id, new EmailOptions(to: ['kunde@example.test'], subject: 'Ihre Rechnung'));
+```
+
+### Attachments are `Attachment` objects
+
+`EmailOptions::$attachments` and `MailOptions::$attachments` were arrays with Billomat's wire keys. They
+are `list<Attachment>` now; `fromFile()` and `fromBinary()` do the base64 encoding, `withAttachment()`
+appends one:
+
+```php
+// 3.x
+$options->attachments = [['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => base64_encode($pdf)]];
+
+// 4.0
+$options = new EmailOptions(attachments: [Attachment::fromBinary('agb.pdf', $pdf)]);
+$options = $options->withAttachment(Attachment::fromFile('/path/to/flyer.pdf'));
 ```
 
 ### `ClientCreateOptions::$dunningRun` defaults to `null`

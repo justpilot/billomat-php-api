@@ -33,40 +33,43 @@ final class ContactsApi extends AbstractApi
     /**
      * Listet die Ansprechpartner eines Kunden.
      *
+     * @param int                                           $parentId ID des Kunden (`client_id`)
      * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Contact>
      */
     #[NoDiscard]
-    public function list(int $clientId, array $filters = []): array
+    public function list(int $parentId, array $filters = []): array
     {
-        return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($clientId, $filters));
+        return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters));
     }
 
     /**
      * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
      *
+     * @param int                                           $parentId ID des Kunden (`client_id`)
      * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Contact>
      */
     #[NoDiscard]
-    public function listPage(int $clientId, array $filters = []): Page
+    public function listPage(int $parentId, array $filters = []): Page
     {
-        return $this->listResourcePage('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($clientId, $filters));
+        return $this->listResourcePage('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters));
     }
 
     /**
      * Iteriert lazy über alle Ansprechpartner eines Kunden.
      *
+     * @param int                                           $parentId ID des Kunden (`client_id`)
      * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Contact>
      */
     #[NoDiscard]
-    public function iterateAll(int $clientId, array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(int $parentId, array $filters = [], int $pageSize = 100): Generator
     {
-        yield from $this->iterateResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($clientId, $filters), $pageSize);
+        yield from $this->iterateResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters), $pageSize);
     }
 
     #[NoDiscard]
@@ -137,8 +140,8 @@ final class ContactsApi extends AbstractApi
      *
      * @return array<string, scalar|array<scalar|null>|null>
      */
-    private function clientFilter(int $clientId, array $filters): array
+    private function clientFilter(int $parentId, array $filters): array
     {
-        return ['client_id' => $clientId] + $filters;
+        return ['client_id' => $parentId] + $filters;
     }
 }

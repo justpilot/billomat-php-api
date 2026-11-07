@@ -57,8 +57,8 @@ An open reminder can be followed by further dunning levels: Billomat increments 
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($reminderId, $filters?)` | GET | `/reminder-items?reminder_id={id}` |
-| `listPage($reminderId, $filters?)` / `iterateAll($reminderId, $filters?, $pageSize?)` | GET | `/reminder-items?reminder_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/reminder-items?reminder_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/reminder-items?reminder_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/reminder-items/{id}` |
 
 Read-only: there is **no** `create`/`update`/`delete` and no `ReminderItemCreateOptions` class. Billomat generates the items from the invoice.
@@ -67,11 +67,11 @@ Read-only: there is **no** `create`/`update`/`delete` and no `ReminderItemCreate
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($reminderId, $filters?)` | GET | `/reminder-tags?reminder_id={id}` |
-| `listPage($reminderId, $filters?)` / `iterateAll($reminderId, $filters?, $pageSize?)` | GET | `/reminder-tags?reminder_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/reminder-tags?reminder_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/reminder-tags?reminder_id={id}` (paginated) |
 | `cloud()` | GET | `/reminder-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/reminder-tags/{id}` |
-| `create($reminderId, $options)` | POST | `/reminder-tags` |
+| `create($parentId, $options)` | POST | `/reminder-tags` |
 | `delete($id)` | DELETE | `/reminder-tags/{id}` |
 
 ## Methods
@@ -153,9 +153,9 @@ use Justpilot\Billomat\Api\MailOptions;
 $billomat->reminders->mail($id, new MailOptions(duplex: true));
 ```
 
-#### `pdf(int $id, ?PdfType $type = null): ReminderPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-`pdf()` returns a `ReminderPdf` model (metadata plus base64 body). `pdfContent()` appends `?format=pdf` and returns the binary PDF content directly; it throws an `UnexpectedResponseException` if the body is empty or doesn't start with `%PDF-`.
+`pdf()` returns a `DocumentPdf` model (metadata plus base64 body). `pdfContent()` appends `?format=pdf` and returns the binary PDF content directly; it throws an `UnexpectedResponseException` if the body is empty or doesn't start with `%PDF-`.
 
 ```php
 $pdf = $billomat->reminders->pdf($reminder->id);                 // model
@@ -243,7 +243,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `subject` | `subject` | `?string` | |
 | `body` | `body` | `?string` | |
 | `filename` | `filename` | `?string` | name of the PDF attachment |
-| `attachments` | `attachments.attachment` | `list<array{filename,mimetype,base64file}>` | additional attachments |
+| `attachments` | `attachments.attachment` | `list<Attachment>` | additional attachments |
 
 Empty recipient arrays are left out, so Billomat falls back to the template.
 
@@ -277,7 +277,7 @@ There is **no** `ReminderItemCreateOptions` and no `ReminderItemUpdateOptions`. 
 | `reminderLevel` | `?int` (dunning level, see `ReminderTextsApi`) |
 | `reminderLevelName` | `?string` (name of the dunning level) |
 | `isOld` | `?bool` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
 ## Read model: `ReminderItem`
@@ -295,7 +295,7 @@ There is **no** `ReminderItemCreateOptions` and no `ReminderItemUpdateOptions`. 
 | `title`, `description` | `?string` |
 | `total` | `?Money` |
 | `isCharge` | `?bool` (the item is a dunning fee) |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `ReminderTag`
@@ -305,7 +305,7 @@ There is **no** `ReminderItemCreateOptions` and no `ReminderItemUpdateOptions`. 
 | `id` | `int` |
 | `reminderId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `ReminderTagCloudEntry`
@@ -317,19 +317,22 @@ There is **no** `ReminderItemCreateOptions` and no `ReminderItemUpdateOptions`. 
 | `count` | `int` |
 | `extra` | `array<string, mixed>` |
 
-## Read model: `ReminderPdf`
+## Read model: `DocumentPdf`
 
-`final class ReminderPdf`.
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
 | Property | Type |
 |---|---|
-| `id`, `reminderId` | `int` |
+| `id` | `int` |
+| `documentId` | `int` (Billomat field `reminder_id`) |
 | `created` | `?\DateTimeImmutable` |
-| `filename`, `mimeType` | `string` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `filename` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodes `base64file` back into raw bytes.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `reminder_id`, `filename` or `base64file` is missing.
 
 ## Enums used
 

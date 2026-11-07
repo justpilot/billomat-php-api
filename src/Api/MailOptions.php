@@ -19,11 +19,11 @@ namespace Justpilot\Billomat\Api;
 final readonly class MailOptions implements WriteOptions
 {
     /**
-     * @param bool|null                                                           $color       farbiger Druck? (`color`)
-     * @param bool|null                                                           $duplex      doppelseitiger Druck? (`duplex`)
-     * @param int|null                                                            $paperWeight Papiergewicht in g/m² (80 oder 90; `paper_weight`)
-     * @param list<array{filename: string, mimetype: string, base64file: string}> $attachments zusätzliche PDF-Anhänge,
-     *                                                                                         die mit ausgedruckt werden
+     * @param bool|null        $color       farbiger Druck? (`color`)
+     * @param bool|null        $duplex      doppelseitiger Druck? (`duplex`)
+     * @param int|null         $paperWeight Papiergewicht in g/m² (80 oder 90; `paper_weight`)
+     * @param list<Attachment> $attachments zusätzliche PDF-Anhänge,
+     *                                      die mit ausgedruckt werden
      */
     public function __construct(
         public ?bool $color = null,
@@ -54,11 +54,17 @@ final readonly class MailOptions implements WriteOptions
     /**
      * Kopie mit geänderten Anhängen.
      *
-     * @param list<array{filename: string, mimetype: string, base64file: string}> $attachments
+     * @param list<Attachment> $attachments
      */
     public function withAttachments(array $attachments): self
     {
         return clone($this, ['attachments' => $attachments]);
+    }
+
+    /** Kopie mit einem zusätzlichen Anhang. */
+    public function withAttachment(Attachment $attachment): self
+    {
+        return clone($this, ['attachments' => [...$this->attachments, $attachment]]);
     }
 
     /**
@@ -76,14 +82,7 @@ final readonly class MailOptions implements WriteOptions
 
         if ([] !== $this->attachments) {
             $data['attachments'] = [
-                'attachment' => array_map(
-                    static fn (array $a): array => [
-                        'filename' => $a['filename'],
-                        'mimetype' => $a['mimetype'],
-                        'base64file' => $a['base64file'],
-                    ],
-                    $this->attachments,
-                ),
+                'attachment' => array_map(static fn (Attachment $a): array => $a->toArray(), $this->attachments),
             ];
         }
 

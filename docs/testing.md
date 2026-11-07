@@ -89,7 +89,7 @@ Key points:
 - `BillomatHttpClient` is instantiated **directly** and connected to the mock. `MockHttpClient` is a Symfony client, not a PSR-18 client — hence `new Psr18Client($mock)`. Don't mock `BillomatHttpClient` itself: it contains the query string builder, error mapping and retry logic, which should stay under test.
 - The `$captured` closure trick appears in many places — it allows assertions on method, URL, headers and payload. Because the request goes through PSR-18, `$options['body']` contains the JSON body as a string (check it with `json_decode()`) and `$options['headers']` is a list of `"Name: value"` strings; there is no `'json'` key. Array filters appear in the URL as `key%5B%5D=v`.
 - `MockResponse` can also simulate HTTP errors (`['http_code' => 404]`) — useful for exception tests, see `tests/Api/AbstractApiExceptionTest.php` and `tests/Http/BillomatHttpClientErrorTest.php`.
-- For retry tests (429, 502/503/504), pass `BillomatHttpClient` a `sleep:` closure (`Closure(int $ms): void`) that only records the delay — otherwise the test actually waits. Alternatively set `retry: RetryPolicy::none()` in the `BillomatConfig`.
+- For retry tests (429, 502/503/504), pass `BillomatHttpClient` a `sleep:` closure (`Closure(int $ms): void`) that only records the delay — otherwise the test actually waits. `sleep:` is an internal test hook (always pass it by name, it is not covered by the BC promise); in your own tests prefer `retry: RetryPolicy::none()` in the `BillomatConfig`.
 
 A real, fully commented template is `tests/Api/ClientsApiTest.php`.
 

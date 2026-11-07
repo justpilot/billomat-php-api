@@ -10,6 +10,7 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 use Justpilot\Billomat\Model\Enum\PdfType;
@@ -18,7 +19,6 @@ use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\InvoiceGroup;
 use Justpilot\Billomat\Model\InvoiceItem;
 use Justpilot\Billomat\Model\InvoicePayment;
-use Justpilot\Billomat\Model\InvoicePdf;
 use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
@@ -331,11 +331,11 @@ final class InvoicesApi extends AbstractApi
      * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null): InvoicePdf
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
         $data = $this->getJson("/invoices/{$id}/pdf", self::pdfQuery($type));
 
-        return InvoicePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching invoice PDF'));
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching invoice PDF'));
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNotesApi;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class DeliveryNoteCommentsApiTest extends TestCase
 {
     #[Test]
@@ -61,10 +63,10 @@ final class DeliveryNoteCommentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->comments;
 
-        $comments = $api->list(42, [DeliveryNoteCommentActionKey::CREATE]);
+        $comments = $api->list(42, new CommentFilter(actionKeys: [DeliveryNoteCommentActionKey::CREATE]));
 
         self::assertCount(1, $comments);
-        self::assertSame(DeliveryNoteCommentActionKey::CREATE, $comments[0]->actionkey);
+        self::assertSame(DeliveryNoteCommentActionKey::CREATE, $comments[0]->actionKey);
         self::assertStringContainsString('delivery_note_id=42', $captured->url);
     }
 

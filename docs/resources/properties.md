@@ -150,7 +150,7 @@ All five are `final readonly` classes with the same structure:
 | `type` | `?PropertyType` |
 | `defaultValue` | `?string` |
 | `isNvl` | `?bool` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
 ## Enums used

@@ -104,7 +104,7 @@ final class TemplatesApiTest extends TestCase
         self::assertSame(11, $tpl->id);
         self::assertSame(TemplateType::UPLOADED, $tpl->templateType);
         self::assertSame(TemplateFormat::DOCX, $tpl->format);
-        self::assertSame('BASE64...', $tpl->base64file);
+        self::assertSame('BASE64...', $tpl->base64File);
     }
 
     #[Test]

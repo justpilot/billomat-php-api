@@ -70,7 +70,7 @@ final readonly class Letter
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * ID des Lieferanten.
          *
@@ -106,7 +106,7 @@ final readonly class Letter
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -135,7 +135,7 @@ final readonly class Letter
             'intro' => $this->intro,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'supplier_id' => $this->supplierId,
         ];
     }

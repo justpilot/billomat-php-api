@@ -18,7 +18,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Confirmation;
-use Justpilot\Billomat\Model\ConfirmationPdf;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
@@ -38,7 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ConfirmationUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
 #[CoversClass(Confirmation::class)]
-#[CoversClass(ConfirmationPdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(ConfirmationStatus::class)]
 #[UsesClass(ConfirmationItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -329,7 +329,7 @@ final class ConfirmationsApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertSame(240, $pdf->confirmationId);
+        self::assertSame(240, $pdf->documentId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
         self::assertSame('https://mycompany.billomat.net/api/confirmations/240/pdf', $captured->url);
     }

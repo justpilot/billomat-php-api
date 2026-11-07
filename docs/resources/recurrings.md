@@ -42,10 +42,10 @@ Over time, a recurring invoice produces regular invoices; they reference their r
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($recurringId, $filters?)` | GET | `/recurring-items?recurring_id={id}` |
-| `listPage($recurringId, $filters?)` / `iterateAll($recurringId, $filters?, $pageSize?)` | GET | `/recurring-items?recurring_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/recurring-items?recurring_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/recurring-items?recurring_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/recurring-items/{id}` |
-| `create($recurringId, $options)` | POST | `/recurring-items` |
+| `create($parentId, $options)` | POST | `/recurring-items` |
 | `update($id, $options)` | PUT | `/recurring-items/{id}` |
 | `delete($id)` | DELETE | `/recurring-items/{id}` |
 
@@ -53,21 +53,21 @@ Over time, a recurring invoice produces regular invoices; they reference their r
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($recurringId, $filters?)` | GET | `/recurring-tags?recurring_id={id}` |
-| `listPage($recurringId, $filters?)` / `iterateAll($recurringId, $filters?, $pageSize?)` | GET | `/recurring-tags?recurring_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/recurring-tags?recurring_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/recurring-tags?recurring_id={id}` (paginated) |
 | `cloud()` | GET | `/recurring-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/recurring-tags/{id}` |
-| `create($recurringId, $options)` | POST | `/recurring-tags` |
+| `create($parentId, $options)` | POST | `/recurring-tags` |
 | `delete($id)` | DELETE | `/recurring-tags/{id}` |
 
 ### `/recurring-email-receivers`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($recurringId, $filters?)` | GET | `/recurring-email-receivers?recurring_id={id}` |
-| `listPage($recurringId, $filters?)` / `iterateAll($recurringId, $filters?, $pageSize?)` | GET | `/recurring-email-receivers?recurring_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/recurring-email-receivers?recurring_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/recurring-email-receivers?recurring_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/recurring-email-receivers/{id}` |
-| `create($recurringId, $options)` | POST | `/recurring-email-receivers` |
+| `create($parentId, $options)` | POST | `/recurring-email-receivers` |
 | `update($id, $options)` | PUT | `/recurring-email-receivers/{id}` |
 | `delete($id)` | DELETE | `/recurring-email-receivers/{id}` |
 
@@ -262,7 +262,7 @@ Has the same fields as `RecurringCreateOptions`, but `clientId` is optional (for
 | `letterPaperWeight` | `?int` |
 | `offerId` | `?int` |
 | `confirmationId` | `?int` |
-| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
 `counter` counts the runs executed so far; `nextCreationDate` is the next scheduled creation date.

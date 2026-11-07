@@ -18,7 +18,7 @@ use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNote;
-use Justpilot\Billomat\Model\CreditNotePdf;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
@@ -38,7 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(CreditNoteUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
 #[CoversClass(CreditNote::class)]
-#[CoversClass(CreditNotePdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(CreditNoteStatus::class)]
 #[UsesClass(CreditNoteItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -280,7 +280,7 @@ final class CreditNotesApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertSame(240, $pdf->creditNoteId);
+        self::assertSame(240, $pdf->documentId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
         self::assertSame('https://mycompany.billomat.net/api/credit-notes/240/pdf', $captured->url);
     }

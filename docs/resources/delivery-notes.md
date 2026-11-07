@@ -47,10 +47,10 @@ Unlike [confirmations](confirmations.md), the API offers no further status trans
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($deliveryNoteId, $filters?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
-| `listPage($deliveryNoteId, $filters?)` / `iterateAll($deliveryNoteId, $filters?, $pageSize?)` | GET | `/delivery-note-items?delivery_note_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/delivery-note-items?delivery_note_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/delivery-note-items/{id}` |
-| `create($deliveryNoteId, $options)` | POST | `/delivery-note-items` |
+| `create($parentId, $options)` | POST | `/delivery-note-items` |
 | `update($id, $options)` | PUT | `/delivery-note-items/{id}` |
 | `delete($id)` | DELETE | `/delivery-note-items/{id}` |
 
@@ -58,21 +58,21 @@ Unlike [confirmations](confirmations.md), the API offers no further status trans
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($deliveryNoteId, $actionKeys?, $filters?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
+| `list($parentId, $filters?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
 | `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/delivery-note-comments?delivery_note_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/delivery-note-comments/{id}` |
-| `create($deliveryNoteId, $options)` | POST | `/delivery-note-comments` |
+| `create($parentId, $options)` | POST | `/delivery-note-comments` |
 | `delete($id)` | DELETE | `/delivery-note-comments/{id}` |
 
 ### `/delivery-note-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($deliveryNoteId, $filters?)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
-| `listPage($deliveryNoteId, $filters?)` / `iterateAll($deliveryNoteId, $filters?, $pageSize?)` | GET | `/delivery-note-tags?delivery_note_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/delivery-note-tags?delivery_note_id={id}` (paginated) |
 | `cloud()` | GET | `/delivery-note-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/delivery-note-tags/{id}` |
-| `create($deliveryNoteId, $options)` | POST | `/delivery-note-tags` |
+| `create($parentId, $options)` | POST | `/delivery-note-tags` |
 | `delete($id)` | DELETE | `/delivery-note-tags/{id}` |
 
 ## Methods
@@ -155,9 +155,9 @@ $billomat->deliveryNotes->mail($id, new MailOptions(duplex: true));
 
 Uploads a signed PDF version. Typical use case: the driver photographs the signed proof of delivery, and the PDF is uploaded base64-encoded.
 
-#### `pdf(int $id, ?PdfType $type = null): DeliveryNotePdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-`pdf()` returns a `DeliveryNotePdf` (base64 container), `pdfContent()` the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
+`pdf()` returns a `DocumentPdf` (base64 container), `pdfContent()` the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 use Justpilot\Billomat\Model\Enum\PdfType;
@@ -185,12 +185,13 @@ $billomat->deliveryNotes->items->delete($item->id);
 ### Delivery note comments
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 
 $comments = $billomat->deliveryNotes->comments->list(
     $note->id,
-    actionKeys: [DeliveryNoteCommentActionKey::COMPLETE, DeliveryNoteCommentActionKey::EMAIL],
+    new CommentFilter(actionKeys: [DeliveryNoteCommentActionKey::COMPLETE, DeliveryNoteCommentActionKey::EMAIL]),
 );
 
 $billomat->deliveryNotes->comments->create(
@@ -281,7 +282,7 @@ The delivery note ID isn't part of the options: pass it as the first argument of
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `comment` | `comment` | `string` | required (constructor) |
-| `actionkey` | `actionkey` | `?DeliveryNoteCommentActionKey` | usually only for system actions |
+| `actionKey` | `actionkey` | `?DeliveryNoteCommentActionKey` | usually only for system actions |
 
 ## Write model: `DeliveryNoteTagCreateOptions`
 
@@ -301,7 +302,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `from` | `from` | `?string` | |
 | `to`, `cc`, `bcc` | `recipients.{to,cc,bcc}` | `list<string>` | empty arrays are left out |
 | `subject`, `body`, `filename` | snake_case equivalent | `?string` | |
-| `attachments` | `attachments.attachment[]` | `list<array{filename,mimetype,base64file}>` | |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | |
 
 ## Read model: `DeliveryNote`
 
@@ -326,7 +327,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `items` | `list<DeliveryNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `offerId` | `?int` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
 ## Read model: `DeliveryNoteItem`
@@ -341,7 +342,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `taxChangedManually` | `?bool` |
 | `title`, `description` | `?string` |
 | `type` | `?ItemType` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `DeliveryNoteComment`
@@ -355,38 +356,39 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?DeliveryNoteCommentActionKey` |
-| `actionkeyRaw` | `?string`, raw value for an unknown `actionkey` |
+| `actionKey` | `?DeliveryNoteCommentActionKey` |
+| `actionKeyRaw` | `?string`, raw value for an unknown `actionkey` |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `DeliveryNoteTag`
 
-`final readonly`. Fields: `id` (`?int`), `deliveryNoteId` (`int`), `name` (`string`), `customfield` (`?string`), `extra` (`array`).
+`final readonly`. Fields: `id` (`?int`), `deliveryNoteId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
 
 ## Read model: `DeliveryNoteTagCloudEntry`
 
 `final readonly`. Aggregate: `id` (`?int`), `name` (`string`), `count` (`int`), `extra` (`array`).
 
-## Read model: `DeliveryNotePdf`
+## Read model: `DocumentPdf`
 
-`final class DeliveryNotePdf` (not `readonly`).
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
 | Property | Type |
 |---|---|
 | `id` | `int` |
-| `deliveryNoteId` | `int` |
+| `documentId` | `int` (Billomat field `delivery_note_id`) |
 | `created` | `?\DateTimeImmutable` |
 | `filename` | `string` |
-| `mimeType` | `string`, default `application/pdf` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodes `base64file`.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `delivery_note_id`, `filename` or `base64file` is missing.
 
 ## Enums used
 
@@ -419,7 +421,6 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `delivery-note` as an object; the SDK wraps it in a list.
 - **Multiple source references are possible.** `invoiceId`, `confirmationId` and `offerId` can all be set at the same time, but Billomat does **not** synchronize the status of the linked documents automatically.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.
-- **`DeliveryNotePdf` is not `readonly`**, a pragmatic exception for the binary data container.
 - **`uploadSignature()` expects plain base64**, without a `data:` prefix. Typical use case: sending a PDF signed by the driver back from a mobile workflow.
 
 ## End-to-end example

@@ -345,11 +345,11 @@ final class BillomatHttpClientObservabilityTest extends TestCase
         return new BillomatHttpClient(
             new Psr18Client(new MockHttpClient($responses)),
             new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key', retry: $retry ?? new RetryPolicy()),
+            logger: $this->logger,
+            events: $this->dispatcher,
             sleep: function (int $milliseconds): void {
                 $this->sleeps[] = $milliseconds;
             },
-            logger: $this->logger,
-            events: $this->dispatcher,
         );
     }
 }

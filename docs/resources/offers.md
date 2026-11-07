@@ -58,10 +58,10 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON  ─�
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($offerId, $filters?)` | GET | `/offer-items?offer_id={id}` |
-| `listPage($offerId, $filters?)` / `iterateAll($offerId, $filters?, $pageSize?)` | GET | `/offer-items?offer_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/offer-items?offer_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/offer-items?offer_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/offer-items/{id}` |
-| `create($offerId, $options)` | POST | `/offer-items` |
+| `create($parentId, $options)` | POST | `/offer-items` |
 | `update($id, $options)` | PUT | `/offer-items/{id}` |
 | `delete($id)` | DELETE | `/offer-items/{id}` |
 
@@ -69,21 +69,21 @@ DRAFT  ──complete()──▶  OPEN  ──win()─────▶  WON  ─�
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($offerId, $actionKeys?, $filters?)` | GET | `/offer-comments?offer_id={id}` |
+| `list($parentId, $filters?)` | GET | `/offer-comments?offer_id={id}` |
 | `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/offer-comments?offer_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/offer-comments/{id}` |
-| `create($offerId, $options)` | POST | `/offer-comments` |
+| `create($parentId, $options)` | POST | `/offer-comments` |
 | `delete($id)` | DELETE | `/offer-comments/{id}` |
 
 ### `/offer-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($offerId, $filters?)` | GET | `/offer-tags?offer_id={id}` |
-| `listPage($offerId, $filters?)` / `iterateAll($offerId, $filters?, $pageSize?)` | GET | `/offer-tags?offer_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/offer-tags?offer_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/offer-tags?offer_id={id}` (paginated) |
 | `cloud()` | GET | `/offer-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/offer-tags/{id}` |
-| `create($offerId, $options)` | POST | `/offer-tags` |
+| `create($parentId, $options)` | POST | `/offer-tags` |
 | `delete($id)` | DELETE | `/offer-tags/{id}` |
 
 ## Methods
@@ -195,14 +195,14 @@ $billomat->offers->mail($id, new MailOptions(duplex: true));
 
 Uploads a signed PDF version. `$base64Pdf` is the Base64-encoded PDF content (without a `data:` prefix).
 
-#### `pdf(int $id, ?PdfType $type = null): OfferPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-`pdf()` returns an `OfferPdf` model with Base64 content; `pdfContent()` skips the JSON layer and returns the raw binary bytes. The `$type` parameter shares the `PdfType` enum with the invoice PDF (`SIGNED`, `PRINT`).
+`pdf()` returns a `DocumentPdf` model with Base64 content; `pdfContent()` skips the JSON layer and returns the raw binary bytes. The `$type` parameter shares the `PdfType` enum with the invoice PDF (`SIGNED`, `PRINT`).
 
 ```php
 use Justpilot\Billomat\Model\Enum\PdfType;
 
-$pdf = $billomat->offers->pdf($offer->id);              // OfferPdf
+$pdf = $billomat->offers->pdf($offer->id);              // DocumentPdf
 file_put_contents('offer.pdf', $pdf->getBinary());
 
 $bytes = $billomat->offers->pdfContent($offer->id, PdfType::SIGNED);
@@ -226,15 +226,16 @@ $billomat->offers->items->delete($item->id);
 
 ### Offer comments
 
-`list()` can optionally filter by `actionkey` values (sent to the API comma-separated):
+`list()` can optionally filter by `actionkey` values via `CommentFilter` (sent to the API comma-separated):
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 
 $comments = $billomat->offers->comments->list(
     $offer->id,
-    actionKeys: [OfferCommentActionKey::EMAIL, OfferCommentActionKey::WIN],
+    new CommentFilter(actionKeys: [OfferCommentActionKey::EMAIL, OfferCommentActionKey::WIN]),
 );
 
 $billomat->offers->comments->create(
@@ -347,7 +348,7 @@ Constructor: `new OfferCommentCreateOptions(string $comment, …)`. The offer ID
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `comment` | `comment` | `string` | Required (constructor) |
-| `actionkey` | `actionkey` | `?OfferCommentActionKey` | Usually only set for system actions |
+| `actionKey` | `actionkey` | `?OfferCommentActionKey` | Usually only set for system actions |
 | `public` | `public` | `?bool` | Visible in the client's activity list |
 
 ## Write model: `OfferTagCreateOptions`
@@ -372,7 +373,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 | `subject` | `subject` | `?string` | |
 | `body` | `body` | `?string` | |
 | `filename` | `filename` | `?string` | File name of the attachment |
-| `attachments` | `attachments.attachment[]` | `list<array{filename,mimetype,base64file}>` | Additional attachments |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | Additional attachments |
 
 ## Read model: `Offer`
 
@@ -402,7 +403,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 | `updated` | `?\DateTimeImmutable` |
 | `validityDate` | `?\DateTimeImmutable` (valid until, date only) |
 | `totalReduction` | `?Money` |
-| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
 ## Read model: `OfferItem`
@@ -421,7 +422,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 | `type` | `?ItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `optional` | `?bool` (optional item) |
-| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `OfferComment`
@@ -435,38 +436,39 @@ Shared class for sending all document types by email (invoices, offers, confirma
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?OfferCommentActionKey` |
-| `actionkeyRaw` | `?string`, the raw value in case Billomat returns an unknown `actionkey` |
+| `actionKey` | `?OfferCommentActionKey` |
+| `actionKeyRaw` | `?string`, the raw value in case Billomat returns an unknown `actionkey` |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `OfferTag`
 
-`final readonly`. Fields: `id` (`?int`), `offerId` (`int`), `name` (`string`), `customfield` (`?string`), `extra`.
+`final readonly`. Fields: `id` (`?int`), `offerId` (`int`), `name` (`string`), `customField` (`?string`), `extra`.
 
 ## Read model: `OfferTagCloudEntry`
 
 `final readonly`. Aggregated tag cloud entry: `id` (`?int`), `name` (`string`), `count` (`int`), `extra`.
 
-## Read model: `OfferPdf`
+## Read model: `DocumentPdf`
 
-`final class OfferPdf` (not `readonly`).
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
 | Property | Type |
 |---|---|
 | `id` | `int` |
-| `offerId` | `int` |
+| `documentId` | `int` (Billomat field `offer_id`) |
 | `created` | `?\DateTimeImmutable` |
 | `filename` | `string` |
-| `mimeType` | `string`, default `application/pdf` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodes `base64file` and returns the raw PDF bytes (`''` for invalid Base64).
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `offer_id`, `filename` or `base64file` is missing.
 
 ## Enums
 
@@ -498,8 +500,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat ignores the explicitly set tax rate and uses the article's/client's default.
 - **`pdfContent()` bypasses JSON entirely.** The body is read as a binary string and must start with `%PDF-`, otherwise an `UnexpectedResponseException` is thrown. HTTP errors still arrive as SDK exceptions (`NotFoundException`, `AuthenticationException`, …) because `BillomatHttpClient` throws them during the request.
 - **`uploadSignature()` expects plain Base64**, no data URI prefix. Passing a `data:application/pdf;base64,...` string results in a broken PDF in Billomat.
-- **`OfferPdf` is not `readonly`**, unlike the other read models.
-- **`OfferCommentActionKey` values are uppercase on the wire** (`WIN`, `LOSE`, …); the enum mirrors the exact values. Unknown values map to `null`, and the raw string is stored in `actionkeyRaw` as well.
+- **`OfferCommentActionKey` values are uppercase on the wire** (`WIN`, `LOSE`, …); the enum mirrors the exact values. Unknown values map to `null`, and the raw string is stored in `actionKeyRaw` as well.
 
 ## End-to-end example
 
@@ -510,6 +511,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Api\OfferCreateOptions;
@@ -593,17 +595,17 @@ file_put_contents("offer-{$opened->offerNumber}.pdf", $pdf->getBinary());
 // 7) Check the audit trail: status changes only
 $status = $billomat->offers->comments->list(
     $offer->id,
-    actionKeys: [
+    new CommentFilter(actionKeys: [
         OfferCommentActionKey::COMPLETE,
         OfferCommentActionKey::WIN,
         OfferCommentActionKey::EMAIL,
-    ],
+    ]),
 );
 
 foreach ($status as $c) {
     printf("[%s] %s: %s\n",
         $c->created?->format('Y-m-d H:i') ?? '?',
-        $c->actionkey?->value ?? $c->actionkeyRaw ?? '-',
+        $c->actionKey?->value ?? $c->actionKeyRaw ?? '-',
         $c->comment ?? '',
     );
 }

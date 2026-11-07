@@ -131,7 +131,13 @@ return [
         'total_net_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag netto vor Rabatt.'],
         'total_gross_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag brutto vor Rabatt.'],
         'discount_amount' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Skontobetrag.'],
-        'status' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Status der Abo-Rechnung.'],
+        'status' => [
+            'type' => 'string',
+            'readOnly' => true,
+            'doc' => 'Status der Abo-Rechnung, z. B. "STARTED".',
+            // Bewusst kein Enum: Billomat dokumentiert die Werte nicht, und ein unbekannter Wert würde zu null.
+            'details' => ['Billomat dokumentiert die möglichen Werte nicht, deshalb ein String statt eines Enums.'],
+        ],
         'in_progress' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Läuft gerade eine Rechnungserzeugung?'],
         'ultimo' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Rechnungen immer zum Monatsletzten erzeugen?'],
         'email_filename' => ['doc' => 'Dateiname des PDF-Anhangs.'],

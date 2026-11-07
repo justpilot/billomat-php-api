@@ -40,7 +40,7 @@ There is **no** `update()` and **no** `convertToIncoming()`; the API doesn't sup
 
 ### `list(array $filters = []): list<InboxDocument>`
 
-Lists the inbox documents. Filters according to the Billomat docs: `per_page`, `page`, `order_by`. The returned models **don't** contain the Base64 content: `base64file` is `null` in the list response. Call `get()` for the binary content.
+Lists the inbox documents. Filters according to the Billomat docs: `per_page`, `page`, `order_by`. The returned models **don't** contain the Base64 content: `base64File` is `null` in the list response. Call `get()` for the binary content.
 
 ```php
 $pending = $billomat->inboxDocuments->list([
@@ -53,7 +53,7 @@ $pending = $billomat->inboxDocuments->list([
 
 ### `get(int $id): ?InboxDocument`
 
-Returns `null` on 404; `getOrFail(int $id): InboxDocument` throws a `NotFoundException` instead. Unlike `list()`, the detail response contains the Base64-encoded file content in `base64file`. `getBinary()` returns it directly as raw bytes.
+Returns `null` on 404; `getOrFail(int $id): InboxDocument` throws a `NotFoundException` instead. Unlike `list()`, the detail response contains the Base64-encoded file content in `base64File`. `getBinary()` returns it directly as raw bytes.
 
 ```php
 $doc = $billomat->inboxDocuments->getOrFail(987);
@@ -70,7 +70,7 @@ use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 $opts = new InboxDocumentCreateOptions(
     filename: 'invoice-may.pdf',
     mimeType: 'application/pdf',
-    base64file: base64_encode((string) file_get_contents('/tmp/invoice-may.pdf')),
+    base64File: base64_encode((string) file_get_contents('/tmp/invoice-may.pdf')),
 );
 
 $doc = $billomat->inboxDocuments->create($opts);
@@ -88,7 +88,7 @@ The three required fields are the first constructor parameters; `documentType` a
 |---|---|---|---|
 | `filename` | `filename` | `string` (required) | Including extension, e.g. `invoice.pdf` |
 | `mimeType` | `mimetype` | `string` (required) | The property is `mimeType` (camelCase), the wire field is `mimetype` (all lower case) |
-| `base64file` | `base64file` | `string` (required) | Content that is already Base64-encoded |
+| `base64File` | `base64file` | `string` (required) | Content that is already Base64-encoded |
 | `documentType` | `document_type` | `?string` | Document type according to Billomat's classification (e.g. `other`, `invoice`, `credit_note`); Billomat's default is `other` |
 | `metadata` | `metadata` | `?array<string, mixed>` | Free-form additional data that Billomat stores as is |
 
@@ -103,7 +103,7 @@ The three required fields are the first constructor parameters; `documentType` a
 | `filename` | `string` |
 | `mimeType` | `string` |
 | `fileSize` | `int` |
-| `base64file` | `?string` |
+| `base64File` | `?string` |
 | `updated` | `?\DateTimeImmutable` |
 | `xrechnungExtractionsId` | `?int` (e-invoicing, read-only, not documented by Billomat) |
 | `userId` | `?int` |
@@ -111,9 +111,9 @@ The three required fields are the first constructor parameters; `documentType` a
 | `pageCount` | `?int` |
 | `fileUrl` | `?string` |
 | `metadata` | `?string` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 
-Plus the helper `getBinary(): string`, which decodes `base64file` and returns the raw bytes, or an empty string if the field is empty or invalidly encoded. On `InboxDocument` instances from `list()`, `base64file` is usually `null`, so `getBinary()` returns an empty string as well.
+Plus the helper `getBinary(): string`, which decodes `base64File` and returns the raw bytes, or an empty string if the field is empty or invalidly encoded. On `InboxDocument` instances from `list()`, `base64File` is usually `null`, so `getBinary()` returns an empty string as well.
 
 ## Enums used
 
@@ -134,7 +134,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 ## Pitfalls
 
 - **E-invoicing (undocumented).** Billomat returns `xrechnung_extractions_id` (`InboxDocument::$xrechnungExtractionsId`) in API responses but doesn't describe it in the API docs. The SDK only reads it (type derived from observed values); writing isn't supported for lack of a specification.
-- **`base64file` only via `get()`.** `list()` returns the metadata without binary content to keep responses small. To process the PDF content, load each document individually via `get($id)`.
+- **`base64File` only via `get()`.** `list()` returns the metadata without binary content to keep responses small. To process the PDF content, load each document individually via `get($id)`.
 - **The wire field is `mimetype`, not `mime_type`.** Unlike most other resources, there's no snake_case with an underscore here; Billomat expects `mimetype` as one word. The PHP property is still called `mimeType` (camelCase).
 - **`metadata` has different types.** You write it as an array; the read model returns it as a raw `?string`.
 - **No conversion to an incoming via the API.** The Billomat API has no `/inbox-documents/{id}/convert` or similar. To replicate the web UI behavior, call `$billomat->incomings->create()` plus `$billomat->incomings->upload()` yourself and delete the inbox document afterwards.
@@ -166,7 +166,7 @@ $doc = $billomat->inboxDocuments->create(
     new InboxDocumentCreateOptions(
         filename: basename($pdfPath),
         mimeType: 'application/pdf',
-        base64file: base64_encode((string) file_get_contents($pdfPath)),
+        base64File: base64_encode((string) file_get_contents($pdfPath)),
     ),
 );
 
@@ -187,7 +187,7 @@ foreach ($billomat->inboxDocuments->list(['order_by' => 'created+ASC']) as $pend
     // 2b) Attach the PDF from the inbox to the incoming (pass the Base64 string through)
     $billomat->incomings->upload(
         $incoming->id,
-        $full->base64file ?? '',
+        $full->base64File ?? '',
     );
 
     // 2c) Remove the document from the inbox

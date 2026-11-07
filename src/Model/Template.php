@@ -70,13 +70,13 @@ final readonly class Template
          *
          * Im Read-Model nur bei UPLOADED und GET /templates/{id} verfügbar.
          */
-        public ?string $base64file = null,
+        public ?string $base64File = null,
         /** Standard-Vorlage für den Dokumenttyp? */
         public bool $isDefault = false,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Ist ein Hintergrundbild für die Vorlage hinterlegt? */
         public ?bool $isBackgroundAvailable = null,
         /**
@@ -102,10 +102,10 @@ final readonly class Template
             templateType: TemplateType::tryFrom(ScalarCaster::toStringOrNull($data['template_type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             format: TemplateFormat::tryFrom(ScalarCaster::toStringOrNull($data['format'] ?? null) ?? ''),
-            base64file: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
+            base64File: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             isBackgroundAvailable: ScalarCaster::toBoolOrNull($data['is_background_available'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -128,10 +128,10 @@ final readonly class Template
             'template_type' => $this->templateType?->value,
             'name' => $this->name,
             'format' => $this->format?->value,
-            'base64file' => $this->base64file,
+            'base64file' => $this->base64File,
             'is_default' => ($this->isDefault ? 1 : 0),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'is_background_available' => null === $this->isBackgroundAvailable ? null : ($this->isBackgroundAvailable ? 1 : 0),
         ], static fn (mixed $v): bool => null !== $v);
     }

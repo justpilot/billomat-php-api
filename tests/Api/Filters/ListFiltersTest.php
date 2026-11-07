@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\ArticleFilter;
 use Justpilot\Billomat\Api\ArticlePropertyValueFilter;
 use Justpilot\Billomat\Api\ClientFilter;
 use Justpilot\Billomat\Api\ClientPropertyValueFilter;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\ConfirmationFilter;
 use Justpilot\Billomat\Api\CreditNoteFilter;
 use Justpilot\Billomat\Api\CreditNotePaymentFilter;
@@ -30,6 +31,7 @@ use Justpilot\Billomat\Api\SupplierFilter;
 use Justpilot\Billomat\Api\SupplierPropertyValueFilter;
 use Justpilot\Billomat\Api\TemplateFilter;
 use Justpilot\Billomat\Api\UserFilter;
+use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
@@ -50,6 +52,7 @@ use UnitEnum;
 #[CoversClass(ArticleFilter::class)]
 #[CoversClass(ArticlePropertyValueFilter::class)]
 #[CoversClass(ClientFilter::class)]
+#[CoversClass(CommentFilter::class)]
 #[CoversClass(ClientPropertyValueFilter::class)]
 #[CoversClass(ConfirmationFilter::class)]
 #[CoversClass(CreditNoteFilter::class)]
@@ -146,6 +149,26 @@ final class ListFiltersTest extends TestCase
     }
 
     #[Test]
+    public function serializesCommentFilters(): void
+    {
+        self::assertSame([], new CommentFilter()->toQuery());
+        self::assertSame(
+            ['actionkey' => 'PAYMENT,MAIL', 'order_by' => 'created+DESC', 'page' => 2, 'per_page' => 50, 'x' => 1],
+            new CommentFilter(
+                actionKeys: [InvoiceCommentActionKey::PAYMENT, InvoiceCommentActionKey::MAIL],
+                orderBy: OrderBy::desc('created'),
+                page: 2,
+                perPage: 50,
+                extra: ['x' => 1],
+            )->toQuery(),
+        );
+        self::assertSame(
+            [InvoiceCommentActionKey::EMAIL, InvoiceCommentActionKey::MAIL],
+            new CommentFilter()->withActionKeys(InvoiceCommentActionKey::EMAIL, InvoiceCommentActionKey::MAIL)->actionKeys,
+        );
+    }
+
+    #[Test]
     public function extraParametersAreAddedAndOverrideFields(): void
     {
         $filter = new ClientFilter(name: 'ACME', extra: ['name' => 'Override', 'client_property_7' => 'x']);
@@ -194,7 +217,11 @@ final class ListFiltersTest extends TestCase
             self::assertSame($expected, $reflectionProperty->getValue($variadicCopy));
         }
         // Ein leerer Filter sendet nichts, die Kopie genau den geänderten Parameter.
-        $wire = 'extra' === $property ? 'extra_param' : strtolower((string) preg_replace('/[A-Z]/', '_$0', $property));
+        $wire = match ($property) {
+            'extra' => 'extra_param',
+            'actionKeys' => 'actionkey',
+            default => strtolower((string) preg_replace('/[A-Z]/', '_$0', $property)),
+        };
         self::assertSame([], $original->toQuery());
         self::assertSame([$wire], array_keys($copy->toQuery()));
     }
@@ -238,6 +265,8 @@ final class ListFiltersTest extends TestCase
             'array' === $name => ['extra_param' => 'x'],
             DateTimeImmutable::class === $name => new DateTimeImmutable('2026-01-02'),
             OrderBy::class === $name => OrderBy::desc('id'),
+            // CommentFilter::withActionKeys() nimmt jedes BackedEnum; CommentsApi prüft die Klasse.
+            BackedEnum::class === $name => InvoiceCommentActionKey::PAYMENT,
             is_subclass_of($name, UnitEnum::class) => $this->lastCase($name),
             default => self::fail('Kein Beispielwert für Typ '.$name),
         };

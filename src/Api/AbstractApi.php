@@ -34,6 +34,9 @@ abstract class AbstractApi
     /** Größte Seitengröße, die Billomat für `per_page` akzeptiert. */
     private const int MAX_PAGE_SIZE = 1000;
 
+    /**
+     * @internal API-Objekte kommen über {@see \Justpilot\Billomat\BillomatClient}, z. B. `$billomat->invoices`
+     */
     public function __construct(
         protected readonly BillomatHttpClientInterface $http,
     ) {

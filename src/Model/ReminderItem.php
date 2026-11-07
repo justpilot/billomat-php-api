@@ -60,7 +60,7 @@ final readonly class ReminderItem
         /** Beschreibung der Position. */
         public ?string $description = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Gesamtbetrag der Position. */
         public ?Money $total = null,
         /** Mahngebühr statt Artikelposition? */
@@ -91,7 +91,7 @@ final readonly class ReminderItem
             quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             total: ScalarCaster::toMoneyOrNull($data['total'] ?? null),
             isCharge: ScalarCaster::toBoolOrNull($data['is_charge'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
@@ -118,7 +118,7 @@ final readonly class ReminderItem
             'unit_price' => $this->unitPrice->toString(),
             'title' => $this->title,
             'description' => $this->description,
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'total' => $this->total?->toString(),
             'is_charge' => $this->isCharge,
         ];

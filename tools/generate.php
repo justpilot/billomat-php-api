@@ -31,6 +31,15 @@ const MONEY_FIELDS = [
     'sales_price', 'sales_price2', 'sales_price3', 'sales_price4', 'sales_price5',
     'total', 'total_gross', 'total_gross_unreduced', 'total_net', 'total_net_unreduced', 'total_reduction', 'unit_price',
 ];
+// Billomat-Feldnamen aus zusammengeschriebenen Wörtern; ohne diese Liste würde `actionkey` zu `$actionkey`
+// statt `$actionKey`. Gilt für Read-Models, Options und Filter.
+const COMPOUND_WORDS = [
+    'actionkey' => 'action_key',
+    'base64file' => 'base64_file',
+    'customfield' => 'custom_field',
+    'filesize' => 'file_size',
+    'mimetype' => 'mime_type',
+];
 
 try {
     main($argv);
@@ -222,7 +231,7 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
 
         $resolved[] = [
             'wire' => $name,
-            'property' => $field['model']['property'] ?? lcfirst(str_replace('_', '', ucwords($name, '_'))),
+            'property' => $field['model']['property'] ?? propertyName($name),
             'type' => $type,
             'doc' => $field['doc'] ?? ($specField['description_de'] ?? null) ?? throw new RuntimeException("Feld '{$name}' hat keine Doku ({$source})."),
             'details' => $field['details'] ?? [],
@@ -1098,4 +1107,14 @@ function docBlock(array $lines, string $indent): string
     }
 
     return $out . $indent . " */\n";
+}
+
+/**
+ * camelCase-Property zu einem Billomat-Feld, z. B. `client_id` → `clientId`, `actionkey_raw` → `actionKeyRaw`.
+ */
+function propertyName(string $wire): string
+{
+    $parts = array_map(static fn (string $part): string => COMPOUND_WORDS[$part] ?? $part, explode('_', $wire));
+
+    return lcfirst(str_replace('_', '', ucwords(implode('_', $parts), '_')));
 }

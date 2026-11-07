@@ -23,15 +23,13 @@ final class SearchApi extends AbstractApi
      *
      * Entspricht GET /search?query={query}.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $extraFilters zusätzliche Query-Parameter neben `query`
+     * @param array<string, scalar|array<scalar|null>|null> $filters zusätzliche Query-Parameter neben `query`
      *
      * @return list<SearchResult>
      */
     #[NoDiscard]
-    public function query(string $query, array $extraFilters = []): array
+    public function query(string $query, array $filters = []): array
     {
-        $filters = ['query' => $query, ...$extraFilters];
-
-        return $this->listResource('/search', 'search', 'result', SearchResult::fromArray(...), $filters);
+        return $this->listResource('/search', 'search', 'result', SearchResult::fromArray(...), ['query' => $query, ...$filters]);
     }
 }

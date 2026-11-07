@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api\Options;
 
+use Justpilot\Billomat\Api\Attachment;
 use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Tests\Support\Payload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(MailOptions::class)]
+#[UsesClass(Attachment::class)]
 final class MailOptionsTest extends TestCase
 {
     #[Test]
@@ -55,8 +58,8 @@ final class MailOptionsTest extends TestCase
     {
         $options = new MailOptions(
             attachments: [
-                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
-                ['filename' => 'flyer.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'WFla'],
+                new Attachment('agb.pdf', 'application/pdf', 'QUJD'),
+                new Attachment('flyer.pdf', 'application/pdf', 'WFla'),
             ],
         );
 
@@ -75,5 +78,25 @@ final class MailOptionsTest extends TestCase
         $options = new MailOptions();
 
         self::assertArrayNotHasKey('attachments', $options->toArray());
+    }
+
+    #[Test]
+    public function withAttachmentAppendsAndKeepsTheOriginal(): void
+    {
+        $first = new Attachment('agb.pdf', 'application/pdf', 'QUJD');
+        $second = Attachment::fromBinary('flyer.pdf', 'XYZ');
+        $original = new MailOptions(attachments: [$first]);
+
+        $copy = $original->withAttachment($second);
+
+        self::assertSame([$first], $original->attachments);
+        self::assertSame([$first, $second], $copy->attachments);
+        self::assertSame(
+            [
+                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+                ['filename' => 'flyer.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'WFla'],
+            ],
+            Payload::arrayAt($copy->toArray(), 'attachments', 'attachment'),
+        );
     }
 }

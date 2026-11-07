@@ -55,10 +55,10 @@ DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEAR
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($confirmationId, $filters?)` | GET | `/confirmation-items?confirmation_id={id}` |
-| `listPage($confirmationId, $filters?)` / `iterateAll($confirmationId, $filters?, $pageSize?)` | GET | `/confirmation-items?confirmation_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/confirmation-items?confirmation_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/confirmation-items?confirmation_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/confirmation-items/{id}` |
-| `create($confirmationId, $options)` | POST | `/confirmation-items` |
+| `create($parentId, $options)` | POST | `/confirmation-items` |
 | `update($id, $options)` | PUT | `/confirmation-items/{id}` |
 | `delete($id)` | DELETE | `/confirmation-items/{id}` |
 
@@ -66,21 +66,21 @@ DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEAR
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($confirmationId, $actionKeys?, $filters?)` | GET | `/confirmation-comments?confirmation_id={id}` |
+| `list($parentId, $filters?)` | GET | `/confirmation-comments?confirmation_id={id}` |
 | `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/confirmation-comments?confirmation_id={id}` (paginated) |
 | `get($id)` / `getOrFail($id)` | GET | `/confirmation-comments/{id}` |
-| `create($confirmationId, $options)` | POST | `/confirmation-comments` |
+| `create($parentId, $options)` | POST | `/confirmation-comments` |
 | `delete($id)` | DELETE | `/confirmation-comments/{id}` |
 
 ### `/confirmation-tags`
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($confirmationId, $filters?)` | GET | `/confirmation-tags?confirmation_id={id}` |
-| `listPage($confirmationId, $filters?)` / `iterateAll($confirmationId, $filters?, $pageSize?)` | GET | `/confirmation-tags?confirmation_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/confirmation-tags?confirmation_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/confirmation-tags?confirmation_id={id}` (paginated) |
 | `cloud()` | GET | `/confirmation-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/confirmation-tags/{id}` |
-| `create($confirmationId, $options)` | POST | `/confirmation-tags` |
+| `create($parentId, $options)` | POST | `/confirmation-tags` |
 | `delete($id)` | DELETE | `/confirmation-tags/{id}` |
 
 ## Methods
@@ -181,9 +181,9 @@ $billomat->confirmations->mail($id, new MailOptions(duplex: true));
 
 Uploads a signed PDF version. `$base64Pdf` is the plain base64-encoded PDF content.
 
-#### `pdf(int $id, ?PdfType $type = null): ConfirmationPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-`pdf()` returns a `ConfirmationPdf` model with base64 content; `pdfContent()` skips JSON and returns the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
+`pdf()` returns a `DocumentPdf` model with base64 content; `pdfContent()` skips JSON and returns the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 $pdf = $billomat->confirmations->pdf($conf->id);
@@ -209,12 +209,13 @@ $billomat->confirmations->items->delete($item->id);
 ### Confirmation comments
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 
 $comments = $billomat->confirmations->comments->list(
     $conf->id,
-    actionKeys: [ConfirmationCommentActionKey::COMPLETE, ConfirmationCommentActionKey::EMAIL],
+    new CommentFilter(actionKeys: [ConfirmationCommentActionKey::COMPLETE, ConfirmationCommentActionKey::EMAIL]),
 );
 
 $billomat->confirmations->comments->create(
@@ -306,7 +307,7 @@ The confirmation ID isn't part of the options: pass it as the first argument of 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `comment` | `comment` | `string` | required (constructor) |
-| `actionkey` | `actionkey` | `?ConfirmationCommentActionKey` | usually only for system actions |
+| `actionKey` | `actionkey` | `?ConfirmationCommentActionKey` | usually only for system actions |
 
 ## Write model: `ConfirmationTagCreateOptions`
 
@@ -326,7 +327,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `from` | `from` | `?string` | |
 | `to`, `cc`, `bcc` | `recipients.{to,cc,bcc}` | `list<string>` | empty arrays are left out |
 | `subject`, `body`, `filename` | snake_case equivalent | `?string` | |
-| `attachments` | `attachments.attachment[]` | `list<array{filename,mimetype,base64file}>` | |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | |
 
 ## Read model: `Confirmation`
 
@@ -354,7 +355,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `items` | `list<ConfirmationItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `totalReduction` | `?Money` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
 ## Read model: `ConfirmationItem`
@@ -372,7 +373,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `title`, `description`, `reduction` | `?string` |
 | `type` | `?ItemType` |
 | `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `ConfirmationComment`
@@ -386,38 +387,39 @@ Shared class for sending every document type by email (invoices, offers, confirm
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?ConfirmationCommentActionKey` |
-| `actionkeyRaw` | `?string`, raw value for an unknown `actionkey` |
+| `actionKey` | `?ConfirmationCommentActionKey` |
+| `actionKeyRaw` | `?string`, raw value for an unknown `actionkey` |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
 ## Read model: `ConfirmationTag`
 
-`final readonly`. Fields: `id` (`?int`), `confirmationId` (`int`), `name` (`string`), `customfield` (`?string`), `extra` (`array`).
+`final readonly`. Fields: `id` (`?int`), `confirmationId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
 
 ## Read model: `ConfirmationTagCloudEntry`
 
 `final readonly`. Aggregate: `id` (`?int`), `name` (`string`), `count` (`int`), `extra` (`array`).
 
-## Read model: `ConfirmationPdf`
+## Read model: `DocumentPdf`
 
-`final class ConfirmationPdf` (not `readonly`).
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
 | Property | Type |
 |---|---|
 | `id` | `int` |
-| `confirmationId` | `int` |
+| `documentId` | `int` (Billomat field `confirmation_id`) |
 | `created` | `?\DateTimeImmutable` |
 | `filename` | `string` |
-| `mimeType` | `string`, default `application/pdf` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodes `base64file`.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `confirmation_id`, `filename` or `base64file` is missing.
 
 ## Enums used
 
@@ -448,7 +450,6 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **Single results are normalized in `list()`.** For exactly one match, Billomat returns `confirmation` as an object; the SDK wraps it in a list.
 - **The `offerId` link is informational.** The confirmation is not synchronized with the offer status automatically; set `OfferStatus::WON` separately via `$billomat->offers->win()`.
 - **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.
-- **`ConfirmationPdf` is not `readonly`**, a pragmatic exception so the container can hold binary data.
 - **`uploadSignature()` expects plain base64**, without a `data:` prefix.
 
 ## End-to-end example

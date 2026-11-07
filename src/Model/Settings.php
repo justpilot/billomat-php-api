@@ -163,7 +163,11 @@ final readonly class Settings
          * BCC-Adressen (in Billomat teils als String/CSV geliefert).
          */
         public array $bccAddresses = [],
-        /** taxation (laut Response vorhanden, Format je nach Account ggf. leer) */
+        /**
+         * Versteuerungsart, z. B. "TARGET" (Soll-Versteuerung); je nach Account leer.
+         *
+         * Billomat dokumentiert die möglichen Werte nicht, deshalb ein String statt eines Enums.
+         */
         public ?string $taxation = null
     ) {
     }

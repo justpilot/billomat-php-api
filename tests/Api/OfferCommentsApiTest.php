@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\OfferCommentCreateOptions;
 use Justpilot\Billomat\Api\OffersApi;
@@ -35,6 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class OfferCommentsApiTest extends TestCase
 {
     #[Test]
@@ -74,11 +76,11 @@ final class OfferCommentsApiTest extends TestCase
             new BillomatConfig('mycompany', 'secret-key'),
         ))->comments;
 
-        $comments = $api->list(42, [OfferCommentActionKey::CREATE, OfferCommentActionKey::COMMENT]);
+        $comments = $api->list(42, new CommentFilter(actionKeys: [OfferCommentActionKey::CREATE, OfferCommentActionKey::COMMENT]));
 
         self::assertCount(2, $comments);
-        self::assertSame(OfferCommentActionKey::CREATE, $comments[0]->actionkey);
-        self::assertNull($comments[1]->actionkey);
+        self::assertSame(OfferCommentActionKey::CREATE, $comments[0]->actionKey);
+        self::assertNull($comments[1]->actionKey);
         self::assertStringContainsString('offer_id=42', $captured->url);
         self::assertStringContainsString('actionkey=CREATE%2CCOMMENT', $captured->url);
     }

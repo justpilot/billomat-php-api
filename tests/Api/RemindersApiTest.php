@@ -16,10 +16,10 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Enum\ReminderStatus;
 use Justpilot\Billomat\Model\Reminder;
-use Justpilot\Billomat\Model\ReminderPdf;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -36,7 +36,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(ReminderUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
 #[CoversClass(Reminder::class)]
-#[CoversClass(ReminderPdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(ReminderStatus::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
@@ -251,7 +251,7 @@ final class RemindersApiTest extends TestCase
 
         $pdf = $api->pdf(240);
 
-        self::assertSame(240, $pdf->reminderId);
+        self::assertSame(240, $pdf->documentId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
     }
 

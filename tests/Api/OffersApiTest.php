@@ -17,11 +17,11 @@ use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
-use Justpilot\Billomat\Model\OfferPdf;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -38,7 +38,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(OfferUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
 #[CoversClass(Offer::class)]
-#[CoversClass(OfferPdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(OfferStatus::class)]
 #[UsesClass(OfferItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
@@ -419,7 +419,7 @@ final class OffersApiTest extends TestCase
         $pdf = $api->pdf(240);
 
         self::assertSame(4882, $pdf->id);
-        self::assertSame(240, $pdf->offerId);
+        self::assertSame(240, $pdf->documentId);
         self::assertSame('offer_123.pdf', $pdf->filename);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
         self::assertSame('https://mycompany.billomat.net/api/offers/240/pdf', $captured->url);

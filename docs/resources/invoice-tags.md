@@ -25,18 +25,18 @@ The SDK splits this into two methods with two separate read models.
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($invoiceId, $filters?)` | GET | `/invoice-tags?invoice_id={id}` |
-| `listPage($invoiceId, $filters?)` / `iterateAll($invoiceId, $filters?, $pageSize?)` | GET | `/invoice-tags?invoice_id={id}` (paginated) |
+| `list($parentId, $filters?)` | GET | `/invoice-tags?invoice_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/invoice-tags?invoice_id={id}` (paginated) |
 | `cloud()` | GET | `/invoice-tags` |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-tags/{id}` |
-| `create($invoiceId, $options)` | POST | `/invoice-tags` |
+| `create($parentId, $options)` | POST | `/invoice-tags` |
 | `delete($id)` | DELETE | `/invoice-tags/{id}` |
 
 There is no `update()` method; delete the tag and create it again.
 
 ## Methods
 
-### `list(int $invoiceId, SubResourceFilter|array $filters = []): list<InvoiceTag>`
+### `list(int $parentId, SubResourceFilter|array $filters = []): list<InvoiceTag>`
 
 Lists the tags of a single invoice.
 
@@ -71,7 +71,7 @@ foreach ($billomat->invoices->tags->cloud() as $entry) {
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
-### `create(int $invoiceId, InvoiceTagCreateOptions $options): InvoiceTag`
+### `create(int $parentId, InvoiceTagCreateOptions $options): InvoiceTag`
 
 ```php
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
@@ -105,7 +105,7 @@ Constructor: `new InvoiceTagCreateOptions(string $name)`. The object is immutabl
 | `id` | `int` |
 | `invoiceId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
 ## Read model: `InvoiceTagCloudEntry`

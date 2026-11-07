@@ -29,7 +29,7 @@ final class InvoiceCommentCreateOptionsTest extends TestCase
     {
         $options = new InvoiceCommentCreateOptions(
             comment: 'x',
-            actionkey: InvoiceCommentActionKey::COMMENT,
+            actionKey: InvoiceCommentActionKey::COMMENT,
         );
 
         $payload = $options->toArray();

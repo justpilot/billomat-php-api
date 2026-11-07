@@ -18,7 +18,7 @@ final class InboxDocumentCreateOptionsTest extends TestCase
         $options = new InboxDocumentCreateOptions(
             filename: 'beleg.pdf',
             mimeType: 'application/pdf',
-            base64file: 'JVBERi0xLg==',
+            base64File: 'JVBERi0xLg==',
         );
 
         self::assertSame(
@@ -37,7 +37,7 @@ final class InboxDocumentCreateOptionsTest extends TestCase
         $options = new InboxDocumentCreateOptions(
             filename: 'beleg.pdf',
             mimeType: 'application/pdf',
-            base64file: 'JVBERi0xLg==',
+            base64File: 'JVBERi0xLg==',
             documentType: 'invoice',
             metadata: ['vendor' => 'ACME', 'amount' => 99.0],
         );

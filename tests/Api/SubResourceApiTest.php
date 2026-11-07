@@ -11,6 +11,7 @@ use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\ClientPropertyValueFilter;
 use Justpilot\Billomat\Api\ClientsApi;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentFilter;
@@ -105,6 +106,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(OfferItemCreateOptions::class)]
 #[UsesClass(Money::class)]
 #[UsesClass(ListCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class SubResourceApiTest extends TestCase
 {
     private MockHttpClient $mock;
@@ -163,7 +165,7 @@ final class SubResourceApiTest extends TestCase
         $this->expectExceptionMessageIsOrContains(OfferCommentActionKey::class);
 
         /** @phpstan-ignore argument.type (absichtlich falsches Enum) */
-        (void) $this->invoices()->comments->list(1, [OfferCommentActionKey::CREATE]);
+        (void) $this->invoices()->comments->list(1, new CommentFilter([OfferCommentActionKey::CREATE]));
     }
 
     /**
@@ -299,9 +301,9 @@ final class SubResourceApiTest extends TestCase
         yield 'items list' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): array => new InvoicesApi($h)->items->list(7, $f), 'invoice-items', 'invoice-items', 'invoice_id=7&'.$sorted];
         yield 'items page' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Page => new InvoicesApi($h)->items->listPage(7, $f), 'invoice-items', 'invoice-items', 'invoice_id=7&'.$sorted];
         yield 'items iterate' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Generator => new InvoicesApi($h)->items->iterateAll(7, $f), 'invoice-items', 'invoice-items', 'invoice_id=7&'.$iterated];
-        yield 'comments list' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): array => new InvoicesApi($h)->comments->list(7, filters: $f), 'invoice-comments', 'invoice-comments', 'invoice_id=7&'.$sorted];
-        yield 'comments page' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Page => new InvoicesApi($h)->comments->listPage(7, [InvoiceCommentActionKey::COMMENT], $f), 'invoice-comments', 'invoice-comments', 'invoice_id=7&'.$sorted.'&actionkey=COMMENT'];
-        yield 'comments iterate' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Generator => new InvoicesApi($h)->comments->iterateAll(7, filters: $f), 'invoice-comments', 'invoice-comments', 'invoice_id=7&'.$iterated];
+        yield 'comments list' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): array => new InvoicesApi($h)->comments->list(7, new CommentFilter(orderBy: $f->orderBy, page: $f->page)), 'invoice-comments', 'invoice-comments', 'invoice_id=7&'.$sorted];
+        yield 'comments page' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Page => new InvoicesApi($h)->comments->listPage(7, new CommentFilter([InvoiceCommentActionKey::COMMENT], $f->orderBy, $f->page)), 'invoice-comments', 'invoice-comments', 'invoice_id=7&actionkey=COMMENT&'.$sorted];
+        yield 'comments iterate' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Generator => new InvoicesApi($h)->comments->iterateAll(7, new CommentFilter(orderBy: $f->orderBy, page: $f->page)), 'invoice-comments', 'invoice-comments', 'invoice_id=7&'.$iterated];
         yield 'tags list' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): array => new InvoicesApi($h)->tags->list(7, $f), 'invoice-tags', 'invoice-tags', 'invoice_id=7&'.$sorted];
         yield 'tags page' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Page => new InvoicesApi($h)->tags->listPage(7, $f), 'invoice-tags', 'invoice-tags', 'invoice_id=7&'.$sorted];
         yield 'tags iterate' => [static fn (BillomatHttpClient $h, SubResourceFilter $f): Generator => new InvoicesApi($h)->tags->iterateAll(7, $f), 'invoice-tags', 'invoice-tags', 'invoice_id=7&'.$iterated];

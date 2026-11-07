@@ -90,7 +90,7 @@ final readonly class Contact
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Firmenname. */
         public ?string $name = null,
         /** Von Billomat zusammengesetzte Adresse (mehrzeilig). */
@@ -141,7 +141,7 @@ final readonly class Contact
             fax: ScalarCaster::toStringOrNull($data['fax'] ?? null),
             mobile: ScalarCaster::toStringOrNull($data['mobile'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             www: ScalarCaster::toStringOrNull($data['www'] ?? null),
@@ -178,7 +178,7 @@ final readonly class Contact
             'fax' => $this->fax,
             'mobile' => $this->mobile,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'name' => $this->name,
             'address' => $this->address,
             'www' => $this->www,

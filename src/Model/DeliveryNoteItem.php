@@ -66,7 +66,7 @@ final readonly class DeliveryNoteItem
         /** Typ der Position (Produkt/Dienstleistung). */
         public ?ItemType $type = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -94,7 +94,7 @@ final readonly class DeliveryNoteItem
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -120,7 +120,7 @@ final readonly class DeliveryNoteItem
             'title' => $this->title,
             'description' => $this->description,
             'type' => $this->type?->value,
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
         ];
     }
 }

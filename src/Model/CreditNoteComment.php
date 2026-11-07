@@ -18,7 +18,7 @@ use const DATE_ATOM;
  * Hinweis zum `actionkey`:
  *  - Bei System-Kommentaren (Statuswechsel, Versand, Zahlung) ist das Feld gesetzt.
  *  - Bei manuell angelegten Kommentaren ist das Feld typischerweise leer.
- *  - Unbekannte Werte werden über das Enum als null geparst; `actionkeyRaw`
+ *  - Unbekannte Werte werden über das Enum als null geparst; `actionKeyRaw`
  *    enthält den ursprünglichen String aus der API.
  *
  * Dokumentation:
@@ -62,11 +62,11 @@ final readonly class CreditNoteComment
          * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
          * bei system-getriebenen Kommentaren selbst.
          */
-        public ?CreditNoteCommentActionKey $actionkey = null,
+        public ?CreditNoteCommentActionKey $actionKey = null,
         /** Roher ActionKey-String aus der API (auch wenn das Enum den Wert nicht kennt). */
-        public ?string $actionkeyRaw = null,
+        public ?string $actionKeyRaw = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Sichtbarkeit für die Aktivitäten-Liste des Kunden. */
         public ?bool $public = null,
         /** Hat der Kunde den Kommentar verfasst (Kundenportal)? */
@@ -97,9 +97,9 @@ final readonly class CreditNoteComment
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
-            actionkey: CreditNoteCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
-            actionkeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            actionKey: CreditNoteCommentActionKey::tryFrom(ScalarCaster::toStringOrNull($data['actionkey'] ?? null) ?? ''),
+            actionKeyRaw: ScalarCaster::toStringOrNull($data['actionkey'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             public: ScalarCaster::toBoolOrNull($data['public'] ?? null),
             byClient: ScalarCaster::toBoolOrNull($data['by_client'] ?? null),
             emailId: ScalarCaster::toIntOrNull($data['email_id'] ?? null),
@@ -124,8 +124,8 @@ final readonly class CreditNoteComment
             'credit_note_id' => $this->creditNoteId,
             'user_id' => $this->userId,
             'comment' => $this->comment,
-            'actionkey' => $this->actionkeyRaw,
-            'customfield' => $this->customfield,
+            'actionkey' => $this->actionKeyRaw,
+            'customfield' => $this->customField,
             'public' => $this->public,
             'by_client' => $this->byClient,
             'email_id' => $this->emailId,

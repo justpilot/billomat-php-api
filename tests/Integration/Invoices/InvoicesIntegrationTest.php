@@ -516,6 +516,23 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
     #[Group('integration')]
     #[Test]
+    public function canFetchInvoicePdfFromSandboxAsJson(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $invoiceId = $this->ensureInvoiceId();
+
+        $pdf = $billomat->invoices->pdf($invoiceId);
+
+        self::assertSame($invoiceId, $pdf->documentId);
+        self::assertSame('application/pdf', $pdf->mimeType);
+        self::assertStringEndsWith('.pdf', $pdf->filename);
+        self::assertSame([], $pdf->extra);
+        self::assertStringStartsWith('%PDF-', $pdf->getBinary());
+        self::assertSame(\strlen($pdf->getBinary()), $pdf->fileSize);
+    }
+
+    #[Group('integration')]
+    #[Test]
     public function canUpdateDraftInvoiceInSandbox(): void
     {
         $billomat = $this->createBillomatClientOrSkip();

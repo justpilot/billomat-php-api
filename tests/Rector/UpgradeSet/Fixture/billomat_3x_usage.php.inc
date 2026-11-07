@@ -14,10 +14,13 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Model\DunningLevel;
 use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoicePdfType;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\InvoiceComment;
+use Justpilot\Billomat\Model\InvoicePdf;
 
 final class Billomat3xUsage
 {
@@ -54,6 +57,15 @@ final class Billomat3xUsage
         $lost = OfferStatus::REJECTED;
         $types = [ArticleType::SERVICE, InvoiceItemType::PRODUCT, InvoicePaymentType::PAYPAL];
         $this->billomat->invoices->mail($id, new InvoiceMailOptions(color: true));
+
+        $offerId = $pdf->offerId;
+        $contacts = $this->billomat->contacts->listByClient(clientId: $id, query: ['per_page' => 10]);
+        $paid = $this->billomat->invoiceComments->listByInvoice($id, [InvoiceCommentActionKey::PAYMENT]);
+    }
+
+    public function describe(InvoicePdf $pdf, InvoiceComment $comment): string
+    {
+        return $pdf->invoiceId.$pdf->base64file.$comment->actionkeyRaw;
     }
 }
 ?>
@@ -71,12 +83,16 @@ use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Api\MailOptions;
+use Justpilot\Billomat\Api\CommentFilter;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\ReminderText;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
+use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\InvoiceComment;
 
 final class Billomat3xUsage
 {
@@ -113,6 +129,15 @@ final class Billomat3xUsage
         $lost = OfferStatus::LOST;
         $types = [ItemType::SERVICE, ItemType::PRODUCT, PaymentType::PAYPAL];
         $this->billomat->invoices->mail($id, new MailOptions(color: true));
+
+        $offerId = $pdf->documentId;
+        $contacts = $this->billomat->contacts->list(parentId: $id, filters: ['per_page' => 10]);
+        $paid = $this->billomat->invoices->comments->list($id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT]));
+    }
+
+    public function describe(DocumentPdf $pdf, InvoiceComment $comment): string
+    {
+        return $pdf->documentId.$pdf->base64File.$comment->actionKeyRaw;
     }
 }
 ?>

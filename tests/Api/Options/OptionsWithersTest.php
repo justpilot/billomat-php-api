@@ -222,8 +222,8 @@ final class OptionsWithersTest extends TestCase
             /** @var class-string<WriteOptions> $class */
             $class = 'Justpilot\\Billomat\\Api\\'.basename($file, '.php');
             foreach (new ReflectionClass($class)->getMethods() as $method) {
-                // withItem() hängt an statt zu ersetzen und hat einen eigenen Test.
-                if (!str_starts_with($method->name, 'with') || 'withItem' === $method->name) {
+                // withItem() und withAttachment() hängen an statt zu ersetzen und haben eigene Tests.
+                if (!str_starts_with($method->name, 'with') || \in_array($method->name, ['withItem', 'withAttachment'], true)) {
                     continue;
                 }
 

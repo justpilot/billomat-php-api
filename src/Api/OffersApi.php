@@ -10,12 +10,12 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferComment;
 use Justpilot\Billomat\Model\OfferItem;
-use Justpilot\Billomat\Model\OfferPdf;
 use Justpilot\Billomat\Model\OfferTag;
 use Justpilot\Billomat\Model\OfferTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
@@ -275,11 +275,11 @@ final class OffersApi extends AbstractApi
      * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null): OfferPdf
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
         $data = $this->getJson("/offers/{$id}/pdf", self::pdfQuery($type));
 
-        return OfferPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching offer PDF'));
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching offer PDF'));
     }
 
     /**

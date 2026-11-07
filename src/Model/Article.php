@@ -120,7 +120,7 @@ final readonly class Article
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Archivierungsstatus.
          *
@@ -177,7 +177,7 @@ final readonly class Article
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             taxId: ScalarCaster::toIntOrNull($data['tax_id'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
             type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
@@ -218,7 +218,7 @@ final readonly class Article
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'archived' => $this->archived,
             'type' => $this->type?->value,
             'revenue_account_number' => $this->revenueAccountNumber,

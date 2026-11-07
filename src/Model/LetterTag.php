@@ -36,7 +36,7 @@ final readonly class LetterTag
         /** Name des Schlagworts. */
         public string $name = '',
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -57,7 +57,7 @@ final readonly class LetterTag
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             letterId: ScalarCaster::toIntOrNull($data['letter_id'] ?? null) ?? 0,
             name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -76,7 +76,7 @@ final readonly class LetterTag
             'id' => $this->id,
             'letter_id' => $this->letterId,
             'name' => $this->name,
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
         ];
     }
 }

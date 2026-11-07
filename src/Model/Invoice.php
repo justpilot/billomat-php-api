@@ -177,7 +177,7 @@ final readonly class Invoice
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Referenz der Factur-X-/ZUGFeRD-Rechnung. */
         public ?string $facturxReference = null,
         /** Summe der Rabatte. */
@@ -243,7 +243,7 @@ final readonly class Invoice
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toNestedList($data['invoice-items'] ?? null, 'invoice-item', 'id', InvoiceItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
             totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
             digProceeded: ScalarCaster::toBoolOrNull($data['dig_proceeded'] ?? null),
@@ -302,7 +302,7 @@ final readonly class Invoice
             'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes)),
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'facturx_reference' => $this->facturxReference,
             'total_reduction' => $this->totalReduction?->toString(),
             'dig_proceeded' => $this->digProceeded,

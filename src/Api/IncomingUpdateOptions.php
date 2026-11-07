@@ -157,7 +157,7 @@ final readonly class IncomingUpdateOptions implements WriteOptions
          * Billomat-Feld: base64file
          * Typ: BASE64FILE
          */
-        public string|Clear|null $base64file = null,
+        public string|Clear|null $base64File = null,
     ) {
     }
 
@@ -269,10 +269,10 @@ final readonly class IncomingUpdateOptions implements WriteOptions
         return clone($this, ['category' => $category]);
     }
 
-    /** Kopie mit geändertem `base64file`. */
-    public function withBase64file(string|Clear|null $base64file): self
+    /** Kopie mit geändertem `base64File`. */
+    public function withBase64File(string|Clear|null $base64File): self
     {
-        return clone($this, ['base64file' => $base64file]);
+        return clone($this, ['base64File' => $base64File]);
     }
 
     /**
@@ -302,7 +302,7 @@ final readonly class IncomingUpdateOptions implements WriteOptions
                 'total_net' => $this->totalNet instanceof Money ? $this->totalNet->toString() : $this->totalNet,
                 'currency_code' => $this->currencyCode,
                 'quote' => $this->quote,
-                'base64file' => $this->base64file,
+                'base64file' => $this->base64File,
                 'category' => $this->category,
                 'client_number' => $this->clientNumber,
                 'expense_account_number' => $this->expenseAccountNumber,

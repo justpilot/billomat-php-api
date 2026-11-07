@@ -16,11 +16,11 @@ The generic `Justpilot\Billomat\Api\PaymentsApi`, typed for `InvoicePayment`, `I
 
 | Method | HTTP | Path |
 |---|---|---|
-| `list($invoiceId?, $filters?)` | GET | `/invoice-payments` |
-| `listPage($invoiceId?, $filters?)` | GET | `/invoice-payments` (one page with metadata) |
-| `iterateAll($invoiceId?, $filters?, $pageSize?)` | GET | `/invoice-payments` (all pages) |
+| `list($parentId?, $filters?)` | GET | `/invoice-payments` |
+| `listPage($parentId?, $filters?)` | GET | `/invoice-payments` (one page with metadata) |
+| `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/invoice-payments` (all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/invoice-payments/{id}` |
-| `create($invoiceId, $options)` | POST | `/invoice-payments` |
+| `create($parentId, $options)` | POST | `/invoice-payments` |
 | `delete($id)` | DELETE | `/invoice-payments/{id}` |
 
 There is no `update()` method; Billomat doesn't support editing a payment. To correct one, delete it and create a new one.
@@ -62,7 +62,7 @@ Like `list()`, with pagination metadata or as a lazy iterator over all pages. Se
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
 
-### `create(int $invoiceId, InvoicePaymentCreateOptions $options): InvoicePayment`
+### `create(int $parentId, InvoicePaymentCreateOptions $options): InvoicePayment`
 
 ```php
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
@@ -122,7 +122,7 @@ The invoice ID isn't part of the options; `create()` takes it as an argument. `t
 | `finapiTransactionId` | `?string` (finAPI bank reconciliation) |
 | `finapiTransactionAmount` | `?Money` (finAPI bank reconciliation) |
 | `documentTitle` | `?string` |
-| `customfield` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
 ## Enums

@@ -38,11 +38,11 @@ GET /api/clients?customfield={search}
 
 ### In the SDK
 
-When **reading**, the value is available as `?string $customfield` on every read model for which Billomat returns it (empty string → `null`):
+When **reading**, the value is available as `?string $customField` on every read model for which Billomat returns it (empty string → `null`):
 
 ```php
 $client = $billomat->clients->get(42);
-$crmId = $client?->customfield;
+$crmId = $client?->customField;
 ```
 
 To **filter**, pass the parameter via `extra` on the typed filter or in the array: `list(new ClientFilter(extra: ['customfield' => '…']))` or `list(['customfield' => '…'])`. There is no dedicated method for **writing** (`PUT /{resource}/{id}/customfield`) yet; for that, create your own `BillomatHttpClient` with the same `BillomatConfig` and call `request('PUT', …)`.

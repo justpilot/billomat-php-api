@@ -64,7 +64,7 @@ final readonly class IncomingPayment
         /** Verwendungszweck (z. B. Buchungstext aus dem Bankexport). */
         public ?string $transactionPurpose = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Währung der Zahlung (ISO-Währungscode). */
         public ?string $currencyCode = null,
         /** Umrechnungskurs zur Hauptwährung. */
@@ -103,7 +103,7 @@ final readonly class IncomingPayment
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),
             transactionPurpose: ScalarCaster::toStringOrNull($data['transaction_purpose'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             paymentGroup: ScalarCaster::toStringOrNull($data['payment_group'] ?? null),
@@ -134,7 +134,7 @@ final readonly class IncomingPayment
             'type' => $this->type?->value,
             'comment' => $this->comment,
             'transaction_purpose' => $this->transactionPurpose,
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'currency_code' => $this->currencyCode,
             'quote' => $this->quote,
             'payment_group' => $this->paymentGroup,

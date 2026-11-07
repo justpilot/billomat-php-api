@@ -81,13 +81,13 @@ $uploaded = new TemplateCreateOptions(
     TemplateDocumentType::OFFER,
     name: 'Angebot 2026',
     format: TemplateFormat::DOCX,
-    base64file: base64_encode(file_get_contents('/path/to/template.docx')),
+    base64File: base64_encode(file_get_contents('/path/to/template.docx')),
 );
 
 $billomat->templates->create($uploaded);
 ```
 
-Setting `format` + `base64file` tells Billomat to store the template as `UPLOADED`. Without these fields you get a `DEFINED` template.
+Setting `format` + `base64File` tells Billomat to store the template as `UPLOADED`. Without these fields you get a `DEFINED` template.
 
 ### `update(int $id, TemplateUpdateOptions $options): Template`
 
@@ -116,8 +116,8 @@ Constructor: `new TemplateCreateOptions(TemplateDocumentType $type, …)` — `t
 |---|---|---|---|
 | `type` | `type` | `TemplateDocumentType` | Required (constructor). Document type: invoice, offer, reminder … |
 | `name` | `name` | `?string` | |
-| `format` | `format` | `?TemplateFormat` | `doc`, `docx` or `rtf`. Only useful together with `base64file`. |
-| `base64file` | `base64file` | `?string` | Base64-encoded template file (UPLOADED only). |
+| `format` | `format` | `?TemplateFormat` | `doc`, `docx` or `rtf`. Only useful together with `base64File`. |
+| `base64File` | `base64file` | `?string` | Base64-encoded template file (UPLOADED only). |
 | `isDefault` | `is_default` | `?bool` | Serialized as `1`/`0`. |
 
 `toArray()` strips `null` values.
@@ -143,10 +143,10 @@ Constructor: `new TemplateCreateOptions(TemplateDocumentType $type, …)` — `t
 | `templateType` | `?TemplateType` | DEFINED or UPLOADED |
 | `name` | `?string` | |
 | `format` | `?TemplateFormat` | Only for UPLOADED + single GET |
-| `base64file` | `?string` | Only for UPLOADED + single GET |
+| `base64File` | `?string` | Only for UPLOADED + single GET |
 | `isDefault` | `bool` | |
 | `updated` | `?\DateTimeImmutable` |  |
-| `customfield` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `customField` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
 | `isBackgroundAvailable` | `?bool` |  |
 | `extra` | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
@@ -172,7 +172,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ## Pitfalls
 
-- **`format` + `base64file` only together.** To create an `UPLOADED` template, set both fields. Otherwise Billomat creates an empty DEFINED template.
+- **`format` + `base64File` only together.** To create an `UPLOADED` template, set both fields. Otherwise Billomat creates an empty DEFINED template.
 - **The default flag is exclusive per `type`.** If you set `isDefault = true` on an INVOICE template, the previous default INVOICE template loses the flag; other document types are not affected.
 - **`format`/`base64file` are missing in the list.** `list()` only returns metadata. The fields are only filled after a single GET (`get($id)`), and only for UPLOADED templates.
 - **`thumb()` bypasses `getJson()`.** The method uses `getRaw()` from `AbstractApi`; it always returns a binary string, no envelope.
@@ -212,7 +212,7 @@ $opts = new TemplateCreateOptions(
     TemplateDocumentType::INVOICE,
     name: 'Mein Briefkopf 2026',
     format: TemplateFormat::DOCX,
-    base64file: base64_encode(file_get_contents('/path/to/invoice-template.docx')),
+    base64File: base64_encode(file_get_contents('/path/to/invoice-template.docx')),
 );
 
 $created = $billomat->templates->create($opts);

@@ -10,9 +10,9 @@ use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Reminder;
-use Justpilot\Billomat\Model\ReminderPdf;
 use Justpilot\Billomat\Model\ReminderTag;
 use Justpilot\Billomat\Model\ReminderTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
@@ -205,11 +205,11 @@ final class RemindersApi extends AbstractApi
      * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
     #[NoDiscard]
-    public function pdf(int $id, ?PdfType $type = null): ReminderPdf
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
         $data = $this->getJson("/reminders/{$id}/pdf", self::pdfQuery($type));
 
-        return ReminderPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching reminder PDF'));
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching reminder PDF'));
     }
 
     /**

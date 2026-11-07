@@ -127,7 +127,7 @@ final readonly class Confirmation
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Summe der Rabatte. */
         public ?Money $totalReduction = null,
         /**
@@ -176,7 +176,7 @@ final readonly class Confirmation
             taxes: ListCaster::toNestedList($data['taxes'] ?? null, 'tax', 'name', TaxSummary::fromArray(...)),
             items: ListCaster::toNestedList($data['confirmation-items'] ?? null, 'confirmation-item', 'id', ConfirmationItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
@@ -220,7 +220,7 @@ final readonly class Confirmation
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'total_reduction' => $this->totalReduction?->toString(),
         ];
 

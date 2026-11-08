@@ -9,6 +9,8 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Model\CreditNote;
+use Justpilot\Billomat\Model\CreditNoteGroup;
+use Justpilot\Billomat\Model\Enum\CreditNoteGroupBy;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
@@ -84,5 +86,20 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
 
         $billomat->creditNotes->delete($note->id);
         self::assertNull($billomat->creditNotes->get($note->id));
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function creditNotesCanBeListedGrouped(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $groups = $billomat->creditNotes->listGrouped(CreditNoteGroupBy::STATUS);
+
+        self::assertContainsOnlyInstancesOf(CreditNoteGroup::class, $groups);
+        foreach ($groups as $group) {
+            self::assertNotNull($group->status);
+            self::assertSame($group->status->value, $group->creditNoteParams['status'] ?? null);
+        }
     }
 }

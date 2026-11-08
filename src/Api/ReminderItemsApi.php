@@ -11,13 +11,18 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * Positionen einer Mahnung (read-only – Mahnungspositionen erzeugt Billomat selbst).
+ * Positionen einer Mahnung.
  *
- * Erreichbar über `$billomat->reminders->items`.
+ * Erreichbar über `$billomat->reminders->items`. Die Positionen der offenen Rechnung legt
+ * Billomat beim Anlegen der Mahnung selbst an; weitere (z. B. eine zusätzliche Gebühr)
+ * lassen sich ergänzen, ändern und löschen.
  *
  * Endpoints:
  *  - GET /reminder-items?reminder_id={id}
  *  - GET /reminder-items/{id}
+ *  - POST /reminder-items
+ *  - PUT /reminder-items/{id}
+ *  - DELETE /reminder-items/{id}
  *
  * Doku: https://www.billomat.com/api/mahnungen/positionen/
  *
@@ -76,5 +81,28 @@ final class ReminderItemsApi extends AbstractSubResourceApi
     public function iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateFor($parentId, $filters, $pageSize);
+    }
+
+    /**
+     * Legt eine Position an einer Mahnung an.
+     *
+     * @param int $parentId ID der Mahnung (`reminder_id`)
+     */
+    public function create(int $parentId, ReminderItemCreateOptions $options): ReminderItem
+    {
+        return $this->createFor($parentId, $options);
+    }
+
+    /**
+     * Ändert eine Position. Nur gesetzte Felder werden gesendet, die übrigen bleiben unverändert.
+     */
+    public function update(int $id, ReminderItemUpdateOptions $options): ReminderItem
+    {
+        return $this->updateFrom($id, $options->toArray());
+    }
+
+    public function delete(int $id): void
+    {
+        $this->deleteById($id);
     }
 }

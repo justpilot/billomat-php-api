@@ -101,7 +101,9 @@ $mapping = [
     'mahnungen' => ['api' => 'RemindersApi', 'model' => 'Reminder',
         'createOptions' => 'ReminderCreateOptions', 'updateOptions' => 'ReminderUpdateOptions',
         'docFile' => 'reminders.md'],
-    'mahnungen/positionen' => ['api' => 'ReminderItemsApi', 'docFile' => 'reminders.md'],
+    'mahnungen/positionen' => ['api' => 'ReminderItemsApi', 'model' => 'ReminderItem',
+        'createOptions' => 'ReminderItemCreateOptions', 'updateOptions' => 'ReminderItemUpdateOptions',
+        'docFile' => 'reminders.md'],
     'mahnungen/schlagworte' => ['api' => 'TagsApi', 'model' => 'ReminderTag',
         'createOptions' => 'ReminderTagCreateOptions', 'docFile' => 'reminders.md'],
 
@@ -131,8 +133,9 @@ $mapping = [
     'eingangsrechnungen/attribute' => ['api' => 'PropertyValuesApi', 'docFile' => 'incomings.md'],
     'eingangsrechnungen/kommentare' => ['api' => 'CommentsApi', 'model' => 'IncomingComment',
         'createOptions' => 'IncomingCommentCreateOptions', 'docFile' => 'incomings.md'],
-    'eingangsrechnungen/posten' => ['docFile' => 'incomings.md',
-        'note' => 'Posten/Items werden inline über Incoming verwaltet.'],
+    'eingangsrechnungen/posten' => ['api' => 'ItemsApi', 'model' => 'IncomingItem',
+        'createOptions' => 'IncomingItemCreateOptions', 'updateOptions' => 'IncomingItemUpdateOptions',
+        'docFile' => 'incomings.md'],
     'eingangsrechnungen/schlagworte' => ['api' => 'TagsApi', 'model' => 'IncomingTag',
         'createOptions' => 'IncomingTagCreateOptions', 'docFile' => 'incomings.md'],
     'eingangsrechnungen/kategorien' => ['api' => 'IncomingCategoriesApi', 'model' => 'IncomingCategory',
@@ -461,6 +464,7 @@ function filterParentIds(array $fieldNames, string $slug): array
 {
     static $parentIdsBySegment = [
         'positionen' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'recurring_id'],
+        'posten' => ['incoming_id'],
         'kommentare' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'letter_id', 'incoming_id'],
         'schlagworte' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'article_id', 'client_id', 'supplier_id', 'recurring_id', 'incoming_id', 'letter_id'],
         'zahlungen' => ['invoice_id', 'credit_note_id', 'incoming_id'],

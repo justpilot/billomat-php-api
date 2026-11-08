@@ -31,7 +31,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `eingangsrechnungen/inbox` | Inbox | ✓ | ✓ | ✓ | — | ✓ |  |
 | `eingangsrechnungen/kategorien` | Kategorien | ✓ | ✓ | — | — | ✓ | Read-only; Mutations-Endpunkte sind in der Spec nicht dokumentiert. |
 | `eingangsrechnungen/kommentare` | Kommentare | ✓ | ✓ | ✓ | — | ✓ |  |
-| `eingangsrechnungen/posten` | Posten | — | — | — | — | ✓ | Posten/Items werden inline über Incoming verwaltet. |
+| `eingangsrechnungen/posten` | Posten | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `eingangsrechnungen/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `eingangsrechnungen/zahlungen` | Zahlungen | ✓ | ✓ | ✓ | — | ✓ |  |
 | `einstellungen` | Einstellungen | ✓ | — | — | — | ✓ |  |
@@ -72,7 +72,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `lieferanten/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `lieferscheine` | Lieferscheine | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `mahnungen` | Mahnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| `mahnungen/positionen` | Positionen | ✓ | — | — | — | ✓ |  |
+| `mahnungen/positionen` | Positionen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `mahnungen/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `rechnungen` | Rechnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `rechnungen/kommentare` | Kommentare | ✓ | ✓ | ✓ | — | ✓ |  |

@@ -12,8 +12,11 @@ use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
+use Justpilot\Billomat\Model\Enum\IncomingGroupBy;
 use Justpilot\Billomat\Model\Incoming;
 use Justpilot\Billomat\Model\IncomingComment;
+use Justpilot\Billomat\Model\IncomingGroup;
+use Justpilot\Billomat\Model\IncomingItem;
 use Justpilot\Billomat\Model\IncomingPayment;
 use Justpilot\Billomat\Model\IncomingProperty;
 use Justpilot\Billomat\Model\IncomingPropertyValue;
@@ -44,6 +47,15 @@ final class IncomingsApi extends AbstractApi
      */
     public private(set) CommentsApi $comments {
         get => $this->comments ??= new CommentsApi($this->http, 'incoming', IncomingComment::fromArray(...), IncomingCommentCreateOptions::class, IncomingCommentActionKey::class);
+    }
+
+    /**
+     * Posten, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<IncomingItem, IncomingItemCreateOptions, IncomingItemUpdateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'incoming', IncomingItem::fromArray(...), IncomingItemCreateOptions::class, IncomingItemUpdateOptions::class);
     }
 
     /**
@@ -126,6 +138,32 @@ final class IncomingsApi extends AbstractApi
     public function iterateAll(IncomingFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/incomings', 'incomings', 'incoming', Incoming::fromArray(...), $filters, $pageSize);
+    }
+
+    /**
+     * Listet Eingangsrechnungen aggregiert nach einem oder mehreren Kriterien.
+     *
+     * Entspricht GET /incomings?group_by=...
+     *
+     * Mehrere Werte werden in der Reihenfolge der Aggregation als CSV gesendet
+     * ("supplier,year" gruppiert zuerst nach Lieferant, dann nach Jahr).
+     *
+     * @param IncomingGroupBy|non-empty-list<IncomingGroupBy>              $groupBy
+     * @param IncomingFilter|array<string, scalar|array<scalar|null>|null> $filters optionale zusätzliche Filter (analog zu list())
+     *
+     * @return list<IncomingGroup>
+     */
+    #[NoDiscard]
+    public function listGrouped(IncomingGroupBy|array $groupBy, IncomingFilter|array $filters = []): array
+    {
+        $values = \is_array($groupBy) ? $groupBy : [$groupBy];
+
+        $csv = implode(',', array_map(static fn (IncomingGroupBy $g): string => $g->value, $values));
+
+        $query = self::filterQuery($filters);
+        $query['group_by'] = $csv;
+
+        return $this->listResource('/incomings', 'incoming-groups', 'incoming-group', IncomingGroup::fromArray(...), $query);
     }
 
     #[NoDiscard]

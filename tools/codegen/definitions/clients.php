@@ -54,6 +54,8 @@ declare(strict_types=1);
  * 'toArray' => [...] an 'model' oder an den Options legt Auswahl und Reihenfolge der
  * toArray()-Schlüssel fest (Billomat-Feldnamen); ohne die Liste gilt die Feldreihenfolge.
  * 'dateObjects' => true an den Options führt Datumsfelder als DateTimeImmutable statt als String.
+ * 'fromArray' => true (oder eine Liste von Doku-Zeilen) an den Create-Options erzeugt ein statisches
+ * fromArray(), das die Options aus einem Billomat-Datensatz baut (z. B. GET /invoices/preset).
  * 'items' => ['class' => …, 'wire' => …, 'item' => …] an den Create-Options erzeugt den Konstruktor-Parameter `items` und withItem()
  * und sendet die gesammelten Positionen verschachtelt mit (z. B. invoice-items.invoice-item).
  *

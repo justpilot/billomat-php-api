@@ -626,6 +626,13 @@ function renderOptions(array $definition, array $options, array $fields, string 
     if (\in_array('money', array_column($writable, 'type'), true)) {
         $imports[] = 'Justpilot\\Billomat\\Model\\Money';
     }
+    if ($isCreate && !empty($options['fromArray'])) {
+        $imports[] = 'Justpilot\\Billomat\\Exception\\UnexpectedResponseException';
+        $imports[] = 'Justpilot\\Billomat\\Internal\\ScalarCaster';
+        if ([] !== array_filter($writable, static fn (array $f): bool => $f['enumList'])) {
+            $imports[] = 'Justpilot\\Billomat\\Internal\\ListCaster';
+        }
+    }
     sort($imports);
     foreach ($imports as $import) {
         $out .= "use {$import};\n";
@@ -674,6 +681,11 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $out .= "    public function withItem({$items['class']} \$item): self\n    {\n        return clone(\$this, ['items' => [...\$this->items, \$item]]);\n    }\n\n";
     }
 
+    // `fromArray`: Create-Options aus einem Billomat-Datensatz (z. B. GET /invoices/preset).
+    if ($isCreate && !empty($options['fromArray'])) {
+        $out .= renderOptionsFromArray($ordered, $dateObjects, $options['fromArray']);
+    }
+
     $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n";
     if (!$isCreate) {
         $out .= "     *\n     * Nicht gesetzte Felder (null) fehlen im Payload, {@see Clear::Field} wird als null gesendet und leert das Feld.\n";
@@ -707,6 +719,71 @@ function renderOptions(array $definition, array $options, array $fields, string 
     $out .= "            ];\n        }\n\n        return \$data;\n    }\n}\n";
 
     return $out;
+}
+
+/**
+ * fromArray() der Create-Options: liest die schreibbaren Felder aus einem Billomat-Datensatz.
+ *
+ * Felder, die die Options nicht kennen (Summen, Status, …), fallen weg; leere Werte bleiben null.
+ * Fehlt ein Pflichtfeld ohne Default, wirft die Methode wie die Read-Models eine UnexpectedResponseException.
+ *
+ * @param list<array<string, mixed>> $fields
+ * @param list<string>|true          $doc    Zusätzliche Doku-Zeilen (z. B. woher der Datensatz kommt)
+ */
+function renderOptionsFromArray(array $fields, bool $dateObjects, array|bool $doc): string
+{
+    $lines = [
+        'Baut die Options aus einem Datensatz mit Billomat-Feldnamen.',
+        ...(\is_array($doc) ? ['', ...$doc] : []),
+        '',
+        'Felder, die die Options nicht kennen (Summen, Status, …), fallen weg; leere Werte bleiben null.',
+        '',
+        '@param array<string,mixed> $data',
+        '',
+        '@throws UnexpectedResponseException wenn ein Pflichtfeld fehlt',
+    ];
+    $out = docBlock($lines, '    ');
+    $out .= "    public static function fromArray(array \$data): self\n    {\n        return new self(\n";
+    foreach ($fields as $field) {
+        $out .= '            ' . $field['property'] . ': ' . optionsHydrateExpression($field, $dateObjects) . ",\n";
+    }
+
+    return $out . "        );\n    }\n\n";
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function optionsHydrateExpression(array $field, bool $dateObjects): string
+{
+    $lookup = "\$data['{$field['wire']}'] ?? null";
+
+    $expression = match (true) {
+        $field['enumList'] => "ListCaster::toEnumList({$lookup}, {$field['enumClass']}::class)",
+        null !== $field['enumClass'] => $field['enumClass'] . "::tryFrom(ScalarCaster::toStringOrNull({$lookup}) ?? '')",
+        'mixed' === $field['type'] => $lookup,
+        default => 'ScalarCaster::' . match ($field['type']) {
+            'int' => 'toIntOrNull',
+            'float' => 'toFloatOrNull',
+            'money' => 'toMoneyOrNull',
+            'bool' => 'toBoolOrNull',
+            'date' => $dateObjects ? 'toDateTimeOrNull' : 'toStringOrNull',
+            default => 'toStringOrNull',
+        } . "({$lookup})",
+    };
+
+    if ($field['enumList'] || 'mixed' === $field['type']) {
+        return $expression;
+    }
+    $create = $field['create'] ?? [];
+    if (!empty($create['constructor']) && !\array_key_exists('default', $create)) {
+        return "ScalarCaster::required({$expression}, self::class, '{$field['wire']}')";
+    }
+    if (!empty($create['constructor']) || !empty($create['nonNull'])) {
+        return $expression . ' ?? ' . var_export($create['default'], true);
+    }
+
+    return $expression;
 }
 
 /**

@@ -16,7 +16,6 @@ return (require __DIR__ . '/shared/items.php')(
     parentField: 'reminder_id',
     specResource: 'mahnungen/positionen',
     docUrl: 'https://www.billomat.com/api/mahnungen/positionen/',
-    withOptions: false,
     omit: ['tax_name', 'tax_rate', 'tax_changed_manually', 'reduction', 'type', 'total_gross_unreduced', 'total_net_unreduced'],
     optionsOnly: ['total_gross', 'total_net', 'created'],
     extra: [

@@ -48,6 +48,7 @@ Only credit notes in status `DRAFT` are fully editable. `update()` on a complete
 | `pdf($id, $type?)` | GET | `/credit-notes/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/credit-notes/{id}/pdf?format=pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/credit-notes/{id}/upload-signature` |
+| `listGrouped($groupBy, $filters?)` | GET | `/credit-notes?group_by=…` |
 
 ### `/credit-note-items`
 
@@ -113,6 +114,30 @@ $drafts = $billomat->creditNotes->list(new CreditNoteFilter(
 ```
 
 `listPage()` takes the same filters and returns a `Page` with pagination metadata; `iterateAll()` walks through all pages lazily. See [Pagination and filtering](../concepts/pagination-and-filtering.md).
+
+#### `listGrouped(CreditNoteGroupBy|array $groupBy, CreditNoteFilter|array $filters = []): list<CreditNoteGroup>`
+
+Aggregated listing via `?group_by=…`, like [`InvoicesApi::listGrouped()`](invoices.md): instead of individual credit notes, Billomat returns one total row per group. Several axes are combined in order (`client,year` groups by client first, then by year).
+
+```php
+use Justpilot\Billomat\Model\Enum\CreditNoteGroupBy;
+
+$byClient = $billomat->creditNotes->listGrouped(CreditNoteGroupBy::CLIENT);
+foreach ($byClient as $group) {
+    printf("Client %d: %s gross\n", $group->clientId, $group->totalGross?->toString() ?? '-');
+}
+
+// Drill down: $group->creditNoteParams is the matching filter set for list()
+$detail = $billomat->creditNotes->list($byClient[0]->creditNoteParams);
+```
+
+| `group_by` (`CreditNoteGroupBy`) | Filled identifier field of `CreditNoteGroup` |
+|---|---|
+| `CLIENT` | `clientId` |
+| `STATUS` | `status` (`?CreditNoteStatus`) |
+| `DAY` / `WEEK` / `MONTH` / `YEAR` | `day` / `week` / `month` / `year` (each `?string`) |
+
+`totalGross` and `totalNet` (`?Money`) hold the totals; unknown fields land in `$extra`. Other values (e.g. `supplier`) are rejected with HTTP 400 `invalid or empty group_by parameter`.
 
 #### `get(int $id): ?CreditNote`
 
@@ -486,6 +511,10 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 | `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 | `extra` | `array<string, mixed>` |
 
+## Read model: `CreditNoteGroup`
+
+Row of `listGrouped()`: `totalGross`, `totalNet` (`?Money`), `clientId` (`?int`), `status` (`?CreditNoteStatus`), `day`, `week`, `month`, `year` (`?string`), `creditNoteParams` (`array<string, scalar>`, the filter set for a drill-down via `list()`) and `extra`.
+
 ## Read model: `DocumentPdf`
 
 `final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
@@ -507,6 +536,7 @@ Empty recipient arrays are left out of the payload so Billomat falls back to the
 
 - [`CreditNoteStatus`](../../src/Model/Enum/CreditNoteStatus.php): `DRAFT`, `OPEN`, `PAID`, `CANCELED`.
 - [`CreditNoteCommentActionKey`](../../src/Model/Enum/CreditNoteCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `UNCANCEL`, `CHANGE_STATUS`, `PAYMENT`, `EMAIL`, `MAIL`, `COMMENT`.
+- [`CreditNoteGroupBy`](../../src/Model/Enum/CreditNoteGroupBy.php): `CLIENT`, `STATUS`, `DAY`, `WEEK`, `MONTH`, `YEAR`, the aggregation axes for `listGrouped()`.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 - [`ItemType`](../../src/Model/Enum/ItemType.php): shared item types (`PRODUCT`, `SERVICE`).
 - [`PaymentType`](../../src/Model/Enum/PaymentType.php): shared payment types (`BANK_TRANSFER`, `PAYPAL`, `CASH`, …).

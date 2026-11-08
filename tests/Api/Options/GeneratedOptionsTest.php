@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesNamespace;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionMethod;
@@ -28,6 +29,7 @@ use ReflectionUnionType;
  */
 #[CoversNamespace('Justpilot\\Billomat\\Api')]
 #[UsesClass(Money::class)]
+#[UsesNamespace('Justpilot\\Billomat\\Internal')]
 final class GeneratedOptionsTest extends TestCase
 {
     private int $counter = 0;
@@ -165,6 +167,28 @@ final class GeneratedOptionsTest extends TestCase
     }
 
     /**
+     * fromArray() liest zurück, was toArray() sendet; Billomat liefert Zahlen als Strings.
+     * Positionen fehlen in den Datensätzen (z. B. GET /invoices/preset) und bleiben leer.
+     *
+     * @param class-string<WriteOptions> $class
+     */
+    #[Test]
+    #[DataProvider('optionsWithFromArray')]
+    public function fromArrayReadsWhatToArraySends(string $class): void
+    {
+        $arguments = [];
+        foreach ($this->parameters($class) as $parameter) {
+            if ('items' !== $parameter->name) {
+                $arguments[$parameter->name] = $this->sampleValue($parameter);
+            }
+        }
+        $options = new $class(...$arguments);
+        $record = array_map(static fn (mixed $value): mixed => \is_int($value) || \is_float($value) ? (string) $value : $value, $options->toArray());
+
+        self::assertEquals($options, new ReflectionMethod($class, 'fromArray')->invoke(null, $record));
+    }
+
+    /**
      * @return iterable<string, array{class-string<WriteOptions>}>
      */
     public static function options(): iterable
@@ -178,6 +202,18 @@ final class GeneratedOptionsTest extends TestCase
             $class = 'Justpilot\\Billomat\\Api\\'.$name;
 
             yield $name => [$class];
+        }
+    }
+
+    /**
+     * @return iterable<string, array{class-string<WriteOptions>}>
+     */
+    public static function optionsWithFromArray(): iterable
+    {
+        foreach (self::options() as $name => $arguments) {
+            if (method_exists($arguments[0], 'fromArray')) {
+                yield $name => $arguments;
+            }
         }
     }
 

@@ -25,6 +25,8 @@ $billomat->roles
 | `update($id, $options)` | PUT | `/roles/{id}` |
 | `delete($id)` | DELETE | `/roles/{id}` |
 
+Roles have no `customfield`: Billomat answers `/roles/{id}/customfield` with 405, so there is no `getCustomField()`/`setCustomField()` here.
+
 ## Methods
 
 ### `list(array $filters = []): list<Role>`

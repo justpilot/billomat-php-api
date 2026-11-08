@@ -100,4 +100,27 @@ final class ReminderTextsApi extends AbstractApi
     {
         $this->deleteVoid("/reminder-texts/{$id}");
     }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /reminder-texts/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/reminder-texts/{$id}", 'reminder-text');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /reminder-texts/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/reminder-texts/{$id}", 'reminder-text', $value);
+    }
 }

@@ -25,6 +25,8 @@ $billomat->freeTexts
 | `update($id, $options)` | PUT | `/free-texts/{id}` |
 | `delete($id)` | DELETE | `/free-texts/{id}` |
 
+Free texts have no `customfield`: Billomat answers `/free-texts/{id}/customfield` with 405, so there is no `getCustomField()`/`setCustomField()` here.
+
 ## Methods
 
 ### `list(array $filters = []): list<FreeText>`

@@ -30,6 +30,7 @@ $billomat->reminderTexts   // Justpilot\Billomat\Api\ReminderTextsApi
 | `create($options)` | POST | `/reminder-texts` |
 | `update($id, $options)` | PUT | `/reminder-texts/{id}` |
 | `delete($id)` | DELETE | `/reminder-texts/{id}` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/reminder-texts/{id}/customfield` |
 
 ## Methods
 
@@ -84,6 +85,10 @@ $billomat->reminderTexts->update($level->id, new ReminderTextUpdateOptions(sort:
 ```php
 $billomat->reminderTexts->delete($level->id);
 ```
+
+### `getCustomField(int $id): ?string` / `setCustomField(int $id, string $value): void`
+
+See [Custom meta attributes](../concepts/custom-meta-attributes.md#in-the-sdk).
 
 ## Write models
 

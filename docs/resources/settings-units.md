@@ -24,6 +24,7 @@ $billomat->units
 | `create($options)` | POST | `/units` |
 | `update($id, $options)` | PUT | `/units/{id}` |
 | `delete($id)` | DELETE | `/units/{id}` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/units/{id}/customfield` |
 
 ## Methods
 
@@ -81,6 +82,10 @@ $billomat->units->update($unit->id, new UnitUpdateOptions(name: 'Paletten'));
 ```php
 $billomat->units->delete($unit->id);
 ```
+
+### `getCustomField(int $id): ?string` / `setCustomField(int $id, string $value): void`
+
+Read and write the `customfield`; see [Custom meta attributes](../concepts/custom-meta-attributes.md#in-the-sdk).
 
 ## Write models
 

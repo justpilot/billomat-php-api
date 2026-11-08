@@ -52,6 +52,7 @@ An open reminder can be followed by further dunning levels: Billomat increments 
 | `pdf($id, $type?)` | GET | `/reminders/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/reminders/{id}/pdf?format=pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/reminders/{id}/upload-signature` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/reminders/{id}/customfield` |
 
 ### `/reminder-items`
 
@@ -63,6 +64,7 @@ An open reminder can be followed by further dunning levels: Billomat increments 
 | `create($parentId, $options)` | POST | `/reminder-items` |
 | `update($id, $options)` | PUT | `/reminder-items/{id}` |
 | `delete($id)` | DELETE | `/reminder-items/{id}` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/reminder-items/{id}/customfield` |
 
 ### `/reminder-tags`
 

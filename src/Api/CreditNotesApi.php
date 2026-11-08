@@ -272,4 +272,27 @@ final class CreditNotesApi extends AbstractApi
     {
         return $this->getPdf("/credit-notes/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
     }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /credit-notes/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/credit-notes/{$id}", 'credit-note');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /credit-notes/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/credit-notes/{$id}", 'credit-note', $value);
+    }
 }

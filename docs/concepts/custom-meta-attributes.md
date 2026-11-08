@@ -45,7 +45,22 @@ $client = $billomat->clients->get(42);
 $crmId = $client?->customField;
 ```
 
-To **filter**, pass the parameter via `extra` on the typed filter or in the array: `list(new ClientFilter(extra: ['customfield' => '…']))` or `list(['customfield' => '…'])`. There is no dedicated method for **writing** (`PUT /{resource}/{id}/customfield`) yet; for that, create your own `BillomatHttpClient` with the same `BillomatConfig` and call `request('PUT', …)`.
+To **read and write the field alone**, every API whose records have a `customfield` offers `getCustomField(int $id): ?string` and `setCustomField(int $id, string $value): void` (`GET`/`PUT /{resource}/{id}/customfield`):
+
+```php
+$billomat->clients->setCustomField(42, 'crm-4711');
+$crmId = $billomat->clients->getCustomField(42);   // 'crm-4711'
+
+$billomat->invoices->items->setCustomField($itemId, 'erp-line-7');
+$billomat->clients->setCustomField(42, '');         // empties the field
+```
+
+- `getCustomField()` returns `null` for an empty field and throws a `NotFoundException` for a record that doesn't exist.
+- `setCustomField()` with `''` clears the field. The write options (`*CreateOptions`/`*UpdateOptions`) have no `customField`; Billomat only changes it through this endpoint.
+- Available on all top-level resources with records of their own (clients, contacts, suppliers, articles, invoices, offers, confirmations, credit notes, delivery notes, letters, reminders, recurrings, incomings, inbox documents, taxes, templates, units, reminder texts, country taxes, users) and on the sub-resources items, payments, comments, tags, properties and property values (also `$billomat->reminders->items`).
+- Not available on roles, free texts and e-mail templates: Billomat answers their `customfield` endpoint with 405. Countries, currencies and incoming categories have no records with an ID of their own.
+
+To **filter**, pass the parameter via `extra` on the typed filter or in the array: `list(new ClientFilter(extra: ['customfield' => '…']))` or `list(['customfield' => '…'])`.
 
 ## Properties and property values — defined custom attributes
 

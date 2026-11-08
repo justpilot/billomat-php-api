@@ -53,6 +53,7 @@ What this means for the API:
 | `encash($id)` | PUT | `/invoices/{id}/encash` |
 | `pdf($id, $type?)` | GET | `/invoices/{id}/pdf` |
 | `pdfContent($id, $type?)` | GET | `/invoices/{id}/pdf?format=pdf` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/invoices/{id}/customfield` |
 
 Sub-resources with their own pages: [items](invoice-items.md) (`$billomat->invoices->items`), [payments](invoice-payments.md) (`->payments`), [comments](invoice-comments.md) (`->comments`), [tags](invoice-tags.md) (`->tags`). See also [recurring invoices](recurrings.md).
 

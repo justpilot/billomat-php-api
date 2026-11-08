@@ -25,6 +25,8 @@ $billomat->emailTemplates
 | `update($id, $options)` | PUT | `/email-templates/{id}` |
 | `delete($id)` | DELETE | `/email-templates/{id}` |
 
+E-mail templates have no `customfield`: Billomat answers `/email-templates/{id}/customfield` with 405, so there is no `getCustomField()`/`setCustomField()` here.
+
 ## Methods
 
 ### `list(array $filters = []): list<EmailTemplate>`

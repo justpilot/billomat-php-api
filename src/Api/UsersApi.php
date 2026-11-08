@@ -117,4 +117,27 @@ final class UsersApi extends AbstractApi
 
         return $this->getRaw("/users/{$id}/avatar", $query);
     }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /users/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/users/{$id}", 'user');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /users/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/users/{$id}", 'user', $value);
+    }
 }

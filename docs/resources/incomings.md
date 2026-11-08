@@ -44,6 +44,7 @@ Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRA
 | `pdf($id)` | GET | `/incomings/{id}/pdf` |
 | `pdfContent($id)` | GET | `/incomings/{id}/pdf?format=pdf` |
 | `listGrouped($groupBy, $filters?)` | GET | `/incomings?group_by=…` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/incomings/{id}/customfield` |
 
 ### `/incoming-items`
 
@@ -208,7 +209,7 @@ foreach ($billomat->incomings->items->list($incoming->id) as $item) {
 $billomat->incomings->items->delete($item->id);
 ```
 
-`$billomat->incomings->items` is the generic `ItemsApi` used by all document items: `list(int $parentId, …)`, `listPage()`, `iterateAll()`, `get()`, `getOrFail()`, `create(int $parentId, $options)` (adds `incoming_id`), `update()` and `delete()`.
+`$billomat->incomings->items` is the generic `ItemsApi` used by all document items: `list(int $parentId, …)`, `listPage()`, `iterateAll()`, `get()`, `getOrFail()`, `create(int $parentId, $options)` (adds `incoming_id`), `update()`, `delete()`, plus `getCustomField()`/`setCustomField()`.
 
 ### Incoming comments
 

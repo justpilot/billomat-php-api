@@ -53,7 +53,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `grundlagen/authentifizierung` | Authentifizierung | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/daten-lesen` | Daten lesen | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/daten-schreiben` | Daten schreiben | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
-| `grundlagen/eigene-meta-daten` | Eigene Meta-Daten | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/eigene-meta-daten` | Eigene Meta-Daten | — | — | — | — | ✓ | `getCustomField()`/`setCustomField()` auf jeder Api, deren Datensätze `customfield` haben (Sandbox: auch Unterressourcen; Rollen, Freitexte und E-Mail-Vorlagen antworten mit 405). |
 | `grundlagen/fehler` | Fehler | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/tools` | Tools | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/zugriffsbegrenzung` | Zugriffsbegrenzung | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |

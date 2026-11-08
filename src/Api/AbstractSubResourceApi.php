@@ -196,6 +196,19 @@ abstract class AbstractSubResourceApi extends AbstractApi
     }
 
     /**
+     * `customfield` eines Datensatzes; für die Unterressourcen, deren Datensätze das Feld haben.
+     */
+    protected function customFieldOf(int $id): ?string
+    {
+        return $this->fetchCustomField("{$this->path}/{$id}", $this->key);
+    }
+
+    protected function storeCustomFieldOf(int $id, string $value): void
+    {
+        $this->storeCustomField("{$this->path}/{$id}", $this->key, $value);
+    }
+
+    /**
      * Query aus Filter und Eltern-ID; die Eltern-ID hat Vorrang vor einem gleichnamigen Filter.
      *
      * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters

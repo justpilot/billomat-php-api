@@ -200,7 +200,8 @@ $mapping = [
     'grundlagen/api-sicherheit' => null,
     'grundlagen/daten-lesen' => null,
     'grundlagen/daten-schreiben' => null,
-    'grundlagen/eigene-meta-daten' => null,
+    'grundlagen/eigene-meta-daten' => ['conceptFile' => 'custom-meta-attributes.md',
+        'note' => '`getCustomField()`/`setCustomField()` auf jeder Api, deren Datensätze `customfield` haben (Sandbox: auch Unterressourcen; Rollen, Freitexte und E-Mail-Vorlagen antworten mit 405).'],
     'grundlagen/fehler' => null,
     'grundlagen/tools' => null,
     'grundlagen/zugriffsbegrenzung' => null,
@@ -355,7 +356,7 @@ function buildFieldGaps(array $resources, array $mapping): array
             }
 
             $expectedFieldNames = filterParentIds($expectedFieldNames, $slug);
-            // `customfield` hat einen eigenen Endpoint (PUT …/customfield) und gehört nicht in die Options.
+            // `customfield` setzt das SDK über setCustomField() (PUT …/customfield), nie über Options.
             $expectedFieldNames = array_values(array_diff($expectedFieldNames, ['customfield']));
             // Rollen: die Rechte-Bereiche stehen als Map in `permissions`.
             if ('RolesApi' === ($map['api'] ?? null)) {

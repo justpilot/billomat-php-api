@@ -100,4 +100,27 @@ final class CountryTaxesApi extends AbstractApi
     {
         $this->deleteVoid("/country-taxes/{$id}");
     }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /country-taxes/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/country-taxes/{$id}", 'country-tax');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /country-taxes/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/country-taxes/{$id}", 'country-tax', $value);
+    }
 }

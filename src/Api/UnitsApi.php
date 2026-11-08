@@ -11,7 +11,7 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * Read-only API-Wrapper für Einheiten.
+ * API-Wrapper für Einheiten.
  */
 final class UnitsApi extends AbstractApi
 {
@@ -76,5 +76,35 @@ final class UnitsApi extends AbstractApi
     public function getOrFail(int $id): Unit
     {
         return $this->get($id) ?? throw $this->notFound("/units/{$id}");
+    }
+
+    /**
+     * Legt eine neue Einheit an.
+     */
+    public function create(UnitCreateOptions $options): Unit
+    {
+        $data = $this->postJson('/units', ['unit' => $options->toArray()]);
+
+        return Unit::fromArray($this->unwrapEnvelope($data, 'unit', 'creating unit'));
+    }
+
+    /**
+     * Ändert eine Einheit (PUT /units/{id}).
+     *
+     * Nur die in den Options gesetzten Felder werden gesendet.
+     */
+    public function update(int $id, UnitUpdateOptions $options): Unit
+    {
+        $data = $this->putJson("/units/{$id}", ['unit' => $options->toArray()]);
+
+        return Unit::fromArray($this->unwrapEnvelope($data, 'unit', 'updating unit'));
+    }
+
+    /**
+     * Löscht eine Einheit.
+     */
+    public function delete(int $id): void
+    {
+        $this->deleteVoid("/units/{$id}");
     }
 }

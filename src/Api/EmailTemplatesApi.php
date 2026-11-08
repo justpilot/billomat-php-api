@@ -11,7 +11,7 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * Read-only API-Wrapper für E-Mail-Vorlagen.
+ * API-Wrapper für E-Mail-Vorlagen.
  *
  * Doku: https://www.billomat.com/en/api/settings/email-templates/
  */
@@ -78,5 +78,35 @@ final class EmailTemplatesApi extends AbstractApi
     public function getOrFail(int $id): EmailTemplate
     {
         return $this->get($id) ?? throw $this->notFound("/email-templates/{$id}");
+    }
+
+    /**
+     * Legt eine neue E-Mail-Vorlage an.
+     */
+    public function create(EmailTemplateCreateOptions $options): EmailTemplate
+    {
+        $data = $this->postJson('/email-templates', ['email-template' => $options->toArray()]);
+
+        return EmailTemplate::fromArray($this->unwrapEnvelope($data, 'email-template', 'creating email template'));
+    }
+
+    /**
+     * Ändert eine E-Mail-Vorlage (PUT /email-templates/{id}).
+     *
+     * Nur die in den Options gesetzten Felder werden gesendet.
+     */
+    public function update(int $id, EmailTemplateUpdateOptions $options): EmailTemplate
+    {
+        $data = $this->putJson("/email-templates/{$id}", ['email-template' => $options->toArray()]);
+
+        return EmailTemplate::fromArray($this->unwrapEnvelope($data, 'email-template', 'updating email template'));
+    }
+
+    /**
+     * Löscht eine E-Mail-Vorlage.
+     */
+    public function delete(int $id): void
+    {
+        $this->deleteVoid("/email-templates/{$id}");
     }
 }

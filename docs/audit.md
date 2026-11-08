@@ -38,14 +38,14 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `einstellungen/artikel-attribute` | Artikel-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/benutzer-attribute` | Benutzer-Attribute | ✓ | ✓ | — | — | ✓ | Fünfter Parent neben article-/client-/supplier-/incoming-properties; nutzt geteilte PropertyCreateOptions. |
 | `einstellungen/eingangsrechnung-attribute` | Eingansgrechnung-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/einheiten` | Einheiten | ✓ | ✓ | — | — | ✓ |  |
-| `einstellungen/email-vorlagen` | E-Mail-Vorlagen | ✓ | ✓ | — | — | ✓ |  |
-| `einstellungen/freitexte` | Freitexte | ✓ | ✓ | — | — | ✓ |  |
+| `einstellungen/einheiten` | Einheiten | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| `einstellungen/email-vorlagen` | E-Mail-Vorlagen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| `einstellungen/freitexte` | Freitexte | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `einstellungen/kunden-attribute` | Kunden-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/lieferanten-attribute` | Lieferanten-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts; im SDK read-only über ReminderTextsApi. |
-| `einstellungen/rollen` | Rollen | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /roles. |
-| `einstellungen/steuerfreie-laender` | Steuerfreie Länder | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /country-taxes. |
+| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | ✓ | ✓ | ✓ | Billomat verlangt beim Anlegen nur `name`, die Spec nennt alle Felder als Pflicht (Sandbox). |
+| `einstellungen/rollen` | Rollen | ✓ | ✓ | ✓ | ✓ | ✓ | Handgeschriebene Options mit Rechte-Map; unbekannte Bereiche lehnt das SDK ab, weil Billomat sie ignoriert. |
+| `einstellungen/steuerfreie-laender` | Steuerfreie Länder | ✓ | ✓ | ✓ | ✓ | ✓ | PUT geht auf /country-taxes (Spec: /country_taxes) und verlangt country_code (Sandbox). |
 | `einstellungen/steuersaetze` | Steuersätze | ✓ | — | — | — | ✓ |  |
 | `einstellungen/vorlagen` | Vorlagen | ✓ | — | ✓ | ✓ | ✓ |  |
 | `grundlagen` | Grundlagen | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |

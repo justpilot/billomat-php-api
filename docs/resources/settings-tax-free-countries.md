@@ -23,8 +23,9 @@ $billomat->countryTaxes
 | `iterateAll($filters?, $pageSize?)` | GET | `/country-taxes` (all pages) |
 | `get($id)` | GET | `/country-taxes/{id}` |
 | `getOrFail($id)` | GET | `/country-taxes/{id}` |
-
-> Read-only in the SDK. Billomat supports create/update/delete (`POST`/`PUT`/`DELETE /country-taxes`), but the SDK doesn't expose them as methods.
+| `create($options)` | POST | `/country-taxes` |
+| `update($id, $options)` | PUT | `/country-taxes/{id}` |
+| `delete($id)` | DELETE | `/country-taxes/{id}` |
 
 ## Methods
 
@@ -51,6 +52,30 @@ Returns `null` on 404.
 
 Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
+### `create(CountryTaxCreateOptions $options): CountryTax`
+
+```php
+use Justpilot\Billomat\Api\CountryTaxCreateOptions;
+
+$entry = $billomat->countryTaxes->create(new CountryTaxCreateOptions(countryCode: 'NO'));
+```
+
+### `update(int $id, CountryTaxUpdateOptions $options): CountryTax`
+
+`countryCode` is the only writable field, and Billomat requires it on every update: an update without it fails with HTTP 400 (`mandatory field "country_code" is missing or empty`).
+
+```php
+use Justpilot\Billomat\Api\CountryTaxUpdateOptions;
+
+$billomat->countryTaxes->update($entry->id, new CountryTaxUpdateOptions(countryCode: 'IS'));
+```
+
+### `delete(int $id): void`
+
+```php
+$billomat->countryTaxes->delete($entry->id);
+```
+
 ## Read model: `CountryTax`
 
 `final readonly class CountryTax`.
@@ -70,6 +95,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
 ::: code-group
+<<< @/snippets/json/country-taxes.create.json [POST /country-taxes]
 <<< @/../tests/Fixtures/Contract/country-taxes/get.json [GET /country-taxes/{id} (response)]
 <<< @/../tests/Fixtures/Contract/country-taxes/list.json [GET /country-taxes (response)]
 :::
@@ -78,6 +104,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 ## Pitfalls
 
 - **No tax rate in the model.** Unlike `/taxes` (see [taxes.md](taxes.md)), this endpoint only holds the list of country codes; the tax rate for these countries is implicitly 0 %.
+- **Update path.** Billomat's docs list the update as `PUT /country_taxes/{id}` (underscore); that path answers 404. The SDK uses `PUT /country-taxes/{id}`, verified in the sandbox.
+- **`countryCode` is required on update**, even though it is the only field and `CountryTaxUpdateOptions` makes it optional like every update field.
 - **Single-item list quirk.** With only one entry Billomat returns an object instead of a list; `listResource()` normalizes this.
 
 ## End-to-end example

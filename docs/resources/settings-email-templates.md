@@ -21,8 +21,9 @@ $billomat->emailTemplates
 | `iterateAll($filters?, $pageSize?)` | GET | `/email-templates` (all pages) |
 | `get($id)` | GET | `/email-templates/{id}` |
 | `getOrFail($id)` | GET | `/email-templates/{id}` |
-
-> Read-only in the SDK. Billomat supports create/update/delete, but the SDK doesn't expose them as methods.
+| `create($options)` | POST | `/email-templates` |
+| `update($id, $options)` | PUT | `/email-templates/{id}` |
+| `delete($id)` | DELETE | `/email-templates/{id}` |
 
 ## Methods
 
@@ -55,6 +56,52 @@ Returns `null` on 404.
 ### `getOrFail(int $id): EmailTemplate`
 
 Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+### `create(EmailTemplateCreateOptions $options): EmailTemplate`
+
+`name` and `type` are required; everything else is optional.
+
+```php
+use Justpilot\Billomat\Api\EmailTemplateCreateOptions;
+use Justpilot\Billomat\Model\Enum\EmailTemplateType;
+
+$template = $billomat->emailTemplates->create(new EmailTemplateCreateOptions(
+    name: 'Invoice (English)',
+    type: EmailTemplateType::INVOICES,
+    subject: 'Your invoice [Invoice.invoice_number]',
+    body: "Hello,\n\nplease find your invoice attached.",
+    bcc: true,
+));
+```
+
+### `update(int $id, EmailTemplateUpdateOptions $options): EmailTemplate`
+
+Only the fields you set are sent; `Clear::Field` empties a field.
+
+```php
+use Justpilot\Billomat\Api\EmailTemplateUpdateOptions;
+
+$billomat->emailTemplates->update($template->id, new EmailTemplateUpdateOptions(isDefault: true));
+```
+
+### `delete(int $id): void`
+
+```php
+$billomat->emailTemplates->delete($template->id);
+```
+
+## Write models
+
+| Field (`EmailTemplateCreateOptions` / `EmailTemplateUpdateOptions`) | Billomat field | Type |
+|---|---|---|
+| `name` | `name` | `string` (required on create) |
+| `type` | `type` | `EmailTemplateType` (required on create) |
+| `subject` | `subject` | `?string` |
+| `body` | `text` | `?string`; named `body` like the read model |
+| `isDefault` | `is_default` | `?bool`, sent as `1`/`0` |
+| `bcc` | `bcc` | `?bool`, sent as `1`/`0` |
+
+In `EmailTemplateUpdateOptions` every field is optional and also accepts `Clear::Field`. Both classes are immutable (`with*()`).
 
 ## Read model: `EmailTemplate`
 
@@ -95,6 +142,7 @@ Unknown values become `null`.
 Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
 ::: code-group
+<<< @/snippets/json/email-templates.create.json [POST /email-templates]
 <<< @/../tests/Fixtures/Contract/email-templates/get.json [GET /email-templates/{id} (response)]
 <<< @/../tests/Fixtures/Contract/email-templates/list.json [GET /email-templates (response)]
 :::
@@ -104,6 +152,8 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 - **`isDefault` is unique per type.** Each document type has exactly one default template; setting a new default replaces the old one on the server.
 - **Single-item list quirk.** With only one template Billomat returns an object instead of a list; `listResource()` normalizes this.
+- **The type is plural.** Billomat expects `INVOICES`, `OFFERS`, …; the singular `INVOICE` (as used by free texts) is rejected with HTTP 400 (`invalid value "INVOICE" for field "type"`). The enum `EmailTemplateType` keeps you on the right side.
+- **More required fields in the docs than in practice.** Billomat's docs mark `bcc` and `is_default` as required; the sandbox accepts a template with only `name` and `type`.
 
 ## End-to-end example
 

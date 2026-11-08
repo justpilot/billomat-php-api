@@ -1,0 +1,8 @@
+{
+    "reminder-text": {
+        "name": "First reminder",
+        "subject": "Payment reminder",
+        "charge_name": "Reminder fee",
+        "charge_amount": "5"
+    }
+}

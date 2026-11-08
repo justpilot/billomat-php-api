@@ -31,10 +31,13 @@ use Justpilot\Billomat\Api\ClientTagCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ContactCreateOptions;
+use Justpilot\Billomat\Api\CountryTaxCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
+use Justpilot\Billomat\Api\EmailTemplateCreateOptions;
+use Justpilot\Billomat\Api\FreeTextCreateOptions;
 use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
@@ -49,12 +52,18 @@ use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
+use Justpilot\Billomat\Api\ReminderTextCreateOptions;
+use Justpilot\Billomat\Api\RoleCreateOptions;
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
 use Justpilot\Billomat\Api\SupplierCreateOptions;
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
 use Justpilot\Billomat\Api\TemplateCreateOptions;
+use Justpilot\Billomat\Api\UnitCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
+use Justpilot\Billomat\Model\Enum\EmailTemplateType;
+use Justpilot\Billomat\Model\Enum\FreeTextType;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\PaymentType;
@@ -219,6 +228,29 @@ function requests(): array
             dueDays: 14,
             invoiceNumberPre: 'RE-',
         )),
+        'units.create' => static fn (BillomatClient $b): object => $b->units->create(new UnitCreateOptions(name: 'hours')),
+        'email-templates.create' => static fn (BillomatClient $b): object => $b->emailTemplates->create(new EmailTemplateCreateOptions(
+            name: 'Invoice (English)',
+            type: EmailTemplateType::INVOICES,
+            subject: 'Invoice [Invoice.invoice_number]',
+            body: 'Please find attached our invoice.',
+        )),
+        'free-texts.create' => static fn (BillomatClient $b): object => $b->freeTexts->create(new FreeTextCreateOptions(
+            name: 'Thank you',
+            type: FreeTextType::INVOICE,
+            intro: 'Thank you for your order.',
+        )),
+        'reminder-texts.create' => static fn (BillomatClient $b): object => $b->reminderTexts->create(new ReminderTextCreateOptions(
+            name: 'First reminder',
+            subject: 'Payment reminder',
+            chargeName: 'Reminder fee',
+            chargeAmount: Money::of('5.00'),
+        )),
+        'country-taxes.create' => static fn (BillomatClient $b): object => $b->countryTaxes->create(new CountryTaxCreateOptions(countryCode: 'NO')),
+        'roles.create' => static fn (BillomatClient $b): object => $b->roles->create(new RoleCreateOptions(
+            name: 'Accounting',
+            permissions: ['invoices' => AccessLevel::DELETE, 'clients' => AccessLevel::READ, 'settings_documents' => AccessLevel::UPDATE],
+        )),
     ];
 }
 
@@ -249,12 +281,12 @@ const PAGES = [
     'taxes' => ['taxes.create', 'taxes/get', 'taxes/list'],
     'templates' => ['templates.create', 'templates/get', 'templates/list'],
     'settings' => ['settings.update', 'settings/get'],
-    'settings-email-templates' => ['email-templates/get', 'email-templates/list'],
-    'settings-free-texts' => ['free-texts/get', 'free-texts/list'],
-    'settings-roles' => ['roles/get', 'roles/list'],
-    'settings-units' => ['units/get', 'units/list'],
-    'settings-reminder-levels' => ['reminder-texts/get', 'reminder-texts/list'],
-    'settings-tax-free-countries' => ['country-taxes/get', 'country-taxes/list'],
+    'settings-email-templates' => ['email-templates.create', 'email-templates/get', 'email-templates/list'],
+    'settings-free-texts' => ['free-texts.create', 'free-texts/get', 'free-texts/list'],
+    'settings-roles' => ['roles.create', 'roles/get', 'roles/list'],
+    'settings-units' => ['units.create', 'units/get', 'units/list'],
+    'settings-reminder-levels' => ['reminder-texts.create', 'reminder-texts/get', 'reminder-texts/list'],
+    'settings-tax-free-countries' => ['country-taxes.create', 'country-taxes/get', 'country-taxes/list'],
     'users' => ['users/get', 'users/list'],
     'incoming-categories' => ['incoming-categories/get', 'incoming-categories/list'],
     'countries' => ['countries/list'],

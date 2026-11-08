@@ -5,15 +5,14 @@ declare(strict_types=1);
 /*
  * Codegen-Definition für die Ressource „E-Mail-Vorlagen“ (/email-templates).
  *
- * Aufbau und Feld-Schlüssel: siehe clients.php. Das SDK liest E-Mail-Vorlagen nur,
- * deshalb gibt es keine Options; `specEndpoint` dient nur dem Drift-Abgleich.
+ * Aufbau und Feld-Schlüssel: siehe clients.php. EmailTemplateCreateOptions für POST,
+ * EmailTemplateUpdateOptions für PUT.
  *
  * Nach Änderungen: composer generate
  */
 
 return [
     'specResource' => 'einstellungen/email-vorlagen',
-    'specEndpoint' => 'POST /api/email-templates',
     'docUrl' => 'https://www.billomat.com/api/einstellungen/email-vorlagen/',
 
     'model' => [
@@ -28,10 +27,32 @@ return [
         ],
     ],
 
+    'createOptions' => [
+        'class' => 'EmailTemplateCreateOptions',
+        // Billomat erwartet 1/0 statt true/false.
+        'boolAsInt' => true,
+        'endpoint' => 'POST /api/email-templates',
+        'doc' => [
+            'Typisierter Payload für POST /email-templates gemäß Billomat-API.',
+        ],
+    ],
+
+    'updateOptions' => [
+        'class' => 'EmailTemplateUpdateOptions',
+        // Billomat erwartet 1/0 statt true/false.
+        'boolAsInt' => true,
+        'endpoint' => 'PUT /api/email-templates/{id}',
+        'doc' => [
+            'Typisierter Payload für PUT /email-templates/{id} gemäß Billomat-API.',
+            '',
+            'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update).',
+        ],
+    ],
+
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Vorlage.'],
-        'name' => ['doc' => 'Name der Vorlage.'],
+        'name' => ['doc' => 'Name der Vorlage.', 'create' => ['constructor' => true]],
         'subject' => ['doc' => 'Betreff.'],
         // BC: Property und toArray()-Schlüssel heißen weiterhin `body`; `body` bleibt als Fallback.
         'text' => [
@@ -51,6 +72,7 @@ return [
             'doc' => 'Dokumenttyp, für den die Vorlage gilt.',
             'details' => ['Mögliche Werte: INVOICES, OFFERS, CONFIRMATIONS, CREDIT_NOTES, DELIVERY_NOTES, REMINDERS, PAYMENT_THANKS'],
             'enum' => 'EmailTemplateType',
+            'create' => ['constructor' => true],
         ],
         'bcc' => ['doc' => 'Erhält der Absender eine BCC-Kopie?'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Vorlage.'],

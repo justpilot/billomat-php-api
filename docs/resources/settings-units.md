@@ -21,8 +21,9 @@ $billomat->units
 | `iterateAll($filters?, $pageSize?)` | GET | `/units` (all pages) |
 | `get($id)` | GET | `/units/{id}` |
 | `getOrFail($id)` | GET | `/units/{id}` |
-
-> The API is **read-only** in the SDK. Billomat supports create, update and delete, but the SDK doesn't expose them as methods. If you need them, call `$billomat->getHttpClient()` directly.
+| `create($options)` | POST | `/units` |
+| `update($id, $options)` | PUT | `/units/{id}` |
+| `delete($id)` | DELETE | `/units/{id}` |
 
 ## Methods
 
@@ -57,6 +58,39 @@ Returns `null` on 404.
 
 Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
+### `create(UnitCreateOptions $options): Unit`
+
+```php
+use Justpilot\Billomat\Api\UnitCreateOptions;
+
+$unit = $billomat->units->create(new UnitCreateOptions(name: 'Palette'));
+```
+
+### `update(int $id, UnitUpdateOptions $options): Unit`
+
+Only the fields you set are sent.
+
+```php
+use Justpilot\Billomat\Api\UnitUpdateOptions;
+
+$billomat->units->update($unit->id, new UnitUpdateOptions(name: 'Paletten'));
+```
+
+### `delete(int $id): void`
+
+```php
+$billomat->units->delete($unit->id);
+```
+
+## Write models
+
+| Class | Fields |
+|---|---|
+| `UnitCreateOptions` | `name` (required) |
+| `UnitUpdateOptions` | `name` (`string\|Clear\|null`; `null` = unchanged) |
+
+Both are immutable; change single fields with `withName()`.
+
 ## Read model: `Unit`
 
 `final readonly class Unit`.
@@ -75,6 +109,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
 ::: code-group
+<<< @/snippets/json/units.create.json [POST /units]
 <<< @/../tests/Fixtures/Contract/units/get.json [GET /units/{id} (response)]
 <<< @/../tests/Fixtures/Contract/units/list.json [GET /units (response)]
 :::
@@ -83,7 +118,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 ## Pitfalls
 
 - **Single-item list quirk.** With only one unit in the account Billomat returns an object instead of a list; `UnitsApi::list()` normalizes this.
-- **Deleting fails while in use.** Billomat rejects `DELETE /units/{id}` as long as the unit is still assigned to articles (not relevant for the SDK right now, as there is no `delete()`).
+- **Deleting fails while in use.** Billomat rejects `DELETE /units/{id}` as long as the unit is still assigned to articles; `delete()` then throws a `ValidationException`.
 
 ## End-to-end example
 

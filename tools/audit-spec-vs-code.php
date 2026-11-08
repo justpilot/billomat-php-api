@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tools;
 
+use Justpilot\Billomat\Model\Role;
 use ReflectionClass;
 use ReflectionEnum;
 use RuntimeException;
@@ -160,23 +161,29 @@ $mapping = [
     'einstellungen' => ['api' => 'SettingsApi', 'docFile' => 'settings.md'],
     'einstellungen/steuersaetze' => ['api' => 'TaxesApi', 'docFile' => 'taxes.md'],
     'einstellungen/steuerfreie-laender' => ['api' => 'CountryTaxesApi', 'model' => 'CountryTax',
+        'createOptions' => 'CountryTaxCreateOptions', 'updateOptions' => 'CountryTaxUpdateOptions',
         'docFile' => 'settings-tax-free-countries.md',
-        'note' => 'Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /country-taxes.'],
+        'note' => 'PUT geht auf /country-taxes (Spec: /country_taxes) und verlangt country_code (Sandbox).'],
     'einstellungen/einheiten' => ['api' => 'UnitsApi', 'model' => 'Unit',
+        'createOptions' => 'UnitCreateOptions', 'updateOptions' => 'UnitUpdateOptions',
         'docFile' => 'settings-units.md'],
     'einstellungen/email-vorlagen' => ['api' => 'EmailTemplatesApi', 'model' => 'EmailTemplate',
+        'createOptions' => 'EmailTemplateCreateOptions', 'updateOptions' => 'EmailTemplateUpdateOptions',
         'docFile' => 'settings-email-templates.md'],
     'einstellungen/freitexte' => ['api' => 'FreeTextsApi', 'model' => 'FreeText',
+        'createOptions' => 'FreeTextCreateOptions', 'updateOptions' => 'FreeTextUpdateOptions',
         'docFile' => 'settings-free-texts.md'],
     'einstellungen/vorlagen' => ['api' => 'TemplatesApi',
         'createOptions' => 'TemplateCreateOptions', 'updateOptions' => 'TemplateUpdateOptions',
         'docFile' => 'templates.md'],
     'einstellungen/mahnstufen' => ['api' => 'ReminderTextsApi', 'model' => 'ReminderText',
+        'createOptions' => 'ReminderTextCreateOptions', 'updateOptions' => 'ReminderTextUpdateOptions',
         'docFile' => 'settings-reminder-levels.md',
-        'note' => 'Spec dokumentiert /reminder-texts; im SDK read-only über ReminderTextsApi.'],
+        'note' => 'Billomat verlangt beim Anlegen nur `name`, die Spec nennt alle Felder als Pflicht (Sandbox).'],
     'einstellungen/rollen' => ['api' => 'RolesApi', 'model' => 'Role',
+        'createOptions' => 'RoleCreateOptions', 'updateOptions' => 'RoleUpdateOptions',
         'docFile' => 'settings-roles.md',
-        'note' => 'Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /roles.'],
+        'note' => 'Handgeschriebene Options mit Rechte-Map; unbekannte Bereiche lehnt das SDK ab, weil Billomat sie ignoriert.'],
     'einstellungen/kunden-attribute' => ['api' => 'PropertiesApi', 'docFile' => 'properties.md'],
     'einstellungen/artikel-attribute' => ['api' => 'PropertiesApi', 'docFile' => 'properties.md'],
     'einstellungen/lieferanten-attribute' => ['api' => 'PropertiesApi', 'docFile' => 'properties.md'],
@@ -345,9 +352,14 @@ function buildFieldGaps(array $resources, array $mapping): array
             }
 
             $expectedFieldNames = filterParentIds($expectedFieldNames, $slug);
+            // `customfield` hat einen eigenen Endpoint (PUT …/customfield) und gehört nicht in die Options.
+            $expectedFieldNames = array_values(array_diff($expectedFieldNames, ['customfield']));
+            // Rollen: die Rechte-Bereiche stehen als Map in `permissions`.
+            if ('RolesApi' === ($map['api'] ?? null)) {
+                $expectedFieldNames = array_values(array_filter($expectedFieldNames, static fn (string $name): bool => !Role::isArea($name)));
+            }
 
-            $reflected = collectOptionPropertyNames($fqcn);
-            $reflectedSet = array_flip(array_map(snakeCase(...), $reflected));
+            $reflectedSet = array_flip(collectOptionWireNames($fqcn));
 
             $missing = [];
             foreach ($expectedFieldNames as $name) {
@@ -403,17 +415,28 @@ function collectSpecFieldNames(array $resource, string $kind): array
 }
 
 /**
+ * Billomat-Feldnamen der Options: aus der Docblock-Zeile `Billomat-Feld: …` (generierte Klassen,
+ * auch bei abweichendem Property-Namen wie `$body` für `text`), sonst snake_case des Property-Namens
+ * und – für Billomats Komposita wie `base64file` – der kleingeschriebene Name ohne Trennung.
+ *
  * @return list<string>
  */
-function collectOptionPropertyNames(string $fqcn): array
+function collectOptionWireNames(string $fqcn): array
 {
     $names = [];
     $ref = new ReflectionClass($fqcn);
     foreach ($ref->getProperties() as $prop) {
-        if ($prop->isPublic() && !$prop->isStatic()) {
-            $names[] = $prop->getName();
+        if (!$prop->isPublic() || $prop->isStatic()) {
+            continue;
         }
+        if (1 === preg_match('/Billomat-Feld: (\S+)/', (string) $prop->getDocComment(), $match)) {
+            $names[] = $match[1];
+            continue;
+        }
+        $names[] = snakeCase($prop->getName());
+        $names[] = strtolower($prop->getName());
     }
+    $names = array_values(array_unique($names));
     sort($names);
     return $names;
 }

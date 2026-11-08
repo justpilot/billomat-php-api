@@ -23,6 +23,8 @@ use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationUpdateOptions;
 use Justpilot\Billomat\Api\ContactCreateOptions;
 use Justpilot\Billomat\Api\ContactUpdateOptions;
+use Justpilot\Billomat\Api\CountryTaxCreateOptions;
+use Justpilot\Billomat\Api\CountryTaxUpdateOptions;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
@@ -37,6 +39,10 @@ use Justpilot\Billomat\Api\DeliveryNoteItemUpdateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteUpdateOptions;
 use Justpilot\Billomat\Api\EmailOptions;
+use Justpilot\Billomat\Api\EmailTemplateCreateOptions;
+use Justpilot\Billomat\Api\EmailTemplateUpdateOptions;
+use Justpilot\Billomat\Api\FreeTextCreateOptions;
+use Justpilot\Billomat\Api\FreeTextUpdateOptions;
 use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 use Justpilot\Billomat\Api\IncomingCommentCreateOptions;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
@@ -73,7 +79,11 @@ use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 use Justpilot\Billomat\Api\RecurringUpdateOptions;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
 use Justpilot\Billomat\Api\ReminderTagCreateOptions;
+use Justpilot\Billomat\Api\ReminderTextCreateOptions;
+use Justpilot\Billomat\Api\ReminderTextUpdateOptions;
 use Justpilot\Billomat\Api\ReminderUpdateOptions;
+use Justpilot\Billomat\Api\RoleCreateOptions;
+use Justpilot\Billomat\Api\RoleUpdateOptions;
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
 use Justpilot\Billomat\Api\SupplierCreateOptions;
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
@@ -83,8 +93,11 @@ use Justpilot\Billomat\Api\TaxRateCreateOptions;
 use Justpilot\Billomat\Api\TaxRateUpdateOptions;
 use Justpilot\Billomat\Api\TemplateCreateOptions;
 use Justpilot\Billomat\Api\TemplateUpdateOptions;
+use Justpilot\Billomat\Api\UnitCreateOptions;
+use Justpilot\Billomat\Api\UnitUpdateOptions;
 use Justpilot\Billomat\Api\WriteOptions;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Model\Role;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -121,6 +134,8 @@ use UnitEnum;
 #[CoversClass(ConfirmationUpdateOptions::class)]
 #[CoversClass(ContactCreateOptions::class)]
 #[CoversClass(ContactUpdateOptions::class)]
+#[CoversClass(CountryTaxCreateOptions::class)]
+#[CoversClass(CountryTaxUpdateOptions::class)]
 #[CoversClass(CreditNoteCommentCreateOptions::class)]
 #[CoversClass(CreditNoteCreateOptions::class)]
 #[CoversClass(CreditNoteItemCreateOptions::class)]
@@ -135,6 +150,10 @@ use UnitEnum;
 #[CoversClass(DeliveryNoteTagCreateOptions::class)]
 #[CoversClass(DeliveryNoteUpdateOptions::class)]
 #[CoversClass(EmailOptions::class)]
+#[CoversClass(EmailTemplateCreateOptions::class)]
+#[CoversClass(EmailTemplateUpdateOptions::class)]
+#[CoversClass(FreeTextCreateOptions::class)]
+#[CoversClass(FreeTextUpdateOptions::class)]
 #[CoversClass(InboxDocumentCreateOptions::class)]
 #[CoversClass(IncomingCommentCreateOptions::class)]
 #[CoversClass(IncomingCreateOptions::class)]
@@ -146,7 +165,6 @@ use UnitEnum;
 #[CoversClass(InvoiceCreateOptions::class)]
 #[CoversClass(InvoiceItemCreateOptions::class)]
 #[CoversClass(InvoiceItemUpdateOptions::class)]
-#[CoversClass(MailOptions::class)]
 #[CoversClass(InvoicePaymentCreateOptions::class)]
 #[CoversClass(InvoiceTagCreateOptions::class)]
 #[CoversClass(InvoiceUpdateOptions::class)]
@@ -154,6 +172,7 @@ use UnitEnum;
 #[CoversClass(LetterCreateOptions::class)]
 #[CoversClass(LetterTagCreateOptions::class)]
 #[CoversClass(LetterUpdateOptions::class)]
+#[CoversClass(MailOptions::class)]
 #[CoversClass(OfferCommentCreateOptions::class)]
 #[CoversClass(OfferCreateOptions::class)]
 #[CoversClass(OfferItemCreateOptions::class)]
@@ -171,7 +190,11 @@ use UnitEnum;
 #[CoversClass(RecurringUpdateOptions::class)]
 #[CoversClass(ReminderCreateOptions::class)]
 #[CoversClass(ReminderTagCreateOptions::class)]
+#[CoversClass(ReminderTextCreateOptions::class)]
+#[CoversClass(ReminderTextUpdateOptions::class)]
 #[CoversClass(ReminderUpdateOptions::class)]
+#[CoversClass(RoleCreateOptions::class)]
+#[CoversClass(RoleUpdateOptions::class)]
 #[CoversClass(SettingsUpdateOptions::class)]
 #[CoversClass(SupplierCreateOptions::class)]
 #[CoversClass(SupplierPropertyValueCreateOptions::class)]
@@ -181,7 +204,10 @@ use UnitEnum;
 #[CoversClass(TaxRateUpdateOptions::class)]
 #[CoversClass(TemplateCreateOptions::class)]
 #[CoversClass(TemplateUpdateOptions::class)]
+#[CoversClass(UnitCreateOptions::class)]
+#[CoversClass(UnitUpdateOptions::class)]
 #[UsesClass(Money::class)]
+#[UsesClass(Role::class)]
 final class OptionsWithersTest extends TestCase
 {
     /**
@@ -222,8 +248,9 @@ final class OptionsWithersTest extends TestCase
             /** @var class-string<WriteOptions> $class */
             $class = 'Justpilot\\Billomat\\Api\\'.basename($file, '.php');
             foreach (new ReflectionClass($class)->getMethods() as $method) {
-                // withItem() und withAttachment() hängen an statt zu ersetzen und haben eigene Tests.
-                if (!str_starts_with($method->name, 'with') || \in_array($method->name, ['withItem', 'withAttachment'], true)) {
+                // withItem(), withAttachment() und withPermission() hängen an statt zu ersetzen,
+                // withPermissions() prüft die Bereichsnamen; alle haben eigene Tests (RoleOptionsTest).
+                if (!str_starts_with($method->name, 'with') || \in_array($method->name, ['withItem', 'withAttachment', 'withPermission', 'withPermissions'], true)) {
                     continue;
                 }
 

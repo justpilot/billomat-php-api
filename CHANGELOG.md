@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
-## [Unreleased]
+## [4.0.0-beta.2] - 2026-11-08
 
-Endpoints the Billomat API documents but the SDK didn't cover yet. Each was checked against the sandbox first; all additions, no BC break.
+Second beta of 4.0. It adds endpoints the Billomat API documents but the SDK didn't cover yet. Each was checked against the sandbox first; all additions, no BC break.
 
 ### Added
 

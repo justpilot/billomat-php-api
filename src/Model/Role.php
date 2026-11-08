@@ -53,13 +53,21 @@ final readonly class Role
     }
 
     /**
+     * Ist `$key` ein Rechte-Bereich? Bekannt aus {@see AREAS} oder mit `settings_` beginnend.
+     */
+    public static function isArea(string $key): bool
+    {
+        return \in_array($key, self::AREAS, true) || str_starts_with($key, 'settings_');
+    }
+
+    /**
      * @param array<string,mixed> $data
      */
     public static function fromArray(array $data): self
     {
         $areas = array_filter(
             $data,
-            static fn (string|int $key): bool => \in_array($key, self::AREAS, true) || str_starts_with((string) $key, 'settings_'),
+            static fn (string|int $key): bool => self::isArea((string) $key),
             ARRAY_FILTER_USE_KEY,
         );
 

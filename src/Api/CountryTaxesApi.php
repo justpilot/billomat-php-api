@@ -11,13 +11,10 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * Read-only API-Wrapper für die Liste steuerfreier Länder
+ * API-Wrapper für die Liste steuerfreier Länder
  * (`/country-taxes`).
  *
  * Quelle: https://www.billomat.com/api/einstellungen/steuerfreie-laender/
- *
- * Billomat unterstützt zusätzlich POST/PUT/DELETE auf `/country-taxes`. Das
- * SDK exponiert diese Verben aktuell nicht.
  *
  * Filter:
  *  - `country` — ISO 3166 Alpha-2 Ländercode (exact).
@@ -72,5 +69,35 @@ final class CountryTaxesApi extends AbstractApi
     public function getOrFail(int $id): CountryTax
     {
         return $this->get($id) ?? throw $this->notFound("/country-taxes/{$id}");
+    }
+
+    /**
+     * Trägt ein steuerfreies Land ein.
+     */
+    public function create(CountryTaxCreateOptions $options): CountryTax
+    {
+        $data = $this->postJson('/country-taxes', ['country-tax' => $options->toArray()]);
+
+        return CountryTax::fromArray($this->unwrapEnvelope($data, 'country-tax', 'creating country tax'));
+    }
+
+    /**
+     * Ändert ein steuerfreies Land (PUT /country-taxes/{id}).
+     *
+     * Billomat verlangt `country_code` auch hier; ohne das Feld antwortet es mit HTTP 400.
+     */
+    public function update(int $id, CountryTaxUpdateOptions $options): CountryTax
+    {
+        $data = $this->putJson("/country-taxes/{$id}", ['country-tax' => $options->toArray()]);
+
+        return CountryTax::fromArray($this->unwrapEnvelope($data, 'country-tax', 'updating country tax'));
+    }
+
+    /**
+     * Entfernt ein steuerfreies Land.
+     */
+    public function delete(int $id): void
+    {
+        $this->deleteVoid("/country-taxes/{$id}");
     }
 }

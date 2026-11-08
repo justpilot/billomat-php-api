@@ -21,8 +21,9 @@ $billomat->roles
 | `iterateAll($filters?, $pageSize?)` | GET | `/roles` (all pages) |
 | `get($id)` | GET | `/roles/{id}` |
 | `getOrFail($id)` | GET | `/roles/{id}` |
-
-> Read-only in the SDK. Billomat supports create/update/delete (`POST`/`PUT`/`DELETE /roles`), but the SDK doesn't expose them as methods.
+| `create($options)` | POST | `/roles` |
+| `update($id, $options)` | PUT | `/roles/{id}` |
+| `delete($id)` | DELETE | `/roles/{id}` |
 
 ## Methods
 
@@ -48,6 +49,57 @@ Returns `null` on 404.
 ### `getOrFail(int $id): Role`
 
 Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+### `create(RoleCreateOptions $options): Role`
+
+The permissions are a map area → `AccessLevel`, like `Role::$permissions`. Areas without an entry get no access.
+
+```php
+use Justpilot\Billomat\Api\RoleCreateOptions;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
+
+$role = $billomat->roles->create(new RoleCreateOptions(
+    name: 'Accounting',
+    permissions: [
+        'invoices' => AccessLevel::DELETE,
+        'clients' => AccessLevel::READ,
+        'settings_documents' => AccessLevel::UPDATE,
+    ],
+));
+
+// or step by step
+$options = new RoleCreateOptions(name: 'Sales')
+    ->withPermission('offers', AccessLevel::UPDATE)
+    ->withPermission('clients', AccessLevel::UPDATE);
+```
+
+### `update(int $id, RoleUpdateOptions $options): Role`
+
+Only what you set is sent: a `null` name stays unchanged, and areas without an entry keep their access. An area set to `null` loses its access (sent as an empty string).
+
+```php
+use Justpilot\Billomat\Api\RoleUpdateOptions;
+
+$billomat->roles->update($role->id, new RoleUpdateOptions(permissions: [
+    'clients' => AccessLevel::UPDATE, // raise
+    'invoices' => null,               // revoke
+]));
+```
+
+### `delete(int $id): void`
+
+```php
+$billomat->roles->delete($role->id);
+```
+
+## Write models
+
+| Class | Fields |
+|---|---|
+| `RoleCreateOptions` | `name` (`string`, required), `permissions` (`array<string, AccessLevel>`) |
+| `RoleUpdateOptions` | `name` (`?string`), `permissions` (`array<string, AccessLevel\|null>`, `null` revokes) |
+
+Both are immutable: `withName()`, `withPermissions()` (replaces the map) and `withPermission($area, $level)` (sets one area). Every way of setting permissions checks the area name and throws an `InvalidArgumentException` for an unknown one, because Billomat silently ignores unknown fields and a typo (`invoice` instead of `invoices`) would otherwise go unnoticed. `Role::isArea($key)` applies the same rule: one of `Role::AREAS` or any key starting with `settings_`.
 
 ## Read model: `Role`
 
@@ -87,6 +139,7 @@ They are in `Role::AREAS`. `fromArray()` also accepts any key starting with `set
 Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
 ::: code-group
+<<< @/snippets/json/roles.create.json [POST /roles]
 <<< @/../tests/Fixtures/Contract/roles/get.json [GET /roles/{id} (response)]
 <<< @/../tests/Fixtures/Contract/roles/list.json [GET /roles (response)]
 :::
@@ -96,6 +149,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 - **The master role can't be deleted.** The system role `Master` (usually `id=1`) can't be removed, not even in the UI.
 - **No access → no entry.** Areas without access, and values the SDK doesn't know, are not in `permissions`; check with `$role->permissions['articles'] ?? null`, or `($role->permissions['articles'] ?? null)?->allows(AccessLevel::UPDATE) ?? false` for a minimum level.
+- **Allowed levels depend on the area.** The `settings_*` areas only accept `UPDATE`; `READ` or `DELETE` there makes Billomat answer HTTP 400 (`invalid value "READ" for field "settings_documents"`), and so does `READ` for `banking`. The SDK doesn't check levels per area, the `ValidationException` carries Billomat's message.
 - **Single-item list quirk.** With only one role Billomat returns an object instead of a list; `listResource()` normalizes this.
 
 ## End-to-end example

@@ -11,7 +11,7 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * Read-only API-Wrapper für Freitext-Bausteine.
+ * API-Wrapper für Freitext-Bausteine.
  *
  * Doku: https://www.billomat.com/en/api/settings/free-texts/
  */
@@ -78,5 +78,35 @@ final class FreeTextsApi extends AbstractApi
     public function getOrFail(int $id): FreeText
     {
         return $this->get($id) ?? throw $this->notFound("/free-texts/{$id}");
+    }
+
+    /**
+     * Legt einen neuen Freitext an.
+     */
+    public function create(FreeTextCreateOptions $options): FreeText
+    {
+        $data = $this->postJson('/free-texts', ['free-text' => $options->toArray()]);
+
+        return FreeText::fromArray($this->unwrapEnvelope($data, 'free-text', 'creating free text'));
+    }
+
+    /**
+     * Ändert einen Freitext (PUT /free-texts/{id}).
+     *
+     * Nur die in den Options gesetzten Felder werden gesendet.
+     */
+    public function update(int $id, FreeTextUpdateOptions $options): FreeText
+    {
+        $data = $this->putJson("/free-texts/{$id}", ['free-text' => $options->toArray()]);
+
+        return FreeText::fromArray($this->unwrapEnvelope($data, 'free-text', 'updating free text'));
+    }
+
+    /**
+     * Löscht einen Freitext.
+     */
+    public function delete(int $id): void
+    {
+        $this->deleteVoid("/free-texts/{$id}");
     }
 }

@@ -2,7 +2,7 @@
 
 # Lookups (Stammdaten & settings)
 
-API wrappers for the ten read-only lookup endpoints: master data and account settings that other resources refer to.
+API wrappers for ten lookup endpoints: master data and account settings that other resources refer to.
 
 ## Access
 
@@ -21,7 +21,7 @@ $billomat->incomingCategories  // incoming invoice categories (string ID)
 
 ## Model
 
-All ten APIs are read-only: none of them has `create`/`update`/`delete`. `countries` and `currencies` only offer `list()`/`listPage()`/`iterateAll()`; the others also have `get($id)`, which returns `null` on 404, and `getOrFail($id)`, which throws `NotFoundException` instead. `UsersApi` additionally has `getMyself()` for the currently authenticated user. For `incomingCategories`, `$id` is a **string** slug (e.g. `goods`), not a number.
+`countries`, `currencies`, `users` and `incomingCategories` are read-only. `units`, `emailTemplates`, `freeTexts`, `reminderTexts`, `roles` and `countryTaxes` additionally have `create($options)`, `update($id, $options)` and `delete($id)` (POST/PUT/DELETE on the same paths); the details are on their pages. `countries` and `currencies` only offer `list()`/`listPage()`/`iterateAll()`; the others also have `get($id)`, which returns `null` on 404, and `getOrFail($id)`, which throws `NotFoundException` instead. `UsersApi` additionally has `getMyself()` for the currently authenticated user. For `incomingCategories`, `$id` is a **string** slug (e.g. `goods`), not a number.
 
 The only writable part is the sub-resource `$billomat->users->properties` (custom field definitions for users, see [properties.md](properties.md)).
 
@@ -33,13 +33,13 @@ Each of these resources provides master data that other models refer to only by 
 |---|---|---|---|
 | `countries` | GET | `/countries` | `list($filters?)`, `listPage($filters?)`, `iterateAll()` |
 | `currencies` | GET | `/currencies` | `list($filters?)`, `listPage($filters?)`, `iterateAll()` |
-| `units` | GET | `/units`, `/units/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
+| `units` | GET, POST, PUT, DELETE | `/units`, `/units/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `create()`, `update()`, `delete()` |
 | `users` | GET | `/users`, `/users/{id}`, `/users/myself` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `getMyself()` |
-| `emailTemplates` | GET | `/email-templates`, `/email-templates/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
-| `freeTexts` | GET | `/free-texts`, `/free-texts/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
-| `reminderTexts` | GET | `/reminder-texts`, `/reminder-texts/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
-| `roles` | GET | `/roles`, `/roles/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
-| `countryTaxes` | GET | `/country-taxes`, `/country-taxes/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
+| `emailTemplates` | GET, POST, PUT, DELETE | `/email-templates`, `/email-templates/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `create()`, `update()`, `delete()` |
+| `freeTexts` | GET, POST, PUT, DELETE | `/free-texts`, `/free-texts/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `create()`, `update()`, `delete()` |
+| `reminderTexts` | GET, POST, PUT, DELETE | `/reminder-texts`, `/reminder-texts/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `create()`, `update()`, `delete()` |
+| `roles` | GET, POST, PUT, DELETE | `/roles`, `/roles/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `create()`, `update()`, `delete()` |
+| `countryTaxes` | GET, POST, PUT, DELETE | `/country-taxes`, `/country-taxes/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)`, `create()`, `update()`, `delete()` |
 | `incomingCategories` | GET | `/incoming-categories`, `/incoming-categories/{id}` | `list($filters?)`, `listPage()`, `iterateAll()`, `get($id)`, `getOrFail($id)` |
 
 All generated read models below also have an `extra` array with the fields the SDK doesn't map yet (see [Read models](../concepts/models.md)); it is left out of the tables.
@@ -278,7 +278,7 @@ Unknown values become `null`.
 
 ## Pitfalls
 
-- **Everything is read-only.** None of these ten APIs has `create`/`update`/`delete`. To create a new user or e-mail template, use the Billomat web UI (the API has no write endpoint for users; for the others the SDK doesn't expose one).
+- **Users, countries, currencies and incoming categories are read-only.** Billomat has no write endpoint for them; create users in the Billomat web UI. The settings resources (units, e-mail templates, free texts, reminder texts, roles, tax-free countries) can be written, see their pages.
 - **`countries` and `currencies` have no `get()`.** To get a single country or currency, pass `code` as a filter (`list(['code' => 'DE'])`) or load the list and filter on the client side. The lists are small (~250 countries, ~170 currencies).
 - **`code` is the key, not `id`.** `Country` and `Currency` have an optional `id`, but all references (`Client::$countryCode`, `Invoice::$currencyCode`) use the ISO code.
 - **Billomat is inconsistent.** Some endpoints return `code`, others `country_code`/`currency_code`; the read models accept both. Don't build logic around which field comes back.

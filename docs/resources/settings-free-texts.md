@@ -21,8 +21,9 @@ $billomat->freeTexts
 | `iterateAll($filters?, $pageSize?)` | GET | `/free-texts` (all pages) |
 | `get($id)` | GET | `/free-texts/{id}` |
 | `getOrFail($id)` | GET | `/free-texts/{id}` |
-
-> Read-only in the SDK. Billomat supports create/update/delete, but the SDK doesn't expose them as methods.
+| `create($options)` | POST | `/free-texts` |
+| `update($id, $options)` | PUT | `/free-texts/{id}` |
+| `delete($id)` | DELETE | `/free-texts/{id}` |
 
 ## Methods
 
@@ -55,6 +56,41 @@ Returns `null` on 404.
 ### `getOrFail(int $id): FreeText`
 
 Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+### `create(FreeTextCreateOptions $options): FreeText`
+
+`type` and `name` are required; `title`, `label`, `intro`, `note` and `isDefault` are optional.
+
+```php
+use Justpilot\Billomat\Api\FreeTextCreateOptions;
+use Justpilot\Billomat\Model\Enum\FreeTextType;
+
+$text = $billomat->freeTexts->create(new FreeTextCreateOptions(
+    type: FreeTextType::OFFER,
+    name: 'Offer intro',
+    intro: 'Thank you for your enquiry.',
+));
+```
+
+### `update(int $id, FreeTextUpdateOptions $options): FreeText`
+
+Only the fields you set are sent; `Clear::Field` empties a field.
+
+```php
+use Justpilot\Billomat\Api\FreeTextUpdateOptions;
+
+$billomat->freeTexts->update($text->id, new FreeTextUpdateOptions(note: 'Valid for 30 days.'));
+```
+
+### `delete(int $id): void`
+
+```php
+$billomat->freeTexts->delete($text->id);
+```
+
+## Write models
+
+`FreeTextCreateOptions` and `FreeTextUpdateOptions` have the fields `type` (`FreeTextType`), `name`, `title`, `label`, `intro`, `note` and `isDefault` (sent as `1`/`0`). On create `type` and `name` are required; on update every field is optional and accepts `Clear::Field`. Both classes are immutable (`with*()`).
 
 ## Read model: `FreeText`
 
@@ -104,6 +140,7 @@ The full list depends on the document type and is documented in the Billomat UI 
 Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
 ::: code-group
+<<< @/snippets/json/free-texts.create.json [POST /free-texts]
 <<< @/../tests/Fixtures/Contract/free-texts/get.json [GET /free-texts/{id} (response)]
 <<< @/../tests/Fixtures/Contract/free-texts/list.json [GET /free-texts (response)]
 :::
@@ -113,6 +150,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 - **`is_default` is exclusive per type.** Each document type has exactly one default free text; setting a new default replaces the old one on the server.
 - **Single-item list quirk.** With only one free text in the account Billomat returns an object instead of a list; `listResource()` normalizes this.
+- **The type is singular.** Free texts use `INVOICE`, `OFFER`, … — unlike e-mail templates, whose types are plural (`INVOICES`).
 
 ## End-to-end example
 

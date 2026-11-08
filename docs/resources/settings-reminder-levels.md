@@ -8,7 +8,7 @@ Billomat models reminder (dunning) levels via `/reminder-texts`. The SDK exposes
 |---|---|---|
 | `ReminderTextsApi` | `/reminder-texts` | Text blocks per reminder level (subject, header, footer, fees) — matches the official *Mahnstufen* page. |
 
-The endpoint is read-only in the SDK. The former `DunningLevelsApi` was removed in 4.0; use `$billomat->reminderTexts` instead.
+You can list, read, create, change and delete levels. The former `DunningLevelsApi` was removed in 4.0; use `$billomat->reminderTexts` instead.
 
 ## Access
 
@@ -27,8 +27,9 @@ $billomat->reminderTexts   // Justpilot\Billomat\Api\ReminderTextsApi
 | `iterateAll($filters?, $pageSize?)` | GET | `/reminder-texts` (lazy over all pages) |
 | `get($id)` | GET | `/reminder-texts/{id}` |
 | `getOrFail($id)` | GET | `/reminder-texts/{id}` |
-
-> Billomat supports create/update/delete (POST/PUT/DELETE on `/reminder-texts`), but the SDK doesn't expose them as methods.
+| `create($options)` | POST | `/reminder-texts` |
+| `update($id, $options)` | PUT | `/reminder-texts/{id}` |
+| `delete($id)` | DELETE | `/reminder-texts/{id}` |
 
 ## Methods
 
@@ -51,6 +52,53 @@ Returns `null` on 404.
 ### `ReminderTextsApi::getOrFail(int $id): ReminderText`
 
 Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+### `ReminderTextsApi::create(ReminderTextCreateOptions $options): ReminderText`
+
+Only `name` is required.
+
+```php
+use Justpilot\Billomat\Api\ReminderTextCreateOptions;
+use Justpilot\Billomat\Model\Money;
+
+$level = $billomat->reminderTexts->create(new ReminderTextCreateOptions(
+    name: '2nd reminder',
+    subject: 'Second reminder for invoice [Invoice.invoice_number]',
+    chargeName: 'Reminder fee',
+    chargeAmount: Money::of('5.00'),
+));
+```
+
+### `ReminderTextsApi::update(int $id, ReminderTextUpdateOptions $options): ReminderText`
+
+Only the fields you set are sent; `Clear::Field` empties a field.
+
+```php
+use Justpilot\Billomat\Api\ReminderTextUpdateOptions;
+
+$billomat->reminderTexts->update($level->id, new ReminderTextUpdateOptions(sort: 2));
+```
+
+### `ReminderTextsApi::delete(int $id): void`
+
+```php
+$billomat->reminderTexts->delete($level->id);
+```
+
+## Write models
+
+| Field (`ReminderTextCreateOptions` / `ReminderTextUpdateOptions`) | Billomat field | Type |
+|---|---|---|
+| `name` | `name` | `string` (required on create) |
+| `subject` | `subject` | `?string` |
+| `header` | `header` | `?string` |
+| `footer` | `footer` | `?string` |
+| `sort` | `sorting` | `?int`; named `sort` like the read model |
+| `chargeName` | `charge_name` | `?string` |
+| `chargeDescription` | `charge_description` | `?string` |
+| `chargeAmount` | `charge_amount` | `?Money`, see [Money](../concepts/money.md) |
+
+In `ReminderTextUpdateOptions` every field is optional and also accepts `Clear::Field`. Both classes are immutable (`with*()`).
 
 ## Read model
 
@@ -78,6 +126,7 @@ Like `get()`, but throws `NotFoundException` instead of returning `null`.
 Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
 ::: code-group
+<<< @/snippets/json/reminder-texts.create.json [POST /reminder-texts]
 <<< @/../tests/Fixtures/Contract/reminder-texts/get.json [GET /reminder-texts/{id} (response)]
 <<< @/../tests/Fixtures/Contract/reminder-texts/list.json [GET /reminder-texts (response)]
 :::
@@ -87,6 +136,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 - **`sort` instead of `sorting`.** Billomat returns the order as `sorting` (formerly `sort`); the SDK keeps exposing it as `ReminderText::$sort`, and `toArray()` writes it under the key `sort`.
 - **Reminder level of a reminder.** `Reminder::$reminderLevel` and `Reminder::$reminderLevelName` refer to the levels configured here, and `Reminder::$reminderTextId` to the text used; see [Reminders](reminders.md).
+- **Only `name` is really required.** Billomat's docs mark every field (including `sorting` and the fee fields) as required; the sandbox creates a level from `name` alone, so the SDK only requires `name`.
 - **Single-item list quirk.** `list()` normalizes via `listResource()`, even if Billomat returns a single level as an object instead of a list.
 
 ## End-to-end example

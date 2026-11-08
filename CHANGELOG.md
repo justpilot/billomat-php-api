@@ -6,6 +6,16 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+Endpoints the Billomat API documents but the SDK didn't cover yet. Each was checked against the sandbox first; all additions, no BC break.
+
+### Added
+
+- **Write access to the settings resources.** `create()`, `update()` and `delete()` on `units`, `emailTemplates`, `freeTexts`, `reminderTexts`, `countryTaxes` and `roles`, with the generated `UnitCreateOptions`/`UnitUpdateOptions`, `EmailTemplate…`, `FreeText…`, `ReminderText…`, `CountryTax…` and the handwritten `RoleCreateOptions`/`RoleUpdateOptions`. Only the fields Billomat really requires are constructor parameters (a reminder level needs just `name`, although the API docs mark every field as required). `countryTaxes->update()` needs `countryCode` again and goes to `/country-taxes/{id}`, not `/country_taxes/{id}` as the docs say. Role permissions are a map area → `AccessLevel` like on the `Role` read model; `null` in `RoleUpdateOptions` revokes an area, an unknown area throws `InvalidArgumentException` because Billomat ignores it silently. New `Role::isArea()`.
+
+### Fixed
+
+- `docs/audit.md` compares the Billomat field names from the options' docblocks, so renamed properties (`$body` for `text`, `$sort` for `sorting`, `$base64File`) no longer show up as missing fields.
+
 ## [4.0.0-beta.1] - 2026-11-07
 
 First beta of 4.0. The public API is frozen: further betas only get fixes and additions, a break is only made to fix a bug and is listed here and in [UPGRADE-4.0.md](UPGRADE-4.0.md) (see [Backward compatibility](docs/concepts/backward-compatibility.md)). Before the freeze every action was checked against the Billomat sandbox; methods for endpoints Billomat doesn't have are removed. Install with `composer require justpilot/billomat-php-api:^4.0@beta`.

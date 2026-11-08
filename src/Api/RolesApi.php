@@ -11,13 +11,9 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * Read-only API-Wrapper für Mitarbeiter-Rollen.
+ * API-Wrapper für Mitarbeiter-Rollen.
  *
  * Quelle: https://www.billomat.com/api/einstellungen/rollen/
- *
- * Billomat unterstützt zusätzlich POST/PUT/DELETE auf `/roles`. Das SDK
- * exponiert diese Verben aktuell nicht — wer Rollen verwaltet, kann
- * `BillomatHttpClient` direkt nutzen.
  *
  * Filter:
  *  - `name` — case-insensitive Teilstring-Suche auf dem Rollennamen.
@@ -72,5 +68,35 @@ final class RolesApi extends AbstractApi
     public function getOrFail(int $id): Role
     {
         return $this->get($id) ?? throw $this->notFound("/roles/{$id}");
+    }
+
+    /**
+     * Legt eine neue Rolle an.
+     */
+    public function create(RoleCreateOptions $options): Role
+    {
+        $data = $this->postJson('/roles', ['role' => $options->toArray()]);
+
+        return Role::fromArray($this->unwrapEnvelope($data, 'role', 'creating role'));
+    }
+
+    /**
+     * Ändert eine Rolle (PUT /roles/{id}).
+     *
+     * Nur gesetzte Felder werden gesendet; Bereiche ohne Eintrag in den Options behalten ihre Rechte.
+     */
+    public function update(int $id, RoleUpdateOptions $options): Role
+    {
+        $data = $this->putJson("/roles/{$id}", ['role' => $options->toArray()]);
+
+        return Role::fromArray($this->unwrapEnvelope($data, 'role', 'updating role'));
+    }
+
+    /**
+     * Löscht eine Rolle.
+     */
+    public function delete(int $id): void
+    {
+        $this->deleteVoid("/roles/{$id}");
     }
 }

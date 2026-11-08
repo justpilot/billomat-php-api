@@ -11,7 +11,7 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * Read-only API-Wrapper für Mahn-Textbausteine.
+ * API-Wrapper für Mahn-Textbausteine.
  *
  * Doku: https://www.billomat.com/en/api/settings/reminder-texts/
  */
@@ -69,5 +69,35 @@ final class ReminderTextsApi extends AbstractApi
     public function getOrFail(int $id): ReminderText
     {
         return $this->get($id) ?? throw $this->notFound("/reminder-texts/{$id}");
+    }
+
+    /**
+     * Legt eine neue Mahnstufe an.
+     */
+    public function create(ReminderTextCreateOptions $options): ReminderText
+    {
+        $data = $this->postJson('/reminder-texts', ['reminder-text' => $options->toArray()]);
+
+        return ReminderText::fromArray($this->unwrapEnvelope($data, 'reminder-text', 'creating reminder text'));
+    }
+
+    /**
+     * Ändert eine Mahnstufe (PUT /reminder-texts/{id}).
+     *
+     * Nur die in den Options gesetzten Felder werden gesendet.
+     */
+    public function update(int $id, ReminderTextUpdateOptions $options): ReminderText
+    {
+        $data = $this->putJson("/reminder-texts/{$id}", ['reminder-text' => $options->toArray()]);
+
+        return ReminderText::fromArray($this->unwrapEnvelope($data, 'reminder-text', 'updating reminder text'));
+    }
+
+    /**
+     * Löscht eine Mahnstufe.
+     */
+    public function delete(int $id): void
+    {
+        $this->deleteVoid("/reminder-texts/{$id}");
     }
 }

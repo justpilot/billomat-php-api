@@ -49,6 +49,7 @@ Only credit notes in status `DRAFT` are fully editable. `update()` on a complete
 | `pdfContent($id, $type?)` | GET | `/credit-notes/{id}/pdf?format=pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/credit-notes/{id}/upload-signature` |
 | `listGrouped($groupBy, $filters?)` | GET | `/credit-notes?group_by=…` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/credit-notes/{id}/customfield` |
 
 ### `/credit-note-items`
 

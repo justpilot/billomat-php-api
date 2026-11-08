@@ -153,4 +153,27 @@ final class TemplatesApi extends AbstractApi
             'format' => $format->value,
         ]);
     }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /templates/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/templates/{$id}", 'template');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /templates/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/templates/{$id}", 'template', $value);
+    }
 }

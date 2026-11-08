@@ -168,6 +168,33 @@ abstract class AbstractApi
     }
 
     /**
+     * Liest das `customfield` eines Datensatzes (GET {$path}/customfield); null, wenn es leer ist.
+     *
+     * @param string $path Pfad des Datensatzes, z. B. `/clients/12`
+     * @param string $key  Envelope-Schlüssel, z. B. `client`
+     *
+     * @throws NotFoundException           wenn es den Datensatz nicht gibt (404)
+     * @throws UnexpectedResponseException wenn die Antwort nicht zum Envelope passt
+     */
+    protected function fetchCustomField(string $path, string $key): ?string
+    {
+        $record = $this->unwrapEnvelope($this->getJson("{$path}/customfield"), $key, "fetching custom field of {$key}");
+
+        return ScalarCaster::toStringOrNull($record['customfield'] ?? null);
+    }
+
+    /**
+     * Setzt das `customfield` eines Datensatzes (PUT {$path}/customfield); '' leert es.
+     *
+     * @param string $path Pfad des Datensatzes, z. B. `/clients/12`
+     * @param string $key  Envelope-Schlüssel, z. B. `client`
+     */
+    protected function storeCustomField(string $path, string $key, string $value): void
+    {
+        $this->putVoid("{$path}/customfield", [$key => ['customfield' => $value]]);
+    }
+
+    /**
      * Hydriert eine Liste aus einer Billomat-Envelope-Response.
      *
      * Billomat liefert Listen in zwei Varianten desselben Wrappers:

@@ -26,6 +26,7 @@ $billomat->countryTaxes
 | `create($options)` | POST | `/country-taxes` |
 | `update($id, $options)` | PUT | `/country-taxes/{id}` |
 | `delete($id)` | DELETE | `/country-taxes/{id}` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/country-taxes/{id}/customfield` |
 
 ## Methods
 
@@ -75,6 +76,10 @@ $billomat->countryTaxes->update($entry->id, new CountryTaxUpdateOptions(countryC
 ```php
 $billomat->countryTaxes->delete($entry->id);
 ```
+
+### `getCustomField(int $id): ?string` / `setCustomField(int $id, string $value): void`
+
+See [Custom meta attributes](../concepts/custom-meta-attributes.md#in-the-sdk).
 
 ## Read model: `CountryTax`
 

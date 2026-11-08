@@ -41,6 +41,8 @@ return [
         'dateObjects' => true,
         'items' => ['class' => 'InvoiceItemCreateOptions', 'wire' => 'invoice-items', 'item' => 'invoice-item'],
         'toArray' => $optionsOrder('currency_code', 'net_gross'),
+        // Für InvoicesApi::preset(): Billomat liefert den Entwurf mit Rechnungs-Feldnamen.
+        'fromArray' => ['Grundlage für {@see InvoicesApi::preset()}: Billomat liefert den Rechnungsentwurf mit diesen Feldnamen.'],
         'doc' => [
             'Typisierter Payload für POST /invoices gemäß Billomat-API.',
             '',

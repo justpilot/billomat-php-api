@@ -40,6 +40,7 @@ What this means for the API:
 | `iterateAll($filters?, $pageSize?)` | GET | `/invoices` (lazy, across all pages) |
 | `listGrouped($groupBy, $filters?)` | GET | `/invoices?group_by=…` |
 | `get($id)` / `getOrFail($id)` | GET | `/invoices/{id}` |
+| `preset(…)` | GET | `/invoices/preset?confirmation_id=…` (or another source) |
 | `create($options)` | POST | `/invoices` |
 | `update($id, $options)` | PUT | `/invoices/{id}` |
 | `complete($id, $templateId?)` | PUT | `/invoices/{id}/complete` |
@@ -143,6 +144,33 @@ Which identifier field of `InvoiceGroup` is filled depends on `group_by`:
 ### `get(int $id): ?Invoice` / `getOrFail(int $id): Invoice`
 
 `get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
+
+### `preset(?int $clientId = null, ?int $offerId = null, ?int $confirmationId = null, ?int $deliveryNoteId = null, ?int $invoiceId = null, ?int $recurringId = null): InvoiceCreateOptions`
+
+Asks Billomat for an invoice draft with everything it takes over from a source (client, address, texts, template, payment terms, currency, the reference to the source …) and returns it as `InvoiceCreateOptions`, ready to adjust and pass to `create()`. Billomat documents the endpoint only with `confirmation_id`; the other five sources work in the sandbox but are undocumented:
+
+| Parameter | Source | Result | Documented by Billomat |
+|---|---|---|---|
+| `confirmationId` | Order confirmation | Invoice for the confirmation | yes |
+| `clientId` | Client | Draft with the account defaults for this client | no |
+| `offerId` | Offer | Invoice for the offer | no |
+| `deliveryNoteId` | Delivery note | Invoice for the delivery note | no |
+| `invoiceId` | Invoice | **Correction invoice** for that invoice | no |
+| `recurringId` | Recurring invoice | Invoice from the recurring template | no |
+
+::: warning Undocumented sources
+Billomat doesn't document the sources marked "no", so it may change or drop them without notice. The SDK keeps the parameters (they are covered by the [backward compatibility promise](../concepts/backward-compatibility.md) like any other parameter), but if Billomat stops supporting a source, `preset()` with it fails with a `ValidationException`. For code that has to keep working, prefer `confirmationId`, or build the options yourself from the source record.
+:::
+
+```php
+$options = $billomat->invoices->preset(confirmationId: 550206);
+
+$invoice = $billomat->invoices->create(
+    $options->withDate(new DateTimeImmutable())->withLabel('Project X'),
+);
+```
+
+The draft has **no items**, and Billomat doesn't copy them on `create()` either, even with `confirmationId` set. Transfer them yourself, e.g. by reading the source's items and adding them with `withItem()` or `$billomat->invoices->items->create()`. Without a source Billomat answers HTTP 400 (`Neither client nor supplier was set`), as it does for an ID that doesn't exist; both arrive as `ValidationException`. Sums, status and other read-only fields of the draft are dropped. `InvoiceCreateOptions::fromArray()` does the mapping and can also be used on your own data with Billomat field names.
 
 ### `create(InvoiceCreateOptions $options): Invoice`
 
@@ -474,6 +502,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **E-invoice (undocumented).** Billomat returns `facturx_reference` (`Invoice::$facturxReference`) in API responses but doesn't describe it in the API docs. The SDK only reads it (types derived from observed values); writing it is not supported because there is no specification.
 - **`update()` only on `DRAFT`.** Once `complete()` has run, a PUT no longer changes the invoice. Use `cancel()` plus a new invoice, or a correction invoice linked via `invoiceId`.
 - **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes documents in any status (the sandbox returns 200 for completed and canceled ones as well). Prefer `cancel()` for completed documents: issued documents have to be kept for bookkeeping (GoBD), and deleting one leaves a gap in the number sequence.
+- **`preset()` copies no items.** See `preset()` above; the source's items have to be transferred by hand.
 - **`pdf()` requires `complete()`.** A `DRAFT` invoice has no PDF yet; depending on the account the endpoint returns 404 or an error.
 - **Single-item list quirk.** As with all resources, `list()` normalizes it automatically.
 - **`pdfContent()` doesn't go through `getJson()`.** In a mock test, make the mock return a body that starts with `%PDF-`; otherwise `UnexpectedResponseException` is thrown. The HTTP status is still checked for errors.

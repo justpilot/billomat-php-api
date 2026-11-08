@@ -2,12 +2,13 @@
 
 # Incomings (Eingangsrechnungen)
 
-API wrapper for incoming invoices under `/incomings` and their four sub-resources (`/incoming-comments`, `/incoming-payments`, `/incoming-tags`, `/incoming-property-values`). The custom property definitions live under `/incoming-properties` (`$billomat->incomings->properties`, documented in [Properties](properties.md) and only touched on here).
+API wrapper for incoming invoices under `/incomings` and their five sub-resources (`/incoming-items`, `/incoming-comments`, `/incoming-payments`, `/incoming-tags`, `/incoming-property-values`). The custom property definitions live under `/incoming-properties` (`$billomat->incomings->properties`, documented in [Properties](properties.md) and only touched on here).
 
 ## Access
 
 ```php
 $billomat->incomings                  // the incoming invoices themselves
+$billomat->incomings->items           // line items (amount, tax, cost center)
 $billomat->incomings->comments        // comment history per document
 $billomat->incomings->payments        // payments made
 $billomat->incomings->tags            // tags
@@ -17,7 +18,7 @@ $billomat->incomings->properties      // custom property definitions
 
 ## Model
 
-An incoming is a supplier invoice: a document someone else issued to your company. It's the counterpart of `Invoice`, but much slimmer: Billomat stores no line items here, only the totals (`totalGross`, `totalNet`).
+An incoming is a supplier invoice: a document someone else issued to your company. It's the counterpart of `Invoice`, but much slimmer: its line items (`IncomingItem`) carry only an amount, tax data and booking information (category, cost center, expense account) instead of quantity × unit price.
 
 - **Origin**: the required field `supplierId` points to a [supplier](suppliers.md).
 - **Status**: `IncomingStatus` (`DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`). Billomat derives it from the due date, cancellation and the sum of payments; you can't write it directly.
@@ -42,6 +43,18 @@ Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRA
 | `delete($id)` | DELETE | `/incomings/{id}` |
 | `pdf($id)` | GET | `/incomings/{id}/pdf` |
 | `pdfContent($id)` | GET | `/incomings/{id}/pdf?format=pdf` |
+| `listGrouped($groupBy, $filters?)` | GET | `/incomings?group_by=…` |
+
+### `/incoming-items`
+
+| Method | HTTP | Path |
+|---|---|---|
+| `list($parentId, $filters?)` | GET | `/incoming-items?incoming_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/incoming-items?incoming_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/incoming-items/{id}` |
+| `create($parentId, $options)` | POST | `/incoming-items` |
+| `update($id, $options)` | PUT | `/incoming-items/{id}` |
+| `delete($id)` | DELETE | `/incoming-items/{id}` |
 
 ### `/incoming-comments`
 
@@ -147,6 +160,55 @@ file_put_contents('/tmp/receipt.pdf', $billomat->incomings->pdfContent($incoming
 ```
 
 The file itself is attached with the `base64File` option of `create()` or `update()`; Billomat has no separate upload endpoint, and no cancel/uncancel for incomings either.
+
+#### `listGrouped(IncomingGroupBy|array $groupBy, IncomingFilter|array $filters = []): list<IncomingGroup>`
+
+Aggregated listing via `?group_by=…`, like [`InvoicesApi::listGrouped()`](invoices.md): instead of individual incomings, Billomat returns one total row per group.
+
+```php
+use Justpilot\Billomat\Model\Enum\IncomingGroupBy;
+
+// Costs per supplier and year
+$groups = $billomat->incomings->listGrouped([IncomingGroupBy::SUPPLIER, IncomingGroupBy::YEAR]);
+
+// Drill down: $group->incomingParams is the matching filter set for list()
+$detail = $billomat->incomings->list($groups[0]->incomingParams);
+```
+
+| `group_by` (`IncomingGroupBy`) | Filled identifier field of `IncomingGroup` |
+|---|---|
+| `SUPPLIER` | `supplierId` |
+| `STATUS` | `status` (`?IncomingStatus`) |
+| `DAY` / `WEEK` / `MONTH` / `YEAR` | `day` / `week` / `month` / `year` (each `?string`) |
+
+`totalGross` and `totalNet` (`?Money`) hold the totals; unknown fields land in `$extra`. Billomat rejects `client` (and any other value) with HTTP 400 `invalid or empty group_by parameter`.
+
+### Incoming items
+
+```php
+use Justpilot\Billomat\Api\IncomingItemCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemUpdateOptions;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
+
+$item = $billomat->incomings->items->create($incoming->id, new IncomingItemCreateOptions(
+    total: Money::of('119.50'),
+    description: 'Hosting May',
+    taxRate: 19.0,
+    taxIncluded: true,
+    type: ItemType::SERVICE,
+));
+
+$billomat->incomings->items->update($item->id, new IncomingItemUpdateOptions(costCenter: 4711));
+
+foreach ($billomat->incomings->items->list($incoming->id) as $item) {
+    printf("%s: %s\n", $item->description ?? '-', $item->total?->toString() ?? '-');
+}
+
+$billomat->incomings->items->delete($item->id);
+```
+
+`$billomat->incomings->items` is the generic `ItemsApi` used by all document items: `list(int $parentId, …)`, `listPage()`, `iterateAll()`, `get()`, `getOrFail()`, `create(int $parentId, $options)` (adds `incoming_id`), `update()` and `delete()`.
 
 ### Incoming comments
 
@@ -262,6 +324,24 @@ Mirrors `IncomingCreateOptions`, but `supplierId` is optional here (`?int`, not 
 | `supplierId` | `supplier_id` | `int\|Clear\|null` | |
 | all other fields | same as `IncomingCreateOptions` | same type, additionally `\|Clear` | |
 
+## Write models: `IncomingItemCreateOptions` / `IncomingItemUpdateOptions`
+
+Constructor: `new IncomingItemCreateOptions(Money $total, …)`. The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`. In `IncomingItemUpdateOptions` every field is optional and also accepts `Clear::Field`.
+
+| Property | Billomat field | Type | Notes |
+|---|---|---|---|
+| `total` | `total` | `Money` (required on create) | Amount of the item; the spec says `INT`, Billomat accepts decimals |
+| `description` | `description` | `?string` | |
+| `position` | `position` | `?int` | Assigned automatically (appended) if omitted |
+| `taxName` | `tax_name` | `?string` | e.g. `USt` |
+| `taxRate` | `tax_rate` | `?float` | Percent |
+| `taxRateReverseCharge` | `tax_rate_reverse_charge` | `?float` | Rate for reverse charge |
+| `taxIncluded` | `tax_included` | `?bool` | Is `total` gross? Sent as `1`/`0` |
+| `category` | `category` | `?string` | Title of the category |
+| `type` | `type` | `?ItemType` | `PRODUCT`/`SERVICE`; only for invoices from abroad |
+| `costCenter` | `cost_center` | `?int` | |
+| `expenseAccountNumber` | `expense_account_number` | `?int` | |
+
 ## Write model: `IncomingCommentCreateOptions`
 
 Constructor: `new IncomingCommentCreateOptions(string $comment, ?IncomingCommentActionKey $actionkey = null)`. The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`, which adds `incoming_id` to the payload.
@@ -327,6 +407,14 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingPropertyId, mi
 | `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
 `paidAmount` and `openAmount` are calculated server-side from the payments. Amounts are [`Money`](../concepts/money.md) values.
+
+## Read model: `IncomingItem`
+
+Same fields as the write model plus `id` (`int`), `incomingId` (`?int`), `customField` (`?string`) and `extra`. `total` is `?Money`.
+
+## Read model: `IncomingGroup`
+
+Row of `listGrouped()`: `totalGross`, `totalNet` (`?Money`), `supplierId` (`?int`), `status` (`?IncomingStatus`), `day`, `week`, `month`, `year` (`?string`), `incomingParams` (`array<string, scalar>`, the filter set for a drill-down via `list()`) and `extra`.
 
 ## Read model: `IncomingComment`
 
@@ -417,6 +505,8 @@ Constructor: `new IncomingPropertyValueCreateOptions(int $incomingPropertyId, mi
 
 - [`IncomingStatus`](../../src/Model/Enum/IncomingStatus.php): `DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`. Set by the server, not by the client. `label()` returns a German display label (`Entwurf`, `Offen`, …).
 - [`IncomingCommentActionKey`](../../src/Model/Enum/IncomingCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `UNCANCEL`, `CHANGE_STATUS`, `PAYMENT`, `UPLOAD`, `COMMENT`. Billomat generates most values automatically; usually only `COMMENT` makes sense manually.
+- [`IncomingGroupBy`](../../src/Model/Enum/IncomingGroupBy.php): `SUPPLIER`, `STATUS`, `DAY`, `WEEK`, `MONTH`, `YEAR`, the aggregation axes for `listGrouped()`.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE` for `IncomingItem::$type`.
 - [`PaymentType`](../../src/Model/Enum/PaymentType.php): enum shared with invoices (`BANK_TRANSFER`, `CASH`, `PAYPAL`, …).
 - [`PropertyType`](../../src/Model/Enum/PropertyType.php): data type of the property definition (`IncomingProperty`) and of `IncomingPropertyValue::$type`.
 
@@ -427,6 +517,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ::: code-group
 <<< @/snippets/json/incomings.create.json [POST /incomings]
+<<< @/snippets/json/incoming-items.create.json [POST /incoming-items]
 <<< @/../tests/Fixtures/Contract/incomings/get.json [GET /incomings/{id} (response)]
 <<< @/../tests/Fixtures/Contract/incomings/list.json [GET /incomings (response)]
 :::
@@ -439,7 +530,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **`markIncomingAsPaid` is always sent.** Unlike the other optional fields, `IncomingPaymentCreateOptions::toArray()` doesn't filter it out; `false` ends up as `mark_incoming_as_paid=0` in the payload. Leave it unset (`false`) for partial payments.
 - **`tag` node in `cloud()`.** For `GET /incoming-tags` without `incoming_id`, Billomat returns the node `tag` (with `count`), not `incoming-tag`. `$billomat->incomings->tags` handles both paths internally; cloud entries have a different shape than single tags and are hydrated into a separate read model.
 - **`incomingNumber` vs. `number`.** Billomat accepts the supplier's invoice number as `incoming_number` and as `number`, and returns it as `number`. The read model exposes it as `incomingNumber`.
-- **No line items.** Unlike `Invoice`, there's no `IncomingItem` resource; amounts are only kept as totals in `totalGross`/`totalNet`.
+- **Items are amounts, not quantity × price.** `IncomingItem` has no quantity or unit price; `total` is the item's amount, gross or net depending on `taxIncluded`.
 - **`actionkey` on comments is mostly server-driven.** When you create a comment manually, omit `actionkey`; Billomat then sets `COMMENT`. Self-set values like `PAYMENT` are accepted, but their effects (e.g. a status change) don't happen.
 - **`$billomat->incomings->propertyValues` has no `update()`/`delete()`.** Values are upserted via `create()`; the API has no explicit update endpoint.
 - **`$billomat->incomings->properties->create()` uses `PropertyCreateOptions`** (shared with the article, client, supplier and user properties), not a class of its own.

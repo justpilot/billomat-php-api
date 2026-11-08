@@ -12,12 +12,14 @@ use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\CreditNote;
 use Justpilot\Billomat\Model\CreditNoteComment;
+use Justpilot\Billomat\Model\CreditNoteGroup;
 use Justpilot\Billomat\Model\CreditNoteItem;
 use Justpilot\Billomat\Model\CreditNotePayment;
 use Justpilot\Billomat\Model\CreditNoteTag;
 use Justpilot\Billomat\Model\CreditNoteTagCloudEntry;
 use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
+use Justpilot\Billomat\Model\Enum\CreditNoteGroupBy;
 use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
@@ -122,6 +124,32 @@ final class CreditNotesApi extends AbstractApi
     public function iterateAll(CreditNoteFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters, $pageSize);
+    }
+
+    /**
+     * Listet Gutschriften aggregiert nach einem oder mehreren Kriterien.
+     *
+     * Entspricht GET /credit-notes?group_by=...
+     *
+     * Mehrere Werte werden in der Reihenfolge der Aggregation als CSV gesendet
+     * ("client,year" gruppiert zuerst nach Kunde, dann nach Jahr).
+     *
+     * @param CreditNoteGroupBy|non-empty-list<CreditNoteGroupBy>            $groupBy
+     * @param CreditNoteFilter|array<string, scalar|array<scalar|null>|null> $filters optionale zusätzliche Filter (analog zu list())
+     *
+     * @return list<CreditNoteGroup>
+     */
+    #[NoDiscard]
+    public function listGrouped(CreditNoteGroupBy|array $groupBy, CreditNoteFilter|array $filters = []): array
+    {
+        $values = \is_array($groupBy) ? $groupBy : [$groupBy];
+
+        $csv = implode(',', array_map(static fn (CreditNoteGroupBy $g): string => $g->value, $values));
+
+        $query = self::filterQuery($filters);
+        $query['group_by'] = $csv;
+
+        return $this->listResource('/credit-notes', 'credit-note-groups', 'credit-note-group', CreditNoteGroup::fromArray(...), $query);
     }
 
     #[NoDiscard]

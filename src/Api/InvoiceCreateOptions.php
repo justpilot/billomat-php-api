@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
+use Justpilot\Billomat\Internal\ListCaster;
+use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
@@ -448,6 +451,52 @@ final readonly class InvoiceCreateOptions implements WriteOptions
     public function withItem(InvoiceItemCreateOptions $item): self
     {
         return clone($this, ['items' => [...$this->items, $item]]);
+    }
+
+    /**
+     * Baut die Options aus einem Datensatz mit Billomat-Feldnamen.
+     *
+     * Grundlage für {@see InvoicesApi::preset()}: Billomat liefert den Rechnungsentwurf mit diesen Feldnamen.
+     *
+     * Felder, die die Options nicht kennen (Summen, Status, …), fallen weg; leere Werte bleiben null.
+     *
+     * @param array<string,mixed> $data
+     *
+     * @throws UnexpectedResponseException wenn ein Pflichtfeld fehlt
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
+            contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
+            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
+            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
+            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
+            date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
+            supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
+            supplyDateType: SupplyDateType::tryFrom(ScalarCaster::toStringOrNull($data['supply_date_type'] ?? null) ?? ''),
+            dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
+            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
+            address: ScalarCaster::toStringOrNull($data['address'] ?? null),
+            discountRate: ScalarCaster::toIntOrNull($data['discount_rate'] ?? null),
+            discountDate: ScalarCaster::toDateTimeOrNull($data['discount_date'] ?? null),
+            discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
+            title: ScalarCaster::toStringOrNull($data['title'] ?? null),
+            label: ScalarCaster::toStringOrNull($data['label'] ?? null),
+            intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
+            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
+            netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
+            reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
+            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
+            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
+            invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),
+            offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
+            confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
+            recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
+            paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, PaymentType::class),
+            templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
+            freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
+        );
     }
 
     /**

@@ -146,6 +146,50 @@ final class InvoicesApi extends AbstractApi
     }
 
     /**
+     * Holt einen Rechnungsentwurf mit den Vorgaben, die Billomat aus einer Quelle übernimmt
+     * (GET /invoices/preset), als Create-Options zum Anpassen und Anlegen.
+     *
+     * Quelle ist ein Kunde, ein Angebot, eine Auftragsbestätigung, ein Lieferschein, eine
+     * Rechnung (ergibt eine Korrekturrechnung) oder eine Abo-Rechnung. Billomat dokumentiert
+     * nur `confirmation_id`; die übrigen Quellen funktionieren in der Sandbox, sind aber
+     * undokumentiert und können ohne Ankündigung wegfallen (dann HTTP 400). Billomat übernimmt
+     * Kunde, Adresse, Texte, Vorlage, Zahlungsziel usw., aber **keine Positionen**, auch
+     * nicht beim Anlegen; die überträgt der Aufrufer selbst (z. B. mit {@see ItemsApi::list()}
+     * auf der Quelle und withItem()):
+     *
+     *     $options = $billomat->invoices->preset(confirmationId: 550206);
+     *     $invoice = $billomat->invoices->create($options->withDate(new DateTimeImmutable()));
+     *
+     * Ohne Quelle antwortet Billomat mit HTTP 400 („Neither client nor supplier was set“),
+     * ebenso bei einer ID, die es nicht gibt.
+     *
+     * @throws ValidationException         wenn keine Quelle gesetzt ist oder es sie nicht gibt
+     * @throws UnexpectedResponseException wenn der Entwurf keinen Kunden enthält
+     */
+    #[NoDiscard]
+    public function preset(
+        ?int $clientId = null,
+        ?int $offerId = null,
+        ?int $confirmationId = null,
+        ?int $deliveryNoteId = null,
+        ?int $invoiceId = null,
+        ?int $recurringId = null,
+    ): InvoiceCreateOptions {
+        $query = array_filter([
+            'client_id' => $clientId,
+            'offer_id' => $offerId,
+            'confirmation_id' => $confirmationId,
+            'delivery_note_id' => $deliveryNoteId,
+            'invoice_id' => $invoiceId,
+            'recurring_id' => $recurringId,
+        ], static fn (?int $id): bool => null !== $id);
+
+        $data = $this->getJson('/invoices/preset', $query);
+
+        return InvoiceCreateOptions::fromArray($this->unwrapEnvelope($data, 'invoice', 'fetching invoice preset'));
+    }
+
+    /**
      * Holt eine einzelne Rechnung, oder null wenn nicht gefunden.
      *
      * Entspricht GET /invoices/{id}

@@ -99,11 +99,12 @@ return static function (
 
     if ($withOptions) {
         // BC: toArray() war schon immer anders sortiert als die Properties.
-        $toArray = [
+        // Ohne die Felder aus $omit (Mahnungspositionen kennen z. B. keinen `type`).
+        $toArray = array_values(array_filter([
             'type', 'article_id', 'title', 'description', 'quantity', 'unit_price', 'unit', 'tax_name', 'tax_rate',
             'tax_changed_manually', 'reduction', 'position',
             ...array_keys(array_filter($extra, static fn (array $f): bool => empty($f['readOnly']))),
-        ];
+        ], static fn (string $name): bool => isset($fields[$name])));
         $definition['createOptions'] = [
             'class' => $prefix . 'ItemCreateOptions',
             'endpoint' => "POST /api/{$path}",

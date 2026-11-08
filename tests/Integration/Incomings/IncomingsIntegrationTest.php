@@ -6,12 +6,18 @@ namespace Justpilot\Billomat\Tests\Integration\Incomings;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemUpdateOptions;
 use Justpilot\Billomat\Api\IncomingUpdateOptions;
 use Justpilot\Billomat\Api\InvoiceFilter;
 use Justpilot\Billomat\Api\SupplierCreateOptions;
 use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Model\Enum\IncomingGroupBy;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Model\IncomingGroup;
+use Justpilot\Billomat\Model\IncomingItem;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -124,6 +130,60 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
             self::assertSame($pdf->getBinary(), $billomat->incomings->pdfContent($incoming->id));
         } finally {
             $billomat->incomings->delete($incoming->id);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function itemsOfAnIncomingCanBeManaged(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $incoming = $billomat->incomings->create(new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId(),
+            date: new DateTimeImmutable('today'),
+            incomingNumber: 'IT-ITEMS-'.date('His'),
+            currencyCode: 'EUR',
+        ));
+
+        try {
+            $item = $billomat->incomings->items->create($incoming->id, new IncomingItemCreateOptions(
+                total: Money::of('119.50'),
+                description: 'Hosting',
+                taxRate: 19.0,
+                taxIncluded: true,
+                type: ItemType::SERVICE,
+            ));
+            self::assertSame($incoming->id, $item->incomingId);
+            self::assertSame('119.5', $item->total?->toString());
+            self::assertTrue($item->taxIncluded);
+            self::assertSame(ItemType::SERVICE, $item->type);
+
+            $updated = $billomat->incomings->items->update($item->id, new IncomingItemUpdateOptions(description: 'Server'));
+            self::assertSame('Server', $updated->description);
+            self::assertSame('119.5', $updated->total?->toString());
+
+            $ids = array_map(static fn (IncomingItem $i): int => $i->id, $billomat->incomings->items->list($incoming->id));
+            self::assertContains($item->id, $ids);
+
+            $billomat->incomings->items->delete($item->id);
+            self::assertNull($billomat->incomings->items->get($item->id));
+        } finally {
+            $billomat->incomings->delete($incoming->id);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function incomingsCanBeListedGrouped(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $groups = $billomat->incomings->listGrouped([IncomingGroupBy::SUPPLIER, IncomingGroupBy::YEAR]);
+
+        self::assertContainsOnlyInstancesOf(IncomingGroup::class, $groups);
+        foreach ($groups as $group) {
+            self::assertNotNull($group->totalGross);
+            self::assertSame($group->supplierId, isset($group->incomingParams['supplier_id']) ? (int) $group->incomingParams['supplier_id'] : null);
         }
     }
 }

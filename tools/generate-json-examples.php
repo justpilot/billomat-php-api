@@ -40,6 +40,7 @@ use Justpilot\Billomat\Api\EmailTemplateCreateOptions;
 use Justpilot\Billomat\Api\FreeTextCreateOptions;
 use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
@@ -52,6 +53,7 @@ use Justpilot\Billomat\Api\PropertyCreateOptions;
 use Justpilot\Billomat\Api\RecurringCreateOptions;
 use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
+use Justpilot\Billomat\Api\ReminderItemCreateOptions;
 use Justpilot\Billomat\Api\ReminderTextCreateOptions;
 use Justpilot\Billomat\Api\RoleCreateOptions;
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
@@ -251,6 +253,17 @@ function requests(): array
             name: 'Accounting',
             permissions: ['invoices' => AccessLevel::DELETE, 'clients' => AccessLevel::READ, 'settings_documents' => AccessLevel::UPDATE],
         )),
+        'incoming-items.create' => static fn (BillomatClient $b): object => $b->incomings->items->create(3001, new IncomingItemCreateOptions(
+            total: Money::of('119.00'),
+            description: 'Hosting',
+            taxRate: 19.0,
+            taxIncluded: true,
+        )),
+        'reminder-items.create' => static fn (BillomatClient $b): object => $b->reminders->items->create(4001, new ReminderItemCreateOptions(
+            quantity: 1.0,
+            unitPrice: Money::of('2.50'),
+            title: 'Postage',
+        )),
     ];
 }
 
@@ -274,9 +287,9 @@ const PAGES = [
     'credit-notes' => ['credit-notes.create', 'credit-notes/get', 'credit-notes/list'],
     'delivery-notes' => ['delivery-notes.create', 'delivery-notes/get', 'delivery-notes/list'],
     'letters' => ['letters.create', 'letters/get', 'letters/list'],
-    'reminders' => ['reminders.create', 'reminders/get', 'reminders/list'],
+    'reminders' => ['reminders.create', 'reminder-items.create', 'reminders/get', 'reminders/list'],
     'recurrings' => ['recurrings.create', 'recurrings/get', 'recurrings/list'],
-    'incomings' => ['incomings.create', 'incomings/get', 'incomings/list'],
+    'incomings' => ['incomings.create', 'incoming-items.create', 'incomings/get', 'incomings/list'],
     'inbox-documents' => ['inbox-documents.create', 'inbox-documents/get', 'inbox-documents/list'],
     'taxes' => ['taxes.create', 'taxes/get', 'taxes/list'],
     'templates' => ['templates.create', 'templates/get', 'templates/list'],

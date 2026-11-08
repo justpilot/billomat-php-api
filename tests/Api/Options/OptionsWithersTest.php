@@ -46,6 +46,8 @@ use Justpilot\Billomat\Api\FreeTextUpdateOptions;
 use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 use Justpilot\Billomat\Api\IncomingCommentCreateOptions;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemUpdateOptions;
 use Justpilot\Billomat\Api\IncomingPaymentCreateOptions;
 use Justpilot\Billomat\Api\IncomingPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\IncomingTagCreateOptions;
@@ -78,6 +80,8 @@ use Justpilot\Billomat\Api\RecurringItemUpdateOptions;
 use Justpilot\Billomat\Api\RecurringTagCreateOptions;
 use Justpilot\Billomat\Api\RecurringUpdateOptions;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
+use Justpilot\Billomat\Api\ReminderItemCreateOptions;
+use Justpilot\Billomat\Api\ReminderItemUpdateOptions;
 use Justpilot\Billomat\Api\ReminderTagCreateOptions;
 use Justpilot\Billomat\Api\ReminderTextCreateOptions;
 use Justpilot\Billomat\Api\ReminderTextUpdateOptions;
@@ -157,6 +161,8 @@ use UnitEnum;
 #[CoversClass(InboxDocumentCreateOptions::class)]
 #[CoversClass(IncomingCommentCreateOptions::class)]
 #[CoversClass(IncomingCreateOptions::class)]
+#[CoversClass(IncomingItemCreateOptions::class)]
+#[CoversClass(IncomingItemUpdateOptions::class)]
 #[CoversClass(IncomingPaymentCreateOptions::class)]
 #[CoversClass(IncomingPropertyValueCreateOptions::class)]
 #[CoversClass(IncomingTagCreateOptions::class)]
@@ -189,6 +195,8 @@ use UnitEnum;
 #[CoversClass(RecurringTagCreateOptions::class)]
 #[CoversClass(RecurringUpdateOptions::class)]
 #[CoversClass(ReminderCreateOptions::class)]
+#[CoversClass(ReminderItemCreateOptions::class)]
+#[CoversClass(ReminderItemUpdateOptions::class)]
 #[CoversClass(ReminderTagCreateOptions::class)]
 #[CoversClass(ReminderTextCreateOptions::class)]
 #[CoversClass(ReminderTextUpdateOptions::class)]

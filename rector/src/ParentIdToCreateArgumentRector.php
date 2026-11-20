@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Rector;
 
+use Justpilot\Billomat\Api\ContactCreateOptions;
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
 use Override;
 use PhpParser\Node;
@@ -15,8 +16,8 @@ use PhpParser\Node\Name;
 use Rector\Rector\AbstractRector;
 
 /**
- * Zieht die Eltern-ID aus den Create-Options von Zahlungen, Kommentaren, Schlagworten, Attributwerten und
- * E-Mail-Empfängern in das erste Argument von `create()`.
+ * Zieht die Eltern-ID aus den Create-Options von Zahlungen, Kommentaren, Schlagworten, Attributwerten,
+ * E-Mail-Empfängern und Kontakten in das erste Argument von `create()`.
  *
  * `create(new InvoicePaymentCreateOptions(invoiceId: $id, amount: …))` wird
  * `create($id, new InvoicePaymentCreateOptions(amount: …))`. In 3.x war die Eltern-ID der erste
@@ -26,6 +27,14 @@ use Rector\Rector\AbstractRector;
 final class ParentIdToCreateArgumentRector extends AbstractRector
 {
     private const string OPTIONS_PATTERN = '/^Justpilot\\\\Billomat\\\\Api\\\\(\w+?)(?:Payment|Comment|Tag|PropertyValue)CreateOptions$/';
+
+    /**
+     * Options, deren Eltern-ID nicht aus dem Klassennamen folgt: Klasse => 3.x-Parametername.
+     */
+    private const array PARENT_PARAMETERS = [
+        RecurringEmailReceiverCreateOptions::class => 'recurringId',
+        ContactCreateOptions::class => 'clientId',
+    ];
 
     #[Override]
     public function getNodeTypes(): array
@@ -77,11 +86,7 @@ final class ParentIdToCreateArgumentRector extends AbstractRector
      */
     private function parentParameter(string $class): ?string
     {
-        if (RecurringEmailReceiverCreateOptions::class === $class) {
-            return 'recurringId';
-        }
-
-        return 1 === preg_match(self::OPTIONS_PATTERN, $class, $match) ? lcfirst($match[1]).'Id' : null;
+        return self::PARENT_PARAMETERS[$class] ?? (1 === preg_match(self::OPTIONS_PATTERN, $class, $match) ? lcfirst($match[1]).'Id' : null);
     }
 
     private function createCall(MethodCall $node, Arg $parent, New_ $options, Arg $original, string $class): MethodCall

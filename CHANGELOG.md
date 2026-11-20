@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [Unreleased]
+
+### Changed
+
+- **Contacts are a sub-resource of clients.** `$billomat->contacts` is `$billomat->clients->contacts`, and `create()` takes the client ID as its first argument like every other sub-resource: `create($clientId, new ContactCreateOptions(firstName: 'Erika'))`. `ContactCreateOptions` no longer has `$clientId` and `withClientId()`. `list()`, `listPage()` and `iterateAll()` accept a `SubResourceFilter` (sorting and pagination) besides an array. This is the last break before 4.0.0, made so the API doesn't freeze with one parent-scoped resource that works differently. The Rector set moves the property and the client ID, also for code written against the betas. See [UPGRADE-4.0.md](UPGRADE-4.0.md#the-parent-id-is-an-argument-of-create).
+
 ## [4.0.0-beta.2] - 2026-11-08
 
 Second beta of 4.0. It adds endpoints the Billomat API documents but the SDK didn't cover yet. Each was checked against the sandbox first; all additions, no BC break.

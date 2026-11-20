@@ -27,7 +27,7 @@ For clients, suppliers, articles, users and all document types (invoices, offers
 
 - top-level resources: `clients`, `suppliers`, `articles`, `users`, `invoices`, `offers`, `confirmations`, `creditNotes`, `deliveryNotes`, `reminders`, `letters`, `incomings`, `recurrings`, `inboxDocuments`, `activities`, `roles`,
 - master data lookups: `countries`, `currencies`, `countryTaxes`, `units`, `emailTemplates`, `freeTexts`, `incomingCategories`, `reminderTexts`, `taxes`, `templates`,
-- `contacts`, with the client ID as the first argument: `$billomat->contacts->iterateAll($clientId)`,
+- `clients->contacts`, with the client ID as the first argument: `$billomat->clients->contacts->iterateAll($clientId)`,
 - the attribute sub-resources `properties` (on `clients`, `articles`, `suppliers`, `incomings`, `users`) and `propertyValues` (on `clients`, `articles`, `suppliers`, `incomings`), e.g. `$billomat->clients->propertyValues->iterateAll($clientId)`,
 - the document sub-resources `items`, `comments`, `tags` and `payments` (where the parent has them) and `recurrings->emailReceivers`, e.g. `$billomat->invoices->items->iterateAll($invoiceId, new SubResourceFilter(orderBy: OrderBy::asc('position')))`.
 

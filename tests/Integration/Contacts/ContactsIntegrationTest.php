@@ -47,7 +47,7 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $clientId = $this->ensureClientId();
 
-        $contacts = $billomat->contacts->list($clientId, ['per_page' => 5]);
+        $contacts = $billomat->clients->contacts->list($clientId, ['per_page' => 5]);
 
         self::assertIsArray($contacts);
         self::assertContainsOnlyInstancesOf(Contact::class, $contacts);
@@ -62,7 +62,6 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $faker = $this->faker();
 
         $opts = new ContactCreateOptions(
-            clientId: $clientId,
             firstName: $faker->firstName(),
             lastName: $faker->lastName(),
             countryCode: 'DE',
@@ -70,24 +69,25 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
             phone: $faker->phoneNumber(),
         );
 
-        $contact = $billomat->contacts->create($opts);
+        $contact = $billomat->clients->contacts->create($clientId, $opts);
+        self::assertSame($clientId, $contact->clientId);
 
         // Update
         $update = new ContactUpdateOptions(city: 'Berlin');
-        $updated = $billomat->contacts->update($contact->id, $update);
+        $updated = $billomat->clients->contacts->update($contact->id, $update);
 
         self::assertSame($contact->id, $updated->id);
 
         // Get
-        $fetched = $billomat->contacts->get($contact->id);
+        $fetched = $billomat->clients->contacts->get($contact->id);
         self::assertInstanceOf(Contact::class, $fetched);
         self::assertSame('Berlin', $fetched->city);
 
         // Avatar: Billomat liefert ein Platzhalterbild, solange keins hochgeladen ist.
-        self::assertNotSame('', $billomat->contacts->avatar($contact->id, 32));
+        self::assertNotSame('', $billomat->clients->contacts->avatar($contact->id, 32));
 
         // Cleanup
-        $billomat->contacts->delete($contact->id);
-        self::assertNull($billomat->contacts->get($contact->id));
+        $billomat->clients->contacts->delete($contact->id);
+        self::assertNull($billomat->clients->contacts->get($contact->id));
     }
 }

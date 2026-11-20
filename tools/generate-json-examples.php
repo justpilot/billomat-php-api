@@ -120,8 +120,7 @@ function requests(): array
             netGross: NetGross::NET,
             dueDays: 14,
         )),
-        'contacts.create' => static fn (BillomatClient $b): object => $b->contacts->create(new ContactCreateOptions(
-            clientId: 1001,
+        'contacts.create' => static fn (BillomatClient $b): object => $b->clients->contacts->create(1001, new ContactCreateOptions(
             firstName: 'Erika',
             lastName: 'Mustermann',
             email: 'erika@example.com',

@@ -2,12 +2,12 @@
 
 # Contacts (Ansprechpartner)
 
-API wrapper for client contacts under `/contacts`. A contact always belongs to exactly one client (`client_id` as foreign key). Typical use: store several contact persons per company (accounting, purchasing, management).
+API wrapper for client contacts under `/contacts`. A contact always belongs to exactly one client (`client_id` as foreign key), so the API is a sub-resource of `clients`, like its tags and properties. Typical use: store several contact persons per company (accounting, purchasing, management).
 
 ## Access
 
 ```php
-$billomat->contacts
+$billomat->clients->contacts
 ```
 
 `Justpilot\Billomat\Api\ContactsApi`.
@@ -20,7 +20,7 @@ $billomat->contacts
 | `listPage($parentId, $filters?)` | GET | `/contacts?client_id={id}` (page with metadata) |
 | `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/contacts?client_id={id}` (lazy over all pages) |
 | `get($id)` / `getOrFail($id)` | GET | `/contacts/{id}` |
-| `create($options)` | POST | `/contacts` |
+| `create($parentId, $options)` | POST | `/contacts` |
 | `update($id, $options)` | PUT | `/contacts/{id}` |
 | `delete($id)` | DELETE | `/contacts/{id}` |
 | `avatar($id, $size?)` | GET | `/contacts/{id}/avatar` |
@@ -29,12 +29,12 @@ There is **no** unfiltered `list()`: Billomat's `GET /contacts` requires a `clie
 
 ## Methods
 
-### `list(int $parentId, array $filters = []): list<Contact>`
+### `list(int $parentId, SubResourceFilter|array $filters = []): list<Contact>`
 
 Lists all contacts of a client.
 
 ```php
-$contacts = $billomat->contacts->list(98765);
+$contacts = $billomat->clients->contacts->list(98765);
 
 foreach ($contacts as $contact) {
     printf("#%d %s %s <%s>\n",
@@ -46,30 +46,29 @@ foreach ($contacts as $contact) {
 }
 ```
 
-`$filters` takes additional query parameters such as `page` and `per_page`. `client_id` always comes from `$clientId`.
+`$filters` takes a `SubResourceFilter` (sorting and pagination: `new SubResourceFilter(orderBy: OrderBy::asc('last_name'), perPage: 50)`) or an array of query parameters. Billomat filters contacts only by client; `client_id` always comes from `$parentId`.
 
-`listPage(int $parentId, array $filters = []): Page<Contact>` returns one page with `PageInfo`, `iterateAll(int $parentId, array $filters = [], int $pageSize = 100): Generator<Contact>` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
+`listPage(int $parentId, SubResourceFilter|array $filters = []): Page<Contact>` returns one page with `PageInfo`, `iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator<Contact>` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?Contact`
 
 Returns `null` on 404. `getOrFail(int $id): Contact` throws a `NotFoundException` instead.
 
-### `create(ContactCreateOptions $options): Contact`
+### `create(int $parentId, ContactCreateOptions $options): Contact`
 
 ```php
 use Justpilot\Billomat\Api\ContactCreateOptions;
 
 $opts = new ContactCreateOptions(
-    clientId: 98765,
     firstName: 'Erika',
     lastName: 'Mustermann',
     email: 'erika@example.com',
 );
 
-$created = $billomat->contacts->create($opts);
+$created = $billomat->clients->contacts->create(98765, $opts);
 ```
 
-`clientId` is required and the first constructor argument; all other fields are optional and passed as named arguments.
+The client ID is the first argument of `create()`, as on every sub-resource; the SDK adds it to the payload as `client_id`. All fields of the options are optional and passed as named arguments.
 
 ### `update(int $id, ContactUpdateOptions $options): Contact`
 
@@ -78,7 +77,7 @@ use Justpilot\Billomat\Api\ContactUpdateOptions;
 
 $patch = new ContactUpdateOptions(email: 'new.address@example.com');
 
-$billomat->contacts->update($contactId, $patch);
+$billomat->clients->contacts->update($contactId, $patch);
 ```
 
 `ContactUpdateOptions` is a true partial update: only non-`null` fields are sent, and `Clear::Field` empties a field. The `client_id` deliberately can't be changed on update.
@@ -93,11 +92,10 @@ Returns the contact's avatar as raw image bytes (usually PNG), not JSON. `$size`
 
 ## Write model: `ContactCreateOptions`
 
-Constructor: `new ContactCreateOptions(int $clientId, …)`. All other fields are optional, nullable constructor parameters passed as named arguments. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withEmail('new@example.com')`).
+Constructor: `new ContactCreateOptions(…)`. All fields are optional, nullable constructor parameters passed as named arguments; the client ID is the first argument of `create()`. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withEmail('new@example.com')`).
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` | Required, constructor argument |
 | `label` | `label` | `?string` | Free-form label (e.g. `Accounting`) |
 | `name` | `name` | `?string` | Company name |
 | `salutation` | `salutation` | `?string` | Salutation (`Herr`, `Frau`, …) |
@@ -119,7 +117,7 @@ Constructor: `new ContactCreateOptions(int $clientId, …)`. All other fields ar
 
 ## Write model: `ContactUpdateOptions`
 
-Same fields as `ContactCreateOptions`, **without** `clientId`: Billomat doesn't allow changing the client on update. All fields are optional constructor parameters, and `toArray()` strips `null` values as well. `null` means "don't send", the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null` so Billomat empties it, e.g. `new ContactUpdateOptions(note: Clear::Field)`.
+Same fields as `ContactCreateOptions`. Billomat doesn't allow changing the client on update. All fields are optional constructor parameters, and `toArray()` strips `null` values as well. `null` means "don't send", the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null` so Billomat empties it, e.g. `new ContactUpdateOptions(note: Clear::Field)`.
 
 | Property | Billomat field | Type |
 |---|---|---|
@@ -178,7 +176,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 
 ## Pitfalls
 
-- **`list()` requires a filter.** Billomat's `GET /contacts` without `client_id` returns an error, not a global list. The SDK makes the client ID a required argument.
+- **`list()` requires a filter.** Billomat's `GET /contacts` without `client_id` returns an error, not a global list. The SDK makes the client ID a required argument (`$parentId`).
 - **Single-item list quirk.** If a client has exactly one contact, Billomat returns a single object under `contacts.contact` instead of a list. `list()` normalizes this to a `list<Contact>` via an `array_is_list()` check.
 - **`client_id` can't be changed on update.** `ContactUpdateOptions` deliberately doesn't have the field. To "move" a contact to another client, delete it and create it again.
 - **`null` doesn't empty a field.** In `ContactUpdateOptions`, `null` means "leave unchanged". To empty a field, pass `Clear::Field`.
@@ -204,7 +202,7 @@ $billomat = BillomatClient::create(
 $clientId = 98765;
 
 // 1) List existing contacts
-foreach ($billomat->contacts->list($clientId) as $contact) {
+foreach ($billomat->clients->contacts->list($clientId) as $contact) {
     printf("[#%d] %s %s — %s\n",
         $contact->id,
         $contact->firstName ?? '',
@@ -215,7 +213,6 @@ foreach ($billomat->contacts->list($clientId) as $contact) {
 
 // 2) Create a new contact
 $opts = new ContactCreateOptions(
-    clientId: $clientId,
     label: 'Accounting',
     salutation: 'Frau',
     firstName: 'Erika',
@@ -224,15 +221,15 @@ $opts = new ContactCreateOptions(
     countryCode: 'DE',
 );
 
-$created = $billomat->contacts->create($opts);
+$created = $billomat->clients->contacts->create($clientId, $opts);
 printf("Created: #%d %s %s\n", $created->id, $created->firstName, $created->lastName);
 
 // 3) Update the email address
 $patch = new ContactUpdateOptions(email: 'finance@example.com');
 
-$updated = $billomat->contacts->update($created->id, $patch);
+$updated = $billomat->clients->contacts->update($created->id, $patch);
 var_dump($updated->email); // 'finance@example.com'
 
 // 4) Delete it again
-$billomat->contacts->delete($created->id);
+$billomat->clients->contacts->delete($created->id);
 ```

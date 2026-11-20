@@ -60,7 +60,7 @@ final class ListPagingTest extends TestCase
         $page = ['page' => 2, 'per_page' => 2];
         $filter = ['name' => 'x'];
 
-        yield 'contacts' => ['/contacts', 'contacts', 'contact', static fn (BillomatClient $b): Page => $b->contacts->listPage(9, $page), static fn (BillomatClient $b): Generator => $b->contacts->iterateAll(9, $filter, 2)];
+        yield 'contacts' => ['/contacts', 'contacts', 'contact', static fn (BillomatClient $b): Page => $b->clients->contacts->listPage(9, $page), static fn (BillomatClient $b): Generator => $b->clients->contacts->iterateAll(9, $filter, 2)];
         yield 'taxes' => ['/taxes', 'taxes', 'tax', static fn (BillomatClient $b): Page => $b->taxes->listPage($page), static fn (BillomatClient $b): Generator => $b->taxes->iterateAll($filter, 2)];
         yield 'templates' => ['/templates', 'templates', 'template', static fn (BillomatClient $b): Page => $b->templates->listPage($page), static fn (BillomatClient $b): Generator => $b->templates->iterateAll($filter, 2)];
         yield 'reminder texts' => ['/reminder-texts', 'reminder-texts', 'reminder-text', static fn (BillomatClient $b): Page => $b->reminderTexts->listPage($page), static fn (BillomatClient $b): Generator => $b->reminderTexts->iterateAll($filter, 2)];
@@ -114,7 +114,7 @@ final class ListPagingTest extends TestCase
      */
     public static function defaultIterators(): iterable
     {
-        yield 'contacts' => ['contacts', 'contact', static fn (BillomatClient $b): Generator => $b->contacts->iterateAll(9)];
+        yield 'contacts' => ['contacts', 'contact', static fn (BillomatClient $b): Generator => $b->clients->contacts->iterateAll(9)];
         yield 'taxes' => ['taxes', 'tax', static fn (BillomatClient $b): Generator => $b->taxes->iterateAll()];
         yield 'templates' => ['templates', 'template', static fn (BillomatClient $b): Generator => $b->templates->iterateAll()];
         yield 'reminder texts' => ['reminder-texts', 'reminder-text', static fn (BillomatClient $b): Generator => $b->reminderTexts->iterateAll()];
@@ -142,9 +142,9 @@ final class ListPagingTest extends TestCase
             $this->page('contacts', 'contact', [1], page: 1, perPage: 100, total: 1),
         );
 
-        (void) $billomat->contacts->list(9, ['client_id' => 1]);
-        (void) $billomat->contacts->listPage(9, ['client_id' => 1]);
-        foreach ($billomat->contacts->iterateAll(9, ['client_id' => 1]) as $contact) {
+        (void) $billomat->clients->contacts->list(9, ['client_id' => 1]);
+        (void) $billomat->clients->contacts->listPage(9, ['client_id' => 1]);
+        foreach ($billomat->clients->contacts->iterateAll(9, ['client_id' => 1]) as $contact) {
             self::assertSame(1, $contact->id);
         }
 

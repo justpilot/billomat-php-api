@@ -10,7 +10,6 @@ use Justpilot\Billomat\Api\ActivitiesApi;
 use Justpilot\Billomat\Api\ArticlesApi;
 use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Api\ConfirmationsApi;
-use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\CountriesApi;
 use Justpilot\Billomat\Api\CountryTaxesApi;
 use Justpilot\Billomat\Api\CreditNotesApi;
@@ -87,12 +86,9 @@ final class BillomatClient
         get => $this->inboxDocuments ??= new InboxDocumentsApi($this->http);
     }
 
-    // Stammdaten; Schlagworte und Attribute hängen an der jeweiligen Ressource, z. B. `$billomat->clients->tags`.
+    // Stammdaten; Ansprechpartner, Schlagworte und Attribute hängen an der jeweiligen Ressource, z. B. `$billomat->clients->contacts`.
     public private(set) ClientsApi $clients {
         get => $this->clients ??= new ClientsApi($this->http);
-    }
-    public private(set) ContactsApi $contacts {
-        get => $this->contacts ??= new ContactsApi($this->http);
     }
     public private(set) ArticlesApi $articles {
         get => $this->articles ??= new ArticlesApi($this->http);

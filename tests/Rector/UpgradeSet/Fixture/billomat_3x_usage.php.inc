@@ -3,6 +3,7 @@
 namespace Justpilot\Billomat\Tests\Rector\UpgradeSet\Fixture;
 
 use Justpilot\Billomat\Api\ArticleTagsApi;
+use Justpilot\Billomat\Api\ContactCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCommentsApi;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceEmailOptions;
@@ -39,6 +40,8 @@ final class Billomat3xUsage
         $this->billomat->clientPropertyValues->iterateAll(['client_id' => $id], 50);
         $this->billomat->reminderItems->listByReminder($id);
         $this->billomat->contacts->listByClient($id);
+        $this->billomat->contacts->create(new ContactCreateOptions(clientId: $id, firstName: 'Anna'));
+        $this->billomat->contacts->create(options: new ContactCreateOptions($id));
         $this->billomat->invoices->email($id, $email);
         $this->payments->list(['invoice_id' => $id]);
         $this->offerComments->listByOffer($id);
@@ -86,6 +89,7 @@ use Justpilot\Billomat\Api\MailOptions;
 use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\ReminderText;
+use Justpilot\Billomat\Api\ContactCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceTagCreateOptions;
 use Justpilot\Billomat\BillomatClient;
@@ -110,7 +114,9 @@ final class Billomat3xUsage
         $this->billomat->invoices->payments->list(filters: ['invoice_id' => $id, 'order_by' => 'date+DESC']);
         $this->billomat->clients->propertyValues->iterateAll(filters: ['client_id' => $id], pageSize: 50);
         $this->billomat->reminders->items->list($id);
-        $this->billomat->contacts->list($id);
+        $this->billomat->clients->contacts->list($id);
+        $this->billomat->clients->contacts->create($id, new ContactCreateOptions(firstName: 'Anna'));
+        $this->billomat->clients->contacts->create(parentId: $id, options: new ContactCreateOptions());
         $this->billomat->invoices->email($id, $email);
         $this->payments->list(filters: ['invoice_id' => $id]);
         $this->offerComments->list($id);
@@ -131,7 +137,7 @@ final class Billomat3xUsage
         $this->billomat->invoices->mail($id, new MailOptions(color: true));
 
         $offerId = $pdf->documentId;
-        $contacts = $this->billomat->contacts->list(parentId: $id, filters: ['per_page' => 10]);
+        $contacts = $this->billomat->clients->contacts->list(parentId: $id, filters: ['per_page' => 10]);
         $paid = $this->billomat->invoices->comments->list($id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT]));
     }
 

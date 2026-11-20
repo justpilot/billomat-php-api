@@ -43,7 +43,7 @@ Run your code style fixer afterwards; Rector does not sort imports.
 
 | 3.x | 4.0 |
 |---|---|
-| `$billomat->invoiceComments`, `$billomat->clientTags`, … (all 39 flat sub-resources) | `$billomat->invoices->comments`, `$billomat->clients->tags`, … |
+| `$billomat->invoiceComments`, `$billomat->clientTags`, … (all 39 flat sub-resources), `$billomat->contacts` | `$billomat->invoices->comments`, `$billomat->clients->tags`, …, `$billomat->clients->contacts` |
 | `$billomat->dunningLevels`, `DunningLevelsApi`, `DunningLevel` | `$billomat->reminderTexts`, `ReminderTextsApi`, `ReminderText` |
 | `listByInvoice($id)`, `listByOffer($id)`, … on sub-resources, `ContactsApi::listByClient()` | `list($id)` |
 | Named arguments `invoiceId:`, `offerId:`, `reminderId:`, `recurringId:`, … on comments, tags, items and e-mail receivers, `clientId:` on contacts | `parentId:` |
@@ -61,7 +61,7 @@ Run your code style fixer afterwards; Rector does not sort imports.
 | `$options->getItems()` on document create options | `$options->items` |
 | `$this->putEmptyResponse()` in `AbstractApi` subclasses | `$this->putVoid()` |
 | `pdf($id, $type, rawPdf: true)` / `pdf($id, $type, true)` on the document APIs | `pdfContent($id, $type)` (`rawPdf: false` is dropped) |
-| `create(new InvoicePaymentCreateOptions(invoiceId: $id, …))` and the other payment, comment, tag, property value and e-mail receiver options | `create($id, new InvoicePaymentCreateOptions(…))` |
+| `create(new InvoicePaymentCreateOptions(invoiceId: $id, …))` and the other payment, comment, tag, property value, e-mail receiver and contact options | `create($id, new InvoicePaymentCreateOptions(…))` |
 
 The set only touches calls it can attribute to the SDK: `$billomat->invoiceComments` is rewritten when
 Rector (via PHPStan) knows that `$billomat` is a `BillomatClient`. Untyped variables, values from a
@@ -394,7 +394,7 @@ echo $me->email;
 
 `contacts->list()`, `taxes->list()`, `templates->list()` and the item lists called their filter parameter
 `$query`, `search->query()` called it `$extraFilters`; it is `$filters` now, as on every other list
-method. The parent ID is `$parentId` on every sub-resource and on `contacts` (3.x: `$clientId`,
+method. The parent ID is `$parentId` on every sub-resource, contacts included (3.x: `$clientId`,
 `$invoiceId`, `$reminderId`, `$recurringId`, …). This only matters if you pass them by name, and the
 Rector set renames them:
 
@@ -406,7 +406,7 @@ $billomat->search->query('ACME', extraFilters: ['per_page' => 5]);
 
 // 4.0
 $billomat->taxes->list(filters: ['per_page' => 50]);
-$billomat->contacts->list(parentId: $id);
+$billomat->clients->contacts->list(parentId: $id);
 $billomat->search->query('ACME', filters: ['per_page' => 5]);
 ```
 
@@ -427,8 +427,8 @@ exists), cast the result to `(void)`:
 
 ## Sub-resources hang off their parent
 
-Items, payments, comments, tags, properties, property values and recurring e-mail receivers are no
-longer properties of `BillomatClient`. They are reached through their parent resource and created on
+Items, payments, comments, tags, properties, property values, recurring e-mail receivers and contacts
+are no longer properties of `BillomatClient`. They are reached through their parent resource and created on
 first access:
 
 ```php
@@ -475,6 +475,7 @@ $billomat->clients->tags->create($clientId, $options); // see "The parent ID is 
 | `$billomat->articleTags` | `$billomat->articles->tags` |
 | `$billomat->articleProperties` | `$billomat->articles->properties` |
 | `$billomat->articlePropertyValues` | `$billomat->articles->propertyValues` |
+| `$billomat->contacts` | `$billomat->clients->contacts` |
 | `$billomat->clientTags` | `$billomat->clients->tags` |
 | `$billomat->clientProperties` | `$billomat->clients->properties` |
 | `$billomat->clientPropertyValues` | `$billomat->clients->propertyValues` |
@@ -514,7 +515,7 @@ $billomat->contacts->listByClient($clientId);
 
 // 4.0
 $billomat->invoices->items->list($invoiceId, ['per_page' => 50]);
-$billomat->contacts->list($clientId);
+$billomat->clients->contacts->list($clientId);
 ```
 
 Payments and property values can be listed without a parent, so the parent ID is the optional first
@@ -555,8 +556,8 @@ The Rector set converts the 3.x calls; `null` as action keys is dropped.
 
 ### The parent ID is an argument of `create()`
 
-Payments, comments, tags, property values and recurring e-mail receivers take the parent ID as the first
-argument of `create()`, like items already did and like `list($parentId)`. The parent ID field is gone from
+Payments, comments, tags, property values, recurring e-mail receivers and contacts take the parent ID as
+the first argument of `create()`, like items already did and like `list($parentId)`. The parent ID field is gone from
 their create options (`invoiceId`, `offerId`, `clientId`, `recurringId`, …, and their `with…Id()` methods):
 
 ```php
@@ -564,11 +565,13 @@ their create options (`invoiceId`, `offerId`, `clientId`, `recurringId`, …, an
 $billomat->invoicePayments->create(new InvoicePaymentCreateOptions(invoiceId: $invoiceId, amount: 119.0));
 $billomat->clientTags->create(new ClientTagCreateOptions(clientId: $clientId, name: 'VIP'));
 $billomat->recurringEmailReceivers->create(new RecurringEmailReceiverCreateOptions(recurringId: $id, type: RecurringEmailReceiverType::CC, address: 'a@example.com'));
+$billomat->contacts->create(new ContactCreateOptions(clientId: $clientId, firstName: 'Erika'));
 
 // 4.0
 $billomat->invoices->payments->create($invoiceId, new InvoicePaymentCreateOptions(amount: Money::of('119')));
 $billomat->clients->tags->create($clientId, new ClientTagCreateOptions(name: 'VIP'));
 $billomat->recurrings->emailReceivers->create($id, new RecurringEmailReceiverCreateOptions(type: RecurringEmailReceiverType::CC, address: 'a@example.com'));
+$billomat->clients->contacts->create($clientId, new ContactCreateOptions(firstName: 'Erika'));
 ```
 
 Positional calls change too: `new InvoiceTagCreateOptions($invoiceId, 'VIP')` becomes

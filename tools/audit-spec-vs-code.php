@@ -453,7 +453,7 @@ function snakeCase(string $camel): string
 
 /**
  * Entfernt Parent-ID-Felder aus der Erwartungsliste für Items, Kommentare, Schlagworte,
- * Zahlungen und Empfänger — diese werden vom parent-API-Code (z.B.
+ * Zahlungen, Empfänger und Kontakte — diese werden vom parent-API-Code (z.B.
  * CreditNoteItemsApi::create($creditNoteId, …)) gesetzt und sind absichtlich nicht
  * als Property in der *Options-Klasse abgebildet.
  *
@@ -470,6 +470,7 @@ function filterParentIds(array $fieldNames, string $slug): array
         'schlagworte' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'article_id', 'client_id', 'supplier_id', 'recurring_id', 'incoming_id', 'letter_id'],
         'zahlungen' => ['invoice_id', 'credit_note_id', 'incoming_id'],
         'empfaenger' => ['recurring_id'],
+        'kontakte' => ['client_id'],
         'attribute' => ['client_id', 'article_id', 'supplier_id', 'incoming_id'],
     ];
 

@@ -7,7 +7,7 @@ Danke, dass du zu `justpilot/billomat-php-api` beitragen möchtest. Dieses Dokum
 1. Eröffne ein Issue (auch für Bugfixes), damit Scope und Ansatz vorab geklärt sind.
 2. Forke das Repository und erzeuge einen Feature-Branch mit sprechendem Namen, z. B. `feature/add-articles-resource` oder `fix/payment-list-pagination`.
 3. Halte Commits klein und thematisch fokussiert. Englische Commit-Messages im Imperativ („Add articles list endpoint“).
-4. Reiche einen Pull Request gegen `main` ein und beschreibe das Warum (nicht nur das Was). Verweise im PR-Text auf das Issue.
+4. Reiche einen Pull Request gegen `3.x` ein (dieser Branch bekommt nur noch Sicherheitsfixes; alles andere geht nach 4.x auf `main`) und beschreibe das Warum (nicht nur das Was). Verweise im PR-Text auf das Issue.
 5. Lokale Qualitätspipeline (`composer ci`) muss grün sein, bevor Review angefordert wird.
 
 ## Coding-Standards

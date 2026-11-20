@@ -67,6 +67,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DeliveryNoteComment::class)]
 #[CoversClass(FreeText::class)]
 #[CoversClass(InboxDocument::class)]
+#[UsesClass(InboxDocumentType::class)]
 #[CoversClass(Incoming::class)]
 #[CoversClass(IncomingPayment::class)]
 #[CoversClass(InvoiceComment::class)]

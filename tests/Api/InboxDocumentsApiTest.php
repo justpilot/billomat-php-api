@@ -10,6 +10,7 @@ use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\InboxDocument;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -25,6 +26,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(InboxDocumentsApi::class)]
 #[CoversClass(InboxDocumentCreateOptions::class)]
 #[CoversClass(InboxDocument::class)]
+#[UsesClass(InboxDocumentType::class)]
 #[UsesClass(BillomatConfig::class)]
 #[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]

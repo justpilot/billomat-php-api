@@ -1,7 +1,7 @@
 # Billomat PHP SDK
 
 [![CI](https://github.com/justpilot/billomat-php-api/actions/workflows/ci.yml/badge.svg?branch=4.x)](https://github.com/justpilot/billomat-php-api/actions/workflows/ci.yml)
-[![Packagist Version](https://img.shields.io/packagist/v/justpilot/billomat-php-api?include_prereleases)](https://packagist.org/packages/justpilot/billomat-php-api)
+[![Packagist Version](https://img.shields.io/packagist/v/justpilot/billomat-php-api)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![Downloads](https://img.shields.io/packagist/dt/justpilot/billomat-php-api)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![PHP](https://img.shields.io/packagist/dependency-v/justpilot/billomat-php-api/php)](https://www.php.net/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
@@ -18,10 +18,10 @@ A modern, fully typed PHP 8.5 SDK for the [Billomat API](https://www.billomat.co
 ## Installation
 
 ```bash
-composer require justpilot/billomat-php-api:^4.0@beta
+composer require justpilot/billomat-php-api
 ```
 
-4.0 is in beta (API frozen); without the constraint Composer installs the latest stable 3.x release.
+Coming from 3.x? [UPGRADE-4.0.md](UPGRADE-4.0.md) lists every change and ships a Rector set for the mechanical part.
 
 The SDK needs a PSR-18 client and PSR-17 factories. `php-http/discovery` installs one if none is present; otherwise pick one:
 
@@ -88,8 +88,8 @@ The full documentation is also published at [billomat-php.justpilot.io](https://
 
 | SDK | PHP | HTTP client | Status |
 |---|---|---|---|
-| 4.x | 8.5+ | any PSR-18 client | beta, public API frozen |
-| 3.x | 8.4+ | Symfony HttpClient 8.1+ | security fixes until 4.0.0 |
+| 4.x | 8.5+ | any PSR-18 client | active |
+| 3.x | 8.4+ | Symfony HttpClient 8.1+ | security fixes until 2027-05-31 |
 
 ## Contributing
 

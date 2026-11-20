@@ -133,17 +133,12 @@ jobs:
       - name: Install roave/backward-compatibility-check
         run: composer global require --no-progress roave/backward-compatibility-check:^8.26
 
-      # Gegen eine Alpha nur zur Information; ab dem ersten Beta-Tag bricht der Job bei jedem BC-Bruch ab.
+      # Jeder BC-Bruch gegen das letzte 4.x-Tag bricht den Job ab; akzeptierte Funde stehen in der Baseline.
       - name: Compare against the latest 4.x tag
         run: |
           base=$(git -c versionsort.suffix=- tag --list 'v4.*' --sort=-v:refname | head -n 1)
           echo "Comparing against ${base}"
-          bin="$(composer global config bin-dir --absolute)/roave-backward-compatibility-check"
-          if [[ "${base}" == *-alpha* ]]; then
-            "${bin}" --from="${base}" --format=github-actions || echo "::notice::${base} is an alpha: BC breaks are informational until 4.0.0-beta.1."
-          else
-            "${bin}" --from="${base}" --format=github-actions
-          fi
+          "$(composer global config bin-dir --absolute)/roave-backward-compatibility-check" --from="${base}" --format=github-actions
 
   mutation:
     name: Mutation Testing

@@ -6,6 +6,14 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-11-20
+
+First stable release of 4.0, a rewrite on PHP 8.5: models and options generated from Billomat's API documentation, any PSR-18 client instead of Symfony HttpClient, amounts as exact `Money`, sub-resources under their parent (`$billomat->invoices->comments`), retries and rate-limit handling, PSR-3 logging and PSR-14 events, and a parser for incoming webhooks. The public API now follows Semantic Versioning: breaking changes only come with 5.0 (see [Backward compatibility](docs/concepts/backward-compatibility.md)).
+
+Coming from 3.x: [UPGRADE-4.0.md](UPGRADE-4.0.md) lists every change with a before/after example, and the Rector set `rector/upgrade-4.0.php` does the mechanical part. The sections of the 4.0 pre-releases below describe the changes in detail. 3.x gets security fixes until 2027-05-31.
+
+The entries below are the changes since 4.0.0-beta.2. The inbox metadata fix and the entries under *Changed* (except `$extra`) break code written against a beta; UPGRADE-4.0.md covers each of them.
+
 ### Fixed
 
 - **Inbox document metadata.** `InboxDocumentCreateOptions` sent `metadata` as a flat array, which Billomat rejects with HTTP 400 ("Unknown meta data field"), and `InboxDocument::$metadata` was a `?string` that lost the values. Both are a key → value map now (`array<string, string>`), sent as Billomat's `{"data": [{"key": …, "value": …}]}`; the keys are the new `InboxDocumentMetadataKey` enum, and unknown keys throw `InvalidArgumentException` before the request. `documentType` is the new `InboxDocumentType` enum on the options and the model. Measured in the sandbox. See [UPGRADE-4.0.md](UPGRADE-4.0.md#inboxdocument-metadata-is-a-key--value-map).
@@ -182,6 +190,17 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
   - The read-model properties Billomat no longer returns: `Article::$unit`/`$purchasePriceCurrencyCode`/`$categoryId`, `Client::$customerportalUrl`, `Contact::$note`, `*Property::$position`, `TaxRate::$accountId`, `ReminderText::$dueDays`, `Country::$nameDe`/`$eu`, `User::$phone`/`$mobile`/`$fax`, `Invoice::$customerportalUrl`, `CreditNote::$customerportalUrl`, `Offer`/`Confirmation::$discountRate`/`$discountDate`/`$discountDays`/`$discountAmount`/`$customerportalUrl`, `Letter::$letterNumber`/`$number`/`$numberPre`/`$numberLength`/`$note`/`$customerportalUrl`, `Reminder::$reminderNumber`/`$number`/`$numberPre`/`$numberLength`/`$totalNet`/`$quote`, `Recurring::$numberPre`, `Incoming::$supplyDate`/`$dueDays`/`$paidAt`/`$intro`, `DeliveryNote::$totalGross`/`$totalNet`/`$netGross`/`$reduction`/`$totalGrossUnreduced`/`$totalNetUnreduced`/`$currencyCode`/`$quote`/`$customerportalUrl`, `$created` on `InvoiceItem`/`OfferItem`/`CreditNoteItem`/`ConfirmationItem`, `ReminderItem::$totalGross`/`$totalNet`/`$created` and `DeliveryNoteItem::$unitPrice`/`$taxName`/`$taxRate`/`$reduction`/`$totalGross`/`$totalNet`/`$totalGrossUnreduced`/`$totalNetUnreduced`/`$created`. They also disappear from the models' constructors and `toArray()`. Fields that are writable stay in the `*CreateOptions`/`*UpdateOptions`.
 - `AbstractApi::mapHttpException()` and `HttpException::fromResponse()` (Symfony-specific; the mapping now lives in `BillomatHttpClient`).
 - **BC break: status methods for endpoints Billomat doesn't have.** `OffersApi::undo()` and `ConfirmationsApi::undo()` are gone (`PUT …/undo` answers 404); use `uncancel()` or `unclear()`. `DeliveryNotesApi` and `LettersApi` lose `cancel()`, `clear()` and `undo()`: Billomat answers `cancel` with 400 ("cancellation not supported") and `clear`/`undo` with 404, so these methods could never succeed.
+
+## [3.4.1] - 2026-11-07
+
+### Fixed
+- **`email()` und `mail()` werfen nach erfolgreichem Versand keine Exception mehr.** Billomat beantwortet `POST /{dokumente}/{id}/email` und `/mail` mit `200 OK` und leerem Body (`text/html`); das SDK hat ihn als JSON dekodiert und eine `JsonException` geworfen, obwohl die E-Mail bzw. der Brief verschickt war. Wer daraufhin erneut gesendet hat, hat das Dokument doppelt verschickt. Betrifft `email()` bei Rechnungen, Angeboten, Auftragsbestätigungen, Gutschriften, Lieferscheinen, Briefen und Mahnungen sowie `invoices->mail()`. HTTP-Fehler werden weiterhin als Exception geworfen.
+- **Ein `+` in Filterwerten wird als `%2B` gesendet.** Bisher ging es unkodiert raus, und Billomat liest ein unkodiertes `+` als Leerzeichen: `clients->list(['email' => 'plus+test@example.com'])` fand nichts, aus `+49 …` wurde ` 49 …`. In `order_by` wird das `+` zwischen Feld und Richtung (`date+DESC`) jetzt als Leerzeichen gesendet (`date%20DESC`), das akzeptiert Billomat; `%2B` lehnt es dort ab. `'order_by' => 'date+DESC'` funktioniert weiter.
+- **`0000-00-00` und ungültige Datumswerte wie `2024-02-30` ergeben `null`.** PHP lehnt sie nicht ab, sondern rollt auf `-0001-11-30` bzw. `2024-03-01` über; jedes Datumsfeld der Read-Models bekam so ein falsches Datum.
+- **`iterateAll()` bricht nicht mehr nach der ersten Seite ab, wenn Billomat die Seitengröße kappt.** Verglichen wurde die Anzahl der Einträge mit dem angefragten `$pageSize` statt mit dem `@per_page` der Antwort, `iterateAll(pageSize: 2000)` lieferte so nur die ersten 1000 Einträge. `$pageSize` wird jetzt auf 1–1000 begrenzt, eine leere Seite beendet die Iteration.
+
+### Security
+- **`symfony/http-client` mindestens `^8.1.11`.** Die Version behebt GHSA-gq53-v8w2-gjhj (`ScopingHttpClient` schickt Zugangsdaten an fremde Origins) und GHSA-c7hm-wqwp-f9v8 (`NoPrivateNetworkHttpClient`, DNS-Rebinding). Das SDK nutzt keinen der beiden Clients, die Untergrenze verhindert aber, dass Projekte eine betroffene Version installieren.
 
 ## [3.4.0] - 2026-10-24
 

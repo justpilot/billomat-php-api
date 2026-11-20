@@ -201,7 +201,7 @@ PHPStan runs without a baseline: every finding fails CI and is fixed in the code
 1. **Tests** on PHP 8.5 (required) and 8.6 (experimental, `continue-on-error`).
 2. **PSR-18 compat** — a smoke test with Guzzle and without Symfony (`.github/compat/guzzle`).
 3. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer generate:check`, `composer audit`.
-4. **Backward compatibility** — [`roave/backward-compatibility-check`](https://github.com/Roave/BackwardCompatibilityCheck) compares the public API against the latest `v4.*` tag. Accepted findings go into `.roave-backward-compatibility-check.xml`. While the latest tag is an alpha the findings are informational; from `v4.0.0-beta.1` on every BC break fails the job.
+4. **Backward compatibility** — [`roave/backward-compatibility-check`](https://github.com/Roave/BackwardCompatibilityCheck) compares the public API against the latest `v4.*` tag. Accepted findings go into `.roave-backward-compatibility-check.xml`; every other BC break fails the job.
 5. **Links** (`.github/workflows/links.yml`, separate workflow) — [lychee](https://lychee.cli.rs) checks the links in `docs/`, the root Markdown files and the Billomat links in the docblocks (`src/`, `tools/codegen/definitions/`), configured in `lychee.toml`. It also runs weekly to catch links that break without a change on our side.
 6. **Mutation testing** — on PRs only the changed lines (`--git-diff-lines`, 90 % MSI); on `main`/`4.x` the full run with the thresholds from `infection.json5`.
 

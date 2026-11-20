@@ -1,7 +1,7 @@
 # Upgrading from 3.x to 4.0
 
 This guide lists every backward-incompatible change in 4.0 with a before/after example.
-From 4.0.0-beta.1 on the public API is frozen; a later break is only made to fix a bug and is added here. The [CHANGELOG](CHANGELOG.md) has the full list of changes.
+It also covers the breaks between the 4.0 betas and 4.0.0, so it applies to code written against a beta as well. The [CHANGELOG](CHANGELOG.md) has the full list of changes.
 
 Recommended order:
 
@@ -19,7 +19,7 @@ run the set **before** you change anything by hand:
 
 ```bash
 composer require --dev rector/rector
-composer require justpilot/billomat-php-api:^4.0@beta   # ^4.0 once 4.0.0 is released
+composer require justpilot/billomat-php-api:^4.0
 
 vendor/bin/rector process src tests --config vendor/justpilot/billomat-php-api/rector/upgrade-4.0.php --dry-run
 vendor/bin/rector process src tests --config vendor/justpilot/billomat-php-api/rector/upgrade-4.0.php
@@ -94,6 +94,15 @@ These changes need a decision and are not automated. The sections below describe
 - Exceptions you extended or built yourself: the leaf exceptions are `final`, the `HttpException`
   constructor is `@internal`.
 - `DocumentPdf` throws on missing fields and invalid base64 where the PDF models fell back to `0`/`''`.
+- Status and endpoint methods without a Billomat endpoint are removed: see the sections below for the
+  replacement of each one.
+- Item updates take `*ItemUpdateOptions`, not the create options.
+- Read-model IDs are `int`: drop `null` checks on `$id`; read models you build yourself take only the
+  required fields positionally, everything else by name.
+- `users->getMyself()` returns `User` and is never `null`.
+- `get()` throws `UnexpectedResponseException` on an unexpected response instead of returning `null`.
+- Retries are on by default; pass `RetryPolicy::none()` to keep 3.x behaviour.
+- `ClientCreateOptions::$dunningRun` defaults to `null` instead of `false`.
 - PSR-18 setup, `MockHttpClient` in tests, exception handling, `#[\NoDiscard]`, `BillomatConfig` validation.
 
 ## PHP 8.5 is required

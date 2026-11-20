@@ -25,7 +25,7 @@ final class SubResourceMap
     /**
      * Klassen, die ihren Namen behalten, deren `listBy{Parent}()` aber `list()` und deren Parent-ID-Parameter `$parentId` heißt.
      */
-    private const array KEPT_LIST_BY_PARENT = ['ReminderItemsApi', 'RecurringEmailReceiversApi'];
+    private const array KEPT_LIST_BY_PARENT = ['ReminderItemsApi', 'RecurringEmailReceiversApi', 'ContactsApi'];
 
     /**
      * Klassen, deren Listen-Methoden die Parent-ID als neuen optionalen ersten Parameter bekommen haben.
@@ -78,6 +78,7 @@ final class SubResourceMap
         'supplierPropertyValues' => ['SupplierPropertyValuesApi', 'suppliers', 'SuppliersApi', 'propertyValues', 'PropertyValuesApi'],
         'userProperties' => ['UserPropertiesApi', 'users', 'UsersApi', 'properties', 'PropertiesApi'],
         'dunningLevels' => ['DunningLevelsApi', 'reminderTexts', 'ReminderTextsApi', null, 'ReminderTextsApi'],
+        'contacts' => ['ContactsApi', 'clients', 'ClientsApi', 'contacts', 'ContactsApi'],
     ];
 
     /**

@@ -47,11 +47,12 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Kontakts.'],
+        // Die Kunden-ID übergibt `ContactsApi::create()` als eigenes Argument; ändern lässt sie sich nicht.
         'client_id' => [
+            'type' => 'int',
+            'readOnly' => true,
             'doc' => 'ID des Kunden, zu dem der Kontakt gehört.',
             'model' => ['nonNull' => true],
-            'create' => ['constructor' => true],
-            'update' => ['skip' => true],
         ],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Kontakts.'],
         'label' => ['doc' => 'Bezeichnung des Kontakts.'],

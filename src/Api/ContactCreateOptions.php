@@ -19,13 +19,6 @@ final readonly class ContactCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Kunden, zu dem der Kontakt gehört.
-         *
-         * Billomat-Feld: client_id
-         * Typ: INT
-         */
-        public int $clientId,
-        /**
          * Bezeichnung des Kontakts.
          *
          * Billomat-Feld: label
@@ -143,12 +136,6 @@ final readonly class ContactCreateOptions implements WriteOptions
     ) {
     }
 
-    /** Kopie mit geändertem `clientId`. */
-    public function withClientId(int $clientId): self
-    {
-        return clone($this, ['clientId' => $clientId]);
-    }
-
     /** Kopie mit geändertem `label`. */
     public function withLabel(?string $label): self
     {
@@ -253,7 +240,6 @@ final readonly class ContactCreateOptions implements WriteOptions
     public function toArray(): array
     {
         return array_filter([
-            'client_id' => $this->clientId,
             'label' => $this->label,
             'salutation' => $this->salutation,
             'first_name' => $this->firstName,

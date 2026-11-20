@@ -7,7 +7,7 @@ Every Billomat resource is a property on `BillomatClient`; sub-resources hang of
 | Resource | Access | Docs |
 |---|---|---|
 | Clients | `$billomat->clients`, `->tags`, `->properties`, `->propertyValues` | [clients.md](clients.md), [client-tags.md](client-tags.md) |
-| Contacts | `$billomat->contacts` | [contacts.md](contacts.md) |
+| Contacts | `$billomat->clients->contacts` | [contacts.md](contacts.md) |
 | Suppliers | `$billomat->suppliers`, `->tags`, `->properties`, `->propertyValues` | [suppliers.md](suppliers.md) |
 | Articles | `$billomat->articles`, `->tags`, `->properties`, `->propertyValues` | [articles.md](articles.md) |
 | Property definitions | `->properties` on clients, suppliers, articles, incomings and users | [properties.md](properties.md) |

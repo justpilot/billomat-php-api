@@ -14,7 +14,7 @@ use Justpilot\Billomat\Pagination\Page;
 use NoDiscard;
 
 /**
- * API-Wrapper für Kunden-Ansprechpartner (Contacts).
+ * API-Wrapper für Kunden-Ansprechpartner (Contacts), erreichbar als `$billomat->clients->contacts`.
  *
  * Doku: https://www.billomat.com/en/api/clients/contacts/
  *
@@ -33,13 +33,13 @@ final class ContactsApi extends AbstractApi
     /**
      * Listet die Ansprechpartner eines Kunden.
      *
-     * @param int                                           $parentId ID des Kunden (`client_id`)
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param int                                                             $parentId ID des Kunden (`client_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  Sortierung, Seite, …
      *
      * @return list<Contact>
      */
     #[NoDiscard]
-    public function list(int $parentId, array $filters = []): array
+    public function list(int $parentId, SubResourceFilter|array $filters = []): array
     {
         return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters));
     }
@@ -47,13 +47,13 @@ final class ContactsApi extends AbstractApi
     /**
      * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
      *
-     * @param int                                           $parentId ID des Kunden (`client_id`)
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param int                                                             $parentId ID des Kunden (`client_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  Sortierung, Seite, …
      *
      * @return Page<Contact>
      */
     #[NoDiscard]
-    public function listPage(int $parentId, array $filters = []): Page
+    public function listPage(int $parentId, SubResourceFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters));
     }
@@ -61,13 +61,13 @@ final class ContactsApi extends AbstractApi
     /**
      * Iteriert lazy über alle Ansprechpartner eines Kunden.
      *
-     * @param int                                           $parentId ID des Kunden (`client_id`)
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param int                                                             $parentId ID des Kunden (`client_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  Sortierung, Seite, …
      *
      * @return Generator<int, Contact>
      */
     #[NoDiscard]
-    public function iterateAll(int $parentId, array $filters = [], int $pageSize = 100): Generator
+    public function iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters), $pageSize);
     }
@@ -90,13 +90,17 @@ final class ContactsApi extends AbstractApi
     }
 
     /**
+     * Legt einen Ansprechpartner bei einem Kunden an.
+     *
+     * @param int $parentId ID des Kunden (`client_id`)
+     *
      * @throws ValidationException
      * @throws AuthenticationException
      * @throws HttpException
      */
-    public function create(ContactCreateOptions $options): Contact
+    public function create(int $parentId, ContactCreateOptions $options): Contact
     {
-        $payload = ['contact' => $options->toArray()];
+        $payload = ['contact' => [...$options->toArray(), 'client_id' => $parentId]];
 
         $data = $this->postJson('/contacts', $payload);
 
@@ -136,13 +140,13 @@ final class ContactsApi extends AbstractApi
     /**
      * `client_id` ist beim Listen Pflicht und hat Vorrang vor einem gleichnamigen Filter.
      *
-     * @param array<string, scalar|array<scalar|null>|null> $filters
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return array<string, scalar|array<scalar|null>|null>
      */
-    private function clientFilter(int $parentId, array $filters): array
+    private function clientFilter(int $parentId, SubResourceFilter|array $filters): array
     {
-        return ['client_id' => $parentId] + $filters;
+        return ['client_id' => $parentId] + self::filterQuery($filters);
     }
 
     /**

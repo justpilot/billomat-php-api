@@ -15,7 +15,7 @@ final class ContactCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesNameAndWww(): void
     {
-        $options = new ContactCreateOptions(clientId: 42, name: 'Buchhaltung GmbH', www: 'example.com');
+        $options = new ContactCreateOptions(name: 'Buchhaltung GmbH', www: 'example.com');
 
         $payload = $options->toArray();
 
@@ -24,10 +24,8 @@ final class ContactCreateOptionsTest extends TestCase
     }
 
     #[Test]
-    public function minimalPayloadHasOnlyClientId(): void
+    public function emptyOptionsSendNothingTheClientIdIsAnArgumentOfCreate(): void
     {
-        $options = new ContactCreateOptions(clientId: 1);
-
-        self::assertSame(['client_id' => 1], $options->toArray());
+        self::assertSame([], new ContactCreateOptions()->toArray());
     }
 }

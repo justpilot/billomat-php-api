@@ -171,7 +171,7 @@ final class ActionEndpointsTest extends TestCase
      */
     public static function avatars(): iterable
     {
-        yield 'contacts' => ['contacts', static fn (BillomatClient $b, ?int $size): string => $b->contacts->avatar(4, $size)];
+        yield 'contacts' => ['contacts', static fn (BillomatClient $b, ?int $size): string => $b->clients->contacts->avatar(4, $size)];
         yield 'users' => ['users', static fn (BillomatClient $b, ?int $size): string => $b->users->avatar(4, $size)];
     }
 

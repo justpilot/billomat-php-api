@@ -109,7 +109,7 @@ final class BillomatClientTest extends TestCase
         $client = BillomatClient::create(billomatId: 'mycompany', apiKey: 'k', httpClient: new Psr18Client(new MockHttpClient()));
         $properties = new ReflectionObject($client)->getProperties(ReflectionProperty::IS_PUBLIC);
 
-        self::assertCount(30, $properties);
+        self::assertCount(29, $properties);
         foreach ($properties as $property) {
             // Vor dem ersten Zugriff existiert die API noch nicht.
             self::assertFalse($property->isInitialized($client), $property->name);

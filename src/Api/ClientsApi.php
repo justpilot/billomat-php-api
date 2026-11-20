@@ -33,6 +33,13 @@ use NoDiscard;
 final class ClientsApi extends AbstractApi
 {
     /**
+     * Ansprechpartner der Kunden, siehe {@see ContactsApi}.
+     */
+    public private(set) ContactsApi $contacts {
+        get => $this->contacts ??= new ContactsApi($this->http);
+    }
+
+    /**
      * Schlagworte, siehe {@see TagsApi}.
      *
      * @var TagsApi<ClientTag, ClientTagCloudEntry, ClientTagCreateOptions>

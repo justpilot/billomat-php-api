@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![Packagist](https://img.shields.io/badge/packagist-justpilot%2Fbillomat--php--api-orange.svg)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
-[![codecov](https://codecov.io/gh/justpilot/billomat-php-api/branch/main/graph/badge.svg)](https://codecov.io/gh/justpilot/billomat-php-api)
+[![codecov](https://codecov.io/gh/justpilot/billomat-php-api/branch/3.x/graph/badge.svg)](https://codecov.io/gh/justpilot/billomat-php-api)
 
 **Sprache / Language:** Deutsch (diese Datei) · [English](README.en.md)
 
@@ -13,7 +13,7 @@ Modernes, typisiertes PHP 8.4+ SDK für die [Billomat-API](https://www.billomat.
 > Unoffizielles SDK. Dieses Projekt steht in keiner offiziellen Verbindung zur Billomat GmbH und wird unabhängig entwickelt und gepflegt.
 
 > [!NOTE]
-> **4.0 ist als Vorabversion erschienen** ([`v4.0.0-alpha.1`](https://github.com/justpilot/billomat-php-api/releases/tag/v4.0.0-alpha.1)): PHP 8.5, beliebiger PSR-18-Client, exakte Beträge statt `float`. Die englische Doku zu 4.0 steht auf [billomat-php.justpilot.io](https://billomat-php.justpilot.io), der Umstieg in [UPGRADE-4.0.md](https://github.com/justpilot/billomat-php-api/blob/4.x/UPGRADE-4.0.md). Diese README beschreibt weiterhin 3.x.
+> **4.0 ist erschienen** ([`v4.0.0`](https://github.com/justpilot/billomat-php-api/releases/tag/v4.0.0)): PHP 8.5, beliebiger PSR-18-Client, exakte Beträge statt `float`. Die englische Doku zu 4.0 steht auf [billomat-php.justpilot.io](https://billomat-php.justpilot.io), der Umstieg in [UPGRADE-4.0.md](https://github.com/justpilot/billomat-php-api/blob/v4.0.0/UPGRADE-4.0.md). Diese README beschreibt 3.x; 3.x bekommt Sicherheitsupdates bis 2027-05-31.
 
 ## Inhalt
 

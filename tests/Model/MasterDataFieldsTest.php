@@ -270,4 +270,17 @@ final class MasterDataFieldsTest extends TestCase
             self::assertNull($props[$property], $property);
         }
     }
+
+    /**
+     * Die Länder- und Währungslisten liefern `code`, die Einzelabfragen teils `country_code`/`currency_code`.
+     * `code` hat Vorrang.
+     */
+    #[Test]
+    public function codeWinsOverTheLongKey(): void
+    {
+        self::assertSame('DE', Country::fromArray(['code' => 'DE', 'country_code' => 'AT'])->code);
+        self::assertSame('AT', Country::fromArray(['country_code' => 'AT'])->code);
+        self::assertSame('EUR', Currency::fromArray(['code' => 'EUR', 'currency_code' => 'CHF'])->code);
+        self::assertSame('CHF', Currency::fromArray(['currency_code' => 'CHF'])->code);
+    }
 }

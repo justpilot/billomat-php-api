@@ -50,8 +50,8 @@ final class InvoicePaymentTest extends TestCase
     {
         $payment = new InvoicePayment(
             id: 10,
-            amount: Money::of('89.5'),
             invoiceId: 200,
+            amount: Money::of('89.5'),
             date: new DateTimeImmutable('2025-03-01'),
             type: PaymentType::CASH,
             comment: 'Barzahlung',

@@ -29,6 +29,8 @@ Every error the SDK throws extends `Justpilot\Billomat\Exception\BillomatExcepti
 | `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, but the body doesn't match the expected structure (since 3.2). |
 | `InvalidWebhookException` | `src/Exception/InvalidWebhookException.php` | An incoming webhook request couldn't be parsed (see [Webhooks](concepts/webhooks.md#receiving-webhooks-with-the-sdk)). |
 
+All classes except `BillomatException` and `HttpException` are `final`: catch them, don't extend them. The SDK creates the exceptions itself; their constructors are not part of the [BC promise](concepts/backward-compatibility.md). To test your own error handling, let a mock PSR-18 client return the status code (see [Testing](testing.md)).
+
 ## Mapping HTTP status → exception
 
 `BillomatHttpClient::request()` (see `src/Http/BillomatHttpClient.php`) turns every response with status ≥ 400 into an SDK exception — only after the automatic retries (see [HTTP layer](advanced/http-layer.md#retries-and-rate-limits)) are exhausted:

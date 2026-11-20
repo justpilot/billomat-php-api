@@ -49,6 +49,12 @@ final readonly class Role
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * @var array<string, mixed>
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -77,6 +83,11 @@ final readonly class Role
             permissions: ListCaster::toEnumMap($areas, AccessLevel::class),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
+            extra: array_filter(
+                $data,
+                static fn (string|int $key): bool => !self::isArea((string) $key) && !\in_array($key, ['id', 'name', 'created', 'updated'], true),
+                ARRAY_FILTER_USE_KEY,
+            ),
         );
     }
 
@@ -89,6 +100,7 @@ final readonly class Role
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             ...array_map(static fn (AccessLevel $level): string => $level->value, $this->permissions),

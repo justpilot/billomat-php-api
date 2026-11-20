@@ -12,6 +12,11 @@ use Throwable;
  */
 class HttpException extends BillomatException
 {
+    /**
+     * @internal Das SDK erzeugt die Exception selbst; Parameter und Reihenfolge fallen nicht unter das
+     *           BC-Versprechen. Zum Testen eigener Fehlerbehandlung einen PSR-18-Mock-Client mit der
+     *           passenden Antwort nutzen.
+     */
     public function __construct(
         string $message,
         private readonly int $statusCode,

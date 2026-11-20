@@ -149,6 +149,8 @@ enum WebhookEvent: string
 
     /**
      * Schlüssel des Envelopes im Body, wie in der REST-API: `invoice_payment` → `invoice-payment`.
+     *
+     * @internal für {@see WebhookPayload}; zum Auswerten eines Webhooks reicht `WebhookPayload::fromJson()`
      */
     public function envelopeKey(): string
     {

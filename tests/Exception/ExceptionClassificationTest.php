@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Exception;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\BillomatException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\InvalidWebhookException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\RateLimitException;
 use Justpilot\Billomat\Exception\TransportException;
@@ -25,6 +26,7 @@ use RuntimeException;
 #[CoversClass(BillomatException::class)]
 #[CoversClass(HttpException::class)]
 #[CoversClass(TransportException::class)]
+#[CoversClass(InvalidWebhookException::class)]
 final class ExceptionClassificationTest extends TestCase
 {
     #[Test]
@@ -56,6 +58,7 @@ final class ExceptionClassificationTest extends TestCase
         yield 'ohne previous' => [new TransportException(''), true, true];
         yield 'ungültiger Request' => [new TransportException('', 0, self::requestException()), false, false];
         yield 'unerwartete Antwort' => [new UnexpectedResponseException(''), false, true];
+        yield 'ungültiger Webhook' => [new InvalidWebhookException(''), false, false];
     }
 
     #[Test]

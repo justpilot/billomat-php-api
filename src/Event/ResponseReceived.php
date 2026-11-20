@@ -14,6 +14,9 @@ use Psr\Http\Message\ResponseInterface;
  */
 final readonly class ResponseReceived
 {
+    /**
+     * @internal das SDK erzeugt die Events; neue Felder können in einem Minor-Release dazukommen
+     */
     public function __construct(
         public RequestInterface $request,
         public ResponseInterface $response,

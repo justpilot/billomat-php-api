@@ -11,6 +11,6 @@ namespace Justpilot\Billomat\Exception;
  *  - 401 Unauthorized
  *  - 403 Forbidden
  */
-class AuthenticationException extends HttpException
+final class AuthenticationException extends HttpException
 {
 }

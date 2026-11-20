@@ -15,6 +15,9 @@ use Psr\Http\Message\ResponseInterface;
  */
 final readonly class RetryScheduled
 {
+    /**
+     * @internal das SDK erzeugt die Events; neue Felder können in einem Minor-Release dazukommen
+     */
     public function __construct(
         public RequestInterface $request,
         /** Nummer des fehlgeschlagenen Versuchs, ab 1. */

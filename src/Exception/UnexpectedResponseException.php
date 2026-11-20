@@ -10,6 +10,6 @@ namespace Justpilot\Billomat\Exception;
  *
  * Sollte in der Praxis nicht auftreten; deutet meist auf eine geänderte API hin.
  */
-class UnexpectedResponseException extends BillomatException
+final class UnexpectedResponseException extends BillomatException
 {
 }

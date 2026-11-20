@@ -12,6 +12,6 @@ namespace Justpilot\Billomat\Exception;
  * Sonst landet diese Exception beim Aufrufer, der mit {@see getRetryAfter()} planen kann.
  * Kommt sie beim Aufrufer an, sind die Retries ausgeschöpft.
  */
-class RateLimitException extends HttpException
+final class RateLimitException extends HttpException
 {
 }

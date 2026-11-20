@@ -10,6 +10,6 @@ namespace Justpilot\Billomat\Exception;
  * Typischer Statuscode:
  *  - 404 Not Found
  */
-class NotFoundException extends HttpException
+final class NotFoundException extends HttpException
 {
 }

@@ -22,6 +22,7 @@ use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\FreeTextType;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\ItemType;
@@ -154,8 +155,9 @@ final class MasterDataFieldsTest extends TestCase
         ];
         yield 'InboxDocument' => [
             InboxDocument::fromArray(...),
-            ['id' => '1', 'user_id' => '42', 'document_type' => 'Text', 'page_count' => '42', 'file_url' => 'Text', 'metadata' => 'Text'],
-            ['userId' => 42, 'documentType' => 'Text', 'pageCount' => 42, 'fileUrl' => 'Text', 'metadata' => 'Text'],
+            // `metadata` ist eine Map statt nullable, eigener Test in InboxDocumentTest.
+            ['id' => '1', 'user_id' => '42', 'document_type' => 'INVOICE', 'page_count' => '42', 'file_url' => 'Text'],
+            ['userId' => 42, 'documentType' => InboxDocumentType::INVOICE, 'pageCount' => 42, 'fileUrl' => 'Text'],
         ];
         yield 'Incoming' => [
             Incoming::fromArray(...),

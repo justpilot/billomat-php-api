@@ -13,6 +13,9 @@ use Psr\Http\Message\RequestInterface;
  */
 final readonly class RequestStarted
 {
+    /**
+     * @internal das SDK erzeugt die Events; neue Felder können in einem Minor-Release dazukommen
+     */
     public function __construct(
         public RequestInterface $request,
         /** Nummer des Versuchs, ab 1. */

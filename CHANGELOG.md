@@ -6,7 +6,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Fixed
+
+- **Inbox document metadata.** `InboxDocumentCreateOptions` sent `metadata` as a flat array, which Billomat rejects with HTTP 400 ("Unknown meta data field"), and `InboxDocument::$metadata` was a `?string` that lost the values. Both are a key → value map now (`array<string, string>`), sent as Billomat's `{"data": [{"key": …, "value": …}]}`; the keys are the new `InboxDocumentMetadataKey` enum, and unknown keys throw `InvalidArgumentException` before the request. `documentType` is the new `InboxDocumentType` enum on the options and the model. Measured in the sandbox. See [UPGRADE-4.0.md](UPGRADE-4.0.md#inboxdocument-metadata-is-a-key--value-map).
+- `InvalidWebhookException::mayHaveBeenProcessed()` returns `false`: there is no request to Billomat behind it.
+
 ### Changed
+
+- **API surface frozen for 4.0.** `BillomatClient::getHttpClient()` returns `BillomatHttpClientInterface`. The leaf exceptions (`AuthenticationException`, `NotFoundException`, `ValidationException`, `RateLimitException`, `TransportException`, `UnexpectedResponseException`, `InvalidWebhookException`) are `final`. `@internal`: the constructors of `HttpException`, the events, `Page` and `PageInfo`, and `WebhookEvent::envelopeKey()`. The BC promise now states that methods an `*Api` class inherits from the internal base classes are covered.
+- `Activity`, `InboxDocument`, `Role`, `SearchResult` and `Settings` keep fields the SDK doesn't map in `$extra`, like the generated models.
 
 - **No silent `0`/`''` fallbacks in read models.** Fields that fell back to `0`, `''` or `false` when Billomat sent nothing (108 in all: `clientId` on documents, the parent IDs of comments, tags, payments, property values and e-mail receivers, `quantity` on items, tag and property names, tag cloud counts, country and currency codes, tax rate fields, `TaxSummary`, `InboxDocument`, `AccountQuota`, …) are required now: `fromArray()` throws `UnexpectedResponseException` when one is missing or empty, like for `id`. Each was checked against recorded sandbox responses. `Client::$name` is `?string` instead, because Billomat sends an empty name for private clients. Required fields come first in the read-model constructors. The generator no longer supports `model.nonNull`. See [UPGRADE-4.0.md](UPGRADE-4.0.md#no-silent-0-fallbacks).
 - **Contacts are a sub-resource of clients.** `$billomat->contacts` is `$billomat->clients->contacts`, and `create()` takes the client ID as its first argument like every other sub-resource: `create($clientId, new ContactCreateOptions(firstName: 'Erika'))`. `ContactCreateOptions` no longer has `$clientId` and `withClientId()`. `list()`, `listPage()` and `iterateAll()` accept a `SubResourceFilter` (sorting and pagination) besides an array. This is the last break before 4.0.0, made so the API doesn't freeze with one parent-scoped resource that works differently. The Rector set moves the property and the client ID, also for code written against the betas. See [UPGRADE-4.0.md](UPGRADE-4.0.md#the-parent-id-is-an-argument-of-create).

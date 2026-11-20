@@ -21,6 +21,9 @@ namespace Justpilot\Billomat\Pagination;
  */
 final readonly class PageInfo
 {
+    /**
+     * @internal das SDK erzeugt die Seiten; neue Felder können in einem Minor-Release dazukommen
+     */
     public function __construct(
         public int $page,
         public int $perPage,

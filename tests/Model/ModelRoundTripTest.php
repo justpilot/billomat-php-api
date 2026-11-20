@@ -27,6 +27,7 @@ use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionProperty;
+use ReflectionType;
 
 /**
  * Prüft alle Read-Models mit `fromArray()` und `toArray()` per Reflection: `fromArray(toArray())`
@@ -374,7 +375,7 @@ final class ModelRoundTripTest extends TestCase
         return match (true) {
             'bool' === $name => false,
             'array' === $name => [],
-            null === $type || $type->allowsNull() => null,
+            !$type instanceof ReflectionType || $type->allowsNull() => null,
             default => $this->sampleValue($parameter, ''),
         };
     }

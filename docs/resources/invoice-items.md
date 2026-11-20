@@ -1,127 +1,159 @@
-<!-- Quelle: https://www.billomat.com/api/rechnungen/positionen/ -->
+<!-- Source: https://www.billomat.com/api/rechnungen/positionen/ -->
 
 # Invoice Items (Rechnungspositionen)
 
-API-Wrapper für die Positionen einer Rechnung. Endpunkte unter `/invoice-items`.
+API wrapper for the items (line items) of an invoice. Endpoints at `/invoice-items`.
 
-## Zugriff
+## Access
 
 ```php
-$billomat->invoiceItems
+$billomat->invoices->items
 ```
 
-`Justpilot\Billomat\Api\InvoiceItemsApi`.
+The generic `Justpilot\Billomat\Api\ItemsApi`, typed for `InvoiceItem`, `InvoiceItemCreateOptions` and `InvoiceItemUpdateOptions`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByInvoice($invoiceId, $query?)` | GET | `/invoice-items?invoice_id={id}` |
-| `get($id)` | GET | `/invoice-items/{id}` |
-| `create($invoiceId, $options)` | POST | `/invoice-items` |
+| `list($parentId, $filters?)` | GET | `/invoice-items?invoice_id={id}` |
+| `listPage($parentId, $filters?)` | GET | `/invoice-items?invoice_id={id}` (one page with metadata) |
+| `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/invoice-items?invoice_id={id}` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/invoice-items/{id}` |
+| `create($parentId, $options)` | POST | `/invoice-items` |
 | `update($id, $options)` | PUT | `/invoice-items/{id}` |
 | `delete($id)` | DELETE | `/invoice-items/{id}` |
 
-## Methoden
+## Methods
 
-### `listByInvoice(int $invoiceId, array $query = []): list<InvoiceItem>`
+### `list(int $parentId, SubResourceFilter|array $filters = []): list<InvoiceItem>`
 
-Listet alle Positionen einer Rechnung. `invoice_id` wird automatisch als Filter gesetzt, weitere Filter (`page`, `per_page` …) können über `$query` mitgegeben werden.
+Lists all items of an invoice. `invoice_id` is set from `$invoiceId` automatically. Billomat filters items only by the invoice, but sorts and paginates them like any list: `SubResourceFilter` carries `orderBy`, `page`, `perPage` and `extra`.
 
 ```php
-$items = $billomat->invoiceItems->listByInvoice(98765, [
-    'per_page' => 100,
-]);
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SubResourceFilter;
+
+$items = $billomat->invoices->items->list(98765, new SubResourceFilter(
+    orderBy: OrderBy::asc('position'),
+));
 ```
 
-### `get(int $id): ?InvoiceItem`
+### `listPage(int $parentId, SubResourceFilter|array $filters = []): Page<InvoiceItem>` / `iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator<int, InvoiceItem>`
 
-Liefert `null` bei 404.
+Like `list()`, with pagination metadata or as a lazy iterator over all pages. See [Pagination](../advanced/pagination.md).
 
-### `create(int $invoiceId, InvoiceItemCreateOptions $options): InvoiceItem`
+### `get(int $id): ?InvoiceItem` / `getOrFail(int $id): InvoiceItem`
 
-Hängt eine Position an eine bestehende Rechnung. `invoice_id` wird vom SDK in den Payload eingefügt.
+`get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
+
+### `create(int $parentId, InvoiceItemCreateOptions $options): InvoiceItem`
+
+Adds an item to an existing invoice. The SDK inserts `invoice_id` into the payload.
 
 ```php
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
 
-$item = new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: 49.90);
-$item->title = 'Premium-Support (3 Monate)';
-$item->type = InvoiceItemType::SERVICE;
-$item->unit = 'Monat';
+$item = new InvoiceItemCreateOptions(
+    quantity: 3.0,
+    unitPrice: Money::of('49.90'),
+    title: 'Premium support (3 months)',
+    type: ItemType::SERVICE,
+    unit: 'month',
+);
 
-$created = $billomat->invoiceItems->create($invoiceId, $item);
+$created = $billomat->invoices->items->create($invoiceId, $item);
 ```
 
-### `update(int $id, InvoiceItemCreateOptions $options): InvoiceItem`
+### `update(int $id, InvoiceItemUpdateOptions $options): InvoiceItem`
 
-Aktualisiert eine bestehende Position. Verwendet **dieselbe** Options-Klasse wie `create()` — eine eigene `UpdateOptions` gibt es nicht. `quantity` und `unitPrice` werden immer gesendet (sie sind Pflicht im Konstruktor), alle anderen `null`-Felder bleiben unangetastet.
+Updates an existing item. Only the fields you set are sent; Billomat keeps all other fields (checked against the sandbox). `Clear::Field` empties a field. Passing `InvoiceItemCreateOptions` throws an `InvalidArgumentException`.
 
-### `delete(int $id): bool`
+```php
+use Justpilot\Billomat\Api\InvoiceItemUpdateOptions;
 
-Löscht eine Position. Gibt `true` zurück, wenn Billomat ohne Fehler antwortet.
+$updated = $billomat->invoices->items->update($created->id, new InvoiceItemUpdateOptions(unitPrice: Money::of('25')));
+```
 
-## Write-Modell: `InvoiceItemCreateOptions`
+### `delete(int $id): void`
 
-Konstruktor: `new InvoiceItemCreateOptions(float $quantity, float $unitPrice)`.
+Deletes an item. Errors are thrown as exceptions.
 
-| Property | Billomat-Feld | Typ | Notes |
+## Write model: `InvoiceItemCreateOptions`
+
+Constructor: `new InvoiceItemCreateOptions(float $quantity, Money $unitPrice, …)`. The object is immutable (`final readonly`); all other fields are optional named arguments, and every field has a `with*()` method that returns a modified copy.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `type` | `type` | `?InvoiceItemType` | `PRODUCT` oder `SERVICE` |
-| `articleId` | `article_id` | `?int` | Falls verknüpft mit einem Artikel |
-| `title` | `title` | `?string` | Bezeichnung der Position |
-| `description` | `description` | `?string` | Mehrzeilige Detailbeschreibung |
-| `quantity` | `quantity` | `float` | Pflicht (im Konstruktor) |
-| `unitPrice` | `unit_price` | `float` | Pflicht (im Konstruktor) |
-| `unit` | `unit` | `?string` | Frei wählbar, z. B. `Stunde`, `Stück`, `Monat` |
-| `taxName` | `tax_name` | `?string` | Bezeichnung des Steuersatzes, z. B. `MwSt` |
-| `taxRate` | `tax_rate` | `?float` | Prozentwert, z. B. `19.0` |
-| `taxChangedManually` | `tax_changed_manually` | `?bool` | Setzt Billomat, wenn der Steuersatz vom Default des Kunden/Artikels abweicht |
-| `reduction` | `reduction` | `?string` | Rabatt absolut (`"5"`) oder relativ (`"10%"`) |
-| `position` | `position` | `?int` | Sortierreihenfolge; beim Erstellen typischerweise automatisch vergeben |
+| `type` | `type` | `?ItemType` | `PRODUCT` or `SERVICE` |
+| `articleId` | `article_id` | `?int` | If linked to an article |
+| `title` | `title` | `?string` | Item name |
+| `description` | `description` | `?string` | Multi-line description |
+| `quantity` | `quantity` | `float` | Required (constructor) |
+| `unitPrice` | `unit_price` | `Money` | Required (constructor) |
+| `unit` | `unit` | `?string` | Free text, e.g. `hour`, `piece`, `month` |
+| `taxName` | `tax_name` | `?string` | Name of the tax rate, e.g. `MwSt` |
+| `taxRate` | `tax_rate` | `?float` | Percentage, e.g. `19.0` |
+| `taxChangedManually` | `tax_changed_manually` | `?bool` | Set when the tax rate differs from the client's/article's default |
+| `reduction` | `reduction` | `?string` | Discount, absolute (`"5"`) or relative (`"10%"`) |
+| `position` | `position` | `?int` | Sort order; usually assigned automatically on create |
 
-`toArray()` filtert `null`-Werte heraus — **außer** `quantity` und `unit_price`, die immer mitgesendet werden.
+`toArray()` drops `null` values. `quantity` and `unit_price` are never `null`, so they are always sent (`unit_price` as a string via `Money::toString()`).
 
-## Read-Modell: `InvoiceItem`
+## Write model: `InvoiceItemUpdateOptions`
+
+Same fields as `InvoiceItemCreateOptions`, but all of them optional: `new InvoiceItemUpdateOptions(unitPrice: Money::of('25'))`. Each field is `X|Clear|null`; `null` (not set) is left out of the payload, `Clear::Field` is sent as `null` and empties the field. Every field has a `with*()` method.
+
+## Read model: `InvoiceItem`
 
 `final readonly class InvoiceItem`.
 
-| Property | Typ | Notes |
+| Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | |
+| `id` | `int` | |
 | `invoiceId` | `?int` | |
 | `articleId` | `?int` | |
-| `position` | `?int` | Sortierreihenfolge in der Rechnung |
+| `position` | `?int` | Sort order within the invoice |
 | `unit` | `?string` | |
 | `quantity` | `float` | |
-| `unitPrice` | `float` | |
+| `unitPrice` | `Money` | |
 | `taxName` | `?string` | |
 | `taxRate` | `?float` | |
 | `taxChangedManually` | `?bool` | |
 | `title` | `?string` | |
 | `description` | `?string` | |
 | `reduction` | `?string` | |
-| `type` | `?InvoiceItemType` | |
-| `totalGross`, `totalNet` | `?float` | Inkl. Rabatt |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` | Ohne Rabatt |
-| `created` | `?\DateTimeImmutable` | |
-| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+| `type` | `?ItemType` | |
+| `totalGross`, `totalNet` | `?Money` | Including discount |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` | Without discount |
+| `customField` | `?string` | Free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `extra` | `array<string, mixed>` | Fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
-> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
+## Enums
 
-## Verwendete Enums
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE`.
 
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE`.
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-## Stolpersteine
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-- **Kein separater `UpdateOptions`-Typ.** `update()` verwendet dieselbe Klasse wie `create()`. Praktisch heißt das: der Konstruktor verlangt `quantity` und `unitPrice`, auch wenn du sie nicht ändern willst. Du musst sie also entweder neu setzen oder die alten Werte aus dem Read-Modell übernehmen.
-- **Steuersatz manuell ändern.** Wenn die Position vom Default-Steuersatz des Kunden/Artikels abweichen soll, setze `taxRate` **und** `taxChangedManually = true`. Lässt du das Flag weg, ignoriert Billomat oft den manuellen `taxRate`.
-- **Reihenfolge.** Beim Anlegen ist `position` typischerweise irrelevant — Billomat hängt die Position ans Ende. Beim Update kannst du `position` setzen, um umzusortieren. Andere Positionen werden dabei nicht automatisch verschoben.
-- **Positionen im `create()`-Call der Rechnung.** Wenn du eine Rechnung mit `addItem()` direkt anlegst, sind die Positionen Teil derselben POST-Anfrage — kein zweiter Call nötig. Siehe [Invoices](invoices.md).
+::: code-group
+<<< @/snippets/json/invoice-items.create.json [POST /invoice-items]
+<<< @/../tests/Fixtures/Contract/invoice-items/get.json [GET /invoice-items/{id} (response)]
+<<< @/../tests/Fixtures/Contract/invoice-items/list.json [GET /invoice-items (response)]
+:::
+<!-- json-examples:end -->
 
-## End-to-End-Beispiel
+## Pitfalls
+
+- **Changing the tax rate manually.** If the item should differ from the client's/article's default tax rate, set `taxRate` **and** `taxChangedManually: true`. Without the flag, Billomat often ignores the manual `taxRate`.
+- **Order.** On create, `position` is usually irrelevant; Billomat appends the item at the end. On update you can set `position` to reorder. Other items are not shifted automatically.
+- **Items in the invoice's `create()` call.** If you create an invoice directly with `items: […]`, the items are part of the same POST request; no second call is needed. See [Invoices](invoices.md).
+
+## End-to-end example
 
 ```php
 <?php
@@ -132,40 +164,46 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Api\InvoiceItemUpdateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Rechnung leer anlegen
+// Create an empty invoice
 $invoice = $billomat->invoices->create(new InvoiceCreateOptions(clientId: 12345));
 
-// Erste Position via Items-API ergänzen
-$first = new InvoiceItemCreateOptions(quantity: 10.0, unitPrice: 12.5);
-$first->title = 'Lizenzgebühr Modul A';
-$first->type = InvoiceItemType::PRODUCT;
-$first->unit = 'Lizenz';
+// Add the first item via the items API
+$first = new InvoiceItemCreateOptions(
+    quantity: 10.0,
+    unitPrice: Money::of('12.5'),
+    title: 'License fee module A',
+    type: ItemType::PRODUCT,
+    unit: 'license',
+);
 
-$created = $billomat->invoiceItems->create($invoice->id, $first);
+$created = $billomat->invoices->items->create($invoice->id, $first);
 
-// Zweite Position
-$second = new InvoiceItemCreateOptions(quantity: 2.5, unitPrice: 110.0);
-$second->title = 'Anpassung & Support';
-$second->type = InvoiceItemType::SERVICE;
-$second->unit = 'Stunde';
+// Second item
+$second = new InvoiceItemCreateOptions(
+    quantity: 2.5,
+    unitPrice: Money::of('110'),
+    title: 'Customization & support',
+    type: ItemType::SERVICE,
+    unit: 'hour',
+);
 
-$billomat->invoiceItems->create($invoice->id, $second);
+$billomat->invoices->items->create($invoice->id, $second);
 
-// Alle Positionen lesen
-foreach ($billomat->invoiceItems->listByInvoice($invoice->id) as $item) {
-    printf("- %s: %.2f x %.2f = %.2f\n", $item->title, $item->quantity, $item->unitPrice, $item->totalNet ?? 0.0);
+// Read all items
+foreach ($billomat->invoices->items->list($invoice->id) as $item) {
+    printf("- %s: %.2f x %s = %s\n", $item->title, $item->quantity, $item->unitPrice->format(), ($item->totalNet ?? Money::zero())->format());
 }
 
-// Erste Position aktualisieren (Preis senken) — quantity bleibt gleich
-$update = new InvoiceItemCreateOptions(quantity: $created->quantity, unitPrice: 9.99);
-$update->title = $created->title;
-$billomat->invoiceItems->update($created->id, $update);
+// Update the first item: only the price is sent, quantity and title stay the same
+$billomat->invoices->items->update($created->id, new InvoiceItemUpdateOptions(unitPrice: Money::of('9.99')));
 ```

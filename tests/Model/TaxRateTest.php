@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\TaxRate;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -13,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(TaxRate::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 final class TaxRateTest extends TestCase
 {
     #[Test]
@@ -27,7 +29,6 @@ final class TaxRateTest extends TestCase
         ]);
 
         self::assertSame(12, $tax->id);
-        self::assertSame(99, $tax->accountId);
         self::assertSame('MwSt', $tax->name);
         self::assertSame(19.0, $tax->rate);
         self::assertTrue($tax->isDefault);
@@ -49,21 +50,18 @@ final class TaxRateTest extends TestCase
     #[Test]
     public function itTreatsIsDefaultTrueStringAsTrue(): void
     {
-        $tax = TaxRate::fromArray(['is_default' => 'true']);
+        $tax = TaxRate::fromArray(['id' => 1, 'name' => 'MwSt', 'rate' => '19', 'is_default' => 'true']);
 
         self::assertTrue($tax->isDefault);
     }
 
     #[Test]
-    public function itDefaultsMissingFields(): void
+    public function itRejectsMissingRequiredFields(): void
     {
-        $tax = TaxRate::fromArray([]);
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('TaxRate without a valid "name" field');
 
-        self::assertNull($tax->id);
-        self::assertNull($tax->accountId);
-        self::assertSame('', $tax->name);
-        self::assertSame(0.0, $tax->rate);
-        self::assertFalse($tax->isDefault);
+        TaxRate::fromArray(['id' => 1, 'rate' => '19', 'is_default' => '0']);
     }
 
     #[Test]
@@ -79,8 +77,9 @@ final class TaxRateTest extends TestCase
 
         self::assertSame(
             [
-                'id' => 12,
+                // `account_id` bildet das Model nicht mehr ab; es bleibt als unbekanntes Feld erhalten.
                 'account_id' => 99,
+                'id' => 12,
                 'name' => 'MwSt',
                 'rate' => 19.0,
                 'is_default' => 1,

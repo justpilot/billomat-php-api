@@ -32,24 +32,24 @@ use Justpilot\Billomat\Model\DeliveryNoteComment;
 use Justpilot\Billomat\Model\DeliveryNoteItem;
 use Justpilot\Billomat\Model\DeliveryNoteTag;
 use Justpilot\Billomat\Model\EmailTemplate;
-use Justpilot\Billomat\Model\Enum\ArticleType;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
@@ -74,6 +74,7 @@ use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\Letter;
 use Justpilot\Billomat\Model\LetterComment;
 use Justpilot\Billomat\Model\LetterTag;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferComment;
 use Justpilot\Billomat\Model\OfferItem;
@@ -94,6 +95,7 @@ use Justpilot\Billomat\Model\Template;
 use Justpilot\Billomat\Model\Unit;
 use Justpilot\Billomat\Model\User;
 use Justpilot\Billomat\Model\UserProperty;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -132,6 +134,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(EmailTemplate::class)]
 #[CoversClass(FreeText::class)]
 #[CoversClass(InboxDocument::class)]
+#[UsesClass(InboxDocumentType::class)]
 #[CoversClass(Incoming::class)]
 #[CoversClass(IncomingComment::class)]
 #[CoversClass(IncomingPayment::class)]
@@ -166,7 +169,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Unit::class)]
 #[CoversClass(User::class)]
 #[CoversClass(UserProperty::class)]
-#[UsesClass(ArticleType::class)]
+#[UsesClass(ItemType::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(ConfirmationCommentActionKey::class)]
@@ -178,8 +181,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(IncomingCommentActionKey::class)]
 #[UsesClass(IncomingStatus::class)]
 #[UsesClass(InvoiceCommentActionKey::class)]
-#[UsesClass(InvoiceItemType::class)]
-#[UsesClass(InvoicePaymentType::class)]
+#[UsesClass(PaymentType::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(LetterCommentActionKey::class)]
 #[UsesClass(LetterStatus::class)]
@@ -194,6 +196,7 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(TemplateDocumentType::class)]
 #[UsesClass(TemplateFormat::class)]
 #[UsesClass(TemplateType::class)]
+#[UsesClass(Money::class)]
 final class MetadataFieldsTest extends TestCase
 {
     /**
@@ -273,7 +276,7 @@ final class MetadataFieldsTest extends TestCase
     public function itHydratesAndExportsMetadataFields(Closure $hydrate, array $keys): void
     {
         $data = [
-            'id' => '1',
+            ...RequiredFields::forHydrator($hydrate),
             'created' => '2026-10-20T19:58:59+02:00',
             'updated' => '2026-10-20T20:02:16+02:00',
             'customfield' => 'crm-4711',
@@ -289,7 +292,7 @@ final class MetadataFieldsTest extends TestCase
             self::assertSame($data[$key], $array[$key]);
 
             if ('customfield' === $key) {
-                self::assertSame('crm-4711', $props['customfield']);
+                self::assertSame('crm-4711', $props['customField']);
 
                 continue;
             }
@@ -306,7 +309,7 @@ final class MetadataFieldsTest extends TestCase
     #[DataProvider('models')]
     public function itTreatsEmptyMetadataAsNull(Closure $hydrate, array $keys): void
     {
-        $props = get_object_vars($hydrate(['id' => '1', 'created' => '', 'updated' => '', 'customfield' => '']));
+        $props = get_object_vars($hydrate([...RequiredFields::forHydrator($hydrate), 'created' => '', 'updated' => '', 'customfield' => '']));
 
         foreach ($keys as $key) {
             self::assertNull($props[$key]);

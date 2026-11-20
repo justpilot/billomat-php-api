@@ -1,51 +1,55 @@
-<!-- Quelle: https://www.billomat.com/api/benutzer/ -->
+<!-- Source: https://www.billomat.com/api/benutzer/ -->
 
 # Users (Benutzer)
 
-Read-only API-Wrapper für die Billomat-Ressource „Benutzer" — entspricht den Endpunkten unter `/users`.
+Read-only API wrapper for the Billomat users resource at `/users`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->users
 ```
 
-`Justpilot\Billomat\Api\UsersApi`, intern angelegt in `BillomatClient::__construct()`.
+`Justpilot\Billomat\Api\UsersApi`, created lazily on first access to `$billomat->users`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list()` | GET | `/users` |
-| `listPage()` | GET | `/users` (Seite mit Metadaten) |
-| `iterateAll()` | GET | `/users` (lazy über alle Seiten) |
+| `listPage()` | GET | `/users` (page with metadata) |
+| `iterateAll()` | GET | `/users` (lazy over all pages) |
 | `get($id)` | GET | `/users/{id}` |
+| `getOrFail($id)` | GET | `/users/{id}` |
 | `getMyself()` | GET | `/users/myself` |
+| `avatar($id, $size?)` | GET | `/users/{id}/avatar` |
 
-Avatar-Endpunkt (`GET /users/{id}/avatar`) ist im SDK nicht implementiert; bei Bedarf direkt über `BillomatClient::getHttpClient()` aufrufen.
+Custom field definitions for users are available as the sub-resource `$billomat->users->properties` (`PropertiesApi` with `UserProperty`); see [properties.md](properties.md).
 
-## Methoden
+## Methods
 
-### `list(array $filters = []): list<User>`
+### `list(UserFilter|array $filters = []): list<User>`
 
-Listet Benutzer mit optionalen Filtern.
+Lists users, optionally filtered.
 
 ```php
-public function list(array $filters = []): array
+public function list(UserFilter|array $filters = []): array
 ```
 
-Unterstützte Filter laut Billomat-Doku:
+Use the typed filter `UserFilter`; a plain array with Billomat parameters still works. Filters supported according to the Billomat docs:
 
-| Filter | Bedeutung |
-|---|---|
-| `email` | E-Mail-Adresse (case-insensitiv) |
-| `first_name` | Vorname |
-| `last_name` | Nachname |
+| Filter | `UserFilter` field | Meaning |
+|---|---|---|
+| `email` | `email` | E-mail address (case-insensitive) |
+| `first_name` | `firstName` | First name |
+| `last_name` | `lastName` | Last name |
+
+Plus `orderBy`, `page`, `perPage` and `extra` for further query parameters.
 
 ```php
-$users = $billomat->users->list([
-    'email' => '@example.com',
-]);
+use Justpilot\Billomat\Api\UserFilter;
+
+$users = $billomat->users->list(new UserFilter(email: '@example.com'));
 
 foreach ($users as $user) {
     echo $user->id . ': ' . $user->email . PHP_EOL;
@@ -54,19 +58,19 @@ foreach ($users as $user) {
 
 **Exceptions:** `AuthenticationException`, `HttpException`.
 
-### `listPage(array $filters = []): Page<User>`
+### `listPage(UserFilter|array $filters = []): Page<User>`
 
-Wie `list()`, liefert aber zusätzlich `page`/`per_page`/`total` aus dem Response-Envelope.
+Like `list()`, but also returns `page`/`per_page`/`total` from the response envelope as `PageInfo` in `$page->info`.
 
 ```php
-$page = $billomat->users->listPage(['per_page' => 25]);
+$page = $billomat->users->listPage(new UserFilter(perPage: 25));
 
-echo $page->total, ' Benutzer (Seite ', $page->page, '/', $page->totalPages, ')';
+echo $page->info->total, ' users (page ', $page->info->page, '/', $page->info->totalPages(), ')';
 ```
 
-### `iterateAll(array $filters = [], int $pageSize = 100): Generator<int, User>`
+### `iterateAll(UserFilter|array $filters = [], int $pageSize = 100): Generator<int, User>`
 
-Lazy-Iteration über alle Seiten, analog `auto_paging_iter()` im Stripe-SDK.
+Lazy iteration over all pages.
 
 ```php
 foreach ($billomat->users->iterateAll() as $user) {
@@ -76,7 +80,7 @@ foreach ($billomat->users->iterateAll() as $user) {
 
 ### `get(int $id): ?User`
 
-Holt einen Benutzer per ID. Liefert `null` bei 404.
+Fetches a user by ID. Returns `null` on 404.
 
 ```php
 $user = $billomat->users->get(123);
@@ -84,41 +88,62 @@ $user = $billomat->users->get(123);
 
 **Exceptions:** `AuthenticationException`, `HttpException`.
 
-### `getMyself(): ?User`
+### `getOrFail(int $id): User`
 
-Gibt den aktuell authentifizierten Benutzer zurück (`GET /users/myself`).
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
+
+### `getMyself(): User`
+
+Returns the currently authenticated user (`GET /users/myself`). There always is one for a valid API key, so unlike `get()` the method never returns `null`; a 404 comes through as `NotFoundException`.
 
 ```php
 $me = $billomat->users->getMyself();
-echo $me?->email;
+echo $me->email;
 ```
 
-## Stolpersteine
+### `avatar(int $id, ?int $size = null): string`
 
-- **Kein Schreibzugriff per API.** Billomat dokumentiert für `/users` ausschliesslich Lese-Endpunkte (list, single, avatar, myself). Es existiert kein offizielles `POST/PUT/DELETE /users`. Benutzerverwaltung — Anlegen, Rolle ändern, Passwort, Löschen — geschieht ausschliesslich über die Billomat-Web-UI. Das SDK exponiert daher absichtlich keine `create`/`update`/`delete`-Verben für diese Ressource.
-- **`role_id` ist nur Read-Lookup.** Die Rolle eines Benutzers liest sich aus `User::$roleId`; die Roll-Definitionen selbst kommen aus [`settings-roles.md`](settings-roles.md). Die Zuordnung „User → Rolle" verändert man in der UI, nicht hier.
+Returns the user's avatar as raw image bytes (usually PNG), not JSON. `$size` is the edge length in pixels.
 
-## Read-Modell: `User`
+```php
+file_put_contents('me.png', $billomat->users->avatar($billomat->users->getMyself()->id, 64));
+```
+
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
+
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
+
+::: code-group
+<<< @/../tests/Fixtures/Contract/users/get.json [GET /users/{id} (response)]
+<<< @/../tests/Fixtures/Contract/users/list.json [GET /users (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **No write access via the API.** Billomat documents only read endpoints for `/users` (list, single, avatar, myself); there is no official `POST/PUT/DELETE /users`. User management — creating users, changing roles, passwords, deleting — happens only in the Billomat web UI. The SDK therefore deliberately has no `create`/`update`/`delete` for users. (Custom field *definitions* under `$billomat->users->properties` are writable.)
+- **Rights are a map of `AccessLevel`.** `$user->rights['invoices'] ?? null` is `READ`, `UPDATE`, `DELETE` or `null` (no access). Levels include the lower ones, so check with `allows()`: `($user->rights['invoices'] ?? null)?->allows(AccessLevel::UPDATE) ?? false`. Values the SDK doesn't know are dropped.
+- **`role_id` is a read-only reference.** A user's role is in `User::$roleId`; the role definitions come from [`settings-roles.md`](settings-roles.md). Assigning a role to a user happens in the UI.
+
+## Read model: `User`
 
 `final readonly class Justpilot\Billomat\Model\User`
 
-| Property | Typ | Mapping |
+| Property | Type | Mapping |
 |---|---|---|
-| `id` | `?int` | `id` |
+| `id` | `int` | `id` |
 | `email` | `?string` | `email` |
 | `firstName` | `?string` | `first_name` |
 | `lastName` | `?string` | `last_name` |
 | `salutation` | `?string` | `salutation` |
-| `phone` | `?string` | `phone` |
-| `mobile` | `?string` | `mobile` |
-| `fax` | `?string` | `fax` |
 | `roleId` | `?int` | `role_id` |
-| `created`, `updated` | `?\DateTimeImmutable` |  |
-| `locale` | `?string` |  |
-| `timezone` | `?string` |  |
-| `isAccountOwner` | `?bool` | Inhaber des Accounts |
-| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+| `created`, `updated` | `?\DateTimeImmutable` | `created`, `updated` |
+| `customField` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `locale` | `?string` | `locale` |
+| `timezone` | `?string` | `timezone` |
+| `isAccountOwner` | `?bool` | Account owner |
+| `rights` | `array<string, AccessLevel>` | `rights`: access level per area (`articles`, `banking`, …); areas without access are left out |
+| `extra` | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-> **Veraltet seit 3.1:** `phone`, `mobile`, `fax`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
-
-`User::fromArray($data)` hydratisiert aus dem Billomat-Wire-Format; `User::toArray()` schreibt zurück (snake_case).
+`User::fromArray($data)` hydrates from the Billomat wire format; `User::toArray()` writes it back (snake_case).

@@ -9,8 +9,9 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
 use Justpilot\Billomat\Model\Client;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\InboxDocument;
@@ -29,12 +30,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Account::class)]
 #[CoversClass(Invoice::class)]
 #[CoversClass(InboxDocument::class)]
+#[UsesClass(InboxDocumentType::class)]
 #[UsesClass(AccountQuota::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(NetGross::class)]
 #[UsesClass(SupplyDateType::class)]
 #[UsesClass(InvoiceItem::class)]
-#[UsesClass(InvoiceItemType::class)]
+#[UsesClass(ItemType::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 final class EInvoiceFieldsTest extends TestCase
@@ -75,7 +77,7 @@ final class EInvoiceFieldsTest extends TestCase
     #[Test]
     public function invoiceExposesFacturxReference(): void
     {
-        $invoice = Invoice::fromArray(['id' => '1', 'facturx_reference' => 'PO-2026-17']);
+        $invoice = Invoice::fromArray(['id' => '1', 'client_id' => '1', 'facturx_reference' => 'PO-2026-17']);
 
         self::assertSame('PO-2026-17', $invoice->facturxReference);
         self::assertSame('PO-2026-17', $invoice->toArray()['facturx_reference']);
@@ -84,7 +86,7 @@ final class EInvoiceFieldsTest extends TestCase
     #[Test]
     public function inboxDocumentExposesXrechnungExtractionsId(): void
     {
-        $doc = InboxDocument::fromArray(['id' => '1', 'xrechnung_extractions_id' => '815']);
+        $doc = InboxDocument::fromArray(['id' => '1', 'filename' => 'invoice.xml', 'filesize' => '1', 'xrechnung_extractions_id' => '815']);
 
         self::assertSame(815, $doc->xrechnungExtractionsId);
         self::assertSame(815, $doc->toArray()['xrechnung_extractions_id']);
@@ -95,8 +97,8 @@ final class EInvoiceFieldsTest extends TestCase
     {
         $client = Client::fromArray(['id' => '1', 'facturx_identifier' => '', 'seller_identifier' => '']);
         $account = Account::fromArray(['id' => '1', 'tax_authority_number' => '', 'facturx_fields_enabled' => '']);
-        $invoice = Invoice::fromArray(['id' => '1', 'facturx_reference' => '']);
-        $doc = InboxDocument::fromArray(['id' => '1', 'xrechnung_extractions_id' => '']);
+        $invoice = Invoice::fromArray(['id' => '1', 'client_id' => '1', 'facturx_reference' => '']);
+        $doc = InboxDocument::fromArray(['id' => '1', 'filename' => 'invoice.xml', 'filesize' => '1', 'xrechnung_extractions_id' => '']);
 
         self::assertNull($client->facturxIdentifier);
         self::assertNull($client->sellerIdentifier);

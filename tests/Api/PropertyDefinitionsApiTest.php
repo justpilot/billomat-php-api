@@ -4,47 +4,59 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
-use Justpilot\Billomat\Api\ClientPropertiesApi;
-use Justpilot\Billomat\Api\IncomingPropertiesApi;
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\ClientsApi;
+use Justpilot\Billomat\Api\IncomingsApi;
+use Justpilot\Billomat\Api\PropertiesApi;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
-use Justpilot\Billomat\Api\SupplierPropertiesApi;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
+use Justpilot\Billomat\Api\SuppliersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientProperty;
 use Justpilot\Billomat\Model\Enum\PropertyType;
 use Justpilot\Billomat\Model\IncomingProperty;
 use Justpilot\Billomat\Model\SupplierProperty;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ClientPropertiesApi::class)]
-#[CoversClass(IncomingPropertiesApi::class)]
-#[CoversClass(SupplierPropertiesApi::class)]
+#[CoversClass(PropertiesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ClientsApi::class)]
+#[UsesClass(IncomingsApi::class)]
+#[UsesClass(SuppliersApi::class)]
 #[CoversClass(PropertyCreateOptions::class)]
+#[UsesClass(PropertyUpdateOptions::class)]
 #[CoversClass(ClientProperty::class)]
 #[CoversClass(IncomingProperty::class)]
 #[CoversClass(SupplierProperty::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(PropertyType::class)]
+#[UsesClass(ListCaster::class)]
 final class PropertyDefinitionsApiTest extends TestCase
 {
     private function http(MockHttpClient $mock): BillomatHttpClient
     {
-        return new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        return new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
     }
 
-    // ---------------------- ClientPropertiesApi ----------------------
+    // ---------------------- Client properties ----------------------
 
     #[Test]
     public function itListsClientProperties(): void
@@ -63,13 +75,12 @@ final class PropertyDefinitionsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
         $props = $api->list();
         self::assertCount(2, $props);
         self::assertSame('VAT-ID', $props[0]->name);
         self::assertSame(PropertyType::TEXTFIELD, $props[0]->type);
-        self::assertSame(2, $props[1]->position);
         self::assertNull($props[0]->isNvl);
         self::assertTrue($props[1]->isNvl);
     }
@@ -83,7 +94,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             ],
         ], JSON_THROW_ON_ERROR), ['http_code' => 200]));
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
         $props = $api->list();
         self::assertCount(1, $props);
@@ -97,7 +108,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             'client-properties' => [],
         ], JSON_THROW_ON_ERROR), ['http_code' => 200]));
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
         self::assertSame([], $api->list());
     }
@@ -113,7 +124,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
         $prop = $api->get(42);
         self::assertNotNull($prop);
@@ -126,7 +137,7 @@ final class PropertyDefinitionsApiTest extends TestCase
     {
         $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse('Not Found', ['http_code' => 404]));
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
         self::assertNull($api->get(999));
     }
@@ -134,80 +145,80 @@ final class PropertyDefinitionsApiTest extends TestCase
     #[Test]
     public function itCreatesClientProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'body' => $options['body'] ?? null];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse(json_encode([
                 'client-property' => ['id' => 100, 'name' => 'Neues Feld', 'type' => 'TEXTAREA'],
             ], JSON_THROW_ON_ERROR), ['http_code' => 201]);
         });
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Neues Feld');
-        $opts->type = PropertyType::TEXTAREA;
-        $opts->position = 5;
-        $opts->isNvl = true;
+        $opts = new PropertyCreateOptions(
+            name: 'Neues Feld',
+            type: PropertyType::TEXTAREA,
+            position: 5,
+            isNvl: true,
+        );
 
         $created = $api->create($opts);
 
         self::assertSame(100, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertStringEndsWith('/api/client-properties', $captured['url']);
-        self::assertIsString($captured['body']);
-        $payload = json_decode($captured['body'], true, flags: JSON_THROW_ON_ERROR);
-        self::assertSame('Neues Feld', $payload['client-property']['name']);
-        self::assertSame('TEXTAREA', $payload['client-property']['type']);
-        self::assertSame(5, $payload['client-property']['position']);
-        self::assertSame(1, $payload['client-property']['is_nvl']);
+        self::assertSame('POST', $captured->method);
+        self::assertStringEndsWith('/api/client-properties', $captured->url);
+        self::assertIsString($captured->body());
+        self::assertSame('Neues Feld', $captured->jsonAt('client-property', 'name'));
+        self::assertSame('TEXTAREA', $captured->jsonAt('client-property', 'type'));
+        self::assertSame(5, $captured->jsonAt('client-property', 'position'));
+        self::assertSame(1, $captured->jsonAt('client-property', 'is_nvl'));
     }
 
     #[Test]
     public function itUpdatesClientProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse(json_encode([
                 'client-property' => ['id' => 42, 'name' => 'Geändert', 'type' => 'TEXTFIELD'],
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Geändert');
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyUpdateOptions(name: 'Geändert', type: PropertyType::TEXTFIELD);
 
         $updated = $api->update(42, $opts);
 
         self::assertSame('Geändert', $updated->name);
-        self::assertSame('PUT', $captured['method']);
-        self::assertStringEndsWith('/api/client-properties/42', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertStringEndsWith('/api/client-properties/42', $captured->url);
     }
 
     #[Test]
     public function itDeletesClientProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new ClientPropertiesApi($this->http($mock));
+        $api = new ClientsApi($this->http($mock))->properties;
 
-        self::assertTrue($api->delete(42));
-        self::assertSame('DELETE', $captured['method']);
-        self::assertStringEndsWith('/api/client-properties/42', $captured['url']);
+        $api->delete(42);
+        self::assertSame('DELETE', $captured->method);
+        self::assertStringEndsWith('/api/client-properties/42', $captured->url);
     }
 
-    // ---------------------- IncomingPropertiesApi ----------------------
+    // ---------------------- Incoming properties ----------------------
 
     #[Test]
     public function itListsIncomingProperties(): void
@@ -224,7 +235,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new IncomingPropertiesApi($this->http($mock));
+        $api = new IncomingsApi($this->http($mock))->properties;
 
         $props = $api->list();
         self::assertCount(1, $props);
@@ -234,29 +245,27 @@ final class PropertyDefinitionsApiTest extends TestCase
     #[Test]
     public function itCreatesIncomingProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'body' => $options['body'] ?? null];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse(json_encode([
                 'incoming-property' => ['id' => 11, 'name' => 'Projekt', 'type' => 'CHECKBOX'],
             ], JSON_THROW_ON_ERROR), ['http_code' => 201]);
         });
 
-        $api = new IncomingPropertiesApi($this->http($mock));
+        $api = new IncomingsApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Projekt');
-        $opts->type = PropertyType::CHECKBOX;
+        $opts = new PropertyCreateOptions(name: 'Projekt', type: PropertyType::CHECKBOX);
 
         $created = $api->create($opts);
 
         self::assertSame(11, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertStringEndsWith('/api/incoming-properties', $captured['url']);
-        self::assertIsString($captured['body']);
-        $payload = json_decode($captured['body'], true, flags: JSON_THROW_ON_ERROR);
-        self::assertSame('CHECKBOX', $payload['incoming-property']['type']);
+        self::assertSame('POST', $captured->method);
+        self::assertStringEndsWith('/api/incoming-properties', $captured->url);
+        self::assertIsString($captured->body());
+        self::assertSame('CHECKBOX', $captured->jsonAt('incoming-property', 'type'));
     }
 
     #[Test]
@@ -270,7 +279,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new IncomingPropertiesApi($this->http($mock));
+        $api = new IncomingsApi($this->http($mock))->properties;
 
         $prop = $api->get(3);
         self::assertNotNull($prop);
@@ -280,14 +289,16 @@ final class PropertyDefinitionsApiTest extends TestCase
     #[Test]
     public function itDeletesIncomingProperty(): void
     {
-        $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse('', ['http_code' => 200]));
+        $mock = new MockHttpClient([new MockResponse('', ['http_code' => 200])]);
 
-        $api = new IncomingPropertiesApi($this->http($mock));
+        $api = new IncomingsApi($this->http($mock))->properties;
 
-        self::assertTrue($api->delete(3));
+        $api->delete(3);
+
+        self::assertSame(1, $mock->getRequestsCount());
     }
 
-    // ---------------------- SupplierPropertiesApi ----------------------
+    // ---------------------- Supplier properties ----------------------
 
     #[Test]
     public function itListsSupplierProperties(): void
@@ -304,7 +315,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
         $props = $api->list();
         self::assertCount(1, $props);
@@ -320,7 +331,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             ],
         ], JSON_THROW_ON_ERROR), ['http_code' => 200]));
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
         $props = $api->list();
         self::assertCount(1, $props);
@@ -334,7 +345,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             'supplier-properties' => [],
         ], JSON_THROW_ON_ERROR), ['http_code' => 200]));
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
         self::assertSame([], $api->list());
     }
@@ -342,52 +353,50 @@ final class PropertyDefinitionsApiTest extends TestCase
     #[Test]
     public function itCreatesSupplierProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'body' => $options['body'] ?? null];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse(json_encode([
                 'supplier-property' => ['id' => 21, 'name' => 'IBAN-Country', 'type' => 'TEXTFIELD'],
             ], JSON_THROW_ON_ERROR), ['http_code' => 201]);
         });
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'IBAN-Country');
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'IBAN-Country', type: PropertyType::TEXTFIELD);
 
         $created = $api->create($opts);
 
         self::assertSame(21, $created->id);
-        self::assertStringEndsWith('/api/supplier-properties', $captured['url']);
-        self::assertIsString($captured['body']);
-        $payload = json_decode($captured['body'], true, flags: JSON_THROW_ON_ERROR);
-        self::assertSame('IBAN-Country', $payload['supplier-property']['name']);
+        self::assertStringEndsWith('/api/supplier-properties', $captured->url);
+        self::assertIsString($captured->body());
+        self::assertSame('IBAN-Country', $captured->jsonAt('supplier-property', 'name'));
     }
 
     #[Test]
     public function itUpdatesSupplierProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse(json_encode([
                 'supplier-property' => ['id' => 21, 'name' => 'Geändert', 'type' => 'TEXTFIELD'],
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Geändert');
+        $opts = new PropertyUpdateOptions(name: 'Geändert');
 
         $updated = $api->update(21, $opts);
 
         self::assertSame('Geändert', $updated->name);
-        self::assertSame('PUT', $captured['method']);
-        self::assertStringEndsWith('/api/supplier-properties/21', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertStringEndsWith('/api/supplier-properties/21', $captured->url);
     }
 
     #[Test]
@@ -401,7 +410,7 @@ final class PropertyDefinitionsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
         $prop = $api->get(5);
         self::assertNotNull($prop);
@@ -413,7 +422,7 @@ final class PropertyDefinitionsApiTest extends TestCase
     {
         $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse('Not Found', ['http_code' => 404]));
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
         self::assertNull($api->get(999));
     }
@@ -421,18 +430,18 @@ final class PropertyDefinitionsApiTest extends TestCase
     #[Test]
     public function itDeletesSupplierProperty(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new SupplierPropertiesApi($this->http($mock));
+        $api = new SuppliersApi($this->http($mock))->properties;
 
-        self::assertTrue($api->delete(5));
-        self::assertSame('DELETE', $captured['method']);
-        self::assertStringEndsWith('/api/supplier-properties/5', $captured['url']);
+        $api->delete(5);
+        self::assertSame('DELETE', $captured->method);
+        self::assertStringEndsWith('/api/supplier-properties/5', $captured->url);
     }
 }

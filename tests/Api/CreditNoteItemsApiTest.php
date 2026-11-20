@@ -4,36 +4,48 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
-use Justpilot\Billomat\Api\CreditNoteItemsApi;
+use Justpilot\Billomat\Api\CreditNoteItemUpdateOptions;
+use Justpilot\Billomat\Api\CreditNotesApi;
+use Justpilot\Billomat\Api\ItemsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNoteItem;
+use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(CreditNoteItemsApi::class)]
+#[CoversClass(ItemsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(CreditNotesApi::class)]
 #[CoversClass(CreditNoteItemCreateOptions::class)]
+#[CoversClass(CreditNoteItemUpdateOptions::class)]
 #[CoversClass(CreditNoteItem::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class CreditNoteItemsApiTest extends TestCase
 {
     #[Test]
     public function itListsItemsByCreditNote(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'credit-note-items' => [
@@ -46,16 +58,16 @@ final class CreditNoteItemsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new CreditNoteItemsApi(new BillomatHttpClient(
-            $mock,
+        $api = new CreditNotesApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
-        $items = $api->listByCreditNote(123);
+        $items = $api->list(123);
 
         self::assertCount(1, $items);
         self::assertSame(2.0, $items[0]->quantity);
-        self::assertStringContainsString('credit_note_id=123', $captured['url']);
+        self::assertStringContainsString('credit_note_id=123', $captured->url);
     }
 
     #[Test]
@@ -64,7 +76,7 @@ final class CreditNoteItemsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse(
                 json_encode([
@@ -74,18 +86,18 @@ final class CreditNoteItemsApiTest extends TestCase
             );
         });
 
-        $api = new CreditNoteItemsApi(new BillomatHttpClient(
-            $mock,
+        $api = new CreditNotesApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->items;
 
-        $opts = new CreditNoteItemCreateOptions(quantity: 2.0, unitPrice: 50.0);
+        $opts = new CreditNoteItemCreateOptions(quantity: 2.0, unitPrice: Money::of('50'));
         self::assertSame(77, $api->create(123, $opts)->id);
-        self::assertSame(77, $api->update(77, $opts)->id);
-        self::assertTrue($api->delete(77));
+        self::assertSame(77, $api->update(77, new CreditNoteItemUpdateOptions(unitPrice: Money::of('60')))->id);
+        $api->delete(77);
 
-        self::assertSame('POST', $captured[0]['method']);
-        self::assertSame('PUT', $captured[1]['method']);
-        self::assertSame('DELETE', $captured[2]['method']);
+        self::assertSame('POST', $captured[0]->method);
+        self::assertSame('PUT', $captured[1]->method);
+        self::assertSame('DELETE', $captured[2]->method);
     }
 }

@@ -9,7 +9,10 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Model\CreditNote;
+use Justpilot\Billomat\Model\CreditNoteGroup;
+use Justpilot\Billomat\Model\Enum\CreditNoteGroupBy;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -24,19 +27,21 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] !== $clients) {
-            return $clients[0]->id;
+            $id = $clients[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         $faker = $this->faker();
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
-
-        self::assertNotNull($created->id);
 
         return $created->id;
     }
@@ -61,21 +66,40 @@ final class CreditNotesIntegrationTest extends AbstractBillomatIntegrationTestCa
         $clientId = $this->ensureClientId();
         $faker = $this->faker();
 
-        $opts = new CreditNoteCreateOptions(clientId: $clientId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->title = 'Integrationstest-Gutschrift '.date('d.m.Y H:i:s');
+        $opts = new CreditNoteCreateOptions(
+            clientId: $clientId,
+            date: new DateTimeImmutable('today'),
+            title: 'Integrationstest-Gutschrift '.date('d.m.Y H:i:s'),
+        );
 
-        $item = new CreditNoteItemCreateOptions(1.0, $faker->randomFloat(2, 5, 50));
-        $item->title = 'Korrekturposition';
+        $item = new CreditNoteItemCreateOptions(
+            1.0,
+            Money::of((string) $faker->randomFloat(2, 5, 50)),
+            title: 'Korrekturposition',
+        );
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $note = $billomat->creditNotes->create($opts);
 
-        self::assertNotNull($note->id);
         self::assertSame(CreditNoteStatus::DRAFT, $note->status);
 
-        self::assertTrue($billomat->creditNotes->delete($note->id));
+        $billomat->creditNotes->delete($note->id);
         self::assertNull($billomat->creditNotes->get($note->id));
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function creditNotesCanBeListedGrouped(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $groups = $billomat->creditNotes->listGrouped(CreditNoteGroupBy::STATUS);
+
+        self::assertContainsOnlyInstancesOf(CreditNoteGroup::class, $groups);
+        foreach ($groups as $group) {
+            self::assertNotNull($group->status);
+            self::assertSame($group->status->value, $group->creditNoteParams['status'] ?? null);
+        }
     }
 }

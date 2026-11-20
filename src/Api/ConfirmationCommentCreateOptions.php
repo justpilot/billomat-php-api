@@ -12,38 +12,43 @@ use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
  * Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.
  *
  * Doku:
- * https://www.billomat.com/en/api/confirmations/comments/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ConfirmationCommentCreateOptions
+final readonly class ConfirmationCommentCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: confirmation_id
-         */
-        public int $confirmationId,
         /**
          * Kommentartext.
          *
          * Billomat-Feld: comment
          */
         public string $comment,
+        /**
+         * ActionKey als Enum, sofern bekannt.
+         *
+         * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
+         * bei system-getriebenen Kommentaren selbst.
+         *
+         * Billomat-Feld: actionkey
+         */
+        public ?ConfirmationCommentActionKey $actionKey = null,
     ) {
     }
 
-    /**
-     * ActionKey als Enum, sofern bekannt.
-     *
-     * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
-     * bei system-getriebenen Kommentaren selbst.
-     *
-     * Billomat-Feld: actionkey
-     */
-    public ?ConfirmationCommentActionKey $actionkey = null;
+    /** Kopie mit geändertem `comment`. */
+    public function withComment(string $comment): self
+    {
+        return clone($this, ['comment' => $comment]);
+    }
+
+    /** Kopie mit geändertem `actionKey`. */
+    public function withActionKey(?ConfirmationCommentActionKey $actionKey): self
+    {
+        return clone($this, ['actionKey' => $actionKey]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -52,13 +57,9 @@ final class ConfirmationCommentCreateOptions
      */
     public function toArray(): array
     {
-        $data = [
-            'confirmation_id' => $this->confirmationId,
+        return array_filter([
             'comment' => $this->comment,
-            'actionkey' => $this->actionkey?->value,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+            'actionkey' => $this->actionKey?->value,
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

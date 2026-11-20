@@ -13,7 +13,7 @@ use const DATE_ATOM;
  * Repräsentiert einen Steuersatz aus der Billomat-API.
  *
  * Dieses Model bildet die Struktur von GET /taxes bzw. GET /taxes/{id} ab.
- * Es ist als Read-Model gedacht: Anlegen und Ändern erfolgen über TaxRateCreateOptions.
+ * Es ist als Read-Model gedacht: Anlegen über TaxRateCreateOptions, Ändern über TaxRateUpdateOptions.
  *
  * Dokumentation:
  * https://www.billomat.com/api/einstellungen/steuersaetze/
@@ -23,15 +23,22 @@ use const DATE_ATOM;
  */
 final readonly class TaxRate
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'rate' => true,
+        'is_default' => true,
+        'created' => true,
+        'updated' => true,
+        'customfield' => true,
+        'can_delete' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Steuersatzes. */
-        public ?int $id,
-        /**
-         * ID des Accounts, zu dem der Steuersatz gehört.
-         *
-         * @deprecated since 3.1 – Billomat liefert `account_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $accountId,
+        public int $id,
         /**
          * Name des Steuersatzes.
          *
@@ -51,13 +58,19 @@ final readonly class TaxRate
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Kann der Steuersatz gelöscht werden?
          *
          * false, solange er auf Belegen oder Artikeln verwendet wird.
          */
         public ?bool $canDelete = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -69,15 +82,15 @@ final readonly class TaxRate
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            accountId: ScalarCaster::toIntOrNull($data['account_id'] ?? null),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
-            rate: ScalarCaster::toFloatOrNull($data['rate'] ?? null) ?? 0.0,
-            isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
+            rate: ScalarCaster::required(ScalarCaster::toFloatOrNull($data['rate'] ?? null), self::class, 'rate'),
+            isDefault: ScalarCaster::required(ScalarCaster::toBoolOrNull($data['is_default'] ?? null), self::class, 'is_default'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             canDelete: ScalarCaster::toBoolOrNull($data['can_delete'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -91,14 +104,14 @@ final readonly class TaxRate
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
-            'account_id' => $this->accountId,
             'name' => $this->name,
             'rate' => $this->rate,
             'is_default' => ($this->isDefault ? 1 : 0),
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'can_delete' => null === $this->canDelete ? null : ($this->canDelete ? 1 : 0),
         ];
     }

@@ -1,50 +1,46 @@
-<!-- Quelle: https://www.billomat.com/api/einstellungen/mahnstufen/ -->
+<!-- Source: https://www.billomat.com/api/einstellungen/mahnstufen/ -->
 
-# Reminder Levels / Dunning Levels (Mahnstufen)
+# Reminder Levels (Mahnstufen)
 
-Mahnstufen werden in Billomat über `/reminder-texts` abgebildet. Das SDK exponiert zusätzlich das ältere `DunningLevelsApi`, das inzwischen **deprecated** ist:
+Billomat models reminder (dunning) levels via `/reminder-texts`. The SDK exposes them through `ReminderTextsApi`:
 
-| API | Endpunkt | Inhalt |
+| API | Endpoint | Content |
 |---|---|---|
-| `ReminderTextsApi` | `/reminder-texts` | Text-Bausteine pro Mahnstufe (Betreff, Header, Footer, Gebühren) — entspricht der offiziell dokumentierten *Mahnstufen*-Seite. |
-| `DunningLevelsApi` | `/dunning-levels` | **Deprecated seit 3.1.** Billomat antwortet mit `404 resource not found`; der Endpoint ist nicht dokumentiert. Wird in 4.0 entfernt. |
+| `ReminderTextsApi` | `/reminder-texts` | Text blocks per reminder level (subject, header, footer, fees) — matches the official *Mahnstufen* page. |
 
-Beide Endpunkte sind read-only im SDK.
+You can list, read, create, change and delete levels. The former `DunningLevelsApi` was removed in 4.0; use `$billomat->reminderTexts` instead.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->reminderTexts   // Justpilot\Billomat\Api\ReminderTextsApi
-$billomat->dunningLevels   // Justpilot\Billomat\Api\DunningLevelsApi
 ```
 
-## Endpunkt-Übersicht
+## Endpoints
 
 ### `ReminderTextsApi`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/reminder-texts` |
+| `listPage($filters?)` | GET | `/reminder-texts` (page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/reminder-texts` (lazy over all pages) |
 | `get($id)` | GET | `/reminder-texts/{id}` |
+| `getOrFail($id)` | GET | `/reminder-texts/{id}` |
+| `create($options)` | POST | `/reminder-texts` |
+| `update($id, $options)` | PUT | `/reminder-texts/{id}` |
+| `delete($id)` | DELETE | `/reminder-texts/{id}` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/reminder-texts/{id}/customfield` |
 
-### `DunningLevelsApi`
-
-| Methode | HTTP | Pfad |
-|---|---|---|
-| `list($filters?)` | GET | `/dunning-levels` |
-| `get($id)` | GET | `/dunning-levels/{id}` |
-
-> Anlegen/Bearbeiten/Löschen sind bei Billomat verfügbar (POST/PUT/DELETE auf `/reminder-texts`), aber nicht als SDK-Methoden exponiert.
-
-## Methoden
+## Methods
 
 ### `ReminderTextsApi::list(array $filters = []): list<ReminderText>`
 
 ```php
 foreach ($billomat->reminderTexts->list() as $rt) {
-    printf("Stufe %d: %s — '%s'\n",
+    printf("Level %d: %s — '%s'\n",
         $rt->sort ?? 0,
-        $rt->name ?? '(ohne Name)',
+        $rt->name ?? '(no name)',
         $rt->subject ?? '',
     );
 }
@@ -52,56 +48,103 @@ foreach ($billomat->reminderTexts->list() as $rt) {
 
 ### `ReminderTextsApi::get(int $id): ?ReminderText`
 
-Liefert `null` bei 404.
+Returns `null` on 404.
 
-### `DunningLevelsApi::list(array $filters = []): list<DunningLevel>`
+### `ReminderTextsApi::getOrFail(int $id): ReminderText`
 
-### `DunningLevelsApi::get(int $id): ?DunningLevel`
+Like `get()`, but throws `NotFoundException` instead of returning `null`.
 
-## Read-Modelle
+### `ReminderTextsApi::create(ReminderTextCreateOptions $options): ReminderText`
+
+Only `name` is required.
+
+```php
+use Justpilot\Billomat\Api\ReminderTextCreateOptions;
+use Justpilot\Billomat\Model\Money;
+
+$level = $billomat->reminderTexts->create(new ReminderTextCreateOptions(
+    name: '2nd reminder',
+    subject: 'Second reminder for invoice [Invoice.invoice_number]',
+    chargeName: 'Reminder fee',
+    chargeAmount: Money::of('5.00'),
+));
+```
+
+### `ReminderTextsApi::update(int $id, ReminderTextUpdateOptions $options): ReminderText`
+
+Only the fields you set are sent; `Clear::Field` empties a field.
+
+```php
+use Justpilot\Billomat\Api\ReminderTextUpdateOptions;
+
+$billomat->reminderTexts->update($level->id, new ReminderTextUpdateOptions(sort: 2));
+```
+
+### `ReminderTextsApi::delete(int $id): void`
+
+```php
+$billomat->reminderTexts->delete($level->id);
+```
+
+### `getCustomField(int $id): ?string` / `setCustomField(int $id, string $value): void`
+
+See [Custom meta attributes](../concepts/custom-meta-attributes.md#in-the-sdk).
+
+## Write models
+
+| Field (`ReminderTextCreateOptions` / `ReminderTextUpdateOptions`) | Billomat field | Type |
+|---|---|---|
+| `name` | `name` | `string` (required on create) |
+| `subject` | `subject` | `?string` |
+| `header` | `header` | `?string` |
+| `footer` | `footer` | `?string` |
+| `sort` | `sorting` | `?int`; named `sort` like the read model |
+| `chargeName` | `charge_name` | `?string` |
+| `chargeDescription` | `charge_description` | `?string` |
+| `chargeAmount` | `charge_amount` | `?Money`, see [Money](../concepts/money.md) |
+
+In `ReminderTextUpdateOptions` every field is optional and also accepts `Clear::Field`. Both classes are immutable (`with*()`).
+
+## Read model
 
 ### `ReminderText`
 
 `final readonly class ReminderText`.
 
-| Property | Billomat-Feld | Typ | Zweck |
+| Property | Billomat field | Type | Purpose |
 |---|---|---|---|
-| `id` | `id` | `?int` | |
-| `name` | `name` | `?string` | Name der Mahnstufe (intern) |
-| `subject` | `subject` | `?string` | Betreff der Mahn-E-Mail/des Briefs |
-| `header` | `header` | `?string` | Einleitung |
-| `footer` | `footer` | `?string` | Anmerkung |
-| `dueDays` | `due_days` | `?int` | Liefert Billomat nicht mehr; nur aus Kompatibilitätsgründen vorhanden |
-| `sort` | `sorting` (Fallback `sort`) | `?int` | Reihenfolge der Stufe |
-| `chargeName` | `charge_name` | `?string` | Name der Mahngebühr |
-| `chargeDescription` | `charge_description` | `?string` | Beschreibung der Mahngebühr |
-| `chargeAmount` | `charge_amount` | `?float` | Höhe der Mahngebühr |
+| `id` | `id` | `int` | |
+| `name` | `name` | `?string` | Name of the reminder level (internal) |
+| `subject` | `subject` | `?string` | Subject of the reminder e-mail/letter |
+| `header` | `header` | `?string` | Introduction |
+| `footer` | `footer` | `?string` | Closing note |
+| `sort` | `sorting` (fallback `sort`) | `?int` | Order of the level |
+| `chargeName` | `charge_name` | `?string` | Name of the reminder fee |
+| `chargeDescription` | `charge_description` | `?string` | Description of the reminder fee |
+| `chargeAmount` | `charge_amount` | `?Money` | Amount of the reminder fee (see [Money](../concepts/money.md)) |
+| `customField` | `customfield` | `?string` | Free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `extra` | — | `array<string,mixed>` | Fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |
 
-### `DunningLevel`
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-`final readonly class DunningLevel`.
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-| Property | Billomat-Feld | Typ | Zweck |
-|---|---|---|---|
-| `id` | `id` | `?int` | |
-| `name` | `name` | `?string` | Name der Stufe |
-| `position` | `position` | `?int` | Position in der Mahn-Reihenfolge |
-| `dueDays` | `due_days` | `?int` | Fälligkeitstage bis zur nächsten Stufe |
-| `charge` | `charge` | `?float` | Mahngebühr |
-| `interest` | `interest` | `?float` | Verzugszinsen (Prozent) |
+::: code-group
+<<< @/snippets/json/reminder-texts.create.json [POST /reminder-texts]
+<<< @/../tests/Fixtures/Contract/reminder-texts/get.json [GET /reminder-texts/{id} (response)]
+<<< @/../tests/Fixtures/Contract/reminder-texts/list.json [GET /reminder-texts (response)]
+:::
+<!-- json-examples:end -->
 
-## Welche der beiden API nutzen?
+## Pitfalls
 
-- **`ReminderTextsApi`** für alles rund um Mahnstufen: Texte (Betreff, Einleitung, Footer), Reihenfolge (`sort`) und Mahngebühr (`charge*`).
-- **`DunningLevelsApi`** nicht mehr verwenden — der Endpoint antwortet mit 404.
+- **`sort` instead of `sorting`.** Billomat returns the order as `sorting` (formerly `sort`); the SDK keeps exposing it as `ReminderText::$sort`, and `toArray()` writes it under the key `sort`.
+- **Reminder level of a reminder.** `Reminder::$reminderLevel` and `Reminder::$reminderLevelName` refer to the levels configured here, and `Reminder::$reminderTextId` to the text used; see [Reminders](reminders.md).
+- **Only `name` is really required.** Billomat's docs mark every field (including `sorting` and the fee fields) as required; the sandbox creates a level from `name` alone, so the SDK only requires `name`.
+- **Single-item list quirk.** `list()` normalizes via `listResource()`, even if Billomat returns a single level as an object instead of a list.
 
-## Stolpersteine
-
-- **`/dunning-levels` antwortet mit 404** (Stand 2026-10). Der Integration-Test (`tests/Integration/Lookups/LookupsIntegrationTest.php`) markiert sich als `skipped`, wenn Billomat 404 zurückgibt.
-- **Spec-Drift im Read-Modell.** Wie oben erwähnt — `ReminderText` exponiert `sort` (das Billomat-Feld heisst `sorting`) und kennt die `charge_*`-Felder nicht. Wer Mahngebühren aus der API lesen muss, ergänzt `ReminderText`.
-- **Single-Item-List-Quirk.** Beide APIs normalisieren über `listResource()`.
-
-## End-to-End-Beispiel
+## End-to-end example
 
 ```php
 <?php
@@ -117,30 +160,17 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// Mahn-Texte in Reihenfolge
+// Reminder levels in order
 $texts = $billomat->reminderTexts->list();
 usort($texts, static fn ($a, $b) => ($a->sort ?? 0) <=> ($b->sort ?? 0));
 
 foreach ($texts as $rt) {
-    printf("Stufe %d: %s\n  Betreff: %s\n",
+    printf("Level %d: %s\n  Subject: %s\n  Fee: %s EUR (%s)\n",
         $rt->sort ?? 0,
         $rt->name ?? '',
         $rt->subject ?? '',
+        $rt->chargeAmount?->format(2) ?? '0.00',
+        $rt->chargeName ?? 'none',
     );
-}
-
-// Numerische Konfiguration (falls Tenant unterstützt)
-try {
-    foreach ($billomat->dunningLevels->list() as $level) {
-        printf("[Pos %d] %s — %d Tage, %.2f € Gebühr, %.1f %% Zinsen\n",
-            $level->position ?? 0,
-            $level->name ?? '',
-            $level->dueDays ?? 0,
-            $level->charge ?? 0.0,
-            $level->interest ?? 0.0,
-        );
-    }
-} catch (\Justpilot\Billomat\Exception\NotFoundException) {
-    echo "Sandbox stellt /dunning-levels nicht bereit.\n";
 }
 ```

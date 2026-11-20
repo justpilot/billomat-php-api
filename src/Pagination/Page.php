@@ -11,11 +11,13 @@ namespace Justpilot\Billomat\Pagination;
  * `*Api::listPage()`-Methoden zurückgegeben. Für lazy Iteration über alle
  * Seiten siehe stattdessen `*Api::iterateAll()`.
  *
- * @template T of object
+ * @template-covariant T of object
  */
 final readonly class Page
 {
     /**
+     * @internal das SDK erzeugt die Seiten; neue Felder können in einem Minor-Release dazukommen
+     *
      * @param list<T> $items
      */
     public function __construct(

@@ -11,6 +11,6 @@ namespace Justpilot\Billomat\Exception;
  *  - 400 Bad Request
  *  - 422 Unprocessable Entity
  */
-class ValidationException extends HttpException
+final class ValidationException extends HttpException
 {
 }

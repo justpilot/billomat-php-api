@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 $optionsOrder = ['invoice_id', 'contact_id', 'address', 'number_pre', 'number', 'number_length', 'date', 'due_days', 'due_date', 'subject', 'label', 'intro', 'note', 'reminder_text_id', 'template_id'];
 
@@ -52,17 +51,24 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'ReminderFilter',
+        'endpoint' => 'GET /api/reminders?invoice_number=RE123',
+        'fields' => [
+            'status' => ['enum' => 'ReminderStatus'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Mahnung.'],
-        'client_id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         // Die Rechnung lässt sich nach dem Anlegen nicht mehr ändern.
         'invoice_id' => ['create' => ['constructor' => true], 'update' => ['skip' => true], 'doc' => 'ID der überfälligen Rechnung.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Mahnung.'],
-        'reminder_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Mahnungsnummer.', 'deprecated' => $gone('reminder_number')],
-        'number' => ['type' => 'int', 'writable' => true, 'doc' => 'Laufende Nummer (ohne Präfix).', 'deprecated' => $gone('number')],
-        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Mahnungsnummer.', 'deprecated' => $gone('number_pre')],
-        'number_length' => ['type' => 'int', 'writable' => true, 'doc' => 'Mindestlänge der Mahnungsnummer.', 'deprecated' => $gone('number_length')],
+        'number' => ['type' => 'int', 'writable' => true, 'doc' => 'Laufende Nummer (ohne Präfix).', 'optionsOnly' => true],
+        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Mahnungsnummer.', 'optionsOnly' => true],
+        'number_length' => ['type' => 'int', 'writable' => true, 'doc' => 'Mindestlänge der Mahnungsnummer.', 'optionsOnly' => true],
         'status' => ['type' => 'string', 'readOnly' => true, 'enum' => 'ReminderStatus', 'doc' => 'Status der Mahnung.'],
         'date' => ['doc' => 'Mahnungsdatum.'],
         'due_days' => ['doc' => 'Tage bis zur Fälligkeit.'],
@@ -73,9 +79,7 @@ return [
         'intro' => ['doc' => 'Einleitungstext.'],
         'note' => ['doc' => 'Anmerkungstext.'],
         'total_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag brutto.'],
-        'total_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag netto.', 'deprecated' => $gone('total_net')],
         'currency_code' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Währung (ISO-Währungscode).'],
-        'quote' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Umrechnungskurs.', 'deprecated' => $gone('quote')],
         'reminder_text_id' => ['type' => 'int', 'writable' => true, 'doc' => 'ID des Mahntextes (Mahnstufe).'],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Mahnung abgeschlossen wird.'],
         'reminder-items' => [

@@ -16,7 +16,7 @@ final class OfferStatusTest extends TestCase
     public function itExposesAllExpectedCases(): void
     {
         self::assertSame(
-            ['DRAFT', 'OPEN', 'ACCEPTED', 'REJECTED', 'CLEARED', 'CANCELED'],
+            ['DRAFT', 'OPEN', 'WON', 'LOST', 'CLEARED', 'CANCELED'],
             array_map(static fn (OfferStatus $c): string => $c->value, OfferStatus::cases())
         );
     }
@@ -26,8 +26,8 @@ final class OfferStatusTest extends TestCase
     {
         self::assertNull(OfferStatus::fromApi(null));
         self::assertNull(OfferStatus::fromApi('BOGUS'));
-        self::assertSame(OfferStatus::ACCEPTED, OfferStatus::fromApi('ACCEPTED'));
-        self::assertSame(OfferStatus::REJECTED, OfferStatus::fromApi('REJECTED'));
+        self::assertSame(OfferStatus::WON, OfferStatus::fromApi('WON'));
+        self::assertSame(OfferStatus::LOST, OfferStatus::fromApi('LOST'));
     }
 
     #[Test]

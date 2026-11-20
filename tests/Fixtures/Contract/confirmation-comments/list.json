@@ -1,0 +1,35 @@
+{
+    "confirmation-comments": {
+        "confirmation-comment": [
+            {
+                "id": "1516574",
+                "created": "2026-10-26T16:59:03+01:00",
+                "comment": "Text 28",
+                "actionkey": "CREATE",
+                "public": "0",
+                "by_client": "0",
+                "user_id": "136536",
+                "email_id": "",
+                "client_id": "",
+                "confirmation_id": "550449",
+                "customfield": ""
+            },
+            {
+                "id": "1516575",
+                "created": "2026-10-26T16:59:04+01:00",
+                "comment": "Text 16",
+                "actionkey": "COMMENT",
+                "public": "0",
+                "by_client": "0",
+                "user_id": "136536",
+                "email_id": "",
+                "client_id": "",
+                "confirmation_id": "550449",
+                "customfield": ""
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "2"
+    }
+}

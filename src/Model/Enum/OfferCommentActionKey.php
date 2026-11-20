@@ -13,10 +13,12 @@ namespace Justpilot\Billomat\Model\Enum;
  * Unbekannte Werte werden über `tryFrom()` als null behandelt; der Roh-String
  * wird im Modell zusätzlich aufgehoben.
  *
- * Doku: https://www.billomat.com/en/api/estimates/comments/
+ * Doku: https://www.billomat.com/api/angebote/kommentare/
  */
 enum OfferCommentActionKey: string
 {
+    use FromApi;
+
     case CREATE = 'CREATE';
     case EDIT = 'EDIT';
     case OPEN = 'OPEN';

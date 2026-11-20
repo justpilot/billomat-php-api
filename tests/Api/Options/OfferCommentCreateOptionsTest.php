@@ -14,12 +14,12 @@ use PHPUnit\Framework\TestCase;
 final class OfferCommentCreateOptionsTest extends TestCase
 {
     #[Test]
-    public function minimalPayloadHasParentIdAndComment(): void
+    public function minimalPayloadHasOnlyTheComment(): void
     {
-        $options = new OfferCommentCreateOptions(offerId: 17, comment: 'Vom Kunden angenommen.');
+        $options = new OfferCommentCreateOptions(comment: 'Vom Kunden angenommen.');
 
         self::assertSame(
-            ['offer_id' => 17, 'comment' => 'Vom Kunden angenommen.'],
+            ['comment' => 'Vom Kunden angenommen.'],
             $options->toArray(),
         );
     }
@@ -27,8 +27,10 @@ final class OfferCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesActionkeyAsApiString(): void
     {
-        $options = new OfferCommentCreateOptions(offerId: 1, comment: 'x');
-        $options->actionkey = OfferCommentActionKey::COMMENT;
+        $options = new OfferCommentCreateOptions(
+            comment: 'x',
+            actionKey: OfferCommentActionKey::COMMENT,
+        );
 
         self::assertSame('COMMENT', $options->toArray()['actionkey']);
     }
@@ -36,8 +38,7 @@ final class OfferCommentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPublicFlag(): void
     {
-        $options = new OfferCommentCreateOptions(offerId: 1, comment: 'x');
-        $options->public = true;
+        $options = new OfferCommentCreateOptions(comment: 'x', public: true);
 
         self::assertTrue($options->toArray()['public']);
     }

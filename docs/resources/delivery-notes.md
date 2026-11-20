@@ -1,404 +1,422 @@
-<!-- Quelle: https://www.billomat.com/api/lieferscheine/ -->
+<!-- Source: https://www.billomat.com/api/lieferscheine/ -->
 
 # Delivery Notes (Lieferscheine)
 
-API-Wrapper für Lieferscheine unter `/delivery-notes` und ihre drei Sub-Ressourcen (`/delivery-note-items`, `/delivery-note-comments`, `/delivery-note-tags`).
+API wrapper for delivery notes under `/delivery-notes` and their three sub-resources (`/delivery-note-items`, `/delivery-note-comments`, `/delivery-note-tags`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->deliveryNotes          // Lieferscheine selbst
-$billomat->deliveryNoteItems      // Positionen
-$billomat->deliveryNoteComments   // Kommentare / Audit-Trail
-$billomat->deliveryNoteTags       // Schlagworte
+$billomat->deliveryNotes             // delivery notes
+$billomat->deliveryNotes->items      // line items
+$billomat->deliveryNotes->comments   // comments / audit trail
+$billomat->deliveryNotes->tags       // tags
 ```
 
-## Modell
+## Model
 
-Ein Lieferschein dokumentiert die physische Übergabe einer Lieferung. Er ist im Vergleich zur [Rechnung](invoices.md) wert-arm — Beträge erscheinen im Read-Modell zwar (für interne Auswertungen), das Dokument selbst hat aber keine Zahlungspflicht. Der Status-Lebenszyklus ist identisch zur [Auftragsbestätigung](confirmations.md):
+A delivery note documents the physical handover of a delivery. Compared to an [invoice](invoices.md) it carries little monetary data: the read model has no total or price fields, and the document itself creates no payment obligation. The status lifecycle is a single step:
 
 ```
-DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
-                         │
-                         └──cancel()──▶  CANCELED
+DRAFT  ──complete()──▶  CREATED
 ```
 
-`undo()` setzt `CLEARED`/`CANCELED` zurück auf `OPEN`. Der Lieferschein kann an eine Quell-Rechnung (`invoiceId`) und/oder Auftragsbestätigung (`confirmationId`) gekoppelt werden.
+Unlike [confirmations](confirmations.md), the API offers no further status transitions: `PUT /delivery-notes/{id}/cancel` and `/uncancel` answer 400 ("cancellation not supported"), `/clear`, `/unclear` and `/undo` answer 404. The enum still knows `OPEN`, `CLEARED` and `CANCELED`, which Billomat may report for documents changed in the web app. A delivery note can be linked to a source invoice (`invoiceId`), confirmation (`confirmationId`) and/or offer (`offerId`).
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
 ### `/delivery-notes`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/delivery-notes` |
-| `get($id)` | GET | `/delivery-notes/{id}` |
+| `listPage($filters?)` | GET | `/delivery-notes` (one page plus pagination metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/delivery-notes` (all pages, lazily) |
+| `get($id)` / `getOrFail($id)` | GET | `/delivery-notes/{id}` |
 | `create($options)` | POST | `/delivery-notes` |
 | `update($id, $options)` | PUT | `/delivery-notes/{id}` |
 | `delete($id)` | DELETE | `/delivery-notes/{id}` |
 | `complete($id, $templateId?)` | PUT | `/delivery-notes/{id}/complete` |
-| `cancel($id)` | PUT | `/delivery-notes/{id}/cancel` |
-| `clear($id)` | PUT | `/delivery-notes/{id}/clear` |
-| `undo($id)` | PUT | `/delivery-notes/{id}/undo` |
 | `email($id, $options?)` | POST | `/delivery-notes/{id}/email` |
-| `uploadSignature($id, $base64Pdf)` | PUT | `/delivery-notes/{id}/upload-signature` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/delivery-notes/{id}/pdf` |
+| `mail($id, $options?)` | POST | `/delivery-notes/{id}/mail` |
+| `pdf($id, $type?)` | GET | `/delivery-notes/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/delivery-notes/{id}/pdf?format=pdf` |
 
 ### `/delivery-note-items`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByDeliveryNote($deliveryNoteId, $query?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
-| `get($id)` | GET | `/delivery-note-items/{id}` |
-| `create($deliveryNoteId, $options)` | POST | `/delivery-note-items` |
+| `list($parentId, $filters?)` | GET | `/delivery-note-items?delivery_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/delivery-note-items?delivery_note_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/delivery-note-items/{id}` |
+| `create($parentId, $options)` | POST | `/delivery-note-items` |
 | `update($id, $options)` | PUT | `/delivery-note-items/{id}` |
 | `delete($id)` | DELETE | `/delivery-note-items/{id}` |
 
 ### `/delivery-note-comments`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByDeliveryNote($deliveryNoteId, $actionKeys?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
-| `get($id)` | GET | `/delivery-note-comments/{id}` |
-| `create($options)` | POST | `/delivery-note-comments` |
+| `list($parentId, $filters?)` | GET | `/delivery-note-comments?delivery_note_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/delivery-note-comments?delivery_note_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/delivery-note-comments/{id}` |
+| `create($parentId, $options)` | POST | `/delivery-note-comments` |
 | `delete($id)` | DELETE | `/delivery-note-comments/{id}` |
 
 ### `/delivery-note-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByDeliveryNote($deliveryNoteId)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
+| `list($parentId, $filters?)` | GET | `/delivery-note-tags?delivery_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/delivery-note-tags?delivery_note_id={id}` (paginated) |
 | `cloud()` | GET | `/delivery-note-tags` |
-| `get($id)` | GET | `/delivery-note-tags/{id}` |
-| `create($options)` | POST | `/delivery-note-tags` |
+| `get($id)` / `getOrFail($id)` | GET | `/delivery-note-tags/{id}` |
+| `create($parentId, $options)` | POST | `/delivery-note-tags` |
 | `delete($id)` | DELETE | `/delivery-note-tags/{id}` |
 
-## Methoden
+## Methods
 
-### Delivery Notes
+### Delivery notes
 
-#### `list(array $filters = []): list<DeliveryNote>`
+#### `list(DeliveryNoteFilter|array $filters = []): list<DeliveryNote>`
 
-Filter laut Billomat-Doku: `client_id`, `contact_id`, `status`, `from`, `to`, `number_pre`, `tags`, `invoice_id`, `confirmation_id`, `order_by`. `array_is_list()` normalisiert Single-Treffer.
+Filters according to the Billomat docs: `client_id`, `contact_id`, `status`, `from`, `to`, `number_pre`, `tags`, `invoice_id`, `confirmation_id`, `order_by`. If Billomat returns a single match as an object, the SDK normalizes it to a list.
+
+The typed filter `DeliveryNoteFilter` is recommended. Its camelCase fields are `clientId`, `contactId`, `deliveryNoteNumber`, `status` (`list<DeliveryNoteStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` and `articleId`. Multi-value fields are lists and are sent comma-separated. On top of that there are `orderBy`, `page`, `perPage` and `extra` for further query parameters (e.g. `invoice_id`, `confirmation_id`, `number_pre`). A plain array still works.
 
 ```php
-$openDeliveries = $billomat->deliveryNotes->list([
-    'status' => 'OPEN',
-    'order_by' => 'date+DESC',
-]);
+use Justpilot\Billomat\Api\DeliveryNoteFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
+
+$openDeliveries = $billomat->deliveryNotes->list(new DeliveryNoteFilter(
+    status: [DeliveryNoteStatus::OPEN],
+    orderBy: OrderBy::desc('date'),
+));
 ```
+
+`listPage()` takes the same filters and returns a `Page` with pagination metadata; `iterateAll()` walks through all pages lazily. See [Pagination and filtering](../concepts/pagination-and-filtering.md).
 
 #### `get(int $id): ?DeliveryNote`
 
-Liefert `null` bei 404. Eingebettete `delivery-note-items` und `taxes` werden automatisch hydriert.
+Returns `null` on 404. Embedded `delivery-note-items` and `taxes` are hydrated automatically. `getOrFail()` throws a `NotFoundException` instead of returning `null`.
 
 #### `create(DeliveryNoteCreateOptions $options): DeliveryNote`
 
-Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen als `delivery-note-items.delivery-note-item` im Payload. Über `invoiceId` und/oder `confirmationId` lässt sich der Lieferschein an Vorgänger-Dokumente anhängen.
+Line items can be passed directly in the `create()` call via `items: […]` or `withItem()`; they end up as `delivery-note-items.delivery-note-item` in the payload. `invoiceId`, `confirmationId` and `offerId` link the delivery note to preceding documents.
 
 ```php
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
-$opts = new DeliveryNoteCreateOptions(clientId: 12345);
-$opts->invoiceId = 999;
-$opts->date = new DateTimeImmutable('today');
-$opts->title = 'Lieferschein';
-
-$opts->addItem(new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 49.90));
+$opts = new DeliveryNoteCreateOptions(
+    clientId: 12345,
+    invoiceId: 999,
+    date: new DateTimeImmutable('today'),
+    title: 'Delivery note',
+    items: [
+        new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: Money::of('49.90')),
+    ],
+);
 
 $note = $billomat->deliveryNotes->create($opts);
 ```
 
 #### `update(int $id, DeliveryNoteUpdateOptions $options): DeliveryNote`
 
-Schmaler Subset, voll editierbar nur im `DRAFT`. Positionen sind hier nicht änderbar — dafür die `DeliveryNoteItemsApi` nutzen.
+Fully editable only in `DRAFT`. Line items can't be changed here; use `$billomat->deliveryNotes->items`.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
-DRAFT → OPEN. Vergibt die endgültige `delivery_note_number` und erzeugt das PDF.
+Completes the draft. Assigns the final `delivery_note_number` and generates the PDF.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
-Nur im `DRAFT` erlaubt — danach `cancel()`.
+Deletes the delivery note. There is no `cancel()` for delivery notes; in the sandbox, Billomat also deleted completed delivery notes.
 
-#### Status-Übergänge
+#### `email(int $id, ?EmailOptions $options = null): void`
+
+Sends the delivery note by email. Without options, Billomat uses the account defaults; the PDF is attached automatically.
+
+
+#### `mail(int $id, ?MailOptions $options = null): void`
+
+Sends the delivery note by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
 
 ```php
-$billomat->deliveryNotes->cancel($note->id);   // OPEN/CLEARED → CANCELED
-$billomat->deliveryNotes->clear($note->id);    // OPEN          → CLEARED
-$billomat->deliveryNotes->undo($note->id);     // {clear,cancel} → OPEN
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->deliveryNotes->mail($id, new MailOptions(duplex: true));
 ```
 
-Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge → `ValidationException` (422).
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-#### `email(int $id, ?DeliveryNoteEmailOptions $options = null): bool`
-
-Versendet den Lieferschein per E-Mail. Ohne Options nutzt Billomat die Defaults aus dem Account; das PDF wird automatisch angehängt.
-
-#### `uploadSignature(int $id, string $base64Pdf): bool`
-
-Lädt eine unterschriebene PDF-Version hoch — typischer Use Case: der Fahrer fotografiert die unterschriebene Empfangsbestätigung, das PDF wird Base64-encodiert hochgeladen.
-
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string`
-
-Liefert `DeliveryNotePdf` (Base64-Container) oder mit `$rawPdf = true` die rohen Bytes.
+`pdf()` returns a `DocumentPdf` (base64 container), `pdfContent()` the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
-
-$pdf = $billomat->deliveryNotes->pdf($note->id, InvoicePdfType::SIGNED);
-file_put_contents('lieferschein.pdf', $pdf->getBinary());
+$pdf = $billomat->deliveryNotes->pdf($note->id);
+file_put_contents('delivery-note.pdf', $pdf->getBinary());
 ```
 
-### Delivery Note Items
+### Delivery note items
 
 ```php
-$items = $billomat->deliveryNoteItems->listByDeliveryNote($note->id);
+$items = $billomat->deliveryNotes->items->list($note->id);
 
-$item = $billomat->deliveryNoteItems->create(
+$item = $billomat->deliveryNotes->items->create(
     $note->id,
-    new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
+    new DeliveryNoteItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
-$billomat->deliveryNoteItems->update($item->id, $opts);
-$billomat->deliveryNoteItems->delete($item->id);
+$billomat->deliveryNotes->items->update($item->id, new DeliveryNoteItemUpdateOptions(title: 'Packed separately'));
+$billomat->deliveryNotes->items->delete($item->id);
 ```
 
-`create()` injiziert `delivery_note_id` automatisch — die Options-Klasse selbst hat dieses Feld nicht. `update()` verwendet dieselbe Klasse wie `create()`.
+`create()` adds `delivery_note_id` automatically; the options class itself has no such field. `update()` takes `DeliveryNoteItemUpdateOptions` and only sends the fields you set.
 
-### Delivery Note Comments
+### Delivery note comments
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 
-$comments = $billomat->deliveryNoteComments->listByDeliveryNote(
+$comments = $billomat->deliveryNotes->comments->list(
     $note->id,
-    actionKeys: [DeliveryNoteCommentActionKey::COMPLETE, DeliveryNoteCommentActionKey::EMAIL],
+    new CommentFilter(actionKeys: [DeliveryNoteCommentActionKey::COMPLETE, DeliveryNoteCommentActionKey::EMAIL]),
 );
 
-$billomat->deliveryNoteComments->create(
+$billomat->deliveryNotes->comments->create(
+    $note->id,
     new DeliveryNoteCommentCreateOptions(
-        deliveryNoteId: $note->id,
-        comment: 'Übergeben an Lager Süd.',
+        comment: 'Handed over to warehouse South.',
     ),
 );
 ```
 
-### Delivery Note Tags
+### Delivery note tags
 
 ```php
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
 
-$tag = $billomat->deliveryNoteTags->create(
-    new DeliveryNoteTagCreateOptions(deliveryNoteId: $note->id, name: 'speditionsversand'),
+$tag = $billomat->deliveryNotes->tags->create(
+    $note->id,
+    new DeliveryNoteTagCreateOptions(name: 'freight-shipping'),
 );
 
-$tags  = $billomat->deliveryNoteTags->listByDeliveryNote($note->id);
-$cloud = $billomat->deliveryNoteTags->cloud();
+$tags  = $billomat->deliveryNotes->tags->list($note->id);
+$cloud = $billomat->deliveryNotes->tags->cloud();
 ```
 
-## Write-Modell: `DeliveryNoteCreateOptions`
+## Write model: `DeliveryNoteCreateOptions`
 
-Konstruktor: `new DeliveryNoteCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+Constructor: `new DeliveryNoteCreateOptions(int $clientId, …)`. `clientId` is required and the first parameter. Every field is a constructor parameter with a default and is passed as a named argument. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withTitle('New')`).
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` | Pflicht (Konstruktor) |
+| `clientId` | `client_id` | `int` | required (constructor) |
 | `contactId` | `contact_id` | `?int` | |
 | `address` | `address` | `?string` | |
-| `numberPre`, `number`, `numberLength` | analog | `?string`/`?int`/`?int` | |
-| `date` | `date` | `?\DateTimeImmutable` | als `Y-m-d` serialisiert |
-| `title`, `label`, `intro`, `note`, `reduction` | analog | `?string` | |
+| `numberPre`, `number`, `numberLength` | snake_case equivalent | `?string`/`?int`/`?int` | |
+| `date` | `date` | `?\DateTimeImmutable` | serialized as `Y-m-d` |
+| `title`, `label`, `intro`, `note`, `reduction` | snake_case equivalent | `?string` | |
 | `currencyCode` | `currency_code` | `?string` | |
 | `netGross` | `net_gross` | `?NetGross` | |
 | `quote` | `quote` | `?float` | |
-| `invoiceId` | `invoice_id` | `?int` | Quell-Rechnung |
-| `confirmationId` | `confirmation_id` | `?int` | Quell-Auftragsbestätigung |
+| `invoiceId` | `invoice_id` | `?int` | source invoice |
+| `confirmationId` | `confirmation_id` | `?int` | source confirmation |
 | `freeTextId` | `free_text_id` | `?int` | |
 | `templateId` | `template_id` | `?int` | |
+| `offerId` | `offer_id` | `?int` | source offer |
 
-Anders als bei `OfferCreateOptions`/`ConfirmationCreateOptions` gibt es hier **keine** `discountRate`/`discountDays`/`discountDate`/`validityDays` — der Lieferschein hat keinen eigenen Zahlungs- oder Gültigkeitskontext.
+Unlike `OfferCreateOptions`/`ConfirmationCreateOptions`, there is **no** `discountRate`/`discountDays`/`discountDate`/`validityDays`: a delivery note has no payment or validity context of its own.
 
-### Positionen
+### Line items
 
-`addItem(DeliveryNoteItemCreateOptions $item): self` und `getItems(): list<DeliveryNoteItemCreateOptions>`. `toArray()` rendert sie als `delivery-note-items.delivery-note-item`.
+Line items are passed as a list via the constructor parameter `items` (`items: [new DeliveryNoteItemCreateOptions(…), …]`) and are then available in the `$items` property. `withItem()` returns a copy with one additional item. `toArray()` renders them as `delivery-note-items.delivery-note-item`.
 
-## Write-Modell: `DeliveryNoteUpdateOptions`
+## Write model: `DeliveryNoteUpdateOptions`
 
-Spiegelt `DeliveryNoteCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne Items-Helper. Felder, die nicht gesetzt werden, bleiben unberührt.
+Mirrors `DeliveryNoteCreateOptions`, but `clientId` is optional and there is no `items`. `null` means "don't send", so the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null`, and Billomat empties it, e.g. `new DeliveryNoteUpdateOptions(note: Clear::Field)`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `clientId` | `client_id` | `?int` |
-| `contactId`, `numberPre`, `number`, `numberLength`, `invoiceId`, `confirmationId`, `freeTextId`, `templateId` | analog | `?int`/`?string` |
-| `address`, `title`, `label`, `intro`, `note`, `reduction`, `currencyCode` | analog | `?string` |
+| `contactId`, `numberPre`, `number`, `numberLength`, `invoiceId`, `confirmationId`, `offerId`, `freeTextId`, `templateId` | snake_case equivalent | `?int`/`?string` |
+| `address`, `title`, `label`, `intro`, `note`, `reduction`, `currencyCode` | snake_case equivalent | `?string` |
 | `date` | `date` | `?\DateTimeImmutable` |
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` |
 
-## Write-Modell: `DeliveryNoteItemCreateOptions`
+Every field additionally accepts `Clear::Field`.
 
-Konstruktor: `new DeliveryNoteItemCreateOptions(float $quantity, float $unitPrice)`. Beide Pflicht, werden auch bei `0` mitgeschickt.
+## Write model: `DeliveryNoteItemCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+Constructor: `new DeliveryNoteItemCreateOptions(float $quantity, Money $unitPrice)`. Both are required and are sent even when they are `0`.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
-| `unitPrice` | `unit_price` | `float` | Pflicht (Konstruktor) |
-| `type` | `type` | `?InvoiceItemType` | |
+| `quantity` | `quantity` | `float` | required (constructor) |
+| `unitPrice` | `unit_price` | `Money` | required (constructor) |
+| `type` | `type` | `?ItemType` | |
 | `articleId` | `article_id` | `?int` | |
-| `title`, `description`, `unit` | analog | `?string` | |
-| `taxName`, `taxRate`, `taxChangedManually` | analog | `?string`/`?float`/`?bool` | |
+| `title`, `description`, `unit` | snake_case equivalent | `?string` | |
+| `taxName`, `taxRate`, `taxChangedManually` | snake_case equivalent | `?string`/`?float`/`?bool` | |
 | `reduction` | `reduction` | `?string` | |
 | `position` | `position` | `?int` | |
 
-`DeliveryNoteItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ.
+For `ItemsApi::update()` there is `DeliveryNoteItemUpdateOptions`: every field is optional (`X|Clear|null`) with a `with*()` method, only the fields you set are sent, and `Clear::Field` empties a field. Billomat keeps all other fields of the item.
 
-## Write-Modell: `DeliveryNoteCommentCreateOptions`
+## Write model: `DeliveryNoteCommentCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+The delivery note ID isn't part of the options: pass it as the first argument of `create()`, which adds `delivery_note_id` to the payload.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `deliveryNoteId` | `delivery_note_id` | `int` | Pflicht (Konstruktor) |
-| `comment` | `comment` | `string` | Pflicht (Konstruktor) |
-| `actionkey` | `actionkey` | `?DeliveryNoteCommentActionKey` | typischerweise nur bei System-Aktionen |
+| `comment` | `comment` | `string` | required (constructor) |
+| `actionKey` | `actionkey` | `?DeliveryNoteCommentActionKey` | usually only for system actions |
 
-## Write-Modell: `DeliveryNoteTagCreateOptions`
+## Write model: `DeliveryNoteTagCreateOptions`
 
-| Property | Billomat-Feld | Typ |
+The delivery note ID isn't part of the options: pass it as the first argument of `create()`, which adds `delivery_note_id` to the payload.
+
+| Property | Billomat field | Type |
 |---|---|---|
-| `deliveryNoteId` | `delivery_note_id` | `int` (Pflicht) |
-| `name` | `name` | `string` (Pflicht) |
+| `name` | `name` | `string` (required) |
 
-## Write-Modell: `DeliveryNoteEmailOptions`
+## Write model: `EmailOptions`
 
-Strukturell identisch zu `OfferEmailOptions`/`ConfirmationEmailOptions`. Keine Pflichtfelder.
+Shared class for sending every document type by email (invoices, offers, confirmations, credit notes, delivery notes, reminders, letters); the full description is on the [Invoices](invoices.md#write-model-emailoptions) page. No required fields.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `emailTemplateId` | `email_template_id` | `?int` | |
 | `from` | `from` | `?string` | |
-| `to`, `cc`, `bcc` | `recipients.{to,cc,bcc}` | `list<string>` | leere Arrays werden weggelassen |
-| `subject`, `body`, `filename` | analog | `?string` | |
-| `attachments` | `attachments.attachment[]` | `list<array{filename,mimetype,base64file}>` | |
+| `to`, `cc`, `bcc` | `recipients.{to,cc,bcc}` | `list<string>` | empty arrays are left out |
+| `subject`, `body`, `filename` | snake_case equivalent | `?string` | |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | |
 
-## Read-Modell: `DeliveryNote`
+## Read model: `DeliveryNote`
 
 `final readonly class DeliveryNote`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `deliveryNoteNumber` | `?string` — erst nach `complete()` |
+| `deliveryNoteNumber` | `?string`, only set after `complete()` |
 | `number`, `numberPre`, `numberLength` | `?int`/`?string`/`?int` |
 | `status` | `?DeliveryNoteStatus` |
 | `date` | `?\DateTimeImmutable` |
 | `address` | `?string` |
-| `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `netGross` | `?NetGross` |
-| `currencyCode` | `?string` |
-| `quote` | `?float` |
+| `title`, `label`, `intro`, `note` | `?string` |
 | `invoiceId` | `?int` |
 | `confirmationId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
-| `customerportalUrl` | `?string` |
+| `taxes` | `list<TaxSummary>`: tax summary per rate (`name`, `rate`, `amount`, `amountNet`, `amountGross`, the latter each also as `*Plain`/`*Rounded`; amounts as `Money`) |
 | `items` | `list<DeliveryNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
 | `offerId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
-> **Veraltet seit 3.1:** `totalGross`, `totalNet`, `netGross`, `reduction`, `totalGrossUnreduced`, `totalNetUnreduced`, `currencyCode`, `quote`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
-
-## Read-Modell: `DeliveryNoteItem`
+## Read model: `DeliveryNoteItem`
 
 `final readonly`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id`, `deliveryNoteId`, `articleId`, `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
-| `taxName` | `?string` |
-| `taxRate` | `?float` |
+| `quantity` | `float` |
 | `taxChangedManually` | `?bool` |
-| `title`, `description`, `reduction` | `?string` |
-| `type` | `?InvoiceItemType` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `created` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `title`, `description` | `?string` |
+| `type` | `?ItemType` |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-> **Veraltet seit 3.1:** `unitPrice`, `taxName`, `taxRate`, `reduction`, `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced`, `created`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null` (`unitPrice`: immer `0.0`). Sie werden in 4.0 entfernt.
-
-## Read-Modell: `DeliveryNoteComment`
+## Read model: `DeliveryNoteComment`
 
 `final readonly`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `deliveryNoteId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?DeliveryNoteCommentActionKey` |
-| `actionkeyRaw` | `?string` — Roh-Wert bei unbekanntem `actionkey` |
+| `actionKey` | `?DeliveryNoteCommentActionKey` |
+| `actionKeyRaw` | `?string`, raw value for an unknown `actionkey` |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `DeliveryNoteTag`
+## Read model: `DeliveryNoteTag`
 
-`final readonly`. Felder: `id` (`?int`), `deliveryNoteId` (`int`), `name` (`string`), `customfield` (`?string`).
+`final readonly`. Fields: `id` (`?int`), `deliveryNoteId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
 
-## Read-Modell: `DeliveryNoteTagCloudEntry`
+## Read model: `DeliveryNoteTagCloudEntry`
 
-`final readonly`. Aggregat: `id` (`?int`), `name` (`string`), `count` (`int`).
+`final readonly`. Aggregate: `id` (`?int`), `name` (`string`), `count` (`int`), `extra` (`array`).
 
-## Read-Modell: `DeliveryNotePdf`
+## Read model: `DocumentPdf`
 
-`final class DeliveryNotePdf` (nicht `readonly`).
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `int` |
-| `deliveryNoteId` | `int` |
+| `documentId` | `int` (Billomat field `delivery_note_id`) |
 | `created` | `?\DateTimeImmutable` |
 | `filename` | `string` |
-| `mimeType` | `string` — Default `application/pdf` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodiert `base64file`.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `delivery_note_id`, `filename` or `base64file` is missing.
 
-## Verwendete Enums
+## Enums used
 
-- [`DeliveryNoteStatus`](../../src/Model/Enum/DeliveryNoteStatus.php): `DRAFT`, `OPEN`, `CREATED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `CREATED`. Hat `label()` für deutsche Bezeichnung.
+- [`DeliveryNoteStatus`](../../src/Model/Enum/DeliveryNoteStatus.php): `DRAFT`, `OPEN`, `CREATED`, `CLEARED`, `CANCELED`. After `complete()`, Billomat now returns `CREATED`. Has `label()` for the German display name.
 - [`DeliveryNoteCommentActionKey`](../../src/Model/Enum/DeliveryNoteCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`.
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE`, shared with invoice items.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`); the wire values are lowercase.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 
-## Stolpersteine
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-- **Lieferschein ist wert-arm.** Beträge sind im Read-Modell enthalten (vom Backend errechnet), aber das Dokument löst keine Forderung aus. Wer eine Zahlung erwartet, ist hier falsch — `InvoicesApi` oder `IncomingsApi` ist gemeint.
-- **Kein `discount`/`validity`.** Anders als `OfferCreateOptions`/`ConfirmationCreateOptions` hat `DeliveryNoteCreateOptions` keine `discountRate`/`discountDays`/`discountDate`/`validityDays`-Felder. Wer aus Copy-Paste-Reflex sucht, findet sie nicht.
-- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `delivery-note-items` beim PUT. Stets die `DeliveryNoteItemsApi` verwenden.
-- **`delete()` nur im `DRAFT`.** Nach `complete()` ist nur noch `cancel()` möglich.
-- **`DeliveryNoteItemCreateOptions` ist auch der Update-Typ.** Der Konstruktor verlangt `quantity` und `unitPrice`, selbst wenn du nur den Titel ändern willst.
-- **`array_is_list`-Normalisierung in `list()`.** Bei genau einem Treffer liefert Billomat `delivery-note` als Objekt — das SDK packt das selbst in eine Liste.
-- **Doppelte Quell-Referenz möglich.** Sowohl `invoiceId` als auch `confirmationId` können gleichzeitig gesetzt sein — Billomat synchronisiert die Status der verlinkten Dokumente aber **nicht** automatisch.
-- **`tax_changed_manually` ist Pflicht für manuelle `taxRate`-Werte.** Ohne das Flag nimmt Billomat den Default des Artikels/Kunden.
-- **`DeliveryNotePdf` ist nicht `readonly`** — pragmatische Ausnahme für den Binärdaten-Container.
-- **`uploadSignature()` erwartet reines Base64**, kein `data:`-Prefix. Typischer Anwendungsfall: vom Fahrer signiertes PDF aus dem Mobil-Workflow zurückspielen.
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-## End-to-End-Beispiel
+::: code-group
+<<< @/snippets/json/delivery-notes.create.json [POST /delivery-notes]
+<<< @/../tests/Fixtures/Contract/delivery-notes/get.json [GET /delivery-notes/{id} (response)]
+<<< @/../tests/Fixtures/Contract/delivery-notes/list.json [GET /delivery-notes (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **A delivery note carries little monetary data.** Billomat returns no total or price fields in the read model, and the document creates no receivable. If you expect a payment, you want `$billomat->invoices` or `$billomat->incomings`.
+- **No `discount`/`validity`.** Unlike `OfferCreateOptions`/`ConfirmationCreateOptions`, `DeliveryNoteCreateOptions` has no `discountRate`/`discountDays`/`discountDate`/`validityDays` fields. Don't look for them out of copy-paste habit.
+- **`update()` doesn't change line items.** Billomat ignores embedded `delivery-note-items` on PUT. Always use `$billomat->deliveryNotes->items`.
+- **No status transitions after `complete()`.** The SDK has no `cancel()`, `clear()` or `undo()` for delivery notes because Billomat's API doesn't support them (400/404). Up to 3.x the SDK had these methods; they always failed.
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes delivery notes in any status. Think twice before deleting a completed one: it is numbered, and deleting it leaves a gap in the number sequence.
+- **Item updates are partial.** `DeliveryNoteItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
+- **Single results are normalized in `list()`.** For exactly one match, Billomat returns `delivery-note` as an object; the SDK wraps it in a list.
+- **Multiple source references are possible.** `invoiceId`, `confirmationId` and `offerId` can all be set at the same time, but Billomat does **not** synchronize the status of the linked documents automatically.
+- **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.
+- **No signature upload.** Billomat only accepts signed PDFs for invoices, credit notes and reminders (`uploadSignature()` there); for delivery notes it answers "no signature upload supported for this document type".
+
+## End-to-end example
 
 ```php
 <?php
@@ -409,70 +427,68 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\DeliveryNoteCommentCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
-use Justpilot\Billomat\Api\DeliveryNoteEmailOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteTagCreateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Enum\PdfType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Lieferschein zu einer bestehenden Rechnung anlegen
-$opts = new DeliveryNoteCreateOptions(clientId: 12345);
-$opts->invoiceId = 999;
-$opts->date = new DateTimeImmutable('today');
-$opts->title = 'Lieferschein';
-$opts->intro = 'Bitte bei Empfang gegenzeichnen.';
+// 1) Create a delivery note for an existing invoice
+$opts = new DeliveryNoteCreateOptions(
+    clientId: 12345,
+    invoiceId: 999,
+    date: new DateTimeImmutable('today'),
+    title: 'Delivery note',
+    intro: 'Please countersign on receipt.',
+);
 
-$item = new DeliveryNoteItemCreateOptions(quantity: 3.0, unitPrice: 49.90);
-$item->title = 'Hardware-Paket';
-$item->type = InvoiceItemType::PRODUCT;
-$item->unit = 'Stück';
-$opts->addItem($item);
+$item = new DeliveryNoteItemCreateOptions(
+    quantity: 3.0,
+    unitPrice: Money::of('49.90'),
+    title: 'Hardware bundle',
+    type: ItemType::PRODUCT,
+    unit: 'piece',
+);
+$opts = $opts->withItem($item);
 
 $note = $billomat->deliveryNotes->create($opts);
-printf("Lieferschein #%d angelegt (DRAFT)\n", $note->id);
+printf("Delivery note #%d created (DRAFT)\n", $note->id);
 
-// 2) Tag setzen
-$billomat->deliveryNoteTags->create(
-    new DeliveryNoteTagCreateOptions(deliveryNoteId: $note->id, name: 'speditionsversand'),
+// 2) Add a tag
+$billomat->deliveryNotes->tags->create(
+    $note->id,
+    new DeliveryNoteTagCreateOptions(name: 'freight-shipping'),
 );
 
-// 3) Abschließen → OPEN, Nummer wird vergeben
+// 3) Complete: the number is assigned
 $billomat->deliveryNotes->complete($note->id);
 
-$opened = $billomat->deliveryNotes->get($note->id);
-printf("Status: %s, Lieferscheinnummer: %s\n",
-    $opened?->status?->label() ?? '?',
-    $opened?->deliveryNoteNumber ?? '?',
+$opened = $billomat->deliveryNotes->getOrFail($note->id);
+printf("Status: %s, delivery note number: %s\n",
+    $opened->status?->label() ?? '?',
+    $opened->deliveryNoteNumber ?? '?',
 );
 
-// 4) PDF an Spedition mailen
-$email = new DeliveryNoteEmailOptions();
-$email->to = ['spedition@example.com'];
-$email->subject = 'Lieferschein {NUMBER}';
+// 4) Email the PDF to the carrier
+$email = new EmailOptions(to: ['carrier@example.com'], subject: 'Delivery note {NUMBER}');
 $billomat->deliveryNotes->email($note->id, $email);
 
-// 5) Unterschriebene Empfangsbestätigung hochladen (z. B. vom Mobil-Workflow)
-$signed = file_get_contents('/var/spool/scans/' . $opened?->deliveryNoteNumber . '.pdf');
-if (false !== $signed) {
-    $billomat->deliveryNotes->uploadSignature($note->id, base64_encode($signed));
-}
-
-// 6) Vermerk und als erledigt markieren
-$billomat->deliveryNoteComments->create(
+// 5) Add a note
+$billomat->deliveryNotes->comments->create(
+    $note->id,
     new DeliveryNoteCommentCreateOptions(
-        deliveryNoteId: $note->id,
-        comment: 'Empfang quittiert durch Lager Süd am 02.06.',
+        comment: 'Receipt confirmed by warehouse South on June 2.',
     ),
 );
-$billomat->deliveryNotes->clear($note->id);
 
-// 7) Signierte PDF-Version archivieren
-$pdf = $billomat->deliveryNotes->pdf($note->id, InvoicePdfType::SIGNED);
-file_put_contents("ls-{$opened?->deliveryNoteNumber}.pdf", $pdf->getBinary());
+// 6) Archive the PDF
+$pdf = $billomat->deliveryNotes->pdf($note->id);
+file_put_contents("delivery-note-{$opened->deliveryNoteNumber}.pdf", $pdf->getBinary());
 ```

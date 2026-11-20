@@ -4,58 +4,101 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
+use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Model\RecurringEmailReceiver;
+use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
- * API-Wrapper für E-Mail-Empfänger einer Abo-Rechnung.
+ * E-Mail-Empfänger einer Abo-Rechnung.
+ *
+ * Erreichbar über `$billomat->recurrings->emailReceivers`.
  *
  * Endpoints:
  *  - GET    /recurring-email-receivers?recurring_id={id}
  *  - GET    /recurring-email-receivers/{id}
  *  - POST   /recurring-email-receivers
+ *  - PUT    /recurring-email-receivers/{id}
  *  - DELETE /recurring-email-receivers/{id}
  *
- * Doku: https://www.billomat.com/api/abo-rechnungen/email-empfaenger/
+ * Doku: https://www.billomat.com/api/abo-rechnungen/empfaenger/
+ *
+ * @extends AbstractSubResourceApi<RecurringEmailReceiver>
  */
-final class RecurringEmailReceiversApi extends AbstractApi
+final class RecurringEmailReceiversApi extends AbstractSubResourceApi
 {
+    protected const string PLURAL = 'email-receivers';
+    protected const string SINGULAR = 'email-receiver';
+
     /**
+     * @internal Instanzen kommen über `$billomat->recurrings->emailReceivers`
+     */
+    public function __construct(BillomatHttpClientInterface $http)
+    {
+        parent::__construct($http, 'recurring', RecurringEmailReceiver::fromArray(...));
+    }
+
+    /**
+     * Listet die E-Mail-Empfänger einer Abo-Rechnung.
+     *
+     * @param int                                                             $parentId ID der Abo-Rechnung (`recurring_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
      * @return list<RecurringEmailReceiver>
      */
-    public function listByRecurring(int $recurringId): array
+    #[NoDiscard]
+    public function list(int $parentId, SubResourceFilter|array $filters = []): array
     {
-        return $this->listResource('/recurring-email-receivers', 'recurring-email-receivers', 'recurring-email-receiver', RecurringEmailReceiver::fromArray(...), ['recurring_id' => $recurringId]);
+        return $this->listFor($parentId, $filters);
     }
 
-    public function get(int $id): ?RecurringEmailReceiver
+    /**
+     * Liefert eine einzelne Seite samt Pagination-Metadaten.
+     *
+     * @param int                                                             $parentId ID der Abo-Rechnung (`recurring_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<RecurringEmailReceiver>
+     */
+    #[NoDiscard]
+    public function listPage(int $parentId, SubResourceFilter|array $filters = []): Page
     {
-        $data = $this->getJsonOrNull("/recurring-email-receivers/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['recurring-email-receiver'] ?? null;
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return RecurringEmailReceiver::fromArray($row);
+        return $this->pageFor($parentId, $filters);
     }
 
-    public function create(RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
+    /**
+     * Iteriert lazy durch alle Treffer und yieldet sie einzeln.
+     *
+     * @param int                                                             $parentId ID der Abo-Rechnung (`recurring_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  `page`/`per_page` werden überschrieben
+     *
+     * @return Generator<int, RecurringEmailReceiver>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
     {
-        $payload = ['recurring-email-receiver' => $options->toArray()];
-
-        $data = $this->postJson('/recurring-email-receivers', $payload);
-
-        return RecurringEmailReceiver::fromArray($this->unwrapEnvelope($data, 'recurring-email-receiver', 'creating recurring e-mail receiver'));
+        yield from $this->iterateFor($parentId, $filters, $pageSize);
     }
 
-    public function delete(int $id): bool
+    /**
+     * Fügt einer Abo-Rechnung einen E-Mail-Empfänger hinzu.
+     */
+    public function create(int $parentId, RecurringEmailReceiverCreateOptions $options): RecurringEmailReceiver
     {
-        $this->deleteVoid("/recurring-email-receivers/{$id}");
+        return $this->createFor($parentId, $options);
+    }
 
-        return true;
+    /**
+     * Ändert Typ oder Adresse eines Empfängers; die Abo-Rechnung lässt sich nicht ändern.
+     */
+    public function update(int $id, RecurringEmailReceiverUpdateOptions $options): RecurringEmailReceiver
+    {
+        return $this->updateFrom($id, $options->toArray());
+    }
+
+    public function delete(int $id): void
+    {
+        $this->deleteById($id);
     }
 }

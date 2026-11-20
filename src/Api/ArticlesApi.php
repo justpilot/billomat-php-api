@@ -7,9 +7,15 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Article;
+use Justpilot\Billomat\Model\ArticleProperty;
+use Justpilot\Billomat\Model\ArticlePropertyValue;
+use Justpilot\Billomat\Model\ArticleTag;
+use Justpilot\Billomat\Model\ArticleTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Articles-Ressource (Artikel).
@@ -26,11 +32,39 @@ use Justpilot\Billomat\Pagination\Page;
 final class ArticlesApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ArticleTag, ArticleTagCloudEntry, ArticleTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'article', ArticleTag::fromArray(...), ArticleTagCloudEntry::fromArray(...), ArticleTagCreateOptions::class);
+    }
+
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<ArticleProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'article', ArticleProperty::fromArray(...));
+    }
+
+    /**
+     * Attributwerte, siehe {@see PropertyValuesApi}.
+     *
+     * @var PropertyValuesApi<ArticlePropertyValue, ArticlePropertyValueCreateOptions, ArticlePropertyValueFilter>
+     */
+    public private(set) PropertyValuesApi $propertyValues {
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'article', ArticlePropertyValue::fromArray(...), ArticlePropertyValueCreateOptions::class, ArticlePropertyValueFilter::class);
+    }
+
+    /**
+     * @param ArticleFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Article>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(ArticleFilter|array $filters = []): array
     {
         return $this->listResource('/articles', 'articles', 'article', Article::fromArray(...), $filters);
     }
@@ -42,11 +76,12 @@ final class ArticlesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ArticleFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Article>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(ArticleFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/articles', 'articles', 'article', Article::fromArray(...), $filters);
     }
@@ -59,30 +94,31 @@ final class ArticlesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ArticleFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Article>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(ArticleFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/articles', 'articles', 'article', Article::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Article
     {
-        $data = $this->getJsonOrNull("/articles/{$id}");
+        return $this->getResource("/articles/{$id}", 'article', Article::fromArray(...), 'fetching article');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['article'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return Article::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Article
+    {
+        return $this->get($id) ?? throw $this->notFound("/articles/{$id}");
     }
 
     /**
@@ -108,10 +144,31 @@ final class ArticlesApi extends AbstractApi
         return Article::fromArray($this->unwrapEnvelope($data, 'article', 'updating article'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/articles/{$id}");
+    }
 
-        return true;
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /articles/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/articles/{$id}", 'article');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /articles/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/articles/{$id}", 'article', $value);
     }
 }

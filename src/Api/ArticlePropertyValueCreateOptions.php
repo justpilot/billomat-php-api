@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/article-property-values.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ArticlePropertyValueCreateOptions
+final readonly class ArticlePropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: article_id
-         * Typ: INT
-         */
-        public int $articleId,
         /**
          * ID der Eigenschaft.
          *
@@ -40,6 +33,18 @@ final class ArticlePropertyValueCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `articlePropertyId`. */
+    public function withArticlePropertyId(int $articlePropertyId): self
+    {
+        return clone($this, ['articlePropertyId' => $articlePropertyId]);
+    }
+
+    /** Kopie mit geändertem `value`. */
+    public function withValue(mixed $value): self
+    {
+        return clone($this, ['value' => $value]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -48,7 +53,6 @@ final class ArticlePropertyValueCreateOptions
     public function toArray(): array
     {
         return [
-            'article_id' => $this->articleId,
             'article_property_id' => $this->articlePropertyId,
             'value' => $this->value,
         ];

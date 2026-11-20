@@ -4,27 +4,35 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\ArticlesApi;
 use Justpilot\Billomat\Api\ArticleTagCreateOptions;
-use Justpilot\Billomat\Api\ArticleTagsApi;
+use Justpilot\Billomat\Api\TagsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ArticleTag;
 use Justpilot\Billomat\Model\ArticleTagCloudEntry;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ArticleTagsApi::class)]
+#[CoversClass(TagsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ArticlesApi::class)]
 #[CoversClass(ArticleTagCreateOptions::class)]
 #[CoversClass(ArticleTag::class)]
 #[CoversClass(ArticleTagCloudEntry::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class ArticleTagsApiTest extends TestCase
@@ -32,10 +40,10 @@ final class ArticleTagsApiTest extends TestCase
     #[Test]
     public function itListsTagsByArticle(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'article-tags' => [
@@ -46,15 +54,15 @@ final class ArticleTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ArticleTagsApi(new BillomatHttpClient(
-            $mock,
+        $api = new ArticlesApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        $tags = $api->listByArticle(42);
+        $tags = $api->list(42);
         self::assertCount(1, $tags);
         self::assertSame('bestseller', $tags[0]->name);
-        self::assertStringContainsString('article_id=42', $captured['url']);
+        self::assertStringContainsString('article_id=42', $captured->url);
     }
 
     #[Test]
@@ -68,10 +76,10 @@ final class ArticleTagsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ArticleTagsApi(new BillomatHttpClient(
-            $mock,
+        $api = new ArticlesApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
         $cloud = $api->cloud();
         self::assertCount(1, $cloud);
@@ -85,7 +93,7 @@ final class ArticleTagsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if ('POST' === $method) {
                 return new MockResponse(
@@ -99,13 +107,13 @@ final class ArticleTagsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new ArticleTagsApi(new BillomatHttpClient(
-            $mock,
+        $api = new ArticlesApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->tags;
 
-        $tag = $api->create(new ArticleTagCreateOptions(articleId: 42, name: 'neu'));
+        $tag = $api->create(42, new ArticleTagCreateOptions(name: 'neu'));
         self::assertSame(99, $tag->id);
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 }

@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\Enum\TaxRule;
+use Justpilot\Billomat\Model\Enum\ValueType;
 
 use const DATE_ATOM;
 
@@ -23,11 +28,81 @@ use const DATE_ATOM;
  */
 final readonly class Client
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'created' => true,
+        'client_number' => true,
+        'number' => true,
+        'number_pre' => true,
+        'number_length' => true,
+        'street' => true,
+        'zip' => true,
+        'city' => true,
+        'state' => true,
+        'country_code' => true,
+        'address' => true,
+        'first_name' => true,
+        'last_name' => true,
+        'salutation' => true,
+        'email' => true,
+        'phone' => true,
+        'fax' => true,
+        'mobile' => true,
+        'www' => true,
+        'note' => true,
+        'locale' => true,
+        'tax_number' => true,
+        'vat_number' => true,
+        'tax_rule' => true,
+        'net_gross' => true,
+        'currency_code' => true,
+        'debitor_account_number' => true,
+        'price_group' => true,
+        'archived' => true,
+        'dunning_run' => true,
+        'reduction' => true,
+        'discount_rate_type' => true,
+        'discount_rate' => true,
+        'discount_days_type' => true,
+        'discount_days' => true,
+        'due_days_type' => true,
+        'due_days' => true,
+        'reminder_due_days_type' => true,
+        'reminder_due_days' => true,
+        'offer_validity_days_type' => true,
+        'offer_validity_days' => true,
+        'bank_account_owner' => true,
+        'bank_number' => true,
+        'bank_name' => true,
+        'bank_account_number' => true,
+        'bank_swift' => true,
+        'bank_iban' => true,
+        'sepa_mandate' => true,
+        'sepa_mandate_date' => true,
+        'default_payment_types' => true,
+        'enable_customerportal' => true,
+        'revenue_gross' => true,
+        'revenue_net' => true,
+        'updated' => true,
+        'customfield' => true,
+        'facturx_identifier' => true,
+        'seller_identifier' => true,
+        'dig_exclude' => true,
+        'client-property-values' => true,
+    ];
+
+    /**
+     * @param list<PaymentType>         $defaultPaymentTypes
+     * @param list<ClientPropertyValue> $propertyValues
+     * @param array<string, mixed>      $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Kunden. */
-        public ?int $id,
-        /** Firmenname des Kunden. */
-        public string $name,
+        public int $id,
+        /** Firmenname des Kunden; leer bei Privatpersonen. */
+        public ?string $name = null,
         /** Erstellungszeitpunkt des Kunden. */
         public ?DateTimeImmutable $created = null,
         /** Kundennummer (frei wählbar). */
@@ -91,13 +166,13 @@ final readonly class Client
          *
          * Mögliche Werte: TAX, NO_TAX, COUNTRY
          */
-        public ?string $taxRule = null,
+        public ?TaxRule $taxRule = null,
         /**
          * Preisbasis.
          *
          * Mögliche Werte: NET, GROSS, SETTINGS
          */
-        public ?string $netGross = null,
+        public ?NetGross $netGross = null,
         /**
          * Währung des Kunden (ISO-Währungscode).
          *
@@ -136,7 +211,7 @@ final readonly class Client
          *
          * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
          */
-        public ?string $discountRateType = null,
+        public ?ValueType $discountRateType = null,
         /** Skonto-Satz. */
         public ?float $discountRate = null,
         /**
@@ -144,7 +219,7 @@ final readonly class Client
          *
          * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
          */
-        public ?string $discountDaysType = null,
+        public ?ValueType $discountDaysType = null,
         /** Skonto-Tage. */
         public ?float $discountDays = null,
         /**
@@ -152,7 +227,7 @@ final readonly class Client
          *
          * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
          */
-        public ?string $dueDaysType = null,
+        public ?ValueType $dueDaysType = null,
         /** Fälligkeit in Tagen nach Rechnungsdatum. */
         public ?int $dueDays = null,
         /**
@@ -160,7 +235,7 @@ final readonly class Client
          *
          * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
          */
-        public ?string $reminderDueDaysType = null,
+        public ?ValueType $reminderDueDaysType = null,
         /** Mahnfälligkeit in Tagen. */
         public ?int $reminderDueDays = null,
         /**
@@ -168,7 +243,7 @@ final readonly class Client
          *
          * Mögliche Werte: SETTINGS, ABSOLUTE, RELATIVE
          */
-        public ?string $offerValidityDaysType = null,
+        public ?ValueType $offerValidityDaysType = null,
         /** Angebotsgültigkeit in Tagen. */
         public ?int $offerValidityDays = null,
         /** Kontoinhaber. */
@@ -188,27 +263,21 @@ final readonly class Client
         /** Ausstelldatum des SEPA-Mandats. */
         public ?DateTimeImmutable $sepaMandateDate = null,
         /**
-         * Standard-Zahlarten (CSV).
+         * Standard-Zahlarten.
          *
-         * Beispiel: "CASH,BANK_TRANSFER"
+         * Billomat überträgt sie kommasepariert, z. B. "CASH,BANK_TRANSFER".
          */
-        public ?string $defaultPaymentTypes = null,
+        public array $defaultPaymentTypes = [],
         /** Kundenportal aktiviert? */
         public ?bool $enableCustomerportal = null,
-        /**
-         * Persönliche URL zum Kundenportal.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** Brutto-Umsatz (read-only Auswertungsfeld). */
-        public ?float $revenueGross = null,
+        public ?Money $revenueGross = null,
         /** Netto-Umsatz (read-only Auswertungsfeld). */
-        public ?float $revenueNet = null,
+        public ?Money $revenueNet = null,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Kennung für E-Rechnungen (ZUGFeRD/Factur-X).
          *
@@ -223,6 +292,18 @@ final readonly class Client
         public ?string $sellerIdentifier = null,
         /** Von Billomat geliefert, aber nicht dokumentiert. */
         public ?bool $digExclude = null,
+        /**
+         * Attributwerte des Kunden.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert (leer: "").
+         */
+        public array $propertyValues = [],
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -234,8 +315,8 @@ final readonly class Client
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             clientNumber: ScalarCaster::toStringOrNull($data['client_number'] ?? null),
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),
@@ -259,23 +340,23 @@ final readonly class Client
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             taxNumber: ScalarCaster::toStringOrNull($data['tax_number'] ?? null),
             vatNumber: ScalarCaster::toStringOrNull($data['vat_number'] ?? null),
-            taxRule: ScalarCaster::toStringOrNull($data['tax_rule'] ?? null),
-            netGross: ScalarCaster::toStringOrNull($data['net_gross'] ?? null),
+            taxRule: TaxRule::tryFrom(ScalarCaster::toStringOrNull($data['tax_rule'] ?? null) ?? ''),
+            netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             debitorAccountNumber: ScalarCaster::toIntOrNull($data['debitor_account_number'] ?? null),
             priceGroup: ScalarCaster::toIntOrNull($data['price_group'] ?? null),
             archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
             dunningRun: ScalarCaster::toBoolOrNull($data['dunning_run'] ?? null),
             reduction: ScalarCaster::toFloatOrNull($data['reduction'] ?? null),
-            discountRateType: ScalarCaster::toStringOrNull($data['discount_rate_type'] ?? null),
+            discountRateType: ValueType::tryFrom(ScalarCaster::toStringOrNull($data['discount_rate_type'] ?? null) ?? ''),
             discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
-            discountDaysType: ScalarCaster::toStringOrNull($data['discount_days_type'] ?? null),
+            discountDaysType: ValueType::tryFrom(ScalarCaster::toStringOrNull($data['discount_days_type'] ?? null) ?? ''),
             discountDays: ScalarCaster::toFloatOrNull($data['discount_days'] ?? null),
-            dueDaysType: ScalarCaster::toStringOrNull($data['due_days_type'] ?? null),
+            dueDaysType: ValueType::tryFrom(ScalarCaster::toStringOrNull($data['due_days_type'] ?? null) ?? ''),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
-            reminderDueDaysType: ScalarCaster::toStringOrNull($data['reminder_due_days_type'] ?? null),
+            reminderDueDaysType: ValueType::tryFrom(ScalarCaster::toStringOrNull($data['reminder_due_days_type'] ?? null) ?? ''),
             reminderDueDays: ScalarCaster::toIntOrNull($data['reminder_due_days'] ?? null),
-            offerValidityDaysType: ScalarCaster::toStringOrNull($data['offer_validity_days_type'] ?? null),
+            offerValidityDaysType: ValueType::tryFrom(ScalarCaster::toStringOrNull($data['offer_validity_days_type'] ?? null) ?? ''),
             offerValidityDays: ScalarCaster::toIntOrNull($data['offer_validity_days'] ?? null),
             bankAccountOwner: ScalarCaster::toStringOrNull($data['bank_account_owner'] ?? null),
             bankNumber: ScalarCaster::toStringOrNull($data['bank_number'] ?? null),
@@ -285,16 +366,17 @@ final readonly class Client
             bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
             sepaMandate: ScalarCaster::toStringOrNull($data['sepa_mandate'] ?? null),
             sepaMandateDate: ScalarCaster::toDateTimeOrNull($data['sepa_mandate_date'] ?? null),
-            defaultPaymentTypes: ScalarCaster::toStringOrNull($data['default_payment_types'] ?? null),
+            defaultPaymentTypes: ListCaster::toEnumList($data['default_payment_types'] ?? null, PaymentType::class),
             enableCustomerportal: ScalarCaster::toBoolOrNull($data['enable_customerportal'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
-            revenueGross: ScalarCaster::toFloatOrNull($data['revenue_gross'] ?? null),
-            revenueNet: ScalarCaster::toFloatOrNull($data['revenue_net'] ?? null),
+            revenueGross: ScalarCaster::toMoneyOrNull($data['revenue_gross'] ?? null),
+            revenueNet: ScalarCaster::toMoneyOrNull($data['revenue_net'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             facturxIdentifier: ScalarCaster::toStringOrNull($data['facturx_identifier'] ?? null),
             sellerIdentifier: ScalarCaster::toStringOrNull($data['seller_identifier'] ?? null),
             digExclude: ScalarCaster::toBoolOrNull($data['dig_exclude'] ?? null),
+            propertyValues: ListCaster::toNestedList($data['client-property-values'] ?? null, 'client-property-value', 'id', ClientPropertyValue::fromArray(...)),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -307,7 +389,8 @@ final readonly class Client
      */
     public function toArray(): array
     {
-        return [
+        $data = [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'created' => $this->created?->format(DATE_ATOM),
@@ -333,23 +416,23 @@ final readonly class Client
             'locale' => $this->locale,
             'tax_number' => $this->taxNumber,
             'vat_number' => $this->vatNumber,
-            'tax_rule' => $this->taxRule,
-            'net_gross' => $this->netGross,
+            'tax_rule' => $this->taxRule?->value,
+            'net_gross' => $this->netGross?->value,
             'currency_code' => $this->currencyCode,
             'debitor_account_number' => $this->debitorAccountNumber,
             'price_group' => $this->priceGroup,
             'archived' => $this->archived,
             'dunning_run' => $this->dunningRun,
             'reduction' => $this->reduction,
-            'discount_rate_type' => $this->discountRateType,
+            'discount_rate_type' => $this->discountRateType?->value,
             'discount_rate' => $this->discountRate,
-            'discount_days_type' => $this->discountDaysType,
+            'discount_days_type' => $this->discountDaysType?->value,
             'discount_days' => $this->discountDays,
-            'due_days_type' => $this->dueDaysType,
+            'due_days_type' => $this->dueDaysType?->value,
             'due_days' => $this->dueDays,
-            'reminder_due_days_type' => $this->reminderDueDaysType,
+            'reminder_due_days_type' => $this->reminderDueDaysType?->value,
             'reminder_due_days' => $this->reminderDueDays,
-            'offer_validity_days_type' => $this->offerValidityDaysType,
+            'offer_validity_days_type' => $this->offerValidityDaysType?->value,
             'offer_validity_days' => $this->offerValidityDays,
             'bank_account_owner' => $this->bankAccountOwner,
             'bank_number' => $this->bankNumber,
@@ -359,16 +442,23 @@ final readonly class Client
             'bank_iban' => $this->bankIban,
             'sepa_mandate' => $this->sepaMandate,
             'sepa_mandate_date' => $this->sepaMandateDate?->format('Y-m-d'),
-            'default_payment_types' => $this->defaultPaymentTypes,
+            'default_payment_types' => [] === $this->defaultPaymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->defaultPaymentTypes)),
             'enable_customerportal' => $this->enableCustomerportal,
-            'customerportal_url' => $this->customerportalUrl,
-            'revenue_gross' => $this->revenueGross,
-            'revenue_net' => $this->revenueNet,
+            'revenue_gross' => $this->revenueGross?->toString(),
+            'revenue_net' => $this->revenueNet?->toString(),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'facturx_identifier' => $this->facturxIdentifier,
             'seller_identifier' => $this->sellerIdentifier,
             'dig_exclude' => $this->digExclude,
         ];
+
+        if ([] !== $this->propertyValues) {
+            $data['client-property-values'] = [
+                'client-property-value' => array_map(static fn (ClientPropertyValue $item): array => $item->toArray(), $this->propertyValues),
+            ];
+        }
+
+        return $data;
     }
 }

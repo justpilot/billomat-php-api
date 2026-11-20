@@ -7,9 +7,11 @@ namespace Justpilot\Billomat\Tests\Api\Options;
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
+use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\Payload;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -17,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoiceCreateOptions::class)]
 #[UsesClass(InvoiceItemCreateOptions::class)]
+#[UsesClass(Money::class)]
 final class InvoiceCreateOptionsTest extends TestCase
 {
     #[Test]
@@ -46,9 +49,11 @@ final class InvoiceCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesEnumsAsTheirStringValue(): void
     {
-        $options = new InvoiceCreateOptions(clientId: 1);
-        $options->netGross = NetGross::NET;
-        $options->supplyDateType = SupplyDateType::SUPPLY_DATE;
+        $options = new InvoiceCreateOptions(
+            clientId: 1,
+            supplyDateType: SupplyDateType::SUPPLY_DATE,
+            netGross: NetGross::NET,
+        );
 
         $payload = $options->toArray();
 
@@ -59,11 +64,13 @@ final class InvoiceCreateOptionsTest extends TestCase
     #[Test]
     public function itFormatsDatesAsIsoLocalDate(): void
     {
-        $options = new InvoiceCreateOptions(clientId: 1);
-        $options->date = new DateTimeImmutable('2024-05-30T15:42:00');
-        $options->supplyDate = new DateTimeImmutable('2024-05-25');
-        $options->dueDate = new DateTimeImmutable('2024-06-14');
-        $options->discountDate = new DateTimeImmutable('2024-06-07');
+        $options = new InvoiceCreateOptions(
+            clientId: 1,
+            date: new DateTimeImmutable('2024-05-30T15:42:00'),
+            supplyDate: new DateTimeImmutable('2024-05-25'),
+            dueDate: new DateTimeImmutable('2024-06-14'),
+            discountDate: new DateTimeImmutable('2024-06-07'),
+        );
 
         $payload = $options->toArray();
 
@@ -74,36 +81,40 @@ final class InvoiceCreateOptionsTest extends TestCase
     }
 
     #[Test]
-    public function addItemAppendsItemsAndGetItemsReturnsThem(): void
+    public function withItemReturnsCopyWithAppendedItem(): void
     {
         $options = new InvoiceCreateOptions(clientId: 1);
-        $item1 = new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: 10.0);
-        $item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 20.0);
+        $item1 = new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: Money::of('10'));
+        $item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: Money::of('20'));
 
-        $options->addItem($item1)->addItem($item2);
+        $withItems = $options->withItem($item1)->withItem($item2);
 
-        self::assertSame([$item1, $item2], $options->getItems());
+        self::assertSame([$item1, $item2], $withItems->items);
+        self::assertSame([], $options->items);
     }
 
     #[Test]
     public function itEmbedsItemsUnderInvoiceItemsInvoiceItemKey(): void
     {
         $options = new InvoiceCreateOptions(clientId: 1);
-        $item = new InvoiceItemCreateOptions(quantity: 3.0, unitPrice: 49.90);
-        $item->title = 'Beratung';
-        $item->type = InvoiceItemType::SERVICE;
-        $options->addItem($item);
+        $item = new InvoiceItemCreateOptions(
+            quantity: 3.0,
+            unitPrice: Money::of('49.9'),
+            title: 'Beratung',
+            type: ItemType::SERVICE,
+        );
+        $options = $options->withItem($item);
 
         $payload = $options->toArray();
 
         self::assertArrayHasKey('invoice-items', $payload);
-        self::assertArrayHasKey('invoice-item', $payload['invoice-items']);
-        self::assertCount(1, $payload['invoice-items']['invoice-item']);
+        self::assertArrayHasKey('invoice-item', Payload::arrayAt($payload, 'invoice-items'));
+        self::assertCount(1, Payload::arrayAt($payload, 'invoice-items', 'invoice-item'));
 
-        $serialised = $payload['invoice-items']['invoice-item'][0];
+        $serialised = Payload::arrayAt($payload, 'invoice-items', 'invoice-item', 0);
         self::assertSame('Beratung', $serialised['title']);
         self::assertSame(3.0, $serialised['quantity']);
-        self::assertSame(49.90, $serialised['unit_price']);
+        self::assertSame('49.9', $serialised['unit_price']);
         self::assertSame('SERVICE', $serialised['type']);
     }
 }

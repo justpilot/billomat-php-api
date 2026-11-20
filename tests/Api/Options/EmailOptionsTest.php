@@ -1,0 +1,154 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Justpilot\Billomat\Tests\Api\Options;
+
+use Justpilot\Billomat\Api\Attachment;
+use Justpilot\Billomat\Api\EmailOptions;
+use Justpilot\Billomat\Tests\Support\Payload;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\TestCase;
+
+#[CoversClass(EmailOptions::class)]
+#[UsesClass(Attachment::class)]
+final class EmailOptionsTest extends TestCase
+{
+    #[Test]
+    public function emptyOptionsProduceEmptyEnvelope(): void
+    {
+        $options = new EmailOptions();
+
+        self::assertSame([], $options->toArray());
+    }
+
+    #[Test]
+    public function itWrapsRecipientsInToCcBccBlocks(): void
+    {
+        $options = new EmailOptions(
+            to: ['kunde@example.com'],
+            cc: ['cc1@example.com', 'cc2@example.com'],
+            bcc: ['archive@example.com'],
+        );
+
+        $payload = $options->toArray();
+
+        self::assertSame(
+            [
+                'to' => ['kunde@example.com'],
+                'cc' => ['cc1@example.com', 'cc2@example.com'],
+                'bcc' => ['archive@example.com'],
+            ],
+            $payload['recipients']
+        );
+    }
+
+    #[Test]
+    public function itOmitsEmptyRecipientGroups(): void
+    {
+        $options = new EmailOptions(to: ['kunde@example.com']);
+
+        $payload = $options->toArray();
+
+        self::assertArrayHasKey('to', Payload::arrayAt($payload, 'recipients'));
+        self::assertArrayNotHasKey('cc', Payload::arrayAt($payload, 'recipients'));
+        self::assertArrayNotHasKey('bcc', Payload::arrayAt($payload, 'recipients'));
+    }
+
+    #[Test]
+    public function itOmitsRecipientsWhenAllGroupsAreEmpty(): void
+    {
+        $options = new EmailOptions(from: 'info@example.com', subject: 'Test');
+
+        $payload = $options->toArray();
+
+        self::assertArrayNotHasKey('recipients', $payload);
+        self::assertSame('info@example.com', $payload['from']);
+        self::assertSame('Test', $payload['subject']);
+    }
+
+    #[Test]
+    public function itWrapsAttachmentsInAttachmentEnvelope(): void
+    {
+        $options = new EmailOptions(
+            attachments: [
+                new Attachment('agb.pdf', 'application/pdf', 'QUJD'),
+                new Attachment('flyer.png', 'image/png', 'WFla'),
+            ],
+        );
+
+        $payload = $options->toArray();
+
+        self::assertArrayHasKey('attachments', $payload);
+        self::assertCount(2, Payload::arrayAt($payload, 'attachments', 'attachment'));
+        self::assertSame('agb.pdf', Payload::at($payload, 'attachments', 'attachment', 0, 'filename'));
+        self::assertSame('application/pdf', Payload::at($payload, 'attachments', 'attachment', 0, 'mimetype'));
+        self::assertSame('QUJD', Payload::at($payload, 'attachments', 'attachment', 0, 'base64file'));
+    }
+
+    #[Test]
+    public function itOmitsAttachmentsKeyWhenEmpty(): void
+    {
+        $options = new EmailOptions();
+
+        self::assertArrayNotHasKey('attachments', $options->toArray());
+    }
+
+    #[Test]
+    public function itPassesScalarFieldsThrough(): void
+    {
+        $options = new EmailOptions(
+            from: 'info@example.com',
+            subject: 'Ihre Rechnung',
+            body: 'Anbei die Rechnung.',
+            filename: 'rechnung-001',
+        );
+
+        $payload = $options->toArray();
+
+        self::assertSame('info@example.com', $payload['from']);
+        self::assertSame('Ihre Rechnung', $payload['subject']);
+        self::assertSame('Anbei die Rechnung.', $payload['body']);
+        self::assertSame('rechnung-001', $payload['filename']);
+    }
+
+    #[Test]
+    public function itPassesEmailTemplateIdThrough(): void
+    {
+        $options = new EmailOptions(emailTemplateId: 42);
+
+        $payload = $options->toArray();
+
+        self::assertSame(42, $payload['email_template_id']);
+    }
+
+    #[Test]
+    public function itOmitsEmailTemplateIdWhenNull(): void
+    {
+        $options = new EmailOptions(subject: 'Test');
+
+        self::assertArrayNotHasKey('email_template_id', $options->toArray());
+    }
+
+    #[Test]
+    public function withAttachmentAppendsAndKeepsTheOriginal(): void
+    {
+        $first = new Attachment('agb.pdf', 'application/pdf', 'QUJD');
+        $second = Attachment::fromBinary('flyer.pdf', 'XYZ');
+        $original = new EmailOptions(attachments: [$first]);
+
+        $copy = $original->withAttachment($second);
+
+        self::assertSame([$first], $original->attachments);
+        self::assertSame([$first, $second], $copy->attachments);
+        self::assertSame(
+            [
+                ['filename' => 'agb.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'QUJD'],
+                ['filename' => 'flyer.pdf', 'mimetype' => 'application/pdf', 'base64file' => 'WFla'],
+            ],
+            Payload::arrayAt($copy->toArray(), 'attachments', 'attachment'),
+        );
+    }
+}

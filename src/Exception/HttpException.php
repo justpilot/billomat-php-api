@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Exception;
 
-use Symfony\Contracts\HttpClient\ResponseInterface;
+use Override;
 use Throwable;
 
 /**
@@ -12,11 +12,17 @@ use Throwable;
  */
 class HttpException extends BillomatException
 {
+    /**
+     * @internal Das SDK erzeugt die Exception selbst; Parameter und Reihenfolge fallen nicht unter das
+     *           BC-Versprechen. Zum Testen eigener Fehlerbehandlung einen PSR-18-Mock-Client mit der
+     *           passenden Antwort nutzen.
+     */
     public function __construct(
         string $message,
         private readonly int $statusCode,
         private readonly ?string $responseBody = null,
         ?Throwable $previous = null,
+        private readonly ?int $retryAfter = null,
     ) {
         parent::__construct($message, $statusCode, $previous);
     }
@@ -32,21 +38,30 @@ class HttpException extends BillomatException
     }
 
     /**
-     * Convenience-Helfer um aus einer Symfony-Response eine HttpException zu bauen.
+     * Sekunden bis zum nächsten Versuch, falls Billomat sie mitgeteilt hat.
+     *
+     * Gesetzt bei 429 (`Retry-After` bzw. `X-Rate-Limit-Reset`) und bei 502/503/504 (`Retry-After`).
      */
-    public static function fromResponse(ResponseInterface $response, string $fallbackMessage = 'HTTP error from Billomat'): self
+    public function getRetryAfter(): ?int
     {
-        $statusCode = $response->getStatusCode();
+        return $this->retryAfter;
+    }
 
-        $body = null;
-        try {
-            $body = $response->getContent(false); // Inhalt auch bei 4xx/5xx holen
-        } catch (Throwable) {
-            // Body konnte nicht gelesen werden, ignorieren
-        }
+    /**
+     * `true` bei 429, 502, 503 und 504.
+     */
+    #[Override]
+    public function isTransient(): bool
+    {
+        return \in_array($this->statusCode, [429, 502, 503, 504], true);
+    }
 
-        $message = $fallbackMessage.\sprintf(' (status %d)', $statusCode);
-
-        return new self($message, $statusCode, $body);
+    /**
+     * `false` bei 4xx (inkl. 429), `true` bei 5xx.
+     */
+    #[Override]
+    public function mayHaveBeenProcessed(): bool
+    {
+        return $this->statusCode >= 500;
     }
 }

@@ -7,12 +7,16 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Reminder;
-use Justpilot\Billomat\Model\ReminderPdf;
+use Justpilot\Billomat\Model\ReminderTag;
+use Justpilot\Billomat\Model\ReminderTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Reminders-Ressource (Mahnungen).
@@ -27,6 +31,7 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
  *  - DELETE /reminders/{id}
  *  - PUT    /reminders/{id}/complete
  *  - PUT    /reminders/{id}/cancel
+ *  - PUT    /reminders/{id}/uncancel
  *  - POST   /reminders/{id}/email
  *  - GET    /reminders/{id}/pdf
  *  - PUT    /reminders/{id}/upload-signature
@@ -34,11 +39,28 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 final class RemindersApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Positionen (read-only), siehe {@see ReminderItemsApi}.
+     */
+    public private(set) ReminderItemsApi $items {
+        get => $this->items ??= new ReminderItemsApi($this->http);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ReminderTag, ReminderTagCloudEntry, ReminderTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'reminder', ReminderTag::fromArray(...), ReminderTagCloudEntry::fromArray(...), ReminderTagCreateOptions::class);
+    }
+
+    /**
+     * @param ReminderFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Reminder>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(ReminderFilter|array $filters = []): array
     {
         return $this->listResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
     }
@@ -50,11 +72,12 @@ final class RemindersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ReminderFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Reminder>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(ReminderFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters);
     }
@@ -67,30 +90,31 @@ final class RemindersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ReminderFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Reminder>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(ReminderFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/reminders', 'reminders', 'reminder', Reminder::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Reminder
     {
-        $data = $this->getJsonOrNull("/reminders/{$id}");
+        return $this->getResource("/reminders/{$id}", 'reminder', Reminder::fromArray(...), 'fetching reminder');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['reminder'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return Reminder::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Reminder
+    {
+        return $this->get($id) ?? throw $this->notFound("/reminders/{$id}");
     }
 
     /**
@@ -116,7 +140,7 @@ final class RemindersApi extends AbstractApi
         return Reminder::fromArray($this->unwrapEnvelope($data, 'reminder', 'updating reminder'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -127,67 +151,98 @@ final class RemindersApi extends AbstractApi
         $payload = ['reminder' => $body];
 
         $this->putVoid("/reminders/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/reminders/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    /** Storniert eine Mahnung (Status → CANCELED). */
+    public function cancel(int $id): void
     {
         $this->putVoid("/reminders/{$id}/cancel");
-
-        return true;
     }
 
-    public function email(int $id, ?ReminderEmailOptions $options = null): bool
+    /** Hebt die Stornierung auf (CANCELED → OPEN). */
+    public function uncancel(int $id): void
+    {
+        $this->putVoid("/reminders/{$id}/uncancel");
+    }
+
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postVoid("/reminders/{$id}/email", $payload);
-
-        return true;
     }
 
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    /**
+     * Versendet eine Mahnung postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /reminders/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postVoid("/reminders/{$id}/mail", $payload);
+    }
+
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/reminders/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**
-     * @return ReminderPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Ruft das PDF einer Mahnung als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /reminders/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ReminderPdf|string
+    #[NoDiscard]
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
-        $query = [];
+        $data = $this->getJson("/reminders/{$id}/pdf", self::pdfQuery($type));
 
-        if ($type instanceof InvoicePdfType) {
-            $query['type'] = $type->value;
-        }
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching reminder PDF'));
+    }
 
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
+    /**
+     * Ruft das PDF einer Mahnung als binären Inhalt ab (GET /reminders/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/reminders/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
+    }
 
-            $response = $this->http->request('GET', "/reminders/{$id}/pdf", $query);
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /reminders/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/reminders/{$id}", 'reminder');
+    }
 
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
-        }
-
-        $data = $this->getJson("/reminders/{$id}/pdf", $query);
-
-        return ReminderPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching reminder PDF'));
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /reminders/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/reminders/{$id}", 'reminder', $value);
     }
 }

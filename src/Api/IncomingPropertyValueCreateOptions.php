@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/incoming-property-values.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class IncomingPropertyValueCreateOptions
+final readonly class IncomingPropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: incoming_id
-         * Typ: INT
-         */
-        public int $incomingId,
         /**
          * ID der Eigenschaft.
          *
@@ -40,6 +33,18 @@ final class IncomingPropertyValueCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `incomingPropertyId`. */
+    public function withIncomingPropertyId(int $incomingPropertyId): self
+    {
+        return clone($this, ['incomingPropertyId' => $incomingPropertyId]);
+    }
+
+    /** Kopie mit geändertem `value`. */
+    public function withValue(mixed $value): self
+    {
+        return clone($this, ['value' => $value]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -48,7 +53,6 @@ final class IncomingPropertyValueCreateOptions
     public function toArray(): array
     {
         return [
-            'incoming_id' => $this->incomingId,
             'incoming_property_id' => $this->incomingPropertyId,
             'value' => $this->value,
         ];

@@ -7,11 +7,16 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Model\ClientProperty;
+use Justpilot\Billomat\Model\ClientPropertyValue;
+use Justpilot\Billomat\Model\ClientTag;
+use Justpilot\Billomat\Model\ClientTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Clients-Ressource.
@@ -27,6 +32,41 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
  */
 final class ClientsApi extends AbstractApi
 {
+    /**
+     * Ansprechpartner der Kunden, siehe {@see ContactsApi}.
+     */
+    public private(set) ContactsApi $contacts {
+        get => $this->contacts ??= new ContactsApi($this->http);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ClientTag, ClientTagCloudEntry, ClientTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'client', ClientTag::fromArray(...), ClientTagCloudEntry::fromArray(...), ClientTagCreateOptions::class);
+    }
+
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<ClientProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'client', ClientProperty::fromArray(...));
+    }
+
+    /**
+     * Attributwerte, siehe {@see PropertyValuesApi}.
+     *
+     * @var PropertyValuesApi<ClientPropertyValue, ClientPropertyValueCreateOptions, ClientPropertyValueFilter>
+     */
+    public private(set) PropertyValuesApi $propertyValues {
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'client', ClientPropertyValue::fromArray(...), ClientPropertyValueCreateOptions::class, ClientPropertyValueFilter::class);
+    }
+
+    #[NoDiscard]
     public function getMyself(): Client
     {
         $data = $this->getJson('/clients/myself');
@@ -39,11 +79,12 @@ final class ClientsApi extends AbstractApi
      *
      * Entspricht GET /clients
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ClientFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Client>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(ClientFilter|array $filters = []): array
     {
         return $this->listResource('/clients', 'clients', 'client', Client::fromArray(...), $filters);
     }
@@ -55,11 +96,12 @@ final class ClientsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ClientFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Client>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(ClientFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/clients', 'clients', 'client', Client::fromArray(...), $filters);
     }
@@ -72,11 +114,12 @@ final class ClientsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ClientFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Client>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(ClientFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/clients', 'clients', 'client', Client::fromArray(...), $filters, $pageSize);
     }
@@ -86,21 +129,21 @@ final class ClientsApi extends AbstractApi
      *
      * Entspricht GET /clients/{id}
      */
+    #[NoDiscard]
     public function get(int $id): ?Client
     {
-        $data = $this->getJsonOrNull("/clients/{$id}");
+        return $this->getResource("/clients/{$id}", 'client', Client::fromArray(...), 'fetching client');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $clientData = $data['client'] ?? null;
-
-        if (!\is_array($clientData)) {
-            return null;
-        }
-
-        return Client::fromArray($clientData);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Client
+    {
+        return $this->get($id) ?? throw $this->notFound("/clients/{$id}");
     }
 
     /**
@@ -169,14 +212,10 @@ final class ClientsApi extends AbstractApi
      * (Rechnungen, Angebote, …) hängen, können nicht hart gelöscht, sondern
      * nur archiviert werden. In diesem Fall wirft Billomat 400/422 und die
      * SDK propagiert eine {@see ValidationException}.
-     *
-     * @return bool true bei Erfolg
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/clients/{$id}");
-
-        return true;
     }
 
     /**
@@ -189,16 +228,34 @@ final class ClientsApi extends AbstractApi
      *
      * @param int|null $size optionale Kantenlänge in Pixel
      */
+    #[NoDiscard]
     public function avatar(int $id, ?int $size = null): string
     {
         $query = null !== $size ? ['size' => $size] : [];
 
-        $response = $this->http->request('GET', "/clients/{$id}/avatar", $query);
+        return $this->getRaw("/clients/{$id}/avatar", $query);
+    }
 
-        try {
-            return $response->getContent();
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
-        }
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /clients/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/clients/{$id}", 'client');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /clients/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/clients/{$id}", 'client', $value);
     }
 }

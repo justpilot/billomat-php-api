@@ -1,0 +1,16 @@
+{
+    "reminder-item": {
+        "id": "4287488",
+        "article_id": "",
+        "reminder_id": "3375689",
+        "position": "1",
+        "unit": "",
+        "quantity": "1",
+        "unit_price": "100",
+        "title": "Text 37",
+        "description": "",
+        "total": "100",
+        "is_charge": "0",
+        "customfield": ""
+    }
+}

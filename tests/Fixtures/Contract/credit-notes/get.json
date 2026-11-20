@@ -1,0 +1,49 @@
+{
+    "credit-note": {
+        "id": "1794656",
+        "created": "2026-10-26T16:59:05+01:00",
+        "updated": "2026-10-26T16:59:07+01:00",
+        "client_id": "10651661",
+        "contact_id": "",
+        "credit_note_number": "GS2",
+        "number": "2",
+        "number_pre": "GS",
+        "number_length": "0",
+        "title": "Text 29",
+        "date": "2026-10-26",
+        "address": "Firma 9 GmbH\nMusterstraße 9\n10009 Musterstadt 9",
+        "status": "PAID",
+        "label": "",
+        "intro": "Text 30",
+        "note": "Text 31",
+        "total_net": "99.8",
+        "total_gross": "118.76",
+        "reduction": "",
+        "total_reduction": "0",
+        "total_net_unreduced": "99.8",
+        "total_gross_unreduced": "118.76",
+        "currency_code": "EUR",
+        "quote": "1",
+        "net_gross": "NET",
+        "paid_amount": "118.76",
+        "open_amount": "0",
+        "taxes": {
+            "tax": {
+                "name": "Name 13",
+                "rate": "19",
+                "amount": "18.96",
+                "amount_plain": "18.96",
+                "amount_rounded": "18.96",
+                "amount_net": "99.8",
+                "amount_net_plain": "99.8",
+                "amount_net_rounded": "99.8",
+                "amount_gross": "118.762",
+                "amount_gross_plain": "118.762",
+                "amount_gross_rounded": "118.76"
+            }
+        },
+        "invoice_id": "",
+        "template_id": "971611",
+        "customfield": ""
+    }
+}

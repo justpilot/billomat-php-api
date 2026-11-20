@@ -45,9 +45,14 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'ArticleFilter',
+        'endpoint' => 'GET /api/articles',
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Artikels.'],
-        'created' => ['type' => 'datetime', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Erstellungszeitpunkt des Artikels.'],
+        'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Artikels.'],
         'article_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Vollständige Artikelnummer (Präfix + laufende Nummer).'],
         'number' => ['doc' => 'Laufende Nummer (ohne Präfix).'],
         'number_pre' => ['doc' => 'Präfix der Artikelnummer.'],
@@ -69,7 +74,7 @@ return [
             'writable' => true,
             'doc' => 'Bezeichnung der Einheit.',
             'details' => ['Besser `unitId` verwenden.'],
-            'deprecated' => 'since 3.1 – Billomat liefert `unit` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
+            'optionsOnly' => true,
         ],
         'unit_id' => ['doc' => 'ID der verknüpften Einheit.'],
         'purchase_price' => ['doc' => 'Einkaufspreis.'],
@@ -78,7 +83,7 @@ return [
             'type' => 'string',
             'writable' => true,
             'doc' => 'Währung des Einkaufspreises (ISO-Währungscode).',
-            'deprecated' => 'since 3.1 – Billomat liefert `purchase_price_currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
+            'optionsOnly' => true,
         ],
         'supplier_id' => ['doc' => 'ID des verknüpften Lieferanten.'],
         'tax_id' => ['doc' => 'ID des verknüpften Steuersatzes.'],
@@ -87,14 +92,22 @@ return [
             'type' => 'int',
             'writable' => true,
             'doc' => 'ID der Artikelkategorie.',
-            'deprecated' => 'since 3.1 – Billomat liefert `category_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
+            'optionsOnly' => true,
         ],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
         'archived' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Archivierungsstatus.', 'details' => ['true = archiviert, false = aktiv.']],
-        'type' => ['enum' => 'ArticleType', 'doc' => 'Artikeltyp: Produkt oder Dienstleistung.'],
+        'type' => ['enum' => 'ItemType', 'doc' => 'Artikeltyp: Produkt oder Dienstleistung.'],
         'revenue_account_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Erlöskonto.'],
         'cost_center' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Kostenstelle.'],
         'purchase_price_net_gross' => ['enum' => 'NetGross', 'doc' => 'Preisbasis des Einkaufspreises (netto oder brutto).'],
+        'article-property-values' => [
+            'type' => 'list',
+            'readOnly' => true,
+            'list' => ['class' => 'ArticlePropertyValue', 'item' => 'article-property-value'],
+            'model' => ['property' => 'propertyValues'],
+            'doc' => 'Attributwerte des Artikels.',
+            'details' => ['Von Billomat geliefert, aber nicht dokumentiert (leer: "").'],
+        ],
     ],
 ];

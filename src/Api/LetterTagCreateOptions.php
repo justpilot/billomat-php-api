@@ -13,15 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/letter-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class LetterTagCreateOptions
+final readonly class LetterTagCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: letter_id
-         */
-        public int $letterId,
         /**
          * Name des Schlagworts.
          *
@@ -29,6 +23,12 @@ final class LetterTagCreateOptions
          */
         public string $name,
     ) {
+    }
+
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
     }
 
     /**
@@ -39,7 +39,6 @@ final class LetterTagCreateOptions
     public function toArray(): array
     {
         return [
-            'letter_id' => $this->letterId,
             'name' => $this->name,
         ];
     }

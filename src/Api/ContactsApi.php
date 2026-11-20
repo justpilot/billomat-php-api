@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Contact;
+use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
- * API-Wrapper für Kunden-Ansprechpartner (Contacts).
+ * API-Wrapper für Kunden-Ansprechpartner (Contacts), erreichbar als `$billomat->clients->contacts`.
  *
  * Doku: https://www.billomat.com/en/api/clients/contacts/
  *
@@ -20,48 +24,83 @@ use Justpilot\Billomat\Model\Contact;
  *  - POST   /contacts
  *  - PUT    /contacts/{id}
  *  - DELETE /contacts/{id}
+ *  - GET    /contacts/{id}/avatar
  *
  * `client_id` ist beim Listen Pflicht.
  */
 final class ContactsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $query
+     * Listet die Ansprechpartner eines Kunden.
+     *
+     * @param int                                                             $parentId ID des Kunden (`client_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  Sortierung, Seite, …
      *
      * @return list<Contact>
      */
-    public function listByClient(int $clientId, array $query = []): array
+    #[NoDiscard]
+    public function list(int $parentId, SubResourceFilter|array $filters = []): array
     {
-        $params = array_merge(['client_id' => $clientId], $query);
-
-        return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $params);
-    }
-
-    public function get(int $id): ?Contact
-    {
-        $data = $this->getJsonOrNull("/contacts/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['contact'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return Contact::fromArray($row);
+        return $this->listResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters));
     }
 
     /**
+     * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
+     *
+     * @param int                                                             $parentId ID des Kunden (`client_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  Sortierung, Seite, …
+     *
+     * @return Page<Contact>
+     */
+    #[NoDiscard]
+    public function listPage(int $parentId, SubResourceFilter|array $filters = []): Page
+    {
+        return $this->listResourcePage('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters));
+    }
+
+    /**
+     * Iteriert lazy über alle Ansprechpartner eines Kunden.
+     *
+     * @param int                                                             $parentId ID des Kunden (`client_id`)
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters  Sortierung, Seite, …
+     *
+     * @return Generator<int, Contact>
+     */
+    #[NoDiscard]
+    public function iterateAll(int $parentId, SubResourceFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/contacts', 'contacts', 'contact', Contact::fromArray(...), $this->clientFilter($parentId, $filters), $pageSize);
+    }
+
+    #[NoDiscard]
+    public function get(int $id): ?Contact
+    {
+        return $this->getResource("/contacts/{$id}", 'contact', Contact::fromArray(...), 'fetching contact');
+    }
+
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Contact
+    {
+        return $this->get($id) ?? throw $this->notFound("/contacts/{$id}");
+    }
+
+    /**
+     * Legt einen Ansprechpartner bei einem Kunden an.
+     *
+     * @param int $parentId ID des Kunden (`client_id`)
+     *
      * @throws ValidationException
      * @throws AuthenticationException
      * @throws HttpException
      */
-    public function create(ContactCreateOptions $options): Contact
+    public function create(int $parentId, ContactCreateOptions $options): Contact
     {
-        $payload = ['contact' => $options->toArray()];
+        $payload = ['contact' => [...$options->toArray(), 'client_id' => $parentId]];
 
         $data = $this->postJson('/contacts', $payload);
 
@@ -77,10 +116,59 @@ final class ContactsApi extends AbstractApi
         return Contact::fromArray($this->unwrapEnvelope($data, 'contact', 'updating contact'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/contacts/{$id}");
+    }
 
-        return true;
+    /**
+     * Lädt das Avatar (binäres Bild) eines Ansprechpartners.
+     *
+     * Entspricht GET /contacts/{id}/avatar?size={size}. Billomat liefert kein JSON, sondern direkt
+     * das Bild (i. d. R. PNG); Rückgabe ist der rohe Body.
+     *
+     * @param int|null $size optionale Kantenlänge in Pixel
+     */
+    #[NoDiscard]
+    public function avatar(int $id, ?int $size = null): string
+    {
+        $query = null !== $size ? ['size' => $size] : [];
+
+        return $this->getRaw("/contacts/{$id}/avatar", $query);
+    }
+
+    /**
+     * `client_id` ist beim Listen Pflicht und hat Vorrang vor einem gleichnamigen Filter.
+     *
+     * @param SubResourceFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return array<string, scalar|array<scalar|null>|null>
+     */
+    private function clientFilter(int $parentId, SubResourceFilter|array $filters): array
+    {
+        return ['client_id' => $parentId] + self::filterQuery($filters);
+    }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /contacts/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/contacts/{$id}", 'contact');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /contacts/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/contacts/{$id}", 'contact', $value);
     }
 }

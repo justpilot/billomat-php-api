@@ -6,16 +6,20 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\TaxesApi;
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
+use Justpilot\Billomat\Api\TaxRateUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\TaxRate;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -23,7 +27,9 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(TaxesApi::class)]
 #[CoversClass(TaxRate::class)]
 #[UsesClass(TaxRateCreateOptions::class)]
+#[UsesClass(TaxRateUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
@@ -32,12 +38,12 @@ final class TaxesApiTest extends TestCase
     #[Test]
     public function itListsTaxRates(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'taxes' => [
@@ -68,7 +74,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $result = $api->list(['page' => 1, 'per_page' => 50]);
@@ -80,10 +86,10 @@ final class TaxesApiTest extends TestCase
         self::assertSame(19.0, $result[0]->rate);
         self::assertTrue($result[0]->isDefault);
 
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes?page=1&per_page=50',
-            $captured['url']
+            $captured->url
         );
     }
 
@@ -107,7 +113,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $tax = $api->get(5);
@@ -132,7 +138,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $tax = $api->get(999999);
@@ -143,12 +149,12 @@ final class TaxesApiTest extends TestCase
     #[Test]
     public function itCreatesTaxRate(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'tax' => [
@@ -168,7 +174,7 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
         $options = new TaxRateCreateOptions(
@@ -184,36 +190,29 @@ final class TaxesApiTest extends TestCase
         self::assertSame(7.0, $created->rate);
         self::assertFalse($created->isDefault);
 
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes',
-            $captured['url']
+            $captured->url
         );
 
         // Payload ermitteln: bevorzugt "json", Fallback auf "body"
-        $optionsArray = $captured['options'] ?? [];
-        $payload = $optionsArray['json'] ?? null;
-
-        if (null === $payload && isset($optionsArray['body']) && \is_string($optionsArray['body'])) {
-            $payload = json_decode($optionsArray['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertIsArray($payload);
+        $payload = $captured->json();
         self::assertArrayHasKey('tax', $payload);
-        self::assertSame('USt 7%', $payload['tax']['name']);
-        self::assertSame(7.0, $payload['tax']['rate']);
-        self::assertSame(0, $payload['tax']['is_default']);
+        self::assertSame('USt 7%', $captured->jsonAt('tax', 'name'));
+        self::assertSame(7.0, $captured->jsonAt('tax', 'rate'));
+        self::assertSame(0, $captured->jsonAt('tax', 'is_default'));
     }
 
     #[Test]
     public function itUpdatesTaxRate(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $body = json_encode([
                 'tax' => [
@@ -233,10 +232,10 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
-        $options = new TaxRateCreateOptions(
+        $options = new TaxRateUpdateOptions(
             name: 'USt 7% (neu)',
             rate: 7.0,
             isDefault: true,
@@ -249,22 +248,43 @@ final class TaxesApiTest extends TestCase
         self::assertSame(7.0, $updated->rate);
         self::assertTrue($updated->isDefault);
 
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes/10',
-            $captured['url']
+            $captured->url
         );
+    }
+
+    #[Test]
+    public function renamingATaxRateSendsOnlyTheName(): void
+    {
+        // Vor 4.0.0-beta.1 nahm update() TaxRateCreateOptions mit `isDefault = false`
+        // und setzte damit den Standard-Steuersatz bei jedem Umbenennen zurück.
+        $captured = new CapturedRequest();
+
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
+
+            return new MockResponse('{"tax":{"id":"10","name":"USt 19 %","rate":"19","is_default":"1"}}');
+        });
+
+        $api = new TaxesApi(new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key')));
+
+        $updated = $api->update(10, new TaxRateUpdateOptions(name: 'USt 19 %'));
+
+        self::assertSame(['tax' => ['name' => 'USt 19 %']], $captured->json());
+        self::assertTrue($updated->isDefault);
     }
 
     #[Test]
     public function itDeletesTaxRate(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             return new MockResponse('', ['http_code' => 200]);
         });
@@ -274,16 +294,14 @@ final class TaxesApiTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new TaxesApi($http);
 
-        $result = $api->delete(10);
-
-        self::assertTrue($result);
-        self::assertSame('DELETE', $captured['method']);
+        $api->delete(10);
+        self::assertSame('DELETE', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/taxes/10',
-            $captured['url']
+            $captured->url
         );
     }
 
@@ -306,7 +324,7 @@ final class TaxesApiTest extends TestCase
         ));
 
         $api = new TaxesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig(billomatId: 'x', apiKey: 'k'),
         ));
 
@@ -326,7 +344,7 @@ final class TaxesApiTest extends TestCase
         ));
 
         $api = new TaxesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig(billomatId: 'x', apiKey: 'k'),
         ));
 

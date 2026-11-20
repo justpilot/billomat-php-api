@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 return [
     'specResource' => 'angebote',
@@ -36,7 +35,7 @@ return [
             'Typisierter Payload für POST /offers.',
             '',
             'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.',
-            'Positionen lassen sich beim Anlegen über addItem() direkt mitsenden.',
+            'Positionen lassen sich beim Anlegen über `items:` bzw. withItem() direkt mitsenden.',
         ],
     ],
 
@@ -55,9 +54,17 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'OfferFilter',
+        'endpoint' => 'GET /api/offers',
+        'fields' => [
+            'status' => ['enum' => 'OfferStatus'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Angebots.'],
-        'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Angebots.'],
         'offer_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Angebotsnummer (wird beim Abschließen vergeben).'],
@@ -68,10 +75,9 @@ return [
         'date' => ['doc' => 'Angebotsdatum.'],
         'validity_days' => ['doc' => 'Gültigkeit in Tagen (Angebotsgültigkeit).'],
         'address' => ['doc' => 'Vollständige Angebotsadresse (formatiert).'],
-        'discount_rate' => ['type' => 'int', 'writable' => true, 'model' => ['type' => 'float'], 'update' => ['type' => 'float'], 'doc' => 'Skonto in Prozent.', 'deprecated' => $gone('discount_rate')],
-        'discount_date' => ['type' => 'date', 'writable' => true, 'doc' => 'Skontodatum.', 'deprecated' => $gone('discount_date')],
-        'discount_days' => ['type' => 'int', 'writable' => true, 'doc' => 'Skontozeitraum in Tagen.', 'deprecated' => $gone('discount_days')],
-        'discount_amount' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Skontobetrag.', 'deprecated' => $gone('discount_amount')],
+        'discount_rate' => ['type' => 'int', 'writable' => true, 'model' => ['type' => 'float'], 'update' => ['type' => 'float'], 'doc' => 'Skonto in Prozent.', 'optionsOnly' => true],
+        'discount_date' => ['type' => 'date', 'writable' => true, 'doc' => 'Skontodatum.', 'optionsOnly' => true],
+        'discount_days' => ['type' => 'int', 'writable' => true, 'doc' => 'Skontozeitraum in Tagen.', 'optionsOnly' => true],
         'title' => ['doc' => 'Dokumentenüberschrift.'],
         'label' => ['doc' => 'Bezeichnung.'],
         'intro' => ['doc' => 'Einleitungstext.'],
@@ -87,7 +93,6 @@ return [
         'free_text_id' => ['doc' => 'ID des Freitextes zur Belegung von title, label, intro und note.'],
         'template_id' => ['doc' => 'ID der Vorlage, mit der das Angebot abgeschlossen wird.'],
         'taxes' => ['type' => 'taxes', 'readOnly' => true, 'doc' => 'Steuerzeilen des Angebots.'],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Persönliche URL zum Kundenportal.', 'deprecated' => $gone('customerportal_url')],
         'offer-items' => [
             'type' => 'list',
             'readOnly' => true,

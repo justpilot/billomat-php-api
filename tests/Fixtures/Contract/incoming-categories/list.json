@@ -1,0 +1,24 @@
+{
+    "incoming-categories": {
+        "incoming-category": [
+            {
+                "id": "accommodation_costs_employee",
+                "title": "Text 47",
+                "description": "Text 48"
+            },
+            {
+                "id": "accommodation_costs_owner",
+                "title": "Text 49",
+                "description": "Text 50"
+            },
+            {
+                "id": "accounting_costs",
+                "title": "Text 51",
+                "description": "Text 52"
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "84"
+    }
+}

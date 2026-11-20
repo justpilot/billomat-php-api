@@ -8,16 +8,20 @@ use Justpilot\Billomat\Api\EmailTemplatesApi;
 use Justpilot\Billomat\Api\FreeTextsApi;
 use Justpilot\Billomat\Api\ReminderTextsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\EmailTemplate;
+use Justpilot\Billomat\Model\Enum\EmailTemplateType;
 use Justpilot\Billomat\Model\FreeText;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\ReminderText;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -29,8 +33,10 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(FreeText::class)]
 #[CoversClass(ReminderText::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class TextResourcesApiTest extends TestCase
 {
     #[Test]
@@ -57,14 +63,14 @@ final class TextResourcesApiTest extends TestCase
         });
 
         $api = new EmailTemplatesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
         $templates = $api->list();
         self::assertCount(1, $templates);
         self::assertSame('Standard Rechnung', $templates[0]->name);
-        self::assertSame('INVOICES', $templates[0]->type);
+        self::assertSame(EmailTemplateType::INVOICES, $templates[0]->type);
         self::assertSame('Im Anhang Ihre Rechnung.', $templates[0]->body);
         self::assertTrue($templates[0]->bcc);
         self::assertTrue($templates[0]->isDefault);
@@ -86,7 +92,7 @@ final class TextResourcesApiTest extends TestCase
         });
 
         $api = new FreeTextsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -119,16 +125,15 @@ final class TextResourcesApiTest extends TestCase
         });
 
         $api = new ReminderTextsApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
         $texts = $api->list();
         self::assertCount(1, $texts);
-        self::assertSame(14, $texts[0]->dueDays);
         self::assertSame(2, $texts[0]->sort);
         self::assertSame('Mahngebühr', $texts[0]->chargeName);
         self::assertSame('Pauschale', $texts[0]->chargeDescription);
-        self::assertSame(5.5, $texts[0]->chargeAmount);
+        self::assertSame('5.5', $texts[0]->chargeAmount?->toString());
     }
 }

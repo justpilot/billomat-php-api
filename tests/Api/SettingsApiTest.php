@@ -8,17 +8,20 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Api\SettingsApi;
 use Justpilot\Billomat\Api\SettingsUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\NumberRangeMode;
 use Justpilot\Billomat\Model\Enum\TemplateEngine;
 use Justpilot\Billomat\Model\Settings;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -27,6 +30,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Settings::class)]
 #[UsesClass(SettingsUpdateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(NumberRangeMode::class)]
@@ -69,7 +73,7 @@ final class SettingsApiTest extends TestCase
         ]);
 
         $config = new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key');
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new SettingsApi($http);
 
         $settings = $api->get();
@@ -111,12 +115,12 @@ final class SettingsApiTest extends TestCase
     #[Test]
     public function itUpdatesSettingsViaPutAndSendsExpectedPayload(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             $responseBody = json_encode([
                 'settings' => [
@@ -133,14 +137,15 @@ final class SettingsApiTest extends TestCase
         });
 
         $config = new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key');
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new SettingsApi($http);
 
-        $opts = new SettingsUpdateOptions();
-        $opts->netGross = NetGross::GROSS;
-        $opts->numberRangeMode = NumberRangeMode::IGNORE_PREFIX;
-        $opts->dueDays = 30;
-        $opts->printVersion = true;
+        $opts = new SettingsUpdateOptions(
+            netGross: NetGross::GROSS,
+            numberRangeMode: NumberRangeMode::IGNORE_PREFIX,
+            dueDays: 30,
+            printVersion: true,
+        );
 
         $updated = $api->update($opts);
 
@@ -151,73 +156,55 @@ final class SettingsApiTest extends TestCase
         self::assertTrue($updated->printVersion);
 
         // Request prüfen
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/settings', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/settings', $captured->url);
 
-        $options = $captured['options'] ?? [];
-
-        // Payload robust lesen: json-Option oder body-String
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $payload = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertIsArray($payload, 'Expected JSON payload array (options[json] or decoded options[body]).');
+        $payload = $captured->json();
         self::assertArrayHasKey('settings', $payload);
         self::assertIsArray($payload['settings']);
 
         // nur gesetzte Felder werden übertragen
-        self::assertSame('GROSS', $payload['settings']['net_gross'] ?? null);
-        self::assertSame('IGNORE_PREFIX', $payload['settings']['number_range_mode'] ?? null);
-        self::assertSame(30, $payload['settings']['due_days'] ?? null);
-        self::assertSame(1, $payload['settings']['print_version'] ?? null);
+        self::assertSame('GROSS', $captured->jsonAt('settings', 'net_gross'));
+        self::assertSame('IGNORE_PREFIX', $captured->jsonAt('settings', 'number_range_mode'));
+        self::assertSame(30, $captured->jsonAt('settings', 'due_days'));
+        self::assertSame(1, $captured->jsonAt('settings', 'print_version'));
 
         // nicht gesetzt => nicht im Payload
-        self::assertArrayNotHasKey('currency_code', $payload['settings']);
-        self::assertArrayNotHasKey('locale', $payload['settings']);
+        self::assertArrayNotHasKey('currency_code', $captured->jsonArray('settings'));
+        self::assertArrayNotHasKey('locale', $captured->jsonArray('settings'));
     }
 
     #[Test]
     public function updateOptionsSerializeAllNewWritableFields(): void
     {
-        $opts = new SettingsUpdateOptions();
-
-        $opts->bgcolor = 'ffffff';
-        $opts->color1 = 'aabbcc';
-        $opts->articleNumberPre = 'A-';
-        $opts->articleNumberLength = 5;
-
-        $opts->invoiceLabel = 'Rechnung';
-        $opts->invoiceIntro = 'Anbei …';
-        $opts->invoiceNote = 'Bitte überweisen …';
-
-        $opts->offerLabel = 'Angebot';
-        $opts->offerIntro = 'Hier unser Angebot';
-        $opts->offerNote = 'Gültig 30 Tage';
-        $opts->offerFilename = 'angebot-{nr}';
-
-        $opts->confirmationNumberPre = 'AB-';
-        $opts->confirmationNumberLength = 4;
-        $opts->confirmationLabel = 'Auftragsbestätigung';
-        $opts->confirmationIntro = 'Wir bestätigen Ihren Auftrag';
-
-        $opts->creditNoteNumberPre = 'GU-';
-        $opts->creditNoteLabel = 'Gutschrift';
-
-        $opts->deliveryNoteNumberPre = 'LS-';
-        $opts->deliveryNoteLabel = 'Lieferschein';
-
-        $opts->reminderFilename = 'mahnung-{nr}';
-        $opts->reminderDueDays = 7;
-
-        $opts->letterLabel = 'Brief';
-        $opts->letterIntro = '…';
-
-        $opts->bccAddresses = ['archiv@example.com', 'cc@example.com'];
-        $opts->taxation = 'STANDARD';
-
-        $opts->priceGroups = [2 => 'Sonderpreis', 3 => 'B2B'];
+        $opts = new SettingsUpdateOptions(
+            bgcolor: 'ffffff',
+            color1: 'aabbcc',
+            articleNumberPre: 'A-',
+            articleNumberLength: 5,
+            priceGroups: [2 => 'Sonderpreis', 3 => 'B2B'],
+            invoiceLabel: 'Rechnung',
+            invoiceIntro: 'Anbei …',
+            invoiceNote: 'Bitte überweisen …',
+            offerLabel: 'Angebot',
+            offerIntro: 'Hier unser Angebot',
+            offerNote: 'Gültig 30 Tage',
+            offerFilename: 'angebot-{nr}',
+            confirmationNumberPre: 'AB-',
+            confirmationNumberLength: 4,
+            confirmationLabel: 'Auftragsbestätigung',
+            confirmationIntro: 'Wir bestätigen Ihren Auftrag',
+            creditNoteNumberPre: 'GU-',
+            creditNoteLabel: 'Gutschrift',
+            deliveryNoteNumberPre: 'LS-',
+            deliveryNoteLabel: 'Lieferschein',
+            reminderFilename: 'mahnung-{nr}',
+            reminderDueDays: 7,
+            letterLabel: 'Brief',
+            letterIntro: '…',
+            bccAddresses: ['archiv@example.com', 'cc@example.com'],
+            taxation: 'STANDARD',
+        );
 
         $payload = $opts->toArray();
 
@@ -273,7 +260,7 @@ final class SettingsApiTest extends TestCase
         ]);
 
         $config = new BillomatConfig(billomatId: 'mycompany', apiKey: 'secret-key');
-        $http = new BillomatHttpClient($mock, $config);
+        $http = new BillomatHttpClient(new Psr18Client($mock), $config);
         $api = new SettingsApi($http);
 
         $settings = $api->get();

@@ -5,8 +5,9 @@ declare(strict_types=1);
 /*
  * Codegen-Definition für die Ressource „Steuersätze“ (/taxes).
  *
- * Aufbau und Feld-Schlüssel: siehe clients.php. TaxRateCreateOptions dient
- * sowohl für POST als auch für PUT; alle Felder sind Konstruktor-Parameter.
+ * Aufbau und Feld-Schlüssel: siehe clients.php. TaxRateCreateOptions für POST
+ * (Pflichtfelder als Konstruktor-Parameter), TaxRateUpdateOptions für PUT
+ * (alle Felder optional, nur gesetzte werden gesendet).
  *
  * Nach Änderungen: composer generate
  */
@@ -23,7 +24,7 @@ return [
             'Repräsentiert einen Steuersatz aus der Billomat-API.',
             '',
             'Dieses Model bildet die Struktur von GET /taxes bzw. GET /taxes/{id} ab.',
-            'Es ist als Read-Model gedacht: Anlegen und Ändern erfolgen über TaxRateCreateOptions.',
+            'Es ist als Read-Model gedacht: Anlegen über TaxRateCreateOptions, Ändern über TaxRateUpdateOptions.',
         ],
     ],
 
@@ -33,35 +34,41 @@ return [
         // Billomat erwartet 1/0 statt true/false.
         'boolAsInt' => true,
         'doc' => [
-            'Typisierter Payload für POST /taxes und PUT /taxes/{id} gemäß Billomat-API.',
+            'Typisierter Payload für POST /taxes gemäß Billomat-API.',
+        ],
+    ],
+
+    'updateOptions' => [
+        'class' => 'TaxRateUpdateOptions',
+        'endpoint' => 'PUT /api/taxes/{id}',
+        // Billomat erwartet 1/0 statt true/false.
+        'boolAsInt' => true,
+        'doc' => [
+            'Typisierter Payload für PUT /taxes/{id} gemäß Billomat-API.',
+            '',
+            'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update):',
+            'ein Umbenennen setzt `is_default` nicht zurück.',
         ],
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Steuersatzes.'],
-        'account_id' => [
-            'type' => 'int',
-            'readOnly' => true,
-            'model' => ['required' => true],
-            'doc' => 'ID des Accounts, zu dem der Steuersatz gehört.',
-            'deprecated' => 'since 3.1 – Billomat liefert `account_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
-        ],
         'name' => [
             'doc' => 'Name des Steuersatzes.',
             'details' => ['Beispiel: "MwSt"'],
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true],
         ],
         'rate' => [
             'doc' => 'Höhe des Steuersatzes in Prozent.',
             'details' => ['Beispiel: 19.0'],
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true],
         ],
         'is_default' => [
             'doc' => 'Standard-Steuersatz?',
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true, 'default' => false],
         ],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Steuersatzes.'],

@@ -8,11 +8,14 @@ use Justpilot\Billomat\Api\CountryTaxesApi;
 use Justpilot\Billomat\Api\IncomingCategoriesApi;
 use Justpilot\Billomat\Api\RolesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CountryTax;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
 use Justpilot\Billomat\Model\IncomingCategory;
 use Justpilot\Billomat\Model\Role;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -20,8 +23,10 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
+use const DATE_ATOM;
 use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(IncomingCategoriesApi::class)]
@@ -31,14 +36,17 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Role::class)]
 #[CoversClass(CountryTax::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(ListCaster::class)]
+#[UsesClass(AccessLevel::class)]
 final class LookupTrioApiTest extends TestCase
 {
     private function client(MockHttpClient $mock): BillomatHttpClient
     {
-        return new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        return new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
     }
 
     #[Test]
@@ -124,7 +132,8 @@ final class LookupTrioApiTest extends TestCase
                             'banking' => 'READ',
                             'net_income_statement' => 'READ',
                             'accounting_export' => '',
-                            'customfield' => '',
+                            // Kein Rechte-Bereich, auch wenn der Wert wie eine Zugriffsstufe aussieht.
+                            'customfield' => 'READ',
                         ],
                     ],
                 ],
@@ -139,18 +148,19 @@ final class LookupTrioApiTest extends TestCase
         $role = $roles[0];
         self::assertSame(1, $role->id);
         self::assertSame('Master', $role->name);
-        self::assertSame('DELETE', $role->permissions['articles']);
-        self::assertSame('UPDATE', $role->permissions['settings_addons']);
-        self::assertArrayNotHasKey('id', $role->permissions);
-        self::assertArrayNotHasKey('name', $role->permissions);
-        self::assertSame('READ', $role->permissions['suppliers']);
-        self::assertSame('UPDATE', $role->permissions['incomings']);
-        self::assertSame('DELETE', $role->permissions['letters']);
-        self::assertSame('READ', $role->permissions['banking']);
-        self::assertSame('READ', $role->permissions['net_income_statement']);
-        self::assertArrayHasKey('accounting_export', $role->permissions);
-        self::assertNull($role->permissions['accounting_export']);
-        self::assertArrayNotHasKey('customfield', $role->permissions);
+        // Bereiche ohne Rechte (leerer String) und Nicht-Rechte-Felder fehlen in der Map.
+        self::assertSame([
+            'articles' => AccessLevel::DELETE,
+            'clients' => AccessLevel::DELETE,
+            'invoices' => AccessLevel::DELETE,
+            'settings_my_account' => AccessLevel::UPDATE,
+            'settings_addons' => AccessLevel::UPDATE,
+            'suppliers' => AccessLevel::READ,
+            'incomings' => AccessLevel::UPDATE,
+            'letters' => AccessLevel::DELETE,
+            'banking' => AccessLevel::READ,
+            'net_income_statement' => AccessLevel::READ,
+        ], $role->permissions);
     }
 
     #[Test]
@@ -163,8 +173,11 @@ final class LookupTrioApiTest extends TestCase
                 'role' => [
                     'id' => 42,
                     'name' => 'Azubi',
+                    'created' => '2013-09-27T10:49:44+02:00',
+                    'updated' => '2014-01-02T08:00:00+01:00',
                     'articles' => 'READ',
                     'offers' => '',
+                    'settings_new_area' => 'UPDATE',
                 ],
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
@@ -174,8 +187,18 @@ final class LookupTrioApiTest extends TestCase
         $role = $api->get(42);
         self::assertNotNull($role);
         self::assertSame(42, $role->id);
-        self::assertSame('READ', $role->permissions['articles']);
-        self::assertNull($role->permissions['offers']);
+        // Neue `settings_*`-Bereiche landen ohne SDK-Update in der Map.
+        self::assertSame(['articles' => AccessLevel::READ, 'settings_new_area' => AccessLevel::UPDATE], $role->permissions);
+        self::assertSame('2013-09-27T10:49:44+02:00', $role->created?->format(DATE_ATOM));
+        self::assertSame('2014-01-02T08:00:00+01:00', $role->updated?->format(DATE_ATOM));
+        self::assertSame([
+            'id' => 42,
+            'name' => 'Azubi',
+            'articles' => 'READ',
+            'settings_new_area' => 'UPDATE',
+            'created' => '2013-09-27T10:49:44+02:00',
+            'updated' => '2014-01-02T08:00:00+01:00',
+        ], $role->toArray());
     }
 
     #[Test]
@@ -256,6 +279,6 @@ final class LookupTrioApiTest extends TestCase
         $api = new RolesApi($this->client($mock));
 
         $this->expectException(AuthenticationException::class);
-        $api->get(1);
+        (void) $api->get(1);
     }
 }

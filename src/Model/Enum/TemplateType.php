@@ -11,11 +11,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum TemplateType: string
 {
+    use FromApi;
+
     case DEFINED = 'DEFINED';
     case UPLOADED = 'UPLOADED';
-
-    public static function fromApi(?string $value): ?self
-    {
-        return null === $value ? null : (self::tryFrom($value) ?? null);
-    }
 }

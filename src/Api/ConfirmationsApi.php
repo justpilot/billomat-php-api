@@ -7,12 +7,19 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Confirmation;
-use Justpilot\Billomat\Model\ConfirmationPdf;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\ConfirmationComment;
+use Justpilot\Billomat\Model\ConfirmationItem;
+use Justpilot\Billomat\Model\ConfirmationTag;
+use Justpilot\Billomat\Model\ConfirmationTagCloudEntry;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Confirmations-Ressource (Auftragsbestätigungen).
@@ -27,20 +34,48 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
  *  - DELETE /confirmations/{id}
  *  - PUT    /confirmations/{id}/complete
  *  - PUT    /confirmations/{id}/cancel
+ *  - PUT    /confirmations/{id}/uncancel
  *  - PUT    /confirmations/{id}/clear   (als erledigt markieren)
- *  - PUT    /confirmations/{id}/undo    (Status zurücksetzen)
+ *  - PUT    /confirmations/{id}/unclear (Erledigt-Markierung zurücknehmen)
  *  - POST   /confirmations/{id}/email
  *  - GET    /confirmations/{id}/pdf
- *  - PUT    /confirmations/{id}/upload-signature
  */
 final class ConfirmationsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<ConfirmationItem, ConfirmationItemCreateOptions, ConfirmationItemUpdateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'confirmation', ConfirmationItem::fromArray(...), ConfirmationItemCreateOptions::class, ConfirmationItemUpdateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<ConfirmationComment, ConfirmationCommentCreateOptions, ConfirmationCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'confirmation', ConfirmationComment::fromArray(...), ConfirmationCommentCreateOptions::class, ConfirmationCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<ConfirmationTag, ConfirmationTagCloudEntry, ConfirmationTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'confirmation', ConfirmationTag::fromArray(...), ConfirmationTagCloudEntry::fromArray(...), ConfirmationTagCreateOptions::class);
+    }
+
+    /**
+     * @param ConfirmationFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Confirmation>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(ConfirmationFilter|array $filters = []): array
     {
         return $this->listResource('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters);
     }
@@ -52,11 +87,12 @@ final class ConfirmationsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ConfirmationFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Confirmation>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(ConfirmationFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters);
     }
@@ -69,30 +105,31 @@ final class ConfirmationsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param ConfirmationFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Confirmation>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(ConfirmationFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/confirmations', 'confirmations', 'confirmation', Confirmation::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Confirmation
     {
-        $data = $this->getJsonOrNull("/confirmations/{$id}");
+        return $this->getResource("/confirmations/{$id}", 'confirmation', Confirmation::fromArray(...), 'fetching confirmation');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['confirmation'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return Confirmation::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Confirmation
+    {
+        return $this->get($id) ?? throw $this->notFound("/confirmations/{$id}");
     }
 
     /**
@@ -118,7 +155,7 @@ final class ConfirmationsApi extends AbstractApi
         return Confirmation::fromArray($this->unwrapEnvelope($data, 'confirmation', 'updating confirmation'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -129,85 +166,103 @@ final class ConfirmationsApi extends AbstractApi
         $payload = ['confirmation' => $body];
 
         $this->putVoid("/confirmations/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/confirmations/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    /** Storniert eine Auftragsbestätigung (Status → CANCELED). */
+    public function cancel(int $id): void
     {
         $this->putVoid("/confirmations/{$id}/cancel");
+    }
 
-        return true;
+    /** Hebt die Stornierung auf (CANCELED → COMPLETED). */
+    public function uncancel(int $id): void
+    {
+        $this->putVoid("/confirmations/{$id}/uncancel");
     }
 
     /** Markiert eine Auftragsbestätigung als erledigt (Status → CLEARED). */
-    public function clear(int $id): bool
+    public function clear(int $id): void
     {
         $this->putVoid("/confirmations/{$id}/clear");
-
-        return true;
     }
 
-    /** Setzt einen Status zurück auf OPEN (Rückgängigmachen von clear/cancel). */
-    public function undo(int $id): bool
+    /** Nimmt die Erledigt-Markierung zurück (CLEARED → COMPLETED). */
+    public function unclear(int $id): void
     {
-        $this->putVoid("/confirmations/{$id}/undo");
-
-        return true;
+        $this->putVoid("/confirmations/{$id}/unclear");
     }
 
-    public function email(int $id, ?ConfirmationEmailOptions $options = null): bool
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postVoid("/confirmations/{$id}/email", $payload);
-
-        return true;
-    }
-
-    public function uploadSignature(int $id, string $base64Pdf): bool
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/confirmations/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**
-     * Ruft das PDF einer Auftragsbestätigung ab.
+     * Versendet eine Auftragsbestätigung postalisch über den Pixelletter-Service.
      *
-     * @return ConfirmationPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Entspricht POST /confirmations/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
      */
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string
+    public function mail(int $id, ?MailOptions $options = null): void
     {
-        $query = [];
+        $payload = ['mail' => $options?->toArray() ?? []];
 
-        if ($type instanceof InvoicePdfType) {
-            $query['type'] = $type->value;
-        }
+        $this->postVoid("/confirmations/{$id}/mail", $payload);
+    }
 
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
+    /**
+     * Ruft das PDF einer Auftragsbestätigung als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /confirmations/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
+     */
+    #[NoDiscard]
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
+    {
+        $data = $this->getJson("/confirmations/{$id}/pdf", self::pdfQuery($type));
 
-            $response = $this->http->request('GET', "/confirmations/{$id}/pdf", $query);
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching confirmation PDF'));
+    }
 
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
-        }
+    /**
+     * Ruft das PDF einer Auftragsbestätigung als binären Inhalt ab (GET /confirmations/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/confirmations/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
+    }
 
-        $data = $this->getJson("/confirmations/{$id}/pdf", $query);
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /confirmations/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/confirmations/{$id}", 'confirmation');
+    }
 
-        return ConfirmationPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching confirmation PDF'));
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /confirmations/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/confirmations/{$id}", 'confirmation', $value);
     }
 }

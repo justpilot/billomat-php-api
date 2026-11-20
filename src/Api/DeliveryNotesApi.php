@@ -7,12 +7,19 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\DeliveryNote;
-use Justpilot\Billomat\Model\DeliveryNotePdf;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\DeliveryNoteComment;
+use Justpilot\Billomat\Model\DeliveryNoteItem;
+use Justpilot\Billomat\Model\DeliveryNoteTag;
+use Justpilot\Billomat\Model\DeliveryNoteTagCloudEntry;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Delivery-Notes-Ressource (Lieferscheine).
@@ -26,21 +33,45 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
  *  - PUT    /delivery-notes/{id}
  *  - DELETE /delivery-notes/{id}
  *  - PUT    /delivery-notes/{id}/complete
- *  - PUT    /delivery-notes/{id}/cancel
- *  - PUT    /delivery-notes/{id}/clear
- *  - PUT    /delivery-notes/{id}/undo
  *  - POST   /delivery-notes/{id}/email
  *  - GET    /delivery-notes/{id}/pdf
- *  - PUT    /delivery-notes/{id}/upload-signature
  */
 final class DeliveryNotesApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<DeliveryNoteItem, DeliveryNoteItemCreateOptions, DeliveryNoteItemUpdateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'delivery-note', DeliveryNoteItem::fromArray(...), DeliveryNoteItemCreateOptions::class, DeliveryNoteItemUpdateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<DeliveryNoteComment, DeliveryNoteCommentCreateOptions, DeliveryNoteCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'delivery-note', DeliveryNoteComment::fromArray(...), DeliveryNoteCommentCreateOptions::class, DeliveryNoteCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<DeliveryNoteTag, DeliveryNoteTagCloudEntry, DeliveryNoteTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'delivery-note', DeliveryNoteTag::fromArray(...), DeliveryNoteTagCloudEntry::fromArray(...), DeliveryNoteTagCreateOptions::class);
+    }
+
+    /**
+     * @param DeliveryNoteFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<DeliveryNote>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(DeliveryNoteFilter|array $filters = []): array
     {
         return $this->listResource('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters);
     }
@@ -52,11 +83,12 @@ final class DeliveryNotesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param DeliveryNoteFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<DeliveryNote>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(DeliveryNoteFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters);
     }
@@ -69,30 +101,31 @@ final class DeliveryNotesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param DeliveryNoteFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, DeliveryNote>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(DeliveryNoteFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/delivery-notes', 'delivery-notes', 'delivery-note', DeliveryNote::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?DeliveryNote
     {
-        $data = $this->getJsonOrNull("/delivery-notes/{$id}");
+        return $this->getResource("/delivery-notes/{$id}", 'delivery-note', DeliveryNote::fromArray(...), 'fetching delivery note');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['delivery-note'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return DeliveryNote::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): DeliveryNote
+    {
+        return $this->get($id) ?? throw $this->notFound("/delivery-notes/{$id}");
     }
 
     /**
@@ -118,7 +151,7 @@ final class DeliveryNotesApi extends AbstractApi
         return DeliveryNote::fromArray($this->unwrapEnvelope($data, 'delivery-note', 'updating delivery note'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -129,81 +162,79 @@ final class DeliveryNotesApi extends AbstractApi
         $payload = ['delivery-note' => $body];
 
         $this->putVoid("/delivery-notes/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/delivery-notes/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
-    {
-        $this->putVoid("/delivery-notes/{$id}/cancel");
-
-        return true;
-    }
-
-    public function clear(int $id): bool
-    {
-        $this->putVoid("/delivery-notes/{$id}/clear");
-
-        return true;
-    }
-
-    public function undo(int $id): bool
-    {
-        $this->putVoid("/delivery-notes/{$id}/undo");
-
-        return true;
-    }
-
-    public function email(int $id, ?DeliveryNoteEmailOptions $options = null): bool
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postVoid("/delivery-notes/{$id}/email", $payload);
-
-        return true;
-    }
-
-    public function uploadSignature(int $id, string $base64Pdf): bool
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/delivery-notes/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**
-     * @return DeliveryNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Versendet einen Lieferschein postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /delivery-notes/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
      */
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): DeliveryNotePdf|string
+    public function mail(int $id, ?MailOptions $options = null): void
     {
-        $query = [];
+        $payload = ['mail' => $options?->toArray() ?? []];
 
-        if ($type instanceof InvoicePdfType) {
-            $query['type'] = $type->value;
-        }
+        $this->postVoid("/delivery-notes/{$id}/mail", $payload);
+    }
 
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
+    /**
+     * Ruft das PDF eines Lieferscheins als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /delivery-notes/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
+     */
+    #[NoDiscard]
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
+    {
+        $data = $this->getJson("/delivery-notes/{$id}/pdf", self::pdfQuery($type));
 
-            $response = $this->http->request('GET', "/delivery-notes/{$id}/pdf", $query);
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching delivery note PDF'));
+    }
 
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
-        }
+    /**
+     * Ruft das PDF eines Lieferscheins als binären Inhalt ab (GET /delivery-notes/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/delivery-notes/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
+    }
 
-        $data = $this->getJson("/delivery-notes/{$id}/pdf", $query);
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /delivery-notes/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/delivery-notes/{$id}", 'delivery-note');
+    }
 
-        return DeliveryNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching delivery note PDF'));
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /delivery-notes/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/delivery-notes/{$id}", 'delivery-note', $value);
     }
 }

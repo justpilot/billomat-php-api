@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\InboxDocument;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Posteingangs-Dokumente (Inbox Documents).
  *
- * Doku: https://www.billomat.com/en/api/inbox-documents/
+ * Doku: https://www.billomat.com/api/eingangsrechnungen/inbox/
  *
  * Endpoints:
  *  - GET    /inbox-documents
@@ -22,10 +24,11 @@ use Justpilot\Billomat\Pagination\Page;
 final class InboxDocumentsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<InboxDocument>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/inbox-documents', 'inbox-documents', 'inbox-document', InboxDocument::fromArray(...), $filters);
@@ -38,10 +41,11 @@ final class InboxDocumentsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<InboxDocument>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/inbox-documents', 'inbox-documents', 'inbox-document', InboxDocument::fromArray(...), $filters);
@@ -55,30 +59,31 @@ final class InboxDocumentsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, InboxDocument>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/inbox-documents', 'inbox-documents', 'inbox-document', InboxDocument::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?InboxDocument
     {
-        $data = $this->getJsonOrNull("/inbox-documents/{$id}");
+        return $this->getResource("/inbox-documents/{$id}", 'inbox-document', InboxDocument::fromArray(...), 'fetching inbox document');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['inbox-document'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return InboxDocument::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): InboxDocument
+    {
+        return $this->get($id) ?? throw $this->notFound("/inbox-documents/{$id}");
     }
 
     public function create(InboxDocumentCreateOptions $options): InboxDocument
@@ -90,10 +95,31 @@ final class InboxDocumentsApi extends AbstractApi
         return InboxDocument::fromArray($this->unwrapEnvelope($data, 'inbox-document', 'creating inbox document'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/inbox-documents/{$id}");
+    }
 
-        return true;
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /inbox-documents/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/inbox-documents/{$id}", 'inbox-document');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /inbox-documents/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/inbox-documents/{$id}", 'inbox-document', $value);
     }
 }

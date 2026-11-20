@@ -1,163 +1,180 @@
-<!-- Quelle: https://www.billomat.com/api/lieferanten/ -->
+<!-- Source: https://www.billomat.com/api/lieferanten/ -->
 
 # Suppliers (Lieferanten)
 
-API-Wrapper für Lieferanten unter `/suppliers` und ihre zwei Sub-Ressourcen (`/supplier-tags`, `/supplier-property-values`).
+API wrapper for suppliers under `/suppliers` and their two sub-resources (`/supplier-tags`, `/supplier-property-values`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->suppliers               // Lieferanten selbst
-$billomat->supplierTags            // Schlagworte an einem Lieferanten
-$billomat->supplierPropertyValues  // Werte benutzerdefinierter Lieferanten-Eigenschaften
+$billomat->suppliers                  // the suppliers themselves
+$billomat->suppliers->tags            // tags on a supplier
+$billomat->suppliers->propertyValues  // custom property values on a supplier
 ```
 
-Die Definitionen der Eigenschaften (Property-Schemata) liegen separat unter `$billomat->supplierProperties` — siehe [Property-Definitionen](properties.md). Hier geht es ausschließlich um die Werte, die ein konkreter Lieferant für diese Definitionen trägt.
+The property definitions (schemas) live separately under `$billomat->suppliers->properties`, see [Property definitions](properties.md). This page only covers the values a specific supplier holds for those definitions.
 
-## Modell
+## Model
 
-Ein Supplier ist ein Lieferant — strukturell das Gegenstück zu [Clients](clients.md), aber für die eingehende Seite: Lieferanten erscheinen auf Eingangsbelegen (siehe [Incomings](incomings.md)) und können einem [Article](articles.md) als Standard-Lieferant zugewiesen werden (`Article::$supplierId`).
+A supplier is the counterpart of a [client](clients.md) on the purchasing side: suppliers appear on incoming invoices (see [Incomings](incomings.md)) and can be assigned to an [article](articles.md) as default supplier (`Article::$supplierId`).
 
-- **Adresse**: zerlegt in `street`, `zip`, `city`, `state`, `countryCode` (ISO-2). Das Read-Modell hat zusätzlich ein zusammengesetztes `address`-Feld, das Billomat selbst aus den Einzelteilen baut.
-- **Kontakt**: `email`, `phone`, `fax`, `mobile`, `www` plus optionale persönliche Ansprache (`salutation`, `firstName`, `lastName`).
-- **Steuer & Bank**: `taxNumber`, `vatNumber` und ein vollständiger Bankblock (`bankIban`, `bankBic`, …) für Überweisungen an den Lieferanten.
+- **Address**: split into `street`, `zip`, `city`, `state`, `countryCode` (ISO alpha-2). The read model also has a combined `address` field that Billomat builds from the parts.
+- **Contact**: `email`, `phone`, `fax`, `mobile`, `www`, plus an optional personal salutation (`salutation`, `firstName`, `lastName`).
+- **Tax and bank**: `taxNumber`, `vatNumber`, a full bank block (`bankIban`, `bankBic`, …) for transfers to the supplier, and the SEPA `creditorIdentifier`.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
 ### `/suppliers`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/suppliers` |
-| `get($id)` | GET | `/suppliers/{id}` |
+| `listPage($filters?)` | GET | `/suppliers` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/suppliers` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/suppliers/{id}` |
 | `create($options)` | POST | `/suppliers` |
 | `update($id, $options)` | PUT | `/suppliers/{id}` |
 | `delete($id)` | DELETE | `/suppliers/{id}` |
 
 ### `/supplier-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listBySupplier($supplierId)` | GET | `/supplier-tags?supplier_id={id}` |
+| `list($parentId, $filters?)` | GET | `/supplier-tags?supplier_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/supplier-tags?supplier_id={id}` (paginated) |
 | `cloud()` | GET | `/supplier-tags` |
-| `get($id)` | GET | `/supplier-tags/{id}` |
-| `create($options)` | POST | `/supplier-tags` |
+| `get($id)` / `getOrFail($id)` | GET | `/supplier-tags/{id}` |
+| `create($parentId, $options)` | POST | `/supplier-tags` |
 | `delete($id)` | DELETE | `/supplier-tags/{id}` |
 
 ### `/supplier-property-values`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `list($filters?)` | GET | `/supplier-property-values` |
-| `get($id)` | GET | `/supplier-property-values/{id}` |
-| `create($options)` | POST | `/supplier-property-values` |
+| `list($parentId?, $filters?)` | GET | `/supplier-property-values` |
+| `listPage($parentId?, $filters?)` | GET | `/supplier-property-values` |
+| `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/supplier-property-values` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/supplier-property-values/{id}` |
+| `create($parentId, $options)` | POST | `/supplier-property-values` |
 
 ## Suppliers
 
-### `list(array $filters = []): list<Supplier>`
+### `list(SupplierFilter|array $filters = []): list<Supplier>`
 
-Filter laut Billomat-Doku: `name`, `client_number`, `email`, `first_name`, `last_name`, `country_code`, `note`, `tags`. Array-Werte werden als `key[]=…` codiert.
+Filters according to the Billomat docs: `name`, `client_number`, `email`, `first_name`, `last_name`, `country_code`, `creditor_identifier`, `note`, `incoming_id`, `tags`. Use the typed filter `SupplierFilter`; its fields are the camelCase versions of these names (`countryCode`, `creditorIdentifier`, `incomingId`, …; `incomingId` and `tags` are lists, sent comma-separated), plus `orderBy`, `page`, `perPage` and `extra` for other parameters. A plain array still works; array values are encoded as `key[]=…`.
 
 ```php
-$german = $billomat->suppliers->list([
-    'country_code' => 'DE',
-    'order_by' => 'name+ASC',
-]);
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\SupplierFilter;
+
+$german = $billomat->suppliers->list(new SupplierFilter(
+    countryCode: 'DE',
+    orderBy: OrderBy::asc('name'),
+));
 ```
+
+`listPage()` returns the same list plus pagination metadata, `iterateAll()` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?Supplier`
 
-Liefert `null` bei 404.
+Returns `null` on 404. `getOrFail(int $id): Supplier` throws a `NotFoundException` instead.
 
 ### `create(SupplierCreateOptions $options): Supplier`
 
 ```php
 use Justpilot\Billomat\Api\SupplierCreateOptions;
 
-$opts = new SupplierCreateOptions(name: 'Hetzner Online GmbH');
-$opts->street = 'Industriestr. 25';
-$opts->zip = '91710';
-$opts->city = 'Gunzenhausen';
-$opts->countryCode = 'DE';
-$opts->vatNumber = 'DE812871812';
-$opts->bankIban = 'DE89370400440532013000';
-$opts->bankBic = 'COBADEFFXXX';
-$opts->currencyCode = 'EUR';
+$opts = new SupplierCreateOptions(
+    name: 'Hetzner Online GmbH',
+    street: 'Industriestr. 25',
+    zip: '91710',
+    city: 'Gunzenhausen',
+    countryCode: 'DE',
+    vatNumber: 'DE812871812',
+    bankIban: 'DE89370400440532013000',
+    bankBic: 'COBADEFFXXX',
+    currencyCode: 'EUR',
+);
 
 $supplier = $billomat->suppliers->create($opts);
 ```
 
 ### `update(int $id, SupplierUpdateOptions $options): Supplier`
 
-Partial-Update — nicht gesetzte Properties bleiben unverändert.
+Partial update: fields left `null` stay unchanged.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
-## Write-Modell: `SupplierCreateOptions`
+Deletes the supplier.
 
-Konstruktor: `new SupplierCreateOptions(string $name)` — `name` ist Pflicht.
+## Write model: `SupplierCreateOptions`
 
-### Identifikation & Ansprache
+Constructor: `new SupplierCreateOptions(string $name, …)`. `name` is required and the first parameter. All other fields are constructor parameters with a default and are passed as named arguments. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withEmail('new@example.com')`).
 
-| Property | Billomat-Feld | Typ | Notes |
+### Identification and salutation
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `name` | `name` | `string` (Pflicht) | Firmenname oder Kurzbezeichnung |
-| `salutation` | `salutation` | `?string` | z. B. `Herr` / `Frau` |
-| `firstName` | `first_name` | `?string` | Ansprechpartner |
-| `lastName` | `last_name` | `?string` | Ansprechpartner |
-| `note` | `note` | `?string` | Freie Notiz |
+| `name` | `name` | `string` (required) | Company name or short name |
+| `clientNumber` | `client_number` | `?string` | Your own customer number at the supplier |
+| `salutation` | `salutation` | `?string` | e.g. `Herr` / `Frau` |
+| `firstName` | `first_name` | `?string` | Contact person |
+| `lastName` | `last_name` | `?string` | Contact person |
+| `note` | `note` | `?string` | Free-text note |
 
-### Adresse
+### Address
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `street` | `street` | `?string` | — |
-| `zip` | `zip` | `?string` | PLZ |
+| `zip` | `zip` | `?string` | Postal code |
 | `city` | `city` | `?string` | — |
-| `state` | `state` | `?string` | Bundesland/Region |
-| `countryCode` | `country_code` | `?string` | ISO-3166-1 alpha-2, z. B. `DE` |
+| `state` | `state` | `?string` | State/region |
+| `countryCode` | `country_code` | `?string` | ISO 3166-1 alpha-2, e.g. `DE` |
 
-### Kontakt
+### Contact
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `email` | `email` | `?string` | — |
 | `phone` | `phone` | `?string` | — |
 | `fax` | `fax` | `?string` | — |
 | `mobile` | `mobile` | `?string` | — |
-| `www` | `www` | `?string` | Webseite |
+| `www` | `www` | `?string` | Website |
 
-### Steuern & Bank
+### Tax and bank
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `taxNumber` | `tax_number` | `?string` | Lokale Steuernummer |
-| `vatNumber` | `vat_number` | `?string` | USt-IdNr. |
-| `bankAccountNumber` | `bank_account_number` | `?string` | Altes Kontonummer-Format |
-| `bankAccountOwner` | `bank_account_owner` | `?string` | Kontoinhaber |
-| `bankNumber` | `bank_number` | `?string` | Altes BLZ-Format |
+| `taxNumber` | `tax_number` | `?string` | Local tax number |
+| `vatNumber` | `vat_number` | `?string` | VAT ID |
+| `bankAccountNumber` | `bank_account_number` | `?string` | Legacy account number format |
+| `bankAccountOwner` | `bank_account_owner` | `?string` | Account holder |
+| `bankNumber` | `bank_number` | `?string` | Legacy bank code (BLZ) format |
 | `bankName` | `bank_name` | `?string` | — |
 | `bankIban` | `bank_iban` | `?string` | IBAN |
 | `bankBic` | `bank_bic` | `?string` | BIC/SWIFT |
-| `currencyCode` | `currency_code` | `?string` | Standardwährung für Eingangsbelege |
+| `bankSwift` | `bank_swift` | `?string` | BIC/SWIFT as named in the Billomat docs; alias of `bankBic`, both are serialized |
+| `currencyCode` | `currency_code` | `?string` | Default currency for incoming invoices |
+| `creditorIdentifier` | `creditor_identifier` | `?string` | SEPA creditor ID |
 
-## Write-Modell: `SupplierUpdateOptions`
+## Write model: `SupplierUpdateOptions`
 
-Spiegelt `SupplierCreateOptions` exakt, jedoch ist `name` nicht mehr Pflicht und alle Felder sind nullable. Nicht gesetzte Properties bleiben unverändert.
+Mirrors `SupplierCreateOptions`, but `name` is no longer required and every field is nullable. `null` means "don't send", the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null` so Billomat empties it, e.g. `new SupplierUpdateOptions(note: Clear::Field)`.
 
-## Read-Modell: `Supplier`
+## Read model: `Supplier`
 
-`final readonly class Supplier`. Wichtig: `name` ist auch im Read-Modell ein nicht-nullbarer `string`.
+`final readonly class Supplier`. Note: `name` is a non-nullable `string` in the read model too.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `created` | `?\DateTimeImmutable` |
 | `name` | `string` |
-| `clientNumber` | `?int` (nur Read — von Billomat vergebene laufende Lieferantennummer) |
+| `clientNumber` | `?int` |
 | `salutation`, `firstName`, `lastName` | `?string` |
 | `street`, `zip`, `city`, `state`, `countryCode` | `?string` |
-| `address` | `?string` (nur Read — server-seitig zusammengesetzte Adresszeile) |
+| `address` | `?string` (read-only: address line assembled server-side) |
 | `note` | `?string` |
 | `email`, `phone`, `fax`, `mobile`, `www` | `?string` |
 | `taxNumber`, `vatNumber` | `?string` |
@@ -168,119 +185,145 @@ Spiegelt `SupplierCreateOptions` exakt, jedoch ist `name` nicht mehr Pflicht und
 | `locale` | `?string` |
 | `creditorAccountNumber` | `?string` |
 | `creditorIdentifier` | `?string` |
-| `costsGross` | `?float` |
-| `costsNet` | `?float` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `costsGross` | `?Money` (read-only, see [Money](../concepts/money.md)) |
+| `costsNet` | `?Money` (read-only) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
-## Supplier Tags
+## Supplier tags
 
-Funktional identisch zu [Article Tags](articles.md#article-tags), bezogen auf einen Lieferanten statt einen Artikel.
+Works exactly like [Article tags](articles.md#article-tags), but for a supplier instead of an article.
 
-### Methoden
+### Methods
 
 ```php
 use Justpilot\Billomat\Api\SupplierTagCreateOptions;
 
-$tag = $billomat->supplierTags->create(
-    new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'hosting'),
+$tag = $billomat->suppliers->tags->create(
+    $supplier->id,
+    new SupplierTagCreateOptions(name: 'hosting'),
 );
 
-$tags  = $billomat->supplierTags->listBySupplier($supplier->id);
-$cloud = $billomat->supplierTags->cloud(); // aggregiert, mit count
-$billomat->supplierTags->delete($tag->id);
+$tags  = $billomat->suppliers->tags->list($supplier->id);
+$cloud = $billomat->suppliers->tags->cloud(); // aggregated, with count
+$billomat->suppliers->tags->delete($tag->id);
 ```
 
-Ein `update()` gibt es nicht — Tags werden gelöscht und neu angelegt.
+There is no `update()`: delete the tag and create a new one.
 
-### Write-Modell: `SupplierTagCreateOptions`
+### Write model: `SupplierTagCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+The supplier ID isn't part of the options: pass it as the first argument of `create()`, which adds `supplier_id` to the payload.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `supplierId` | `supplier_id` | `int` (Pflicht) | — |
-| `name` | `name` | `string` (Pflicht) | — |
+| `name` | `name` | `string` (required) | — |
 
-### Read-Modell: `SupplierTag`
+### Read model: `SupplierTag`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `supplierId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-### Read-Modell: `SupplierTagCloudEntry`
+### Read model: `SupplierTagCloudEntry`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
 | `count` | `int` |
+| `extra` | `array<string, mixed>` |
 
-## Supplier Property Values
+## Supplier property values
 
-Speichert die Werte für die in [`properties.md`](properties.md) definierten Lieferanten-Eigenschaften (`supplierProperties`). Eine Property-Definition (`SupplierProperty`) ist das Schema (Name + `PropertyType`), ein `SupplierPropertyValue` ist die konkrete Belegung an einem Lieferanten.
+Stores the values for the supplier properties defined in [`properties.md`](properties.md) (`$billomat->suppliers->properties`). A property definition (`SupplierProperty`) is the schema (name + `PropertyType`); a `SupplierPropertyValue` is the actual value on one supplier.
 
 ```php
 use Justpilot\Billomat\Api\SupplierPropertyValueCreateOptions;
+use Justpilot\Billomat\Api\SupplierPropertyValueFilter;
+use Justpilot\Billomat\Api\OrderBy;
 
-// Werte für einen Lieferanten auflisten
-$values = $billomat->supplierPropertyValues->list([
-    'supplier_id' => $supplier->id,
-]);
+// List the values of one supplier
+$values = $billomat->suppliers->propertyValues->list($supplier->id);
 
-// Wert für die Property "Kreditorennummer Buchhaltung" (id = 17) setzen
-$value = $billomat->supplierPropertyValues->create(
+// Only the values of property 12, typed filter with sorting
+$values = $billomat->suppliers->propertyValues->list($supplier->id, new SupplierPropertyValueFilter(
+    supplierPropertyId: 12,
+    orderBy: OrderBy::desc('updated'),
+));
+
+// Set the value of the property "Accounting creditor number" (id = 17)
+$value = $billomat->suppliers->propertyValues->create(
+    $supplier->id,
     new SupplierPropertyValueCreateOptions(
-        supplierId: $supplier->id,
         supplierPropertyId: 17,
         value: '70001',
     ),
 );
 ```
 
-Es gibt weder `update()` noch `delete()` — ein erneuter `create()`-Call mit derselben `supplierPropertyId` überschreibt den bestehenden Wert.
+There is neither `update()` nor `delete()`: calling `create()` again with the same `supplierPropertyId` overwrites the existing value.
 
-### Write-Modell: `SupplierPropertyValueCreateOptions`
+### Write model: `SupplierPropertyValueCreateOptions`
 
-Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt:
+The supplier ID isn't part of the options: pass it as the first argument of `create()`, which adds `supplier_id` to the payload.
 
-| Property | Billomat-Feld | Typ | Notes |
+Both values are required and set via the constructor.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `supplierId` | `supplier_id` | `int` (Pflicht) | — |
-| `supplierPropertyId` | `supplier_property_id` | `int` (Pflicht) | ID der Property-Definition |
-| `value` | `value` | `mixed` (Pflicht) | Bei `CHECKBOX` werden `0`/`1` erwartet |
+| `supplierPropertyId` | `supplier_property_id` | `int` (required) | ID of the property definition |
+| `value` | `value` | `mixed` (required) | `CHECKBOX` expects `0`/`1` |
 
-### Read-Modell: `SupplierPropertyValue`
+### Read model: `SupplierPropertyValue`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `supplierId` | `int` |
 | `supplierPropertyId` | `int` |
-| `type` | `?string` (rohes API-Feld, z. B. `TEXTFIELD`) |
-| `name` | `?string` (Name aus der Property-Definition) |
+| `type` | `?PropertyType` (`TEXTFIELD`, `TEXTAREA`, `CHECKBOX`) |
+| `name` | `?string` (name from the property definition) |
 | `value` | `mixed` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Verwendete Enums
+## Enums used
 
-- [`PropertyType`](../../src/Model/Enum/PropertyType.php): `TEXTFIELD`, `TEXTAREA`, `CHECKBOX` — wird vom zugehörigen [`SupplierProperty`](../../src/Model/SupplierProperty.php) der Definition getragen, nicht vom Wert selbst.
+- [`PropertyType`](../../src/Model/Enum/PropertyType.php): `TEXTFIELD`, `TEXTAREA`, `CHECKBOX`, on the property definition ([`SupplierProperty`](../../src/Model/SupplierProperty.php)) and on `SupplierPropertyValue::$type`.
 
-Lieferanten haben sonst keine ressourcen-spezifischen Enums; alle Felder am `Supplier` selbst sind plain Strings (`countryCode`, `currencyCode`, …).
+Suppliers have no other resource-specific enums; all fields on `Supplier` itself are plain strings (`countryCode`, `currencyCode`, …).
 
-## Stolpersteine
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-- **Kein `update()` für Tags und Property-Values.** Tags löschen und neu anlegen; bei Property-Values überschreibt ein erneuter POST mit derselben `supplier_property_id` den bestehenden Eintrag.
-- **`address` und `clientNumber` sind read-only.** Beide Felder erscheinen im `Supplier`-Read-Modell, fehlen aber in `SupplierCreateOptions`/`SupplierUpdateOptions` — Billomat baut sie selbst aus `street`/`zip`/`city`/`countryCode` bzw. einer laufenden Nummer.
-- **`Supplier::$name` ist nicht-null.** Im Gegensatz zu fast allen anderen Feldern ist `name` im Read-Modell ein `string` (kein `?string`) — ein leerer Name liefert `''`, nicht `null`.
-- **`bankBic` kommt als `bank_swift`.** Billomat liefert den BIC im Feld `bank_swift`; das Read-Modell mappt ihn auf `bankBic` (Fallback `bank_bic`).
-- **Alte vs. moderne Bankdaten.** `bankAccountNumber`/`bankNumber` sind die deutschen Pre-SEPA-Felder. Für SEPA-Überweisungen sind `bankIban`/`bankBic` relevant; beide Paare lassen sich parallel setzen, aber Billomat nutzt für Überweisungen primär IBAN/BIC.
-- **`currencyCode` als Default.** Der Wert wird auf neu angelegte Eingangsbelege ([Incomings](incomings.md)) übernommen, kann dort aber pro Beleg überschrieben werden.
-- **Verknüpfung zu Artikeln läuft über `Article::$supplierId`.** Beim Löschen eines Suppliers verlieren betroffene Artikel nur den Verweis — sie werden nicht mitgelöscht.
-- **`PropertyType::CHECKBOX` erwartet `0`/`1` als `value`.** Boolean-Strings (`"true"`/`"false"`) werden nicht erkannt.
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-## End-to-End-Beispiel
+::: code-group
+<<< @/snippets/json/suppliers.create.json [POST /suppliers]
+<<< @/../tests/Fixtures/Contract/suppliers/get.json [GET /suppliers/{id} (response)]
+<<< @/../tests/Fixtures/Contract/suppliers/list.json [GET /suppliers (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **No `update()` for tags and property values.** Delete tags and create them again; for property values, another POST with the same `supplier_property_id` overwrites the existing entry.
+- **`address` is read-only.** The field appears in the `Supplier` read model but not in `SupplierCreateOptions`/`SupplierUpdateOptions`; Billomat builds it from `street`/`zip`/`city`/`countryCode`.
+- **`clientNumber` has different types.** You write it as `?string` (your customer number at the supplier); the read model types it as `?int`.
+- **`Supplier::$name` is non-null.** Unlike almost all other fields, `name` is a `string` (not `?string`) in the read model; an empty name yields `''`, not `null`.
+- **`bankBic` arrives as `bank_swift`.** Billomat returns the BIC in the `bank_swift` field; the read model maps it to `bankBic` (falling back to `bank_bic`). On write, `bankBic` and `bankSwift` are sent as separate fields.
+- **Legacy vs. modern bank details.** `bankAccountNumber`/`bankNumber` are the German pre-SEPA fields. For SEPA transfers `bankIban`/`bankBic` matter; you can set both pairs, but Billomat primarily uses IBAN/BIC for transfers.
+- **`currencyCode` as default.** The value is copied to new incoming invoices ([Incomings](incomings.md)) and can be overridden per document there.
+- **Articles link via `Article::$supplierId`.** When a supplier is deleted, affected articles only lose the reference; they aren't deleted.
+- **`PropertyType::CHECKBOX` expects `0`/`1` as `value`.** Boolean strings (`"true"`/`"false"`) aren't recognized.
+
+## End-to-end example
 
 ```php
 <?php
@@ -300,51 +343,50 @@ $billomat = BillomatClient::create(
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Lieferant anlegen
-$opts = new SupplierCreateOptions(name: 'Hetzner Online GmbH');
-$opts->street = 'Industriestr. 25';
-$opts->zip = '91710';
-$opts->city = 'Gunzenhausen';
-$opts->countryCode = 'DE';
-$opts->email = 'billing@hetzner.com';
-$opts->www = 'https://www.hetzner.com';
-$opts->vatNumber = 'DE812871812';
-$opts->bankIban = 'DE89370400440532013000';
-$opts->bankBic = 'COBADEFFXXX';
-$opts->currencyCode = 'EUR';
+// 1) Create a supplier
+$opts = new SupplierCreateOptions(
+    name: 'Hetzner Online GmbH',
+    clientNumber: 'K-123456',
+    street: 'Industriestr. 25',
+    zip: '91710',
+    city: 'Gunzenhausen',
+    countryCode: 'DE',
+    email: 'billing@hetzner.com',
+    www: 'https://www.hetzner.com',
+    vatNumber: 'DE812871812',
+    bankIban: 'DE89370400440532013000',
+    bankBic: 'COBADEFFXXX',
+    currencyCode: 'EUR',
+);
 
 $supplier = $billomat->suppliers->create($opts);
-printf("Lieferant #%d (%s) angelegt — Kreditor-Nr. %s\n",
+printf("Supplier #%d (%s) created\n", $supplier->id, $supplier->name);
+
+// 2) Add tags
+$billomat->suppliers->tags->create(
     $supplier->id,
-    $supplier->name,
-    $supplier->clientNumber ?? 'tbd',
+    new SupplierTagCreateOptions(name: 'hosting'),
+);
+$billomat->suppliers->tags->create(
+    $supplier->id,
+    new SupplierTagCreateOptions(name: 'monthly-invoice'),
 );
 
-// 2) Tags vergeben
-$billomat->supplierTags->create(
-    new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'hosting'),
-);
-$billomat->supplierTags->create(
-    new SupplierTagCreateOptions(supplierId: $supplier->id, name: 'monthly-invoice'),
-);
-
-// 3) Custom-Property setzen (SupplierProperty #17 = "Kreditorennummer Buchhaltung")
-$billomat->supplierPropertyValues->create(
+// 3) Set a custom property (SupplierProperty #17 = "Accounting creditor number")
+$billomat->suppliers->propertyValues->create(
+    $supplier->id,
     new SupplierPropertyValueCreateOptions(
-        supplierId: $supplier->id,
         supplierPropertyId: 17,
         value: '70001',
     ),
 );
 
-// 4) Kontaktdaten später nachpflegen — Partial-Update
-$update = new SupplierUpdateOptions();
-$update->phone = '+49 9831 505-0';
-$update->note = 'Standard-Hostingpartner seit 2018.';
+// 4) Add contact details later: partial update
+$update = new SupplierUpdateOptions(phone: '+49 9831 505-0', note: 'Default hosting partner since 2018.');
 $billomat->suppliers->update($supplier->id, $update);
 
-// 5) Cloud-Übersicht aller Supplier-Tags
-foreach ($billomat->supplierTags->cloud() as $entry) {
+// 5) Cloud overview of all supplier tags
+foreach ($billomat->suppliers->tags->cloud() as $entry) {
     printf("%s (%d)\n", $entry->name, $entry->count);
 }
 ```

@@ -15,149 +15,222 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/contacts.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ContactCreateOptions
+final readonly class ContactCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * ID des Kunden, zu dem der Kontakt gehört.
+         * Bezeichnung des Kontakts.
          *
-         * Billomat-Feld: client_id
-         * Typ: INT
+         * Billomat-Feld: label
+         * Typ: ALNUM
          */
-        public int $clientId,
+        public ?string $label = null,
+        /**
+         * Anrede.
+         *
+         * Billomat-Feld: salutation
+         * Typ: ALNUM
+         */
+        public ?string $salutation = null,
+        /**
+         * Vorname.
+         *
+         * Billomat-Feld: first_name
+         * Typ: ALNUM
+         */
+        public ?string $firstName = null,
+        /**
+         * Nachname.
+         *
+         * Billomat-Feld: last_name
+         * Typ: ALNUM
+         */
+        public ?string $lastName = null,
+        /**
+         * Straße.
+         *
+         * Billomat-Feld: street
+         * Typ: ALNUM
+         */
+        public ?string $street = null,
+        /**
+         * Postleitzahl.
+         *
+         * Billomat-Feld: zip
+         * Typ: ALNUM
+         */
+        public ?string $zip = null,
+        /**
+         * Ort.
+         *
+         * Billomat-Feld: city
+         * Typ: ALNUM
+         */
+        public ?string $city = null,
+        /**
+         * Bundesland / Bezirk / Region.
+         *
+         * Billomat-Feld: state
+         * Typ: ALNUM
+         */
+        public ?string $state = null,
+        /**
+         * Ländercode (ISO 3166-1 Alpha-2).
+         *
+         * Beispiel: "DE", "AT", "CH"
+         *
+         * Billomat-Feld: country_code
+         * Typ: Ländercode nach ISO 3166 Alpha-2
+         */
+        public ?string $countryCode = null,
+        /**
+         * E-Mail-Adresse.
+         *
+         * Billomat-Feld: email
+         * Typ: gültige E-Mail-Adresse
+         */
+        public ?string $email = null,
+        /**
+         * Telefonnummer.
+         *
+         * Billomat-Feld: phone
+         * Typ: ALNUM
+         */
+        public ?string $phone = null,
+        /**
+         * Faxnummer.
+         *
+         * Billomat-Feld: fax
+         * Typ: ALNUM
+         */
+        public ?string $fax = null,
+        /**
+         * Mobilnummer.
+         *
+         * Billomat-Feld: mobile
+         * Typ: ALNUM
+         */
+        public ?string $mobile = null,
+        /**
+         * Notiz zum Kontakt.
+         *
+         * Billomat-Feld: note
+         */
+        public ?string $note = null,
+        /**
+         * Firmenname.
+         *
+         * Billomat-Feld: name
+         * Typ: ALNUM
+         */
+        public ?string $name = null,
+        /**
+         * Website (ohne Schema).
+         *
+         * Beispiel: "example.com"
+         *
+         * Billomat-Feld: www
+         * Typ: URL (ohne http)
+         */
+        public ?string $www = null,
     ) {
     }
 
-    /**
-     * Bezeichnung des Kontakts.
-     *
-     * Billomat-Feld: label
-     * Typ: ALNUM
-     */
-    public ?string $label = null;
+    /** Kopie mit geändertem `label`. */
+    public function withLabel(?string $label): self
+    {
+        return clone($this, ['label' => $label]);
+    }
 
-    /**
-     * Anrede.
-     *
-     * Billomat-Feld: salutation
-     * Typ: ALNUM
-     */
-    public ?string $salutation = null;
+    /** Kopie mit geändertem `salutation`. */
+    public function withSalutation(?string $salutation): self
+    {
+        return clone($this, ['salutation' => $salutation]);
+    }
 
-    /**
-     * Vorname.
-     *
-     * Billomat-Feld: first_name
-     * Typ: ALNUM
-     */
-    public ?string $firstName = null;
+    /** Kopie mit geändertem `firstName`. */
+    public function withFirstName(?string $firstName): self
+    {
+        return clone($this, ['firstName' => $firstName]);
+    }
 
-    /**
-     * Nachname.
-     *
-     * Billomat-Feld: last_name
-     * Typ: ALNUM
-     */
-    public ?string $lastName = null;
+    /** Kopie mit geändertem `lastName`. */
+    public function withLastName(?string $lastName): self
+    {
+        return clone($this, ['lastName' => $lastName]);
+    }
 
-    /**
-     * Straße.
-     *
-     * Billomat-Feld: street
-     * Typ: ALNUM
-     */
-    public ?string $street = null;
+    /** Kopie mit geändertem `street`. */
+    public function withStreet(?string $street): self
+    {
+        return clone($this, ['street' => $street]);
+    }
 
-    /**
-     * Postleitzahl.
-     *
-     * Billomat-Feld: zip
-     * Typ: ALNUM
-     */
-    public ?string $zip = null;
+    /** Kopie mit geändertem `zip`. */
+    public function withZip(?string $zip): self
+    {
+        return clone($this, ['zip' => $zip]);
+    }
 
-    /**
-     * Ort.
-     *
-     * Billomat-Feld: city
-     * Typ: ALNUM
-     */
-    public ?string $city = null;
+    /** Kopie mit geändertem `city`. */
+    public function withCity(?string $city): self
+    {
+        return clone($this, ['city' => $city]);
+    }
 
-    /**
-     * Bundesland / Bezirk / Region.
-     *
-     * Billomat-Feld: state
-     * Typ: ALNUM
-     */
-    public ?string $state = null;
+    /** Kopie mit geändertem `state`. */
+    public function withState(?string $state): self
+    {
+        return clone($this, ['state' => $state]);
+    }
 
-    /**
-     * Ländercode (ISO 3166-1 Alpha-2).
-     *
-     * Beispiel: "DE", "AT", "CH"
-     *
-     * Billomat-Feld: country_code
-     * Typ: Ländercode nach ISO 3166 Alpha-2
-     */
-    public ?string $countryCode = null;
+    /** Kopie mit geändertem `countryCode`. */
+    public function withCountryCode(?string $countryCode): self
+    {
+        return clone($this, ['countryCode' => $countryCode]);
+    }
 
-    /**
-     * E-Mail-Adresse.
-     *
-     * Billomat-Feld: email
-     * Typ: gültige E-Mail-Adresse
-     */
-    public ?string $email = null;
+    /** Kopie mit geändertem `email`. */
+    public function withEmail(?string $email): self
+    {
+        return clone($this, ['email' => $email]);
+    }
 
-    /**
-     * Telefonnummer.
-     *
-     * Billomat-Feld: phone
-     * Typ: ALNUM
-     */
-    public ?string $phone = null;
+    /** Kopie mit geändertem `phone`. */
+    public function withPhone(?string $phone): self
+    {
+        return clone($this, ['phone' => $phone]);
+    }
 
-    /**
-     * Faxnummer.
-     *
-     * Billomat-Feld: fax
-     * Typ: ALNUM
-     */
-    public ?string $fax = null;
+    /** Kopie mit geändertem `fax`. */
+    public function withFax(?string $fax): self
+    {
+        return clone($this, ['fax' => $fax]);
+    }
 
-    /**
-     * Mobilnummer.
-     *
-     * Billomat-Feld: mobile
-     * Typ: ALNUM
-     */
-    public ?string $mobile = null;
+    /** Kopie mit geändertem `mobile`. */
+    public function withMobile(?string $mobile): self
+    {
+        return clone($this, ['mobile' => $mobile]);
+    }
 
-    /**
-     * Notiz zum Kontakt.
-     *
-     * Billomat-Feld: note
-     */
-    public ?string $note = null;
+    /** Kopie mit geändertem `note`. */
+    public function withNote(?string $note): self
+    {
+        return clone($this, ['note' => $note]);
+    }
 
-    /**
-     * Firmenname.
-     *
-     * Billomat-Feld: name
-     * Typ: ALNUM
-     */
-    public ?string $name = null;
+    /** Kopie mit geändertem `name`. */
+    public function withName(?string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
 
-    /**
-     * Website (ohne Schema).
-     *
-     * Beispiel: "example.com"
-     *
-     * Billomat-Feld: www
-     * Typ: URL (ohne http)
-     */
-    public ?string $www = null;
+    /** Kopie mit geändertem `www`. */
+    public function withWww(?string $www): self
+    {
+        return clone($this, ['www' => $www]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -166,8 +239,7 @@ final class ContactCreateOptions
      */
     public function toArray(): array
     {
-        $data = [
-            'client_id' => $this->clientId,
+        return array_filter([
             'label' => $this->label,
             'salutation' => $this->salutation,
             'first_name' => $this->firstName,
@@ -184,9 +256,6 @@ final class ContactCreateOptions
             'note' => $this->note,
             'name' => $this->name,
             'www' => $this->www,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Enum\TemplateThumbFormat;
 use Justpilot\Billomat\Model\Template;
+use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Vorlagen (Templates).
@@ -21,34 +25,40 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht GET /templates
      *
-     * @param array<string, scalar|array|null> $query
+     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Template>
      */
-    public function list(array $query = []): array
+    #[NoDiscard]
+    public function list(TemplateFilter|array $filters = []): array
     {
-        $data = $this->getJson('/templates', $query);
+        return $this->listResource('/templates', 'templates', 'template', Template::fromArray(...), $filters);
+    }
 
-        $raw = $data['templates']['template'] ?? [];
+    /**
+     * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
+     *
+     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<Template>
+     */
+    #[NoDiscard]
+    public function listPage(TemplateFilter|array $filters = []): Page
+    {
+        return $this->listResourcePage('/templates', 'templates', 'template', Template::fromArray(...), $filters);
+    }
 
-        // Billomat kann bei 1 Element ein einzelnes Objekt liefern
-        if (\is_array($raw) && isset($raw['id'])) {
-            $raw = [$raw];
-        }
-
-        if (!\is_array($raw)) {
-            return [];
-        }
-
-        $templates = [];
-        foreach ($raw as $row) {
-            if (\is_array($row)) {
-                /** @var array<string,mixed> $row */
-                $templates[] = Template::fromArray($row);
-            }
-        }
-
-        return $templates;
+    /**
+     * Iteriert lazy über alle Seiten.
+     *
+     * @param TemplateFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Generator<int, Template>
+     */
+    #[NoDiscard]
+    public function iterateAll(TemplateFilter|array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/templates', 'templates', 'template', Template::fromArray(...), $filters, $pageSize);
     }
 
     /**
@@ -58,22 +68,21 @@ final class TemplatesApi extends AbstractApi
      *
      * - Bei UPLOADED kommt ggf. format/base64file mit
      */
+    #[NoDiscard]
     public function get(int $id): ?Template
     {
-        $data = $this->getJsonOrNull("/templates/{$id}");
+        return $this->getResource("/templates/{$id}", 'template', Template::fromArray(...), 'fetching template');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $tpl = $data['template'] ?? null;
-
-        if (!\is_array($tpl)) {
-            throw new UnexpectedResponseException('Unexpected response from Billomat when fetching template.');
-        }
-
-        /** @var array<string,mixed> $tpl */
-        return Template::fromArray($tpl);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Template
+    {
+        return $this->get($id) ?? throw $this->notFound("/templates/{$id}");
     }
 
     /**
@@ -91,7 +100,7 @@ final class TemplatesApi extends AbstractApi
 
         $tpl = $data['template'] ?? null;
 
-        if (!\is_array($tpl)) {
+        if (!self::isRecord($tpl)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when creating template.');
         }
 
@@ -114,7 +123,7 @@ final class TemplatesApi extends AbstractApi
 
         $tpl = $data['template'] ?? null;
 
-        if (!\is_array($tpl)) {
+        if (!self::isRecord($tpl)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when updating template.');
         }
 
@@ -127,11 +136,9 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht DELETE /templates/{id}
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/templates/{$id}");
-
-        return true;
     }
 
     /**
@@ -139,10 +146,34 @@ final class TemplatesApi extends AbstractApi
      *
      * Entspricht GET /templates/{id}/thumb
      */
+    #[NoDiscard]
     public function thumb(int $id, TemplateThumbFormat $format = TemplateThumbFormat::PNG): string
     {
         return $this->getRaw("/templates/{$id}/thumb", [
             'format' => $format->value,
         ]);
+    }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /templates/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/templates/{$id}", 'template');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /templates/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/templates/{$id}", 'template', $value);
     }
 }

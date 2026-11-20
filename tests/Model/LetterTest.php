@@ -41,7 +41,6 @@ final class LetterTest extends TestCase
         self::assertSame(11, $letter->id);
         self::assertSame(42, $letter->clientId);
         self::assertSame(100, $letter->contactId);
-        self::assertSame('BR-2025-0011', $letter->letterNumber);
         self::assertSame(LetterStatus::OPEN, $letter->status);
         self::assertInstanceOf(DateTimeImmutable::class, $letter->date);
         self::assertSame('Vertragsänderung', $letter->subject);
@@ -57,7 +56,6 @@ final class LetterTest extends TestCase
         self::assertSame(1, $letter->clientId);
         self::assertNull($letter->status);
         self::assertNull($letter->subject);
-        self::assertNull($letter->letterNumber);
         self::assertNull($letter->date);
     }
 

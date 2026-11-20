@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/rechnungen/ -->
+<!-- Source: https://www.billomat.com/api/rechnungen/ -->
 
 # Invoices (Rechnungen)
 
-API-Wrapper für die Billomat-Ressource „Rechnungen“ unter `/invoices`.
+API wrapper for the Billomat invoice resource at `/invoices`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->invoices
@@ -14,30 +14,33 @@ $billomat->invoices
 
 ## Lifecycle
 
-Billomat-Rechnungen haben einen Status (`Justpilot\Billomat\Model\Enum\InvoiceStatus`):
+Billomat invoices have a status (`Justpilot\Billomat\Model\Enum\InvoiceStatus`):
 
 ```text
 DRAFT ──(complete)──> OPEN ──(payments)──> PAID
                         │
-                        ├──(Fälligkeit überschritten)──> OVERDUE
+                        ├──(due date passed)──> OVERDUE
                         │
                         └──(cancel)──> CANCELED ──(uncancel)──> OPEN/OVERDUE/PAID
 ```
 
-Konsequenzen für die API:
+What this means for the API:
 
-- **`create()`** liefert eine Rechnung im Status `DRAFT`. Erst dann ist `update()` erlaubt.
-- **`complete()`** vergibt die endgültige `invoice_number`, erzeugt das PDF und wechselt in `OPEN`/`OVERDUE`/`PAID` (abhängig von Zahlungseingängen).
-- **`delete()`** funktioniert ausschließlich auf `DRAFT`-Rechnungen.
-- **`cancel()`** auf einer abgeschlossenen Rechnung markiert sie als `CANCELED` (löscht sie nicht). `uncancel()` macht die Stornierung rückgängig.
+- **`create()`** returns an invoice with status `DRAFT`. Only drafts can be changed with `update()`.
+- **`complete()`** assigns the final `invoice_number`, generates the PDF and moves the invoice to `OPEN`, `OVERDUE` or `PAID` (depending on received payments).
+- **`delete()`** works in any status, also on completed invoices. Use it for drafts; cancel completed invoices with `cancel()` instead (see below).
+- **`cancel()`** marks a completed invoice as `CANCELED` (it does not delete it). `uncancel()` reverts the cancellation.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `list()` | GET | `/invoices` |
+| `list($filters?)` | GET | `/invoices` |
+| `listPage($filters?)` | GET | `/invoices` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/invoices` (lazy, across all pages) |
 | `listGrouped($groupBy, $filters?)` | GET | `/invoices?group_by=…` |
-| `get($id)` | GET | `/invoices/{id}` |
+| `get($id)` / `getOrFail($id)` | GET | `/invoices/{id}` |
+| `preset(…)` | GET | `/invoices/preset?confirmation_id=…` (or another source) |
 | `create($options)` | POST | `/invoices` |
 | `update($id, $options)` | PUT | `/invoices/{id}` |
 | `complete($id, $templateId?)` | PUT | `/invoices/{id}/complete` |
@@ -48,377 +51,467 @@ Konsequenzen für die API:
 | `mail($id, $options?)` | POST | `/invoices/{id}/mail` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/invoices/{id}/upload-signature` |
 | `encash($id)` | PUT | `/invoices/{id}/encash` |
-| `pdf($id, $type?, $rawPdf=false)` | GET | `/invoices/{id}/pdf` |
+| `pdf($id, $type?)` | GET | `/invoices/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/invoices/{id}/pdf?format=pdf` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/invoices/{id}/customfield` |
 
-Verwandte Ressourcen mit eigener Doku: [Positionen](invoice-items.md), [Zahlungen](invoice-payments.md), [Kommentare](invoice-comments.md), [Schlagworte](invoice-tags.md), [Abo-Rechnungen](recurrings.md).
+Sub-resources with their own pages: [items](invoice-items.md) (`$billomat->invoices->items`), [payments](invoice-payments.md) (`->payments`), [comments](invoice-comments.md) (`->comments`), [tags](invoice-tags.md) (`->tags`). See also [recurring invoices](recurrings.md).
 
-## Methoden
+## Methods
 
-### `list(array $filters = []): list<Invoice>`
+### `list(InvoiceFilter|array $filters = []): list<Invoice>`
 
 ```php
-$invoices = $billomat->invoices->list([
-    'status' => ['OPEN', 'OVERDUE'],
-    'order_by' => 'date+DESC',
-    'per_page' => 20,
-]);
+use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+
+$invoices = $billomat->invoices->list(new InvoiceFilter(
+    status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE],
+    from: new DateTimeImmutable('2026-01-01'),
+    orderBy: OrderBy::desc('date')->thenAsc('invoice_number'),
+    perPage: 20,
+));
+
+// The same filter built with withers:
+$filter = new InvoiceFilter()
+    ->withStatus(InvoiceStatus::OPEN, InvoiceStatus::OVERDUE)
+    ->withPerPage(20);
 ```
 
-Filter siehe Billomat-Doku (`client_id`, `status`, `from`, `to`, `label`, `intro`, `note`, `order_by`, `per_page` …). Array-Werte werden korrekt als `key[]=…` codiert.
+The typed `InvoiceFilter` is the recommended way to filter. Multi-value fields (`status`, `paymentType`, `tags`) are lists and are sent comma-separated (Billomat combines them with OR), `from`/`to` are `DateTimeImmutable`, and the `orderBy` above becomes `order_by=date+DESC,invoice_number+ASC`. A plain array of Billomat parameters still works; array values in it are encoded as `key[]=…`.
 
-### `listGrouped(InvoiceGroupBy|array $groupBy, array $filters = []): list<InvoiceGroup>`
+| Billomat filter | `InvoiceFilter` field |
+|---|---|
+| `client_id` / `contact_id` | `clientId` / `contactId` |
+| `invoice_number` | `invoiceNumber` |
+| `status` | `status` (`list<InvoiceStatus>`) |
+| `payment_type` | `paymentType` (`list<PaymentType>`) |
+| `from` / `to` | `from` / `to` |
+| `label` / `intro` / `note` | `label` / `intro` / `note` |
+| `tags` | `tags` |
+| `article_id` | `articleId` |
+| `order_by` | `orderBy` |
+| `page` / `per_page` | `page` / `perPage` |
 
-Aggregiertes Listing über `?group_by=…`. Statt einzelner Rechnungen liefert Billomat Summen-Zeilen — eine pro Gruppe.
+Other query parameters (e.g. filters on custom attributes) go into `extra: [...]`; they override fields with the same name.
+
+### `listPage(InvoiceFilter|array $filters = []): Page<Invoice>` / `iterateAll(InvoiceFilter|array $filters = [], int $pageSize = 100): Generator<int, Invoice>`
+
+`listPage()` returns one page plus the pagination metadata (`@page`, `@per_page`, `@total`) as `Justpilot\Billomat\Pagination\Page`. `iterateAll()` fetches page after page and yields the invoices one by one; `page` and `per_page` in the filter are overridden. Details: [Pagination](../advanced/pagination.md).
+
+```php
+foreach ($billomat->invoices->iterateAll(new InvoiceFilter(status: [InvoiceStatus::OPEN])) as $invoice) {
+    // …
+}
+```
+
+### `listGrouped(InvoiceGroupBy|array $groupBy, InvoiceFilter|array $filters = []): list<InvoiceGroup>`
+
+Aggregated listing via `?group_by=…`. Instead of individual invoices, Billomat returns total rows, one per group.
 
 ```php
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 
-// Umsatz pro Kunde
+// Revenue per client
 $byClient = $billomat->invoices->listGrouped(InvoiceGroupBy::CLIENT);
 foreach ($byClient as $group) {
-    printf("Kunde %d: %.2f EUR brutto\n", $group->clientId, $group->totalGross);
+    printf("Client %d: %s EUR gross\n", $group->clientId, $group->totalGross?->format(2) ?? '-');
 }
 
-// Mehrere Achsen kombinieren — Reihenfolge bestimmt die Aggregation:
-//   "client,year" → zuerst nach Kunde, dann nach Jahr.
+// Combine several axes; the order defines the aggregation:
+//   "client,year" → first by client, then by year.
 $byClientYear = $billomat->invoices->listGrouped([
     InvoiceGroupBy::CLIENT,
     InvoiceGroupBy::YEAR,
 ]);
 
-// Drill-down auf eine konkrete Gruppe — Billomat liefert das passende
-// Filterset in $group->invoiceParams gleich mit.
+// Drill down into one group: Billomat includes the matching filter set
+// in $group->invoiceParams (as an array, which list() accepts).
 $first = $byClient[0];
 $detail = $billomat->invoices->list($first->invoiceParams);
 ```
 
-Welche Felder im `InvoiceGroup` gefüllt sind, hängt vom `group_by`-Parameter ab:
+Which identifier field of `InvoiceGroup` is filled depends on `group_by`:
 
-| `group_by` | Gefülltes Identifier-Feld |
+| `group_by` | Filled identifier field |
 |---|---|
 | `client` | `clientId` |
-| `status` | `status` |
-| `day` / `week` / `month` / `year` | `day` / `week` / `month` / `year` (jeweils `?string`) |
+| `status` | `status` (`?InvoiceStatus`) |
+| `day` / `week` / `month` / `year` | `day` / `week` / `month` / `year` (each `?string`) |
 
-`totalGross` und `totalNet` enthalten die Aggregat-Summen.
+`totalGross` and `totalNet` (`?Money`) hold the aggregated totals. For the time axes Billomat adds a group for invoices without a date (drafts) with an empty field; its identifier is `null`. Unknown fields land in `$extra`, `toArray()` returns Billomat's field names.
 
-### `get(int $id): ?Invoice`
+### `get(int $id): ?Invoice` / `getOrFail(int $id): Invoice`
 
-Liefert `null` bei 404.
+`get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
+
+### `preset(?int $clientId = null, ?int $offerId = null, ?int $confirmationId = null, ?int $deliveryNoteId = null, ?int $invoiceId = null, ?int $recurringId = null): InvoiceCreateOptions`
+
+Asks Billomat for an invoice draft with everything it takes over from a source (client, address, texts, template, payment terms, currency, the reference to the source …) and returns it as `InvoiceCreateOptions`, ready to adjust and pass to `create()`. Billomat documents the endpoint only with `confirmation_id`; the other five sources work in the sandbox but are undocumented:
+
+| Parameter | Source | Result | Documented by Billomat |
+|---|---|---|---|
+| `confirmationId` | Order confirmation | Invoice for the confirmation | yes |
+| `clientId` | Client | Draft with the account defaults for this client | no |
+| `offerId` | Offer | Invoice for the offer | no |
+| `deliveryNoteId` | Delivery note | Invoice for the delivery note | no |
+| `invoiceId` | Invoice | **Correction invoice** for that invoice | no |
+| `recurringId` | Recurring invoice | Invoice from the recurring template | no |
+
+::: warning Undocumented sources
+Billomat doesn't document the sources marked "no", so it may change or drop them without notice. The SDK keeps the parameters (they are covered by the [backward compatibility promise](../concepts/backward-compatibility.md) like any other parameter), but if Billomat stops supporting a source, `preset()` with it fails with a `ValidationException`. For code that has to keep working, prefer `confirmationId`, or build the options yourself from the source record.
+:::
+
+```php
+$options = $billomat->invoices->preset(confirmationId: 550206);
+
+$invoice = $billomat->invoices->create(
+    $options->withDate(new DateTimeImmutable())->withLabel('Project X'),
+);
+```
+
+The draft has **no items**, and Billomat doesn't copy them on `create()` either, even with `confirmationId` set. Transfer them yourself, e.g. by reading the source's items and adding them with `withItem()` or `$billomat->invoices->items->create()`. Without a source Billomat answers HTTP 400 (`Neither client nor supplier was set`), as it does for an ID that doesn't exist; both arrive as `ValidationException`. Sums, status and other read-only fields of the draft are dropped. `InvoiceCreateOptions::fromArray()` does the mapping and can also be used on your own data with Billomat field names.
 
 ### `create(InvoiceCreateOptions $options): Invoice`
 
 ```php
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
-$opts = new InvoiceCreateOptions(clientId: 12345);
-$opts->title = 'Webentwicklung Mai 2026';
-$opts->dueDays = 14;
+$opts = new InvoiceCreateOptions(clientId: 12345, title: 'Web development May 2026', dueDays: 14);
 
-$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: 95.0);
-$item->title = 'Konzeption';
-$opts->addItem($item);
+$item = new InvoiceItemCreateOptions(quantity: 8.0, unitPrice: Money::of('95'), title: 'Concept');
+$opts = $opts->withItem($item);
 
 $invoice = $billomat->invoices->create($opts);
 // $invoice->status === InvoiceStatus::DRAFT
 ```
 
-Positionen können direkt im `create()`-Call mit `addItem()` mitgegeben werden — sie landen unter `invoice-items.invoice-item` im Payload. Alternativ: leere Rechnung anlegen und Positionen separat via `$billomat->invoiceItems->create($invoiceId, …)` ergänzen, siehe [Invoice Items](invoice-items.md).
+Items can be passed directly in the `create()` call via `items: […]` or `withItem()`; they end up under `invoice-items.invoice-item` in the payload. Alternatively, create an empty invoice and add items separately with `$billomat->invoices->items->create($invoiceId, …)`, see [Invoice items](invoice-items.md).
 
 ### `update(int $id, InvoiceUpdateOptions $options): Invoice`
 
-Funktioniert nur für `DRAFT`. Positionen sind hier **nicht** veränderbar — dafür die `InvoiceItemsApi` nutzen.
+Only works on `DRAFT` invoices. Items **cannot** be changed here; use `$billomat->invoices->items` for that.
 
-### `complete(int $id, ?int $templateId = null): bool`
+### `complete(int $id, ?int $templateId = null): void`
 
-Schließt eine `DRAFT`-Rechnung ab.
+Completes a `DRAFT` invoice.
 
 ```php
 $billomat->invoices->complete($invoice->id);
 
-// oder mit eigener Vorlage
+// or with a specific template
 $billomat->invoices->complete($invoice->id, templateId: 42);
 ```
 
-Rückgabe `true`, wenn Billomat HTTP 200 antwortet. Nach `complete()`:
+Errors are thrown as exceptions. After `complete()`:
 
-- `invoice_number` ist gesetzt,
-- ein PDF wurde generiert (über `pdf()` abrufbar),
-- Status wechselt auf `OPEN`, `OVERDUE` oder `PAID`.
+- `invoice_number` is set,
+- a PDF has been generated (available via `pdf()`),
+- the status changes to `OPEN`, `OVERDUE` or `PAID`.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
-Nur für `DRAFT`. Anderenfalls antwortet Billomat mit 422 → `ValidationException`.
+Only for `DRAFT` invoices. Otherwise Billomat responds with 422 → `ValidationException`.
 
-### `cancel(int $id): bool` / `uncancel(int $id): bool`
+### `cancel(int $id): void` / `uncancel(int $id): void`
 
-Storniert eine bereits abgeschlossene Rechnung oder macht die Stornierung rückgängig.
+Cancels a completed invoice or reverts the cancellation.
 
-### `email(int $id, ?InvoiceEmailOptions $options = null): bool`
+### `email(int $id, ?EmailOptions $options = null): void`
 
-Versendet die Rechnung als PDF-Anhang per E-Mail. Ohne `$options` zieht Billomat alle Defaults aus dem Account (Absender, Empfänger aus den Kunden-Stammdaten, Betreff/Body aus der Default-Vorlage).
+Sends the invoice by email with the PDF attached. Without `$options`, Billomat takes all defaults from the account (sender, recipient from the client record, subject/body from the default template).
 
 ```php
-use Justpilot\Billomat\Api\InvoiceEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-// 1) Minimal: Defaults verwenden
+// 1) Minimal: use the defaults
 $billomat->invoices->email($invoice->id);
 
-// 2) Mit eigenen Empfängern und individuellem Text
-$opts = new InvoiceEmailOptions();
-$opts->from = 'rechnungen@meinefirma.de';
-$opts->to = ['kunde@example.com'];
-$opts->bcc = ['buchhaltung@meinefirma.de'];
-$opts->subject = 'Ihre Rechnung vom Juni';
-$opts->body = "Sehr geehrte Damen und Herren,\n\nim Anhang Ihre Rechnung.\n";
-$opts->filename = 'rechnung-2026-0042';
+// 2) With custom recipients and text
+$opts = new EmailOptions(
+    from: 'invoices@mycompany.example',
+    to: ['client@example.com'],
+    bcc: ['accounting@mycompany.example'],
+    subject: 'Your invoice for June',
+    body: "Dear Sir or Madam,\n\nplease find your invoice attached.\n",
+    filename: 'invoice-2026-0042',
+);
 
 $billomat->invoices->email($invoice->id, $opts);
 ```
 
-Voraussetzungen:
+Requirements:
 
-- Die Rechnung muss `complete()`-d sein (sonst existiert kein PDF).
-- `from` muss im Billomat-Account als Absender hinterlegt sein, sonst antwortet die API mit `ValidationException`.
+- The invoice must be completed with `complete()` (otherwise there is no PDF).
+- `from` must be configured as a sender in the Billomat account, otherwise the API responds with a `ValidationException`.
 
-### `mail(int $id, ?InvoiceMailOptions $options = null): bool`
+### `mail(int $id, ?MailOptions $options = null): void`
 
-Verschickt die Rechnung postalisch über den Pixelletter-Service. **Kostenpflichtig** — Billomat verrechnet Porto + Druck.
+Sends the invoice by post via the Pixelletter service. **This costs money**: Billomat charges postage and printing.
 
 ```php
-use Justpilot\Billomat\Api\InvoiceMailOptions;
+use Justpilot\Billomat\Api\MailOptions;
 
-$opts = new InvoiceMailOptions();
-$opts->color = true;
-$opts->duplex = true;
-$opts->paperWeight = '90';
+$opts = new MailOptions(color: true, duplex: true, paperWeight: 90);
 
 $billomat->invoices->mail($invoice->id, $opts);
 ```
 
-Die Empfängeradresse wird automatisch aus der auf der Rechnung hinterlegten Adresse übernommen — eine separate Adress-Property gibt es bewusst nicht.
+The recipient address is taken from the address on the invoice; there is intentionally no separate address property.
 
-### `uploadSignature(int $id, string $base64Pdf): bool`
+### `uploadSignature(int $id, string $base64Pdf): void`
 
-Lädt eine unterschriebene PDF-Version der Rechnung hoch und ersetzt damit das von Billomat erzeugte PDF.
+Uploads a signed PDF version of the invoice. Billomat keeps it next to its own PDF: `pdf($id, PdfType::SIGNED)` returns the uploaded file, `pdf($id)` still the generated one. Before an upload the signed variant answers 404, so `pdf(..., PdfType::SIGNED)` throws a `NotFoundException`. The document must not be a draft any more.
 
 ```php
 $signed = base64_encode(file_get_contents('/path/to/signed-invoice.pdf'));
 $billomat->invoices->uploadSignature($invoice->id, $signed);
 ```
 
-### `encash(int $id): bool`
+### `encash(int $id): void`
 
-Übergibt eine Rechnung an das Inkasso-Verfahren von Billomat. Laut Billomat-Doku muss die Rechnung dafür im Status `OPEN` oder `OVERDUE` sein.
+Hands an invoice over to Billomat's debt collection service (Inkasso). According to the Billomat docs, the invoice must be `OPEN` or `OVERDUE`.
 
 ```php
 $billomat->invoices->encash($invoice->id);
 ```
 
-### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string`
+### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-Zwei Modi:
+Two methods for the same endpoint:
 
 ```php
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 
-// 1) Standardmodus: JSON mit Base64-PDF
-$pdf = $billomat->invoices->pdf($invoice->id, InvoicePdfType::SIGNED);
-// $pdf ist InvoicePdf — mit getBinary() zum Dekodieren
-file_put_contents('rechnung.pdf', $pdf->getBinary());
+// 1) pdf(): JSON with a Base64 PDF
+$pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED);
+// $pdf is a DocumentPdf; getBinary() decodes it
+file_put_contents('invoice.pdf', $pdf->getBinary());
 
-// 2) Raw-Modus: direkt application/pdf, Rückgabe ist der Binärinhalt als String
-$binary = $billomat->invoices->pdf($invoice->id, InvoicePdfType::SIGNED, rawPdf: true);
-file_put_contents('rechnung.pdf', $binary);
+// 2) pdfContent(): application/pdf directly, returns the binary content as a string
+$binary = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
+file_put_contents('invoice.pdf', $binary);
 ```
 
-`type` ist optional:
+`type` is optional:
 
-- `InvoicePdfType::SIGNED` (`signed`) — signierte Version
-- `InvoicePdfType::PRINT` (`print`) — Druckversion ohne Hintergrund
+- `PdfType::SIGNED` (`signed`): the version uploaded with `uploadSignature()` (404 → `NotFoundException` without one)
+- `PdfType::PRINT` (`print`): print version without background
 
-Ohne `type` liefert Billomat das Standard-PDF.
+`DocumentPdf` (`final readonly`, shared by every document type) has `id`, `documentId` (Billomat field `invoice_id`), `created`, `filename`, `mimeType`, `fileSize` (`?int`), `base64File` and `extra`. `getBinary()` throws an `UnexpectedResponseException` for invalid Base64.
 
-## Write-Modell: `InvoiceCreateOptions`
+Without `type`, Billomat returns the standard PDF. In `pdfContent()`, an empty body or a body without the `%PDF-` header throws an `UnexpectedResponseException`.
 
-Konstruktor: `new InvoiceCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+## Write model: `InvoiceCreateOptions`
 
-### Identifikation & Nummerierung
+Constructor: `new InvoiceCreateOptions(int $clientId, …)`. `clientId` is required and the first parameter. All other fields are constructor parameters with a default and are passed as named arguments. The object is immutable (`final readonly`); every field has a `with*()` method that returns a modified copy (e.g. `$opts->withTitle('New')`).
 
-| Property | Billomat-Feld | Typ |
+### Identification and numbering
+
+| Property | Billomat field | Type |
 |---|---|---|
-| `clientId` | `client_id` | `int` (Pflicht) |
+| `clientId` | `client_id` | `int` (required) |
 | `contactId` | `contact_id` | `?int` |
-| `address` | `address` | `?string` (Default: Adresse des Kunden) |
+| `address` | `address` | `?string` (default: the client's address) |
 | `numberPre` | `number_pre` | `?string` |
 | `number` | `number` | `?int` |
 | `numberLength` | `number_length` | `?int` |
 
-### Datumsangaben
+### Dates
 
-`?\DateTimeImmutable` — werden automatisch zu `Y-m-d` serialisiert.
+`?\DateTimeImmutable`, serialized as `Y-m-d`.
 
-| Property | Billomat-Feld |
+| Property | Billomat field |
 |---|---|
 | `date` | `date` |
 | `supplyDate` | `supply_date` |
-| `supplyDateType` | `supply_date_type` (`SupplyDateType`-Enum) |
+| `supplyDateType` | `supply_date_type` (`SupplyDateType` enum) |
 | `dueDate` | `due_date` |
 | `discountDate` | `discount_date` |
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `dueDays` | `due_days` | `?int` |
 | `discountRate` | `discount_rate` | `?int` |
 | `discountDays` | `discount_days` | `?int` |
 
-### Beschreibungstexte
+### Texts
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `title` | `title` | `?string` |
 | `label` | `label` | `?string` |
 | `intro` | `intro` | `?string` |
 | `note` | `note` | `?string` |
 
-### Beträge & Konditionen
+### Amounts and terms
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
-| `reduction` | `reduction` | `?string` (`"10"` oder `"10%"`) |
+| `reduction` | `reduction` | `?string` (`"10"` or `"10%"`) |
 | `currencyCode` | `currency_code` | `?string` |
 | `netGross` | `net_gross` | `?NetGross` |
-| `quote` | `quote` | `?float` (Währungskurs) |
-| `paymentTypes` | `payment_types` | `?string` (CSV, z. B. `BANK_TRANSFER,CASH`) |
+| `quote` | `quote` | `?float` (exchange rate) |
+| `paymentTypes` | `payment_types` | `list<PaymentType>` (Billomat: comma-separated, e.g. `BANK_TRANSFER,CASH`) |
 
-### Verknüpfungen
+### References
 
-| Property | Billomat-Feld | Typ | Zweck |
+| Property | Billomat field | Type | Purpose |
 |---|---|---|---|
-| `invoiceId` | `invoice_id` | `?int` | Bei Korrekturrechnungen: ID der korrigierten Rechnung |
-| `offerId` | `offer_id` | `?int` | Quell-Angebot (Ressource nicht im SDK) |
-| `confirmationId` | `confirmation_id` | `?int` | Quell-Auftragsbestätigung (nicht im SDK) |
-| `recurringId` | `recurring_id` | `?int` | Quell-Abo (nicht im SDK) |
-| `freeTextId` | `free_text_id` | `?int` | Vorlage für title/label/intro/note |
-| `templateId` | `template_id` | `?int` | Vorlage für die PDF-Erzeugung |
+| `invoiceId` | `invoice_id` | `?int` | For correction invoices: ID of the corrected invoice |
+| `offerId` | `offer_id` | `?int` | Source [offer](offers.md) |
+| `confirmationId` | `confirmation_id` | `?int` | Source [confirmation](confirmations.md) |
+| `recurringId` | `recurring_id` | `?int` | Source [recurring invoice](recurrings.md) |
+| `freeTextId` | `free_text_id` | `?int` | Free text template for title/label/intro/note |
+| `templateId` | `template_id` | `?int` | Template for PDF generation |
 
-### Positionen
+### Items
 
-Positionen werden nicht über eine Property, sondern über `addItem()` angehängt:
+Items are passed via the constructor parameter `items` (`list<InvoiceItemCreateOptions>`) and are then available in the `$items` property. `withItem()` returns a copy with one more item:
 
 ```php
-$opts->addItem(new InvoiceItemCreateOptions(quantity: 5.0, unitPrice: 25.0));
+$opts = $opts->withItem(new InvoiceItemCreateOptions(quantity: 5.0, unitPrice: Money::of('25')));
 ```
 
-`getItems(): list<InvoiceItemCreateOptions>` listet die hinzugefügten Positionen. `toArray()` rendert sie in `invoice-items.invoice-item`. Details: [Invoice Items](invoice-items.md).
+`toArray()` renders them into `invoice-items.invoice-item`. Details: [Invoice items](invoice-items.md).
 
-## Write-Modell: `InvoiceUpdateOptions`
+## Write model: `InvoiceUpdateOptions`
 
-Schmaler Subset für Partial-Updates. Felder, die nicht gesetzt werden, bleiben unberührt. Positionen lassen sich hier **nicht** ändern.
+For partial updates; it has the same fields as `InvoiceCreateOptions` except `items`, all optional (named constructor arguments, `with*()` methods). `null` means "don't send", the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null` so Billomat empties it, e.g. `new InvoiceUpdateOptions(note: Clear::Field)`. Items **cannot** be changed here.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
-| `date`, `supplyDate`, `dueDate` | analog | `?\DateTimeImmutable` |
-| `supplyDateType` | `supply_date_type` | `?SupplyDateType` |
-| `dueDays` | `due_days` | `?int` |
-| `title`, `label`, `intro`, `note` | analog | `?string` |
-| `reduction` | `reduction` | `?string` |
-| `netGross` | `net_gross` | `?NetGross` |
-| `currencyCode` | `currency_code` | `?string` |
-| `quote` | `quote` | `?float` |
-| `paymentTypes` | `payment_types` | `?string` |
+| `clientId`, `contactId` | same | `int\|Clear\|null` |
+| `number`, `numberPre`, `numberLength` | same | `int\|Clear\|null`, `string\|Clear\|null`, `int\|Clear\|null` |
+| `date`, `supplyDate`, `dueDate`, `discountDate` | same | `\DateTimeImmutable\|Clear\|null` |
+| `supplyDateType` | `supply_date_type` | `SupplyDateType\|Clear\|null` |
+| `dueDays`, `discountDays` | same | `int\|Clear\|null` |
+| `discountRate` | `discount_rate` | `float\|Clear\|null` |
+| `address`, `title`, `label`, `intro`, `note` | same | `string\|Clear\|null` |
+| `reduction` | `reduction` | `string\|Clear\|null` |
+| `netGross` | `net_gross` | `NetGross\|Clear\|null` |
+| `currencyCode` | `currency_code` | `string\|Clear\|null` |
+| `quote` | `quote` | `float\|Clear\|null` |
+| `invoiceId`, `offerId`, `confirmationId`, `recurringId` | same | `int\|Clear\|null` |
+| `templateId`, `freeTextId` | same | `int\|Clear\|null` |
+| `paymentTypes` | `payment_types` | `list<PaymentType>\|Clear` |
 
-## Write-Modell: `InvoiceEmailOptions`
+## Write model: `EmailOptions`
 
-Payload für `email()`. Alle Felder sind optional — Billomat füllt fehlende Werte aus der gewählten Vorlage oder den Account-Defaults.
+Payload for `email()`. One class shared by all document types: offers, confirmations, credit notes, delivery notes, reminders and letters use the same fields. All fields are optional; Billomat fills missing values from the selected template or the account defaults.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `emailTemplateId` | `email_template_id` | `?int` | ID einer im Account hinterlegten E-Mail-Vorlage |
-| `from` | `from` | `?string` | Muss im Account als Absender freigegeben sein |
-| `to` | `recipients.to` | `list<string>` | TO-Empfänger |
-| `cc` | `recipients.cc` | `list<string>` | CC-Empfänger |
-| `bcc` | `recipients.bcc` | `list<string>` | BCC-Empfänger |
+| `emailTemplateId` | `email_template_id` | `?int` | ID of an email template stored in the account |
+| `from` | `from` | `?string` | Must be an approved sender in the account |
+| `to` | `recipients.to` | `list<string>` | TO recipients |
+| `cc` | `recipients.cc` | `list<string>` | CC recipients |
+| `bcc` | `recipients.bcc` | `list<string>` | BCC recipients |
 | `subject` | `subject` | `?string` | |
-| `body` | `body` | `?string` | Plain-Text-Body |
-| `filename` | `filename` | `?string` | Dateiname des PDF-Anhangs, ohne `.pdf` |
-| `attachments` | `attachments.attachment[]` | `list<array{filename:string,mimetype:string,base64file:string}>` | Zusätzliche Anhänge |
+| `body` | `body` | `?string` | Plain-text body |
+| `filename` | `filename` | `?string` | File name of the PDF attachment, without `.pdf` |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | Additional attachments |
 
-`toArray()` filtert leere Empfängerlisten und `null`-Felder heraus.
+`toArray()` drops empty recipient lists and `null` fields.
 
-## Write-Modell: `InvoiceMailOptions`
+Attachments are `Justpilot\Billomat\Api\Attachment` objects (`filename`, `mimeType`, `base64File`; wire fields `filename`, `mimetype`, `base64file`). `Attachment::fromFile($path, $filename = null, $mimeType = 'application/pdf')` and `Attachment::fromBinary($filename, $content, $mimeType = 'application/pdf')` do the Base64 encoding; `new Attachment(...)` takes content that is already encoded. `withAttachment()` appends one attachment, `withAttachments()` replaces the list. The same applies to `MailOptions`.
 
-Payload für `mail()` (Pixelletter). Empfängeradresse kommt fix aus der Rechnungsadresse — daher kein `to`-Feld.
+```php
+use Justpilot\Billomat\Api\Attachment;
+use Justpilot\Billomat\Api\EmailOptions;
 
-| Property | Billomat-Feld | Typ | Notes |
+$options = new EmailOptions(to: ['kunde@example.com'])
+    ->withAttachment(Attachment::fromFile('/path/to/terms.pdf', 'AGB.pdf'));
+```
+
+## Write model: `MailOptions`
+
+Payload for `mail()` (Pixelletter), shared by all document types (invoices, offers, confirmations, credit notes, delivery notes, letters, reminders). Like the other options classes it is `final readonly` with named constructor arguments. The recipient address always comes from the document's address, so there is no `to` field.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `color` | `color` | `?bool` | Wird als `1`/`0` serialisiert |
-| `duplex` | `duplex` | `?bool` | Doppelseitiger Druck |
-| `paperWeight` | `paper_weight` | `?string` | g/m² als String, z. B. `"80"` |
-| `attachments` | `attachments.attachment[]` | `list<array{filename:string,mimetype:string,base64file:string}>` | |
+| `color` | `color` | `?bool` | Serialized as `1`/`0` |
+| `duplex` | `duplex` | `?bool` | Double-sided printing |
+| `paperWeight` | `paper_weight` | `?int` | g/m², 80 or 90 |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | Printed along with the invoice |
 
-## Read-Modell: `Invoice`
+## Read model: `Invoice`
 
-`final readonly class Invoice`. Die wichtigsten Felder:
+`final readonly class Invoice`. The main fields:
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `invoiceNumber` | `?string` (leer bei `DRAFT`) |
+| `invoiceNumber` | `?string` (empty for `DRAFT`) |
 | `number`, `numberPre`, `numberLength` | `?int`, `?string`, `?int` |
 | `status` | `?InvoiceStatus` |
 | `date`, `supplyDate`, `dueDate`, `discountDate` | `?\DateTimeImmutable` |
 | `supplyDateType` | `?SupplyDateType` |
 | `dueDays`, `discountDays` | `?int` |
 | `address` | `?string` |
-| `discountRate`, `discountAmount` | `?float` |
+| `discountRate`, `discountAmount` | `?float`, `?Money` |
 | `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `totalGross`, `totalNet` | `?float` |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `paidAmount`, `openAmount` | `?float` |
+| `totalGross`, `totalNet` | `?Money` |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
+| `paidAmount`, `openAmount` | `?Money` |
 | `netGross` | `?NetGross` |
-| `currencyCode`, `paymentTypes` | `?string` |
+| `currencyCode` | `?string` |
+| `paymentTypes` | `list<PaymentType>` (unknown values are dropped) |
 | `quote` | `?float` |
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` — Steuer-Zusammenfassung |
-| `customerportalUrl` | `?string` |
+| `taxes` | `list<TaxSummary>`: tax summary per rate with `name`, `rate`, the tax `amount` and the net/gross amounts it applies to (`amountNet`, `amountGross`, each also as `*Plain` unrounded and `*Rounded`), all `Money` |
 | `templateId` | `?int` |
-| `items` | `list<InvoiceItem>` — falls die API die Positionen mitliefert |
+| `items` | `list<InvoiceItem>`, if the API includes the items (only `GET /invoices/{id}`) |
 | `updated` | `?\DateTimeImmutable` |
-| `facturxReference` | `?string` (E-Rechnung, nur lesend – von Billomat nicht dokumentiert) |
-| `totalReduction` | `?float` |
+| `facturxReference` | `?string` (e-invoice, read-only, not documented by Billomat) |
+| `totalReduction` | `?Money` |
 | `digProceeded` | `?bool` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>`: fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
-> **Veraltet seit 3.1:** `customerportalUrl`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
+`Invoice::fromArray()` normalizes the `taxes` structure (Billomat returns single entries sometimes as an object, sometimes as a list) and the embedded `invoice-items`.
 
-`Invoice::fromArray()` normalisiert die `taxes`-Struktur (Billomat liefert einzelne Einträge mal als Objekt, mal als Liste) und die mitgelieferten `invoice-items`.
+## Enums
 
-## Verwendete Enums
-
-- [`InvoiceStatus`](../../src/Model/Enum/InvoiceStatus.php): `DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`. Hat `label(): string` für UI-Labels (z. B. „Bezahlt“).
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`).
-- [`InvoiceGroupBy`](../../src/Model/Enum/InvoiceGroupBy.php): `CLIENT`, `STATUS`, `DAY`, `WEEK`, `MONTH`, `YEAR` — Aggregationsachsen für `listGrouped()`.
+- [`InvoiceStatus`](../../src/Model/Enum/InvoiceStatus.php): `DRAFT`, `OPEN`, `OVERDUE`, `PAID`, `CANCELED`. Has `label(): string` for German UI labels (e.g. "Bezahlt").
+- [`PaymentType`](../../src/Model/Enum/PaymentType.php): accepted payment types, see [Invoice payments](invoice-payments.md#enums).
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`).
+- [`InvoiceGroupBy`](../../src/Model/Enum/InvoiceGroupBy.php): `CLIENT`, `STATUS`, `DAY`, `WEEK`, `MONTH`, `YEAR`, the aggregation axes for `listGrouped()`.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 - [`SupplyDateType`](../../src/Model/Enum/SupplyDateType.php): `SUPPLY_DATE`, `DELIVERY_DATE`, `SUPPLY_TEXT`, `DELIVERY_TEXT`.
 
-## Stolpersteine
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-- **E-Rechnung (undokumentiert).** `facturx_reference` (`Invoice::$facturxReference`) liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
-- **`update()` nur auf `DRAFT`.** Sobald `complete()` lief, ändert ein PUT die Rechnung nicht mehr. Stattdessen `cancel()` + neue Rechnung, oder Korrekturrechnung mit `invoiceId`-Verknüpfung.
-- **`delete()` nur auf `DRAFT`.** Eine abgeschlossene Rechnung wird `cancel()`-d, nicht gelöscht (Buchhaltungsgründe).
-- **`pdf()` setzt `complete()` voraus.** Bei `DRAFT`-Rechnungen existiert noch kein PDF — der Endpoint liefert je nach Account 404 oder einen Fehler.
-- **Single-Item-List-Quirk.** Wie bei allen Ressourcen normalisiert `list()` automatisch.
-- **`pdf(rawPdf: true)` umgeht das `getJson()`-Dispatching.** Wenn du den Aufruf in einem Mock-Test einbaust, achte darauf, dass der Mock auch `application/pdf` zurückgibt — der HTTP-Status wird trotzdem auf Fehler geprüft.
-- **`email()` setzt `complete()` voraus.** Bei `DRAFT`-Rechnungen existiert noch kein PDF; Billomat antwortet je nach Konto mit `ValidationException` oder schickt eine leere Mail.
-- **`mail()` ist kostenpflichtig.** Pixelletter rechnet pro Brief ab — Tests besser nur in der Sandbox laufen lassen.
-- **`InvoiceEmailOptions::$from`** muss eine im Billomat-Account verifizierte Absenderadresse sein. Sonst kommt 422 zurück.
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-## End-to-End-Beispiel
+::: code-group
+<<< @/snippets/json/invoices.create.json [POST /invoices]
+<<< @/../tests/Fixtures/Contract/invoices/get.json [GET /invoices/{id} (response)]
+<<< @/../tests/Fixtures/Contract/invoices/list.json [GET /invoices (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **E-invoice (undocumented).** Billomat returns `facturx_reference` (`Invoice::$facturxReference`) in API responses but doesn't describe it in the API docs. The SDK only reads it (types derived from observed values); writing it is not supported because there is no specification.
+- **`update()` only on `DRAFT`.** Once `complete()` has run, a PUT no longer changes the invoice. Use `cancel()` plus a new invoice, or a correction invoice linked via `invoiceId`.
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes documents in any status (the sandbox returns 200 for completed and canceled ones as well). Prefer `cancel()` for completed documents: issued documents have to be kept for bookkeeping (GoBD), and deleting one leaves a gap in the number sequence.
+- **`preset()` copies no items.** See `preset()` above; the source's items have to be transferred by hand.
+- **`pdf()` requires `complete()`.** A `DRAFT` invoice has no PDF yet; depending on the account the endpoint returns 404 or an error.
+- **Single-item list quirk.** As with all resources, `list()` normalizes it automatically.
+- **`pdfContent()` doesn't go through `getJson()`.** In a mock test, make the mock return a body that starts with `%PDF-`; otherwise `UnexpectedResponseException` is thrown. The HTTP status is still checked for errors.
+- **`email()` requires `complete()`.** A `DRAFT` invoice has no PDF yet; depending on the account Billomat responds with a `ValidationException` or sends an empty email.
+- **`mail()` costs money.** Pixelletter charges per letter; run tests only in the sandbox.
+- **`EmailOptions::$from`** must be a verified sender address in the Billomat account. Otherwise you get a 422.
+
+## End-to-end example
 
 ```php
 <?php
@@ -430,44 +523,44 @@ require __DIR__ . '/vendor/autoload.php';
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Entwurf anlegen
-$opts = new InvoiceCreateOptions(clientId: 12345);
-$opts->title = 'Beratung Juni 2026';
-$opts->date = new DateTimeImmutable('today');
-$opts->dueDays = 14;
+// 1) Create a draft
+$opts = new InvoiceCreateOptions(
+    clientId: 12345,
+    title: 'Consulting June 2026',
+    date: new DateTimeImmutable('today'),
+    dueDays: 14,
+);
 
-$item1 = new InvoiceItemCreateOptions(quantity: 4.0, unitPrice: 120.0);
-$item1->title = 'Workshop';
-$opts->addItem($item1);
+$item1 = new InvoiceItemCreateOptions(quantity: 4.0, unitPrice: Money::of('120'), title: 'Workshop');
+$opts = $opts->withItem($item1);
 
-$item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: 85.0);
-$item2->title = 'Nachgespräch';
-$opts->addItem($item2);
+$item2 = new InvoiceItemCreateOptions(quantity: 2.0, unitPrice: Money::of('85'), title: 'Follow-up meeting');
+$opts = $opts->withItem($item2);
 
 $invoice = $billomat->invoices->create($opts);
-printf("Entwurf #%d angelegt, Status %s\n", $invoice->id, $invoice->status?->label());
+printf("Draft #%d created, status %s\n", $invoice->id, $invoice->status?->value);
 
-// 2) Abschließen
+// 2) Complete
 $billomat->invoices->complete($invoice->id);
 
-// 3) Frisch laden, jetzt mit Rechnungsnummer
-$completed = $billomat->invoices->get($invoice->id);
+// 3) Reload, now with an invoice number
+$completed = $billomat->invoices->getOrFail($invoice->id);
 printf(
-    "Abgeschlossen: %s%d (Brutto: %.2f %s)\n",
-    $completed->numberPre,
-    $completed->number,
-    $completed->totalGross,
+    "Completed: %s (gross: %s %s)\n",
+    $completed->invoiceNumber,
+    $completed->totalGross?->format(2),
     $completed->currencyCode,
 );
 
-// 4) PDF speichern
-$pdf = $billomat->invoices->pdf($invoice->id, InvoicePdfType::SIGNED, rawPdf: true);
-file_put_contents(sprintf('rechnung-%d.pdf', $invoice->id), $pdf);
+// 4) Save the PDF
+$pdf = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
+file_put_contents(sprintf('invoice-%d.pdf', $invoice->id), $pdf);
 ```

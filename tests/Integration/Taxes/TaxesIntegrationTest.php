@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\Taxes;
 
 use Justpilot\Billomat\Api\TaxRateCreateOptions;
+use Justpilot\Billomat\Api\TaxRateUpdateOptions;
 use Justpilot\Billomat\Model\TaxRate;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -30,7 +31,6 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         if ([] !== $taxes) {
             $first = $taxes[0];
 
-            self::assertNotNull($first->id);
             self::assertGreaterThan(0, $first->id);
 
             self::assertNotSame('', trim($first->name));
@@ -48,6 +48,7 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // 1) neuen Steuersatz anlegen
         $name = 'SDK Integration Test Tax '.$faker->numberBetween(1000, 9999);
         $rate = $faker->randomElement([7.0, 9.5, 21.0]);
+        self::assertIsFloat($rate);
         $isDefault = false;
 
         $options = new TaxRateCreateOptions(
@@ -58,7 +59,6 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $created = $billomat->taxes->create($options);
 
-        self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
         self::assertSame($name, $created->name);
         self::assertSame($rate, $created->rate);
@@ -74,11 +74,15 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($name, $fetched->name);
         self::assertSame($rate, $fetched->rate);
 
-        // 3) löschen
-        $deleteResult = $billomat->taxes->delete($taxId);
-        self::assertTrue($deleteResult);
+        // 3) Teil-Update: nur der Name, der Satz muss bleiben
+        $renamed = $billomat->taxes->update($taxId, new TaxRateUpdateOptions(name: $name.' (umbenannt)'));
+        self::assertSame($name.' (umbenannt)', $renamed->name);
+        self::assertSame($rate, $billomat->taxes->getOrFail($taxId)->rate);
 
-        // 4) sicherstellen, dass er weg ist (get() gibt null zurück)
+        // 4) löschen
+        $billomat->taxes->delete($taxId);
+
+        // 5) sicherstellen, dass er weg ist (get() gibt null zurück)
         $afterDelete = $billomat->taxes->get($taxId);
         self::assertNull($afterDelete);
     }

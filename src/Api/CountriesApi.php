@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Country;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für die Länderliste.
@@ -16,11 +17,14 @@ use Justpilot\Billomat\Pagination\Page;
 final class CountriesApi extends AbstractApi
 {
     /**
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
      * @return list<Country>
      */
-    public function list(): array
+    #[NoDiscard]
+    public function list(array $filters = []): array
     {
-        return $this->listResource('/countries', 'countries', 'country', Country::fromArray(...));
+        return $this->listResource('/countries', 'countries', 'country', Country::fromArray(...), $filters);
     }
 
     /**
@@ -30,10 +34,11 @@ final class CountriesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Country>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/countries', 'countries', 'country', Country::fromArray(...), $filters);
@@ -47,10 +52,11 @@ final class CountriesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Country>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/countries', 'countries', 'country', Country::fromArray(...), $filters, $pageSize);

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\InboxDocuments;
 
 use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
+use Justpilot\Billomat\Model\Enum\InboxDocumentMetadataKey;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\InboxDocument;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -40,14 +42,18 @@ final class InboxDocumentsIntegrationTest extends AbstractBillomatIntegrationTes
         $opts = new InboxDocumentCreateOptions(
             filename: 'it-test-'.date('His').'.pdf',
             mimeType: 'application/pdf',
-            base64file: base64_encode(self::MINIMAL_PDF),
+            base64File: base64_encode(self::MINIMAL_PDF),
+            documentType: InboxDocumentType::INVOICE,
+            metadata: [InboxDocumentMetadataKey::SENDER_CITY->value => 'Siegen', InboxDocumentMetadataKey::WWW->value => 'example.com'],
         );
 
         $doc = $billomat->inboxDocuments->create($opts);
+        $loaded = $billomat->inboxDocuments->getOrFail($doc->id);
 
-        self::assertNotNull($doc->id);
+        self::assertSame(InboxDocumentType::INVOICE, $loaded->documentType);
+        self::assertSame(['SENDER_CITY' => 'Siegen', 'WWW' => 'example.com'], $loaded->metadata);
 
-        self::assertTrue($billomat->inboxDocuments->delete($doc->id));
+        $billomat->inboxDocuments->delete($doc->id);
         self::assertNull($billomat->inboxDocuments->get($doc->id));
     }
 }

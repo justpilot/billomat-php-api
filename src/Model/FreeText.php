@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\FreeTextType;
 
 use const DATE_ATOM;
 
@@ -22,11 +23,26 @@ use const DATE_ATOM;
  */
 final readonly class FreeText
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'title' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'created' => true,
+        'updated' => true,
+        'type' => true,
+        'name' => true,
+        'is_default' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Freitexts. */
-        public ?int $id,
+        public int $id,
         /** Überschrift bzw. Betreff. */
-        public ?string $title,
+        public ?string $title = null,
         /** Bezeichnung. */
         public ?string $label = null,
         /** Einleitungstext bzw. Brieftext. */
@@ -42,11 +58,17 @@ final readonly class FreeText
          *
          * Mögliche Werte: INVOICE, CORRECTION, OFFER, CONFIRMATION, CREDIT_NOTE, DELIVERY_NOTE, LETTER
          */
-        public ?string $type = null,
+        public ?FreeTextType $type = null,
         /** Name der Textvorlage. */
         public ?string $name = null,
         /** Standard-Freitext für den Dokumenttyp? */
         public ?bool $isDefault = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -58,16 +80,17 @@ final readonly class FreeText
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            type: ScalarCaster::toStringOrNull($data['type'] ?? null),
+            type: FreeTextType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -81,6 +104,7 @@ final readonly class FreeText
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'title' => $this->title,
             'label' => $this->label,
@@ -88,7 +112,7 @@ final readonly class FreeText
             'note' => $this->note,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
-            'type' => $this->type,
+            'type' => $this->type?->value,
             'name' => $this->name,
             'is_default' => $this->isDefault,
         ];

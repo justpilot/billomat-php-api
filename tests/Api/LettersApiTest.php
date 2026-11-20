@@ -5,24 +5,27 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\LetterCreateOptions;
-use Justpilot\Billomat\Api\LetterEmailOptions;
 use Justpilot\Billomat\Api\LettersApi;
 use Justpilot\Billomat\Api\LetterUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\LetterStatus;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Letter;
-use Justpilot\Billomat\Model\LetterPdf;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -30,11 +33,12 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(LettersApi::class)]
 #[CoversClass(LetterCreateOptions::class)]
 #[CoversClass(LetterUpdateOptions::class)]
-#[CoversClass(LetterEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(Letter::class)]
-#[CoversClass(LetterPdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(LetterStatus::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
@@ -56,7 +60,7 @@ final class LettersApiTest extends TestCase
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -85,7 +89,7 @@ final class LettersApiTest extends TestCase
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -93,16 +97,15 @@ final class LettersApiTest extends TestCase
 
         self::assertInstanceOf(Letter::class, $letter);
         self::assertSame(LetterStatus::OPEN, $letter->status);
-        self::assertSame('B-2026-0001', $letter->letterNumber);
     }
 
     #[Test]
     public function itCreatesLetterViaPost(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'letter' => ['id' => 777, 'client_id' => 123, 'status' => 'DRAFT', 'subject' => 'Info'],
@@ -112,34 +115,31 @@ final class LettersApiTest extends TestCase
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new LetterCreateOptions(clientId: 123);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->subject = 'Info';
+        $opts = new LetterCreateOptions(
+            clientId: 123,
+            date: new DateTimeImmutable('2026-03-01'),
+            subject: 'Info',
+        );
 
         $letter = $api->create($opts);
 
         self::assertSame(777, $letter->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(123, $payload['letter']['client_id']);
-        self::assertSame('Info', $payload['letter']['subject']);
+        self::assertSame(123, $captured->jsonAt('letter', 'client_id'));
+        self::assertSame('Info', $captured->jsonAt('letter', 'subject'));
     }
 
     #[Test]
     public function itUpdatesLetter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'letter' => ['id' => 777, 'client_id' => 123, 'subject' => 'Geändert'],
@@ -149,17 +149,16 @@ final class LettersApiTest extends TestCase
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new LetterUpdateOptions();
-        $opts->subject = 'Geändert';
+        $opts = new LetterUpdateOptions(subject: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->subject);
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
@@ -167,66 +166,56 @@ final class LettersApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->complete(1));
-        self::assertTrue($api->cancel(2));
-        self::assertTrue($api->clear(3));
-        self::assertTrue($api->undo(4));
-        self::assertTrue($api->delete(5));
+        $api->complete(1);
+        $api->delete(5);
 
-        self::assertSame('https://mycompany.billomat.net/api/letters/1/complete', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/2/cancel', $captured[1]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/3/clear', $captured[2]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/4/undo', $captured[3]['url']);
-        self::assertSame('DELETE', $captured[4]['method']);
+        self::assertSame('PUT', $captured[0]->method);
+        self::assertSame('https://mycompany.billomat.net/api/letters/1/complete', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/letters/5', $captured[1]->url);
+        self::assertSame('DELETE', $captured[1]->method);
     }
 
     #[Test]
     public function itEmailsLetter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new LetterEmailOptions();
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(to: ['kunde@example.com']);
 
-        self::assertTrue($api->email(42, $opts));
+        $api->email(42, $opts);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
+        self::assertSame(['kunde@example.com'], $captured->jsonAt('email', 'recipients', 'to'));
     }
 
     #[Test]
     public function itFetchesLetterPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'pdf' => [
@@ -243,61 +232,35 @@ final class LettersApiTest extends TestCase
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(LetterPdf::class, $pdf);
-        self::assertSame(240, $pdf->letterId);
+        self::assertSame(240, $pdf->documentId);
     }
 
     #[Test]
     public function itFetchesRawPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             return new MockResponse('%PDF-1.4 RAW%', ['http_code' => 200]);
         });
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, InvoicePdfType::PRINT, rawPdf: true);
+        $result = $api->pdfContent(777, PdfType::PRINT);
 
         self::assertIsString($result);
-        self::assertStringContainsString('format=pdf', $captured['url']);
-    }
-
-    #[Test]
-    public function itUploadsLetterPdfAndSignature(): void
-    {
-        $captured = [];
-
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url, 'options' => $options];
-
-            return new MockResponse('', ['http_code' => 200]);
-        });
-
-        $api = new LettersApi(new BillomatHttpClient(
-            $mock,
-            new BillomatConfig('mycompany', 'secret-key'),
-        ));
-
-        $b64 = base64_encode('PDF');
-
-        self::assertTrue($api->upload(100, $b64));
-        self::assertTrue($api->uploadSignature(200, $b64));
-
-        self::assertSame('https://mycompany.billomat.net/api/letters/100/upload', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/letters/200/upload-signature', $captured[1]['url']);
+        self::assertStringContainsString('format=pdf', $captured->url);
     }
 
     #[Test]
@@ -310,7 +273,7 @@ final class LettersApiTest extends TestCase
         ));
 
         $api = new LettersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

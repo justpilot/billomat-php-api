@@ -31,21 +31,21 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `eingangsrechnungen/inbox` | Inbox | ✓ | ✓ | ✓ | — | ✓ |  |
 | `eingangsrechnungen/kategorien` | Kategorien | ✓ | ✓ | — | — | ✓ | Read-only; Mutations-Endpunkte sind in der Spec nicht dokumentiert. |
 | `eingangsrechnungen/kommentare` | Kommentare | ✓ | ✓ | ✓ | — | ✓ |  |
-| `eingangsrechnungen/posten` | Posten | — | — | — | — | ✓ | Posten/Items werden inline über Incoming verwaltet. |
+| `eingangsrechnungen/posten` | Posten | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `eingangsrechnungen/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `eingangsrechnungen/zahlungen` | Zahlungen | ✓ | ✓ | ✓ | — | ✓ |  |
 | `einstellungen` | Einstellungen | ✓ | — | — | — | ✓ |  |
 | `einstellungen/artikel-attribute` | Artikel-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/benutzer-attribute` | Benutzer-Attribute | ✓ | ✓ | — | — | ✓ | Fünfter Parent neben article-/client-/supplier-/incoming-properties; nutzt geteilte PropertyCreateOptions. |
 | `einstellungen/eingangsrechnung-attribute` | Eingansgrechnung-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/einheiten` | Einheiten | ✓ | ✓ | — | — | ✓ |  |
-| `einstellungen/email-vorlagen` | E-Mail-Vorlagen | ✓ | ✓ | — | — | ✓ |  |
-| `einstellungen/freitexte` | Freitexte | ✓ | ✓ | — | — | ✓ |  |
+| `einstellungen/einheiten` | Einheiten | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| `einstellungen/email-vorlagen` | E-Mail-Vorlagen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| `einstellungen/freitexte` | Freitexte | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `einstellungen/kunden-attribute` | Kunden-Attribute | ✓ | — | — | — | ✓ |  |
 | `einstellungen/lieferanten-attribute` | Lieferanten-Attribute | ✓ | — | — | — | ✓ |  |
-| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | — | — | ✓ | Spec dokumentiert /reminder-texts. DunningLevelsApi (/dunning-levels) ist deprecated – Endpoint antwortet mit 404. |
-| `einstellungen/rollen` | Rollen | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /roles. |
-| `einstellungen/steuerfreie-laender` | Steuerfreie Länder | ✓ | ✓ | — | — | ✓ | Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /country-taxes. |
+| `einstellungen/mahnstufen` | Mahnstufen | ✓ | ✓ | ✓ | ✓ | ✓ | Billomat verlangt beim Anlegen nur `name`, die Spec nennt alle Felder als Pflicht (Sandbox). |
+| `einstellungen/rollen` | Rollen | ✓ | ✓ | ✓ | ✓ | ✓ | Handgeschriebene Options mit Rechte-Map; unbekannte Bereiche lehnt das SDK ab, weil Billomat sie ignoriert. |
+| `einstellungen/steuerfreie-laender` | Steuerfreie Länder | ✓ | ✓ | ✓ | ✓ | ✓ | PUT geht auf /country-taxes (Spec: /country_taxes) und verlangt country_code (Sandbox). |
 | `einstellungen/steuersaetze` | Steuersätze | ✓ | — | — | — | ✓ |  |
 | `einstellungen/vorlagen` | Vorlagen | ✓ | — | ✓ | ✓ | ✓ |  |
 | `grundlagen` | Grundlagen | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
@@ -53,7 +53,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `grundlagen/authentifizierung` | Authentifizierung | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/daten-lesen` | Daten lesen | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/daten-schreiben` | Daten schreiben | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
-| `grundlagen/eigene-meta-daten` | Eigene Meta-Daten | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
+| `grundlagen/eigene-meta-daten` | Eigene Meta-Daten | — | — | — | — | ✓ | `getCustomField()`/`setCustomField()` auf jeder Api, deren Datensätze `customfield` haben (Sandbox: auch Unterressourcen; Rollen, Freitexte und E-Mail-Vorlagen antworten mit 405). |
 | `grundlagen/fehler` | Fehler | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/tools` | Tools | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `grundlagen/zugriffsbegrenzung` | Zugriffsbegrenzung | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
@@ -72,7 +72,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `lieferanten/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `lieferscheine` | Lieferscheine | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `mahnungen` | Mahnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
-| `mahnungen/positionen` | Positionen | ✓ | — | — | — | ✓ |  |
+| `mahnungen/positionen` | Positionen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `mahnungen/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `rechnungen` | Rechnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `rechnungen/kommentare` | Kommentare | ✓ | ✓ | ✓ | — | ✓ |  |
@@ -81,7 +81,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `rechnungen/zahlungen` | Zahlungen | ✓ | ✓ | ✓ | — | ✓ |  |
 | `suche` | Suche | ✓ | ✓ | — | — | ✓ |  |
 | `waehrungen` | Währungen | ✓ | ✓ | — | — | ✓ |  |
-| `webhooks` | Webhooks | — | — | — | — | ✓ | Empfänger-seitiges Konzept – kein REST-Endpunkt; siehe docs/concepts/webhooks.md. |
+| `webhooks` | Webhooks | — | — | — | — | ✓ | Kein REST-Endpunkt; Empfang über `src/Webhook/` (`WebhookEvent`, `WebhookHeaders`, `WebhookPayload`), siehe docs/concepts/webhooks.md. |
 
 ## Feld-Lücken in `*Options`-Klassen
 

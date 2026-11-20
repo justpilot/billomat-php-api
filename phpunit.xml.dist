@@ -34,6 +34,7 @@
     <source restrictNotices="true" restrictWarnings="true" ignoreIndirectDeprecations="true">
         <include>
             <directory suffix=".php">src</directory>
+            <directory suffix=".php">rector/src</directory>
         </include>
     </source>
 

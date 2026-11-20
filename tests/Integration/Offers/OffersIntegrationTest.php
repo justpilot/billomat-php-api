@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\OfferCreateOptions;
 use Justpilot\Billomat\Api\OfferItemCreateOptions;
 use Justpilot\Billomat\Api\OfferUpdateOptions;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -25,19 +26,21 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] !== $clients) {
-            return $clients[0]->id;
+            $id = $clients[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         $faker = $this->faker();
 
-        $clientOptions = new ClientCreateOptions();
-        $clientOptions->name = $faker->company();
-        $clientOptions->email = $faker->unique()->safeEmail();
-        $clientOptions->countryCode = 'DE';
+        $clientOptions = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($clientOptions);
-
-        self::assertNotNull($created->id);
 
         return $created->id;
     }
@@ -55,7 +58,6 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $offers) {
             $first = $offers[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
             self::assertInstanceOf(OfferStatus::class, $first->status);
         }
@@ -71,26 +73,27 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $today = new DateTimeImmutable('today');
 
-        $opts = new OfferCreateOptions(clientId: $clientId);
-        $opts->date = $today;
-        $opts->validityDays = 14;
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'Integrationstest-Angebot '.date('d.m.Y H:i:s');
-        $opts->label = 'Leistungen Integrationstest';
+        $opts = new OfferCreateOptions(
+            clientId: $clientId,
+            date: $today,
+            validityDays: 14,
+            title: 'Integrationstest-Angebot '.date('d.m.Y H:i:s'),
+            label: 'Leistungen Integrationstest',
+            currencyCode: 'EUR',
+        );
 
         $item = new OfferItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition',
         );
-        $item->title = 'Testposition';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $offer = $billomat->offers->create($opts);
 
-        self::assertNotNull($offer->id);
         self::assertSame($clientId, $offer->clientId);
         self::assertSame(OfferStatus::DRAFT, $offer->status);
 
@@ -107,22 +110,23 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $faker = $this->faker();
 
         // Create draft
-        $opts = new OfferCreateOptions(clientId: $clientId);
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'Update-Test '.date('d.m.Y H:i:s');
+        $opts = new OfferCreateOptions(
+            clientId: $clientId,
+            title: 'Update-Test '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        );
 
-        $item = new OfferItemCreateOptions(1.0, $faker->randomFloat(2, 10, 50));
-        $item->title = 'Update Test Position';
-        $opts->addItem($item);
+        $item = new OfferItemCreateOptions(
+            1.0,
+            Money::of((string) $faker->randomFloat(2, 10, 50)),
+            title: 'Update Test Position',
+        );
+        $opts = $opts->withItem($item);
 
         $draft = $billomat->offers->create($opts);
 
-        self::assertNotNull($draft->id);
-
         // Update title via PUT
-        $update = new OfferUpdateOptions();
-        $update->title = 'Geänderter Titel';
-        $update->date = new DateTimeImmutable('today');
+        $update = new OfferUpdateOptions(date: new DateTimeImmutable('today'), title: 'Geänderter Titel');
 
         $updated = $billomat->offers->update($draft->id, $update);
 
@@ -130,7 +134,50 @@ final class OffersIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame('Geänderter Titel', $updated->title);
 
         // Delete
-        self::assertTrue($billomat->offers->delete($draft->id));
+        $billomat->offers->delete($draft->id);
         self::assertNull($billomat->offers->get($draft->id));
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function canWalkThroughOfferStatusTransitionsInSandbox(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $clientId = $this->ensureClientId();
+
+        $opts = new OfferCreateOptions(
+            clientId: $clientId,
+            title: 'Status-Test '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        )->withItem(new OfferItemCreateOptions(1.0, Money::of('10.00'), title: 'Status-Test Position'));
+
+        $offer = $billomat->offers->create($opts);
+        $id = $offer->id;
+
+        try {
+            $billomat->offers->complete($id);
+            self::assertSame(OfferStatus::OPEN, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->cancel($id);
+            self::assertSame(OfferStatus::CANCELED, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->uncancel($id);
+            self::assertSame(OfferStatus::OPEN, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->win($id);
+            self::assertSame(OfferStatus::WON, $billomat->offers->getOrFail($id)->status);
+
+            // clear() geht erst aus WON, unclear() führt zurück nach WON.
+            $billomat->offers->clear($id);
+            self::assertSame(OfferStatus::CLEARED, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->unclear($id);
+            self::assertSame(OfferStatus::WON, $billomat->offers->getOrFail($id)->status);
+
+            $billomat->offers->lose($id);
+            self::assertSame(OfferStatus::LOST, $billomat->offers->getOrFail($id)->status);
+        } finally {
+            $billomat->offers->delete($id);
+        }
     }
 }

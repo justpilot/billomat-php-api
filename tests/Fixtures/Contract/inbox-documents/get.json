@@ -1,0 +1,17 @@
+{
+    "inbox-document": {
+        "id": "2249574",
+        "created": "2026-10-26T16:59:11+01:00",
+        "updated": "2026-10-26T16:59:11+01:00",
+        "user_id": "136536",
+        "filename": "dokument-1.pdf",
+        "mimetype": "application/pdf",
+        "document_type": "",
+        "filesize": "125",
+        "page_count": "0",
+        "file_url": "https://www.example.com/1",
+        "metadata": "",
+        "xrechnung_extractions_id": "",
+        "customfield": ""
+    }
+}

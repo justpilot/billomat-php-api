@@ -16,8 +16,10 @@ final class OfferCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesValidityDateAsIsoDate(): void
     {
-        $options = new OfferCreateOptions(clientId: 7);
-        $options->validityDate = new DateTimeImmutable('2026-12-31 23:59:59');
+        $options = new OfferCreateOptions(
+            clientId: 7,
+            validityDate: new DateTimeImmutable('2026-12-31 23:59:59'),
+        );
 
         self::assertSame('2026-12-31', $options->toArray()['validity_date']);
     }

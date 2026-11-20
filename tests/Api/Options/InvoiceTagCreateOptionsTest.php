@@ -13,10 +13,10 @@ use PHPUnit\Framework\TestCase;
 final class InvoiceTagCreateOptionsTest extends TestCase
 {
     #[Test]
-    public function toArrayContainsInvoiceIdAndName(): void
+    public function toArrayContainsOnlyTheName(): void
     {
-        $options = new InvoiceTagCreateOptions(invoiceId: 17, name: 'wichtig');
+        $options = new InvoiceTagCreateOptions(name: 'wichtig');
 
-        self::assertSame(['invoice_id' => 17, 'name' => 'wichtig'], $options->toArray());
+        self::assertSame(['name' => 'wichtig'], $options->toArray());
     }
 }

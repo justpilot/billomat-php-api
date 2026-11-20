@@ -22,23 +22,33 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class ReminderText
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'subject' => true,
+        'header' => true,
+        'footer' => true,
+        'sorting' => true,
+        'sort' => true,
+        'charge_name' => true,
+        'charge_description' => true,
+        'charge_amount' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID der Mahnstufe. */
-        public ?int $id,
+        public int $id,
         /** Name der Mahnstufe. */
-        public ?string $name,
+        public ?string $name = null,
         /** Betreff. */
         public ?string $subject = null,
         /** Einleitung. */
         public ?string $header = null,
         /** Anmerkung. */
         public ?string $footer = null,
-        /**
-         * Fälligkeit in Tagen.
-         *
-         * @deprecated since 3.1 – Billomat liefert `due_days` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $dueDays = null,
         /** Reihenfolge der Mahnstufe. */
         public ?int $sort = null,
         /** Name der Mahngebühr (falls vorhanden). */
@@ -46,9 +56,15 @@ final readonly class ReminderText
         /** Beschreibung der Mahngebühr (falls vorhanden). */
         public ?string $chargeDescription = null,
         /** Höhe der Mahngebühr (falls vorhanden). */
-        public ?float $chargeAmount = null,
+        public ?Money $chargeAmount = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -60,17 +76,17 @@ final readonly class ReminderText
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
             header: ScalarCaster::toStringOrNull($data['header'] ?? null),
             footer: ScalarCaster::toStringOrNull($data['footer'] ?? null),
-            dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             sort: ScalarCaster::toIntOrNull($data['sorting'] ?? $data['sort'] ?? null),
             chargeName: ScalarCaster::toStringOrNull($data['charge_name'] ?? null),
             chargeDescription: ScalarCaster::toStringOrNull($data['charge_description'] ?? null),
-            chargeAmount: ScalarCaster::toFloatOrNull($data['charge_amount'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            chargeAmount: ScalarCaster::toMoneyOrNull($data['charge_amount'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -84,17 +100,17 @@ final readonly class ReminderText
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'subject' => $this->subject,
             'header' => $this->header,
             'footer' => $this->footer,
-            'due_days' => $this->dueDays,
             'sort' => $this->sort,
             'charge_name' => $this->chargeName,
             'charge_description' => $this->chargeDescription,
-            'charge_amount' => $this->chargeAmount,
-            'customfield' => $this->customfield,
+            'charge_amount' => $this->chargeAmount?->toString(),
+            'customfield' => $this->customField,
         ];
     }
 }

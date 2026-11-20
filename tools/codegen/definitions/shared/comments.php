@@ -27,12 +27,12 @@ return static function (string $prefix, string $label, string $parentField, ?str
 
     $fields = [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne ID des Kommentars.'],
+        // Die Eltern-ID übergibt `CommentsApi::create()` als eigenes Argument.
         $parentField => [
-            ...$writable,
             'type' => 'int',
+            'readOnly' => true,
             'doc' => 'ID des Dokuments, an dem der Kommentar hängt.',
-            'model' => ['required' => true, 'nonNull' => true],
-            'create' => ['constructor' => true],
+            'model' => ['required' => true],
         ],
         'comment' => [...$writable, 'doc' => 'Kommentartext.', 'create' => ['constructor' => true]],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt.'],
@@ -52,7 +52,7 @@ return static function (string $prefix, string $label, string $parentField, ?str
             'type' => 'string',
             'readOnly' => true,
             'doc' => 'Roher ActionKey-String aus der API (auch wenn das Enum den Wert nicht kennt).',
-            'model' => ['property' => 'actionkeyRaw', 'sources' => ['actionkey'], 'key' => 'actionkey'],
+            'model' => ['property' => 'actionKeyRaw', 'sources' => ['actionkey'], 'key' => 'actionkey'],
         ],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
     ];
@@ -84,7 +84,7 @@ return static function (string $prefix, string $label, string $parentField, ?str
                 'Hinweis zum `actionkey`:',
                 ' - Bei System-Kommentaren (Statuswechsel, Versand, Zahlung) ist das Feld gesetzt.',
                 ' - Bei manuell angelegten Kommentaren ist das Feld typischerweise leer.',
-                ' - Unbekannte Werte werden über das Enum als null geparst; `actionkeyRaw`',
+                ' - Unbekannte Werte werden über das Enum als null geparst; `actionKeyRaw`',
                 '   enthält den ursprünglichen String aus der API.',
             ],
             // BC: toArray() gibt den rohen ActionKey unter `actionkey` aus und war schon immer so sortiert.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\SearchResult;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Volltextsuche.
@@ -22,14 +23,13 @@ final class SearchApi extends AbstractApi
      *
      * Entspricht GET /search?query={query}.
      *
-     * @param array<string, scalar|array|null> $extraFilters zusätzliche Query-Parameter neben `query`
+     * @param array<string, scalar|array<scalar|null>|null> $filters zusätzliche Query-Parameter neben `query`
      *
      * @return list<SearchResult>
      */
-    public function query(string $query, array $extraFilters = []): array
+    #[NoDiscard]
+    public function query(string $query, array $filters = []): array
     {
-        $filters = ['query' => $query, ...$extraFilters];
-
-        return $this->listResource('/search', 'search', 'result', SearchResult::fromArray(...), $filters);
+        return $this->listResource('/search', 'search', 'result', SearchResult::fromArray(...), ['query' => $query, ...$filters]);
     }
 }

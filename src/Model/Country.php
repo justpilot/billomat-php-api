@@ -17,25 +17,28 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class Country
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'code' => true,
+        'country_code' => true,
+        'name' => true,
+        'id' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** ISO-Ländercode (z. B. "DE"). */
         public string $code,
         /** Name des Landes. */
         public ?string $name = null,
-        /**
-         * Deutscher Name des Landes.
-         *
-         * @deprecated since 3.1 – Billomat liefert `name_de` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $nameDe = null,
-        /**
-         * Gehört das Land zur EU?
-         *
-         * @deprecated since 3.1 – Billomat liefert `eu` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?bool $eu = null,
         /** Interne Billomat-ID des Landes. */
         public ?int $id = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -47,11 +50,10 @@ final readonly class Country
     public static function fromArray(array $data): self
     {
         return new self(
-            code: ScalarCaster::toStringOrNull($data['code'] ?? $data['country_code'] ?? null) ?? '',
+            code: ScalarCaster::required(ScalarCaster::toStringOrNull($data['code'] ?? $data['country_code'] ?? null), self::class, 'code'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
-            nameDe: ScalarCaster::toStringOrNull($data['name_de'] ?? null),
-            eu: ScalarCaster::toBoolOrNull($data['eu'] ?? null),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -65,10 +67,9 @@ final readonly class Country
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'code' => $this->code,
             'name' => $this->name,
-            'name_de' => $this->nameDe,
-            'eu' => $this->eu,
             'id' => $this->id,
         ];
     }

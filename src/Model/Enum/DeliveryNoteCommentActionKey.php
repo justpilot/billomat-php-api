@@ -7,10 +7,12 @@ namespace Justpilot\Billomat\Model\Enum;
 /**
  * Typ eines DeliveryNote-Kommentars (actionkey).
  *
- * Doku: https://www.billomat.com/en/api/delivery-notes/comments/
+ * Doku: https://www.billomat.com/api/lieferscheine/
  */
 enum DeliveryNoteCommentActionKey: string
 {
+    use FromApi;
+
     case CREATE = 'CREATE';
     case EDIT = 'EDIT';
     case OPEN = 'OPEN';

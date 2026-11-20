@@ -17,6 +17,14 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class SearchResult
 {
+    /** Billomat-Felder, die das Model abbildet; alle anderen landen in {@see $extra}. */
+    private const array FIELDS = [
+        'resource' => true,
+        'id' => true,
+        'headline' => true,
+        'subline' => true,
+    ];
+
     public function __construct(
         /** Slug der Ressource, z. B. "invoices", "delivery-notes". */
         public string $resource,
@@ -26,6 +34,12 @@ final readonly class SearchResult
         public ?string $headline,
         /** Unterzeile, z. B. Datum und Kundenname. */
         public ?string $subline,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * @var array<string, mixed>
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -35,10 +49,11 @@ final readonly class SearchResult
     public static function fromArray(array $data): self
     {
         return new self(
-            resource: ScalarCaster::toStringOrNull($data['resource'] ?? null) ?? '',
+            resource: ScalarCaster::required(ScalarCaster::toStringOrNull($data['resource'] ?? null), self::class, 'resource'),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             headline: ScalarCaster::toStringOrNull($data['headline'] ?? null),
             subline: ScalarCaster::toStringOrNull($data['subline'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -48,6 +63,7 @@ final readonly class SearchResult
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'resource' => $this->resource,
             'id' => $this->id,
             'headline' => $this->headline,

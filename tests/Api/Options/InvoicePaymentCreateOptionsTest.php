@@ -6,21 +6,24 @@ namespace Justpilot\Billomat\Tests\Api\Options;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoicePaymentCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoicePaymentCreateOptions::class)]
+#[UsesClass(Money::class)]
 final class InvoicePaymentCreateOptionsTest extends TestCase
 {
     #[Test]
     public function minimalPayloadKeepsRequiredFields(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 240, amount: 99.95);
+        $options = new InvoicePaymentCreateOptions(amount: Money::of('99.95'));
 
         self::assertSame(
-            ['invoice_id' => 240, 'amount' => 99.95, 'mark_invoice_as_paid' => 0],
+            ['amount' => '99.95', 'mark_invoice_as_paid' => 0],
             $options->toArray()
         );
     }
@@ -28,8 +31,7 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function markInvoiceAsPaidIsSerializedAsOneOrZero(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->markInvoiceAsPaid = true;
+        $options = new InvoicePaymentCreateOptions(amount: Money::of('1'), markInvoiceAsPaid: true);
 
         $payload = $options->toArray();
 
@@ -39,8 +41,10 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function itFormatsDateAsIsoLocalDate(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->date = new DateTimeImmutable('2024-06-01T12:34:56');
+        $options = new InvoicePaymentCreateOptions(
+            amount: Money::of('1'),
+            date: new DateTimeImmutable('2024-06-01T12:34:56'),
+        );
 
         $payload = $options->toArray();
 
@@ -50,8 +54,10 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPaymentTypeEnumAsStringValue(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->type = InvoicePaymentType::BANK_TRANSFER;
+        $options = new InvoicePaymentCreateOptions(
+            amount: Money::of('1'),
+            type: PaymentType::BANK_TRANSFER,
+        );
 
         $payload = $options->toArray();
 
@@ -61,8 +67,7 @@ final class InvoicePaymentCreateOptionsTest extends TestCase
     #[Test]
     public function itStripsAllOtherNullFields(): void
     {
-        $options = new InvoicePaymentCreateOptions(invoiceId: 1, amount: 1.0);
-        $options->comment = 'manuell';
+        $options = new InvoicePaymentCreateOptions(amount: Money::of('1'), comment: 'manuell');
 
         $payload = $options->toArray();
 

@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/supplier-property-values.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class SupplierPropertyValueCreateOptions
+final readonly class SupplierPropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: supplier_id
-         * Typ: INT
-         */
-        public int $supplierId,
         /**
          * ID der Eigenschaft.
          *
@@ -40,6 +33,18 @@ final class SupplierPropertyValueCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `supplierPropertyId`. */
+    public function withSupplierPropertyId(int $supplierPropertyId): self
+    {
+        return clone($this, ['supplierPropertyId' => $supplierPropertyId]);
+    }
+
+    /** Kopie mit geändertem `value`. */
+    public function withValue(mixed $value): self
+    {
+        return clone($this, ['value' => $value]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -48,7 +53,6 @@ final class SupplierPropertyValueCreateOptions
     public function toArray(): array
     {
         return [
-            'supplier_id' => $this->supplierId,
             'supplier_property_id' => $this->supplierPropertyId,
             'value' => $this->value,
         ];

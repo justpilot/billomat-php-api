@@ -6,9 +6,12 @@ namespace Justpilot\Billomat\Tests\Integration\Reminders;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
+use Justpilot\Billomat\Api\ReminderItemCreateOptions;
+use Justpilot\Billomat\Api\ReminderItemUpdateOptions;
 use Justpilot\Billomat\Api\ReminderUpdateOptions;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\ReminderStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -47,7 +50,6 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $reminders) {
             $first = $reminders[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
         }
     }
@@ -59,25 +61,50 @@ final class RemindersIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoiceId = $this->findOverdueInvoiceIdOrSkip();
         $billomat = $this->createBillomatClientOrSkip();
 
-        $opts = new ReminderCreateOptions(invoiceId: $invoiceId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->subject = 'Integrationstest-Mahnung '.date('d.m.Y H:i:s');
-        $opts->label = 'Reminder Integrationstest';
+        $opts = new ReminderCreateOptions(
+            invoiceId: $invoiceId,
+            date: new DateTimeImmutable('today'),
+            subject: 'Integrationstest-Mahnung '.date('d.m.Y H:i:s'),
+            label: 'Reminder Integrationstest',
+        );
 
         $reminder = $billomat->reminders->create($opts);
 
-        self::assertNotNull($reminder->id);
         self::assertSame(ReminderStatus::DRAFT, $reminder->status);
 
         // Update
-        $update = new ReminderUpdateOptions();
-        $update->subject = 'Geänderter Mahnungs-Betreff';
+        $update = new ReminderUpdateOptions(subject: 'Geänderter Mahnungs-Betreff');
         $updated = $billomat->reminders->update($reminder->id, $update);
 
         self::assertSame($reminder->id, $updated->id);
 
         // Cleanup
-        self::assertTrue($billomat->reminders->delete($reminder->id));
+        $billomat->reminders->delete($reminder->id);
         self::assertNull($billomat->reminders->get($reminder->id));
+    }
+
+    /**
+     * Billomat legt die Positionen der Rechnung selbst an; weitere lassen sich ergänzen, ändern und löschen.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function itemsOfAReminderDraftCanBeManaged(): void
+    {
+        $invoiceId = $this->findOverdueInvoiceIdOrSkip();
+        $billomat = $this->createBillomatClientOrSkip();
+        $reminder = $billomat->reminders->create(new ReminderCreateOptions(invoiceId: $invoiceId, date: new DateTimeImmutable('today')));
+
+        try {
+            $item = $billomat->reminders->items->create($reminder->id, new ReminderItemCreateOptions(quantity: 1.0, unitPrice: Money::of('2.50'), title: 'Porto'));
+            self::assertSame($reminder->id, $item->reminderId);
+            self::assertSame('2.5', $item->unitPrice->toString());
+
+            self::assertSame('Porto und Versand', $billomat->reminders->items->update($item->id, new ReminderItemUpdateOptions(title: 'Porto und Versand'))->title);
+
+            $billomat->reminders->items->delete($item->id);
+            self::assertNull($billomat->reminders->items->get($item->id));
+        } finally {
+            $billomat->reminders->delete($reminder->id);
+        }
     }
 }

@@ -1,0 +1,7 @@
+{
+    "tax": {
+        "name": "VAT reduced",
+        "rate": 7,
+        "is_default": 0
+    }
+}

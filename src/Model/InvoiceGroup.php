@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 
 /**
  * Aggregat-Eintrag aus GET /invoices?group_by=...
@@ -14,6 +15,9 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  *  - group_by=status → status
  *  - group_by=day/week/month/year → eines der Zeit-Felder
  *
+ * Die Gruppe der Rechnungen ohne Datum (Entwürfe) liefert Billomat mit leerem Zeitfeld (`"day": ""`);
+ * es kommt als null an (in der Sandbox geprüft).
+ *
  * `invoiceParams` enthält das Filterset, das Billomat zurückgibt, damit man den Aggregat-
  * Eintrag in einen Folge-Request an `list()` weiterreichen kann (Drill-down).
  *
@@ -21,19 +25,23 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  */
 final readonly class InvoiceGroup
 {
+    private const array FIELDS = ['total_gross', 'total_net', 'client_id', 'status', 'day', 'week', 'month', 'year', 'invoice-params'];
+
     /**
      * @param array<string, scalar> $invoiceParams Filter zum Drill-down (z. B. ['client_id' => 476]).
+     * @param array<string, mixed>  $extra         Felder, die dieses Model nicht kennt
      */
     public function __construct(
-        public ?float $totalGross,
-        public ?float $totalNet,
+        public ?Money $totalGross,
+        public ?Money $totalNet,
         public ?int $clientId = null,
-        public ?string $status = null,
+        public ?InvoiceStatus $status = null,
         public ?string $day = null,
         public ?string $week = null,
         public ?string $month = null,
         public ?string $year = null,
         public array $invoiceParams = [],
+        public array $extra = [],
     ) {
     }
 
@@ -52,15 +60,37 @@ final readonly class InvoiceGroup
         }
 
         return new self(
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
+            totalNet: ScalarCaster::toMoneyOrNull($data['total_net'] ?? null),
             clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null),
-            status: ScalarCaster::toStringOrNull($data['status'] ?? null),
+            status: InvoiceStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             day: ScalarCaster::toStringOrNull($data['day'] ?? null),
             week: ScalarCaster::toStringOrNull($data['week'] ?? null),
             month: ScalarCaster::toStringOrNull($data['month'] ?? null),
             year: ScalarCaster::toStringOrNull($data['year'] ?? null),
             invoiceParams: $params,
+            extra: array_diff_key($data, array_flip(self::FIELDS)),
         );
+    }
+
+    /**
+     * Für Debug- und Log-Ausgaben, mit Billomats Feldnamen.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            ...$this->extra,
+            'total_gross' => $this->totalGross?->toString(),
+            'total_net' => $this->totalNet?->toString(),
+            'client_id' => $this->clientId,
+            'status' => $this->status?->value,
+            'day' => $this->day,
+            'week' => $this->week,
+            'month' => $this->month,
+            'year' => $this->year,
+            'invoice-params' => $this->invoiceParams,
+        ];
     }
 }

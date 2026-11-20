@@ -4,38 +4,48 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentFilter;
+use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\LetterCommentCreateOptions;
-use Justpilot\Billomat\Api\LetterCommentsApi;
+use Justpilot\Billomat\Api\LettersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
 use Justpilot\Billomat\Model\LetterComment;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(LetterCommentsApi::class)]
+#[CoversClass(CommentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(LettersApi::class)]
 #[CoversClass(LetterCommentCreateOptions::class)]
 #[CoversClass(LetterComment::class)]
 #[CoversClass(LetterCommentActionKey::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class LetterCommentsApiTest extends TestCase
 {
     #[Test]
     public function itListsCommentsByLetter(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'letter-comments' => [
@@ -48,16 +58,16 @@ final class LetterCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new LetterCommentsApi(new BillomatHttpClient(
-            $mock,
+        $api = new LettersApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $comments = $api->listByLetter(42, [LetterCommentActionKey::CREATE]);
+        $comments = $api->list(42, new CommentFilter(actionKeys: [LetterCommentActionKey::CREATE]));
 
         self::assertCount(1, $comments);
-        self::assertSame(LetterCommentActionKey::CREATE, $comments[0]->actionkey);
-        self::assertStringContainsString('letter_id=42', $captured['url']);
+        self::assertSame(LetterCommentActionKey::CREATE, $comments[0]->actionKey);
+        self::assertStringContainsString('letter_id=42', $captured->url);
     }
 
     #[Test]
@@ -66,7 +76,7 @@ final class LetterCommentsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if ('POST' === $method) {
                 return new MockResponse(
@@ -80,14 +90,14 @@ final class LetterCommentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new LetterCommentsApi(new BillomatHttpClient(
-            $mock,
+        $api = new LettersApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $created = $api->create(new LetterCommentCreateOptions(letterId: 42, comment: 'Hallo'));
+        $created = $api->create(42, new LetterCommentCreateOptions(comment: 'Hallo'));
 
         self::assertSame(99, $created->id);
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 }

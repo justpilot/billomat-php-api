@@ -23,6 +23,23 @@ use RuntimeException;
 const PROJECT_ROOT = __DIR__ . '/..';
 const SPEC_PATH = PROJECT_ROOT . '/docs/spec/billomat.json';
 const DEFINITIONS_DIR = __DIR__ . '/codegen/definitions';
+// FLOAT-Felder mit diesen Namen sind Geldbeträge und werden zu Money statt float.
+// Mengen, Steuersätze, Skonto-/Rabattsätze und Wechselkurse (`quote`) bleiben float.
+const MONEY_FIELDS = [
+    'amount', 'charge_amount', 'costs_gross', 'costs_net', 'discount_amount', 'finapi_transaction_amount',
+    'open_amount', 'paid_amount', 'purchase_price', 'revenue_gross', 'revenue_net',
+    'sales_price', 'sales_price2', 'sales_price3', 'sales_price4', 'sales_price5',
+    'total', 'total_gross', 'total_gross_unreduced', 'total_net', 'total_net_unreduced', 'total_reduction', 'unit_price',
+];
+// Billomat-Feldnamen aus zusammengeschriebenen Wörtern; ohne diese Liste würde `actionkey` zu `$actionkey`
+// statt `$actionKey`. Gilt für Read-Models, Options und Filter.
+const COMPOUND_WORDS = [
+    'actionkey' => 'action_key',
+    'base64file' => 'base64_file',
+    'customfield' => 'custom_field',
+    'filesize' => 'file_size',
+    'mimetype' => 'mime_type',
+];
 
 try {
     main($argv);
@@ -117,6 +134,12 @@ function renderResource(array $definition, array $spec, string $source): array
     if (isset($definition['updateOptions'])) {
         $files['src/Api/' . $definition['updateOptions']['class'] . '.php'] = renderOptions($definition, $definition['updateOptions'], $fields, $source, false);
     }
+    if (isset($definition['filter'])) {
+        // `filter.specResource`: Spec-Ressource des Listen-Endpunkts, falls die Definition selbst keine hat.
+        $filterSlug = $definition['filter']['specResource'] ?? $slug ?? throw new RuntimeException("Filter ohne Spec-Ressource ({$source}).");
+        $filterResource = $spec['resources'][$filterSlug] ?? throw new RuntimeException("Spec-Ressource '{$filterSlug}' nicht gefunden ({$source}).");
+        $files['src/Api/' . $definition['filter']['class'] . '.php'] = renderFilter($definition, $definition['filter'], $filterResource['endpoints'], $source);
+    }
 
     return $files;
 }
@@ -160,9 +183,20 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
     }
 
     $resolved = [];
+    $unmapped = [];
 
     foreach ($definitionFields as $name => $field) {
         $specField = $specFields[$name] ?? null;
+
+        // Kein stiller Ersatzwert (0, '', false) im Read-Model: Ein Feld ist entweder `required` (Billomat
+        // liefert es immer, fehlt es, wirft fromArray()) oder nullable.
+        if (\array_key_exists('nonNull', $field['model'] ?? [])) {
+            throw new RuntimeException("'model.nonNull' gibt es nicht mehr: Feld '{$name}' als 'required' markieren oder nullable lassen ({$source}).");
+        }
+        // `required` wirft bei fehlendem Wert; ein unbekannter Enum-Wert (→ null) passt nicht dazu.
+        if (!empty($field['model']['required']) && !empty($field['enum'])) {
+            throw new RuntimeException("Pflichtfeld '{$name}' kann kein Enum sein ({$source}).");
+        }
 
         if (null === $specField && !isset($field['type'])) {
             throw new RuntimeException("Feld '{$name}' steht nicht in der Spec und braucht einen expliziten 'type' ({$source}).");
@@ -173,19 +207,35 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
         }
 
         $type = $field['type'] ?? phpTypeFromSpec((string) $specField['type']);
+        if ('float' === $type && \in_array($name, MONEY_FIELDS, true)) {
+            $type = 'money';
+        }
         if (\in_array($type, ['taxes', 'list'], true) && empty($field['readOnly'])) {
             throw new RuntimeException("Listen-Feld '{$name}' muss 'readOnly' sein ({$source}).");
         }
+        if (!empty($field['enumList']) && empty($field['enum'])) {
+            throw new RuntimeException("Feld '{$name}' mit 'enumList' braucht eine Enum-Klasse in 'enum' ({$source}).");
+        }
+        // `map`: Objekt Schlüssel → Enum-Wert (z. B. Benutzerrechte), nur im Read-Model.
+        if ('map' === $type && (empty($field['enum']) || empty($field['readOnly']))) {
+            throw new RuntimeException("Map-Feld '{$name}' braucht 'enum' und muss 'readOnly' sein ({$source}).");
+        }
         $enum = $specField['enum'] ?? null;
+        // Feste Wertemenge in der Spec: Enum-Klasse angeben oder bewusst mit `'enum' => false` beim String bleiben.
+        if (null !== $enum && !\array_key_exists('enum', $field)) {
+            $unmapped[] = $name;
+        }
 
         $resolved[] = [
             'wire' => $name,
-            'property' => $field['model']['property'] ?? lcfirst(str_replace('_', '', ucwords($name, '_'))),
+            'property' => $field['model']['property'] ?? propertyName($name),
             'type' => $type,
             'doc' => $field['doc'] ?? ($specField['description_de'] ?? null) ?? throw new RuntimeException("Feld '{$name}' hat keine Doku ({$source})."),
             'details' => $field['details'] ?? [],
             'enum' => $enum,
-            'enumClass' => $field['enum'] ?? null,
+            'enumClass' => ($field['enum'] ?? null) ?: null,
+            // `enumList`: kommaseparierte Werte (z. B. Zahlarten) als list<Enum>.
+            'enumList' => !empty($field['enumList']),
             'specType' => null !== $specField ? (null !== $enum ? implode(' | ', $enum) : (string) $specField['type']) : null,
             'specDefault' => $specField['default'] ?? null,
             'writable' => empty($field['readOnly']),
@@ -196,6 +246,10 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
             'create' => $field['create'] ?? [],
             'update' => $field['update'] ?? [],
         ];
+    }
+
+    if ([] !== $unmapped) {
+        throw new RuntimeException('Spec-Felder mit fester Wertemenge brauchen \'enum\' in der Definition (' . $source . '): ' . implode(', ', $unmapped));
     }
 
     return $resolved;
@@ -234,7 +288,8 @@ function renderModel(array $definition, array $fields, string $source): string
     if ($usesDate) {
         $imports[] = 'DateTimeImmutable';
     }
-    if ([] !== $listFields) {
+    $typedLists = array_values(array_filter($fields, static fn (array $f): bool => isListField($f) || $f['enumList'] || isEnumMap($f)));
+    if ([] !== $typedLists) {
         $imports[] = 'Justpilot\\Billomat\\Internal\\ListCaster';
     }
     sort($imports);
@@ -250,18 +305,36 @@ function renderModel(array $definition, array $fields, string $source): string
     $out .= "\n" . classDoc($definition['model']['doc'], $definition['docUrl'], $source, 'Dokumentation:');
     $out .= 'final readonly class ' . $definition['model']['class'] . "\n{\n";
     // Listen-Felder brauchen den Element-Typ als @param am Konstruktor.
-    if ([] !== $listFields) {
-        $listTypes = array_map(listTypeHint(...), $listFields);
-        $width = max(array_map(\strlen(...), $listTypes));
-        $out .= docBlock(array_map(
-            static fn (array $f, string $t): string => '@param ' . str_pad($t, $width) . ' $' . $f['property'],
-            $listFields,
-            $listTypes,
-        ), '    ');
+    // Alle Billomat-Felder, die das Model abbildet; der Rest landet in `extra`.
+    $known = [];
+    foreach ($fields as $field) {
+        foreach ($field['model']['sources'] ?? [$field['wire']] as $wire) {
+            $known[$wire] = true;
+        }
     }
+    $out .= "    /** Billomat-Felder, die das Model abbildet. */\n";
+    $out .= "    private const array FIELDS = [\n";
+    foreach (array_keys($known) as $wire) {
+        $out .= "        '{$wire}' => true,\n";
+    }
+    $out .= "    ];\n\n";
+    // Listen-Felder und `extra` brauchen den Element-Typ als @param am Konstruktor.
+    $paramTypes = [...array_map(listTypeHint(...), $typedLists), 'array<string, mixed>'];
+    $paramNames = [...array_column($typedLists, 'property'), 'extra'];
+    $width = max(array_map(\strlen(...), $paramTypes));
+    $out .= docBlock(array_map(
+        static fn (string $t, string $name): string => '@param ' . str_pad($t, $width) . ' $' . $name,
+        $paramTypes,
+        $paramNames,
+    ), '    ');
     $out .= "    public function __construct(\n";
 
-    foreach ($fields as $field) {
+    // Pflichtfelder (ohne Default) stehen vorne; PHP erlaubt keine Pflicht-Parameter nach optionalen.
+    $constructorFields = [
+        ...array_filter($fields, isRequired(...)),
+        ...array_filter($fields, static fn (array $f): bool => !isRequired($f)),
+    ];
+    foreach ($constructorFields as $field) {
         $lines = [$field['doc']];
         $details = $field['details'];
         if (null !== $field['enum']) {
@@ -276,24 +349,29 @@ function renderModel(array $definition, array $fields, string $source): string
 
         $out .= docBlock($lines, '        ');
         $out .= '        public ' . modelTypeHint($field) . ' $' . $field['property'];
-        if (isListField($field)) {
+        if (isListField($field) || $field['enumList'] || isEnumMap($field)) {
             $out .= ' = []';
-        } elseif (empty($field['model']['required'])) {
-            if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
-                throw new RuntimeException("Nicht-nullbares Enum-Feld '{$field['wire']}' braucht 'required' ({$source}).");
-            }
-            $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : nonNullFallback(modelType($field)));
+        } elseif (!isRequired($field)) {
+            $out .= ' = null';
         }
         $out .= ",\n";
     }
 
+    $out .= docBlock([
+        'Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.',
+        '',
+        'Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.',
+    ], '        ');
+    $out .= "        public array \$extra = [],\n";
     $out .= "    ) {\n    }\n\n";
+
 
     $out .= "    /**\n     * Hydriert das Model aus einem Billomat-Response-Array.\n     *\n     * @param array<string,mixed> \$data\n     */\n";
     $out .= "    public static function fromArray(array \$data): self\n    {\n        return new self(\n";
-    foreach ($fields as $field) {
+    foreach ($constructorFields as $field) {
         $out .= '            ' . $field['property'] . ': ' . hydrateExpression($field) . ",\n";
     }
+    $out .= "            extra: array_diff_key(\$data, self::FIELDS),\n";
     $out .= "        );\n    }\n\n";
 
     $out .= "    /**\n     * Exportiert das Model als Array mit Billomat-Feldnamen.\n     *\n     * Praktisch für Debugging oder Log-Ausgaben.\n     *\n     * @return array<string,mixed>\n     */\n";
@@ -303,14 +381,19 @@ function renderModel(array $definition, array $fields, string $source): string
         throw new RuntimeException("'filterNulls' und Listen-Felder lassen sich nicht kombinieren ({$source}).");
     }
     $out .= "    public function toArray(): array\n    {\n        " . ([] !== $listFields ? '$data = ' : 'return ') . ($filterNulls ? 'array_filter(' : '') . "[\n";
+    // Unbekannte Felder zuerst, damit abgebildete Felder sie nie überschreiben.
+    $out .= "            ...\$this->extra,\n";
     $boolAsInt = !empty($definition['model']['boolAsInt']);
     foreach (exportFields($scalarFields, $definition['model']['toArray'] ?? null, $source) as $field) {
         $value = '$this->' . $field['property'];
         $value = match (true) {
-            null !== $field['enumClass'] => $value . (empty($field['model']['nonNull']) ? '?->value' : '->value'),
-            'date' === modelType($field) => $value . "?->format('Y-m-d')",
-            'datetime' === modelType($field) => $value . '?->format(DATE_ATOM)',
-            $boolAsInt && 'bool' === modelType($field) => boolAsIntExpression($value, !empty($field['model']['nonNull'])),
+            $field['enumList'] => enumListExpression($field, $value),
+            isEnumMap($field) => "array_map(static fn ({$field['enumClass']} \$v): string => \$v->value, {$value})",
+            null !== $field['enumClass'] => $value . '?->value',
+            'date' === modelType($field) => $value . (isRequired($field) ? '->' : '?->') . "format('Y-m-d')",
+            'datetime' === modelType($field) => $value . (isRequired($field) ? '->' : '?->') . 'format(DATE_ATOM)',
+            'money' === modelType($field) => $value . (isRequired($field) ? '->toString()' : '?->toString()'),
+            $boolAsInt && 'bool' === modelType($field) => boolAsIntExpression($value, isRequired($field)),
             default => $value,
         };
         // `model.key`: abweichender Schlüssel in toArray() (BC, z. B. nach einer Umbenennung bei Billomat).
@@ -322,7 +405,7 @@ function renderModel(array $definition, array $fields, string $source): string
     foreach ($listFields as $field) {
         $value = '$this->' . $field['property'];
         if ('taxes' === $field['type']) {
-            $entry = "['tax' => {$value}]";
+                $entry = "[\n                'tax' => array_map(static fn (TaxSummary \$tax): array => \$tax->toArray(), {$value}),\n            ]";
         } else {
             $class = $field['list']['class'];
             $entry = "[\n                '{$field['list']['item']}' => array_map(static fn ({$class} \$item): array => \$item->toArray(), {$value}),\n            ]";
@@ -347,13 +430,36 @@ function isListField(array $field): bool
 }
 
 /**
+ * Objekt Schlüssel → Enum-Wert im Read-Model (Typ `map`), z. B. `rights` der Benutzer.
+ *
+ * @param array<string, mixed> $field
+ */
+function isEnumMap(array $field): bool
+{
+    return 'map' === $field['type'];
+}
+
+/**
  * @param array<string, mixed> $field
  */
 function listTypeHint(array $field): string
 {
-    return 'taxes' === $field['type']
-        ? 'list<array{name: string, rate: float, amount: float}>'
-        : 'list<' . $field['list']['class'] . '>';
+    return match (true) {
+        $field['enumList'] => 'list<' . $field['enumClass'] . '>',
+        isEnumMap($field) => 'array<string, ' . $field['enumClass'] . '>',
+        'taxes' === $field['type'] => 'list<TaxSummary>',
+        default => 'list<' . $field['list']['class'] . '>',
+    };
+}
+
+/**
+ * Kommaseparierter Billomat-String aus einer Enum-Liste; eine leere Liste wird zu null.
+ *
+ * @param array<string, mixed> $field
+ */
+function enumListExpression(array $field, string $value): string
+{
+    return "[] === {$value} ? null : implode(',', array_map(static fn ({$field['enumClass']} \$v): string => \$v->value, {$value}))";
 }
 
 /**
@@ -367,16 +473,14 @@ function modelType(array $field): string
 }
 
 /**
- * Ersatzwert für nicht-nullbare Felder, wenn Billomat nichts liefert.
+ * `model.required`: Billomat liefert das Feld immer (z. B. `id`). Nicht-nullbar, ohne Default;
+ * fehlt es, wirft fromArray() eine UnexpectedResponseException statt auf 0/'' auszuweichen.
+ *
+ * @param array<string, mixed> $field
  */
-function nonNullFallback(string $type): string
+function isRequired(array $field): bool
 {
-    return match ($type) {
-        'int' => '0',
-        'float' => '0.0',
-        'bool' => 'false',
-        default => "''",
-    };
+    return !empty($field['model']['required']);
 }
 
 /**
@@ -384,8 +488,11 @@ function nonNullFallback(string $type): string
  */
 function modelTypeHint(array $field): string
 {
+    if ($field['enumList'] || isEnumMap($field)) {
+        return 'array';
+    }
     if (null !== $field['enumClass']) {
-        return (empty($field['model']['nonNull']) ? '?' : '') . $field['enumClass'];
+        return '?' . $field['enumClass'];
     }
     if (isListField($field)) {
         return 'array';
@@ -397,10 +504,11 @@ function modelTypeHint(array $field): string
 
     $type = match (modelType($field)) {
         'date', 'datetime' => 'DateTimeImmutable',
+        'money' => 'Money',
         default => modelType($field),
     };
 
-    return empty($field['model']['nonNull']) ? '?' . $type : $type;
+    return isRequired($field) ? $type : '?' . $type;
 }
 
 /**
@@ -411,6 +519,7 @@ function hydrateExpression(array $field): string
     $caster = match (modelType($field)) {
         'int' => 'toIntOrNull',
         'float' => 'toFloatOrNull',
+        'money' => 'toMoneyOrNull',
         'bool' => 'toBoolOrNull',
         'date', 'datetime' => 'toDateTimeOrNull',
         default => 'toStringOrNull',
@@ -422,11 +531,11 @@ function hydrateExpression(array $field): string
     $expression = 'ScalarCaster::' . $caster . '(' . $lookup . ' ?? null)';
 
     if ('taxes' === $field['type']) {
-        return "ListCaster::toTaxList(\$data['{$field['wire']}']['tax'] ?? null)";
+        return "ListCaster::toNestedList(\$data['{$field['wire']}'] ?? null, 'tax', 'name', TaxSummary::fromArray(...))";
     }
     // Ein einzelnes Element liefert Billomat als Objekt statt als Liste – erkennbar an der `id`.
     if ('list' === $field['type']) {
-        return "ListCaster::toList(\$data['{$field['wire']}']['{$field['list']['item']}'] ?? null, 'id', {$field['list']['class']}::fromArray(...))";
+        return "ListCaster::toNestedList(\$data['{$field['wire']}'] ?? null, '{$field['list']['item']}', 'id', {$field['list']['class']}::fromArray(...))";
     }
 
     // `mixed`: Wert unverändert übernehmen (z. B. Eigenschaftswerte, deren Typ von der Eigenschaft abhängt).
@@ -434,16 +543,27 @@ function hydrateExpression(array $field): string
         return $lookup . ' ?? null';
     }
 
-    // Nicht-nullbare Enums brauchen ein `fromApi(string): self`, das unbekannte Werte auf einen Default abbildet.
-    if (null !== $field['enumClass'] && !empty($field['model']['nonNull'])) {
-        return $field['enumClass'] . "::fromApi(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
+    // Unbekannte Werte fallen aus der Liste heraus.
+    if ($field['enumList']) {
+        return "ListCaster::toEnumList({$lookup} ?? null, {$field['enumClass']}::class)";
+    }
+    // Leere und unbekannte Werte fallen aus der Map heraus (leer = kein Zugriff).
+    if (isEnumMap($field)) {
+        return "ListCaster::toEnumMap({$lookup} ?? null, {$field['enumClass']}::class)";
+    }
+    // `model.fromApi`: Enum mit eigener Toleranz (z. B. Groß-/Kleinschreibung) über fromApi() hydrieren.
+    if (null !== $field['enumClass'] && !empty($field['model']['fromApi'])) {
+        return $field['enumClass'] . "::fromApi(ScalarCaster::toStringOrNull({$lookup} ?? null))";
     }
     // Unbekannte oder leere Werte werden zu null statt eine Exception zu werfen.
     if (null !== $field['enumClass']) {
         return $field['enumClass'] . "::tryFrom(ScalarCaster::toStringOrNull({$lookup} ?? null) ?? '')";
     }
 
-    return empty($field['model']['nonNull']) ? $expression : $expression . ' ?? ' . nonNullFallback(modelType($field));
+    return match (true) {
+        isRequired($field) => "ScalarCaster::required({$expression}, self::class, '{$field['wire']}')",
+        default => $expression,
+    };
 }
 
 // -------------------------------------------------------------------------
@@ -476,6 +596,16 @@ function renderOptions(array $definition, array $options, array $fields, string 
     if ($dateObjects && \in_array('date', array_column($writable, 'type'), true)) {
         $imports[] = 'DateTimeImmutable';
     }
+    if (\in_array('money', array_column($writable, 'type'), true)) {
+        $imports[] = 'Justpilot\\Billomat\\Model\\Money';
+    }
+    if ($isCreate && !empty($options['fromArray'])) {
+        $imports[] = 'Justpilot\\Billomat\\Exception\\UnexpectedResponseException';
+        $imports[] = 'Justpilot\\Billomat\\Internal\\ScalarCaster';
+        if ([] !== array_filter($writable, static fn (array $f): bool => $f['enumList'])) {
+            $imports[] = 'Justpilot\\Billomat\\Internal\\ListCaster';
+        }
+    }
     sort($imports);
     foreach ($imports as $import) {
         $out .= "use {$import};\n";
@@ -484,88 +614,423 @@ function renderOptions(array $definition, array $options, array $fields, string 
         $out .= "\n";
     }
     $out .= classDoc($options['doc'], $definition['docUrl'], $source, 'Doku:');
-    $out .= 'final class ' . $options['class'] . "\n{\n";
+    $out .= 'final readonly class ' . $options['class'] . " implements WriteOptions\n{\n";
 
-    // Pflichtfelder beim Anlegen werden als Konstruktor-Parameter erzwungen.
-    $promoted = $isCreate
+    // Pflichtfelder beim Anlegen stehen vorne im Konstruktor, danach alle optionalen Felder.
+    $required = $isCreate
         ? array_values(array_filter($writable, static fn (array $f): bool => !empty($f['create']['constructor'])))
         : [];
-    if ([] !== $promoted) {
-        $out .= "    public function __construct(\n";
-        foreach ($promoted as $field) {
-            $out .= docBlock(optionsDocLines($field, $isCreate), '        ');
-            $out .= '        public ' . optionsPhpType($field, $dateObjects) . ' $' . $field['property'];
-            if (\array_key_exists('default', $field['create'])) {
-                $out .= ' = ' . var_export($field['create']['default'], true);
-            }
-            $out .= ",\n";
-        }
-        $out .= "    ) {\n    }\n\n";
-    }
+    $ordered = [...$required, ...array_values(array_filter($writable, static fn (array $f): bool => !\in_array($f, $required, true)))];
 
-    foreach ($writable as $field) {
-        if (\in_array($field, $promoted, true)) {
-            continue;
-        }
-
-        $nonNull = $isCreate && !empty($field['create']['nonNull']);
-
-        $out .= docBlock(optionsDocLines($field, $isCreate), '    ');
-        $type = optionsPhpType($field, $dateObjects);
-        $out .= '    public ' . ($nonNull || 'mixed' === $type ? '' : '?') . $type . ' $' . $field['property'] . ' = '
-            . ($nonNull ? var_export($field['create']['default'], true) : 'null') . ";\n\n";
-    }
-
-    // `items`: Positionen, die über addItem() gesammelt und verschachtelt mitgesendet werden.
+    // `items`: Positionen, die beim Anlegen verschachtelt mitgesendet werden.
     $items = $isCreate ? ($options['items'] ?? null) : null;
+
+    $out .= "    public function __construct(\n";
+    foreach ($ordered as $field) {
+        $lines = optionsDocLines($field, $isCreate);
+        if ($field['enumList']) {
+            $lines = [...$lines, '', '@var ' . optionsListDocType($field, $isCreate)];
+        }
+        $out .= docBlock($lines, '        ');
+        $out .= '        public ' . optionsParamType($field, $isCreate, $dateObjects) . ' $' . $field['property'] . optionsDefault($field, $isCreate) . ",\n";
+    }
     if (null !== $items) {
-        $class = $items['class'];
-        $out .= "    /**\n     * @var list<{$class}>\n     */\n    private array \$items = [];\n\n";
-        $out .= "    /**\n     * Fügt eine Position hinzu, die beim Anlegen mitgesendet wird.\n     */\n";
-        $out .= "    public function addItem({$class} \$item): self\n    {\n        \$this->items[] = \$item;\n\n        return \$this;\n    }\n\n";
-        $out .= "    /**\n     * @return list<{$class}>\n     */\n    public function getItems(): array\n    {\n        return \$this->items;\n    }\n\n";
+        $out .= "        /**\n         * Positionen, die beim Anlegen mitgesendet werden.\n         *\n         * @var list<{$items['class']}>\n         */\n";
+        $out .= "        public array \$items = [],\n";
+    }
+    $out .= "    ) {\n    }\n\n";
+
+    // Wither: Kopie mit einem geänderten Feld (clone with, PHP 8.5).
+    foreach ($ordered as $field) {
+        $property = $field['property'];
+        $out .= $field['enumList']
+            ? "    /**\n     * Kopie mit geändertem `{$property}`.\n     *\n     * @param " . optionsListDocType($field, $isCreate) . " \${$property}\n     */\n"
+            : "    /** Kopie mit geändertem `{$property}`. */\n";
+        $out .= '    public function with' . ucfirst($property) . '(' . optionsParamType($field, $isCreate, $dateObjects) . " \${$property}): self\n";
+        $out .= "    {\n        return clone(\$this, ['{$property}' => \${$property}]);\n    }\n\n";
+    }
+    if (null !== $items) {
+        $out .= "    /** Kopie mit einer zusätzlichen Position. */\n";
+        $out .= "    public function withItem({$items['class']} \$item): self\n    {\n        return clone(\$this, ['items' => [...\$this->items, \$item]]);\n    }\n\n";
     }
 
-    $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n     *\n     * @return array<string,mixed>\n     */\n";
+    // `fromArray`: Create-Options aus einem Billomat-Datensatz (z. B. GET /invoices/preset).
+    if ($isCreate && !empty($options['fromArray'])) {
+        $out .= renderOptionsFromArray($ordered, $dateObjects, $options['fromArray']);
+    }
+
+    $out .= "    /**\n     * Serialisiert die Options in ein Billomat-Payload-Array.\n";
+    if (!$isCreate) {
+        $out .= "     *\n     * Nicht gesetzte Felder (null) fehlen im Payload, {@see Clear::Field} wird als null gesendet und leert das Feld.\n";
+    }
+    $out .= "     *\n     * @return array<string,mixed>\n     */\n";
     $entries = '';
     $filterNulls = false;
     foreach (exportFields($writable, $options['toArray'] ?? null, $source) as $field) {
-        $value = '$this->' . $field['property'];
+        $property = '$this->' . $field['property'];
         $nonNull = $isCreate && (!empty($field['create']['nonNull']) || !empty($field['create']['constructor']));
         $filterNulls = $filterNulls || !$nonNull;
-        if (null !== $field['enumClass']) {
-            $value .= $nonNull ? '->value' : '?->value';
-        }
-        if ($dateObjects && 'date' === $field['type']) {
-            $value .= ($nonNull ? '->' : '?->') . "format('Y-m-d')";
-        }
-        if ($boolAsInt && 'bool' === $field['type']) {
-            $value = boolAsIntExpression($value, $nonNull);
-        }
-        $entries .= "            '" . $field['wire'] . "' => " . $value . ",\n";
+        $entries .= "            '" . $field['wire'] . "' => " . optionsExportExpression($field, $property, $isCreate, $nonNull, $dateObjects, $boolAsInt) . ",\n";
     }
 
     $out .= "    public function toArray(): array\n    {\n";
-    if (null !== $items) {
-        if (!$filterNulls) {
-            throw new RuntimeException("'items' braucht mindestens ein nullbares Feld ({$source}).");
-        }
-        $out .= "        \$data = [\n" . $entries . "        ];\n\n        // Null-Felder entfernen\n";
-        $out .= "        \$data = array_filter(\$data, static fn (mixed \$v): bool => null !== \$v);\n\n";
-        $out .= "        if ([] !== \$this->items) {\n            \$data['{$items['wire']}'] = [\n";
-        $out .= "                '{$items['item']}' => array_map(static fn ({$class} \$item): array => \$item->toArray(), \$this->items),\n";
-        $out .= "            ];\n        }\n\n        return \$data;\n    }\n}\n";
-
-        return $out;
-    }
     // Sind alle Felder nicht-nullbar, gibt es nichts zu filtern.
-    if (!$filterNulls) {
-        return $out . "        return [\n" . $entries . "        ];\n    }\n}\n";
+    $payload = match (true) {
+        !$filterNulls => "[\n" . $entries . "        ]",
+        $isCreate => "array_filter([\n" . $entries . "        ], static fn (mixed \$v): bool => null !== \$v)",
+        // Update: nicht gesetzte Felder entfernen, Clear::Field als null senden.
+        default => "array_map(\n            static fn (mixed \$v): mixed => \$v instanceof Clear ? null : \$v,\n            array_filter([\n"
+            . preg_replace('/^/m', '    ', rtrim($entries, "\n")) . "\n            ], static fn (mixed \$v): bool => null !== \$v),\n        )",
+    };
+    if (null === $items) {
+        return $out . '        return ' . $payload . ";\n    }\n}\n";
     }
-    $out .= "        \$data = [\n" . $entries . "        ];\n\n        // Null-Felder entfernen\n";
-    $out .= "        return array_filter(\$data, static fn (mixed \$v): bool => null !== \$v);\n    }\n}\n";
+
+    $out .= '        $data = ' . $payload . ";\n\n";
+    $out .= "        if ([] !== \$this->items) {\n            \$data['{$items['wire']}'] = [\n";
+    $out .= "                '{$items['item']}' => array_map(static fn ({$items['class']} \$item): array => \$item->toArray(), \$this->items),\n";
+    $out .= "            ];\n        }\n\n        return \$data;\n    }\n}\n";
 
     return $out;
+}
+
+/**
+ * fromArray() der Create-Options: liest die schreibbaren Felder aus einem Billomat-Datensatz.
+ *
+ * Felder, die die Options nicht kennen (Summen, Status, …), fallen weg; leere Werte bleiben null.
+ * Fehlt ein Pflichtfeld ohne Default, wirft die Methode wie die Read-Models eine UnexpectedResponseException.
+ *
+ * @param list<array<string, mixed>> $fields
+ * @param list<string>|true          $doc    Zusätzliche Doku-Zeilen (z. B. woher der Datensatz kommt)
+ */
+function renderOptionsFromArray(array $fields, bool $dateObjects, array|bool $doc): string
+{
+    $lines = [
+        'Baut die Options aus einem Datensatz mit Billomat-Feldnamen.',
+        ...(\is_array($doc) ? ['', ...$doc] : []),
+        '',
+        'Felder, die die Options nicht kennen (Summen, Status, …), fallen weg; leere Werte bleiben null.',
+        '',
+        '@param array<string,mixed> $data',
+        '',
+        '@throws UnexpectedResponseException wenn ein Pflichtfeld fehlt',
+    ];
+    $out = docBlock($lines, '    ');
+    $out .= "    public static function fromArray(array \$data): self\n    {\n        return new self(\n";
+    foreach ($fields as $field) {
+        $out .= '            ' . $field['property'] . ': ' . optionsHydrateExpression($field, $dateObjects) . ",\n";
+    }
+
+    return $out . "        );\n    }\n\n";
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function optionsHydrateExpression(array $field, bool $dateObjects): string
+{
+    $lookup = "\$data['{$field['wire']}'] ?? null";
+
+    $expression = match (true) {
+        $field['enumList'] => "ListCaster::toEnumList({$lookup}, {$field['enumClass']}::class)",
+        null !== $field['enumClass'] => $field['enumClass'] . "::tryFrom(ScalarCaster::toStringOrNull({$lookup}) ?? '')",
+        'mixed' === $field['type'] => $lookup,
+        default => 'ScalarCaster::' . match ($field['type']) {
+            'int' => 'toIntOrNull',
+            'float' => 'toFloatOrNull',
+            'money' => 'toMoneyOrNull',
+            'bool' => 'toBoolOrNull',
+            'date' => $dateObjects ? 'toDateTimeOrNull' : 'toStringOrNull',
+            default => 'toStringOrNull',
+        } . "({$lookup})",
+    };
+
+    if ($field['enumList'] || 'mixed' === $field['type']) {
+        return $expression;
+    }
+    $create = $field['create'] ?? [];
+    if (!empty($create['constructor']) && !\array_key_exists('default', $create)) {
+        return "ScalarCaster::required({$expression}, self::class, '{$field['wire']}')";
+    }
+    if (!empty($create['constructor']) || !empty($create['nonNull'])) {
+        return $expression . ' ?? ' . var_export($create['default'], true);
+    }
+
+    return $expression;
+}
+
+/**
+ * Filter-Felder eines Listen-Endpunkts aus der Spec, mit Typ aus Name/Beschreibung bzw. Definition.
+ *
+ * Typen: int, string, bool, date, enum, list<int>, list<string>, list<enum>.
+ *
+ * @param list<array<string, mixed>> $endpoints
+ * @param array<string, mixed>       $filter
+ *
+ * @return list<array<string, mixed>>
+ */
+function resolveFilterFields(array $endpoints, array $filter, string $source): array
+{
+    $specFilters = null;
+    foreach ($endpoints as $endpoint) {
+        if (($endpoint['method'] ?? null) . ' ' . ($endpoint['path'] ?? '') === $filter['endpoint']) {
+            $specFilters = $endpoint['filters'] ?? [];
+        }
+    }
+    if (null === $specFilters) {
+        throw new RuntimeException("Filter-Endpunkt '{$filter['endpoint']}' nicht in der Spec gefunden ({$source}).");
+    }
+
+    $overrides = $filter['fields'] ?? [];
+    $unknown = array_diff(array_keys($overrides), array_column($specFilters, 'name'));
+    if ([] !== $unknown) {
+        throw new RuntimeException('Filter-Felder stehen nicht in der Spec (' . $source . '): ' . implode(', ', $unknown));
+    }
+
+    $resolved = [];
+    foreach ($specFilters as $specFilter) {
+        $name = (string) $specFilter['name'];
+        $override = $overrides[$name] ?? [];
+        if (!empty($override['omit'])) {
+            continue;
+        }
+        $doc = (string) ($override['doc'] ?? $specFilter['description_de'] ?? throw new RuntimeException("Filter '{$name}' hat keine Doku ({$source})."));
+        // „mehrere Werte kommasepariert“ / „Mehrere Stati können per Komma getrennt werden“
+        $multiple = 1 === preg_match('/kommasepariert|per Komma getrennt/i', $doc);
+        $enum = $override['enum'] ?? null;
+
+        $type = $override['type'] ?? match (true) {
+            null !== $enum => $multiple ? 'list<enum>' : 'enum',
+            \in_array($name, ['from', 'to'], true) => 'date',
+            'tags' === $name => 'list<string>',
+            str_ends_with($name, '_id') => $multiple ? 'list<int>' : 'int',
+            str_starts_with($name, 'is_') => 'bool',
+            default => 'string',
+        };
+
+        $resolved[] = [
+            'wire' => $name,
+            'property' => lcfirst(str_replace('_', '', ucwords($name, '_'))),
+            'type' => $type,
+            'enumClass' => $enum,
+            'doc' => $doc,
+        ];
+    }
+
+    return $resolved;
+}
+
+/**
+ * Erzeugt eine `*Filter`-Klasse (implements ListFilter) für einen Listen-Endpunkt.
+ *
+ * @param array<string, mixed>       $definition
+ * @param array<string, mixed>       $filter
+ * @param list<array<string, mixed>> $endpoints
+ */
+function renderFilter(array $definition, array $filter, array $endpoints, string $source): string
+{
+    $fields = [
+        ...resolveFilterFields($endpoints, $filter, $source),
+        ['wire' => 'order_by', 'property' => 'orderBy', 'type' => 'orderBy', 'enumClass' => null, 'doc' => 'Sortierung, z. B. `OrderBy::desc(\'date\')->thenAsc(\'name\')`.'],
+        ['wire' => 'page', 'property' => 'page', 'type' => 'int', 'enumClass' => null, 'doc' => 'Seite (ab 1); `iterateAll()` setzt sie selbst.'],
+        ['wire' => 'per_page', 'property' => 'perPage', 'type' => 'int', 'enumClass' => null, 'doc' => 'Einträge pro Seite (Billomat: Standard 100, maximal 1000).'],
+    ];
+
+    $out = "<?php\n\ndeclare(strict_types=1);\n\nnamespace Justpilot\\Billomat\\Api;\n\n";
+    $imports = enumImports($fields);
+    if (\in_array('date', array_column($fields, 'type'), true)) {
+        $imports[] = 'DateTimeImmutable';
+    }
+    sort($imports);
+    foreach ($imports as $import) {
+        $out .= "use {$import};\n";
+    }
+    if ([] !== $imports) {
+        $out .= "\n";
+    }
+    $out .= classDoc([
+        "Typisierter Filter für {$filter['endpoint']}.",
+        '',
+        'Nicht gesetzte Felder (null bzw. leere Liste) fehlen im Query; Mehrfachwerte',
+        'werden kommasepariert gesendet und von Billomat ODER-verknüpft. Weitere',
+        'Query-Parameter (z. B. benutzerdefinierte Attribute) gehen über `extra`.',
+    ], $definition['docUrl'], $source, 'Doku:');
+    $out .= 'final readonly class ' . $filter['class'] . " implements ListFilter\n{\n";
+
+    $out .= "    public function __construct(\n";
+    foreach ($fields as $field) {
+        // Die Zusammenfassung endet mit Punkt (PHP-CS-Fixer: phpdoc_summary).
+        $summary = 1 === preg_match('/[.!?]$/u', $field['doc']) ? $field['doc'] : $field['doc'] . '.';
+        $lines = [$summary, ...('orderBy' === $field['type'] ? [] : ['', 'Billomat-Filter: ' . $field['wire']])];
+        if (str_starts_with($field['type'], 'list<')) {
+            $lines = [...$lines, '', '@var list<' . filterElementType($field) . '>'];
+        }
+        $out .= docBlock($lines, '        ');
+        $out .= '        public ' . filterParamType($field) . ' $' . $field['property'] . (str_starts_with($field['type'], 'list<') ? ' = []' : ' = null') . ",\n";
+    }
+    $out .= "        /**\n         * Weitere Query-Parameter; überschreiben gleichnamige Felder.\n         *\n         * @var array<string, scalar|array<scalar>>\n         */\n";
+    $out .= "        public array \$extra = [],\n";
+    $out .= "    ) {\n    }\n\n";
+
+    // Wither: Kopie mit einem geänderten Feld; Listen-Felder nehmen die Werte variadisch.
+    foreach ($fields as $field) {
+        $property = $field['property'];
+        $out .= "    /** Kopie mit geändertem `{$property}`. */\n";
+        if (str_starts_with($field['type'], 'list<')) {
+            $out .= '    public function with' . ucfirst($property) . '(' . filterElementType($field) . " ...\${$property}): self\n";
+            $out .= "    {\n        return clone(\$this, ['{$property}' => array_values(\${$property})]);\n    }\n\n";
+        } else {
+            $out .= '    public function with' . ucfirst($property) . '(' . filterParamType($field) . " \${$property}): self\n";
+            $out .= "    {\n        return clone(\$this, ['{$property}' => \${$property}]);\n    }\n\n";
+        }
+    }
+    $out .= "    /**\n     * Kopie mit weiteren Query-Parametern.\n     *\n     * @param array<string, scalar|array<scalar>> \$extra\n     */\n";
+    $out .= "    public function withExtra(array \$extra): self\n    {\n        return clone(\$this, ['extra' => \$extra]);\n    }\n\n";
+
+    $out .= "    public function toQuery(): array\n    {\n        return [\n            ...array_filter([\n";
+    foreach ($fields as $field) {
+        $out .= "                '" . $field['wire'] . "' => " . filterExportExpression($field, '$this->' . $field['property']) . ",\n";
+    }
+    $out .= "            ], static fn (mixed \$v): bool => null !== \$v),\n            ...\$this->extra,\n        ];\n    }\n}\n";
+
+    return $out;
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function filterElementType(array $field): string
+{
+    return match ($field['type']) {
+        'list<int>' => 'int',
+        'list<string>' => 'string',
+        'list<enum>' => $field['enumClass'],
+        default => throw new LogicException("Kein Listen-Typ: {$field['type']}"),
+    };
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function filterParamType(array $field): string
+{
+    return match ($field['type']) {
+        'int', 'string', 'bool' => '?' . $field['type'],
+        'date' => '?DateTimeImmutable',
+        'enum' => '?' . $field['enumClass'],
+        'orderBy' => '?OrderBy',
+        'list<int>', 'list<string>', 'list<enum>' => 'array',
+        default => throw new LogicException("Unbekannter Filter-Typ: {$field['type']}"),
+    };
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function filterExportExpression(array $field, string $value): string
+{
+    return match ($field['type']) {
+        'int', 'string' => $value,
+        'bool' => "null === {$value} ? null : ({$value} ? 1 : 0)",
+        'date' => "{$value}?->format('Y-m-d')",
+        'enum' => "{$value}?->value",
+        'orderBy' => "{$value}?->toQuery()",
+        'list<int>', 'list<string>' => "[] === {$value} ? null : implode(',', {$value})",
+        'list<enum>' => "[] === {$value} ? null : implode(',', array_map(static fn ({$field['enumClass']} \$v): string => \$v->value, {$value}))",
+        default => throw new LogicException("Unbekannter Filter-Typ: {$field['type']}"),
+    };
+}
+
+/**
+ * PHP-Typ eines Options-Parameters; Update-Felder akzeptieren zusätzlich {@see Clear}.
+ *
+ * @param array<string, mixed> $field
+ */
+function optionsParamType(array $field, bool $isCreate, bool $dateObjects): string
+{
+    // Enum-Listen: eine leere Liste wird nicht gesendet, deshalb ohne null.
+    if ($field['enumList']) {
+        return $isCreate ? 'array' : 'array|Clear';
+    }
+    $type = optionsPhpType($field, $dateObjects);
+    if ('mixed' === $type) {
+        return 'mixed';
+    }
+    if (!$isCreate) {
+        return $type . '|Clear|null';
+    }
+
+    return !empty($field['create']['nonNull']) || !empty($field['create']['constructor']) ? $type : '?' . $type;
+}
+
+/**
+ * PHPDoc-Typ einer Enum-Liste in Options; Update-Felder können zusätzlich {@see Clear} sein.
+ *
+ * @param array<string, mixed> $field
+ */
+function optionsListDocType(array $field, bool $isCreate): string
+{
+    return 'list<' . $field['enumClass'] . '>' . ($isCreate ? '' : '|Clear');
+}
+
+/**
+ * @param array<string, mixed> $field
+ */
+function optionsDefault(array $field, bool $isCreate): string
+{
+    if ($field['enumList']) {
+        return ' = []';
+    }
+    if ($isCreate && !empty($field['create']['constructor'])) {
+        return \array_key_exists('default', $field['create']) ? ' = ' . var_export($field['create']['default'], true) : '';
+    }
+    if ($isCreate && !empty($field['create']['nonNull'])) {
+        return ' = ' . var_export($field['create']['default'], true);
+    }
+
+    return ' = null';
+}
+
+/**
+ * Ausdruck, mit dem ein Feld in toArray() serialisiert wird.
+ *
+ * In Update-Options kann ein Feld auch {@see Clear} sein – das wird unverändert durchgereicht.
+ *
+ * @param array<string, mixed> $field
+ */
+function optionsExportExpression(array $field, string $value, bool $isCreate, bool $nonNull, bool $dateObjects, bool $boolAsInt): string
+{
+    $isDate = $dateObjects && 'date' === $field['type'];
+    $isBool = $boolAsInt && 'bool' === $field['type'];
+
+    if ($field['enumList']) {
+        return $isCreate ? enumListExpression($field, $value) : "{$value} instanceof Clear ? {$value} : (" . enumListExpression($field, $value) . ')';
+    }
+
+    if (!$isCreate) {
+        return match (true) {
+            null !== $field['enumClass'] => "{$value} instanceof {$field['enumClass']} ? {$value}->value : {$value}",
+            $isDate => "{$value} instanceof DateTimeImmutable ? {$value}->format('Y-m-d') : {$value}",
+            'money' === $field['type'] => "{$value} instanceof Money ? {$value}->toString() : {$value}",
+            $isBool => "\\is_bool({$value}) ? ({$value} ? 1 : 0) : {$value}",
+            default => $value,
+        };
+    }
+
+    if (null !== $field['enumClass']) {
+        $value .= $nonNull ? '->value' : '?->value';
+    }
+    if ($isDate) {
+        $value .= ($nonNull ? '->' : '?->') . "format('Y-m-d')";
+    }
+    if ('money' === $field['type']) {
+        $value .= ($nonNull ? '->' : '?->') . 'toString()';
+    }
+    if ($isBool) {
+        $value = boolAsIntExpression($value, $nonNull);
+    }
+
+    return $value;
 }
 
 /**
@@ -581,7 +1046,11 @@ function boolAsIntExpression(string $value, bool $nonNull): string
  */
 function optionsPhpType(array $field, bool $dateObjects = false): string
 {
-    return $field['enumClass'] ?? ('date' === $field['type'] ? ($dateObjects ? 'DateTimeImmutable' : 'string') : $field['type']);
+    return $field['enumClass'] ?? match ($field['type']) {
+        'date' => $dateObjects ? 'DateTimeImmutable' : 'string',
+        'money' => 'Money',
+        default => $field['type'],
+    };
 }
 
 /**
@@ -688,4 +1157,14 @@ function docBlock(array $lines, string $indent): string
     }
 
     return $out . $indent . " */\n";
+}
+
+/**
+ * camelCase-Property zu einem Billomat-Feld, z. B. `client_id` → `clientId`, `actionkey_raw` → `actionKeyRaw`.
+ */
+function propertyName(string $wire): string
+{
+    $parts = array_map(static fn (string $part): string => COMPOUND_WORDS[$part] ?? $part, explode('_', $wire));
+
+    return lcfirst(str_replace('_', '', ucwords(implode('_', $parts), '_')));
 }

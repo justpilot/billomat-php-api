@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Tests\Internal;
 
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\AccessLevel;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -42,17 +44,80 @@ final class ListCasterTest extends TestCase
         self::assertSame($expected, $ids);
     }
 
-    #[Test]
-    public function toTaxListCastsTaxRows(): void
+    /**
+     * @return iterable<string, array{mixed, list<?int>}>
+     */
+    public static function nestedListCases(): iterable
     {
-        self::assertSame(
-            [['name' => 'MwSt', 'rate' => 19.0, 'amount' => 1.9]],
-            ListCaster::toTaxList(['name' => 'MwSt', 'rate' => '19', 'amount' => '1.9']),
-        );
+        yield 'null' => [null, []];
+        yield 'leerer String statt Wrapper' => ['', []];
+        yield 'Wrapper ohne Liste' => [['other' => [['id' => '5']]], []];
+        yield 'einzelnes Objekt' => [['tax' => ['id' => '5']], [5]];
+        yield 'Liste' => [['tax' => [['id' => '5'], ['id' => '6']]], [5, 6]];
+        yield 'leere Liste' => [['tax' => []], []];
+    }
 
-        self::assertSame(
-            [['name' => '', 'rate' => 0.0, 'amount' => 0.0], ['name' => '7', 'rate' => 7.0, 'amount' => 0.0]],
-            ListCaster::toTaxList([[], ['name' => 7, 'rate' => 7, 'amount' => '']]),
-        );
+    /**
+     * @param list<?int> $expected
+     */
+    #[Test]
+    #[DataProvider('nestedListCases')]
+    public function toNestedListReadsTheListFromItsWrapper(mixed $wrapper, array $expected): void
+    {
+        $ids = ListCaster::toNestedList($wrapper, 'tax', 'id', static fn (array $row): ?int => ScalarCaster::toIntOrNull($row['id'] ?? null));
+
+        self::assertSame($expected, $ids);
+    }
+
+    /**
+     * @return iterable<string, array{mixed, list<PaymentType>}>
+     */
+    public static function enumListCases(): iterable
+    {
+        yield 'null' => [null, []];
+        yield 'leerer String' => ['', []];
+        yield 'kein Skalar' => [['CASH'], []];
+        yield 'ein Wert' => ['CASH', [PaymentType::CASH]];
+        yield 'mehrere Werte in Billomat-Reihenfolge' => ['PAYPAL,CASH', [PaymentType::PAYPAL, PaymentType::CASH]];
+        yield 'Leerzeichen werden entfernt' => [' CASH , PAYPAL ', [PaymentType::CASH, PaymentType::PAYPAL]];
+        yield 'unbekannte und leere Werte fallen heraus' => ['CASH,,BITCOIN,PAYPAL', [PaymentType::CASH, PaymentType::PAYPAL]];
+    }
+
+    /**
+     * @param list<PaymentType> $expected
+     */
+    #[Test]
+    #[DataProvider('enumListCases')]
+    public function toEnumListSplitsCommaSeparatedValues(mixed $value, array $expected): void
+    {
+        self::assertSame($expected, ListCaster::toEnumList($value, PaymentType::class));
+    }
+
+    /**
+     * @return iterable<string, array{mixed, array<string, AccessLevel>}>
+     */
+    public static function enumMapCases(): iterable
+    {
+        yield 'null' => [null, []];
+        yield 'leerer String statt Objekt' => ['', []];
+        yield 'Werte in Billomat-Reihenfolge' => [
+            ['banking' => 'UPDATE', 'articles' => 'DELETE'],
+            ['banking' => AccessLevel::UPDATE, 'articles' => AccessLevel::DELETE],
+        ];
+        yield 'leere und unbekannte Werte fallen heraus' => [
+            ['articles' => 'READ', 'banking' => '', 'clients' => 'ADMIN', 'letters' => null, 'offers' => ['READ']],
+            ['articles' => AccessLevel::READ],
+        ];
+        yield 'Nicht-String-Schlüssel fallen heraus' => [['READ', 'clients' => 'READ'], ['clients' => AccessLevel::READ]];
+    }
+
+    /**
+     * @param array<string, AccessLevel> $expected
+     */
+    #[Test]
+    #[DataProvider('enumMapCases')]
+    public function toEnumMapKeepsKnownValuesPerKey(mixed $value, array $expected): void
+    {
+        self::assertSame($expected, ListCaster::toEnumMap($value, AccessLevel::class));
     }
 }

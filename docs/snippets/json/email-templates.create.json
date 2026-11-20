@@ -1,0 +1,8 @@
+{
+    "email-template": {
+        "name": "Invoice (English)",
+        "subject": "Invoice [Invoice.invoice_number]",
+        "text": "Please find attached our invoice.",
+        "type": "INVOICES"
+    }
+}

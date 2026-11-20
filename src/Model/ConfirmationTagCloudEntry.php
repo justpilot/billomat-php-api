@@ -12,20 +12,34 @@ use Justpilot\Billomat\Internal\ScalarCaster;
  * Jedes Schlagwort wird einmal mit seiner Häufigkeit geliefert.
  *
  * Dokumentation:
- * https://www.billomat.com/en/api/confirmations/tags/
+ * https://www.billomat.com/api/auftragsbestaetigungen/
  *
  * Generiert aus tools/codegen/definitions/confirmation-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
 final readonly class ConfirmationTagCloudEntry
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'count' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
-        /** Interne Billomat-ID des Schlagworts. */
-        public ?int $id,
         /** Name des Schlagworts. */
         public string $name,
         /** Häufigkeit des Schlagworts. */
         public int $count,
+        /** Interne Billomat-ID des Schlagworts. */
+        public ?int $id = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -37,9 +51,10 @@ final readonly class ConfirmationTagCloudEntry
     public static function fromArray(array $data): self
     {
         return new self(
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
+            count: ScalarCaster::required(ScalarCaster::toIntOrNull($data['count'] ?? null), self::class, 'count'),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
-            count: ScalarCaster::toIntOrNull($data['count'] ?? null) ?? 0,
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -53,6 +68,7 @@ final readonly class ConfirmationTagCloudEntry
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'count' => $this->count,

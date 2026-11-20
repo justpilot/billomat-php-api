@@ -4,38 +4,48 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\CommentFilter;
+use Justpilot\Billomat\Api\CommentsApi;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
-use Justpilot\Billomat\Api\CreditNoteCommentsApi;
+use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(CreditNoteCommentsApi::class)]
+#[CoversClass(CommentsApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(CreditNotesApi::class)]
 #[CoversClass(CreditNoteCommentCreateOptions::class)]
 #[CoversClass(CreditNoteComment::class)]
 #[CoversClass(CreditNoteCommentActionKey::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(CommentFilter::class)]
 final class CreditNoteCommentsApiTest extends TestCase
 {
     #[Test]
     public function itListsCommentsByCreditNote(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'credit-note-comments' => [
@@ -48,16 +58,16 @@ final class CreditNoteCommentsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new CreditNoteCommentsApi(new BillomatHttpClient(
-            $mock,
+        $api = new CreditNotesApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $comments = $api->listByCreditNote(42, [CreditNoteCommentActionKey::CREATE]);
+        $comments = $api->list(42, new CommentFilter(actionKeys: [CreditNoteCommentActionKey::CREATE]));
 
         self::assertCount(1, $comments);
-        self::assertSame(CreditNoteCommentActionKey::CREATE, $comments[0]->actionkey);
-        self::assertStringContainsString('credit_note_id=42', $captured['url']);
+        self::assertSame(CreditNoteCommentActionKey::CREATE, $comments[0]->actionKey);
+        self::assertStringContainsString('credit_note_id=42', $captured->url);
     }
 
     #[Test]
@@ -66,7 +76,7 @@ final class CreditNoteCommentsApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if ('POST' === $method) {
                 return new MockResponse(
@@ -80,14 +90,14 @@ final class CreditNoteCommentsApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new CreditNoteCommentsApi(new BillomatHttpClient(
-            $mock,
+        $api = new CreditNotesApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->comments;
 
-        $created = $api->create(new CreditNoteCommentCreateOptions(creditNoteId: 42, comment: 'Hallo'));
+        $created = $api->create(42, new CreditNoteCommentCreateOptions(comment: 'Hallo'));
 
         self::assertSame(99, $created->id);
-        self::assertTrue($api->delete(99));
+        $api->delete(99);
     }
 }

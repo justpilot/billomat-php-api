@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\User;
+use Justpilot\Billomat\Model\UserProperty;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Mitarbeiter/Users.
@@ -16,32 +19,23 @@ use Justpilot\Billomat\Pagination\Page;
 final class UsersApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<UserProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'user', UserProperty::fromArray(...));
+    }
+
+    /**
+     * @param UserFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<User>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(UserFilter|array $filters = []): array
     {
-        $data = $this->getJson('/users', $filters);
-
-        $node = $data['users']['user'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<User> $models */
-        $models = array_map(User::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/users', 'users', 'user', User::fromArray(...), $filters);
     }
 
     /**
@@ -51,11 +45,12 @@ final class UsersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param UserFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<User>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(UserFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/users', 'users', 'user', User::fromArray(...), $filters);
     }
@@ -68,45 +63,81 @@ final class UsersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param UserFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, User>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(UserFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/users', 'users', 'user', User::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?User
     {
-        $data = $this->getJsonOrNull("/users/{$id}");
-
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['user'] ?? null;
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return User::fromArray($row);
+        return $this->getResource("/users/{$id}", 'user', User::fromArray(...), 'fetching user');
     }
 
-    /** Gibt den aktuell authentifizierten Benutzer zurück. */
-    public function getMyself(): ?User
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): User
     {
-        $data = $this->getJsonOrNull('/users/myself');
+        return $this->get($id) ?? throw $this->notFound("/users/{$id}");
+    }
 
-        if (null === $data) {
-            return null;
-        }
+    /**
+     * Gibt den aktuell authentifizierten Benutzer zurück.
+     *
+     * Den gibt es bei gültigem API-Key immer; anders als bei {@see get()} ist ein 404 hier ein
+     * echter Fehler und kommt als {@see NotFoundException} durch.
+     */
+    #[NoDiscard]
+    public function getMyself(): User
+    {
+        return User::fromArray($this->unwrapEnvelope($this->getJson('/users/myself'), 'user', 'fetching own user via /users/myself'));
+    }
 
-        $row = $data['user'] ?? null;
-        if (!\is_array($row)) {
-            return null;
-        }
+    /**
+     * Lädt das Avatar (binäres Bild) eines Benutzers.
+     *
+     * Entspricht GET /users/{id}/avatar?size={size}. Billomat liefert kein JSON, sondern direkt
+     * das Bild (i. d. R. PNG); Rückgabe ist der rohe Body.
+     *
+     * @param int|null $size optionale Kantenlänge in Pixel
+     */
+    #[NoDiscard]
+    public function avatar(int $id, ?int $size = null): string
+    {
+        $query = null !== $size ? ['size' => $size] : [];
 
-        return User::fromArray($row);
+        return $this->getRaw("/users/{$id}/avatar", $query);
+    }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /users/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/users/{$id}", 'user');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /users/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/users/{$id}", 'user', $value);
     }
 }

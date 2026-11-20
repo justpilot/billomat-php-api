@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Internal;
 
 use DateTimeImmutable;
+use InvalidArgumentException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
+use Justpilot\Billomat\Model\Money;
 use Throwable;
 
 /**
@@ -23,6 +26,30 @@ use Throwable;
  */
 final class ScalarCaster
 {
+    /**
+     * Pflichtfeld, das Billomat immer liefert (z. B. `id`): null heißt, es fehlt oder ist unbrauchbar.
+     *
+     * Statt auf 0 oder '' auszuweichen, wird die Antwort als unerwartet abgelehnt.
+     *
+     * @template T
+     *
+     * @param T|null       $value bereits gecasteter Wert, z. B. aus {@see toIntOrNull()}
+     * @param class-string $model Model, das hydriert wird (für die Fehlermeldung)
+     * @param string       $field Billomat-Feldname
+     *
+     * @return T
+     *
+     * @throws UnexpectedResponseException wenn der Wert null ist
+     */
+    public static function required(mixed $value, string $model, string $field): mixed
+    {
+        if (null === $value) {
+            throw new UnexpectedResponseException(\sprintf('Unexpected response from Billomat: %s without a valid "%s" field.', basename(str_replace('\\', '/', $model)), $field));
+        }
+
+        return $value;
+    }
+
     public static function toIntOrNull(mixed $value): ?int
     {
         if (null === $value || '' === $value) {
@@ -55,6 +82,28 @@ final class ScalarCaster
         }
 
         return null;
+    }
+
+    /**
+     * Billomat liefert Beträge als Dezimal-String; Floats (z. B. aus Test-Fixtures) werden
+     * ohne Exponent übernommen. Nicht parsebare Werte werden zu null.
+     */
+    public static function toMoneyOrNull(mixed $value): ?Money
+    {
+        if (\is_float($value)) {
+            // Nachgestellte Nullen entfernt Money selbst.
+            $value = \sprintf('%.10F', $value);
+        }
+
+        if (!\is_string($value) && !\is_int($value)) {
+            return null;
+        }
+
+        try {
+            return '' === $value ? null : Money::of($value);
+        } catch (InvalidArgumentException) {
+            return null;
+        }
     }
 
     public static function toBoolOrNull(mixed $value): ?bool

@@ -1,0 +1,29 @@
+{
+    "credit-note-items": {
+        "credit-note-item": {
+            "id": "10888477",
+            "article_id": "",
+            "credit_note_id": "1794656",
+            "position": "1",
+            "unit": "Stunden",
+            "quantity": "2",
+            "type": "SERVICE",
+            "unit_price": "49.9",
+            "tax_name": "USt",
+            "tax_rate": "19",
+            "tax_rate_reverse_charge": "",
+            "tax_changed_manually": "0",
+            "title": "Text 14",
+            "description": "",
+            "total_net": "99.8",
+            "total_gross": "118.762",
+            "reduction": "",
+            "total_net_unreduced": "99.8",
+            "total_gross_unreduced": "118.762",
+            "customfield": ""
+        },
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "1"
+    }
+}

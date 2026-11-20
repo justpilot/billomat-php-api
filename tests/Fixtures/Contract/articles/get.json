@@ -1,0 +1,42 @@
+{
+    "article": {
+        "id": "1755418",
+        "created": "2026-10-26T16:58:56+01:00",
+        "updated": "2026-10-26T16:58:57+01:00",
+        "archived": "0",
+        "unit_id": "",
+        "article_number": "ART239",
+        "number": "239",
+        "number_pre": "ART",
+        "number_length": "0",
+        "type": "SERVICE",
+        "title": "Text 4",
+        "description": "",
+        "sales_price": "120",
+        "sales_price2": "",
+        "sales_price3": "",
+        "sales_price4": "",
+        "sales_price5": "",
+        "currency_code": "EUR",
+        "tax_id": "271925",
+        "revenue_account_number": "",
+        "cost_center": "",
+        "purchase_price": "",
+        "purchase_price_net_gross": "NET",
+        "supplier_id": "",
+        "customfield": "",
+        "article-property-values": {
+            "article-property-value": {
+                "id": "4605801",
+                "created": "2026-10-26T16:58:57+01:00",
+                "updated": "2026-10-26T16:58:57+01:00",
+                "article_id": "1755418",
+                "article_property_id": "6031",
+                "type": "TEXTFIELD",
+                "name": "Name 10",
+                "value": "Text 2",
+                "customfield": ""
+            }
+        }
+    }
+}

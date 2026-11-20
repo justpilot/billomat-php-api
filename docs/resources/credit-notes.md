@@ -1,40 +1,42 @@
-<!-- Quelle: https://www.billomat.com/api/gutschriften/ -->
+<!-- Source: https://www.billomat.com/api/gutschriften/ -->
 
 # Credit Notes (Gutschriften)
 
-API-Wrapper für Gutschriften unter `/credit-notes` und ihre vier Sub-Ressourcen (`/credit-note-items`, `/credit-note-comments`, `/credit-note-tags`, `/credit-note-payments`).
+API wrapper for credit notes under `/credit-notes` and their four sub-resources (`/credit-note-items`, `/credit-note-comments`, `/credit-note-tags`, `/credit-note-payments`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->creditNotes         // Gutschriften selbst
-$billomat->creditNoteItems     // Positionen
-$billomat->creditNoteComments  // Aktivitäts-Log / freie Kommentare
-$billomat->creditNoteTags      // Schlagworte
-$billomat->creditNotePayments  // Auszahlungen an den Kunden
+$billomat->creditNotes            // credit notes
+$billomat->creditNotes->items     // line items
+$billomat->creditNotes->comments  // activity log / free-form comments
+$billomat->creditNotes->tags      // tags
+$billomat->creditNotes->payments  // payouts to the client
 ```
 
-## Modell
+## Model
 
-Eine Gutschrift (Credit Note) ist eine Korrektur oder Erstattung an den Kunden. Sie kann eigenständig stehen oder über `invoiceId` an eine Original-Rechnung gehängt werden (Korrekturgutschrift). Der Lifecycle ist statusgetrieben:
+A credit note is a correction or refund to the client. It can stand on its own or be linked to an original invoice via `invoiceId` (corrective credit note). The lifecycle is status-driven:
 
 ```
-DRAFT  ── complete() ──▶  OPEN  ── Payment (mark_credit_note_as_paid=1) ──▶  PAID
+DRAFT  ── complete() ──▶  OPEN  ── payment (mark_credit_note_as_paid=1) ──▶  PAID
   │                        │
   │                        └── cancel() ──▶  CANCELED  ── uncancel() ──▶  OPEN
-  └── delete() (nur im DRAFT erlaubt)
+  └── delete() (any status; prefer cancel() once completed)
 ```
 
-Nur Gutschriften im Status `DRAFT` sind voll editierbar — `update()` an einer abgeschlossenen Gutschrift wirft in der Regel `ValidationException`.
+Only credit notes in status `DRAFT` are fully editable. `update()` on a completed credit note usually throws a `ValidationException`.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
 ### `/credit-notes`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/credit-notes` |
-| `get($id)` | GET | `/credit-notes/{id}` |
+| `listPage($filters?)` | GET | `/credit-notes` (one page plus pagination metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/credit-notes` (all pages, lazily) |
+| `get($id)` / `getOrFail($id)` | GET | `/credit-notes/{id}` |
 | `create($options)` | POST | `/credit-notes` |
 | `update($id, $options)` | PUT | `/credit-notes/{id}` |
 | `delete($id)` | DELETE | `/credit-notes/{id}` |
@@ -42,244 +44,308 @@ Nur Gutschriften im Status `DRAFT` sind voll editierbar — `update()` an einer 
 | `cancel($id)` | PUT | `/credit-notes/{id}/cancel` |
 | `uncancel($id)` | PUT | `/credit-notes/{id}/uncancel` |
 | `email($id, $options?)` | POST | `/credit-notes/{id}/email` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/credit-notes/{id}/pdf` |
+| `mail($id, $options?)` | POST | `/credit-notes/{id}/mail` |
+| `pdf($id, $type?)` | GET | `/credit-notes/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/credit-notes/{id}/pdf?format=pdf` |
 | `uploadSignature($id, $base64Pdf)` | PUT | `/credit-notes/{id}/upload-signature` |
+| `listGrouped($groupBy, $filters?)` | GET | `/credit-notes?group_by=…` |
+| `getCustomField($id)` / `setCustomField($id, $value)` | GET/PUT | `/credit-notes/{id}/customfield` |
 
 ### `/credit-note-items`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByCreditNote($creditNoteId, $query?)` | GET | `/credit-note-items?credit_note_id={id}` |
-| `get($id)` | GET | `/credit-note-items/{id}` |
-| `create($creditNoteId, $options)` | POST | `/credit-note-items` |
+| `list($parentId, $filters?)` | GET | `/credit-note-items?credit_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/credit-note-items?credit_note_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/credit-note-items/{id}` |
+| `create($parentId, $options)` | POST | `/credit-note-items` |
 | `update($id, $options)` | PUT | `/credit-note-items/{id}` |
 | `delete($id)` | DELETE | `/credit-note-items/{id}` |
 
 ### `/credit-note-comments`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByCreditNote($creditNoteId, $actionKeys?)` | GET | `/credit-note-comments?credit_note_id={id}` |
-| `get($id)` | GET | `/credit-note-comments/{id}` |
-| `create($options)` | POST | `/credit-note-comments` |
+| `list($parentId, $filters?)` | GET | `/credit-note-comments?credit_note_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/credit-note-comments?credit_note_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/credit-note-comments/{id}` |
+| `create($parentId, $options)` | POST | `/credit-note-comments` |
 | `delete($id)` | DELETE | `/credit-note-comments/{id}` |
 
 ### `/credit-note-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByCreditNote($creditNoteId)` | GET | `/credit-note-tags?credit_note_id={id}` |
+| `list($parentId, $filters?)` | GET | `/credit-note-tags?credit_note_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/credit-note-tags?credit_note_id={id}` (paginated) |
 | `cloud()` | GET | `/credit-note-tags` |
-| `get($id)` | GET | `/credit-note-tags/{id}` |
-| `create($options)` | POST | `/credit-note-tags` |
+| `get($id)` / `getOrFail($id)` | GET | `/credit-note-tags/{id}` |
+| `create($parentId, $options)` | POST | `/credit-note-tags` |
 | `delete($id)` | DELETE | `/credit-note-tags/{id}` |
 
 ### `/credit-note-payments`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `list($filters?)` | GET | `/credit-note-payments` |
-| `get($id)` | GET | `/credit-note-payments/{id}` |
-| `create($options)` | POST | `/credit-note-payments` |
+| `list($parentId?, $filters?)` | GET | `/credit-note-payments` |
+| `listPage($parentId?, $filters?)` / `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/credit-note-payments` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/credit-note-payments/{id}` |
+| `create($parentId, $options)` | POST | `/credit-note-payments` |
 | `delete($id)` | DELETE | `/credit-note-payments/{id}` |
 
-## Methoden
+## Methods
 
-### Credit Notes
+### Credit notes
 
-#### `list(array $filters = []): list<CreditNote>`
+#### `list(CreditNoteFilter|array $filters = []): list<CreditNote>`
 
-Filter werden 1:1 als Query-String an Billomat durchgereicht (`client_id`, `contact_id`, `status`, `from`, `to`, `tags`, `invoice_id`, …). Array-Werte landen als `key[]=…`.
+Billomat filters by `client_id`, `contact_id`, `status`, `from`, `to`, `tags`, `invoice_id` and more.
+
+The typed filter `CreditNoteFilter` is recommended. Its camelCase fields are `clientId`, `contactId`, `creditNoteNumber`, `status` (`list<CreditNoteStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` and `articleId`. Multi-value fields are lists and are sent comma-separated. On top of that there are `orderBy`, `page`, `perPage` and `extra` for further query parameters (e.g. `invoice_id`). A plain array still works: it is passed through to the query string as is, and array values are sent as `key[]=…`.
 
 ```php
-$drafts = $billomat->creditNotes->list([
-    'status' => 'DRAFT',
-    'order_by' => 'created+DESC',
-]);
+use Justpilot\Billomat\Api\CreditNoteFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
+
+$drafts = $billomat->creditNotes->list(new CreditNoteFilter(
+    status: [CreditNoteStatus::DRAFT],
+    orderBy: OrderBy::desc('created'),
+));
 ```
+
+`listPage()` takes the same filters and returns a `Page` with pagination metadata; `iterateAll()` walks through all pages lazily. See [Pagination and filtering](../concepts/pagination-and-filtering.md).
+
+#### `listGrouped(CreditNoteGroupBy|array $groupBy, CreditNoteFilter|array $filters = []): list<CreditNoteGroup>`
+
+Aggregated listing via `?group_by=…`, like [`InvoicesApi::listGrouped()`](invoices.md): instead of individual credit notes, Billomat returns one total row per group. Several axes are combined in order (`client,year` groups by client first, then by year).
+
+```php
+use Justpilot\Billomat\Model\Enum\CreditNoteGroupBy;
+
+$byClient = $billomat->creditNotes->listGrouped(CreditNoteGroupBy::CLIENT);
+foreach ($byClient as $group) {
+    printf("Client %d: %s gross\n", $group->clientId, $group->totalGross?->toString() ?? '-');
+}
+
+// Drill down: $group->creditNoteParams is the matching filter set for list()
+$detail = $billomat->creditNotes->list($byClient[0]->creditNoteParams);
+```
+
+| `group_by` (`CreditNoteGroupBy`) | Filled identifier field of `CreditNoteGroup` |
+|---|---|
+| `CLIENT` | `clientId` |
+| `STATUS` | `status` (`?CreditNoteStatus`) |
+| `DAY` / `WEEK` / `MONTH` / `YEAR` | `day` / `week` / `month` / `year` (each `?string`) |
+
+`totalGross` and `totalNet` (`?Money`) hold the totals; unknown fields land in `$extra`. Other values (e.g. `supplier`) are rejected with HTTP 400 `invalid or empty group_by parameter`.
 
 #### `get(int $id): ?CreditNote`
 
-Liefert `null` bei 404. Eingebettete `credit-note-items` und `taxes` werden automatisch hydriert.
+Returns `null` on 404. Embedded `credit-note-items` and `taxes` are hydrated automatically. `getOrFail()` throws a `NotFoundException` instead of returning `null`.
 
 #### `create(CreditNoteCreateOptions $options): CreditNote`
 
-Items können direkt im `create()`-Call per `addItem()` mitgegeben werden — sie landen unter `credit-note-items.credit-note-item` im Payload.
+Line items can be passed directly in the `create()` call via `items: […]` or `withItem()`. They end up under `credit-note-items.credit-note-item` in the payload.
 
 ```php
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
-$opts = new CreditNoteCreateOptions(clientId: 12345);
-$opts->title = 'Korrektur Rechnung 2026-0042';
-$opts->invoiceId = 9876;
-$opts->date = new DateTimeImmutable('2026-06-02');
+$opts = new CreditNoteCreateOptions(
+    clientId: 12345,
+    title: 'Correction of invoice 2026-0042',
+    invoiceId: 9876,
+    date: new DateTimeImmutable('2026-06-02'),
+);
 
-$item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: -19.90);
-$item->title = 'Rückerstattung Hosting (Mai)';
-$opts->addItem($item);
+$item = new CreditNoteItemCreateOptions(
+    quantity: 1.0,
+    unitPrice: Money::of('-19.90'),
+    title: 'Hosting refund (May)',
+);
+$opts = $opts->withItem($item);
 
 $creditNote = $billomat->creditNotes->create($opts);
 ```
 
 #### `update(int $id, CreditNoteUpdateOptions $options): CreditNote`
 
-Nur im Status `DRAFT` ratsam. Items werden hier **nicht** akzeptiert — die `CreditNoteItemsApi` benutzen.
+Only advisable in status `DRAFT`. Line items are **not** accepted here; use `$billomat->creditNotes->items` instead.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
-Status `DRAFT → OPEN`. Optional kann eine konkrete `templateId` für das PDF mitgegeben werden, sonst greift das Account-Default-Template. Gibt `true` zurück, wenn Billomat mit 200 antwortet.
+Status `DRAFT → OPEN`. Optionally pass a specific `templateId` for the PDF; otherwise the account's default template is used. Errors are thrown as exceptions.
 
-#### `cancel(int $id): bool` / `uncancel(int $id): bool`
+#### `cancel(int $id): void` / `uncancel(int $id): void`
 
-`cancel()` setzt den Status auf `CANCELED`; `uncancel()` kehrt das zurück nach `OPEN`. Beides ist nur an abgeschlossenen Gutschriften sinnvoll.
+`cancel()` sets the status to `CANCELED`; `uncancel()` reverts it to `OPEN`. Both only make sense on completed credit notes.
 
-#### `email(int $id, ?CreditNoteEmailOptions $options = null): bool`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
-Ohne Optionen verwendet Billomat alle Default-Werte des Kunden bzw. der hinterlegten E-Mail-Vorlage. Wirft bei fehlender Empfänger-Konfiguration `ValidationException`.
+Without options, Billomat uses the client's defaults and the configured email template. Throws a `ValidationException` if no recipient is configured.
 
 ```php
-use Justpilot\Billomat\Api\CreditNoteEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-$mail = new CreditNoteEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->bcc = ['buchhaltung@meinefirma.de'];
-$mail->subject = 'Ihre Gutschrift';
-$mail->body = 'Anbei die Gutschrift zur Rechnung 2026-0042.';
+$mail = new EmailOptions(
+    to: ['client@example.com'],
+    bcc: ['accounting@mycompany.com'],
+    subject: 'Your credit note',
+    body: 'Please find attached the credit note for invoice 2026-0042.',
+);
 
 $billomat->creditNotes->email($creditNote->id, $mail);
 ```
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): CreditNotePdf|string`
 
-Liefert per Default ein `CreditNotePdf`-Modell (Metadaten + base64-Body). Mit `$rawPdf = true` wird `?format=pdf` gehängt und der binäre PDF-Inhalt zurückgegeben.
+#### `mail(int $id, ?MailOptions $options = null): void`
+
+Sends the credit note by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
 
 ```php
-$pdf = $billomat->creditNotes->pdf($creditNote->id);                 // Model
-$raw = $billomat->creditNotes->pdf($creditNote->id, rawPdf: true);   // string (PDF binary)
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->creditNotes->mail($id, new MailOptions(duplex: true));
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
 
-Hängt eine vom Kunden unterschriebene PDF-Version an die Gutschrift.
+`pdf()` returns a `DocumentPdf` model (metadata plus base64 body). `pdfContent()` appends `?format=pdf` and returns the binary PDF content (`UnexpectedResponseException` if the body isn't a PDF).
 
-#### `delete(int $id): bool`
+```php
+$pdf = $billomat->creditNotes->pdf($creditNote->id);                 // model
+$raw = $billomat->creditNotes->pdfContent($creditNote->id);        // string (PDF binary)
+```
 
-Funktioniert ausschließlich an Gutschriften im Status `DRAFT`.
+#### `uploadSignature(int $id, string $base64Pdf): void`
 
-### Credit Note Items
+Attaches a signed PDF to the credit note. Billomat keeps it next to its own PDF: `pdf($id, PdfType::SIGNED)` returns the uploaded file, `pdf($id)` still the generated one. Before an upload the signed variant answers 404, so `pdf(..., PdfType::SIGNED)` throws a `NotFoundException`. The document must not be a draft any more.
+
+#### `delete(int $id): void`
+
+Only works on credit notes in status `DRAFT`.
+
+### Credit note items
 
 ```php
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
+use Justpilot\Billomat\Api\CreditNoteItemUpdateOptions;
+use Justpilot\Billomat\Model\Money;
 
-$item = $billomat->creditNoteItems->create(
+$item = $billomat->creditNotes->items->create(
     $creditNote->id,
-    new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: -19.90),
+    new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: Money::of('-19.90')),
 );
 
-$items = $billomat->creditNoteItems->listByCreditNote($creditNote->id);
-$billomat->creditNoteItems->update($item->id, $newOpts);
-$billomat->creditNoteItems->delete($item->id);
+$items = $billomat->creditNotes->items->list($creditNote->id);
+$billomat->creditNotes->items->update($item->id, new CreditNoteItemUpdateOptions(unitPrice: Money::of('-24.90')));
+$billomat->creditNotes->items->delete($item->id);
 ```
 
-`create()` injiziert `credit_note_id` automatisch in den Payload — `CreditNoteItemCreateOptions` selbst hat dieses Feld nicht.
+`create()` adds `credit_note_id` to the payload automatically; `CreditNoteItemCreateOptions` itself has no such field. `update()` takes `CreditNoteItemUpdateOptions`: every field is optional, only the fields you set are sent and Billomat keeps the others.
 
-### Credit Note Comments
+### Credit note comments
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 
-$comment = $billomat->creditNoteComments->create(
+$comment = $billomat->creditNotes->comments->create(
+    $creditNote->id,
     new CreditNoteCommentCreateOptions(
-        creditNoteId: $creditNote->id,
-        comment: 'Kunde bestätigt Rückerstattung per Mail.',
+        comment: 'Client confirmed the refund by email.',
     ),
 );
 
-// Nur EMAIL-/PAYMENT-Einträge des Aktivitäts-Logs
-$entries = $billomat->creditNoteComments->listByCreditNote(
+// Only EMAIL/PAYMENT entries of the activity log
+$entries = $billomat->creditNotes->comments->list(
     $creditNote->id,
-    [CreditNoteCommentActionKey::EMAIL, CreditNoteCommentActionKey::PAYMENT],
+    new CommentFilter(actionKeys: [CreditNoteCommentActionKey::EMAIL, CreditNoteCommentActionKey::PAYMENT]),
 );
 ```
 
-Billomat führt im selben Endpunkt sowohl freie User-Kommentare als auch System-Audit-Einträge (Status-Wechsel, Payment, E-Mail-Versand). Über `$actionKeys` lässt sich nach Typ filtern — die Werte werden als CSV (`actionkey=EMAIL,PAYMENT`) übergeben.
+Billomat keeps both free-form user comments and system audit entries (status changes, payments, emails sent) in the same endpoint. `CommentFilter::$actionKeys` filters by type; the values are sent comma-separated (`actionkey=EMAIL,PAYMENT`).
 
-### Credit Note Tags
+### Credit note tags
 
 ```php
 use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
 
-$billomat->creditNoteTags->create(
-    new CreditNoteTagCreateOptions(creditNoteId: $creditNote->id, name: 'rückerstattung'),
+$billomat->creditNotes->tags->create(
+    $creditNote->id,
+    new CreditNoteTagCreateOptions(name: 'refund'),
 );
 
-$tags = $billomat->creditNoteTags->listByCreditNote($creditNote->id);
-$cloud = $billomat->creditNoteTags->cloud(); // aggregiert, mit count
+$tags = $billomat->creditNotes->tags->list($creditNote->id);
+$cloud = $billomat->creditNotes->tags->cloud(); // aggregated, with count
 ```
 
-Ein Update gibt es nicht — zum Umbenennen muss der Tag gelöscht und neu angelegt werden.
+There is no update. To rename a tag, delete it and create it again.
 
-### Credit Note Payments
+### Credit note payments
 
 ```php
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $payment = new CreditNotePaymentCreateOptions(
-    creditNoteId: $creditNote->id,
-    amount: 19.90,
+    amount: Money::of('19.90'),
+    type: PaymentType::BANK_TRANSFER,
+    date: new DateTimeImmutable('2026-06-05'),
+    markCreditNoteAsPaid: true,
 );
-$payment->type = InvoicePaymentType::BANK_TRANSFER;
-$payment->date = new DateTimeImmutable('2026-06-05');
-$payment->markCreditNoteAsPaid = true;
 
-$billomat->creditNotePayments->create($payment);
+$billomat->creditNotes->payments->create($creditNote->id, $payment);
+
+$payments = $billomat->creditNotes->payments->list($creditNote->id);
 ```
 
-Erst beim Anlegen einer Auszahlung mit `markCreditNoteAsPaid = true` (Wire-Wert `1`) wechselt die Gutschrift in den Status `PAID`. Ohne das Flag bleibt sie `OPEN` und behält einen `openAmount > 0`.
+The credit note only switches to status `PAID` when a payout is created with `markCreditNoteAsPaid: true` (wire value `1`). Without the flag it stays `OPEN` and keeps a positive `openAmount` (`$creditNote->openAmount?->isPositive()`).
 
-## Write-Modell: `CreditNoteCreateOptions`
+## Write model: `CreditNoteCreateOptions`
 
-Konstruktor: `new CreditNoteCreateOptions(int $clientId)`.
+Constructor: `new CreditNoteCreateOptions(int $clientId, …)`. `clientId` is required and the first parameter. Every field is a constructor parameter with a default and is passed as a named argument. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withTitle('New')`).
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` (Pflicht) | |
+| `clientId` | `client_id` | `int` (required) | |
 | `contactId` | `contact_id` | `?int` | |
-| `address` | `address` | `?string` | mehrzeilige Anschrift, überschreibt Kunden-Adresse |
+| `address` | `address` | `?string` | multi-line address, overrides the client address |
 | `numberPre` | `number_pre` | `?string` | |
-| `number` | `number` | `?int` | manuelle Nummerierung — kollidiert mit Auto-Numbering |
+| `number` | `number` | `?int` | manual numbering; conflicts with auto-numbering |
 | `numberLength` | `number_length` | `?int` | |
-| `date` | `date` | `?\DateTimeImmutable` | formatiert als `Y-m-d` |
+| `date` | `date` | `?\DateTimeImmutable` | formatted as `Y-m-d` |
 | `title` | `title` | `?string` | |
 | `label` | `label` | `?string` | |
 | `intro` | `intro` | `?string` | |
 | `note` | `note` | `?string` | |
-| `reduction` | `reduction` | `?string` | absolut oder mit `%`-Suffix |
-| `currencyCode` | `currency_code` | `?string` | ISO 4217, z. B. `EUR` |
-| `netGross` | `net_gross` | `?NetGross` | `NET` / `GROSS` |
-| `quote` | `quote` | `?float` | Umrechnungskurs für Fremdwährung |
-| `invoiceId` | `invoice_id` | `?int` | Quell-Rechnung bei Korrekturgutschrift |
+| `reduction` | `reduction` | `?string` | absolute or with `%` suffix |
+| `currencyCode` | `currency_code` | `?string` | ISO 4217, e.g. `EUR` |
+| `netGross` | `net_gross` | `?NetGross` | `NET` / `GROSS` / `SETTINGS` |
+| `quote` | `quote` | `?float` | exchange rate for foreign currency |
+| `invoiceId` | `invoice_id` | `?int` | source invoice of a corrective credit note |
 | `freeTextId` | `free_text_id` | `?int` | |
 | `templateId` | `template_id` | `?int` | |
 
-Items werden über `addItem(CreditNoteItemCreateOptions)` angehängt; `getItems()` listet sie auf. `toArray()` rendert sie unter `credit-note-items.credit-note-item`.
+Line items are passed as a list via the constructor parameter `items` (`items: [new CreditNoteItemCreateOptions(…), …]`) and are then available in the `$items` property. `withItem()` returns a copy with one additional item. `toArray()` renders them as `credit-note-items.credit-note-item`.
 
-## Write-Modell: `CreditNoteUpdateOptions`
+## Write model: `CreditNoteUpdateOptions`
 
-Spiegelt `CreditNoteCreateOptions` ohne `clientId`-Pflicht (jetzt nullable) und ohne Items-Helper. Felder, die `null` bleiben, werden aus dem Payload gestrippt und damit serverseitig nicht angefasst.
+Mirrors `CreditNoteCreateOptions`, but `clientId` is optional (nullable) and there is no `items`. Fields left at `null` are stripped from the payload and remain unchanged on the server. `Clear::Field` instead sends the field as JSON `null`, and Billomat empties it, e.g. `new CreditNoteUpdateOptions(note: Clear::Field)`.
 
-## Write-Modell: `CreditNoteItemCreateOptions`
+## Write model: `CreditNoteItemCreateOptions`
 
-Konstruktor: `new CreditNoteItemCreateOptions(float $quantity, float $unitPrice)`. Beide Werte sind Pflicht und werden **auch dann mitgeschickt, wenn sie `0` sind** (Sonderfall im `toArray()`-Filter).
+Constructor: `new CreditNoteItemCreateOptions(float $quantity, Money $unitPrice)`. Both values are required and are **sent even when they are `0`** (special case in the `toArray()` filter).
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `quantity` | `quantity` | `float` (Pflicht) | |
-| `unitPrice` | `unit_price` | `float` (Pflicht) | negativ möglich, üblich bei Rückerstattung |
-| `type` | `type` | `?InvoiceItemType` | wiederverwendet aus Invoice-Domain |
+| `quantity` | `quantity` | `float` (required) | |
+| `unitPrice` | `unit_price` | `Money` (required) | may be negative, common for refunds |
+| `type` | `type` | `?ItemType` | shared with the invoice domain |
 | `articleId` | `article_id` | `?int` | |
 | `title` | `title` | `?string` | |
 | `description` | `description` | `?string` | |
@@ -288,42 +354,43 @@ Konstruktor: `new CreditNoteItemCreateOptions(float $quantity, float $unitPrice)
 | `taxRate` | `tax_rate` | `?float` | |
 | `taxChangedManually` | `tax_changed_manually` | `?bool` | |
 | `reduction` | `reduction` | `?string` | |
-| `position` | `position` | `?int` | Sortierung in der PDF |
+| `position` | `position` | `?int` | sort order in the PDF |
 
-## Write-Modell: `CreditNoteCommentCreateOptions`
+## Write model: `CreditNoteCommentCreateOptions`
 
-Konstruktor: `new CreditNoteCommentCreateOptions(int $creditNoteId, string $comment)`.
+Constructor: `new CreditNoteCommentCreateOptions(string $comment)`. The credit note ID isn't part of the options: pass it as the first argument of `create()`, which adds `credit_note_id` to the payload.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `creditNoteId` | `credit_note_id` | `int` (Pflicht) | |
-| `comment` | `comment` | `string` (Pflicht) | |
-| `actionkey` | `actionkey` | `?CreditNoteCommentActionKey` | wird in der Regel von Billomat gesetzt; manuell nur für Audit-Marker sinnvoll |
+| `comment` | `comment` | `string` (required) | |
+| `actionKey` | `actionkey` | `?CreditNoteCommentActionKey` | usually set by Billomat; set manually only for audit markers |
 
-## Write-Modell: `CreditNoteTagCreateOptions`
+## Write model: `CreditNoteTagCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+The credit note ID isn't part of the options: pass it as the first argument of `create()`, which adds `credit_note_id` to the payload.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `creditNoteId` | `credit_note_id` | `int` (Pflicht) | |
-| `name` | `name` | `string` (Pflicht) | |
+| `name` | `name` | `string` (required) | |
 
-## Write-Modell: `CreditNotePaymentCreateOptions`
+## Write model: `CreditNotePaymentCreateOptions`
 
-Konstruktor: `new CreditNotePaymentCreateOptions(int $creditNoteId, float $amount)`.
+Constructor: `new CreditNotePaymentCreateOptions(Money $amount)`. The credit note ID isn't part of the options: pass it as the first argument of `create()`, which adds `credit_note_id` to the payload.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `creditNoteId` | `credit_note_id` | `int` (Pflicht) | wird immer mitgeschickt |
-| `amount` | `amount` | `float` (Pflicht) | wird immer mitgeschickt |
+| `amount` | `amount` | `Money` (required) | always sent |
 | `date` | `date` | `?\DateTimeImmutable` | `Y-m-d` |
+| `type` | `type` | `?PaymentType` | same enum as invoice payments |
 | `comment` | `comment` | `?string` | |
-| `transactionPurpose` | `transaction_purpose` | `?string` | Verwendungszweck der Überweisung |
-| `type` | `type` | `?InvoicePaymentType` | dieselbe Enum wie bei Rechnungs-Zahlungen |
-| `markCreditNoteAsPaid` | `mark_credit_note_as_paid` | `bool` | wird **immer** mitgesendet, als `1` oder `0` |
+| `transactionPurpose` | `transaction_purpose` | `?string` | bank transfer reference |
+| `markCreditNoteAsPaid` | `mark_credit_note_as_paid` | `bool` | **always** sent, as `1` or `0` |
 
-## Write-Modell: `CreditNoteEmailOptions`
+## Write model: `EmailOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+Shared class for sending every document type by email (invoices, offers, confirmations, credit notes, delivery notes, reminders, letters); the full description is on the [Invoices](invoices.md#write-model-emailoptions) page.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `emailTemplateId` | `email_template_id` | `?int` | |
 | `from` | `from` | `?string` | |
@@ -332,155 +399,176 @@ Konstruktor: `new CreditNotePaymentCreateOptions(int $creditNoteId, float $amoun
 | `bcc` | `recipients.bcc` | `list<string>` | |
 | `subject` | `subject` | `?string` | |
 | `body` | `body` | `?string` | |
-| `filename` | `filename` | `?string` | Name des angehängten PDFs |
-| `attachments` | `attachments.attachment` | `list<array{filename,mimetype,base64file}>` | zusätzliche Anhänge |
+| `filename` | `filename` | `?string` | name of the attached PDF |
+| `attachments` | `attachments.attachment` | `list<Attachment>` | additional attachments |
 
-Leere Empfänger-Arrays werden im Payload weggelassen, damit Billomat den Default aus der E-Mail-Vorlage zieht.
+Empty recipient arrays are left out of the payload so Billomat falls back to the email template's defaults.
 
-## Read-Modell: `CreditNote`
+## Read model: `CreditNote`
 
 `final readonly class CreditNote`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `creditNoteNumber` | `?string` (formatierte Nummer inkl. Präfix) |
+| `creditNoteNumber` | `?string` (formatted number including prefix) |
 | `number`, `numberPre`, `numberLength` | `?int`, `?string`, `?int` |
 | `status` | `?CreditNoteStatus` |
 | `date` | `?\DateTimeImmutable` |
 | `address`, `title`, `label`, `intro`, `note` | `?string` |
-| `totalGross`, `totalNet` | `?float` |
+| `totalGross`, `totalNet` | `?Money` |
 | `netGross` | `?NetGross` |
 | `reduction` | `?string` |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `paidAmount`, `openAmount` | `?float` |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
+| `paidAmount`, `openAmount` | `?Money` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `invoiceId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
-| `customerportalUrl` | `?string` |
+| `taxes` | `list<TaxSummary>`: tax summary per rate (`name`, `rate`, `amount`, `amountNet`, `amountGross`, the latter each also as `*Plain`/`*Rounded`; amounts as `Money`) |
 | `items` | `list<CreditNoteItem>` |
 | `updated` | `?\DateTimeImmutable` |
-| `totalReduction` | `?float` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `totalReduction` | `?Money` |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
-> **Veraltet seit 3.1:** `customerportalUrl`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
+## Read model: `CreditNoteItem`
 
-## Read-Modell: `CreditNoteItem`
-
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `?int` |
 | `articleId` | `?int` |
 | `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
+| `quantity`, `unitPrice` | `float`, `Money` |
 | `taxName`, `taxRate`, `taxChangedManually` | `?string`, `?float`, `?bool` |
 | `title`, `description`, `reduction` | `?string` |
-| `type` | `?InvoiceItemType` |
-| `totalGross`, `totalNet` | `?float` |
-| `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `created` | `?\DateTimeImmutable` |
+| `type` | `?ItemType` |
+| `totalGross`, `totalNet` | `?Money` |
+| `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `taxRateReverseCharge` | `?float` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
+## Read model: `CreditNoteComment`
 
-## Read-Modell: `CreditNoteComment`
-
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?CreditNoteCommentActionKey` |
-| `actionkeyRaw` | `?string` (Roh-Wert, falls Billomat einen unbekannten Key liefert) |
+| `actionKey` | `?CreditNoteCommentActionKey` |
+| `actionKeyRaw` | `?string` (raw value in case Billomat sends an unknown key) |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `CreditNoteTag`
+## Read model: `CreditNoteTag`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `CreditNoteTagCloudEntry`
+## Read model: `CreditNoteTagCloudEntry`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
 | `count` | `int` |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `CreditNotePayment`
+## Read model: `CreditNotePayment`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `creditNoteId` | `int` |
 | `date` | `?\DateTimeImmutable` |
-| `amount` | `float` |
-| `type` | `?InvoicePaymentType` |
+| `amount` | `Money` |
+| `type` | `?PaymentType` |
 | `comment`, `transactionPurpose` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `paymentGroup` | `?string` |
-| `finapiTransactionId` | `?string` (finAPI-Bankabgleich) |
-| `finapiTransactionAmount` | `?float` (finAPI-Bankabgleich) |
+| `finapiTransactionId` | `?string` (finAPI bank reconciliation) |
+| `finapiTransactionAmount` | `?Money` (finAPI bank reconciliation) |
 | `documentTitle` | `?string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `CreditNotePdf`
+## Read model: `CreditNoteGroup`
 
-`final class CreditNotePdf` (nicht `readonly`, da als Wrapper konzipiert).
+Row of `listGrouped()`: `totalGross`, `totalNet` (`?Money`), `clientId` (`?int`), `status` (`?CreditNoteStatus`), `day`, `week`, `month`, `year` (`?string`), `creditNoteParams` (`array<string, scalar>`, the filter set for a drill-down via `list()`) and `extra`.
 
-| Property | Typ |
+## Read model: `DocumentPdf`
+
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
+
+| Property | Type |
 |---|---|
-| `id`, `creditNoteId` | `int` |
+| `id` | `int` |
+| `documentId` | `int` (Billomat field `credit_note_id`) |
 | `created` | `?\DateTimeImmutable` |
-| `filename`, `mimeType` | `string` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `filename` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` dekodiert `base64file` zurück in Roh-Bytes.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `credit_note_id`, `filename` or `base64file` is missing.
 
-## Verwendete Enums
+## Enums used
 
 - [`CreditNoteStatus`](../../src/Model/Enum/CreditNoteStatus.php): `DRAFT`, `OPEN`, `PAID`, `CANCELED`.
 - [`CreditNoteCommentActionKey`](../../src/Model/Enum/CreditNoteCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `UNCANCEL`, `CHANGE_STATUS`, `PAYMENT`, `EMAIL`, `MAIL`, `COMMENT`.
-- [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`.
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): wiederverwendet für Item-Typen.
-- [`InvoicePaymentType`](../../src/Model/Enum/InvoicePaymentType.php): wiederverwendet für Zahlungsarten (`BANK_TRANSFER`, `PAYPAL`, `CASH`, …).
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `pdf()` akzeptiert dieselben PDF-Varianten wie bei Invoices.
+- [`CreditNoteGroupBy`](../../src/Model/Enum/CreditNoteGroupBy.php): `CLIENT`, `STATUS`, `DAY`, `WEEK`, `MONTH`, `YEAR`, the aggregation axes for `listGrouped()`.
+- [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): shared item types (`PRODUCT`, `SERVICE`).
+- [`PaymentType`](../../src/Model/Enum/PaymentType.php): shared payment types (`BANK_TRANSFER`, `PAYPAL`, `CASH`, …).
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `pdf()` accepts the same PDF variants as for invoices.
 
-## Stolpersteine
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-- **`update()` nur im DRAFT.** Sobald die Gutschrift abgeschlossen ist, ignoriert Billomat die meisten Felder oder antwortet mit 422. Vor dem Editieren stets `cancel()` → `update()` → `complete()` in Erwägung ziehen.
-- **Items im Update-Payload werden ignoriert.** `CreditNoteUpdateOptions` hat bewusst kein `addItem()`. Positionsänderungen laufen über die `CreditNoteItemsApi`.
-- **`markCreditNoteAsPaid` ist immer im Payload.** Anders als die anderen Felder wird `mark_credit_note_as_paid` nicht weggefiltert — der Default `false` wird als `0` mitgesendet. Beim Setzen auf `true` flippt der Status auf `PAID`, sobald die Summe der Payments den Bruttobetrag erreicht.
-- **`quantity` und `unitPrice` bleiben im Payload, auch wenn sie `0` sind.** `CreditNoteItemCreateOptions::toArray()` whitelistet sie explizit gegen den `array_filter`.
-- **Negative Beträge bei Items.** Eine Gutschrift gleicht eine Rechnung aus — die Praxis ist, im `unitPrice` einen negativen Wert anzugeben (z. B. `-19.90`). Billomat akzeptiert das ohne Umweg.
-- **`number` manuell setzen kollidiert mit Auto-Numbering.** Wenn der Account auf automatische Nummern eingestellt ist, führt ein manuelles `number` zu einer `ValidationException` bei `complete()`.
-- **`uncancel()` setzt zurück auf `OPEN`, nicht auf `DRAFT`.** Eine versehentlich stornierte Gutschrift kann reaktiviert werden, aber sie ist danach nicht wieder editierbar.
-- **`actionkey` im Comment-Filter ist CSV, kein Array.** `listByCreditNote($id, [...])` übergibt mehrere ActionKeys als komma-separierten String, nicht als `actionkey[]=…`.
-- **Tag-Cloud vs. Liste am selben Endpunkt.** `GET /credit-note-tags` ohne `credit_note_id` liefert die aggregierte Cloud (`tag`-Wrapper); mit `credit_note_id` die konkreten Tags (`credit-note-tag`-Wrapper). Der SDK trennt das in `cloud()` und `listByCreditNote()`.
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-## End-to-End-Beispiel
+::: code-group
+<<< @/snippets/json/credit-notes.create.json [POST /credit-notes]
+<<< @/../tests/Fixtures/Contract/credit-notes/get.json [GET /credit-notes/{id} (response)]
+<<< @/../tests/Fixtures/Contract/credit-notes/list.json [GET /credit-notes (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes credit notes in any status. Once completed, prefer `cancel()`: the document is numbered, and deleting it leaves a gap in the number sequence (GoBD).
+- **`update()` only in DRAFT.** Once the credit note is completed, Billomat ignores most fields or responds with 422. Before editing, consider `cancel()` → `update()` → `complete()`.
+- **Items in the update payload are ignored.** `CreditNoteUpdateOptions` deliberately has no `items` field. Change line items through `$billomat->creditNotes->items`.
+- **`markCreditNoteAsPaid` is always in the payload.** Unlike other fields, `mark_credit_note_as_paid` is not filtered out: the default `false` is sent as `0`. With `true`, the status flips to `PAID` once the sum of payments reaches the gross total.
+- **`quantity` and `unitPrice` stay in the payload even when they are `0`.** `CreditNoteItemCreateOptions::toArray()` explicitly whitelists them against the `array_filter`.
+- **Negative amounts on items.** A credit note offsets an invoice; the usual practice is a negative `unitPrice` (e.g. `-19.90`). Billomat accepts that directly.
+- **Setting `number` manually conflicts with auto-numbering.** If the account uses automatic numbers, a manual `number` leads to a `ValidationException` on `complete()`.
+- **`uncancel()` reverts to `OPEN`, not to `DRAFT`.** An accidentally canceled credit note can be reactivated, but it is not editable afterwards.
+- **`actionkey` in the comment filter is CSV, not an array.** `list($id, new CommentFilter(actionKeys: [...]))` sends multiple action keys as a comma-separated string, not as `actionkey[]=…`.
+- **Tag cloud and list share the same endpoint.** `GET /credit-note-tags` without `credit_note_id` returns the aggregated cloud (`tag` wrapper); with `credit_note_id` it returns the actual tags (`credit-note-tag` wrapper). The SDK splits this into `cloud()` and `list()`.
+
+## End-to-end example
 
 ```php
 <?php
@@ -490,64 +578,71 @@ declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
-use Justpilot\Billomat\Api\CreditNoteEmailOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotePaymentCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteTagCreateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoicePaymentType;
+use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Korrekturgutschrift zur Rechnung 9876 anlegen
-$opts = new CreditNoteCreateOptions(clientId: 12345);
-$opts->invoiceId = 9876;
-$opts->title = 'Korrektur Rechnung 2026-0042';
-$opts->date = new DateTimeImmutable('2026-06-02');
-$opts->intro = 'Wir erstatten Ihnen den anteiligen Hosting-Betrag für Mai.';
+// 1) Create a corrective credit note for invoice 9876
+$opts = new CreditNoteCreateOptions(
+    clientId: 12345,
+    invoiceId: 9876,
+    title: 'Correction of invoice 2026-0042',
+    date: new DateTimeImmutable('2026-06-02'),
+    intro: 'We are refunding the pro-rata hosting fee for May.',
+);
 
-$item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: -19.90);
-$item->title = 'Rückerstattung Webhosting Basic (Mai)';
-$opts->addItem($item);
+$item = new CreditNoteItemCreateOptions(
+    quantity: 1.0,
+    unitPrice: Money::of('-19.90'),
+    title: 'Web hosting Basic refund (May)',
+);
+$opts = $opts->withItem($item);
 
 $creditNote = $billomat->creditNotes->create($opts);
-printf("Gutschrift #%d angelegt (Status: %s)\n",
+printf("Credit note #%d created (status: %s)\n",
     $creditNote->id,
-    $creditNote->status?->label() ?? 'unbekannt',
+    $creditNote->status?->label() ?? 'unknown',
 );
 
-// 2) Abschließen — DRAFT → OPEN
+// 2) Complete: DRAFT → OPEN
 $billomat->creditNotes->complete($creditNote->id);
 
-// 3) Tag setzen
-$billomat->creditNoteTags->create(
-    new CreditNoteTagCreateOptions(creditNoteId: $creditNote->id, name: 'rückerstattung'),
+// 3) Add a tag
+$billomat->creditNotes->tags->create(
+    $creditNote->id,
+    new CreditNoteTagCreateOptions(name: 'refund'),
 );
 
-// 4) Per E-Mail versenden
-$mail = new CreditNoteEmailOptions();
-$mail->to = ['kunde@example.com'];
-$mail->bcc = ['buchhaltung@meinefirma.de'];
-$mail->subject = 'Ihre Gutschrift zur Rechnung 2026-0042';
-$mail->body = "Guten Tag,\n\nanbei die Gutschrift.\n\nViele Grüße";
+// 4) Send by email
+$mail = new EmailOptions(
+    to: ['client@example.com'],
+    bcc: ['accounting@mycompany.com'],
+    subject: 'Your credit note for invoice 2026-0042',
+    body: "Hello,\n\nplease find the credit note attached.\n\nBest regards",
+);
 $billomat->creditNotes->email($creditNote->id, $mail);
 
-// 5) Auszahlung verbuchen — OPEN → PAID
+// 5) Record the payout: OPEN → PAID
 $payment = new CreditNotePaymentCreateOptions(
-    creditNoteId: $creditNote->id,
-    amount: 19.90,
+    amount: Money::of('19.90'),
+    type: PaymentType::BANK_TRANSFER,
+    date: new DateTimeImmutable('2026-06-05'),
+    transactionPurpose: 'Hosting refund May',
+    markCreditNoteAsPaid: true,
 );
-$payment->type = InvoicePaymentType::BANK_TRANSFER;
-$payment->date = new DateTimeImmutable('2026-06-05');
-$payment->transactionPurpose = 'Erstattung Hosting Mai';
-$payment->markCreditNoteAsPaid = true;
 
-$billomat->creditNotePayments->create($payment);
+$billomat->creditNotes->payments->create($creditNote->id, $payment);
 
-// 6) PDF abholen
-$pdfBinary = $billomat->creditNotes->pdf($creditNote->id, rawPdf: true);
-file_put_contents("gutschrift-{$creditNote->id}.pdf", $pdfBinary);
+// 6) Download the PDF
+$pdfBinary = $billomat->creditNotes->pdfContent($creditNote->id);
+file_put_contents("credit-note-{$creditNote->id}.pdf", $pdfBinary);
 ```

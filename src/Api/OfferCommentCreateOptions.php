@@ -17,16 +17,9 @@ use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
  * Generiert aus tools/codegen/definitions/offer-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class OfferCommentCreateOptions
+final readonly class OfferCommentCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: offer_id
-         * Typ: INT
-         */
-        public int $offerId,
         /**
          * Kommentartext.
          *
@@ -34,27 +27,43 @@ final class OfferCommentCreateOptions
          * Typ: ALNUM
          */
         public string $comment,
+        /**
+         * ActionKey als Enum, sofern bekannt.
+         *
+         * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
+         * bei system-getriebenen Kommentaren selbst.
+         *
+         * Billomat-Feld: actionkey
+         */
+        public ?OfferCommentActionKey $actionKey = null,
+        /**
+         * Sichtbarkeit für die Aktivitäten-Liste des Kunden.
+         *
+         * Billomat-Feld: public
+         * Typ: BOOL
+         * Default: 0
+         */
+        public ?bool $public = null,
     ) {
     }
 
-    /**
-     * ActionKey als Enum, sofern bekannt.
-     *
-     * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
-     * bei system-getriebenen Kommentaren selbst.
-     *
-     * Billomat-Feld: actionkey
-     */
-    public ?OfferCommentActionKey $actionkey = null;
+    /** Kopie mit geändertem `comment`. */
+    public function withComment(string $comment): self
+    {
+        return clone($this, ['comment' => $comment]);
+    }
 
-    /**
-     * Sichtbarkeit für die Aktivitäten-Liste des Kunden.
-     *
-     * Billomat-Feld: public
-     * Typ: BOOL
-     * Default: 0
-     */
-    public ?bool $public = null;
+    /** Kopie mit geändertem `actionKey`. */
+    public function withActionKey(?OfferCommentActionKey $actionKey): self
+    {
+        return clone($this, ['actionKey' => $actionKey]);
+    }
+
+    /** Kopie mit geändertem `public`. */
+    public function withPublic(?bool $public): self
+    {
+        return clone($this, ['public' => $public]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -63,14 +72,10 @@ final class OfferCommentCreateOptions
      */
     public function toArray(): array
     {
-        $data = [
-            'offer_id' => $this->offerId,
+        return array_filter([
             'comment' => $this->comment,
-            'actionkey' => $this->actionkey?->value,
+            'actionkey' => $this->actionKey?->value,
             'public' => $this->public,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

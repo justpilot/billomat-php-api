@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Model\Activity;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für den Aktivitätsfeed (`/activity-feed`).
@@ -23,10 +24,11 @@ final class ActivitiesApi extends AbstractApi
      *
      * Entspricht GET /activity-feed.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Activity>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource('/activity-feed', 'activity-feed', 'activity', Activity::fromArray(...), $filters);
@@ -35,10 +37,11 @@ final class ActivitiesApi extends AbstractApi
     /**
      * Eine einzelne Seite samt Pagination-Metadaten.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Activity>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/activity-feed', 'activity-feed', 'activity', Activity::fromArray(...), $filters);
@@ -47,10 +50,11 @@ final class ActivitiesApi extends AbstractApi
     /**
      * Iteriert lazy durch den vollständigen Feed.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Activity>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/activity-feed', 'activity-feed', 'activity', Activity::fromArray(...), $filters, $pageSize);

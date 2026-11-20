@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/article-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ArticleTagCreateOptions
+final readonly class ArticleTagCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: article_id
-         * Typ: INT
-         */
-        public int $articleId,
         /**
          * Name des Schlagworts.
          *
@@ -33,6 +26,12 @@ final class ArticleTagCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -41,7 +40,6 @@ final class ArticleTagCreateOptions
     public function toArray(): array
     {
         return [
-            'article_id' => $this->articleId,
             'name' => $this->name,
         ];
     }

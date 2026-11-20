@@ -1,413 +1,453 @@
-<!-- Quelle: https://www.billomat.com/api/auftragsbestaetigungen/ -->
+<!-- Source: https://www.billomat.com/api/auftragsbestaetigungen/ -->
 
 # Confirmations (Auftragsbestätigungen)
 
-API-Wrapper für Auftragsbestätigungen unter `/confirmations` und ihre drei Sub-Ressourcen (`/confirmation-items`, `/confirmation-comments`, `/confirmation-tags`).
+API wrapper for order confirmations under `/confirmations` and their three sub-resources (`/confirmation-items`, `/confirmation-comments`, `/confirmation-tags`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->confirmations          // Auftragsbestätigungen selbst
-$billomat->confirmationItems      // Positionen
-$billomat->confirmationComments   // Kommentare / Audit-Trail
-$billomat->confirmationTags       // Schlagworte
+$billomat->confirmations             // order confirmations
+$billomat->confirmations->items      // line items
+$billomat->confirmations->comments   // comments / audit trail
+$billomat->confirmations->tags       // tags
 ```
 
-## Modell
+## Model
 
-Eine Auftragsbestätigung dokumentiert verbindlich einen Auftrag — typischerweise nach Annahme eines [Angebots](offers.md) und vor der eigentlichen Rechnung. Der Status-Lebenszyklus ist schlanker als beim Angebot, kennt aber keine Annahme/Ablehnung:
+An order confirmation is the binding record of an order, typically issued after an [offer](offers.md) has been accepted and before the actual invoice. Its status lifecycle is simpler than the offer's and has no accept/reject step:
 
 ```
-DRAFT  ──complete()──▶  OPEN  ──clear()───▶  CLEARED
-                         │
+DRAFT  ──complete()──▶  COMPLETED  ──clear()────▶  CLEARED
+                         │   ▲  ◀──unclear()──────┘
+                         │   │
+                         │   └──uncancel()──┐
                          └──cancel()──▶  CANCELED
 ```
 
-`undo()` setzt `CLEARED`/`CANCELED` zurück auf `OPEN`. Voll editierbar ist die Auftragsbestätigung nur im Status `DRAFT`. Die Quelle aus einem Angebot wird über `offerId` referenziert.
+`unclear()` and `uncancel()` set `CLEARED`/`CANCELED` back to `COMPLETED` (older accounts may report `OPEN` instead of `COMPLETED`). The confirmation is only fully editable in status `DRAFT`. The source offer is referenced via `offerId`.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
 ### `/confirmations`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/confirmations` |
-| `get($id)` | GET | `/confirmations/{id}` |
+| `listPage($filters?)` | GET | `/confirmations` (one page plus pagination metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/confirmations` (all pages, lazily) |
+| `get($id)` / `getOrFail($id)` | GET | `/confirmations/{id}` |
 | `create($options)` | POST | `/confirmations` |
 | `update($id, $options)` | PUT | `/confirmations/{id}` |
 | `delete($id)` | DELETE | `/confirmations/{id}` |
 | `complete($id, $templateId?)` | PUT | `/confirmations/{id}/complete` |
 | `cancel($id)` | PUT | `/confirmations/{id}/cancel` |
+| `uncancel($id)` | PUT | `/confirmations/{id}/uncancel` |
 | `clear($id)` | PUT | `/confirmations/{id}/clear` |
-| `undo($id)` | PUT | `/confirmations/{id}/undo` |
+| `unclear($id)` | PUT | `/confirmations/{id}/unclear` |
 | `email($id, $options?)` | POST | `/confirmations/{id}/email` |
-| `uploadSignature($id, $base64Pdf)` | PUT | `/confirmations/{id}/upload-signature` |
-| `pdf($id, $type?, $rawPdf?)` | GET | `/confirmations/{id}/pdf` |
+| `mail($id, $options?)` | POST | `/confirmations/{id}/mail` |
+| `pdf($id, $type?)` | GET | `/confirmations/{id}/pdf` |
+| `pdfContent($id, $type?)` | GET | `/confirmations/{id}/pdf?format=pdf` |
 
 ### `/confirmation-items`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByConfirmation($confirmationId, $query?)` | GET | `/confirmation-items?confirmation_id={id}` |
-| `get($id)` | GET | `/confirmation-items/{id}` |
-| `create($confirmationId, $options)` | POST | `/confirmation-items` |
+| `list($parentId, $filters?)` | GET | `/confirmation-items?confirmation_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/confirmation-items?confirmation_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/confirmation-items/{id}` |
+| `create($parentId, $options)` | POST | `/confirmation-items` |
 | `update($id, $options)` | PUT | `/confirmation-items/{id}` |
 | `delete($id)` | DELETE | `/confirmation-items/{id}` |
 
 ### `/confirmation-comments`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByConfirmation($confirmationId, $actionKeys?)` | GET | `/confirmation-comments?confirmation_id={id}` |
-| `get($id)` | GET | `/confirmation-comments/{id}` |
-| `create($options)` | POST | `/confirmation-comments` |
+| `list($parentId, $filters?)` | GET | `/confirmation-comments?confirmation_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/confirmation-comments?confirmation_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/confirmation-comments/{id}` |
+| `create($parentId, $options)` | POST | `/confirmation-comments` |
 | `delete($id)` | DELETE | `/confirmation-comments/{id}` |
 
 ### `/confirmation-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByConfirmation($confirmationId)` | GET | `/confirmation-tags?confirmation_id={id}` |
+| `list($parentId, $filters?)` | GET | `/confirmation-tags?confirmation_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/confirmation-tags?confirmation_id={id}` (paginated) |
 | `cloud()` | GET | `/confirmation-tags` |
-| `get($id)` | GET | `/confirmation-tags/{id}` |
-| `create($options)` | POST | `/confirmation-tags` |
+| `get($id)` / `getOrFail($id)` | GET | `/confirmation-tags/{id}` |
+| `create($parentId, $options)` | POST | `/confirmation-tags` |
 | `delete($id)` | DELETE | `/confirmation-tags/{id}` |
 
-## Methoden
+## Methods
 
 ### Confirmations
 
-#### `list(array $filters = []): list<Confirmation>`
+#### `list(ConfirmationFilter|array $filters = []): list<Confirmation>`
 
-Filter laut Billomat-Doku: `client_id`, `contact_id`, `status`, `from`, `to`, `number_pre`, `tags`, `order_by` u. a. Array-Werte serialisieren als `key[]=…`. Wie bei `OffersApi` normalisiert `array_is_list()` Single-Treffer auf eine Liste.
+Filters according to the Billomat docs: `client_id`, `contact_id`, `status`, `from`, `to`, `number_pre`, `tags`, `order_by` and more. If Billomat returns a single match as an object, the SDK normalizes it to a list.
+
+The typed filter `ConfirmationFilter` is recommended. Its camelCase fields are `clientId`, `contactId`, `confirmationNumber`, `status` (`list<ConfirmationStatus>`), `from`/`to` (`DateTimeImmutable`), `label`, `intro`, `note`, `tags` and `articleId`. Multi-value fields are lists and are sent comma-separated. On top of that there are `orderBy`, `page`, `perPage` and `extra` for further query parameters (e.g. `number_pre`). A plain array still works; array values are sent as `key[]=…`.
 
 ```php
-$open = $billomat->confirmations->list([
-    'status' => 'OPEN',
-    'order_by' => 'date+DESC',
-]);
+use Justpilot\Billomat\Api\ConfirmationFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\ConfirmationStatus;
+
+$open = $billomat->confirmations->list(new ConfirmationFilter(
+    status: [ConfirmationStatus::OPEN],
+    orderBy: OrderBy::desc('date'),
+));
 ```
+
+`listPage()` takes the same filters and returns a `Page` with pagination metadata; `iterateAll()` walks through all pages lazily. See [Pagination and filtering](../concepts/pagination-and-filtering.md).
 
 #### `get(int $id): ?Confirmation`
 
-Liefert `null` bei 404. Eingebettete `confirmation-items` und `taxes` werden automatisch hydriert.
+Returns `null` on 404. Embedded `confirmation-items` and `taxes` are hydrated automatically. `getOrFail()` throws a `NotFoundException` instead of returning `null`.
 
 #### `create(ConfirmationCreateOptions $options): Confirmation`
 
-Positionen können direkt mit `addItem()` im Payload landen (als `confirmation-items.confirmation-item`). Optional kann `offerId` gesetzt werden, um die Auftragsbestätigung an ein bestehendes Angebot zu hängen.
+Line items can be included in the payload directly via `items: […]` or `withItem()` (as `confirmation-items.confirmation-item`). Optionally set `offerId` to link the confirmation to an existing offer.
 
 ```php
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
+use Justpilot\Billomat\Model\Money;
 
-$opts = new ConfirmationCreateOptions(clientId: 12345);
-$opts->offerId = 678;
-$opts->title = 'Auftragsbestätigung';
-$opts->date = new DateTimeImmutable('today');
-
-$opts->addItem(new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: 99.00));
+$opts = new ConfirmationCreateOptions(
+    clientId: 12345,
+    offerId: 678,
+    title: 'Order confirmation',
+    date: new DateTimeImmutable('today'),
+    items: [
+        new ConfirmationItemCreateOptions(quantity: 1.0, unitPrice: Money::of('99.00')),
+    ],
+);
 
 $conf = $billomat->confirmations->create($opts);
 ```
 
 #### `update(int $id, ConfirmationUpdateOptions $options): Confirmation`
 
-Schmaler Subset, voll editierbar nur im `DRAFT`. Positionen werden hier nicht verarbeitet — `ConfirmationItemsApi` nutzen.
+Fully editable only in `DRAFT`. Line items are not processed here; use `$billomat->confirmations->items`.
 
-#### `complete(int $id, ?int $templateId = null): bool`
+#### `complete(int $id, ?int $templateId = null): void`
 
-DRAFT → OPEN. Vergibt die endgültige `confirmation_number` und erzeugt das PDF. Optional kann eine abweichende Template-ID übergeben werden.
+Completes the draft. Assigns the final `confirmation_number` and generates the PDF. Optionally pass a different template ID.
 
-#### `delete(int $id): bool`
+#### `delete(int $id): void`
 
-Nur im `DRAFT` erlaubt — danach kommt `cancel()` infrage.
+Only allowed in `DRAFT`; after that, use `cancel()`.
 
-#### Status-Übergänge
+#### Status transitions
 
 ```php
-$billomat->confirmations->cancel($conf->id);   // OPEN/CLEARED → CANCELED
-$billomat->confirmations->clear($conf->id);    // OPEN          → CLEARED
-$billomat->confirmations->undo($conf->id);     // {clear,cancel} → OPEN
+$billomat->confirmations->cancel($conf->id);   // COMPLETED → CANCELED
+$billomat->confirmations->uncancel($conf->id); // CANCELED  → COMPLETED
+$billomat->confirmations->clear($conf->id);    // COMPLETED → CLEARED
+$billomat->confirmations->unclear($conf->id);  // CLEARED   → COMPLETED
 ```
 
-Alle geben `true` bei HTTP 200 zurück. Ungültige Übergänge → `ValidationException` (422).
+All four return `void`. Invalid transitions throw a `ValidationException` (Billomat answers 400 "status change not possible"). There is no generic `undo` endpoint; Billomat answers `PUT /confirmations/{id}/undo` with 404.
 
-#### `email(int $id, ?ConfirmationEmailOptions $options = null): bool`
+#### `email(int $id, ?EmailOptions $options = null): void`
 
-Versendet die Auftragsbestätigung per E-Mail. Ohne Options nutzt Billomat die im Account hinterlegten Defaults und hängt das PDF automatisch an.
+Sends the confirmation by email. Without options, Billomat uses the account defaults and attaches the PDF automatically.
 
 ```php
-use Justpilot\Billomat\Api\ConfirmationEmailOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 
-$email = new ConfirmationEmailOptions();
-$email->to = ['kunde@example.com'];
+$email = new EmailOptions(to: ['client@example.com']);
 $billomat->confirmations->email($conf->id, $email);
 ```
 
-#### `uploadSignature(int $id, string $base64Pdf): bool`
 
-Lädt eine unterschriebene PDF-Version hoch. `$base64Pdf` ist der reine Base64-codierte PDF-Inhalt.
+#### `mail(int $id, ?MailOptions $options = null): void`
 
-#### `pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): ConfirmationPdf|string`
+Sends the confirmation by post via the Pixelletter service. **This costs money.** `MailOptions` (colour, duplex, paper weight, extra attachments) is described on the [invoices page](invoices.md#write-model-mailoptions); without options Billomat uses the account defaults.
 
-Liefert ein `ConfirmationPdf`-Model mit Base64-Inhalt; mit `$rawPdf = true` umgeht die Methode JSON und gibt die rohen Bytes zurück.
+```php
+use Justpilot\Billomat\Api\MailOptions;
+
+$billomat->confirmations->mail($id, new MailOptions(duplex: true));
+```
+
+#### `pdf(int $id, ?PdfType $type = null): DocumentPdf` / `pdfContent(int $id, ?PdfType $type = null): string`
+
+`pdf()` returns a `DocumentPdf` model with base64 content; `pdfContent()` skips JSON and returns the raw bytes (`UnexpectedResponseException` if the body isn't a PDF).
 
 ```php
 $pdf = $billomat->confirmations->pdf($conf->id);
-file_put_contents('ab.pdf', $pdf->getBinary());
+file_put_contents('confirmation.pdf', $pdf->getBinary());
 ```
 
-### Confirmation Items
+### Confirmation items
 
 ```php
-$items = $billomat->confirmationItems->listByConfirmation($conf->id);
+$items = $billomat->confirmations->items->list($conf->id);
 
-$item = $billomat->confirmationItems->create(
+$item = $billomat->confirmations->items->create(
     $conf->id,
-    new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: 49.90),
+    new ConfirmationItemCreateOptions(quantity: 2.0, unitPrice: Money::of('49.90')),
 );
 
-$billomat->confirmationItems->update($item->id, $opts);
-$billomat->confirmationItems->delete($item->id);
+$billomat->confirmations->items->update($item->id, new ConfirmationItemUpdateOptions(quantity: 3.0));
+$billomat->confirmations->items->delete($item->id);
 ```
 
-`create()` injiziert `confirmation_id` automatisch — die Options-Klasse selbst hat dieses Feld nicht. `update()` verwendet dieselbe Klasse wie `create()`.
+`create()` adds `confirmation_id` automatically; the options class itself has no such field. `update()` takes `ConfirmationItemUpdateOptions` and only sends the fields you set.
 
-### Confirmation Comments
+### Confirmation comments
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Model\Enum\ConfirmationCommentActionKey;
 
-$comments = $billomat->confirmationComments->listByConfirmation(
+$comments = $billomat->confirmations->comments->list(
     $conf->id,
-    actionKeys: [ConfirmationCommentActionKey::COMPLETE, ConfirmationCommentActionKey::EMAIL],
+    new CommentFilter(actionKeys: [ConfirmationCommentActionKey::COMPLETE, ConfirmationCommentActionKey::EMAIL]),
 );
 
-$billomat->confirmationComments->create(
+$billomat->confirmations->comments->create(
+    $conf->id,
     new ConfirmationCommentCreateOptions(
-        confirmationId: $conf->id,
-        comment: 'Auftrag bestätigt am 02.06.',
+        comment: 'Order confirmed on June 2.',
     ),
 );
 ```
 
-### Confirmation Tags
+### Confirmation tags
 
 ```php
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 
-$tag = $billomat->confirmationTags->create(
-    new ConfirmationTagCreateOptions(confirmationId: $conf->id, name: 'auftrag-2026'),
+$tag = $billomat->confirmations->tags->create(
+    $conf->id,
+    new ConfirmationTagCreateOptions(name: 'order-2026'),
 );
 
-$tags  = $billomat->confirmationTags->listByConfirmation($conf->id);
-$cloud = $billomat->confirmationTags->cloud();
+$tags  = $billomat->confirmations->tags->list($conf->id);
+$cloud = $billomat->confirmations->tags->cloud();
 ```
 
-## Write-Modell: `ConfirmationCreateOptions`
+## Write model: `ConfirmationCreateOptions`
 
-Konstruktor: `new ConfirmationCreateOptions(int $clientId)` — `clientId` ist Pflicht.
+Constructor: `new ConfirmationCreateOptions(int $clientId, …)`. `clientId` is required and the first parameter. Every field is a constructor parameter with a default and is passed as a named argument. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withTitle('New')`).
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `clientId` | `client_id` | `int` | Pflicht (Konstruktor) |
+| `clientId` | `client_id` | `int` | required (constructor) |
 | `contactId` | `contact_id` | `?int` | |
 | `address` | `address` | `?string` | |
-| `numberPre`, `number`, `numberLength` | analog | `?string`/`?int`/`?int` | |
-| `date` | `date` | `?\DateTimeImmutable` | als `Y-m-d` serialisiert |
+| `numberPre`, `number`, `numberLength` | snake_case equivalent | `?string`/`?int`/`?int` | |
+| `date` | `date` | `?\DateTimeImmutable` | serialized as `Y-m-d` |
 | `discountRate` | `discount_rate` | `?int` | |
 | `discountDays` | `discount_days` | `?int` | |
-| `discountDate` | `discount_date` | `?\DateTimeImmutable` | als `Y-m-d` serialisiert |
-| `title`, `label`, `intro`, `note`, `reduction` | analog | `?string` | |
+| `discountDate` | `discount_date` | `?\DateTimeImmutable` | serialized as `Y-m-d` |
+| `title`, `label`, `intro`, `note`, `reduction` | snake_case equivalent | `?string` | |
 | `currencyCode` | `currency_code` | `?string` | |
 | `netGross` | `net_gross` | `?NetGross` | |
 | `quote` | `quote` | `?float` | |
-| `offerId` | `offer_id` | `?int` | Quell-Angebot |
+| `offerId` | `offer_id` | `?int` | source offer |
 | `freeTextId` | `free_text_id` | `?int` | |
 | `templateId` | `template_id` | `?int` | |
 
-### Positionen
+### Line items
 
-`addItem(ConfirmationItemCreateOptions $item): self` und `getItems(): list<ConfirmationItemCreateOptions>` für mitgegebene Positionen. `toArray()` rendert sie als `confirmation-items.confirmation-item`.
+Line items are passed as a list via the constructor parameter `items` (`items: [new ConfirmationItemCreateOptions(…), …]`) and are then available in the `$items` property. `withItem()` returns a copy with one additional item. `toArray()` renders them as `confirmation-items.confirmation-item`.
 
-## Write-Modell: `ConfirmationUpdateOptions`
+## Write model: `ConfirmationUpdateOptions`
 
-Spiegelt `ConfirmationCreateOptions` ohne `clientId`-Pflicht (jetzt optional) und ohne Items-Helper. `discountRate` ist hier `?float` statt `?int`. Felder, die nicht gesetzt werden, bleiben unberührt.
+Mirrors `ConfirmationCreateOptions`, but `clientId` is optional and there is no `items`. `discountRate` is `?float` here instead of `?int`. `null` means "don't send", so the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null`, and Billomat empties it, e.g. `new ConfirmationUpdateOptions(note: Clear::Field)`.
 
-| Property | Billomat-Feld | Typ |
+| Property | Billomat field | Type |
 |---|---|---|
 | `clientId` | `client_id` | `?int` |
-| `contactId`, `numberPre`, `number`, `numberLength`, `freeTextId`, `templateId`, `offerId` | analog | `?int`/`?string` |
-| `address`, `title`, `label`, `intro`, `note`, `reduction`, `currencyCode` | analog | `?string` |
-| `date`, `discountDate` | analog | `?\DateTimeImmutable` |
+| `contactId`, `numberPre`, `number`, `numberLength`, `freeTextId`, `templateId`, `offerId` | snake_case equivalent | `?int`/`?string` |
+| `address`, `title`, `label`, `intro`, `note`, `reduction`, `currencyCode` | snake_case equivalent | `?string` |
+| `date`, `discountDate` | snake_case equivalent | `?\DateTimeImmutable` |
 | `discountRate` | `discount_rate` | `?float` |
 | `discountDays` | `discount_days` | `?int` |
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` |
 
-## Write-Modell: `ConfirmationItemCreateOptions`
+Every field additionally accepts `Clear::Field`.
 
-Konstruktor: `new ConfirmationItemCreateOptions(float $quantity, float $unitPrice)`. Beide Pflicht, werden auch bei `0` mitgeschickt.
+## Write model: `ConfirmationItemCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+Constructor: `new ConfirmationItemCreateOptions(float $quantity, Money $unitPrice)`. Both are required and are sent even when they are `0`.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `quantity` | `quantity` | `float` | Pflicht (Konstruktor) |
-| `unitPrice` | `unit_price` | `float` | Pflicht (Konstruktor) |
-| `type` | `type` | `?InvoiceItemType` | |
+| `quantity` | `quantity` | `float` | required (constructor) |
+| `unitPrice` | `unit_price` | `Money` | required (constructor) |
+| `type` | `type` | `?ItemType` | |
 | `articleId` | `article_id` | `?int` | |
-| `title`, `description`, `unit` | analog | `?string` | |
-| `taxName`, `taxRate`, `taxChangedManually` | analog | `?string`/`?float`/`?bool` | |
+| `title`, `description`, `unit` | snake_case equivalent | `?string` | |
+| `taxName`, `taxRate`, `taxChangedManually` | snake_case equivalent | `?string`/`?float`/`?bool` | |
 | `reduction` | `reduction` | `?string` | |
 | `position` | `position` | `?int` | |
 
-`ConfirmationItemsApi::update()` verwendet dieselbe Klasse — es gibt keinen separaten Update-Typ.
+For `ItemsApi::update()` there is `ConfirmationItemUpdateOptions`: every field is optional (`X|Clear|null`) with a `with*()` method, only the fields you set are sent, and `Clear::Field` empties a field. Billomat keeps all other fields of the item.
 
-## Write-Modell: `ConfirmationCommentCreateOptions`
+## Write model: `ConfirmationCommentCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+The confirmation ID isn't part of the options: pass it as the first argument of `create()`, which adds `confirmation_id` to the payload.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `confirmationId` | `confirmation_id` | `int` | Pflicht (Konstruktor) |
-| `comment` | `comment` | `string` | Pflicht (Konstruktor) |
-| `actionkey` | `actionkey` | `?ConfirmationCommentActionKey` | typischerweise nur bei System-Aktionen |
+| `comment` | `comment` | `string` | required (constructor) |
+| `actionKey` | `actionkey` | `?ConfirmationCommentActionKey` | usually only for system actions |
 
-## Write-Modell: `ConfirmationTagCreateOptions`
+## Write model: `ConfirmationTagCreateOptions`
 
-| Property | Billomat-Feld | Typ |
+The confirmation ID isn't part of the options: pass it as the first argument of `create()`, which adds `confirmation_id` to the payload.
+
+| Property | Billomat field | Type |
 |---|---|---|
-| `confirmationId` | `confirmation_id` | `int` (Pflicht) |
-| `name` | `name` | `string` (Pflicht) |
+| `name` | `name` | `string` (required) |
 
-## Write-Modell: `ConfirmationEmailOptions`
+## Write model: `EmailOptions`
 
-Strukturell identisch zu `OfferEmailOptions`. Keine Pflichtfelder.
+Shared class for sending every document type by email (invoices, offers, confirmations, credit notes, delivery notes, reminders, letters); the full description is on the [Invoices](invoices.md#write-model-emailoptions) page. No required fields.
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
 | `emailTemplateId` | `email_template_id` | `?int` | |
 | `from` | `from` | `?string` | |
-| `to`, `cc`, `bcc` | `recipients.{to,cc,bcc}` | `list<string>` | leere Arrays werden weggelassen |
-| `subject`, `body`, `filename` | analog | `?string` | |
-| `attachments` | `attachments.attachment[]` | `list<array{filename,mimetype,base64file}>` | |
+| `to`, `cc`, `bcc` | `recipients.{to,cc,bcc}` | `list<string>` | empty arrays are left out |
+| `subject`, `body`, `filename` | snake_case equivalent | `?string` | |
+| `attachments` | `attachments.attachment[]` | `list<Attachment>` | |
 
-## Read-Modell: `Confirmation`
+## Read model: `Confirmation`
 
 `final readonly class Confirmation`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
-| `confirmationNumber` | `?string` — erst nach `complete()` |
+| `confirmationNumber` | `?string`, only set after `complete()` |
 | `number`, `numberPre`, `numberLength` | `?int`/`?string`/`?int` |
 | `status` | `?ConfirmationStatus` |
 | `date` | `?\DateTimeImmutable` |
 | `address` | `?string` |
-| `discountRate`, `discountAmount` | `?float`, `?float` |
-| `discountDate` | `?\DateTimeImmutable` |
-| `discountDays` | `?int` |
 | `title`, `label`, `intro`, `note`, `reduction` | `?string` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
+| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
 | `netGross` | `?NetGross` |
 | `currencyCode` | `?string` |
 | `quote` | `?float` |
 | `offerId` | `?int` |
 | `freeTextId`, `templateId` | `?int` |
-| `taxes` | `list<array{name:string,rate:float,amount:float}>` |
-| `customerportalUrl` | `?string` |
+| `taxes` | `list<TaxSummary>`: tax summary per rate (`name`, `rate`, `amount`, `amountNet`, `amountGross`, the latter each also as `*Plain`/`*Rounded`; amounts as `Money`) |
 | `items` | `list<ConfirmationItem>` |
 | `updated` | `?\DateTimeImmutable` |
-| `totalReduction` | `?float` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `totalReduction` | `?Money` |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` (raw fields the SDK doesn't map yet, see [Models](../concepts/models.md)) |
 
-> **Veraltet seit 3.1:** `discountRate`, `discountDate`, `discountDays`, `discountAmount`, `customerportalUrl`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
-
-## Read-Modell: `ConfirmationItem`
+## Read model: `ConfirmationItem`
 
 `final readonly`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id`, `confirmationId`, `articleId`, `position` | `?int` |
 | `unit` | `?string` |
-| `quantity`, `unitPrice` | `float` |
+| `quantity`, `unitPrice` | `float`, `Money` |
 | `taxName` | `?string` |
 | `taxRate` | `?float` |
 | `taxChangedManually` | `?bool` |
 | `title`, `description`, `reduction` | `?string` |
-| `type` | `?InvoiceItemType` |
-| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?float` |
-| `created` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `type` | `?ItemType` |
+| `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced` | `?Money` |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-> **Veraltet seit 3.1:** `created`. Billomat liefert dieses Feld nicht (mehr), der Wert ist immer `null`. Es wird in 4.0 entfernt.
-
-## Read-Modell: `ConfirmationComment`
+## Read model: `ConfirmationComment`
 
 `final readonly`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `confirmationId` | `int` |
 | `comment` | `?string` |
 | `created` | `?\DateTimeImmutable` |
 | `userId` | `?int` |
-| `actionkey` | `?ConfirmationCommentActionKey` |
-| `actionkeyRaw` | `?string` — Roh-Wert bei unbekanntem `actionkey` |
+| `actionKey` | `?ConfirmationCommentActionKey` |
+| `actionKeyRaw` | `?string`, raw value for an unknown `actionkey` |
 | `public` | `?bool` |
 | `byClient` | `?bool` |
 | `emailId` | `?int` |
 | `clientId` | `?int` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Read-Modell: `ConfirmationTag`
+## Read model: `ConfirmationTag`
 
-`final readonly`. Felder: `id` (`?int`), `confirmationId` (`int`), `name` (`string`), `customfield` (`?string`).
+`final readonly`. Fields: `id` (`?int`), `confirmationId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
 
-## Read-Modell: `ConfirmationTagCloudEntry`
+## Read model: `ConfirmationTagCloudEntry`
 
-`final readonly`. Aggregat: `id` (`?int`), `name` (`string`), `count` (`int`).
+`final readonly`. Aggregate: `id` (`?int`), `name` (`string`), `count` (`int`), `extra` (`array`).
 
-## Read-Modell: `ConfirmationPdf`
+## Read model: `DocumentPdf`
 
-`final class ConfirmationPdf` (nicht `readonly`).
+`final readonly class DocumentPdf`, shared by the `pdf()` methods of all document types.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `int` |
-| `confirmationId` | `int` |
+| `documentId` | `int` (Billomat field `confirmation_id`) |
 | `created` | `?\DateTimeImmutable` |
 | `filename` | `string` |
-| `mimeType` | `string` — Default `application/pdf` |
-| `fileSize` | `int` |
-| `base64file` | `string` |
+| `mimeType` | `string` (Billomat field `mimetype`), default `application/pdf` |
+| `fileSize` | `?int` (Billomat field `filesize`) |
+| `base64File` | `string` (Billomat field `base64file`) |
+| `extra` | `array<string, mixed>` |
 
-`getBinary(): string` decodiert `base64file`.
+`getBinary(): string` decodes `base64File` back into raw bytes and throws an `UnexpectedResponseException` for invalid Base64. `fromArray()` throws an `UnexpectedResponseException` as well when `id`, `confirmation_id`, `filename` or `base64file` is missing.
 
-## Verwendete Enums
+## Enums used
 
-- [`ConfirmationStatus`](../../src/Model/Enum/ConfirmationStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. Nach `complete()` liefert Billomat inzwischen `COMPLETED`. Hat `label()` für deutsche Bezeichnung. Beachten: **kein** `ACCEPTED`/`REJECTED` wie beim Angebot.
-- [`ConfirmationCommentActionKey`](../../src/Model/Enum/ConfirmationCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT` — schlanker als bei Offers (`WIN`/`LOSE` fehlen).
-- [`InvoiceItemType`](../../src/Model/Enum/InvoiceItemType.php): `PRODUCT`, `SERVICE` — von Rechnungspositionen geerbt.
-- [`InvoicePdfType`](../../src/Model/Enum/InvoicePdfType.php): `SIGNED` (`signed`), `PRINT` (`print`) — Wire-Werte kleingeschrieben.
+- [`ConfirmationStatus`](../../src/Model/Enum/ConfirmationStatus.php): `DRAFT`, `OPEN`, `COMPLETED`, `CLEARED`, `CANCELED`. After `complete()`, Billomat now returns `COMPLETED`. Has `label()` for the German display name. Note: **no** `WON`/`LOST` as for offers.
+- [`ConfirmationCommentActionKey`](../../src/Model/Enum/ConfirmationCommentActionKey.php): `CREATE`, `EDIT`, `OPEN`, `COMPLETE`, `CANCEL`, `CLEAR`, `CHANGE_STATUS`, `EMAIL`, `MAIL`, `COMMENT`; smaller than for offers (`WIN`/`LOSE` are missing).
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE`, shared with invoice items.
+- [`PdfType`](../../src/Model/Enum/PdfType.php): `SIGNED` (`signed`), `PRINT` (`print`); the wire values are lowercase.
 - [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS`.
 
-## Stolpersteine
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-- **Schlankerer Lebenszyklus als beim Angebot.** Es gibt kein `win()`/`lose()` — eine Auftragsbestätigung wird entweder als erledigt (`clear()`) markiert oder storniert (`cancel()`). Wer aus Gewohnheit `win()` aufrufen will, sucht den falschen Endpoint.
-- **`update()` ändert keine Positionen.** Billomat ignoriert eingebettete `confirmation-items` beim PUT. Stets die `ConfirmationItemsApi` verwenden.
-- **`delete()` nur im `DRAFT`.** Nach `complete()` ist nur noch `cancel()` möglich.
-- **`ConfirmationItemCreateOptions` ist auch der Update-Typ.** Der Konstruktor verlangt `quantity` und `unitPrice` auch beim Update, an dem sich diese Werte gar nicht ändern sollen.
-- **`array_is_list`-Normalisierung in `list()`.** Bei genau einem Treffer liefert Billomat `confirmation` als Objekt — das SDK packt das selbst in eine Liste.
-- **`offerId`-Verknüpfung ist informativ.** Die Bestätigung wird nicht automatisch mit dem Angebots-Status synchronisiert — `OfferStatus::ACCEPTED` muss man separat über `OffersApi::win()` setzen.
-- **`tax_changed_manually` ist Pflicht für manuelle `taxRate`-Werte.** Ohne das Flag nimmt Billomat den Default des Artikels/Kunden.
-- **`ConfirmationPdf` ist nicht `readonly`** — pragmatische Ausnahme, damit der Container Binärdaten halten kann.
-- **`uploadSignature()` erwartet reines Base64**, kein `data:`-Prefix.
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-## End-to-End-Beispiel
+::: code-group
+<<< @/snippets/json/confirmations.create.json [POST /confirmations]
+<<< @/../tests/Fixtures/Contract/confirmations/get.json [GET /confirmations/{id} (response)]
+<<< @/../tests/Fixtures/Contract/confirmations/list.json [GET /confirmations (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **Simpler lifecycle than offers.** There is no `win()`/`lose()`: a confirmation is either marked as done (`clear()`, reverted by `unclear()`) or canceled (`cancel()`, reverted by `uncancel()`). Calling `win()` out of habit means looking for the wrong endpoint.
+- **`update()` doesn't change line items.** Billomat ignores embedded `confirmation-items` on PUT. Always use `$billomat->confirmations->items`.
+- **`delete()` isn't limited to `DRAFT`.** Billomat's API deletes confirmations in any status. After `complete()`, prefer `cancel()`: the confirmation is numbered, and deleting it leaves a gap in the number sequence.
+- **Item updates are partial.** `ConfirmationItemUpdateOptions` sends only the fields you set; Billomat keeps the rest of the item. Passing `*ItemCreateOptions` to `update()` throws an `InvalidArgumentException`.
+- **Single results are normalized in `list()`.** For exactly one match, Billomat returns `confirmation` as an object; the SDK wraps it in a list.
+- **The `offerId` link is informational.** The confirmation is not synchronized with the offer status automatically; set `OfferStatus::WON` separately via `$billomat->offers->win()`.
+- **`tax_changed_manually` is required for manual `taxRate` values.** Without the flag, Billomat uses the article's or client's default.
+- **No signature upload.** Billomat only accepts signed PDFs for invoices, credit notes and reminders (`uploadSignature()` there); for confirmations it answers "no signature upload supported for this document type".
+
+## End-to-end example
 
 ```php
 <?php
@@ -418,64 +458,70 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
-use Justpilot\Billomat\Api\ConfirmationEmailOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Auftragsbestätigung aus Angebot anlegen
-$opts = new ConfirmationCreateOptions(clientId: 12345);
-$opts->offerId = 678;
-$opts->title = 'Auftragsbestätigung Webhosting';
-$opts->date = new DateTimeImmutable('today');
-$opts->intro = 'Wir bestätigen Ihren Auftrag wie folgt.';
+// 1) Create a confirmation from an offer
+$opts = new ConfirmationCreateOptions(
+    clientId: 12345,
+    offerId: 678,
+    title: 'Order confirmation web hosting',
+    date: new DateTimeImmutable('today'),
+    intro: 'We confirm your order as follows.',
+);
 
-$item = new ConfirmationItemCreateOptions(quantity: 12.0, unitPrice: 19.90);
-$item->title = 'Hosting Basic (12 Monate)';
-$item->unit = 'Monat';
-$item->type = InvoiceItemType::SERVICE;
-$opts->addItem($item);
+$item = new ConfirmationItemCreateOptions(
+    quantity: 12.0,
+    unitPrice: Money::of('19.90'),
+    title: 'Hosting Basic (12 months)',
+    unit: 'month',
+    type: ItemType::SERVICE,
+);
+$opts = $opts->withItem($item);
 
 $conf = $billomat->confirmations->create($opts);
-printf("AB #%d angelegt (DRAFT)\n", $conf->id);
+printf("Confirmation #%d created (DRAFT)\n", $conf->id);
 
-// 2) Tag setzen
-$billomat->confirmationTags->create(
-    new ConfirmationTagCreateOptions(confirmationId: $conf->id, name: 'auftrag-2026'),
+// 2) Add a tag
+$billomat->confirmations->tags->create(
+    $conf->id,
+    new ConfirmationTagCreateOptions(name: 'order-2026'),
 );
 
-// 3) Abschließen → OPEN, Nummer wird vergeben
+// 3) Complete: the number is assigned
 $billomat->confirmations->complete($conf->id);
 
-$opened = $billomat->confirmations->get($conf->id);
-printf("Status: %s, Bestätigungsnummer: %s\n",
-    $opened?->status?->label() ?? '?',
-    $opened?->confirmationNumber ?? '?',
+$opened = $billomat->confirmations->getOrFail($conf->id);
+printf("Status: %s, confirmation number: %s\n",
+    $opened->status?->label() ?? '?',
+    $opened->confirmationNumber ?? '?',
 );
 
-// 4) Versenden — Default-Vorlage
-$email = new ConfirmationEmailOptions();
-$email->to = ['kunde@example.com'];
+// 4) Send with the default template
+$email = new EmailOptions(to: ['client@example.com']);
 $billomat->confirmations->email($conf->id, $email);
 
-// 5) Internen Vermerk hinterlegen
-$billomat->confirmationComments->create(
+// 5) Add an internal note
+$billomat->confirmations->comments->create(
+    $conf->id,
     new ConfirmationCommentCreateOptions(
-        confirmationId: $conf->id,
-        comment: 'Auftrag abgewickelt — bereit für Rechnungsstellung.',
+        comment: 'Order processed, ready for invoicing.',
     ),
 );
 
-// 6) Sobald die Rechnung raus ist: Auftrag als erledigt markieren
+// 6) Once the invoice is out: mark the order as done
 $billomat->confirmations->clear($conf->id);
 
-// 7) PDF herunterladen
+// 7) Download the PDF
 $pdf = $billomat->confirmations->pdf($conf->id);
-file_put_contents("ab-{$opened?->confirmationNumber}.pdf", $pdf->getBinary());
+file_put_contents("confirmation-{$opened->confirmationNumber}.pdf", $pdf->getBinary());
 ```

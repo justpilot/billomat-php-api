@@ -1,0 +1,20 @@
+{
+    "credit-note-payment": {
+        "id": "415889",
+        "created": "2026-10-26T16:59:07+01:00",
+        "credit_note_id": "1794656",
+        "user_id": "136536",
+        "date": "2026-10-26",
+        "amount": "118.76",
+        "comment": "",
+        "transaction_purpose": "",
+        "currency_code": "EUR",
+        "quote": "1",
+        "payment_group": "7517192a-2b94-44b1-9c92-30c95a65e1c2",
+        "finapi_transaction_id": "",
+        "finapi_transaction_amount": "",
+        "type": "BANK_TRANSFER",
+        "document_title": "SDK-Beispiel Gutschrift",
+        "customfield": ""
+    }
+}

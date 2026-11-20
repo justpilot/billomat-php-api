@@ -1,279 +1,323 @@
-<!-- Quelle: https://www.billomat.com/api/artikel/ -->
+<!-- Source: https://www.billomat.com/api/artikel/ -->
 
 # Articles (Artikel)
 
-API-Wrapper für Artikel unter `/articles` und ihre zwei Sub-Ressourcen (`/article-tags`, `/article-property-values`).
+API wrapper for articles under `/articles` and their two sub-resources (`/article-tags`, `/article-property-values`).
 
-## Zugriff
+## Access
 
 ```php
-$billomat->articles               // Artikel selbst
-$billomat->articleTags            // Schlagworte an einem Artikel
-$billomat->articlePropertyValues  // Werte benutzerdefinierter Artikel-Eigenschaften
+$billomat->articles                  // the articles themselves
+$billomat->articles->tags            // tags on an article
+$billomat->articles->propertyValues  // custom property values on an article
 ```
 
-Die Definitionen der Eigenschaften (Property-Schemata) liegen separat unter `$billomat->articleProperties` — siehe [Property-Definitionen](properties.md). Hier geht es ausschließlich um die Werte, die ein konkreter Artikel für diese Definitionen trägt.
+The property definitions (schemas) live separately under `$billomat->articles->properties`, see [Property definitions](properties.md). This page only covers the values a specific article holds for those definitions.
 
-## Modell
+## Model
 
-Ein Artikel ist ein wiederverwendbarer Posten, der in Rechnungen, Angeboten und Abo-Rechnungen als Position referenziert werden kann.
+An article is a reusable line item that invoices, offers and recurring invoices can reference as a position.
 
-- **Identifikation**: laufende `number` mit `numberPre` + `numberLength` ergibt die anzeigbare `article_number`.
-- **Preise**: bis zu fünf Verkaufspreis-Stufen (`salesPrice` bis `salesPrice5`) für Staffelpreise/Kundengruppen, optional ein `purchasePrice` mit eigener Währung.
-- **Zuordnung**: `taxId` verweist auf einen [Steuersatz](taxes.md), `unitId` auf eine [Unit](lookups.md), und `supplierId` auf einen [Supplier](suppliers.md). `categoryId` referenziert die Account-internen Artikel-Kategorien.
-- **Custom-Fields**: dynamische Werte über `articlePropertyValues` (z. B. „Lieferzeit“, „Garantie“) — die Property-Definitionen selbst werden über `articleProperties` gepflegt.
+- **Identification**: the sequential `number` combined with `numberPre` and `numberLength` gives the displayed `article_number`.
+- **Prices**: up to five sales price levels (`salesPrice` to `salesPrice5`) for tiered prices or customer groups, optionally a `purchasePrice` with its own currency.
+- **References**: `taxId` points to a [tax rate](taxes.md), `unitId` to a [unit](lookups.md), and `supplierId` to a [supplier](suppliers.md). `categoryId` refers to the account's article categories.
+- **Type**: `type` (`ItemType`) marks the article as `PRODUCT` or `SERVICE`.
+- **Custom fields**: dynamic values via `$billomat->articles->propertyValues` (e.g. "lead time", "warranty"); the property definitions themselves are managed via `$billomat->articles->properties`.
 
-## Endpunkt-Übersicht
+## Endpoint overview
 
 ### `/articles`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `list($filters?)` | GET | `/articles` |
-| `get($id)` | GET | `/articles/{id}` |
+| `listPage($filters?)` | GET | `/articles` (one page with metadata) |
+| `iterateAll($filters?, $pageSize?)` | GET | `/articles` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/articles/{id}` |
 | `create($options)` | POST | `/articles` |
 | `update($id, $options)` | PUT | `/articles/{id}` |
 | `delete($id)` | DELETE | `/articles/{id}` |
 
 ### `/article-tags`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByArticle($articleId)` | GET | `/article-tags?article_id={id}` |
+| `list($parentId, $filters?)` | GET | `/article-tags?article_id={id}` |
+| `listPage($parentId, $filters?)` / `iterateAll($parentId, $filters?, $pageSize?)` | GET | `/article-tags?article_id={id}` (paginated) |
 | `cloud()` | GET | `/article-tags` |
-| `get($id)` | GET | `/article-tags/{id}` |
-| `create($options)` | POST | `/article-tags` |
+| `get($id)` / `getOrFail($id)` | GET | `/article-tags/{id}` |
+| `create($parentId, $options)` | POST | `/article-tags` |
 | `delete($id)` | DELETE | `/article-tags/{id}` |
 
 ### `/article-property-values`
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `list($filters?)` | GET | `/article-property-values` |
-| `get($id)` | GET | `/article-property-values/{id}` |
-| `create($options)` | POST | `/article-property-values` |
+| `list($parentId?, $filters?)` | GET | `/article-property-values` |
+| `listPage($parentId?, $filters?)` | GET | `/article-property-values` |
+| `iterateAll($parentId?, $filters?, $pageSize?)` | GET | `/article-property-values` (all pages) |
+| `get($id)` / `getOrFail($id)` | GET | `/article-property-values/{id}` |
+| `create($parentId, $options)` | POST | `/article-property-values` |
 
 ## Articles
 
-### `list(array $filters = []): list<Article>`
+### `list(ArticleFilter|array $filters = []): list<Article>`
 
-Filter laut Billomat-Doku: `article_number`, `title`, `description`, `currency_code`, `unit_id`, `tags`, `supplier_id`, `category_id`. Array-Werte werden als `key[]=…` codiert.
+Filters according to the Billomat docs: `article_number`, `title`, `description`, `currency_code`, `unit_id`, `tags`, `supplier_id`, `category_id`. Use the typed filter `ArticleFilter` with the camelCase fields `articleNumber`, `title`, `description`, `currencyCode`, `unitId`, `tags` (list, sent comma-separated) and `supplierId`, plus `orderBy`, `page` and `perPage`. Parameters without their own field (e.g. `category_id`) go into `extra: [...]`; a plain array still works too.
 
 ```php
-$active = $billomat->articles->list([
-    'currency_code' => 'EUR',
-    'order_by' => 'title+ASC',
-]);
+use Justpilot\Billomat\Api\ArticleFilter;
+use Justpilot\Billomat\Api\OrderBy;
+
+$active = $billomat->articles->list(new ArticleFilter(
+    currencyCode: 'EUR',
+    orderBy: OrderBy::asc('title'),
+));
 ```
+
+`listPage()` returns the same list plus pagination metadata, `iterateAll()` walks through all pages lazily, see [Pagination](../advanced/pagination.md).
 
 ### `get(int $id): ?Article`
 
-Liefert `null` bei 404.
+Returns `null` on 404. `getOrFail(int $id): Article` throws a `NotFoundException` instead.
 
 ### `create(ArticleCreateOptions $options): Article`
 
 ```php
 use Justpilot\Billomat\Api\ArticleCreateOptions;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
 
-$opts = new ArticleCreateOptions(title: 'Webhosting Basic');
-$opts->description = 'Shared Hosting, 10 GB SSD';
-$opts->salesPrice = 19.90;
-$opts->currencyCode = 'EUR';
-$opts->unit = 'Monat';
-$opts->taxId = 12345;
+$opts = new ArticleCreateOptions(
+    title: 'Web hosting Basic',
+    description: 'Shared hosting, 10 GB SSD',
+    salesPrice: Money::of('19.90'),
+    currencyCode: 'EUR',
+    unit: 'month',
+    taxId: 12345,
+    type: ItemType::SERVICE,
+);
 
 $article = $billomat->articles->create($opts);
 ```
 
 ### `update(int $id, ArticleUpdateOptions $options): Article`
 
-Partial-Update — nicht gesetzte Properties bleiben unangetastet.
+Partial update: fields left `null` stay unchanged.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
-## Write-Modell: `ArticleCreateOptions`
+Deletes the article.
 
-Konstruktor: `new ArticleCreateOptions(string $title)` — `title` ist Pflicht.
+## Write model: `ArticleCreateOptions`
 
-### Identifikation
+Constructor: `new ArticleCreateOptions(string $title, …)`. `title` is required and the first parameter. All other fields are constructor parameters with a default and are passed as named arguments. The object is immutable (`final readonly`); each field has a `with*()` method that returns a modified copy (e.g. `$opts->withDescription('New')`).
 
-| Property | Billomat-Feld | Typ | Notes |
+### Identification
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `title` | `title` | `string` (Pflicht) | — |
-| `numberPre` | `number_pre` | `?string` | Präfix der Artikelnummer (z. B. `ART-`) |
-| `number` | `number` | `?int` | Laufende Nummer; Billomat zählt sonst selbst hoch |
-| `numberLength` | `number_length` | `?int` | Min-Stellenzahl der Nummer mit Nullen-Padding |
+| `title` | `title` | `string` (required) | — |
+| `numberPre` | `number_pre` | `?string` | Article number prefix (e.g. `ART-`) |
+| `number` | `number` | `?int` | Sequential number; otherwise Billomat increments it itself |
+| `numberLength` | `number_length` | `?int` | Minimum number of digits, padded with zeros |
 | `description` | `description` | `?string` | — |
+| `type` | `type` | `?ItemType` | `PRODUCT` or `SERVICE` |
 
-### Preise
+### Prices
 
-| Property | Billomat-Feld | Typ | Notes |
+Amounts are [`Money`](../concepts/money.md) values, not floats.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `salesPrice` | `sales_price` | `?float` | Standard-Verkaufspreis |
-| `salesPrice2` | `sales_price2` | `?float` | Stufe 2 (z. B. Wiederverkäufer) |
-| `salesPrice3` | `sales_price3` | `?float` | Stufe 3 |
-| `salesPrice4` | `sales_price4` | `?float` | Stufe 4 |
-| `salesPrice5` | `sales_price5` | `?float` | Stufe 5 |
-| `currencyCode` | `currency_code` | `?string` | ISO-4217, z. B. `EUR` |
-| `purchasePrice` | `purchase_price` | `?float` | Einkaufspreis |
-| `purchasePriceCurrencyCode` | `purchase_price_currency_code` | `?string` | Eigene Währung für den EK |
+| `salesPrice` | `sales_price` | `?Money` | Default sales price |
+| `salesPrice2` | `sales_price2` | `?Money` | Level 2 (e.g. resellers) |
+| `salesPrice3` | `sales_price3` | `?Money` | Level 3 |
+| `salesPrice4` | `sales_price4` | `?Money` | Level 4 |
+| `salesPrice5` | `sales_price5` | `?Money` | Level 5 |
+| `currencyCode` | `currency_code` | `?string` | ISO 4217, e.g. `EUR` |
+| `purchasePrice` | `purchase_price` | `?Money` | Purchase price |
+| `purchasePriceCurrencyCode` | `purchase_price_currency_code` | `?string` | Separate currency for the purchase price |
+| `purchasePriceNetGross` | `purchase_price_net_gross` | `?NetGross` | Whether `purchasePrice` is net or gross |
 
-### Zuordnungen
+### References
 
-| Property | Billomat-Feld | Typ | Notes |
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `unit` | `unit` | `?string` | Freitext-Einheit (z. B. `Stück`) — alternativ zu `unitId` |
-| `unitId` | `unit_id` | `?int` | Referenz auf `/units` |
-| `supplierId` | `supplier_id` | `?int` | Referenz auf [Supplier](suppliers.md) |
-| `taxId` | `tax_id` | `?int` | Referenz auf [Taxes](taxes.md) |
-| `categoryId` | `category_id` | `?int` | Referenz auf `/article-categories` |
+| `unit` | `unit` | `?string` | Free-text unit (e.g. `piece`), alternative to `unitId` |
+| `unitId` | `unit_id` | `?int` | Reference to `/units` |
+| `supplierId` | `supplier_id` | `?int` | Reference to a [supplier](suppliers.md) |
+| `taxId` | `tax_id` | `?int` | Reference to [taxes](taxes.md) |
+| `categoryId` | `category_id` | `?int` | Reference to `/article-categories` |
 
-## Write-Modell: `ArticleUpdateOptions`
+## Write model: `ArticleUpdateOptions`
 
-Spiegelt `ArticleCreateOptions` exakt, jedoch ist `title` nicht mehr Pflicht und alle Felder sind nullable. Nicht gesetzte Properties bleiben unverändert.
+Mirrors `ArticleCreateOptions`, but `title` is no longer required and every field is nullable. `null` means "don't send", the value stays unchanged. `Clear::Field` (`Justpilot\Billomat\Api\Clear`) sends the field as JSON `null` so Billomat empties it, e.g. `new ArticleUpdateOptions(description: Clear::Field)`.
 
-## Read-Modell: `Article`
+## Read model: `Article`
 
 `final readonly class Article`.
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `created` | `?\DateTimeImmutable` |
-| `articleNumber` | `?string` (zusammengesetzt: `numberPre` + `number` mit Padding) |
+| `articleNumber` | `?string` (combined: `numberPre` + padded `number`) |
 | `number` | `?int` |
 | `numberPre` | `?string` |
 | `numberLength` | `?int` |
 | `title` | `?string` |
 | `description` | `?string` |
-| `salesPrice` | `?float` |
-| `salesPrice2` ... `salesPrice5` | `?float` |
+| `salesPrice` | `?Money` |
+| `salesPrice2` … `salesPrice5` | `?Money` |
 | `currencyCode` | `?string` |
-| `unit` | `?string` |
 | `unitId` | `?int` |
-| `purchasePrice` | `?float` |
-| `purchasePriceCurrencyCode` | `?string` |
+| `purchasePrice` | `?Money` |
 | `supplierId` | `?int` |
 | `taxId` | `?int` |
-| `categoryId` | `?int` |
 | `updated` | `?\DateTimeImmutable` |
 | `archived` | `?bool` |
-| `type` | `?ArticleType` |
+| `type` | `?ItemType` |
 | `revenueAccountNumber` | `?string` |
 | `costCenter` | `?string` |
-| `purchasePriceNetGross` | `?NetGross` (Ob `purchasePrice` netto oder brutto ist) |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `purchasePriceNetGross` | `?NetGross` (whether `purchasePrice` is net or gross) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `propertyValues` | `list<ArticlePropertyValue>` (custom property values, embedded by Billomat in `get()` and `list()`) |
+| `extra` | `array<string, mixed>` (unmapped fields, see [Models](../concepts/models.md)) |
 
-> **Veraltet seit 3.1:** `unit`, `purchasePriceCurrencyCode`, `categoryId`. Billomat liefert diese Felder nicht (mehr), der Wert ist immer `null`. Sie werden in 4.0 entfernt.
+## Article tags
 
-## Article Tags
+Works exactly like [Invoice Tags](invoice-tags.md), but for an article instead of an invoice.
 
-Funktional identisch zu [Invoice Tags](invoice-tags.md), bezogen auf einen Artikel statt eine Rechnung.
-
-### Methoden
+### Methods
 
 ```php
 use Justpilot\Billomat\Api\ArticleTagCreateOptions;
 
-$tag = $billomat->articleTags->create(
-    new ArticleTagCreateOptions(articleId: $article->id, name: 'hosting'),
+$tag = $billomat->articles->tags->create(
+    $article->id,
+    new ArticleTagCreateOptions(name: 'hosting'),
 );
 
-$tags  = $billomat->articleTags->listByArticle($article->id);
-$cloud = $billomat->articleTags->cloud(); // aggregiert, mit count
-$billomat->articleTags->delete($tag->id);
+$tags  = $billomat->articles->tags->list($article->id);
+$cloud = $billomat->articles->tags->cloud(); // aggregated, with count
+$billomat->articles->tags->delete($tag->id);
 ```
 
-Ein `update()` gibt es nicht — Tags werden gelöscht und neu angelegt.
+There is no `update()`: delete the tag and create a new one.
 
-### Write-Modell: `ArticleTagCreateOptions`
+### Write model: `ArticleTagCreateOptions`
 
-Beide Werte sind Pflicht und werden über den Konstruktor gesetzt:
+The article ID isn't part of the options: pass it as the first argument of `create()`, which adds `article_id` to the payload.
 
-| Property | Billomat-Feld | Typ | Notes |
+Both values are required and set via the constructor:
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `articleId` | `article_id` | `int` (Pflicht) | — |
-| `name` | `name` | `string` (Pflicht) | — |
+| `name` | `name` | `string` (required) | — |
 
-### Read-Modell: `ArticleTag`
+### Read model: `ArticleTag`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `articleId` | `int` |
 | `name` | `string` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-### Read-Modell: `ArticleTagCloudEntry`
+### Read model: `ArticleTagCloudEntry`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
 | `id` | `?int` |
 | `name` | `string` |
 | `count` | `int` |
+| `extra` | `array<string, mixed>` |
 
-## Article Property Values
+## Article property values
 
-Speichert die Werte für die in [`properties.md`](properties.md) definierten Artikel-Eigenschaften (`articleProperties`). Eine Property-Definition (`ArticleProperty`) ist das Schema (Name + `PropertyType`), ein `ArticlePropertyValue` ist die konkrete Belegung an einem Artikel.
+Stores the values for the article properties defined in [`properties.md`](properties.md) (`$billomat->articles->properties`). A property definition (`ArticleProperty`) is the schema (name + `PropertyType`); an `ArticlePropertyValue` is the actual value on one article.
 
 ```php
 use Justpilot\Billomat\Api\ArticlePropertyValueCreateOptions;
+use Justpilot\Billomat\Api\ArticlePropertyValueFilter;
+use Justpilot\Billomat\Api\OrderBy;
 
-// Werte für einen Artikel auflisten
-$values = $billomat->articlePropertyValues->list([
-    'article_id' => $article->id,
-]);
+// List the values of one article
+$values = $billomat->articles->propertyValues->list($article->id);
 
-// Wert für die Property "Lieferzeit" (id = 42) setzen
-$value = $billomat->articlePropertyValues->create(
+// Only the values of property 12, typed filter with sorting
+$values = $billomat->articles->propertyValues->list($article->id, new ArticlePropertyValueFilter(
+    articlePropertyId: 12,
+    orderBy: OrderBy::desc('updated'),
+));
+
+// Set the value of the property "Lead time" (id = 42)
+$value = $billomat->articles->propertyValues->create(
+    $article->id,
     new ArticlePropertyValueCreateOptions(
-        articleId: $article->id,
         articlePropertyId: 42,
-        value: '3-5 Werktage',
+        value: '3-5 business days',
     ),
 );
 ```
 
-Es gibt weder `update()` noch `delete()` — ein erneuter `create()`-Call mit derselben `articlePropertyId` überschreibt den bestehenden Wert.
+There is neither `update()` nor `delete()`: calling `create()` again with the same `articlePropertyId` overwrites the existing value.
 
-### Write-Modell: `ArticlePropertyValueCreateOptions`
+### Write model: `ArticlePropertyValueCreateOptions`
 
-Alle drei Werte sind Pflicht und werden über den Konstruktor gesetzt:
+The article ID isn't part of the options: pass it as the first argument of `create()`, which adds `article_id` to the payload.
 
-| Property | Billomat-Feld | Typ | Notes |
+Both values are required and set via the constructor.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `articleId` | `article_id` | `int` (Pflicht) | — |
-| `articlePropertyId` | `article_property_id` | `int` (Pflicht) | ID der Property-Definition |
-| `value` | `value` | `mixed` (Pflicht) | Bei `CHECKBOX` werden `0`/`1` erwartet |
+| `articlePropertyId` | `article_property_id` | `int` (required) | ID of the property definition |
+| `value` | `value` | `mixed` (required) | `CHECKBOX` expects `0`/`1` |
 
-### Read-Modell: `ArticlePropertyValue`
+### Read model: `ArticlePropertyValue`
 
-| Property | Typ |
+| Property | Type |
 |---|---|
-| `id` | `?int` |
+| `id` | `int` |
 | `articleId` | `int` |
 | `articlePropertyId` | `int` |
-| `type` | `?string` (rohes API-Feld, z. B. `TEXTFIELD`) |
-| `name` | `?string` (Name aus der Property-Definition) |
+| `type` | `?PropertyType` (`TEXTFIELD`, `TEXTAREA`, `CHECKBOX`) |
+| `name` | `?string` (name from the property definition) |
 | `value` | `mixed` |
 | `created`, `updated` | `?\DateTimeImmutable` |
-| `customfield` | `?string` (Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md)) |
+| `customField` | `?string` (free-form extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
+| `extra` | `array<string, mixed>` |
 
-## Verwendete Enums
+## Enums used
 
-- [`PropertyType`](../../src/Model/Enum/PropertyType.php): `TEXTFIELD`, `TEXTAREA`, `CHECKBOX` — wird vom zugehörigen [`ArticleProperty`](../../src/Model/ArticleProperty.php) der Definition getragen, nicht vom Wert selbst.
+- [`ItemType`](../../src/Model/Enum/ItemType.php): `PRODUCT`, `SERVICE` (`type`; replaces the former `ArticleType`).
+- [`NetGross`](../../src/Model/Enum/NetGross.php): `NET`, `GROSS`, `SETTINGS` (`purchasePriceNetGross`).
+- [`PropertyType`](../../src/Model/Enum/PropertyType.php): `TEXTFIELD`, `TEXTAREA`, `CHECKBOX`, on the property definition ([`ArticleProperty`](../../src/Model/ArticleProperty.php)) and on `ArticlePropertyValue::$type`.
 
-## Stolpersteine
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-- **Kein `update()` für Tags und Property-Values.** Tags löschen und neu anlegen; bei Property-Values überschreibt ein erneuter POST mit derselben `article_property_id` den bestehenden Eintrag.
-- **`unit` vs. `unitId`.** Beide Felder existieren parallel: `unit` ist ein freier String, `unitId` ein Verweis auf `/units`. Bei beidem zeitgleich kann das Anzeigeverhalten in Belegen abweichen — nur eines setzen.
-- **`number` wird sonst automatisch vergeben.** Ohne explizites `number` zählt Billomat anhand der zuletzt vergebenen Artikelnummer hoch. Eine manuelle `number` muss eindeutig sein, sonst gibt es `422`.
-- **`articleNumber` ist read-only.** Das Feld erscheint nur im Read-Modell und wird serverseitig aus `numberPre` + `number` (gepaddet auf `numberLength`) gebildet.
-- **`purchasePriceCurrencyCode` kann von `currencyCode` abweichen.** Für einen Artikel mit EK in USD und VK in EUR beide Felder setzen.
-- **`PropertyType::CHECKBOX` erwartet `0`/`1` als `value`.** Boolean-Strings (`"true"`/`"false"`) werden nicht erkannt.
-- **`ArticlePropertyValue::$type` ist String, nicht Enum.** Beim Wert selbst kommt der `type` als roher API-String mit; das `PropertyType`-Enum lebt nur im `ArticleProperty`-Read-Modell (Definition).
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-## End-to-End-Beispiel
+::: code-group
+<<< @/snippets/json/articles.create.json [POST /articles]
+<<< @/../tests/Fixtures/Contract/articles/get.json [GET /articles/{id} (response)]
+<<< @/../tests/Fixtures/Contract/articles/list.json [GET /articles (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **No `update()` for tags and property values.** Delete tags and create them again; for property values, another POST with the same `article_property_id` overwrites the existing entry.
+- **`unit` vs. `unitId`.** Both fields exist side by side: `unit` is a free string, `unitId` a reference to `/units`. Setting both at once can make documents display differently than expected; set only one.
+- **`number` is assigned automatically otherwise.** Without an explicit `number`, Billomat increments from the last assigned article number. A manual `number` must be unique, otherwise you get a `422`.
+- **`articleNumber` is read-only.** The field only appears in the read model and is built server-side from `numberPre` + `number` (padded to `numberLength`).
+- **`purchasePriceCurrencyCode` can differ from `currencyCode`.** For an article bought in USD and sold in EUR, set both fields.
+- **`PropertyType::CHECKBOX` expects `0`/`1` as `value`.** Boolean strings (`"true"`/`"false"`) aren't recognized.
+
+## End-to-end example
 
 ```php
 <?php
@@ -287,48 +331,54 @@ use Justpilot\Billomat\Api\ArticlePropertyValueCreateOptions;
 use Justpilot\Billomat\Api\ArticleTagCreateOptions;
 use Justpilot\Billomat\Api\ArticleUpdateOptions;
 use Justpilot\Billomat\BillomatClient;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
     apiKey: getenv('BILLOMAT_API_KEY'),
 );
 
-// 1) Artikel anlegen
-$opts = new ArticleCreateOptions(title: 'Webhosting Basic');
-$opts->description = 'Shared Hosting, 10 GB SSD, tägliches Backup';
-$opts->salesPrice = 19.90;
-$opts->salesPrice2 = 17.90; // Stufe für Wiederverkäufer
-$opts->currencyCode = 'EUR';
-$opts->unit = 'Monat';
-$opts->taxId = 12345;
+// 1) Create an article
+$opts = new ArticleCreateOptions(
+    title: 'Web hosting Basic',
+    description: 'Shared hosting, 10 GB SSD, daily backup',
+    salesPrice: Money::of('19.90'),
+    salesPrice2: Money::of('17.90'), // reseller level
+    currencyCode: 'EUR',
+    unit: 'month',
+    taxId: 12345,
+    type: ItemType::SERVICE,
+);
 
 $article = $billomat->articles->create($opts);
-printf("Artikel #%d (%s) angelegt\n", $article->id, $article->articleNumber);
+printf("Article #%d (%s) created\n", $article->id, $article->articleNumber);
 
-// 2) Tags vergeben — für spätere Filterung
-$billomat->articleTags->create(
-    new ArticleTagCreateOptions(articleId: $article->id, name: 'hosting'),
+// 2) Add tags for later filtering
+$billomat->articles->tags->create(
+    $article->id,
+    new ArticleTagCreateOptions(name: 'hosting'),
 );
-$billomat->articleTags->create(
-    new ArticleTagCreateOptions(articleId: $article->id, name: 'subscription'),
+$billomat->articles->tags->create(
+    $article->id,
+    new ArticleTagCreateOptions(name: 'subscription'),
 );
 
-// 3) Custom-Property pflegen ("Lieferzeit" = ArticleProperty #42)
-$billomat->articlePropertyValues->create(
+// 3) Set a custom property ("Lead time" = ArticleProperty #42)
+$billomat->articles->propertyValues->create(
+    $article->id,
     new ArticlePropertyValueCreateOptions(
-        articleId: $article->id,
         articlePropertyId: 42,
-        value: 'Sofort verfügbar',
+        value: 'Available immediately',
     ),
 );
 
-// 4) Preis später anpassen — Partial-Update
-$update = new ArticleUpdateOptions();
-$update->salesPrice = 24.90;
+// 4) Change the price later: partial update
+$update = new ArticleUpdateOptions(salesPrice: Money::of('24.90'));
 $billomat->articles->update($article->id, $update);
 
-// 5) Cloud-Übersicht aller Artikel-Tags
-foreach ($billomat->articleTags->cloud() as $entry) {
+// 5) Cloud overview of all article tags
+foreach ($billomat->articles->tags->cloud() as $entry) {
     printf("%s (%d)\n", $entry->name, $entry->count);
 }
 ```

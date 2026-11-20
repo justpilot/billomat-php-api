@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\Recurring;
+use Justpilot\Billomat\Model\RecurringItem;
+use Justpilot\Billomat\Model\RecurringTag;
+use Justpilot\Billomat\Model\RecurringTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Abo-Rechnungen (Recurrings).
@@ -23,16 +28,42 @@ use Justpilot\Billomat\Pagination\Page;
 final class RecurringsApi extends AbstractApi
 {
     /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<RecurringItem, RecurringItemCreateOptions, RecurringItemUpdateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'recurring', RecurringItem::fromArray(...), RecurringItemCreateOptions::class, RecurringItemUpdateOptions::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<RecurringTag, RecurringTagCloudEntry, RecurringTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'recurring', RecurringTag::fromArray(...), RecurringTagCloudEntry::fromArray(...), RecurringTagCreateOptions::class);
+    }
+
+    /**
+     * E-Mail-Empfänger, siehe {@see RecurringEmailReceiversApi}.
+     */
+    public private(set) RecurringEmailReceiversApi $emailReceivers {
+        get => $this->emailReceivers ??= new RecurringEmailReceiversApi($this->http);
+    }
+
+    /**
      * Listet Abo-Rechnungen mit optionalen Filtern.
      *
      * Unterstützte Filter laut Doku: client_id, contact_id, name, payment_type,
      * cycle_number, cycle, label, intro, note, tags, article_id.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param RecurringFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Recurring>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(RecurringFilter|array $filters = []): array
     {
         return $this->listResource('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters);
     }
@@ -44,11 +75,12 @@ final class RecurringsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param RecurringFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Recurring>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(RecurringFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters);
     }
@@ -61,29 +93,31 @@ final class RecurringsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param RecurringFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Recurring>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(RecurringFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/recurrings', 'recurrings', 'recurring', Recurring::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Recurring
     {
-        $data = $this->getJsonOrNull("/recurrings/{$id}");
+        return $this->getResource("/recurrings/{$id}", 'recurring', Recurring::fromArray(...), 'fetching recurring');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['recurring'] ?? null;
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return Recurring::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Recurring
+    {
+        return $this->get($id) ?? throw $this->notFound("/recurrings/{$id}");
     }
 
     public function create(RecurringCreateOptions $options): Recurring
@@ -104,10 +138,42 @@ final class RecurringsApi extends AbstractApi
         return Recurring::fromArray($this->unwrapEnvelope($data, 'recurring', 'updating recurring'));
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/recurrings/{$id}");
+    }
 
-        return true;
+    /**
+     * Stoppt die Abo-Rechnung: Billomat setzt `next_creation_date` auf null und erzeugt keine
+     * weiteren Rechnungen. Die Abo-Rechnung selbst bleibt erhalten.
+     *
+     * Entspricht PUT /recurrings/{id}/stop.
+     */
+    public function stop(int $id): void
+    {
+        $this->putVoid("/recurrings/{$id}/stop");
+    }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /recurrings/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/recurrings/{$id}", 'recurring');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /recurrings/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/recurrings/{$id}", 'recurring', $value);
     }
 }

@@ -44,7 +44,7 @@ final class SettingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         // Sicherheitsbremse: PUT nur wenn explizit aktiviert
         $enabled = getenv('BILLOMAT_SETTINGS_PUT');
         if ('1' !== $enabled) {
-            $this->markTestSkipped('Set BILLOMAT_SETTINGS_PUT=1 to enable PUT /settings integration test.');
+            self::markTestSkipped('Set BILLOMAT_SETTINGS_PUT=1 to enable PUT /settings integration test.');
         }
 
         $billomat = $this->createBillomatClientOrSkip();
@@ -56,8 +56,7 @@ final class SettingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         //    und setzen es danach wieder zurück.
         $newPrintVersion = !((bool) $before->printVersion);
 
-        $opts = new SettingsUpdateOptions();
-        $opts->printVersion = $newPrintVersion;
+        $opts = new SettingsUpdateOptions(printVersion: $newPrintVersion);
 
         $billomat->settings->update($opts);
 
@@ -69,8 +68,7 @@ final class SettingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         }
 
         // 4) Rollback (zurück auf vorherigen Wert)
-        $rollback = new SettingsUpdateOptions();
-        $rollback->printVersion = (bool) $before->printVersion;
+        $rollback = new SettingsUpdateOptions(printVersion: (bool) $before->printVersion);
 
         $billomat->settings->update($rollback);
 

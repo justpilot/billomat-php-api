@@ -47,11 +47,12 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Kontakts.'],
+        // Die Kunden-ID übergibt `ContactsApi::create()` als eigenes Argument; ändern lässt sie sich nicht.
         'client_id' => [
+            'type' => 'int',
+            'readOnly' => true,
             'doc' => 'ID des Kunden, zu dem der Kontakt gehört.',
-            'model' => ['required' => true, 'nonNull' => true],
-            'create' => ['constructor' => true],
-            'update' => ['skip' => true],
+            'model' => ['required' => true],
         ],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Kontakts.'],
         'label' => ['doc' => 'Bezeichnung des Kontakts.'],
@@ -72,7 +73,7 @@ return [
             'type' => 'string',
             'writable' => true,
             'doc' => 'Notiz zum Kontakt.',
-            'deprecated' => 'since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
+            'optionsOnly' => true,
         ],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],

@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api;
 use Justpilot\Billomat\Api\CountriesApi;
 use Justpilot\Billomat\Api\CurrenciesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Country;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -25,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(Country::class)]
 #[CoversClass(Currency::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class CountriesCurrenciesApiTest extends TestCase
@@ -45,14 +48,13 @@ final class CountriesCurrenciesApiTest extends TestCase
         });
 
         $api = new CountriesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
         $countries = $api->list();
         self::assertCount(1, $countries);
         self::assertSame('DE', $countries[0]->code);
-        self::assertTrue($countries[0]->eu);
     }
 
     #[Test]
@@ -71,7 +73,7 @@ final class CountriesCurrenciesApiTest extends TestCase
         });
 
         $api = new CurrenciesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

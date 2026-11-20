@@ -16,15 +16,16 @@ final class RecurringUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesAllNewlyExposedFields(): void
     {
-        $options = new RecurringUpdateOptions();
-        $options->nextCreationDate = new DateTimeImmutable('2026-07-01');
-        $options->emailFilename = 'rechnung.pdf';
-        $options->emailBcc = true;
-        $options->letterColor = false;
-        $options->letterDuplex = true;
-        $options->letterPaperWeight = 100;
-        $options->offerId = 42;
-        $options->confirmationId = 7;
+        $options = new RecurringUpdateOptions(
+            nextCreationDate: new DateTimeImmutable('2026-07-01'),
+            emailFilename: 'rechnung.pdf',
+            emailBcc: true,
+            letterColor: false,
+            letterDuplex: true,
+            letterPaperWeight: 100,
+            offerId: 42,
+            confirmationId: 7,
+        );
 
         $payload = $options->toArray();
 

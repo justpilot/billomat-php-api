@@ -1,6 +1,6 @@
 # Pagination
 
-Billomat liefert List-Endpunkte (`/clients`, `/invoices`, …) seitenweise. Die Page-Metadaten stehen als `@page`/`@per_page`/`@total` neben dem eigentlichen Listeneintrag im äußeren Envelope:
+Billomat returns list endpoints (`/clients`, `/invoices`, …) page by page. The page metadata sits as `@page`/`@per_page`/`@total` next to the actual list entry in the outer envelope:
 
 ```json
 {
@@ -13,59 +13,73 @@ Billomat liefert List-Endpunkte (`/clients`, `/invoices`, …) seitenweise. Die 
 }
 ```
 
-Das SDK exponiert dazu drei Stufen, geordnet nach Bequemlichkeit:
+The SDK offers three levels, ordered by convenience:
 
-| Methode | Wann nutzen? |
+| Method | When to use |
 |---|---|
-| `list(array $filters)` | Du brauchst nur die erste Seite (oder gibst `page`/`per_page` selbst mit). Verhalten wie vor v2.1. |
-| `listPage(array $filters)` | Du brauchst Pagination-Metadaten für klassische UI ("Seite 1/12, 234 Treffer"). |
-| `iterateAll(array $filters, int $pageSize = 100)` | Du willst über alle Einträge eines Filters laufen, ohne dich um Page-Indizes zu kümmern. |
+| `list($filters)` | You only need the first page (or pass `page`/`perPage` yourself). |
+| `listPage($filters)` | You need pagination metadata for a classic UI ("page 1/12, 234 results"). |
+| `iterateAll($filters, int $pageSize = 100)` | You want to walk through all entries of a filter without dealing with page indexes. |
 
-`listPage()` und `iterateAll()` sind auf allen 26 List-APIs verfügbar: `clients`, `invoices`, `offers`, `confirmations`, `creditNotes`, `deliveryNotes`, `reminders`, `letters`, `articles`, `suppliers`, `incomings`, `inboxDocuments`, `recurrings`, `contacts` sowie auf den Lookup-/Property-APIs (`articleProperties`, `clientProperties`, `incomingProperties`, `supplierProperties` plus deren `*PropertyValues`-Geschwister) und den globalen Stammdaten (`countries`, `currencies`, `units`, `users`, `emailTemplates`, `freeTexts`).
+For clients, suppliers, articles, users and all document types (invoices, offers, confirmations, credit notes, delivery notes, letters, reminders, incoming invoices, recurring invoices), `$filters` is the typed filter class (`ClientFilter`, `InvoiceFilter`, …) or an array (`ClientFilter|array`). `templates->list()` takes `TemplateFilter|array`. Sub-resources get their parent ID as the first argument: payments take `InvoicePaymentFilter`/`CreditNotePaymentFilter`/`IncomingPaymentFilter`, property values `ClientPropertyValueFilter`/`ArticlePropertyValueFilter`/`SupplierPropertyValueFilter`/`IncomingPropertyValueFilter`, comments `CommentFilter` (action keys plus sorting and pagination), and items, tags, email receivers and property definitions the generic `SubResourceFilter` (only `orderBy`, `page`, `perPage`, `extra`). The other list APIs take an array.
 
-## `iterateAll()` — Auto-Pagination
+`listPage()` and `iterateAll()` are available on these list APIs:
 
-Lazy Generator nach dem Vorbild des Stripe-SDK (`auto_paging_iter()`). Holt seitenweise nach Bedarf und stoppt automatisch, sobald die letzte Seite erreicht ist.
+- top-level resources: `clients`, `suppliers`, `articles`, `users`, `invoices`, `offers`, `confirmations`, `creditNotes`, `deliveryNotes`, `reminders`, `letters`, `incomings`, `recurrings`, `inboxDocuments`, `activities`, `roles`,
+- master data lookups: `countries`, `currencies`, `countryTaxes`, `units`, `emailTemplates`, `freeTexts`, `incomingCategories`, `reminderTexts`, `taxes`, `templates`,
+- `clients->contacts`, with the client ID as the first argument: `$billomat->clients->contacts->iterateAll($clientId)`,
+- the attribute sub-resources `properties` (on `clients`, `articles`, `suppliers`, `incomings`, `users`) and `propertyValues` (on `clients`, `articles`, `suppliers`, `incomings`), e.g. `$billomat->clients->propertyValues->iterateAll($clientId)`,
+- the document sub-resources `items`, `comments`, `tags` and `payments` (where the parent has them) and `recurrings->emailReceivers`, e.g. `$billomat->invoices->items->iterateAll($invoiceId, new SubResourceFilter(orderBy: OrderBy::asc('position')))`.
+
+## `iterateAll()` — auto-pagination
+
+A lazy generator modeled on the Stripe SDK (`auto_paging_iter()`). It fetches page by page on demand and stops automatically once the last page is reached.
 
 ```php
+use Justpilot\Billomat\Api\ClientFilter;
 use Justpilot\Billomat\BillomatClient;
 
 $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: '…');
 
-foreach ($billomat->clients->iterateAll(['country_code' => 'DE']) as $client) {
+foreach ($billomat->clients->iterateAll(new ClientFilter(countryCode: 'DE')) as $client) {
     echo $client->id, ' ', $client->name, PHP_EOL;
 }
 ```
 
-Filter werden bei jeder Page-Anfrage mitgesendet; `page` und `per_page` darin werden überschrieben (das SDK steuert sie selbst).
+Filters are sent with every page request; `page`/`perPage` (or `page`/`per_page` in an array) are overwritten, because the SDK controls them.
 
-### `pageSize` justieren
+### Tuning `pageSize`
 
-Default ist 100. Größere Pages reduzieren Round-Trips, kleinere Pages senken Peak-Memory:
+The default is 100 (Billomat's maximum is 1000; larger values are clamped to 1000, values below 1 to 1). Larger pages mean fewer round trips, smaller pages lower peak memory:
 
 ```php
-foreach ($billomat->invoices->iterateAll(filters: ['date_from' => '2026-01-01'], pageSize: 500) as $invoice) {
+use Justpilot\Billomat\Api\InvoiceFilter;
+
+$filter = new InvoiceFilter(from: new DateTimeImmutable('2026-01-01'));
+
+foreach ($billomat->invoices->iterateAll(filters: $filter, pageSize: 500) as $invoice) {
     // …
 }
 ```
 
-### Terminierung
+### Termination
 
-Der Iterator stoppt in zwei Fällen:
+The iterator stops in two cases:
 
-1. **Bevorzugt:** `PageInfo::hasNextPage()` ist `false`, weil `page * perPage >= total` (Billomat liefert `@total` mit).
-2. **Fallback:** Der Endpunkt liefert keine `@total`-Metadaten und die aktuelle Seite enthält weniger Items als `pageSize`. In dem Fall ist `total` in der `PageInfo` `null`, und `hasNextPage()` gibt optimistisch `true` zurück — der Iterator verlässt sich auf den `count(items) < pageSize`-Check.
+1. **Preferred:** `PageInfo::hasNextPage()` is `false` because `page >= totalPages()` (Billomat sends `@total`).
+2. **Fallback:** the endpoint sends no `@total` metadata and the current page contains fewer items than `pageSize`. In that case `total` in the `PageInfo` is `null` and `hasNextPage()` optimistically returns `true` — the iterator relies on the `count(items) < pageSize` check.
 
-Beide Fälle sind sicher und brechen bei leeren Endpunkten nach der ersten Anfrage ab.
+Both cases are safe and stop after the first request for empty endpoints.
 
-## `listPage()` — Eine Seite mit Metadaten
+## `listPage()` — one page with metadata
 
-Identisch zu `list()`, gibt aber zusätzlich Page-Metadaten als `Page<Model>` zurück:
+Same as `list()`, but also returns the page metadata as a `Page<Model>`:
 
 ```php
+use Justpilot\Billomat\Api\ClientFilter;
 use Justpilot\Billomat\Pagination\Page;
 
-$result = $billomat->clients->listPage(['per_page' => 50, 'page' => 3]);
+$result = $billomat->clients->listPage(new ClientFilter(page: 3, perPage: 50));
 // $result instanceof Page
 
 foreach ($result->items as $client) {
@@ -73,16 +87,16 @@ foreach ($result->items as $client) {
 }
 
 echo sprintf(
-    'Seite %d / %d — %d Treffer insgesamt',
+    'Page %d / %d — %d results in total',
     $result->info->page,
     $result->info->totalPages() ?? 1,
     $result->info->total ?? \count($result->items),
 );
 ```
 
-### `Page<T>` und `PageInfo`
+### `Page<T>` and `PageInfo`
 
-Beide Wert-Objekte liegen unter `Justpilot\Billomat\Pagination\`:
+Both value objects live in `Justpilot\Billomat\Pagination\`:
 
 ```php
 final readonly class Page // generic <T of object>
@@ -96,22 +110,25 @@ final readonly class PageInfo
     public function __construct(
         public int $page,
         public int $perPage,
-        public ?int $total, // null = unbekannt
+        public ?int $total, // null = unknown
     ) {}
 
-    public function totalPages(): ?int;     // null, wenn $total === null
-    public function hasNextPage(): bool;    // true, wenn $total === null (optimistisch)
+    public function totalPages(): ?int;     // null if $total === null
+    public function hasNextPage(): bool;    // true if $total === null (optimistic)
 }
 ```
 
-`PageInfo::$total` ist `null`, wenn der Endpunkt keine `@total`-Metadaten liefert (z. B. einige Lookup-Endpunkte). In dem Fall ist auch `totalPages()` `null`; UI-Code muss diese Möglichkeit mit `?? '?'` o. ä. behandeln.
+`PageInfo::$total` is `null` when the endpoint sends no `@total` metadata (e.g. some lookup endpoints). Then `totalPages()` is `null` as well; UI code has to handle that, e.g. with `?? '?'`.
 
-## Filter mit `list()` weiterhin möglich
+## Paging manually with `list()`
 
-`list()` bleibt unverändert. Wer manuell paginieren will (z. B. zur Wiederaufnahme nach Abbruch), kann das wie bisher:
+`list()` takes `page`/`perPage` as well. To page manually (e.g. to resume after an abort):
 
 ```php
+$pageTwo = $billomat->clients->list(new ClientFilter(page: 2, perPage: 50));
+
+// equivalent as an array
 $pageTwo = $billomat->clients->list(['page' => 2, 'per_page' => 50]);
 ```
 
-Für neue Konsumenten ist `iterateAll()` aber die empfohlene Wahl — weniger Boilerplate, keine Off-by-one-Risiken am Seitenende.
+For new code, `iterateAll()` is the recommended choice — less boilerplate and no off-by-one risk at the end of the list.

@@ -11,6 +11,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum TemplateThumbFormat: string
 {
+    use FromApi;
+
     case PNG = 'png';
     case GIF = 'gif';
     case JPG = 'jpg';

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Integration\Comments;
 
 use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\ConfirmationCommentCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCommentCreateOptions;
@@ -25,9 +26,11 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\ConfirmationComment;
 use Justpilot\Billomat\Model\CreditNoteComment;
 use Justpilot\Billomat\Model\DeliveryNoteComment;
+use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\IncomingComment;
 use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\LetterComment;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\OfferComment;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
@@ -50,15 +53,14 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $this->faker()->company();
-        $opts->email = $this->faker()->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $this->faker()->company(),
+            countryCode: 'DE',
+            email: $this->faker()->unique()->safeEmail(),
+        );
         $client = $billomat->clients->create($opts);
-        $id = $client->id;
-        self::assertNotNull($id);
 
-        return $id;
+        return $client->id;
     }
 
     private function ensureSupplierId(BillomatClient $billomat): int
@@ -71,13 +73,10 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-CommentTest '.date('His'));
-        $opts->countryCode = 'DE';
+        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-CommentTest '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
-        $id = $created->id;
-        self::assertNotNull($id);
 
-        return $id;
+        return $created->id;
     }
 
     #[Group('integration')]
@@ -86,25 +85,30 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $invOpts = new InvoiceCreateOptions(clientId: $this->ensureClientId($billomat));
-        $invOpts->currencyCode = 'EUR';
-        $invOpts->title = 'IT-CommentTest '.date('His');
-        $item = new InvoiceItemCreateOptions(1.0, 10.0);
-        $item->title = 'Pos';
-        $item->unit = 'Stück';
-        $invOpts->addItem($item);
+        $invOpts = new InvoiceCreateOptions(
+            clientId: $this->ensureClientId($billomat),
+            title: 'IT-CommentTest '.date('His'),
+            currencyCode: 'EUR',
+        );
+        $item = new InvoiceItemCreateOptions(1.0, Money::of('10'), unit: 'Stück', title: 'Pos');
+        $invOpts = $invOpts->withItem($item);
         $invoice = $billomat->invoices->create($invOpts);
-        self::assertNotNull($invoice->id);
 
         try {
-            $comment = $billomat->invoiceComments->create(new InvoiceCommentCreateOptions($invoice->id, 'IT-Comment-'.date('His')));
+            $comment = $billomat->invoices->comments->create($invoice->id, new InvoiceCommentCreateOptions('IT-Comment-'.date('His')));
             self::assertNotNull($comment->id);
 
-            $comments = $billomat->invoiceComments->listByInvoice($invoice->id);
+            $comments = $billomat->invoices->comments->list($invoice->id);
             self::assertContainsOnlyInstancesOf(InvoiceComment::class, $comments);
             self::assertGreaterThanOrEqual(1, \count($comments));
 
-            self::assertTrue($billomat->invoiceComments->delete($comment->id));
+            // Billomat legt beim Erstellen einen CREATE-Kommentar an; der manuelle hat den ActionKey COMMENT.
+            $manual = $billomat->invoices->comments->list($invoice->id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::COMMENT]));
+            self::assertSame([$comment->id], array_map(static fn (InvoiceComment $c): int => $c->id, $manual));
+            $created = $billomat->invoices->comments->list($invoice->id, new CommentFilter(actionKeys: [InvoiceCommentActionKey::CREATE]));
+            self::assertNotContains($comment->id, array_map(static fn (InvoiceComment $c): int => $c->id, $created));
+
+            $billomat->invoices->comments->delete($comment->id);
         } finally {
             $billomat->invoices->delete($invoice->id);
         }
@@ -117,17 +121,16 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $offer = $billomat->offers->create(new OfferCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($offer->id);
 
         try {
-            $comment = $billomat->offerComments->create(new OfferCommentCreateOptions($offer->id, 'IT-OffComment-'.date('His')));
+            $comment = $billomat->offers->comments->create($offer->id, new OfferCommentCreateOptions('IT-OffComment-'.date('His')));
             self::assertNotNull($comment->id);
 
-            $comments = $billomat->offerComments->listByOffer($offer->id);
+            $comments = $billomat->offers->comments->list($offer->id);
             self::assertContainsOnlyInstancesOf(OfferComment::class, $comments);
             self::assertGreaterThanOrEqual(1, \count($comments));
 
-            self::assertTrue($billomat->offerComments->delete($comment->id));
+            $billomat->offers->comments->delete($comment->id);
         } finally {
             $billomat->offers->delete($offer->id);
         }
@@ -140,16 +143,15 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $conf = $billomat->confirmations->create(new ConfirmationCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($conf->id);
 
         try {
-            $comment = $billomat->confirmationComments->create(new ConfirmationCommentCreateOptions($conf->id, 'IT-ConfComment-'.date('His')));
+            $comment = $billomat->confirmations->comments->create($conf->id, new ConfirmationCommentCreateOptions('IT-ConfComment-'.date('His')));
             self::assertNotNull($comment->id);
 
-            $comments = $billomat->confirmationComments->listByConfirmation($conf->id);
+            $comments = $billomat->confirmations->comments->list($conf->id);
             self::assertContainsOnlyInstancesOf(ConfirmationComment::class, $comments);
 
-            self::assertTrue($billomat->confirmationComments->delete($comment->id));
+            $billomat->confirmations->comments->delete($comment->id);
         } finally {
             $billomat->confirmations->delete($conf->id);
         }
@@ -162,16 +164,15 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $note = $billomat->creditNotes->create(new CreditNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($note->id);
 
         try {
-            $comment = $billomat->creditNoteComments->create(new CreditNoteCommentCreateOptions($note->id, 'IT-GsComment-'.date('His')));
+            $comment = $billomat->creditNotes->comments->create($note->id, new CreditNoteCommentCreateOptions('IT-GsComment-'.date('His')));
             self::assertNotNull($comment->id);
 
-            $comments = $billomat->creditNoteComments->listByCreditNote($note->id);
+            $comments = $billomat->creditNotes->comments->list($note->id);
             self::assertContainsOnlyInstancesOf(CreditNoteComment::class, $comments);
 
-            self::assertTrue($billomat->creditNoteComments->delete($comment->id));
+            $billomat->creditNotes->comments->delete($comment->id);
         } finally {
             $billomat->creditNotes->delete($note->id);
         }
@@ -184,16 +185,15 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $note = $billomat->deliveryNotes->create(new DeliveryNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($note->id);
 
         try {
-            $comment = $billomat->deliveryNoteComments->create(new DeliveryNoteCommentCreateOptions($note->id, 'IT-LsComment-'.date('His')));
+            $comment = $billomat->deliveryNotes->comments->create($note->id, new DeliveryNoteCommentCreateOptions('IT-LsComment-'.date('His')));
             self::assertNotNull($comment->id);
 
-            $comments = $billomat->deliveryNoteComments->listByDeliveryNote($note->id);
+            $comments = $billomat->deliveryNotes->comments->list($note->id);
             self::assertContainsOnlyInstancesOf(DeliveryNoteComment::class, $comments);
 
-            self::assertTrue($billomat->deliveryNoteComments->delete($comment->id));
+            $billomat->deliveryNotes->comments->delete($comment->id);
         } finally {
             $billomat->deliveryNotes->delete($note->id);
         }
@@ -206,16 +206,15 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $letter = $billomat->letters->create(new LetterCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($letter->id);
 
         try {
-            $comment = $billomat->letterComments->create(new LetterCommentCreateOptions($letter->id, 'IT-BrComment-'.date('His')));
+            $comment = $billomat->letters->comments->create($letter->id, new LetterCommentCreateOptions('IT-BrComment-'.date('His')));
             self::assertNotNull($comment->id);
 
-            $comments = $billomat->letterComments->listByLetter($letter->id);
+            $comments = $billomat->letters->comments->list($letter->id);
             self::assertContainsOnlyInstancesOf(LetterComment::class, $comments);
 
-            self::assertTrue($billomat->letterComments->delete($comment->id));
+            $billomat->letters->comments->delete($comment->id);
         } finally {
             $billomat->letters->delete($letter->id);
         }
@@ -227,19 +226,20 @@ final class CommentsIntegrationTest extends AbstractBillomatIntegrationTestCase
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $incomingOpts = new IncomingCreateOptions(supplierId: $this->ensureSupplierId($billomat));
-        $incomingOpts->incomingNumber = 'IT-IN-Comment-'.date('His');
+        $incomingOpts = new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId($billomat),
+            incomingNumber: 'IT-IN-Comment-'.date('His'),
+        );
         $incoming = $billomat->incomings->create($incomingOpts);
-        self::assertNotNull($incoming->id);
 
         try {
-            $comment = $billomat->incomingComments->create(new IncomingCommentCreateOptions($incoming->id, 'IT-InComment-'.date('His')));
+            $comment = $billomat->incomings->comments->create($incoming->id, new IncomingCommentCreateOptions('IT-InComment-'.date('His')));
             self::assertNotNull($comment->id);
 
-            $comments = $billomat->incomingComments->listByIncoming($incoming->id);
+            $comments = $billomat->incomings->comments->list($incoming->id);
             self::assertContainsOnlyInstancesOf(IncomingComment::class, $comments);
 
-            self::assertTrue($billomat->incomingComments->delete($comment->id));
+            $billomat->incomings->comments->delete($comment->id);
         } finally {
             $billomat->incomings->delete($incoming->id);
         }

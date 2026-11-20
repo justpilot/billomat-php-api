@@ -5,17 +5,21 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Article;
-use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\ItemType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Article::class)]
-#[UsesClass(ArticleType::class)]
+#[UsesClass(ItemType::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class ArticleTest extends TestCase
 {
     #[Test]
@@ -49,17 +53,15 @@ final class ArticleTest extends TestCase
         self::assertInstanceOf(DateTimeImmutable::class, $article->created);
         self::assertSame('A-007', $article->articleNumber);
         self::assertSame('SaaS-Lizenz Pro', $article->title);
-        self::assertSame(199.0, $article->salesPrice);
-        self::assertSame(189.0, $article->salesPrice2);
-        self::assertSame(179.0, $article->salesPrice3);
-        self::assertSame(169.0, $article->salesPrice4);
-        self::assertSame(159.0, $article->salesPrice5);
-        self::assertSame('Stück', $article->unit);
+        self::assertSame('199', $article->salesPrice?->toString());
+        self::assertSame('189', $article->salesPrice2?->toString());
+        self::assertSame('179', $article->salesPrice3?->toString());
+        self::assertSame('169', $article->salesPrice4?->toString());
+        self::assertSame('159', $article->salesPrice5?->toString());
         self::assertSame(42, $article->unitId);
-        self::assertSame(50.0, $article->purchasePrice);
+        self::assertSame('50', $article->purchasePrice?->toString());
         self::assertSame(11, $article->supplierId);
         self::assertSame(1, $article->taxId);
-        self::assertSame(5, $article->categoryId);
     }
 
     #[Test]
@@ -84,7 +86,6 @@ final class ArticleTest extends TestCase
         self::assertNull($article->unitId);
         self::assertNull($article->supplierId);
         self::assertNull($article->taxId);
-        self::assertNull($article->categoryId);
         self::assertNull($article->numberLength);
     }
 
@@ -99,16 +100,19 @@ final class ArticleTest extends TestCase
     #[Test]
     public function toArrayRoundTrips(): void
     {
-        $array = Article::fromArray([
+        $article = Article::fromArray([
             'id' => '7',
             'title' => 'Test',
             'sales_price' => '99.99',
             'currency_code' => 'EUR',
             'unit' => 'Stück',
-        ])->toArray();
+        ]);
+        $array = $article->toArray();
 
-        self::assertSame(99.99, $array['sales_price']);
+        self::assertSame('99.99', $array['sales_price']);
         self::assertSame('EUR', $array['currency_code']);
+        // `unit` bildet das Model seit 4.0 nicht mehr ab; der Rohwert bleibt in `extra`.
+        self::assertSame(['unit' => 'Stück'], $article->extra);
         self::assertSame('Stück', $array['unit']);
     }
 }

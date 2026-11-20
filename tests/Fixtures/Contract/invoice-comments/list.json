@@ -1,0 +1,48 @@
+{
+    "invoice-comments": {
+        "invoice-comment": [
+            {
+                "id": "102425323",
+                "created": "2026-10-26T16:58:57+01:00",
+                "comment": "Text 15",
+                "actionkey": "CREATE",
+                "public": "0",
+                "by_client": "0",
+                "user_id": "136536",
+                "email_id": "",
+                "client_id": "",
+                "invoice_id": "25279655",
+                "customfield": ""
+            },
+            {
+                "id": "102425324",
+                "created": "2026-10-26T16:58:58+01:00",
+                "comment": "Text 16",
+                "actionkey": "COMMENT",
+                "public": "0",
+                "by_client": "0",
+                "user_id": "136536",
+                "email_id": "",
+                "client_id": "",
+                "invoice_id": "25279655",
+                "customfield": ""
+            },
+            {
+                "id": "102425325",
+                "created": "2026-10-26T16:58:59+01:00",
+                "comment": "Text 17",
+                "actionkey": "STATUS",
+                "public": "0",
+                "by_client": "0",
+                "user_id": "136536",
+                "email_id": "",
+                "client_id": "",
+                "invoice_id": "25279655",
+                "customfield": ""
+            }
+        ],
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "5"
+    }
+}

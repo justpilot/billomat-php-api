@@ -16,6 +16,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum RecurringAction: string
 {
+    use FromApi;
+
     case CREATE = 'CREATE';
     case COMPLETE = 'COMPLETE';
     case EMAIL = 'EMAIL';

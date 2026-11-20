@@ -34,6 +34,15 @@ return static function (string $prefix, string $label, string $parentField, stri
             ],
         ],
 
+        // Die Eltern-ID ist ein eigenes Argument von `PropertyValuesApi::list()`.
+        'filter' => [
+            'class' => $prefix . 'PropertyValueFilter',
+            'endpoint' => "GET /api/{$path}",
+            'fields' => [
+                $parentField => ['omit' => true],
+            ],
+        ],
+
         'createOptions' => [
             'class' => $prefix . 'PropertyValueCreateOptions',
             'endpoint' => "POST /api/{$path}",
@@ -43,23 +52,24 @@ return static function (string $prefix, string $label, string $parentField, stri
         // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
         'fields' => [
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Eigenschaftswerts.'],
+            // Die Eltern-ID übergibt `PropertyValuesApi::create()` als eigenes Argument.
             $parentField => [
+                'type' => 'int',
+                'readOnly' => true,
                 'doc' => 'ID des Datensatzes, zu dem der Wert gehört.',
-                'model' => ['required' => true, 'nonNull' => true],
-                'create' => ['constructor' => true],
+                'model' => ['required' => true],
             ],
             "{$resource}_property_id" => [
                 'doc' => 'ID der Eigenschaft.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
-            'type' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Typ der Eigenschaft (z. B. TEXTFIELD, CHECKBOX).'],
-            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Name der Eigenschaft.'],
+            'type' => ['type' => 'string', 'enum' => 'PropertyType', 'readOnly' => true, 'doc' => 'Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX).'],
+            'name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Name der Eigenschaft.'],
             // Der Typ des Werts hängt von der Eigenschaft ab (Text, Checkbox, …), deshalb `mixed`.
             'value' => [
                 'type' => 'mixed',
                 'doc' => 'Wert der Eigenschaft.',
-                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
             'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt.'],

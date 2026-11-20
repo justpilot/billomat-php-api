@@ -11,6 +11,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum TemplateDocumentType: string
 {
+    use FromApi;
+
     case INVOICE = 'INVOICE';
     case OFFER = 'OFFER';
     case CONFIRMATION = 'CONFIRMATION';
@@ -18,11 +20,6 @@ enum TemplateDocumentType: string
     case DELIVERY_NOTE = 'DELIVERY_NOTE';
     case CREDIT_NOTE = 'CREDIT_NOTE';
     case LETTER = 'LETTER';
-
-    public static function fromApi(?string $value): ?self
-    {
-        return null === $value ? null : (self::tryFrom($value) ?? null);
-    }
 
     /**
      * Deutsches Label für UI/Logs.

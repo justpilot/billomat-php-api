@@ -17,16 +17,9 @@ use Justpilot\Billomat\Model\Enum\RecurringEmailReceiverType;
  * Generiert aus tools/codegen/definitions/recurring-email-receivers.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class RecurringEmailReceiverCreateOptions
+final readonly class RecurringEmailReceiverCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID der Abo-Rechnung.
-         *
-         * Billomat-Feld: recurring_id
-         * Typ: INT
-         */
-        public int $recurringId,
         /**
          * Empfänger-Typ (To, Cc oder Bcc).
          *
@@ -44,6 +37,18 @@ final class RecurringEmailReceiverCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `type`. */
+    public function withType(RecurringEmailReceiverType $type): self
+    {
+        return clone($this, ['type' => $type]);
+    }
+
+    /** Kopie mit geändertem `address`. */
+    public function withAddress(string $address): self
+    {
+        return clone($this, ['address' => $address]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -52,7 +57,6 @@ final class RecurringEmailReceiverCreateOptions
     public function toArray(): array
     {
         return [
-            'recurring_id' => $this->recurringId,
             'type' => $this->type->value,
             'address' => $this->address,
         ];

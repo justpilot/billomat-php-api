@@ -23,9 +23,10 @@ final class SettingsUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesEnumsAsStringValue(): void
     {
-        $options = new SettingsUpdateOptions();
-        $options->netGross = NetGross::NET;
-        $options->numberRangeMode = NumberRangeMode::CONSIDER_PREFIX;
+        $options = new SettingsUpdateOptions(
+            netGross: NetGross::NET,
+            numberRangeMode: NumberRangeMode::CONSIDER_PREFIX,
+        );
 
         $payload = $options->toArray();
 
@@ -36,8 +37,7 @@ final class SettingsUpdateOptionsTest extends TestCase
     #[Test]
     public function itEmitsPriceGroupKeysAsPriceGroupNFields(): void
     {
-        $options = new SettingsUpdateOptions();
-        $options->priceGroups = [2 => 'Großkunden', 3 => 'Wiederverkäufer'];
+        $options = new SettingsUpdateOptions(priceGroups: [2 => 'Großkunden', 3 => 'Wiederverkäufer']);
 
         $payload = $options->toArray();
 
@@ -49,8 +49,9 @@ final class SettingsUpdateOptionsTest extends TestCase
     #[Test]
     public function itJoinsBccAddressesAsCsvString(): void
     {
-        $options = new SettingsUpdateOptions();
-        $options->bccAddresses = ['a@example.com', 'b@example.com', 'c@example.com'];
+        $options = new SettingsUpdateOptions(
+            bccAddresses: ['a@example.com', 'b@example.com', 'c@example.com'],
+        );
 
         $payload = $options->toArray();
 
@@ -66,12 +67,10 @@ final class SettingsUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesPrintVersionAsOneOrZero(): void
     {
-        $options = new SettingsUpdateOptions();
-        $options->printVersion = true;
+        $options = new SettingsUpdateOptions(printVersion: true);
         self::assertSame(1, $options->toArray()['print_version']);
 
-        $options->printVersion = false;
-        self::assertSame(0, $options->toArray()['print_version']);
+        self::assertSame(0, $options->withPrintVersion(false)->toArray()['print_version']);
     }
 
     #[Test]
@@ -83,14 +82,15 @@ final class SettingsUpdateOptionsTest extends TestCase
     #[Test]
     public function itPassesScalarFieldsThrough(): void
     {
-        $options = new SettingsUpdateOptions();
-        $options->currencyCode = 'EUR';
-        $options->locale = 'de_DE';
-        $options->dueDays = 14;
-        $options->discountRate = 2.5;
-        $options->invoiceNumberPre = 'RE-';
-        $options->reminderDueDays = 10;
-        $options->taxation = 'gross';
+        $options = new SettingsUpdateOptions(
+            currencyCode: 'EUR',
+            locale: 'de_DE',
+            invoiceNumberPre: 'RE-',
+            dueDays: 14,
+            discountRate: 2.5,
+            reminderDueDays: 10,
+            taxation: 'gross',
+        );
 
         $payload = $options->toArray();
 

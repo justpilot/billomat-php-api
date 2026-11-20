@@ -1,0 +1,20 @@
+{
+    "incoming-payment": {
+        "id": "1877412",
+        "created": "2026-10-26T16:59:09+01:00",
+        "incoming_id": "2063418",
+        "user_id": "136536",
+        "date": "2026-10-26",
+        "amount": "50",
+        "comment": "",
+        "transaction_purpose": "",
+        "currency_code": "EUR",
+        "quote": "1",
+        "payment_group": "82a93d07-2c1e-4299-a1dd-a98829878877",
+        "finapi_transaction_id": "",
+        "finapi_transaction_amount": "",
+        "type": "BANK_TRANSFER",
+        "document_title": "SDK-778",
+        "customfield": ""
+    }
+}

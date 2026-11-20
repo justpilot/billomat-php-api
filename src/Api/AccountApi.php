@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Justpilot\Billomat\Model\Account;
+use NoDiscard;
 
 /**
  * API-Wrapper für die eigenen Account-Informationen.
@@ -23,6 +24,7 @@ final class AccountApi extends AbstractApi
      *
      * Entspricht GET /clients/myself.
      */
+    #[NoDiscard]
     public function get(): Account
     {
         $data = $this->getJson('/clients/myself');

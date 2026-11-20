@@ -11,7 +11,7 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  * Definition einer Kunden-Eigenschaft.
  *
  * Dieses Model bildet die Struktur von GET /client-properties bzw. GET /client-properties/{id} ab.
- * Anlegen und Ändern erfolgen über PropertyCreateOptions.
+ * Anlegen über PropertyCreateOptions, Ändern über PropertyUpdateOptions.
  *
  * Dokumentation:
  * https://www.billomat.com/en/api/settings/client-properties/
@@ -21,9 +21,20 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
  */
 final readonly class ClientProperty
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'name' => true,
+        'type' => true,
+        'default_value' => true,
+        'is_nvl' => true,
+        'customfield' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Attributs. */
-        public ?int $id,
+        public int $id,
         /** Name des Attributs. */
         public string $name,
         /**
@@ -31,19 +42,19 @@ final readonly class ClientProperty
          *
          * TEXTFIELD = einzeiliges Textfeld, TEXTAREA = mehrzeiliges Textfeld, CHECKBOX = Checkbox
          */
-        public ?PropertyType $type,
+        public ?PropertyType $type = null,
         /** Standardwert. */
         public ?string $defaultValue = null,
-        /**
-         * Sortierposition.
-         *
-         * @deprecated since 3.1 – Billomat liefert `position` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $position = null,
         /** Standardwert verwenden, wenn kein anderer Wert gesetzt ist? */
         public ?bool $isNvl = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -55,13 +66,13 @@ final readonly class ClientProperty
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
-            position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             isNvl: ScalarCaster::toBoolOrNull($data['is_nvl'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -75,13 +86,13 @@ final readonly class ClientProperty
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
             'type' => $this->type?->value,
             'default_value' => $this->defaultValue,
-            'position' => $this->position,
             'is_nvl' => $this->isNvl,
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
         ];
     }
 }

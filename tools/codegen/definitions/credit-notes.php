@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 return [
     'specResource' => 'gutschriften',
@@ -31,7 +30,7 @@ return [
             'Typisierter Payload für POST /credit-notes.',
             '',
             'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.',
-            'Positionen lassen sich beim Anlegen über addItem() direkt mitsenden.',
+            'Positionen lassen sich beim Anlegen über `items:` bzw. withItem() direkt mitsenden.',
         ],
     ],
 
@@ -49,9 +48,17 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'CreditNoteFilter',
+        'endpoint' => 'GET /api/credit-notes',
+        'fields' => [
+            'status' => ['enum' => 'CreditNoteStatus'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Gutschrift.'],
-        'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Gutschrift.'],
         'credit_note_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Gutschriftsnummer (wird beim Abschließen vergeben).'],
@@ -79,7 +86,6 @@ return [
         'free_text_id' => ['doc' => 'ID des Freitextes zur Belegung von title, label, intro und note.'],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Gutschrift abgeschlossen wird.'],
         'taxes' => ['type' => 'taxes', 'readOnly' => true, 'doc' => 'Steuerzeilen der Gutschrift.'],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Persönliche URL zum Kundenportal.', 'deprecated' => $gone('customerportal_url')],
         'credit-note-items' => [
             'type' => 'list',
             'readOnly' => true,

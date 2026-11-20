@@ -11,12 +11,9 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum PropertyType: string
 {
+    use FromApi;
+
     case TEXTFIELD = 'TEXTFIELD';
     case TEXTAREA = 'TEXTAREA';
     case CHECKBOX = 'CHECKBOX';
-
-    public static function fromApi(?string $value): ?self
-    {
-        return null === $value || '' === $value ? null : self::tryFrom($value);
-    }
 }

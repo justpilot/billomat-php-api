@@ -5,17 +5,21 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Incoming::class)]
+#[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(IncomingStatus::class)]
+#[UsesClass(Money::class)]
 final class IncomingTest extends TestCase
 {
     #[Test]
@@ -48,14 +52,11 @@ final class IncomingTest extends TestCase
         self::assertSame(11, $incoming->supplierId);
         self::assertInstanceOf(DateTimeImmutable::class, $incoming->created);
         self::assertInstanceOf(DateTimeImmutable::class, $incoming->date);
-        self::assertInstanceOf(DateTimeImmutable::class, $incoming->supplyDate);
         self::assertInstanceOf(DateTimeImmutable::class, $incoming->dueDate);
-        self::assertInstanceOf(DateTimeImmutable::class, $incoming->paidAt);
-        self::assertSame(30, $incoming->dueDays);
         self::assertSame(IncomingStatus::PAID, $incoming->status);
         self::assertSame('ER-2025-0050', $incoming->incomingNumber);
-        self::assertSame(119.0, $incoming->totalGross);
-        self::assertSame(0.0, $incoming->openAmount);
+        self::assertSame('119', $incoming->totalGross?->toString());
+        self::assertSame('0', $incoming->openAmount?->toString());
     }
 
     #[Test]
@@ -73,7 +74,6 @@ final class IncomingTest extends TestCase
         ]);
 
         self::assertNull($incoming->supplierId);
-        self::assertNull($incoming->dueDays);
         self::assertNull($incoming->totalGross);
         self::assertNull($incoming->totalNet);
         self::assertNull($incoming->paidAmount);

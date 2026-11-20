@@ -1,0 +1,26 @@
+{
+    "contact": {
+        "id": "159697",
+        "created": "2026-10-26T16:58:54+01:00",
+        "updated": "2026-10-26T16:58:54+01:00",
+        "client_id": "10651661",
+        "label": "",
+        "name": "Name 2",
+        "salutation": "",
+        "first_name": "Vorname4",
+        "last_name": "Nachname3",
+        "street": "Musterstraße 4",
+        "zip": "10003",
+        "city": "Musterstadt 4",
+        "state": "",
+        "country_code": "DE",
+        "address": "Firma 4 GmbH\nMusterstraße 4\n10004 Musterstadt 4",
+        "phone": "",
+        "fax": "",
+        "mobile": "",
+        "email": "kontakt3@example.com",
+        "www": "",
+        "locale": "",
+        "customfield": ""
+    }
+}

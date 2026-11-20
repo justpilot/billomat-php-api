@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tools;
 
+use Justpilot\Billomat\Model\Role;
 use ReflectionClass;
 use ReflectionEnum;
 use RuntimeException;
@@ -47,35 +48,35 @@ $mapping = [
     'kunden' => ['api' => 'ClientsApi', 'model' => 'Client',
         'createOptions' => 'ClientCreateOptions', 'updateOptions' => 'ClientUpdateOptions',
         'docFile' => 'clients.md'],
-    'kunden/attribute' => ['api' => 'ClientPropertyValuesApi', 'model' => 'ClientPropertyValue',
+    'kunden/attribute' => ['api' => 'PropertyValuesApi', 'model' => 'ClientPropertyValue',
         'createOptions' => 'ClientPropertyValueCreateOptions', 'docFile' => 'properties.md',
         'note' => 'Attribut-Werte (/client-property-values); Definitionen siehe einstellungen/kunden-attribute.'],
     'kunden/kontakte' => ['api' => 'ContactsApi', 'model' => 'Contact',
         'createOptions' => 'ContactCreateOptions', 'updateOptions' => 'ContactUpdateOptions',
         'docFile' => 'contacts.md'],
-    'kunden/schlagworte' => ['api' => 'ClientTagsApi', 'model' => 'ClientTag',
+    'kunden/schlagworte' => ['api' => 'TagsApi', 'model' => 'ClientTag',
         'createOptions' => 'ClientTagCreateOptions', 'docFile' => 'client-tags.md'],
 
     'rechnungen' => ['api' => 'InvoicesApi', 'model' => 'Invoice',
         'createOptions' => 'InvoiceCreateOptions', 'updateOptions' => 'InvoiceUpdateOptions',
         'docFile' => 'invoices.md'],
-    'rechnungen/positionen' => ['api' => 'InvoiceItemsApi', 'model' => 'InvoiceItem',
+    'rechnungen/positionen' => ['api' => 'ItemsApi', 'model' => 'InvoiceItem',
         'createOptions' => 'InvoiceItemCreateOptions', 'docFile' => 'invoice-items.md'],
-    'rechnungen/zahlungen' => ['api' => 'InvoicePaymentsApi', 'model' => 'InvoicePayment',
+    'rechnungen/zahlungen' => ['api' => 'PaymentsApi', 'model' => 'InvoicePayment',
         'createOptions' => 'InvoicePaymentCreateOptions', 'docFile' => 'invoice-payments.md'],
-    'rechnungen/kommentare' => ['api' => 'InvoiceCommentsApi', 'model' => 'InvoiceComment',
+    'rechnungen/kommentare' => ['api' => 'CommentsApi', 'model' => 'InvoiceComment',
         'createOptions' => 'InvoiceCommentCreateOptions', 'docFile' => 'invoice-comments.md'],
-    'rechnungen/schlagworte' => ['api' => 'InvoiceTagsApi', 'model' => 'InvoiceTag',
+    'rechnungen/schlagworte' => ['api' => 'TagsApi', 'model' => 'InvoiceTag',
         'createOptions' => 'InvoiceTagCreateOptions', 'docFile' => 'invoice-tags.md'],
 
     'angebote' => ['api' => 'OffersApi', 'model' => 'Offer',
         'createOptions' => 'OfferCreateOptions', 'updateOptions' => 'OfferUpdateOptions',
         'docFile' => 'offers.md'],
-    'angebote/positionen' => ['api' => 'OfferItemsApi', 'model' => 'OfferItem',
+    'angebote/positionen' => ['api' => 'ItemsApi', 'model' => 'OfferItem',
         'createOptions' => 'OfferItemCreateOptions', 'docFile' => 'offers.md'],
-    'angebote/kommentare' => ['api' => 'OfferCommentsApi', 'model' => 'OfferComment',
+    'angebote/kommentare' => ['api' => 'CommentsApi', 'model' => 'OfferComment',
         'createOptions' => 'OfferCommentCreateOptions', 'docFile' => 'offers.md'],
-    'angebote/schlagworte' => ['api' => 'OfferTagsApi', 'model' => 'OfferTag',
+    'angebote/schlagworte' => ['api' => 'TagsApi', 'model' => 'OfferTag',
         'createOptions' => 'OfferTagCreateOptions', 'docFile' => 'offers.md'],
 
     'auftragsbestaetigungen' => ['api' => 'ConfirmationsApi', 'model' => 'Confirmation',
@@ -88,20 +89,22 @@ $mapping = [
     'gutschriften' => ['api' => 'CreditNotesApi', 'model' => 'CreditNote',
         'createOptions' => 'CreditNoteCreateOptions', 'updateOptions' => 'CreditNoteUpdateOptions',
         'docFile' => 'credit-notes.md'],
-    'gutschriften/positionen' => ['api' => 'CreditNoteItemsApi', 'model' => 'CreditNoteItem',
+    'gutschriften/positionen' => ['api' => 'ItemsApi', 'model' => 'CreditNoteItem',
         'createOptions' => 'CreditNoteItemCreateOptions', 'docFile' => 'credit-notes.md'],
-    'gutschriften/kommentare' => ['api' => 'CreditNoteCommentsApi', 'model' => 'CreditNoteComment',
+    'gutschriften/kommentare' => ['api' => 'CommentsApi', 'model' => 'CreditNoteComment',
         'createOptions' => 'CreditNoteCommentCreateOptions', 'docFile' => 'credit-notes.md'],
-    'gutschriften/schlagworte' => ['api' => 'CreditNoteTagsApi', 'model' => 'CreditNoteTag',
+    'gutschriften/schlagworte' => ['api' => 'TagsApi', 'model' => 'CreditNoteTag',
         'createOptions' => 'CreditNoteTagCreateOptions', 'docFile' => 'credit-notes.md'],
-    'gutschriften/zahlungen' => ['api' => 'CreditNotePaymentsApi', 'model' => 'CreditNotePayment',
+    'gutschriften/zahlungen' => ['api' => 'PaymentsApi', 'model' => 'CreditNotePayment',
         'createOptions' => 'CreditNotePaymentCreateOptions', 'docFile' => 'credit-notes.md'],
 
     'mahnungen' => ['api' => 'RemindersApi', 'model' => 'Reminder',
         'createOptions' => 'ReminderCreateOptions', 'updateOptions' => 'ReminderUpdateOptions',
         'docFile' => 'reminders.md'],
-    'mahnungen/positionen' => ['api' => 'ReminderItemsApi', 'docFile' => 'reminders.md'],
-    'mahnungen/schlagworte' => ['api' => 'ReminderTagsApi', 'model' => 'ReminderTag',
+    'mahnungen/positionen' => ['api' => 'ReminderItemsApi', 'model' => 'ReminderItem',
+        'createOptions' => 'ReminderItemCreateOptions', 'updateOptions' => 'ReminderItemUpdateOptions',
+        'docFile' => 'reminders.md'],
+    'mahnungen/schlagworte' => ['api' => 'TagsApi', 'model' => 'ReminderTag',
         'createOptions' => 'ReminderTagCreateOptions', 'docFile' => 'reminders.md'],
 
     'briefe' => ['api' => 'LettersApi', 'model' => 'Letter',
@@ -111,15 +114,15 @@ $mapping = [
     'artikel' => ['api' => 'ArticlesApi', 'model' => 'Article',
         'createOptions' => 'ArticleCreateOptions', 'updateOptions' => 'ArticleUpdateOptions',
         'docFile' => 'articles.md'],
-    'artikel/attribute' => ['api' => 'ArticlePropertyValuesApi', 'docFile' => 'articles.md'],
-    'artikel/schlagworte' => ['api' => 'ArticleTagsApi', 'model' => 'ArticleTag',
+    'artikel/attribute' => ['api' => 'PropertyValuesApi', 'docFile' => 'articles.md'],
+    'artikel/schlagworte' => ['api' => 'TagsApi', 'model' => 'ArticleTag',
         'createOptions' => 'ArticleTagCreateOptions', 'docFile' => 'articles.md'],
 
     'lieferanten' => ['api' => 'SuppliersApi', 'model' => 'Supplier',
         'createOptions' => 'SupplierCreateOptions', 'updateOptions' => 'SupplierUpdateOptions',
         'docFile' => 'suppliers.md'],
-    'lieferanten/attribute' => ['api' => 'SupplierPropertyValuesApi', 'docFile' => 'suppliers.md'],
-    'lieferanten/schlagworte' => ['api' => 'SupplierTagsApi', 'model' => 'SupplierTag',
+    'lieferanten/attribute' => ['api' => 'PropertyValuesApi', 'docFile' => 'suppliers.md'],
+    'lieferanten/schlagworte' => ['api' => 'TagsApi', 'model' => 'SupplierTag',
         'createOptions' => 'SupplierTagCreateOptions', 'docFile' => 'suppliers.md'],
 
     'eingangsrechnungen' => ['api' => 'IncomingsApi', 'model' => 'Incoming',
@@ -127,32 +130,33 @@ $mapping = [
         'docFile' => 'incomings.md'],
     'eingangsrechnungen/inbox' => ['api' => 'InboxDocumentsApi', 'model' => 'InboxDocument',
         'createOptions' => 'InboxDocumentCreateOptions', 'docFile' => 'inbox-documents.md'],
-    'eingangsrechnungen/attribute' => ['api' => 'IncomingPropertyValuesApi', 'docFile' => 'incomings.md'],
-    'eingangsrechnungen/kommentare' => ['api' => 'IncomingCommentsApi', 'model' => 'IncomingComment',
+    'eingangsrechnungen/attribute' => ['api' => 'PropertyValuesApi', 'docFile' => 'incomings.md'],
+    'eingangsrechnungen/kommentare' => ['api' => 'CommentsApi', 'model' => 'IncomingComment',
         'createOptions' => 'IncomingCommentCreateOptions', 'docFile' => 'incomings.md'],
-    'eingangsrechnungen/posten' => ['docFile' => 'incomings.md',
-        'note' => 'Posten/Items werden inline über Incoming verwaltet.'],
-    'eingangsrechnungen/schlagworte' => ['api' => 'IncomingTagsApi', 'model' => 'IncomingTag',
+    'eingangsrechnungen/posten' => ['api' => 'ItemsApi', 'model' => 'IncomingItem',
+        'createOptions' => 'IncomingItemCreateOptions', 'updateOptions' => 'IncomingItemUpdateOptions',
+        'docFile' => 'incomings.md'],
+    'eingangsrechnungen/schlagworte' => ['api' => 'TagsApi', 'model' => 'IncomingTag',
         'createOptions' => 'IncomingTagCreateOptions', 'docFile' => 'incomings.md'],
     'eingangsrechnungen/kategorien' => ['api' => 'IncomingCategoriesApi', 'model' => 'IncomingCategory',
         'docFile' => 'incoming-categories.md',
         'note' => 'Read-only; Mutations-Endpunkte sind in der Spec nicht dokumentiert.'],
-    'eingangsrechnungen/zahlungen' => ['api' => 'IncomingPaymentsApi', 'model' => 'IncomingPayment',
+    'eingangsrechnungen/zahlungen' => ['api' => 'PaymentsApi', 'model' => 'IncomingPayment',
         'createOptions' => 'IncomingPaymentCreateOptions', 'docFile' => 'incomings.md'],
 
     'abo-rechnungen' => ['api' => 'RecurringsApi', 'model' => 'Recurring',
         'createOptions' => 'RecurringCreateOptions', 'updateOptions' => 'RecurringUpdateOptions',
         'docFile' => 'recurrings.md'],
-    'abo-rechnungen/positionen' => ['api' => 'RecurringItemsApi', 'docFile' => 'recurrings.md'],
+    'abo-rechnungen/positionen' => ['api' => 'ItemsApi', 'docFile' => 'recurrings.md'],
     'abo-rechnungen/empfaenger' => ['api' => 'RecurringEmailReceiversApi', 'docFile' => 'recurrings.md'],
-    'abo-rechnungen/schlagworte' => ['api' => 'RecurringTagsApi', 'docFile' => 'recurrings.md'],
+    'abo-rechnungen/schlagworte' => ['api' => 'TagsApi', 'docFile' => 'recurrings.md'],
 
     'benutzer' => ['api' => 'UsersApi', 'model' => 'User', 'docFile' => 'users.md',
         'note' => 'Read-only; Billomat exponiert kein POST/PUT/DELETE für /users — Benutzerverwaltung ist UI-only.'],
     'laender' => ['api' => 'CountriesApi', 'model' => 'Country', 'docFile' => 'countries.md'],
     'waehrungen' => ['api' => 'CurrenciesApi', 'model' => 'Currency', 'docFile' => 'currencies.md'],
     'webhooks' => ['conceptFile' => 'webhooks.md',
-        'note' => 'Empfänger-seitiges Konzept – kein REST-Endpunkt; siehe docs/concepts/webhooks.md.'],
+        'note' => 'Kein REST-Endpunkt; Empfang über `src/Webhook/` (`WebhookEvent`, `WebhookHeaders`, `WebhookPayload`), siehe docs/concepts/webhooks.md.'],
     'account' => ['api' => 'AccountApi', 'model' => 'Account', 'docFile' => 'account.md'],
     'aktivitaeten' => ['api' => 'ActivitiesApi', 'model' => 'Activity', 'docFile' => 'activities.md'],
     'suche' => ['api' => 'SearchApi', 'model' => 'SearchResult', 'docFile' => 'search.md'],
@@ -160,28 +164,34 @@ $mapping = [
     'einstellungen' => ['api' => 'SettingsApi', 'docFile' => 'settings.md'],
     'einstellungen/steuersaetze' => ['api' => 'TaxesApi', 'docFile' => 'taxes.md'],
     'einstellungen/steuerfreie-laender' => ['api' => 'CountryTaxesApi', 'model' => 'CountryTax',
+        'createOptions' => 'CountryTaxCreateOptions', 'updateOptions' => 'CountryTaxUpdateOptions',
         'docFile' => 'settings-tax-free-countries.md',
-        'note' => 'Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /country-taxes.'],
+        'note' => 'PUT geht auf /country-taxes (Spec: /country_taxes) und verlangt country_code (Sandbox).'],
     'einstellungen/einheiten' => ['api' => 'UnitsApi', 'model' => 'Unit',
+        'createOptions' => 'UnitCreateOptions', 'updateOptions' => 'UnitUpdateOptions',
         'docFile' => 'settings-units.md'],
     'einstellungen/email-vorlagen' => ['api' => 'EmailTemplatesApi', 'model' => 'EmailTemplate',
+        'createOptions' => 'EmailTemplateCreateOptions', 'updateOptions' => 'EmailTemplateUpdateOptions',
         'docFile' => 'settings-email-templates.md'],
     'einstellungen/freitexte' => ['api' => 'FreeTextsApi', 'model' => 'FreeText',
+        'createOptions' => 'FreeTextCreateOptions', 'updateOptions' => 'FreeTextUpdateOptions',
         'docFile' => 'settings-free-texts.md'],
     'einstellungen/vorlagen' => ['api' => 'TemplatesApi',
         'createOptions' => 'TemplateCreateOptions', 'updateOptions' => 'TemplateUpdateOptions',
         'docFile' => 'templates.md'],
     'einstellungen/mahnstufen' => ['api' => 'ReminderTextsApi', 'model' => 'ReminderText',
+        'createOptions' => 'ReminderTextCreateOptions', 'updateOptions' => 'ReminderTextUpdateOptions',
         'docFile' => 'settings-reminder-levels.md',
-        'note' => 'Spec dokumentiert /reminder-texts. DunningLevelsApi (/dunning-levels) ist deprecated – Endpoint antwortet mit 404.'],
+        'note' => 'Billomat verlangt beim Anlegen nur `name`, die Spec nennt alle Felder als Pflicht (Sandbox).'],
     'einstellungen/rollen' => ['api' => 'RolesApi', 'model' => 'Role',
+        'createOptions' => 'RoleCreateOptions', 'updateOptions' => 'RoleUpdateOptions',
         'docFile' => 'settings-roles.md',
-        'note' => 'Read-only im SDK; Spec dokumentiert zusätzlich POST/PUT/DELETE auf /roles.'],
-    'einstellungen/kunden-attribute' => ['api' => 'ClientPropertiesApi', 'docFile' => 'properties.md'],
-    'einstellungen/artikel-attribute' => ['api' => 'ArticlePropertiesApi', 'docFile' => 'properties.md'],
-    'einstellungen/lieferanten-attribute' => ['api' => 'SupplierPropertiesApi', 'docFile' => 'properties.md'],
-    'einstellungen/eingangsrechnung-attribute' => ['api' => 'IncomingPropertiesApi', 'docFile' => 'properties.md'],
-    'einstellungen/benutzer-attribute' => ['api' => 'UserPropertiesApi', 'model' => 'UserProperty',
+        'note' => 'Handgeschriebene Options mit Rechte-Map; unbekannte Bereiche lehnt das SDK ab, weil Billomat sie ignoriert.'],
+    'einstellungen/kunden-attribute' => ['api' => 'PropertiesApi', 'docFile' => 'properties.md'],
+    'einstellungen/artikel-attribute' => ['api' => 'PropertiesApi', 'docFile' => 'properties.md'],
+    'einstellungen/lieferanten-attribute' => ['api' => 'PropertiesApi', 'docFile' => 'properties.md'],
+    'einstellungen/eingangsrechnung-attribute' => ['api' => 'PropertiesApi', 'docFile' => 'properties.md'],
+    'einstellungen/benutzer-attribute' => ['api' => 'PropertiesApi', 'model' => 'UserProperty',
         'docFile' => 'properties.md',
         'note' => 'Fünfter Parent neben article-/client-/supplier-/incoming-properties; nutzt geteilte PropertyCreateOptions.'],
 
@@ -190,7 +200,8 @@ $mapping = [
     'grundlagen/api-sicherheit' => null,
     'grundlagen/daten-lesen' => null,
     'grundlagen/daten-schreiben' => null,
-    'grundlagen/eigene-meta-daten' => null,
+    'grundlagen/eigene-meta-daten' => ['conceptFile' => 'custom-meta-attributes.md',
+        'note' => '`getCustomField()`/`setCustomField()` auf jeder Api, deren Datensätze `customfield` haben (Sandbox: auch Unterressourcen; Rollen, Freitexte und E-Mail-Vorlagen antworten mit 405).'],
     'grundlagen/fehler' => null,
     'grundlagen/tools' => null,
     'grundlagen/zugriffsbegrenzung' => null,
@@ -345,9 +356,14 @@ function buildFieldGaps(array $resources, array $mapping): array
             }
 
             $expectedFieldNames = filterParentIds($expectedFieldNames, $slug);
+            // `customfield` setzt das SDK über setCustomField() (PUT …/customfield), nie über Options.
+            $expectedFieldNames = array_values(array_diff($expectedFieldNames, ['customfield']));
+            // Rollen: die Rechte-Bereiche stehen als Map in `permissions`.
+            if ('RolesApi' === ($map['api'] ?? null)) {
+                $expectedFieldNames = array_values(array_filter($expectedFieldNames, static fn (string $name): bool => !Role::isArea($name)));
+            }
 
-            $reflected = collectOptionPropertyNames($fqcn);
-            $reflectedSet = array_flip(array_map(snakeCase(...), $reflected));
+            $reflectedSet = array_flip(collectOptionWireNames($fqcn));
 
             $missing = [];
             foreach ($expectedFieldNames as $name) {
@@ -403,17 +419,28 @@ function collectSpecFieldNames(array $resource, string $kind): array
 }
 
 /**
+ * Billomat-Feldnamen der Options: aus der Docblock-Zeile `Billomat-Feld: …` (generierte Klassen,
+ * auch bei abweichendem Property-Namen wie `$body` für `text`), sonst snake_case des Property-Namens
+ * und – für Billomats Komposita wie `base64file` – der kleingeschriebene Name ohne Trennung.
+ *
  * @return list<string>
  */
-function collectOptionPropertyNames(string $fqcn): array
+function collectOptionWireNames(string $fqcn): array
 {
     $names = [];
     $ref = new ReflectionClass($fqcn);
     foreach ($ref->getProperties() as $prop) {
-        if ($prop->isPublic() && !$prop->isStatic()) {
-            $names[] = $prop->getName();
+        if (!$prop->isPublic() || $prop->isStatic()) {
+            continue;
         }
+        if (1 === preg_match('/Billomat-Feld: (\S+)/', (string) $prop->getDocComment(), $match)) {
+            $names[] = $match[1];
+            continue;
+        }
+        $names[] = snakeCase($prop->getName());
+        $names[] = strtolower($prop->getName());
     }
+    $names = array_values(array_unique($names));
     sort($names);
     return $names;
 }
@@ -426,7 +453,7 @@ function snakeCase(string $camel): string
 
 /**
  * Entfernt Parent-ID-Felder aus der Erwartungsliste für Items, Kommentare, Schlagworte,
- * Zahlungen und Empfänger — diese werden vom parent-API-Code (z.B.
+ * Zahlungen, Empfänger und Kontakte — diese werden vom parent-API-Code (z.B.
  * CreditNoteItemsApi::create($creditNoteId, …)) gesetzt und sind absichtlich nicht
  * als Property in der *Options-Klasse abgebildet.
  *
@@ -438,10 +465,12 @@ function filterParentIds(array $fieldNames, string $slug): array
 {
     static $parentIdsBySegment = [
         'positionen' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'recurring_id'],
+        'posten' => ['incoming_id'],
         'kommentare' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'letter_id', 'incoming_id'],
         'schlagworte' => ['invoice_id', 'offer_id', 'credit_note_id', 'confirmation_id', 'delivery_note_id', 'reminder_id', 'article_id', 'client_id', 'supplier_id', 'recurring_id', 'incoming_id', 'letter_id'],
         'zahlungen' => ['invoice_id', 'credit_note_id', 'incoming_id'],
         'empfaenger' => ['recurring_id'],
+        'kontakte' => ['client_id'],
         'attribute' => ['client_id', 'article_id', 'supplier_id', 'incoming_id'],
     ];
 

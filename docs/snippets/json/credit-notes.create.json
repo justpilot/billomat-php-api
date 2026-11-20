@@ -1,0 +1,18 @@
+{
+    "credit-note": {
+        "client_id": 1001,
+        "date": "2026-11-02",
+        "title": "Refund for invoice RE-2026-0042",
+        "credit-note-items": {
+            "credit-note-item": [
+                {
+                    "title": "Consulting",
+                    "quantity": 2,
+                    "unit_price": "49.9",
+                    "unit": "hours",
+                    "tax_rate": 19
+                }
+            ]
+        }
+    }
+}

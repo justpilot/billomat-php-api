@@ -9,6 +9,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum LetterCommentActionKey: string
 {
+    use FromApi;
+
     case CREATE = 'CREATE';
     case EDIT = 'EDIT';
     case OPEN = 'OPEN';

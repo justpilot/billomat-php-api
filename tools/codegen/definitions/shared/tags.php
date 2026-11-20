@@ -46,17 +46,17 @@ return static function (string $prefix, string $label, string $parentField, ?str
         // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
         'fields' => [
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Schlagworts.'],
+            // Die Eltern-ID übergibt `TagsApi::create()` als eigenes Argument.
             $parentField => [
-                ...$writable,
                 'type' => 'int',
+                'readOnly' => true,
                 'doc' => 'ID des Datensatzes, an dem das Schlagwort hängt.',
-                'model' => ['required' => true, 'nonNull' => true],
-                'create' => ['constructor' => true],
+                'model' => ['required' => true],
             ],
             'name' => [
                 ...$writable,
                 'doc' => 'Name des Schlagworts.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
             'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
@@ -77,9 +77,9 @@ return static function (string $prefix, string $label, string $parentField, ?str
         ],
 
         'fields' => [
-            'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Schlagworts.'],
-            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'Name des Schlagworts.'],
-            'count' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true, 'nonNull' => true], 'doc' => 'Häufigkeit des Schlagworts.'],
+            'id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'Interne Billomat-ID des Schlagworts.'],
+            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Name des Schlagworts.'],
+            'count' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Häufigkeit des Schlagworts.'],
         ],
     ];
 

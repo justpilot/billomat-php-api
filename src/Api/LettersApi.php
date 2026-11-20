@@ -7,12 +7,18 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\LetterCommentActionKey;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Letter;
-use Justpilot\Billomat\Model\LetterPdf;
+use Justpilot\Billomat\Model\LetterComment;
+use Justpilot\Billomat\Model\LetterTag;
+use Justpilot\Billomat\Model\LetterTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Letters-Ressource (Briefe).
@@ -26,22 +32,36 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
  *  - PUT    /letters/{id}
  *  - DELETE /letters/{id}
  *  - PUT    /letters/{id}/complete
- *  - PUT    /letters/{id}/cancel
- *  - PUT    /letters/{id}/clear
- *  - PUT    /letters/{id}/undo
  *  - POST   /letters/{id}/email
  *  - GET    /letters/{id}/pdf
- *  - PUT    /letters/{id}/upload-signature
- *  - PUT    /letters/{id}/upload         (kompletten Brief-PDF hochladen)
  */
 final class LettersApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<LetterComment, LetterCommentCreateOptions, LetterCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'letter', LetterComment::fromArray(...), LetterCommentCreateOptions::class, LetterCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<LetterTag, LetterTagCloudEntry, LetterTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'letter', LetterTag::fromArray(...), LetterTagCloudEntry::fromArray(...), LetterTagCreateOptions::class);
+    }
+
+    /**
+     * @param LetterFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Letter>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(LetterFilter|array $filters = []): array
     {
         return $this->listResource('/letters', 'letters', 'letter', Letter::fromArray(...), $filters);
     }
@@ -53,11 +73,12 @@ final class LettersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param LetterFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Letter>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(LetterFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/letters', 'letters', 'letter', Letter::fromArray(...), $filters);
     }
@@ -70,30 +91,31 @@ final class LettersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param LetterFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Letter>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(LetterFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/letters', 'letters', 'letter', Letter::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Letter
     {
-        $data = $this->getJsonOrNull("/letters/{$id}");
+        return $this->getResource("/letters/{$id}", 'letter', Letter::fromArray(...), 'fetching letter');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['letter'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return Letter::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Letter
+    {
+        return $this->get($id) ?? throw $this->notFound("/letters/{$id}");
     }
 
     /**
@@ -119,7 +141,7 @@ final class LettersApi extends AbstractApi
         return Letter::fromArray($this->unwrapEnvelope($data, 'letter', 'updating letter'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -130,96 +152,79 @@ final class LettersApi extends AbstractApi
         $payload = ['letter' => $body];
 
         $this->putVoid("/letters/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/letters/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
-    {
-        $this->putVoid("/letters/{$id}/cancel");
-
-        return true;
-    }
-
-    public function clear(int $id): bool
-    {
-        $this->putVoid("/letters/{$id}/clear");
-
-        return true;
-    }
-
-    public function undo(int $id): bool
-    {
-        $this->putVoid("/letters/{$id}/undo");
-
-        return true;
-    }
-
-    public function email(int $id, ?LetterEmailOptions $options = null): bool
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postVoid("/letters/{$id}/email", $payload);
-
-        return true;
     }
 
     /**
-     * Lädt das komplette Brief-PDF hoch (z.B. wenn das Layout extern erzeugt wurde).
+     * Versendet einen Brief postalisch über den Pixelletter-Service.
      *
-     * Entspricht PUT /letters/{id}/upload.
+     * Entspricht POST /letters/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
      */
-    public function upload(int $id, string $base64Pdf): bool
+    public function mail(int $id, ?MailOptions $options = null): void
     {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
+        $payload = ['mail' => $options?->toArray() ?? []];
 
-        $this->putVoid("/letters/{$id}/upload", $payload);
-
-        return true;
-    }
-
-    /** Lädt eine unterschriebene PDF-Version des Briefs hoch. */
-    public function uploadSignature(int $id, string $base64Pdf): bool
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/letters/{$id}/upload-signature", $payload);
-
-        return true;
+        $this->postVoid("/letters/{$id}/mail", $payload);
     }
 
     /**
-     * @return LetterPdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Ruft das PDF eines Briefs als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /letters/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): LetterPdf|string
+    #[NoDiscard]
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
-        $query = [];
+        $data = $this->getJson("/letters/{$id}/pdf", self::pdfQuery($type));
 
-        if ($type instanceof InvoicePdfType) {
-            $query['type'] = $type->value;
-        }
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching letter PDF'));
+    }
 
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
+    /**
+     * Ruft das PDF eines Briefs als binären Inhalt ab (GET /letters/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/letters/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
+    }
 
-            $response = $this->http->request('GET', "/letters/{$id}/pdf", $query);
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /letters/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/letters/{$id}", 'letter');
+    }
 
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
-        }
-
-        $data = $this->getJson("/letters/{$id}/pdf", $query);
-
-        return LetterPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching letter PDF'));
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /letters/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/letters/{$id}", 'letter', $value);
     }
 }

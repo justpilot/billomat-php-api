@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/reminder-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ReminderTagCreateOptions
+final readonly class ReminderTagCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: reminder_id
-         * Typ: INT
-         */
-        public int $reminderId,
         /**
          * Name des Schlagworts.
          *
@@ -33,6 +26,12 @@ final class ReminderTagCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -41,7 +40,6 @@ final class ReminderTagCreateOptions
     public function toArray(): array
     {
         return [
-            'reminder_id' => $this->reminderId,
             'name' => $this->name,
         ];
     }

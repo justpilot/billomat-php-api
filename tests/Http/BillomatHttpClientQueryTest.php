@@ -5,26 +5,30 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Http;
 
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 /**
  * Sichert die Billomat-spezifischen Query-/Header-Quirks im HTTP-Layer ab.
  *
  * Hintergrund (siehe CLAUDE.md): Billomat erwartet:
- *  - Arrays als `key[]=v1&key[]=v2`
+ *  - Arrays als `key[]=v1&key[]=v2` (PSR-7 kodiert die Klammern als `%5B%5D`, Billomat dekodiert sie wieder)
  *  - in `order_by` ein Leerzeichen zwischen Feld und Richtung (`date%20DESC`), nicht `%2B`
  *  - `+` in allen anderen Werten als `%2B` (ein unkodiertes `+` liest Billomat als Leerzeichen)
  *  - keine leeren Werte
  */
 #[CoversClass(BillomatHttpClient::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 final class BillomatHttpClientQueryTest extends TestCase
 {
     /**
@@ -34,7 +38,7 @@ final class BillomatHttpClientQueryTest extends TestCase
     #[DataProvider('queryStringProvider')]
     public function itBuildsExpectedQueryString(array $query, string $expectedSuffix): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $mock = $this->captureMock($captured);
 
         $client = $this->makeClient($mock);
@@ -42,7 +46,7 @@ final class BillomatHttpClientQueryTest extends TestCase
 
         self::assertSame(
             'https://mycompany.billomat.net/api/clients'.$expectedSuffix,
-            $captured['url']
+            $captured->url
         );
     }
 
@@ -68,12 +72,12 @@ final class BillomatHttpClientQueryTest extends TestCase
 
         yield 'Arrays werden als key[]=v Paare serialisiert' => [
             ['payment_type' => ['CASH', 'BANK_TRANSFER']],
-            '?payment_type[]=CASH&payment_type[]=BANK_TRANSFER',
+            '?payment_type%5B%5D=CASH&payment_type%5B%5D=BANK_TRANSFER',
         ];
 
         yield 'null-Elemente in Arrays werden übersprungen' => [
             ['ids' => [1, null, 3]],
-            '?ids[]=1&ids[]=3',
+            '?ids%5B%5D=1&ids%5B%5D=3',
         ];
 
         yield 'order_by: Plus zwischen Feld und Richtung wird ein Leerzeichen' => [
@@ -86,6 +90,11 @@ final class BillomatHttpClientQueryTest extends TestCase
             '?order_by=date%20DESC%2Cinvoice_number%20ASC',
         ];
 
+        yield 'order_by: Leerzeichen bleibt ein Leerzeichen' => [
+            ['order_by' => 'date DESC'],
+            '?order_by=date%20DESC',
+        ];
+
         // In der Sandbox gemessen: `email=plus+test%40…` findet nichts, `email=plus%2Btest%40…` den Kunden.
         yield 'Plus in einem Filterwert wird %2B' => [
             ['email' => 'plus+test@example.com', 'phone' => '+49 30 123'],
@@ -94,7 +103,7 @@ final class BillomatHttpClientQueryTest extends TestCase
 
         yield 'Plus in Array-Werten wird %2B' => [
             ['tags' => ['a+b']],
-            '?tags[]=a%2Bb',
+            '?tags%5B%5D=a%2Bb',
         ];
 
         yield 'bool true wird zu 1' => [
@@ -126,36 +135,36 @@ final class BillomatHttpClientQueryTest extends TestCase
     #[Test]
     public function itSetsContentTypeWhenJsonBodyProvided(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $mock = $this->captureMock($captured);
 
         $client = $this->makeClient($mock);
         $client->request('POST', '/clients', [], ['client' => ['name' => 'Acme']]);
 
-        $headers = $this->normaliseHeaders($captured['options']['headers'] ?? []);
+        $headers = $captured->headers();
         self::assertSame('application/json', $headers['content-type'] ?? null);
 
         // Symfony's HttpClientTrait normalisiert 'json' zu einem JSON-encodierten Body-String
-        self::assertSame('{"client":{"name":"Acme"}}', $captured['options']['body'] ?? null);
+        self::assertSame('{"client":{"name":"Acme"}}', $captured->body());
     }
 
     #[Test]
     public function itOmitsContentTypeWhenNoJsonBody(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $mock = $this->captureMock($captured);
 
         $client = $this->makeClient($mock);
         $client->request('GET', '/clients');
 
-        $headers = $this->normaliseHeaders($captured['options']['headers'] ?? []);
+        $headers = $captured->headers();
         self::assertArrayNotHasKey('content-type', $headers);
     }
 
     #[Test]
     public function itOmitsAppHeadersWhenAppCredentialsAreMissing(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $mock = $this->captureMock($captured);
 
         // Config ohne appId/appSecret
@@ -164,37 +173,19 @@ final class BillomatHttpClientQueryTest extends TestCase
             apiKey: 'secret-key',
         );
 
-        $client = new BillomatHttpClient($mock, $config);
+        $client = new BillomatHttpClient(new Psr18Client($mock), $config);
         $client->request('GET', '/clients');
 
-        $headers = $this->normaliseHeaders($captured['options']['headers'] ?? []);
+        $headers = $captured->headers();
         self::assertSame('secret-key', $headers['x-billomatapikey'] ?? null);
         self::assertArrayNotHasKey('x-appid', $headers);
         self::assertArrayNotHasKey('x-appsecret', $headers);
     }
 
     #[Test]
-    public function itPassesTimeoutFromConfig(): void
-    {
-        $captured = [];
-        $mock = $this->captureMock($captured);
-
-        $config = new BillomatConfig(
-            billomatId: 'mycompany',
-            apiKey: 'secret-key',
-            timeout: 30.0,
-        );
-
-        $client = new BillomatHttpClient($mock, $config);
-        $client->request('GET', '/clients');
-
-        self::assertSame(30.0, $captured['options']['timeout']);
-    }
-
-    #[Test]
     public function itTrimsLeadingSlashFromPath(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $mock = $this->captureMock($captured);
 
         $client = $this->makeClient($mock);
@@ -204,14 +195,14 @@ final class BillomatHttpClientQueryTest extends TestCase
 
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/42',
-            $captured['url']
+            $captured->url
         );
     }
 
     #[Test]
     public function itAcceptsPathWithoutLeadingSlash(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $mock = $this->captureMock($captured);
 
         $client = $this->makeClient($mock);
@@ -220,33 +211,67 @@ final class BillomatHttpClientQueryTest extends TestCase
 
         self::assertSame(
             'https://mycompany.billomat.net/api/clients/42',
-            $captured['url']
+            $captured->url
         );
     }
 
     #[Test]
     public function itSendsAcceptHeader(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
         $mock = $this->captureMock($captured);
 
         $client = $this->makeClient($mock);
         $client->request('GET', '/clients');
 
-        $headers = $this->normaliseHeaders($captured['options']['headers'] ?? []);
+        $headers = $captured->headers();
         self::assertSame('application/json', $headers['accept'] ?? null);
         self::assertSame('de-de', $headers['accept-language'] ?? null);
     }
 
-    /**
-     * @param array<int|string, mixed> $captured
-     */
-    private function captureMock(array &$captured): MockHttpClient
+    #[Test]
+    public function itSendsTheConfiguredLanguage(): void
     {
-        return new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        self::assertContains('Accept-Language: en-gb', $this->sentHeaders('en-gb'));
+    }
+
+    #[Test]
+    public function itOmitsAcceptLanguageWithoutLanguage(): void
+    {
+        $headers = $this->sentHeaders(null);
+
+        self::assertNotSame([], $headers);
+        foreach ($headers as $header) {
+            self::assertStringStartsNotWith('Accept-Language:', $header);
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function sentHeaders(?string $language): array
+    {
+        $headers = [];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$headers): MockResponse {
+            foreach ((array) ($options['headers'] ?? []) as $header) {
+                $headers[] = \is_string($header) ? $header : '';
+            }
+
+            return new MockResponse('{}');
+        });
+        $client = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k', language: $language));
+
+        $client->request('GET', '/clients');
+
+        return $headers;
+    }
+
+    private function captureMock(CapturedRequest $captured): MockHttpClient
+    {
+        return new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
+            $captured->options = $options;
 
             return new MockResponse('{"ok": true}', ['http_code' => 200]);
         });
@@ -261,31 +286,6 @@ final class BillomatHttpClientQueryTest extends TestCase
             appSecret: 'app-secret',
         );
 
-        return new BillomatHttpClient($mock, $config);
-    }
-
-    /**
-     * Normalisiert Header (assoziativ oder "Name: value"-Liste) auf lowercase Keys.
-     *
-     * @param array<int|string, mixed> $rawHeaders
-     *
-     * @return array<string, string>
-     */
-    private function normaliseHeaders(array $rawHeaders): array
-    {
-        $normalised = [];
-
-        foreach ($rawHeaders as $key => $value) {
-            if (\is_int($key)) {
-                if (\is_string($value) && str_contains($value, ':')) {
-                    [$name, $val] = explode(':', $value, 2);
-                    $normalised[strtolower(trim($name))] = trim($val);
-                }
-            } else {
-                $normalised[strtolower($key)] = \is_array($value) ? implode(', ', $value) : (string) $value;
-            }
-        }
-
-        return $normalised;
+        return new BillomatHttpClient(new Psr18Client($mock), $config);
     }
 }

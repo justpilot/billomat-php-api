@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
-use Justpilot\Billomat\Model\Enum\NetGross;
 
 use const DATE_ATOM;
 
@@ -23,13 +22,42 @@ use const DATE_ATOM;
  */
 final readonly class DeliveryNote
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'created' => true,
+        'delivery_note_number' => true,
+        'number' => true,
+        'number_pre' => true,
+        'number_length' => true,
+        'status' => true,
+        'date' => true,
+        'address' => true,
+        'title' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'invoice_id' => true,
+        'confirmation_id' => true,
+        'free_text_id' => true,
+        'template_id' => true,
+        'taxes' => true,
+        'delivery-note-items' => true,
+        'updated' => true,
+        'customfield' => true,
+        'offer_id' => true,
+    ];
+
     /**
-     * @param list<array{name: string, rate: float, amount: float}> $taxes
-     * @param list<DeliveryNoteItem>                                $items
+     * @param list<TaxSummary>       $taxes
+     * @param list<DeliveryNoteItem> $items
+     * @param array<string, mixed>   $extra
      */
     public function __construct(
         /** Interne Billomat-ID des Lieferscheins. */
-        public ?int $id,
+        public int $id,
         /** ID des Kunden. */
         public int $clientId,
         /** ID des Kontakts. */
@@ -62,54 +90,6 @@ final readonly class DeliveryNote
         public ?string $intro = null,
         /** Anmerkungstext. */
         public ?string $note = null,
-        /**
-         * Gesamtbetrag brutto.
-         *
-         * @deprecated since 3.1 – Billomat liefert `total_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $totalGross = null,
-        /**
-         * Gesamtbetrag netto.
-         *
-         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $totalNet = null,
-        /**
-         * Preisbasis (Brutto- oder Netto-Preise).
-         *
-         * @deprecated since 3.1 – Billomat liefert `net_gross` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?NetGross $netGross = null,
-        /**
-         * Rabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").
-         *
-         * @deprecated since 3.1 – Billomat liefert `reduction` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $reduction = null,
-        /**
-         * Gesamtbetrag brutto vor Rabatt.
-         *
-         * @deprecated since 3.1 – Billomat liefert `total_gross_unreduced` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $totalGrossUnreduced = null,
-        /**
-         * Gesamtbetrag netto vor Rabatt.
-         *
-         * @deprecated since 3.1 – Billomat liefert `total_net_unreduced` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $totalNetUnreduced = null,
-        /**
-         * Währung (ISO-Währungscode).
-         *
-         * @deprecated since 3.1 – Billomat liefert `currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $currencyCode = null,
-        /**
-         * Währungskurs (für Umrechnung in die Standard-Währung).
-         *
-         * @deprecated since 3.1 – Billomat liefert `quote` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $quote = null,
         /** ID der Quell-Rechnung. */
         public ?int $invoiceId = null,
         /** ID der Quell-Auftragsbestätigung. */
@@ -120,20 +100,20 @@ final readonly class DeliveryNote
         public ?int $templateId = null,
         /** Steuerzeilen des Lieferscheins. */
         public array $taxes = [],
-        /**
-         * Persönliche URL zum Kundenportal.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** Positionen des Lieferscheins (nur bei GET /delivery-notes/{id}). */
         public array $items = [],
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** ID des Quell-Angebots. */
         public ?int $offerId = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -145,8 +125,8 @@ final readonly class DeliveryNote
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             deliveryNoteNumber: ScalarCaster::toStringOrNull($data['delivery_note_number'] ?? null),
@@ -160,24 +140,16 @@ final readonly class DeliveryNote
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
-            netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
-            reduction: ScalarCaster::toStringOrNull($data['reduction'] ?? null),
-            totalGrossUnreduced: ScalarCaster::toFloatOrNull($data['total_gross_unreduced'] ?? null),
-            totalNetUnreduced: ScalarCaster::toFloatOrNull($data['total_net_unreduced'] ?? null),
-            currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
-            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            taxes: ListCaster::toTaxList($data['taxes']['tax'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
-            items: ListCaster::toList($data['delivery-note-items']['delivery-note-item'] ?? null, 'id', DeliveryNoteItem::fromArray(...)),
+            taxes: ListCaster::toNestedList($data['taxes'] ?? null, 'tax', 'name', TaxSummary::fromArray(...)),
+            items: ListCaster::toNestedList($data['delivery-note-items'] ?? null, 'delivery-note-item', 'id', DeliveryNoteItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -191,6 +163,7 @@ final readonly class DeliveryNote
     public function toArray(): array
     {
         $data = [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
@@ -206,26 +179,19 @@ final readonly class DeliveryNote
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
-            'net_gross' => $this->netGross?->value,
-            'reduction' => $this->reduction,
-            'total_gross_unreduced' => $this->totalGrossUnreduced,
-            'total_net_unreduced' => $this->totalNetUnreduced,
-            'currency_code' => $this->currencyCode,
-            'quote' => $this->quote,
             'invoice_id' => $this->invoiceId,
             'confirmation_id' => $this->confirmationId,
             'free_text_id' => $this->freeTextId,
             'template_id' => $this->templateId,
-            'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'offer_id' => $this->offerId,
         ];
 
         if ([] !== $this->taxes) {
-            $data['taxes'] = ['tax' => $this->taxes];
+            $data['taxes'] = [
+                'tax' => array_map(static fn (TaxSummary $tax): array => $tax->toArray(), $this->taxes),
+            ];
         }
 
         if ([] !== $this->items) {

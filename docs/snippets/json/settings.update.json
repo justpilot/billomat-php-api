@@ -1,0 +1,6 @@
+{
+    "settings": {
+        "invoice_number_pre": "RE-",
+        "due_days": 14
+    }
+}

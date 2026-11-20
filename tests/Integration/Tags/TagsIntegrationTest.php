@@ -37,6 +37,7 @@ use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
 use Justpilot\Billomat\Model\LetterTag;
 use Justpilot\Billomat\Model\LetterTagCloudEntry;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\OfferTag;
 use Justpilot\Billomat\Model\OfferTagCloudEntry;
 use Justpilot\Billomat\Model\ReminderTag;
@@ -65,16 +66,15 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $this->faker()->company();
-        $opts->email = $this->faker()->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $this->faker()->company(),
+            countryCode: 'DE',
+            email: $this->faker()->unique()->safeEmail(),
+        );
 
         $client = $billomat->clients->create($opts);
-        $id = $client->id;
-        self::assertNotNull($id);
 
-        return $id;
+        return $client->id;
     }
 
     private function ensureSupplierId(BillomatClient $billomat): int
@@ -87,27 +87,23 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
             return $existing;
         }
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-TagTest '.date('His'));
-        $opts->countryCode = 'DE';
+        $opts = new SupplierCreateOptions(name: 'IT-Lieferant-TagTest '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
-        $id = $created->id;
-        self::assertNotNull($id);
 
-        return $id;
+        return $created->id;
     }
 
     private function createDraftInvoiceId(BillomatClient $billomat): int
     {
-        $opts = new InvoiceCreateOptions(clientId: $this->ensureClientId($billomat));
-        $opts->currencyCode = 'EUR';
-        $opts->title = 'IT-TagTest '.date('His');
-        $item = new InvoiceItemCreateOptions(1.0, 10.0);
-        $item->title = 'Pos';
-        $item->unit = 'Stück';
-        $opts->addItem($item);
+        $opts = new InvoiceCreateOptions(
+            clientId: $this->ensureClientId($billomat),
+            title: 'IT-TagTest '.date('His'),
+            currencyCode: 'EUR',
+        );
+        $item = new InvoiceItemCreateOptions(1.0, Money::of('10'), unit: 'Stück', title: 'Pos');
+        $opts = $opts->withItem($item);
 
         $invoice = $billomat->invoices->create($opts);
-        self::assertNotNull($invoice->id);
 
         return $invoice->id;
     }
@@ -120,16 +116,16 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoiceId = $this->createDraftInvoiceId($billomat);
 
         try {
-            $tag = $billomat->invoiceTags->create(new InvoiceTagCreateOptions($invoiceId, 'IT-InvTag-'.date('His')));
+            $tag = $billomat->invoices->tags->create($invoiceId, new InvoiceTagCreateOptions('IT-InvTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->invoiceTags->listByInvoice($invoiceId);
+            $tags = $billomat->invoices->tags->list($invoiceId);
             self::assertContainsOnlyInstancesOf(InvoiceTag::class, $tags);
 
-            $cloud = $billomat->invoiceTags->cloud();
+            $cloud = $billomat->invoices->tags->cloud();
             self::assertContainsOnlyInstancesOf(InvoiceTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->invoiceTags->delete($tag->id));
+            $billomat->invoices->tags->delete($tag->id);
         } finally {
             $billomat->invoices->delete($invoiceId);
         }
@@ -142,19 +138,18 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $offer = $billomat->offers->create(new OfferCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($offer->id);
 
         try {
-            $tag = $billomat->offerTags->create(new OfferTagCreateOptions($offer->id, 'IT-OffTag-'.date('His')));
+            $tag = $billomat->offers->tags->create($offer->id, new OfferTagCreateOptions('IT-OffTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->offerTags->listByOffer($offer->id);
+            $tags = $billomat->offers->tags->list($offer->id);
             self::assertContainsOnlyInstancesOf(OfferTag::class, $tags);
 
-            $cloud = $billomat->offerTags->cloud();
+            $cloud = $billomat->offers->tags->cloud();
             self::assertContainsOnlyInstancesOf(OfferTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->offerTags->delete($tag->id));
+            $billomat->offers->tags->delete($tag->id);
         } finally {
             $billomat->offers->delete($offer->id);
         }
@@ -167,19 +162,18 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $conf = $billomat->confirmations->create(new ConfirmationCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($conf->id);
 
         try {
-            $tag = $billomat->confirmationTags->create(new ConfirmationTagCreateOptions($conf->id, 'IT-ConfTag-'.date('His')));
+            $tag = $billomat->confirmations->tags->create($conf->id, new ConfirmationTagCreateOptions('IT-ConfTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->confirmationTags->listByConfirmation($conf->id);
+            $tags = $billomat->confirmations->tags->list($conf->id);
             self::assertContainsOnlyInstancesOf(ConfirmationTag::class, $tags);
 
-            $cloud = $billomat->confirmationTags->cloud();
+            $cloud = $billomat->confirmations->tags->cloud();
             self::assertContainsOnlyInstancesOf(ConfirmationTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->confirmationTags->delete($tag->id));
+            $billomat->confirmations->tags->delete($tag->id);
         } finally {
             $billomat->confirmations->delete($conf->id);
         }
@@ -192,19 +186,18 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $note = $billomat->creditNotes->create(new CreditNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($note->id);
 
         try {
-            $tag = $billomat->creditNoteTags->create(new CreditNoteTagCreateOptions($note->id, 'IT-GsTag-'.date('His')));
+            $tag = $billomat->creditNotes->tags->create($note->id, new CreditNoteTagCreateOptions('IT-GsTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->creditNoteTags->listByCreditNote($note->id);
+            $tags = $billomat->creditNotes->tags->list($note->id);
             self::assertContainsOnlyInstancesOf(CreditNoteTag::class, $tags);
 
-            $cloud = $billomat->creditNoteTags->cloud();
+            $cloud = $billomat->creditNotes->tags->cloud();
             self::assertContainsOnlyInstancesOf(CreditNoteTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->creditNoteTags->delete($tag->id));
+            $billomat->creditNotes->tags->delete($tag->id);
         } finally {
             $billomat->creditNotes->delete($note->id);
         }
@@ -217,19 +210,18 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $note = $billomat->deliveryNotes->create(new DeliveryNoteCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($note->id);
 
         try {
-            $tag = $billomat->deliveryNoteTags->create(new DeliveryNoteTagCreateOptions($note->id, 'IT-LsTag-'.date('His')));
+            $tag = $billomat->deliveryNotes->tags->create($note->id, new DeliveryNoteTagCreateOptions('IT-LsTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->deliveryNoteTags->listByDeliveryNote($note->id);
+            $tags = $billomat->deliveryNotes->tags->list($note->id);
             self::assertContainsOnlyInstancesOf(DeliveryNoteTag::class, $tags);
 
-            $cloud = $billomat->deliveryNoteTags->cloud();
+            $cloud = $billomat->deliveryNotes->tags->cloud();
             self::assertContainsOnlyInstancesOf(DeliveryNoteTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->deliveryNoteTags->delete($tag->id));
+            $billomat->deliveryNotes->tags->delete($tag->id);
         } finally {
             $billomat->deliveryNotes->delete($note->id);
         }
@@ -242,19 +234,18 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         $letter = $billomat->letters->create(new LetterCreateOptions(clientId: $this->ensureClientId($billomat)));
-        self::assertNotNull($letter->id);
 
         try {
-            $tag = $billomat->letterTags->create(new LetterTagCreateOptions($letter->id, 'IT-BrTag-'.date('His')));
+            $tag = $billomat->letters->tags->create($letter->id, new LetterTagCreateOptions('IT-BrTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->letterTags->listByLetter($letter->id);
+            $tags = $billomat->letters->tags->list($letter->id);
             self::assertContainsOnlyInstancesOf(LetterTag::class, $tags);
 
-            $cloud = $billomat->letterTags->cloud();
+            $cloud = $billomat->letters->tags->cloud();
             self::assertContainsOnlyInstancesOf(LetterTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->letterTags->delete($tag->id));
+            $billomat->letters->tags->delete($tag->id);
         } finally {
             $billomat->letters->delete($letter->id);
         }
@@ -266,22 +257,23 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
     {
         $billomat = $this->createBillomatClientOrSkip();
 
-        $incomingOpts = new IncomingCreateOptions(supplierId: $this->ensureSupplierId($billomat));
-        $incomingOpts->incomingNumber = 'IT-IN-Tag-'.date('His');
+        $incomingOpts = new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId($billomat),
+            incomingNumber: 'IT-IN-Tag-'.date('His'),
+        );
         $incoming = $billomat->incomings->create($incomingOpts);
-        self::assertNotNull($incoming->id);
 
         try {
-            $tag = $billomat->incomingTags->create(new IncomingTagCreateOptions($incoming->id, 'IT-InTag-'.date('His')));
+            $tag = $billomat->incomings->tags->create($incoming->id, new IncomingTagCreateOptions('IT-InTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->incomingTags->listByIncoming($incoming->id);
+            $tags = $billomat->incomings->tags->list($incoming->id);
             self::assertContainsOnlyInstancesOf(IncomingTag::class, $tags);
 
-            $cloud = $billomat->incomingTags->cloud();
+            $cloud = $billomat->incomings->tags->cloud();
             self::assertContainsOnlyInstancesOf(IncomingTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->incomingTags->delete($tag->id));
+            $billomat->incomings->tags->delete($tag->id);
         } finally {
             $billomat->incomings->delete($incoming->id);
         }
@@ -299,20 +291,20 @@ final class TagsIntegrationTest extends AbstractBillomatIntegrationTestCase
             self::markTestSkipped('No OVERDUE invoice in sandbox – reminder creation requires one.');
         }
 
+        self::assertNotNull($overdue[0]->id);
         $reminder = $billomat->reminders->create(new ReminderCreateOptions(invoiceId: $overdue[0]->id));
-        self::assertNotNull($reminder->id);
 
         try {
-            $tag = $billomat->reminderTags->create(new ReminderTagCreateOptions($reminder->id, 'IT-MaTag-'.date('His')));
+            $tag = $billomat->reminders->tags->create($reminder->id, new ReminderTagCreateOptions('IT-MaTag-'.date('His')));
             self::assertNotNull($tag->id);
 
-            $tags = $billomat->reminderTags->listByReminder($reminder->id);
+            $tags = $billomat->reminders->tags->list($reminder->id);
             self::assertContainsOnlyInstancesOf(ReminderTag::class, $tags);
 
-            $cloud = $billomat->reminderTags->cloud();
+            $cloud = $billomat->reminders->tags->cloud();
             self::assertContainsOnlyInstancesOf(ReminderTagCloudEntry::class, $cloud);
 
-            self::assertTrue($billomat->reminderTags->delete($tag->id));
+            $billomat->reminders->tags->delete($tag->id);
         } finally {
             $billomat->reminders->delete($reminder->id);
         }

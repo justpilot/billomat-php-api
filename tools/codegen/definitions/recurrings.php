@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 $optionsOrder = [
     'client_id', 'contact_id', 'address', 'number_pre', 'supply_date', 'supply_date_type', 'due_days', 'discount_rate',
@@ -44,8 +43,8 @@ return [
             'Typisierter Payload für POST /recurrings.',
             '',
             'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.',
-            'Positionen lassen sich beim Anlegen über addItem() direkt mitsenden;',
-            'spätere Änderungen an Positionen laufen über RecurringItemsApi.',
+            'Positionen lassen sich beim Anlegen über `items:` bzw. withItem() direkt mitsenden;',
+            'spätere Änderungen an Positionen laufen über $billomat->recurrings->items.',
         ],
     ],
 
@@ -58,14 +57,23 @@ return [
             'Typisierter Payload für PUT /recurrings/{id}.',
             '',
             'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update).',
-            'Positionen lassen sich hier nicht bearbeiten, dafür ist RecurringItemsApi zuständig.',
+            'Positionen lassen sich hier nicht bearbeiten, dafür ist $billomat->recurrings->items zuständig.',
         ],
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'RecurringFilter',
+        'endpoint' => 'GET /api/recurrings',
+        'fields' => [
+            'payment_type' => ['enum' => 'PaymentType'],
+            'cycle' => ['enum' => 'RecurringCycle'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Abo-Rechnung.'],
-        'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Abo-Rechnung.'],
         'address' => ['doc' => 'Komplette Adresse.', 'details' => ['Wird ein leerer Wert übergeben, wird die aktuelle Kunden-Adresse verwendet.']],
@@ -76,7 +84,7 @@ return [
         'discount_rate' => ['create' => ['type' => 'int'], 'update' => ['type' => 'int'], 'doc' => 'Skonto in Prozent.'],
         'discount_days' => ['doc' => 'Skontofrist in Tagen.'],
         'name' => ['doc' => 'Name der Abo-Rechnung (nur intern sichtbar).'],
-        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Rechnungsnummer.', 'deprecated' => $gone('number_pre')],
+        'number_pre' => ['type' => 'string', 'writable' => true, 'doc' => 'Präfix der Rechnungsnummer.', 'optionsOnly' => true],
         'title' => ['doc' => 'Dokumentenüberschrift.'],
         'label' => ['doc' => 'Bezeichnung.'],
         'intro' => ['doc' => 'Einleitungstext.'],
@@ -84,7 +92,12 @@ return [
         'currency_code' => ['doc' => 'Währung (ISO-Währungscode).'],
         'net_gross' => ['enum' => 'NetGross', 'doc' => 'Preisbasis (Brutto- oder Netto-Preise).'],
         'quote' => ['doc' => 'Währungskurs (für Umrechnung in die Standard-Währung).'],
-        'payment_types' => ['doc' => 'Akzeptierte Zahlungsarten (kommasepariert).'],
+        'payment_types' => [
+            'doc' => 'Akzeptierte Zahlungsarten.',
+            'details' => ['Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".'],
+            'enum' => 'PaymentType',
+            'enumList' => true,
+        ],
         'action' => ['enum' => 'RecurringAction', 'doc' => 'Aktion, die bei jedem Lauf ausgeführt wird.'],
         'cycle_number' => ['doc' => 'Anzahl der Intervall-Einheiten zwischen zwei Läufen.'],
         'cycle' => ['enum' => 'RecurringCycle', 'doc' => 'Intervall-Einheit (z. B. monatlich).'],
@@ -118,7 +131,13 @@ return [
         'total_net_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag netto vor Rabatt.'],
         'total_gross_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag brutto vor Rabatt.'],
         'discount_amount' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Skontobetrag.'],
-        'status' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Status der Abo-Rechnung.'],
+        'status' => [
+            'type' => 'string',
+            'readOnly' => true,
+            'doc' => 'Status der Abo-Rechnung, z. B. "STARTED".',
+            // Bewusst kein Enum: Billomat dokumentiert die Werte nicht, und ein unbekannter Wert würde zu null.
+            'details' => ['Billomat dokumentiert die möglichen Werte nicht, deshalb ein String statt eines Enums.'],
+        ],
         'in_progress' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Läuft gerade eine Rechnungserzeugung?'],
         'ultimo' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Rechnungen immer zum Monatsletzten erzeugen?'],
         'email_filename' => ['doc' => 'Dateiname des PDF-Anhangs.'],

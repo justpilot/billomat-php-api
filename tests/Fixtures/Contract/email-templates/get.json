@@ -1,0 +1,13 @@
+{
+    "email-template": {
+        "id": "768701",
+        "created": "2025-12-24T22:59:58+01:00",
+        "updated": "2025-12-24T22:59:58+01:00",
+        "name": "Name 16",
+        "type": "INVOICES",
+        "subject": "Text 53",
+        "text": "Text 54",
+        "bcc": "kontakt5@example.com",
+        "is_default": "1"
+    }
+}

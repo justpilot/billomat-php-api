@@ -11,24 +11,26 @@ namespace Justpilot\Billomat\Model\Enum;
  *
  * Lebenszyklus:
  *  - DRAFT  → über `complete()` → OPEN
- *  - OPEN   → über `win()`  → ACCEPTED
- *  - OPEN   → über `lose()` → REJECTED
- *  - OPEN   → über `clear()`→ CLEARED
- *  - OPEN/ACCEPTED → über `cancel()` → CANCELED
+ *  - OPEN   → über `win()`  → WON
+ *  - OPEN/WON → über `lose()` → LOST
+ *  - WON    → über `clear()` → CLEARED, zurück über `unclear()` → WON
+ *  - OPEN/WON → über `cancel()` → CANCELED, zurück über `uncancel()` → OPEN
  */
 enum OfferStatus: string
 {
+    use FromApi;
+
     /** Entwurf */
     case DRAFT = 'DRAFT';
 
     /** offen / versendet */
     case OPEN = 'OPEN';
 
-    /** angenommen */
-    case ACCEPTED = 'ACCEPTED';
+    /** gewonnen (angenommen) */
+    case WON = 'WON';
 
-    /** abgelehnt */
-    case REJECTED = 'REJECTED';
+    /** verloren (abgelehnt) */
+    case LOST = 'LOST';
 
     /** erledigt (z. B. in Rechnung übernommen) */
     case CLEARED = 'CLEARED';
@@ -36,18 +38,13 @@ enum OfferStatus: string
     /** storniert */
     case CANCELED = 'CANCELED';
 
-    public static function fromApi(?string $status): ?self
-    {
-        return null === $status ? null : self::tryFrom($status);
-    }
-
     public function label(): string
     {
         return match ($this) {
             self::DRAFT => 'Entwurf',
             self::OPEN => 'Offen',
-            self::ACCEPTED => 'Angenommen',
-            self::REJECTED => 'Abgelehnt',
+            self::WON => 'Gewonnen',
+            self::LOST => 'Verloren',
             self::CLEARED => 'Erledigt',
             self::CANCELED => 'Storniert',
         };

@@ -9,18 +9,22 @@ use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\OfferStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Offer;
 use Justpilot\Billomat\Model\OfferItem;
+use Justpilot\Billomat\Model\TaxSummary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Offer::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(OfferStatus::class)]
 #[UsesClass(OfferItem::class)]
+#[UsesClass(Money::class)]
 final class OfferTest extends TestCase
 {
     #[Test]
@@ -34,7 +38,7 @@ final class OfferTest extends TestCase
             'number' => '7',
             'number_pre' => 'AN-',
             'number_length' => '4',
-            'status' => 'ACCEPTED',
+            'status' => 'WON',
             'date' => '2025-04-01',
             'validity_days' => '30',
             'discount_rate' => '2.5',
@@ -83,19 +87,18 @@ final class OfferTest extends TestCase
         self::assertSame(42, $offer->clientId);
         self::assertSame(100, $offer->contactId);
         self::assertSame('AN-2025-0007', $offer->offerNumber);
-        self::assertSame(OfferStatus::ACCEPTED, $offer->status);
+        self::assertSame(OfferStatus::WON, $offer->status);
         self::assertInstanceOf(DateTimeImmutable::class, $offer->date);
         self::assertSame(30, $offer->validityDays);
-        self::assertSame(2.5, $offer->discountRate);
         self::assertSame('Angebot Web-Relaunch', $offer->title);
-        self::assertSame(1190.0, $offer->totalGross);
+        self::assertSame('1190', $offer->totalGross?->toString());
         self::assertSame(NetGross::NET, $offer->netGross);
         self::assertSame(1.0, $offer->quote);
         self::assertNull($offer->freeTextId);
         self::assertSame(5, $offer->templateId);
 
         self::assertCount(1, $offer->taxes);
-        self::assertSame(19.0, $offer->taxes[0]['rate']);
+        self::assertSame(19.0, $offer->taxes[0]->rate);
 
         self::assertCount(1, $offer->items);
         self::assertContainsOnlyInstancesOf(OfferItem::class, $offer->items);
@@ -121,7 +124,7 @@ final class OfferTest extends TestCase
         ]);
 
         self::assertCount(1, $offer->items);
-        self::assertSame(50.0, $offer->items[0]->unitPrice);
+        self::assertSame('50', $offer->items[0]->unitPrice->toString());
     }
 
     #[Test]

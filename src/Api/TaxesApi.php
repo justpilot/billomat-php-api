@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
+use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\TaxRate;
+use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für Steuersätze.
@@ -25,55 +29,60 @@ final class TaxesApi extends AbstractApi
     /**
      * Listet alle Steuersätze auf.
      *
-     * @param array<string, scalar|array|null> $query (z.B. page, per_page)
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<TaxRate>
      */
-    public function list(array $query = []): array
+    #[NoDiscard]
+    public function list(array $filters = []): array
     {
-        $data = $this->getJson('/taxes', $query);
-
-        $taxesData = $data['taxes']['tax'] ?? [];
-
-        if ([] === $taxesData || null === $taxesData) {
-            return [];
-        }
-
-        // Billomat liefert bei einem Element teilweise ein einzelnes Array statt Liste
-        if (!\is_array($taxesData) || isset($taxesData['id'])) {
-            $taxesData = [$taxesData];
-        }
-
-        /** @var list<TaxRate> $taxes */
-        $taxes = array_map(
-            TaxRate::fromArray(...),
-            $taxesData
-        );
-
-        return $taxes;
+        return $this->listResource('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $filters);
     }
 
     /**
-     * Holt einen einzelnen Steuersatz.
+     * Wie {@see list()}, liefert aber zusätzlich die Pagination-Metadaten.
      *
-     * Wir nutzen hier getJsonOrNull() und geben null zurück,
-     * wenn der Steuersatz nicht existiert (404).
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Page<TaxRate>
      */
+    #[NoDiscard]
+    public function listPage(array $filters = []): Page
+    {
+        return $this->listResourcePage('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $filters);
+    }
+
+    /**
+     * Iteriert lazy über alle Seiten.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return Generator<int, TaxRate>
+     */
+    #[NoDiscard]
+    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    {
+        yield from $this->iterateResource('/taxes', 'taxes', 'tax', TaxRate::fromArray(...), $filters, $pageSize);
+    }
+
+    /**
+     * Holt einen einzelnen Steuersatz; null, wenn es ihn nicht gibt (404).
+     */
+    #[NoDiscard]
     public function get(int $id): ?TaxRate
     {
-        $data = $this->getJsonOrNull("/taxes/{$id}");
+        return $this->getResource("/taxes/{$id}", 'tax', TaxRate::fromArray(...), 'fetching tax');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $taxData = $data['tax'] ?? null;
-
-        if (!\is_array($taxData)) {
-            throw new UnexpectedResponseException('Unexpected response from Billomat when fetching tax rate.');
-        }
-
-        return TaxRate::fromArray($taxData);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): TaxRate
+    {
+        return $this->get($id) ?? throw $this->notFound("/taxes/{$id}");
     }
 
     /**
@@ -89,7 +98,7 @@ final class TaxesApi extends AbstractApi
 
         $taxData = $data['tax'] ?? null;
 
-        if (!\is_array($taxData)) {
+        if (!self::isRecord($taxData)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when creating tax rate.');
         }
 
@@ -97,11 +106,12 @@ final class TaxesApi extends AbstractApi
     }
 
     /**
-     * Aktualisiert einen bestehenden Steuersatz.
+     * Aktualisiert einen bestehenden Steuersatz (PUT /taxes/{id}).
      *
-     * Laut Doku: PUT /taxes/{id} mit gleichen Feldern wie beim Anlegen.
+     * Nur die in den Options gesetzten Felder werden gesendet; ein Umbenennen
+     * lässt `is_default` unverändert.
      */
-    public function update(int $id, TaxRateCreateOptions $options): TaxRate
+    public function update(int $id, TaxRateUpdateOptions $options): TaxRate
     {
         $payload = [
             'tax' => $options->toArray(),
@@ -111,7 +121,7 @@ final class TaxesApi extends AbstractApi
 
         $taxData = $data['tax'] ?? null;
 
-        if (!\is_array($taxData)) {
+        if (!self::isRecord($taxData)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when updating tax rate.');
         }
 
@@ -122,14 +132,34 @@ final class TaxesApi extends AbstractApi
      * Löscht einen Steuersatz.
      *
      * Entspricht DELETE /taxes/{id}
-     *
-     * @return bool true bei Erfolg (HTTP 200)
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/taxes/{$id}");
 
         // Wenn kein HttpException geflogen ist, gehen wir von Erfolg aus.
-        return true;
+    }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /taxes/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/taxes/{$id}", 'tax');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /taxes/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/taxes/{$id}", 'tax', $value);
     }
 }

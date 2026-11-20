@@ -1,99 +1,106 @@
-# Beitragsleitfaden
+# Contributing
 
-Danke, dass du zu `justpilot/billomat-php-api` beitragen möchtest. Dieses Dokument beschreibt Workflow, Coding-Standards und Erwartungen an Pull Requests.
+Thanks for contributing to `justpilot/billomat-php-api`. This document describes the workflow, the coding standards and what we expect from pull requests.
+
+## Language
+
+- **Code comments and docblocks are German** (with real umlauts: ä/ö/ü/ß). Identifiers (classes, methods, properties) are English.
+- **Everything else is English:** commit messages, pull requests, issues, `CHANGELOG.md`, `UPGRADE-*.md`, README.
 
 ## Workflow
 
-1. Eröffne ein Issue (auch für Bugfixes), damit Scope und Ansatz vorab geklärt sind.
-2. Forke das Repository und erzeuge einen Feature-Branch mit sprechendem Namen, z. B. `feature/add-articles-resource` oder `fix/payment-list-pagination`.
-3. Halte Commits klein und thematisch fokussiert. Englische Commit-Messages im Imperativ („Add articles list endpoint“).
-4. Reiche einen Pull Request gegen `main` ein und beschreibe das Warum (nicht nur das Was). Verweise im PR-Text auf das Issue.
-5. Lokale Qualitätspipeline (`composer ci`) muss grün sein, bevor Review angefordert wird.
+1. Open an issue first (bug fixes included), so scope and approach are agreed on before you write code.
+2. Fork the repository and create a branch with a descriptive name, e.g. `feat/add-articles-resource` or `fix/payment-list-pagination`.
+3. Keep commits small and focused. Commit messages are English, in the imperative ("Add articles list endpoint"); we use [Conventional Commits](https://www.conventionalcommits.org/) prefixes (`feat:`, `fix:`, `docs:`, `test:`, `chore:`, `feat!:` for breaking changes).
+4. Open the pull request against **`main`** (the 4.x line; security fixes for 3.x go to the `3.x` branch). Explain the why, not only the what, and link the issue.
+5. `composer ci` must pass locally before you request a review.
 
-## Coding-Standards
+## Coding standards
 
-- **PHP 8.4+**. Verwende moderne Sprachfeatures: `final readonly` Klassen für Read-Modelle, `readonly` Properties für Konfiguration, Constructor Property Promotion, Named Arguments, Enums.
-- **`declare(strict_types=1);` am Anfang jeder PHP-Datei**.
-- **`final` für API-Klassen**, `final readonly` für Read-Modelle in `src/Model/`.
-- **PSR-4**:
-  - `Justpilot\Billomat\` → `src/`
-  - `Justpilot\Billomat\Tests\` → `tests/`
-- **Kommentar-Sprache: Deutsch.** Identifier (Klassen, Methoden, Properties) bleiben Englisch. Halte dich an den Stil bestehender Dateien.
-- **Keine globalen Zustände.** Konfiguration läuft über `BillomatConfig`, HTTP-Zugriff über `BillomatHttpClient` bzw. `BillomatHttpClientInterface`.
+- **PHP 8.5+.** Use modern language features: `final readonly` classes for read models and options, constructor property promotion, named arguments, enums, `clone()` with properties for withers.
+- **`declare(strict_types=1);`** at the top of every PHP file.
+- **`final`** for API classes, **`final readonly`** for models in `src/Model/` and write options.
+- **PSR-4:** `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.
+- **No global state.** Configuration goes through `BillomatConfig`, HTTP through `BillomatHttpClient` / `BillomatHttpClientInterface`.
+- **Runtime dependencies are PSR interfaces only** (plus `php-http/discovery`). Never add a concrete HTTP client or framework package to `require`.
+- **Amounts are `Money`**, never `float`. Fixed value sets are enums in `src/Model/Enum/` (with the `FromApi` trait).
 
-## Drei-Schichten-Muster pro Ressource
+[AGENTS.md](AGENTS.md) describes the architecture and all conventions in detail; it's written for AI coding agents but is the most complete reference for humans, too.
 
-Jede Billomat-Ressource folgt demselben Muster — orientiere dich für eine neue Ressource an den bestehenden Beispielen (`ClientsApi`, `ClientCreateOptions`, `ClientUpdateOptions`, `Model\Client`).
+## Three layers per resource
 
-1. **`src/Api/{Resource}Api.php`** — erbt von `AbstractApi`. Exponiert die Verben (`list`, `get`, `create`, `update`, `delete`) plus ressourcenspezifische Aktionen. Kümmert sich um das Auspacken der Billomat-Response-Hülle (`{ "clients": { "client": [...] } }` bzw. `{ "client": { … } }`). Beim Listen muss `array_is_list()` geprüft werden, weil Billomat bei genau einem Eintrag ein Objekt statt einer Liste liefert (siehe `ClientsApi::list()`).
-2. **`src/Api/{Resource}CreateOptions.php` und/oder `{Resource}UpdateOptions.php`** — typisierte Payload-Klassen. Public nullable Properties, Pflichtfelder im Konstruktor. `toArray()` wandelt CamelCase nach snake_case und filtert `null`-Felder mit `array_filter`.
-3. **`src/Model/{Resource}.php`** — `final readonly` Read-Modell mit `fromArray(array $data): self` für die Hydration und `toArray(): array` für Debug-/Log-Ausgaben. Snake_case-↔-CamelCase-Mapping lebt ausschließlich in diesen beiden Methoden.
+Every Billomat resource follows the same pattern; look at `ClientsApi`, `ClientCreateOptions`, `ClientUpdateOptions` and `Model\Client` for an example.
 
-## Neue Ressource hinzufügen
+1. **`src/Api/{Resource}Api.php`** extends `AbstractApi` and exposes the verbs (`list`, `get`, `getOrFail`, `create`, `update`, `delete`) plus resource-specific actions. It unwraps Billomat's envelope (`{"clients": {"client": [...]}}` or `{"client": {...}}`).
+2. **`src/Api/{Resource}CreateOptions.php` / `{Resource}UpdateOptions.php`**: immutable write options (`final readonly`, named arguments, `with*()` withers, `Clear::Field` to empty a field in updates).
+3. **`src/Model/{Resource}.php`**: `final readonly` read model with `fromArray()` and `toArray()`.
 
-1. Lege die drei Dateien wie oben beschrieben an.
-2. Falls die Ressource neue Enums benötigt, lege sie in `src/Model/Enum/` an (`enum X: string { case … }`, optional `fromApi(?string)` und `label()` Methoden).
-3. Registriere die `*Api`-Klasse als `public readonly`-Property auf `BillomatClient` und instanziiere sie im Konstruktor mit `$this->http` als Argument.
-4. Schreibe Unit-Tests in `tests/Api/{Resource}ApiTest.php` (siehe nächster Abschnitt).
-5. Optional: Integrationstest unter `tests/Integration/{Resource}/`.
-6. Lege eine Dokumentationsseite unter `docs/resources/<resource-name>.md` an und verlinke sie in der README-Tabelle.
+**Most models, options and list filters are generated** by `tools/generate.php` from `docs/spec/billomat.json` and a definition in `tools/codegen/definitions/`. Their class docblock says "Generiert aus …". Never edit them by hand: change the definition and run `composer generate`. CI runs `composer generate:check`.
+
+## Adding a resource
+
+1. Add a codegen definition (or the handwritten classes for resources that don't fit) and run `composer generate`.
+2. Write the `*Api` class by hand and add it as a lazy property hook on `BillomatClient` (same pattern as the other APIs).
+3. New enums go into `src/Model/Enum/` (`enum X: string { use FromApi; case … }`, optionally `label()`).
+4. Add unit tests in `tests/Api/{Resource}ApiTest.php` (see below) and optionally an integration test under `tests/Integration/{Resource}/`.
+5. Add a documentation page under `docs/resources/<resource-name>.md` and add it to the table in `docs/resources/README.md`.
 
 ## Tests
 
-- Unit-Tests verwenden `Symfony\Component\HttpClient\MockHttpClient` mit `MockResponse`. Sie konstruieren `BillomatConfig`, dann `BillomatHttpClient`, dann die `*Api`-Klasse direkt — `BillomatHttpClient` selbst wird nicht gemockt.
-- Asserts sollten sowohl das hydratisierte Modell als auch den abgesetzten Request (Methode, URL, Header, Payload) prüfen.
-- **PHPUnit-12-Attribut-Stil:** `#[Test]` auf jeder Test-Methode (kein `test_`-Präfix), `#[CoversClass(Foo::class)]` auf der Klasse (mehrfach, falls mehrere SUTs), statische Assertions (`self::assertX()`).
-- Integrationstests gehören unter `tests/Integration/`, erben von `AbstractBillomatIntegrationTestCase` und verwenden `createBillomatClientOrSkip()`. Sie müssen `markTestSkipped()` aufrufen, wenn `BILLOMAT_ID`/`BILLOMAT_API_KEY` fehlen.
-- Integrationstests tragen `#[CoversNothing]` auf Klassenebene und `#[Group('integration')]` auf der Methode.
-
-Tests und Qualitäts-Pipeline ausführen:
-
-```bash
-composer test                                         # Unit-Tests (schnell)
-composer test:integration                             # nur Integrationstests
-composer test:all                                     # alle Tests
-composer ci                                           # Lint + Analyse + Rector-Dry + Tests
-vendor/bin/phpunit tests/Api/ClientsApiTest.php       # einzelne Datei
-vendor/bin/phpunit --filter it_lists_clients          # einzelne Methode
-```
-
-Detaillierte Test-Doku unter [docs/testing.md](docs/testing.md).
-
-## Qualität: PHPStan, CS-Fixer, Rector, Infection
-
-Alle Werkzeuge laufen über Composer-Skripte:
+- Unit tests use `Symfony\Component\HttpClient\MockHttpClient` with `MockResponse`, wrapped in `Psr18Client`: build a `BillomatConfig`, then `new BillomatHttpClient(new Psr18Client($mock), $config)`, then the `*Api` class. Don't mock `BillomatHttpClient` itself. Retry tests pass a `sleep:` closure so they don't actually wait.
+- Capture the outgoing request with `Tests\Support\CapturedRequest` (`$captured->record($method, $url, $options)` in the mock callback; then `->method`, `->url`, `->query()`, `->headers()`, `->body()`, `->jsonAt('invoice', 'client_id')`, `->jsonArray(…)`) instead of nested arrays. `Tests\Support\Payload::at()`/`arrayAt()` do the same for `toArray()` results. Calls that return several requests collect `CapturedRequest::of(…)` in a list.
+- Assert both the hydrated model and the outgoing request (method, URL, headers, payload).
+- **PHPUnit 13 attributes:** `#[Test]` on every test method (no `test_` prefix), `#[CoversClass(Foo::class)]` on the class, static assertions (`self::assertX()`).
+- Generated code is covered by reflection-based tests (`tests/Model/ModelRoundTripTest.php`, `tests/Api/Options/GeneratedOptionsTest.php`); it needs no per-class tests for its field mapping.
+- Integration tests live under `tests/Integration/`, extend `AbstractBillomatIntegrationTestCase`, use `createBillomatClientOrSkip()` and carry `#[CoversNothing]`. They are skipped without `BILLOMAT_ID`/`BILLOMAT_API_KEY`. Mind the Billomat sandbox rate limit (1,000 requests per 15 minutes).
 
 ```bash
-composer lint           # PHP-CS-Fixer (Dry-Run, zeigt Diff)
-composer lint:fix       # PHP-CS-Fixer anwenden
-composer analyse        # PHPStan Level max (mit phpstan-baseline.neon)
-composer analyse:baseline   # Baseline regenerieren
-composer refactor:dry   # Rector Vorschläge
-composer refactor       # Rector anwenden
-composer mutate         # Infection Mutation Testing
-composer audit          # Sicherheits-Audit der Abhängigkeiten
+composer test                                       # unit tests (fast, no network)
+composer test:integration                           # integration tests against the sandbox
+composer test:all                                   # both
+composer ci                                         # lint + PHPStan + Rector + generate:check + all tests
+vendor/bin/phpunit tests/Api/ClientsApiTest.php     # one file
+vendor/bin/phpunit --filter itListsClients          # one method
 ```
 
-**PHPStan-Baseline:** `phpstan-baseline.neon` friert bestehende Findings ein. Neue Findings führen zu CI-Fail. Wer bestehende Findings behebt, regeneriert die Baseline mit `composer analyse:baseline` und committet das Ergebnis.
+More in [docs/testing.md](docs/testing.md).
 
-**Rector + CS-Fixer Konflikte:** Sollte CS-Fixer eine Rector-Änderung wieder zurückdrehen oder umgekehrt, ist das ein Konfigurationsfehler. Bitte als Issue melden statt Workarounds einzuchecken.
+## Quality tools
 
-## Was nicht ohne Absprache
+```bash
+composer lint             # PHP-CS-Fixer (dry run)
+composer lint:fix         # PHP-CS-Fixer (apply)
+composer analyse          # PHPStan level max (no baseline)
+composer refactor:dry     # Rector suggestions
+composer refactor         # apply Rector
+composer generate         # regenerate models/options/filters
+composer generate:check   # fail if generated files are out of date
+composer mutate           # Infection mutation testing (~3 min, all of src/)
+composer audit            # security audit of the dependencies
+```
 
-- Breaking Changes an öffentlichen Klassen, Methoden oder Properties. Falls notwendig, vorher in einem Issue diskutieren — geht nur mit Major-Version-Bump.
-- Neue Top-Level-Abhängigkeiten in `composer.json`. Begründe den Bedarf im PR.
-- Änderungen an `BillomatHttpClient::buildBillomatQuery()`. Die Eigenheiten (`+` literal, `key[]=v1`-Arrays) sind Workarounds für Billomat-Quirks; siehe [docs/advanced/http-layer.md](docs/advanced/http-layer.md).
+**PHPStan:** level max with the bleeding-edge ruleset and without a baseline or `ignoreErrors`, tests included. Fix findings instead of adding `@phpstan-ignore` comments, ignore rules or casts that only silence them.
+
+**Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/main --ignore-msi-with-no-mutations` (the last flag keeps a change without any mutants, e.g. only property hooks, from failing with 0 %). The full run on `main` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
+
+**Rector vs. PHP-CS-Fixer:** if one tool reverts the other's change, that's a configuration bug; please open an issue instead of committing a workaround.
+
+## Please discuss first
+
+- Breaking changes to public classes, methods or properties. They wait for the next major version; open an issue first to discuss them.
+- New dependencies in `composer.json`. Explain why in the PR.
+- Changes to `BillomatHttpClient::buildBillomatQuery()`. Its quirks (literal `+`, `key[]=v` arrays) work around Billomat behaviour; see [docs/advanced/http-layer.md](docs/advanced/http-layer.md).
 
 ## Changelog
 
-Trage relevante Änderungen unter einem `[Unreleased]`-Abschnitt in `CHANGELOG.md` ein, gegliedert nach `Added`, `Changed`, `Fixed`, `Removed`. Beim Release wird der Abschnitt versioniert.
+Add notable changes to the `[Unreleased]` section of `CHANGELOG.md`, grouped by `Added`, `Changed`, `Fixed` and `Removed`, in English. The section gets its version on release.
 
-## PR-Checkliste
+## PR checklist
 
-- [ ] `composer ci` läuft lokal grün (Lint + PHPStan + Rector-Dry + Tests)
-- [ ] Unit-Tests für neuen Code vorhanden (mit `#[Test]` und `#[CoversClass]`)
-- [ ] Bei neuen Ressourcen: Dokumentation unter `docs/resources/` plus README-Eintrag
-- [ ] `CHANGELOG.md` aktualisiert
-- [ ] Kommentare auf Deutsch, Identifier auf Englisch
-- [ ] Keine Breaking Changes ohne Absprache
-- [ ] Keine neuen `phpstan-baseline.neon`-Einträge ohne Rückfrage (lieber Findings beheben)
+- [ ] `composer ci` passes locally
+- [ ] Unit tests for new code (`#[Test]`, `#[CoversClass]`)
+- [ ] Generated files changed only via definitions + `composer generate`
+- [ ] New resources: docs under `docs/resources/` and an entry in its README
+- [ ] `CHANGELOG.md` updated
+- [ ] Code comments in German, identifiers in English
+- [ ] `composer analyse` passes without new ignores

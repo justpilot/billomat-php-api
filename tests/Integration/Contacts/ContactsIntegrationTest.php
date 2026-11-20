@@ -22,17 +22,20 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] !== $clients) {
-            return $clients[0]->id;
+            $id = $clients[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         $faker = $this->faker();
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
-        self::assertNotNull($created->id);
 
         return $created->id;
     }
@@ -44,7 +47,7 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $clientId = $this->ensureClientId();
 
-        $contacts = $billomat->contacts->listByClient($clientId, ['per_page' => 5]);
+        $contacts = $billomat->clients->contacts->list($clientId, ['per_page' => 5]);
 
         self::assertIsArray($contacts);
         self::assertContainsOnlyInstancesOf(Contact::class, $contacts);
@@ -58,31 +61,33 @@ final class ContactsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clientId = $this->ensureClientId();
         $faker = $this->faker();
 
-        $opts = new ContactCreateOptions(clientId: $clientId);
-        $opts->firstName = $faker->firstName();
-        $opts->lastName = $faker->lastName();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->phone = $faker->phoneNumber();
-        $opts->countryCode = 'DE';
+        $opts = new ContactCreateOptions(
+            firstName: $faker->firstName(),
+            lastName: $faker->lastName(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+            phone: $faker->phoneNumber(),
+        );
 
-        $contact = $billomat->contacts->create($opts);
-
-        self::assertNotNull($contact->id);
+        $contact = $billomat->clients->contacts->create($clientId, $opts);
+        self::assertSame($clientId, $contact->clientId);
 
         // Update
-        $update = new ContactUpdateOptions();
-        $update->city = 'Berlin';
-        $updated = $billomat->contacts->update($contact->id, $update);
+        $update = new ContactUpdateOptions(city: 'Berlin');
+        $updated = $billomat->clients->contacts->update($contact->id, $update);
 
         self::assertSame($contact->id, $updated->id);
 
         // Get
-        $fetched = $billomat->contacts->get($contact->id);
+        $fetched = $billomat->clients->contacts->get($contact->id);
         self::assertInstanceOf(Contact::class, $fetched);
         self::assertSame('Berlin', $fetched->city);
 
+        // Avatar: Billomat liefert ein Platzhalterbild, solange keins hochgeladen ist.
+        self::assertNotSame('', $billomat->clients->contacts->avatar($contact->id, 32));
+
         // Cleanup
-        self::assertTrue($billomat->contacts->delete($contact->id));
-        self::assertNull($billomat->contacts->get($contact->id));
+        $billomat->clients->contacts->delete($contact->id);
+        self::assertNull($billomat->clients->contacts->get($contact->id));
     }
 }

@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
+use Justpilot\Billomat\Api\PropertiesApi;
 use Justpilot\Billomat\Api\PropertyCreateOptions;
-use Justpilot\Billomat\Api\UserPropertiesApi;
+use Justpilot\Billomat\Api\PropertyUpdateOptions;
+use Justpilot\Billomat\Api\UsersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
@@ -17,15 +21,20 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(UserPropertiesApi::class)]
+#[CoversClass(PropertiesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(UsersApi::class)]
 #[CoversClass(UserProperty::class)]
 #[CoversClass(PropertyCreateOptions::class)]
+#[UsesClass(PropertyUpdateOptions::class)]
 #[CoversClass(PropertyType::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
@@ -33,7 +42,7 @@ final class UserPropertiesApiTest extends TestCase
 {
     private function client(MockHttpClient $mock): BillomatHttpClient
     {
-        return new BillomatHttpClient($mock, new BillomatConfig('mycompany', 'secret-key'));
+        return new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig('mycompany', 'secret-key'));
     }
 
     #[Test]
@@ -53,7 +62,7 @@ final class UserPropertiesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new UserPropertiesApi($this->client($mock));
+        $api = new UsersApi($this->client($mock))->properties;
 
         $props = $api->list();
         self::assertCount(2, $props);
@@ -77,7 +86,7 @@ final class UserPropertiesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new UserPropertiesApi($this->client($mock));
+        $api = new UsersApi($this->client($mock))->properties;
 
         $prop = $api->get(7);
         self::assertNotNull($prop);
@@ -89,7 +98,7 @@ final class UserPropertiesApiTest extends TestCase
     {
         $mock = new MockHttpClient(static fn (): MockResponse => new MockResponse('Not Found', ['http_code' => 404]));
 
-        $api = new UserPropertiesApi($this->client($mock));
+        $api = new UsersApi($this->client($mock))->properties;
 
         self::assertNull($api->get(999));
     }
@@ -116,10 +125,9 @@ final class UserPropertiesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 201]);
         });
 
-        $api = new UserPropertiesApi($this->client($mock));
+        $api = new UsersApi($this->client($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'Geburtstag');
-        $opts->type = PropertyType::TEXTFIELD;
+        $opts = new PropertyCreateOptions(name: 'Geburtstag', type: PropertyType::TEXTFIELD);
 
         $created = $api->create($opts);
 
@@ -147,10 +155,9 @@ final class UserPropertiesApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $api = new UserPropertiesApi($this->client($mock));
+        $api = new UsersApi($this->client($mock))->properties;
 
-        $opts = new PropertyCreateOptions(name: 'private Anschrift');
-        $opts->type = PropertyType::TEXTAREA;
+        $opts = new PropertyUpdateOptions(name: 'private Anschrift', type: PropertyType::TEXTAREA);
 
         $updated = $api->update(11, $opts);
 
@@ -172,9 +179,9 @@ final class UserPropertiesApiTest extends TestCase
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $api = new UserPropertiesApi($this->client($mock));
+        $api = new UsersApi($this->client($mock))->properties;
 
-        self::assertTrue($api->delete(11));
+        $api->delete(11);
         self::assertSame('DELETE', $capturedMethod);
         self::assertStringEndsWith('/api/user-properties/11', (string) $capturedUrl);
     }
@@ -188,7 +195,7 @@ final class UserPropertiesApiTest extends TestCase
             ],
         ], JSON_THROW_ON_ERROR), ['http_code' => 200]));
 
-        $api = new UserPropertiesApi($this->client($mock));
+        $api = new UsersApi($this->client($mock))->properties;
 
         $props = $api->list();
         self::assertCount(1, $props);

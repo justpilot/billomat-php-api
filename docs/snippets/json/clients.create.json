@@ -1,0 +1,12 @@
+{
+    "client": {
+        "name": "Example GmbH",
+        "street": "Musterstraße 1",
+        "zip": "10115",
+        "city": "Berlin",
+        "country_code": "DE",
+        "email": "billing@example.com",
+        "net_gross": "NET",
+        "due_days": 14
+    }
+}

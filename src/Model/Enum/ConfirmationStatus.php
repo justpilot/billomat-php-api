@@ -12,21 +12,19 @@ namespace Justpilot\Billomat\Model\Enum;
  * Lebenszyklus:
  *  - DRAFT  → über `complete()` → OPEN bzw. COMPLETED (Billomat liefert
  *    nach `complete()` inzwischen COMPLETED, Stand 2026-10)
- *  - OPEN   → über `clear()`    → CLEARED (z.B. in Rechnung übernommen)
- *  - OPEN/CLEARED → über `cancel()` → CANCELED
+ *  - COMPLETED → über `clear()`  → CLEARED (z.B. in Rechnung übernommen),
+ *    zurück über `unclear()`
+ *  - COMPLETED → über `cancel()` → CANCELED, zurück über `uncancel()`
  */
 enum ConfirmationStatus: string
 {
+    use FromApi;
+
     case DRAFT = 'DRAFT';
     case OPEN = 'OPEN';
     case COMPLETED = 'COMPLETED';
     case CLEARED = 'CLEARED';
     case CANCELED = 'CANCELED';
-
-    public static function fromApi(?string $status): ?self
-    {
-        return null === $status ? null : self::tryFrom($status);
-    }
 
     public function label(): string
     {

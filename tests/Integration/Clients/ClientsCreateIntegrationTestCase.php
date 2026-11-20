@@ -20,23 +20,25 @@ final class ClientsCreateIntegrationTestCase extends AbstractBillomatIntegration
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
-        $options = new ClientCreateOptions();
+        $salutation = $faker->randomElement(['Herr', 'Frau']);
+        self::assertIsString($salutation);
 
-        $options->name = $faker->company();
-        $options->firstName = $faker->firstName();
-        $options->lastName = $faker->lastName();
-        $options->salutation = $faker->randomElement(['Herr', 'Frau']);
-        $options->email = $faker->unique()->safeEmail();
-        $options->phone = $faker->phoneNumber();
-        $options->street = $faker->streetName();
-        $options->zip = $faker->postcode();
-        $options->city = $faker->city();
-        $options->countryCode = 'DE';
-        $options->debitorAccountNumber = $faker->numberBetween(10000, 99999);
+        $options = new ClientCreateOptions(
+            name: $faker->company(),
+            street: $faker->streetName(),
+            zip: $faker->postcode(),
+            city: $faker->city(),
+            countryCode: 'DE',
+            firstName: $faker->firstName(),
+            lastName: $faker->lastName(),
+            salutation: $salutation,
+            email: $faker->unique()->safeEmail(),
+            phone: $faker->phoneNumber(),
+            debitorAccountNumber: $faker->numberBetween(10000, 99999),
+        );
 
         $created = $billomat->clients->create($options);
 
-        self::assertNotNull($created->id);
         self::assertGreaterThan(0, $created->id);
         self::assertSame($options->name, $created->name);
 

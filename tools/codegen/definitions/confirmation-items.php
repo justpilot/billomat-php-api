@@ -15,5 +15,5 @@ return (require __DIR__ . '/shared/items.php')(
     label: 'Position einer Auftragsbestätigung',
     parentField: 'confirmation_id',
     specResource: null,
-    docUrl: 'https://www.billomat.com/en/api/confirmations/items/',
+    docUrl: 'https://www.billomat.com/api/auftragsbestaetigungen/',
 );

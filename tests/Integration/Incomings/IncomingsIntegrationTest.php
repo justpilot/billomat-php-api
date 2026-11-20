@@ -6,9 +6,19 @@ namespace Justpilot\Billomat\Tests\Integration\Incomings;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemCreateOptions;
+use Justpilot\Billomat\Api\IncomingItemUpdateOptions;
 use Justpilot\Billomat\Api\IncomingUpdateOptions;
+use Justpilot\Billomat\Api\InvoiceFilter;
 use Justpilot\Billomat\Api\SupplierCreateOptions;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Model\Enum\IncomingGroupBy;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Incoming;
+use Justpilot\Billomat\Model\IncomingGroup;
+use Justpilot\Billomat\Model\IncomingItem;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -23,13 +33,14 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $suppliers = $billomat->suppliers->list(['per_page' => 1]);
 
         if ([] !== $suppliers) {
-            return $suppliers[0]->id;
+            $id = $suppliers[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
-        $opts = new SupplierCreateOptions(name: 'IT-Lieferant Incoming '.date('His'));
-        $opts->countryCode = 'DE';
+        $opts = new SupplierCreateOptions(name: 'IT-Lieferant Incoming '.date('His'), countryCode: 'DE');
         $created = $billomat->suppliers->create($opts);
-        self::assertNotNull($created->id);
 
         return $created->id;
     }
@@ -54,28 +65,125 @@ final class IncomingsIntegrationTest extends AbstractBillomatIntegrationTestCase
         $supplierId = $this->ensureSupplierId();
         $faker = $this->faker();
 
-        $opts = new IncomingCreateOptions(supplierId: $supplierId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->incomingNumber = 'IT-IN-'.date('His');
-        $opts->label = 'Integrationstest Incoming';
-        $opts->note = 'Auto-Test';
-        $opts->totalGross = $faker->randomFloat(2, 50, 500);
-        $opts->currencyCode = 'EUR';
+        $opts = new IncomingCreateOptions(
+            supplierId: $supplierId,
+            date: new DateTimeImmutable('today'),
+            incomingNumber: 'IT-IN-'.date('His'),
+            label: 'Integrationstest Incoming',
+            note: 'Auto-Test',
+            totalGross: Money::of((string) $faker->randomFloat(2, 50, 500)),
+            currencyCode: 'EUR',
+        );
 
         $incoming = $billomat->incomings->create($opts);
 
-        self::assertNotNull($incoming->id);
         self::assertSame($supplierId, $incoming->supplierId);
 
         // Update
-        $update = new IncomingUpdateOptions();
-        $update->label = 'Geänderter Label';
+        $update = new IncomingUpdateOptions(label: 'Geänderter Label');
         $updated = $billomat->incomings->update($incoming->id, $update);
 
         self::assertSame($incoming->id, $updated->id);
 
         // Cleanup
-        self::assertTrue($billomat->incomings->delete($incoming->id));
+        $billomat->incomings->delete($incoming->id);
         self::assertNull($billomat->incomings->get($incoming->id));
+    }
+
+    /**
+     * GET /incomings/{id}/pdf liefert die per base64File hinterlegte Datei (neu abgelegt, nicht bytegleich). Billomat prüft die Datei,
+     * deshalb dient das PDF einer abgeschlossenen Sandbox-Rechnung als Beleg.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function canFetchTheUploadedPdfOfAnIncoming(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $invoices = $billomat->invoices->list(new InvoiceFilter(status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE, InvoiceStatus::PAID], perPage: 1));
+        if ([] === $invoices) {
+            self::markTestSkipped('Die Sandbox braucht eine abgeschlossene Rechnung als Beleg-PDF.');
+        }
+        $content = $billomat->invoices->pdfContent($invoices[0]->id);
+
+        $incoming = $billomat->incomings->create(new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId(),
+            date: new DateTimeImmutable('today'),
+            incomingNumber: 'IT-PDF-'.date('His'),
+        ));
+
+        try {
+            // Ohne Datei gibt es kein PDF.
+            try {
+                (void) $billomat->incomings->pdf($incoming->id);
+                self::fail('Eine Eingangsrechnung ohne Datei hat kein PDF.');
+            } catch (NotFoundException) {
+            }
+
+            // Ersatz für das frühere upload(): die Datei per update() nachreichen.
+            $billomat->incomings->update($incoming->id, new IncomingUpdateOptions(base64File: base64_encode($content)));
+
+            $pdf = $billomat->incomings->pdf($incoming->id);
+            self::assertSame($incoming->id, $pdf->documentId);
+            self::assertSame([], $pdf->extra);
+            // Billomat legt die Datei neu ab; der Inhalt ist ein PDF, aber nicht bytegleich.
+            self::assertStringStartsWith('%PDF-', $pdf->getBinary());
+            self::assertSame($pdf->getBinary(), $billomat->incomings->pdfContent($incoming->id));
+        } finally {
+            $billomat->incomings->delete($incoming->id);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function itemsOfAnIncomingCanBeManaged(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $incoming = $billomat->incomings->create(new IncomingCreateOptions(
+            supplierId: $this->ensureSupplierId(),
+            date: new DateTimeImmutable('today'),
+            incomingNumber: 'IT-ITEMS-'.date('His'),
+            currencyCode: 'EUR',
+        ));
+
+        try {
+            $item = $billomat->incomings->items->create($incoming->id, new IncomingItemCreateOptions(
+                total: Money::of('119.50'),
+                description: 'Hosting',
+                taxRate: 19.0,
+                taxIncluded: true,
+                type: ItemType::SERVICE,
+            ));
+            self::assertSame($incoming->id, $item->incomingId);
+            self::assertSame('119.5', $item->total?->toString());
+            self::assertTrue($item->taxIncluded);
+            self::assertSame(ItemType::SERVICE, $item->type);
+
+            $updated = $billomat->incomings->items->update($item->id, new IncomingItemUpdateOptions(description: 'Server'));
+            self::assertSame('Server', $updated->description);
+            self::assertSame('119.5', $updated->total?->toString());
+
+            $ids = array_map(static fn (IncomingItem $i): int => $i->id, $billomat->incomings->items->list($incoming->id));
+            self::assertContains($item->id, $ids);
+
+            $billomat->incomings->items->delete($item->id);
+            self::assertNull($billomat->incomings->items->get($item->id));
+        } finally {
+            $billomat->incomings->delete($incoming->id);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function incomingsCanBeListedGrouped(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $groups = $billomat->incomings->listGrouped([IncomingGroupBy::SUPPLIER, IncomingGroupBy::YEAR]);
+
+        self::assertContainsOnlyInstancesOf(IncomingGroup::class, $groups);
+        foreach ($groups as $group) {
+            self::assertNotNull($group->totalGross);
+            self::assertSame($group->supplierId, isset($group->incomingParams['supplier_id']) ? (int) $group->incomingParams['supplier_id'] : null);
+        }
     }
 }

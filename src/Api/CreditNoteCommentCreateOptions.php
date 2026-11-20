@@ -17,16 +17,9 @@ use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
  * Generiert aus tools/codegen/definitions/credit-note-comments.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class CreditNoteCommentCreateOptions
+final readonly class CreditNoteCommentCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Dokuments, an dem der Kommentar hängt.
-         *
-         * Billomat-Feld: credit_note_id
-         * Typ: INT
-         */
-        public int $creditNoteId,
         /**
          * Kommentartext.
          *
@@ -34,27 +27,43 @@ final class CreditNoteCommentCreateOptions
          * Typ: ALNUM
          */
         public string $comment,
+        /**
+         * ActionKey als Enum, sofern bekannt.
+         *
+         * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
+         * bei system-getriebenen Kommentaren selbst.
+         *
+         * Billomat-Feld: actionkey
+         */
+        public ?CreditNoteCommentActionKey $actionKey = null,
+        /**
+         * Sichtbarkeit für die Aktivitäten-Liste des Kunden.
+         *
+         * Billomat-Feld: public
+         * Typ: BOOL
+         * Default: 0
+         */
+        public ?bool $public = null,
     ) {
     }
 
-    /**
-     * ActionKey als Enum, sofern bekannt.
-     *
-     * Beim Anlegen normalerweise nicht relevant – Billomat setzt den Wert
-     * bei system-getriebenen Kommentaren selbst.
-     *
-     * Billomat-Feld: actionkey
-     */
-    public ?CreditNoteCommentActionKey $actionkey = null;
+    /** Kopie mit geändertem `comment`. */
+    public function withComment(string $comment): self
+    {
+        return clone($this, ['comment' => $comment]);
+    }
 
-    /**
-     * Sichtbarkeit für die Aktivitäten-Liste des Kunden.
-     *
-     * Billomat-Feld: public
-     * Typ: BOOL
-     * Default: 0
-     */
-    public ?bool $public = null;
+    /** Kopie mit geändertem `actionKey`. */
+    public function withActionKey(?CreditNoteCommentActionKey $actionKey): self
+    {
+        return clone($this, ['actionKey' => $actionKey]);
+    }
+
+    /** Kopie mit geändertem `public`. */
+    public function withPublic(?bool $public): self
+    {
+        return clone($this, ['public' => $public]);
+    }
 
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
@@ -63,14 +72,10 @@ final class CreditNoteCommentCreateOptions
      */
     public function toArray(): array
     {
-        $data = [
-            'credit_note_id' => $this->creditNoteId,
+        return array_filter([
             'comment' => $this->comment,
-            'actionkey' => $this->actionkey?->value,
+            'actionkey' => $this->actionKey?->value,
             'public' => $this->public,
-        ];
-
-        // Null-Felder entfernen
-        return array_filter($data, static fn (mixed $v): bool => null !== $v);
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

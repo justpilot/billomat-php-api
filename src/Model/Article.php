@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 
 use const DATE_ATOM;
@@ -25,11 +26,45 @@ use const DATE_ATOM;
  */
 final readonly class Article
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'created' => true,
+        'article_number' => true,
+        'number' => true,
+        'number_pre' => true,
+        'number_length' => true,
+        'title' => true,
+        'description' => true,
+        'sales_price' => true,
+        'currency_code' => true,
+        'sales_price2' => true,
+        'sales_price3' => true,
+        'sales_price4' => true,
+        'sales_price5' => true,
+        'unit_id' => true,
+        'purchase_price' => true,
+        'supplier_id' => true,
+        'tax_id' => true,
+        'updated' => true,
+        'customfield' => true,
+        'archived' => true,
+        'type' => true,
+        'revenue_account_number' => true,
+        'cost_center' => true,
+        'purchase_price_net_gross' => true,
+        'article-property-values' => true,
+    ];
+
+    /**
+     * @param list<ArticlePropertyValue> $propertyValues
+     * @param array<string, mixed>       $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Artikels. */
-        public ?int $id,
+        public int $id,
         /** Erstellungszeitpunkt des Artikels. */
-        public ?DateTimeImmutable $created,
+        public ?DateTimeImmutable $created = null,
         /** Vollständige Artikelnummer (Präfix + laufende Nummer). */
         public ?string $articleNumber = null,
         /** Laufende Nummer (ohne Präfix). */
@@ -43,7 +78,7 @@ final readonly class Article
         /** Beschreibung. */
         public ?string $description = null,
         /** Verkaufspreis. */
-        public ?float $salesPrice = null,
+        public ?Money $salesPrice = null,
         /**
          * Währung (ISO-Währungscode).
          *
@@ -55,57 +90,37 @@ final readonly class Article
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice2 = null,
+        public ?Money $salesPrice2 = null,
         /**
          * Preis für Kunden der Preisgruppe 3.
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice3 = null,
+        public ?Money $salesPrice3 = null,
         /**
          * Preis für Kunden der Preisgruppe 4.
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice4 = null,
+        public ?Money $salesPrice4 = null,
         /**
          * Preis für Kunden der Preisgruppe 5.
          *
          * Ohne Angabe gilt der Normalpreis.
          */
-        public ?float $salesPrice5 = null,
-        /**
-         * Bezeichnung der Einheit.
-         *
-         * Besser `unitId` verwenden.
-         *
-         * @deprecated since 3.1 – Billomat liefert `unit` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $unit = null,
+        public ?Money $salesPrice5 = null,
         /** ID der verknüpften Einheit. */
         public ?int $unitId = null,
         /** Einkaufspreis. */
-        public ?float $purchasePrice = null,
-        /**
-         * Währung des Einkaufspreises (ISO-Währungscode).
-         *
-         * @deprecated since 3.1 – Billomat liefert `purchase_price_currency_code` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $purchasePriceCurrencyCode = null,
+        public ?Money $purchasePrice = null,
         /** ID des verknüpften Lieferanten. */
         public ?int $supplierId = null,
         /** ID des verknüpften Steuersatzes. */
         public ?int $taxId = null,
-        /**
-         * ID der Artikelkategorie.
-         *
-         * @deprecated since 3.1 – Billomat liefert `category_id` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $categoryId = null,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * Archivierungsstatus.
          *
@@ -113,13 +128,25 @@ final readonly class Article
          */
         public ?bool $archived = null,
         /** Artikeltyp: Produkt oder Dienstleistung. */
-        public ?ArticleType $type = null,
+        public ?ItemType $type = null,
         /** Erlöskonto. */
         public ?string $revenueAccountNumber = null,
         /** Kostenstelle. */
         public ?string $costCenter = null,
         /** Preisbasis des Einkaufspreises (netto oder brutto). */
         public ?NetGross $purchasePriceNetGross = null,
+        /**
+         * Attributwerte des Artikels.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert (leer: "").
+         */
+        public array $propertyValues = [],
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -131,7 +158,7 @@ final readonly class Article
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             articleNumber: ScalarCaster::toStringOrNull($data['article_number'] ?? null),
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),
@@ -139,26 +166,25 @@ final readonly class Article
             numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
-            salesPrice: ScalarCaster::toFloatOrNull($data['sales_price'] ?? null),
+            salesPrice: ScalarCaster::toMoneyOrNull($data['sales_price'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
-            salesPrice2: ScalarCaster::toFloatOrNull($data['sales_price2'] ?? null),
-            salesPrice3: ScalarCaster::toFloatOrNull($data['sales_price3'] ?? null),
-            salesPrice4: ScalarCaster::toFloatOrNull($data['sales_price4'] ?? null),
-            salesPrice5: ScalarCaster::toFloatOrNull($data['sales_price5'] ?? null),
-            unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
+            salesPrice2: ScalarCaster::toMoneyOrNull($data['sales_price2'] ?? null),
+            salesPrice3: ScalarCaster::toMoneyOrNull($data['sales_price3'] ?? null),
+            salesPrice4: ScalarCaster::toMoneyOrNull($data['sales_price4'] ?? null),
+            salesPrice5: ScalarCaster::toMoneyOrNull($data['sales_price5'] ?? null),
             unitId: ScalarCaster::toIntOrNull($data['unit_id'] ?? null),
-            purchasePrice: ScalarCaster::toFloatOrNull($data['purchase_price'] ?? null),
-            purchasePriceCurrencyCode: ScalarCaster::toStringOrNull($data['purchase_price_currency_code'] ?? null),
+            purchasePrice: ScalarCaster::toMoneyOrNull($data['purchase_price'] ?? null),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
             taxId: ScalarCaster::toIntOrNull($data['tax_id'] ?? null),
-            categoryId: ScalarCaster::toIntOrNull($data['category_id'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             archived: ScalarCaster::toBoolOrNull($data['archived'] ?? null),
-            type: ArticleType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
+            type: ItemType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             revenueAccountNumber: ScalarCaster::toStringOrNull($data['revenue_account_number'] ?? null),
             costCenter: ScalarCaster::toStringOrNull($data['cost_center'] ?? null),
             purchasePriceNetGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['purchase_price_net_gross'] ?? null) ?? ''),
+            propertyValues: ListCaster::toNestedList($data['article-property-values'] ?? null, 'article-property-value', 'id', ArticlePropertyValue::fromArray(...)),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -171,7 +197,8 @@ final readonly class Article
      */
     public function toArray(): array
     {
-        return [
+        $data = [
+            ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
             'article_number' => $this->articleNumber,
@@ -180,26 +207,31 @@ final readonly class Article
             'number_length' => $this->numberLength,
             'title' => $this->title,
             'description' => $this->description,
-            'sales_price' => $this->salesPrice,
+            'sales_price' => $this->salesPrice?->toString(),
             'currency_code' => $this->currencyCode,
-            'sales_price2' => $this->salesPrice2,
-            'sales_price3' => $this->salesPrice3,
-            'sales_price4' => $this->salesPrice4,
-            'sales_price5' => $this->salesPrice5,
-            'unit' => $this->unit,
+            'sales_price2' => $this->salesPrice2?->toString(),
+            'sales_price3' => $this->salesPrice3?->toString(),
+            'sales_price4' => $this->salesPrice4?->toString(),
+            'sales_price5' => $this->salesPrice5?->toString(),
             'unit_id' => $this->unitId,
-            'purchase_price' => $this->purchasePrice,
-            'purchase_price_currency_code' => $this->purchasePriceCurrencyCode,
+            'purchase_price' => $this->purchasePrice?->toString(),
             'supplier_id' => $this->supplierId,
             'tax_id' => $this->taxId,
-            'category_id' => $this->categoryId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'archived' => $this->archived,
             'type' => $this->type?->value,
             'revenue_account_number' => $this->revenueAccountNumber,
             'cost_center' => $this->costCenter,
             'purchase_price_net_gross' => $this->purchasePriceNetGross?->value,
         ];
+
+        if ([] !== $this->propertyValues) {
+            $data['article-property-values'] = [
+                'article-property-value' => array_map(static fn (ArticlePropertyValue $item): array => $item->toArray(), $this->propertyValues),
+            ];
+        }
+
+        return $data;
     }
 }

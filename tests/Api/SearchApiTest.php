@@ -6,22 +6,25 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\SearchApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\SearchResult;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
-use const PHP_URL_QUERY;
 
 #[CoversClass(SearchApi::class)]
 #[CoversClass(SearchResult::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class SearchApiTest extends TestCase
@@ -29,11 +32,11 @@ final class SearchApiTest extends TestCase
     #[Test]
     public function itQueriesAcrossResources(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
 
             return new MockResponse(json_encode([
                 'search' => [
@@ -45,11 +48,11 @@ final class SearchApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $hits = new SearchApi($http)->query('Hans Wurst');
 
-        self::assertSame('GET', $captured['method']);
-        parse_str(parse_url($captured['url'], PHP_URL_QUERY) ?? '', $params);
+        self::assertSame('GET', $captured->method);
+        $params = $captured->query();
         self::assertSame('Hans Wurst', $params['query']);
 
         self::assertCount(2, $hits);
@@ -69,7 +72,7 @@ final class SearchApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
 
         self::assertSame([], new SearchApi($http)->query('nichts'));
     }
@@ -85,10 +88,10 @@ final class SearchApiTest extends TestCase
             return new MockResponse(json_encode(['search' => ['result' => []]], JSON_THROW_ON_ERROR), ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
-        new SearchApi($http)->query('foo', ['per_page' => 5]);
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        (void) new SearchApi($http)->query('foo', ['per_page' => 5]);
 
-        parse_str(parse_url($capturedUrl, PHP_URL_QUERY) ?? '', $params);
+        $params = CapturedRequest::queryOf($capturedUrl);
         self::assertSame('foo', $params['query']);
         self::assertSame('5', $params['per_page']);
     }

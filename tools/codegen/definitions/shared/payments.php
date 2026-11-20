@@ -7,7 +7,7 @@ declare(strict_types=1);
  * (/{resource}-payments).
  *
  * Rechnungen, Gutschriften und Eingangsrechnungen haben dieselben Zahlungsfelder und
- * teilen sich das Enum InvoicePaymentType. Pro Ressource entstehen das Read-Model und die
+ * teilen sich das Enum PaymentType. Pro Ressource entstehen das Read-Model und die
  * Create-Options. Liegt in einem Unterordner, damit der Generator die Datei nicht selbst
  * als Definition lädt.
  *
@@ -41,6 +41,16 @@ return static function (string $prefix, string $label, string $parentField, stri
             ],
         ],
 
+        // Die Eltern-ID ist ein eigenes Argument von `PaymentsApi::list()`.
+        'filter' => [
+            'class' => $prefix . 'PaymentFilter',
+            'endpoint' => "GET /api/{$path}",
+            'fields' => [
+                $parentField => ['omit' => true],
+                'type' => ['enum' => 'PaymentType'],
+            ],
+        ],
+
         'createOptions' => [
             'class' => $prefix . 'PaymentCreateOptions',
             'endpoint' => "POST /api/{$path}",
@@ -48,7 +58,7 @@ return static function (string $prefix, string $label, string $parentField, stri
             'boolAsInt' => true,
             // BC: das Zahlungsdatum war schon immer ein DateTimeImmutable.
             'dateObjects' => true,
-            'toArray' => [$parentField, 'amount', 'date', 'comment', 'transaction_purpose', 'type', $markAsPaid],
+            'toArray' => ['amount', 'date', 'comment', 'transaction_purpose', 'type', $markAsPaid],
             'doc' => [
                 "Typisierter Payload für POST /{$path} gemäß Billomat-API.",
                 '',
@@ -60,19 +70,21 @@ return static function (string $prefix, string $label, string $parentField, stri
         // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
         'fields' => [
             'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne ID der Zahlung.'],
+            // Die Eltern-ID übergibt `PaymentsApi::create()` als eigenes Argument.
             $parentField => [
+                'type' => 'int',
+                'readOnly' => true,
                 'doc' => 'ID des Dokuments, zu dem die Zahlung gehört.',
-                'model' => ['required' => true, 'nonNull' => true],
-                'create' => ['constructor' => true],
+                'model' => ['required' => true],
             ],
-            'date' => ['doc' => 'Zahlungsdatum.', 'model' => ['required' => true]],
+            'date' => ['doc' => 'Zahlungsdatum.'],
             'amount' => [
                 'doc' => 'Zahlungsbetrag.',
-                'model' => ['required' => true, 'nonNull' => true],
+                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
-            'type' => ['enum' => 'InvoicePaymentType', 'doc' => 'Zahlungsart.', 'model' => ['required' => true]],
-            'comment' => ['doc' => 'Kommentar zur Zahlung.', 'model' => ['required' => true]],
+            'type' => ['enum' => 'PaymentType', 'doc' => 'Zahlungsart.'],
+            'comment' => ['doc' => 'Kommentar zur Zahlung.'],
             'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Zahlung.'],
             'user_id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'ID des Users, der die Zahlung erfasst hat.'],
             // Billomat dokumentiert `transaction_purpose` nicht beim Anlegen, nimmt ihn aber an.

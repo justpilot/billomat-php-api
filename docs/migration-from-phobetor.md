@@ -11,7 +11,7 @@ return plain arrays. This SDK uses one `*Api` class per resource and returns
 
 ## Before you start
 
-- **PHP requirement.** This SDK requires PHP 8.4+. Check `php -v` and your CI
+- **PHP requirement.** This SDK requires PHP 8.5+. Check `php -v` and your CI
   matrix before migrating. If you cannot upgrade, this SDK is not for you.
 - **Composer.** You can install both side by side during the migration —
   `Phobetor\Billomat\Client\BillomatClient` and
@@ -89,8 +89,30 @@ $clients = $billomat->getClients(['country_code' => 'DE', 'per_page' => 100]);
 ```
 
 ```php
-// After
+// After — typed filter (recommended)
+use Justpilot\Billomat\Api\ClientFilter;
+
+$clients = $billomat->clients->list(new ClientFilter(countryCode: 'DE', perPage: 100));
+
+// A plain array of Billomat query parameters still works
 $clients = $billomat->clients->list(['country_code' => 'DE', 'per_page' => 100]);
+```
+
+Clients, suppliers, articles, users, templates and every document type (invoices, offers, confirmations, credit notes, delivery notes, letters, reminders, incomings, recurrings) have such a filter class (`InvoiceFilter`, `OfferFilter`, …). Multi-value fields are lists of enums, dates are `DateTimeImmutable`, and sorting uses `OrderBy`:
+
+```php
+use Justpilot\Billomat\Api\InvoiceFilter;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+
+// Before
+$invoices = $billomat->getInvoices(['status' => 'OPEN,OVERDUE', 'order_by' => 'date+DESC']);
+
+// After
+$invoices = $billomat->invoices->list(new InvoiceFilter(
+    status: [InvoiceStatus::OPEN, InvoiceStatus::OVERDUE],
+    orderBy: OrderBy::desc('date'),
+));
 ```
 
 ### List across pages
@@ -112,7 +134,7 @@ foreach ($billomat->clients->iterateAll() as $client) {
 }
 
 // Or one page with metadata
-$result = $billomat->clients->listPage(['per_page' => 50, 'page' => 3]);
+$result = $billomat->clients->listPage(new ClientFilter(page: 3, perPage: 50));
 echo "Page {$result->info->page} of " . ($result->info->totalPages() ?? '?');
 ```
 
@@ -154,19 +176,17 @@ $id = $result['id'];
 // After
 use Justpilot\Billomat\Api\ClientCreateOptions;
 
-$options = new ClientCreateOptions();
-$options->name = 'Acme Inc.';
-$options->number = 424242;
-$options->countryCode = 'DE';
+$options = new ClientCreateOptions(name: 'Acme Inc.', number: 424242, countryCode: 'DE');
 
 $client = $billomat->clients->create($options);
 $id = $client->id;
 ```
 
-Some `*CreateOptions` classes (e.g. `InvoiceCreateOptions`, `InvoiceItemCreateOptions`)
-do take required arguments via the constructor — see [README](../README.en.md#quickstart)
+All `*CreateOptions` / `*UpdateOptions` classes are immutable (`final readonly`) and built
+with named constructor arguments; required fields (e.g. `clientId` on `InvoiceCreateOptions`)
+come first. `with*()` methods return a modified copy — see [README](../README.md#quickstart)
 and the [examples/](../examples/) folder for the per-resource form. `ClientCreateOptions`
-is the property-only variant because Billomat treats every client field as optional.
+has no required argument because Billomat treats every client field as optional.
 
 ### Update
 
@@ -182,8 +202,7 @@ $billomat->updateClient([
 // After
 use Justpilot\Billomat\Api\ClientUpdateOptions;
 
-$options = new ClientUpdateOptions();
-$options->name = 'Acme GmbH';
+$options = new ClientUpdateOptions(name: 'Acme GmbH');
 
 $billomat->clients->update(12345, $options);
 ```
@@ -211,10 +230,10 @@ file_put_contents("invoice-{$invoiceId}.pdf", (string) $response->getBody());
 
 ```php
 // After
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 
 $billomat->invoices->complete($invoiceId);
-$pdf = $billomat->invoices->pdf($invoiceId, InvoicePdfType::SIGNED, rawPdf: true);
+$pdf = $billomat->invoices->pdfContent($invoiceId, PdfType::SIGNED);
 file_put_contents("invoice-{$invoiceId}.pdf", $pdf);
 ```
 
@@ -258,7 +277,7 @@ try {
 
 This SDK does not yet ship an automatic rate-limit wait loop equivalent to
 phobetor's `setDoWaitForRateLimitReset(true)`. If you need it, decorate the
-HTTP client (see the [Logging & HTTP client](../README.en.md#logging--http-client)
+HTTP client (see the [configuration guide](configuration.md#example-logging-requests-and-responses)
 section).
 
 ## Property name mapping
@@ -271,7 +290,7 @@ every resource.
 
 ## Where to go next
 
-- Resource overview: [README.en.md](../README.en.md#resources)
+- Resource overview: [docs/resources/](resources/)
 - Pagination details: [docs/advanced/pagination.md](advanced/pagination.md)
 - Error handling: [docs/error-handling.md](error-handling.md)
 - HTTP layer internals (query encoding, retry decoration): [docs/advanced/http-layer.md](advanced/http-layer.md)

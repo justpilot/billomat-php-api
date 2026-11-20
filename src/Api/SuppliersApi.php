@@ -7,10 +7,16 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\Supplier;
+use Justpilot\Billomat\Model\SupplierProperty;
+use Justpilot\Billomat\Model\SupplierPropertyValue;
+use Justpilot\Billomat\Model\SupplierTag;
+use Justpilot\Billomat\Model\SupplierTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Suppliers-Ressource (Lieferanten).
@@ -27,35 +33,41 @@ use Justpilot\Billomat\Pagination\Page;
 final class SuppliersApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<SupplierTag, SupplierTagCloudEntry, SupplierTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'supplier', SupplierTag::fromArray(...), SupplierTagCloudEntry::fromArray(...), SupplierTagCreateOptions::class);
+    }
+
+    /**
+     * Attribut-Definitionen, siehe {@see PropertiesApi}.
+     *
+     * @var PropertiesApi<SupplierProperty>
+     */
+    public private(set) PropertiesApi $properties {
+        get => $this->properties ??= new PropertiesApi($this->http, 'supplier', SupplierProperty::fromArray(...));
+    }
+
+    /**
+     * Attributwerte, siehe {@see PropertyValuesApi}.
+     *
+     * @var PropertyValuesApi<SupplierPropertyValue, SupplierPropertyValueCreateOptions, SupplierPropertyValueFilter>
+     */
+    public private(set) PropertyValuesApi $propertyValues {
+        get => $this->propertyValues ??= new PropertyValuesApi($this->http, 'supplier', SupplierPropertyValue::fromArray(...), SupplierPropertyValueCreateOptions::class, SupplierPropertyValueFilter::class);
+    }
+
+    /**
+     * @param SupplierFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Supplier>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(SupplierFilter|array $filters = []): array
     {
-        $data = $this->getJson('/suppliers', $filters);
-
-        $node = $data['suppliers']['supplier'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Supplier> $models */
-        $models = array_map(
-            Supplier::fromArray(...),
-            $rows,
-        );
-
-        return $models;
+        return $this->listResource('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters);
     }
 
     /**
@@ -65,11 +77,12 @@ final class SuppliersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Supplier>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(SupplierFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters);
     }
@@ -82,30 +95,31 @@ final class SuppliersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param SupplierFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Supplier>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(SupplierFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/suppliers', 'suppliers', 'supplier', Supplier::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Supplier
     {
-        $data = $this->getJsonOrNull("/suppliers/{$id}");
+        return $this->getResource("/suppliers/{$id}", 'supplier', Supplier::fromArray(...), 'fetching supplier');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['supplier'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return Supplier::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Supplier
+    {
+        return $this->get($id) ?? throw $this->notFound("/suppliers/{$id}");
     }
 
     /**
@@ -121,7 +135,7 @@ final class SuppliersApi extends AbstractApi
 
         $created = $data['supplier'] ?? null;
 
-        if (!\is_array($created)) {
+        if (!self::isRecord($created)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when creating supplier.');
         }
 
@@ -135,17 +149,38 @@ final class SuppliersApi extends AbstractApi
         $data = $this->putJson("/suppliers/{$id}", $payload);
 
         $row = $data['supplier'] ?? null;
-        if (!\is_array($row)) {
+        if (!self::isRecord($row)) {
             throw new UnexpectedResponseException('Unexpected response from Billomat when updating supplier.');
         }
 
         return Supplier::fromArray($row);
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/suppliers/{$id}");
+    }
 
-        return true;
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /suppliers/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/suppliers/{$id}", 'supplier');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /suppliers/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/suppliers/{$id}", 'supplier', $value);
     }
 }

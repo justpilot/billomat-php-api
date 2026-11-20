@@ -10,19 +10,24 @@ use Justpilot\Billomat\Api\RecurringItemCreateOptions;
 use Justpilot\Billomat\Api\RecurringsApi;
 use Justpilot\Billomat\Api\RecurringUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Model\RecurringItem;
+use Justpilot\Billomat\Model\TaxSummary;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -34,21 +39,24 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(RecurringAction::class)]
 #[CoversClass(RecurringCycle::class)]
 #[UsesClass(RecurringItemCreateOptions::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(RecurringItem::class)]
+#[UsesClass(Money::class)]
 final class RecurringsApiTest extends TestCase
 {
     #[Test]
     public function itListsRecurringsAndPassesFilters(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'recurrings' => [
@@ -76,7 +84,7 @@ final class RecurringsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $recurrings = $api->list(['client_id' => 5, 'cycle' => 'MONTHLY']);
@@ -87,7 +95,7 @@ final class RecurringsApiTest extends TestCase
         self::assertSame(RecurringCycle::MONTHLY, $recurrings[0]->cycle);
         self::assertSame(RecurringAction::EMAIL, $recurrings[0]->action);
 
-        $parts = parse_url((string) $captured['url']);
+        $parts = parse_url($captured->url);
         self::assertSame('/api/recurrings', $parts['path'] ?? null);
     }
 
@@ -102,7 +110,7 @@ final class RecurringsApiTest extends TestCase
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $recurrings = $api->list();
@@ -115,7 +123,7 @@ final class RecurringsApiTest extends TestCase
     {
         $mock = new MockHttpClient([new MockResponse('', ['http_code' => 404])]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         self::assertNull($api->get(999));
@@ -137,19 +145,19 @@ final class RecurringsApiTest extends TestCase
                     'next_creation_date' => '2026-07-01',
                     'taxes' => [
                         'tax' => [
-                            ['name' => 'MwSt', 'rate' => 19.0, 'amount' => 19.0],
+                            ['name' => 'MwSt', 'rate' => 19.0, 'amount' => '19'],
                         ],
                     ],
                     'recurring-items' => [
                         'recurring-item' => [
-                            ['id' => 100, 'recurring_id' => 42, 'quantity' => 1.0, 'unit_price' => 100.0, 'title' => 'Hosting Basic'],
+                            ['id' => 100, 'recurring_id' => 42, 'quantity' => 1.0, 'unit_price' => '100', 'title' => 'Hosting Basic'],
                         ],
                     ],
                 ],
             ], JSON_THROW_ON_ERROR), ['http_code' => 200]),
         ]);
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
         $recurring = $api->get(42);
@@ -167,10 +175,10 @@ final class RecurringsApiTest extends TestCase
     #[Test]
     public function createPostsRecurringWithEmbeddedItemsAndHydratesResponse(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'recurring' => [
@@ -187,42 +195,44 @@ final class RecurringsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
-        $opts = new RecurringCreateOptions(clientId: 5);
-        $opts->name = 'Hosting';
-        $opts->cycle = RecurringCycle::MONTHLY;
-        $opts->cycleNumber = 1;
-        $opts->action = RecurringAction::EMAIL;
-        $opts->startDate = new DateTimeImmutable('2026-07-01');
-        $opts->addItem(new RecurringItemCreateOptions(quantity: 1.0, unitPrice: 100.0));
+        $opts = new RecurringCreateOptions(
+            clientId: 5,
+            name: 'Hosting',
+            action: RecurringAction::EMAIL,
+            cycleNumber: 1,
+            cycle: RecurringCycle::MONTHLY,
+            startDate: new DateTimeImmutable('2026-07-01'),
+            items: [
+                new RecurringItemCreateOptions(quantity: 1.0, unitPrice: Money::of('100')),
+            ],
+        );
 
         $recurring = $api->create($opts);
 
         self::assertSame(99, $recurring->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/recurrings', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/recurrings', $captured->url);
 
-        $payload = $this->extractJsonPayload($captured['options']);
-        self::assertIsArray($payload);
-        $inner = $payload['recurring'];
+        $inner = $captured->jsonArray('recurring');
         self::assertSame(5, $inner['client_id']);
         self::assertSame('Hosting', $inner['name']);
         self::assertSame('MONTHLY', $inner['cycle']);
         self::assertSame('EMAIL', $inner['action']);
         self::assertSame('2026-07-01', $inner['start_date']);
-        self::assertCount(1, $inner['recurring-items']['recurring-item']);
-        self::assertSame(1.0, $inner['recurring-items']['recurring-item'][0]['quantity']);
+        self::assertCount(1, $captured->jsonArray('recurring', 'recurring-items', 'recurring-item'));
+        self::assertSame(1.0, $captured->jsonAt('recurring', 'recurring-items', 'recurring-item', 0, 'quantity'));
     }
 
     #[Test]
     public function updateSendsPutAndRetainsClearingItemsFromPayload(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'recurring' => [
@@ -236,60 +246,37 @@ final class RecurringsApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
-        $opts = new RecurringUpdateOptions();
-        $opts->name = 'Hosting Updated';
+        $opts = new RecurringUpdateOptions(name: 'Hosting Updated');
 
         $recurring = $api->update(42, $opts);
 
         self::assertSame('Hosting Updated', $recurring->name);
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/recurrings/42', $captured['url']);
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/recurrings/42', $captured->url);
 
-        $payload = $this->extractJsonPayload($captured['options']);
-        self::assertIsArray($payload);
-        self::assertArrayNotHasKey('recurring-items', $payload['recurring']);
-        self::assertSame('Hosting Updated', $payload['recurring']['name']);
+        self::assertArrayNotHasKey('recurring-items', $captured->jsonArray('recurring'));
+        self::assertSame('Hosting Updated', $captured->jsonAt('recurring', 'name'));
     }
 
     #[Test]
     public function deleteSendsDeleteRequest(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new RecurringsApi($http);
 
-        self::assertTrue($api->delete(99));
-        self::assertSame('DELETE', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/recurrings/99', $captured['url']);
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
+        $api->delete(99);
+        self::assertSame('DELETE', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/recurrings/99', $captured->url);
     }
 }

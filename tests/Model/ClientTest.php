@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Model\Enum\PaymentType;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -14,6 +17,8 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Client::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
+#[UsesClass(ListCaster::class)]
 final class ClientTest extends TestCase
 {
     #[Test]
@@ -64,8 +69,8 @@ final class ClientTest extends TestCase
         self::assertSame('DE89370400440532013000', $client->bankIban);
         self::assertInstanceOf(DateTimeImmutable::class, $client->sepaMandateDate);
         self::assertSame('2023-12-01', $client->sepaMandateDate->format('Y-m-d'));
-        self::assertSame('BANK_TRANSFER,CASH', $client->defaultPaymentTypes);
-        self::assertSame(11900.0, $client->revenueGross);
+        self::assertSame([PaymentType::BANK_TRANSFER, PaymentType::CASH], $client->defaultPaymentTypes);
+        self::assertSame('11900', $client->revenueGross?->toString());
     }
 
     #[Test]

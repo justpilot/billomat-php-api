@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\InvoiceTag;
 use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
@@ -15,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(InvoiceTag::class)]
 #[CoversClass(InvoiceTagCloudEntry::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 final class InvoiceTagTest extends TestCase
 {
     #[Test]
@@ -39,11 +41,17 @@ final class InvoiceTagTest extends TestCase
     }
 
     #[Test]
-    public function cloudEntryDefaultsCountToZero(): void
+    public function cloudEntryRejectsMissingCount(): void
     {
-        $entry = InvoiceTagCloudEntry::fromArray(['name' => 'foo']);
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('InvoiceTagCloudEntry without a valid "count" field');
 
-        self::assertSame(0, $entry->count);
-        self::assertNull($entry->id);
+        InvoiceTagCloudEntry::fromArray(['name' => 'foo']);
+    }
+
+    #[Test]
+    public function cloudEntryWithoutIdHasNullId(): void
+    {
+        self::assertNull(InvoiceTagCloudEntry::fromArray(['name' => 'foo', 'count' => '2'])->id);
     }
 }

@@ -7,15 +7,22 @@ namespace Justpilot\Billomat\Tests\Integration\Invoices;
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
+use Justpilot\Billomat\Api\InvoiceFilter;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
+use Justpilot\Billomat\Api\OrderBy;
+use Justpilot\Billomat\Api\TemplateFilter;
+use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoiceGroup;
+use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Model\Template;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
-use RuntimeException;
 
 #[CoversNothing]
 final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
@@ -28,53 +35,51 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $invoices = $billomat->invoices->list(['per_page' => 1]);
 
         if ([] !== $invoices) {
-            return $invoices[0]->id;
+            $id = $invoices[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         // Falls keine Rechnung existiert → Client & Rechnung anlegen und abschließen
         $faker = $this->faker();
 
         // 1) Client anlegen
-        $clientOptions = new ClientCreateOptions();
-
-        $clientOptions->name = $faker->company();
-        $clientOptions->email = $faker->unique()->safeEmail();
-        $clientOptions->countryCode = 'DE';
+        $clientOptions = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $client = $billomat->clients->create($clientOptions);
         $clientId = $client->id;
 
         // 2) Draft-Rechnung anlegen
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'PDF-Test '.date('d.m.Y H:i:s');
-        $invoiceOpts->label = 'Integrationstest Invoice PDF';
-        $invoiceOpts->note = 'Erstellt durch automatisierten Integrationstest für PDF.';
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $clientId,
+            title: 'PDF-Test '.date('d.m.Y H:i:s'),
+            label: 'Integrationstest Invoice PDF',
+            note: 'Erstellt durch automatisierten Integrationstest für PDF.',
+            currencyCode: 'EUR',
+        );
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'PDF Testposition',
+            description: 'Position für PDF-Test',
         );
-        $item->title = 'PDF Testposition';
-        $item->description = 'Position für PDF-Test';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
-
-        if (null === $draft->id) {
-            throw new RuntimeException('Failed to create draft invoice for PDF integration test.');
-        }
 
         $draftId = $draft->id;
 
         // 3) Abschließen – hier wird in der Regel das PDF erzeugt
-        $completed = $billomat->invoices->complete($draftId);
-        if (!$completed) {
-            throw new RuntimeException('Failed to complete invoice for PDF integration test.');
-        }
+        $billomat->invoices->complete($draftId);
 
         return $draftId;
     }
@@ -91,7 +96,6 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $invoices) {
             $first = $invoices[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
             self::assertInstanceOf(InvoiceStatus::class, $first->status);
         }
@@ -109,9 +113,43 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] !== $invoices) {
             $first = $invoices[0];
-            self::assertNotNull($first->id);
             self::assertIsInt($first->clientId);
             self::assertInstanceOf(InvoiceStatus::class, $first->status);
+        }
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function canListInvoicesWithTypedFilter(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $statuses = [InvoiceStatus::DRAFT, InvoiceStatus::OPEN, InvoiceStatus::PAID];
+        $from = new DateTimeImmutable('2000-01-01');
+
+        // Mehrfach-Status und geschachtelte Sortierung gehen kommasepariert an Billomat.
+        $invoices = $billomat->invoices->list(new InvoiceFilter(
+            status: $statuses,
+            from: $from,
+            orderBy: OrderBy::desc('date')->thenAsc('id'),
+            perPage: 20,
+        ));
+
+        self::assertContainsOnlyInstancesOf(Invoice::class, $invoices);
+        $previous = null;
+        foreach ($invoices as $invoice) {
+            self::assertContains($invoice->status, $statuses);
+            self::assertNotNull($invoice->date);
+            self::assertGreaterThanOrEqual($from, $invoice->date);
+            if ($previous instanceof DateTimeImmutable) {
+                self::assertLessThanOrEqual($previous, $invoice->date, 'Rechnungen sind nicht absteigend nach Datum sortiert.');
+            }
+            $previous = $invoice->date;
+        }
+
+        // Ein Status, den keine der gelisteten Rechnungen hat, liefert eine disjunkte Menge.
+        $canceled = $billomat->invoices->list(new InvoiceFilter(status: [InvoiceStatus::CANCELED], perPage: 20));
+        foreach ($canceled as $invoice) {
+            self::assertSame(InvoiceStatus::CANCELED, $invoice->status);
         }
     }
 
@@ -127,15 +165,13 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         if ([] === $clients) {
             // Fallback: Minimalen Client erstellen, falls noch keiner existiert
-            $clientOptions = new ClientCreateOptions();
-
-            $clientOptions->name = $faker->company();
-            $clientOptions->email = $faker->unique()->safeEmail();
-            $clientOptions->countryCode = 'DE';
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+                countryCode: 'DE',
+                email: $faker->unique()->safeEmail(),
+            );
 
             $createdClient = $billomat->clients->create($clientOptions);
-
-            self::assertNotNull($createdClient->id);
 
             $clientId = $createdClient->id;
         } else {
@@ -149,30 +185,28 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $invoiceOpts = new InvoiceCreateOptions(
             clientId: $clientId,
+            date: $today,
+            title: 'Integrationstest-Rechnung',
+            label: 'Leistungen Integrationstest',
+            note: 'Erstellt durch automatisierten Integrationstest.',
+            currencyCode: 'EUR',
         );
-
-        $invoiceOpts->date = $today;
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Integrationstest-Rechnung';
-        $invoiceOpts->label = 'Leistungen Integrationstest';
-        $invoiceOpts->note = 'Erstellt durch automatisierten Integrationstest.';
 
         // 3) Eine simple Position hinzufügen
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: 40.0,
+            unitPrice: Money::of('40'),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition',
+            description: 'Automatisch generierte Testposition',
         );
-        $item->title = 'Testposition';
-        $item->description = 'Automatisch generierte Testposition';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         // 4) Rechnung in der Sandbox erstellen (Draft)
         $invoice = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($invoice->id);
         self::assertGreaterThan(0, $invoice->id);
         self::assertSame($clientId, $invoice->clientId);
 
@@ -181,7 +215,7 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         // Rechnungsdatum prüfen, wenn vom Server zurückgegeben
         if ($invoice->date instanceof DateTimeImmutable) {
-            self::assertSame($invoiceOpts->date->format('Y-m-d'), $invoice->date->format('Y-m-d'));
+            self::assertSame($today->format('Y-m-d'), $invoice->date->format('Y-m-d'));
         }
 
         // Währung prüfen, wenn zurückgegeben
@@ -195,6 +229,40 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         }
     }
 
+    /**
+     * complete() mit template_id: Billomat übernimmt die Vorlage nur, wenn sie in einem Objekt steckt
+     * ({"invoice": {"template_id": …}}); ein flaches {"template_id": …} würde still ignoriert.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function completeAppliesTheGivenTemplate(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $templates = $billomat->templates->list(new TemplateFilter(type: [TemplateDocumentType::INVOICE]));
+        $nonDefault = array_find($templates, static fn (Template $template): bool => !$template->isDefault);
+        if (null === $nonDefault) {
+            self::markTestSkipped('Die Sandbox braucht eine zweite Rechnungsvorlage neben der Standardvorlage.');
+        }
+
+        $clients = $billomat->clients->list(['per_page' => 1]);
+        if ([] === $clients) {
+            self::markTestSkipped('Die Sandbox braucht mindestens einen Kunden.');
+        }
+
+        $draft = $billomat->invoices->create(
+            new InvoiceCreateOptions(clientId: $clients[0]->id, title: 'Complete mit Vorlage', label: 'Integrationstest complete(templateId)')
+                ->withItem(new InvoiceItemCreateOptions(quantity: 1.0, unitPrice: Money::of('10.00'), title: 'Testposition')),
+        );
+        self::assertNotSame($nonDefault->id, $draft->templateId);
+
+        $billomat->invoices->complete($draft->id, $nonDefault->id);
+
+        $completed = $billomat->invoices->getOrFail($draft->id);
+        self::assertNotSame(InvoiceStatus::DRAFT, $completed->status);
+        self::assertSame($nonDefault->id, $completed->templateId);
+    }
+
     #[Group('integration')]
     #[Test]
     public function canCompleteInvoiceInSandbox(): void
@@ -206,11 +274,11 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] === $clients) {
-            $clientOptions = new ClientCreateOptions();
-
-            $clientOptions->name = $faker->company();
-            $clientOptions->email = $faker->unique()->safeEmail();
-            $clientOptions->countryCode = 'DE';
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+                countryCode: 'DE',
+                email: $faker->unique()->safeEmail(),
+            );
 
             $createdClient = $billomat->clients->create($clientOptions);
             $clientId = $createdClient->id;
@@ -223,37 +291,36 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // 2) Draft-Rechnung erstellen
         $today = new DateTimeImmutable('today');
 
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->date = $today;
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Completion-Test '.date('d.m.Y H:i:s');
-        $invoiceOpts->label = 'Integrationstest Invoice Complete';
-        $invoiceOpts->note = 'Erstellt durch automatisierten Integrationstest für complete().';
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $clientId,
+            date: $today,
+            title: 'Completion-Test '.date('d.m.Y H:i:s'),
+            label: 'Integrationstest Invoice Complete',
+            note: 'Erstellt durch automatisierten Integrationstest für complete().',
+            currencyCode: 'EUR',
+        );
 
-        $unitPrice = $faker->randomFloat(2, 20, 100);
+        $unitPrice = Money::of((string) $faker->randomFloat(2, 20, 100));
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
             unitPrice: $unitPrice,
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition Completion',
+            description: 'Position für Completion-Flow',
         );
-        $item->title = 'Testposition Completion';
-        $item->description = 'Position für Completion-Flow';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($draft->id);
         self::assertGreaterThan(0, $draft->id);
 
         $draftId = $draft->id;
 
         // 3) Rechnung abschließen (ohne template_id, damit Defaults greifen)
-        $result = $billomat->invoices->complete($draftId);
-
-        self::assertTrue($result);
+        $billomat->invoices->complete($draftId);
 
         // 4) Invoice neu laden und prüfen
         $completed = $billomat->invoices->get($draftId);
@@ -281,11 +348,11 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] === $clients) {
-            $clientOptions = new ClientCreateOptions();
-
-            $clientOptions->name = $faker->company();
-            $clientOptions->email = $faker->unique()->safeEmail();
-            $clientOptions->countryCode = 'DE';
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+                countryCode: 'DE',
+                email: $faker->unique()->safeEmail(),
+            );
 
             $createdClient = $billomat->clients->create($clientOptions);
             $clientId = $createdClient->id;
@@ -296,32 +363,31 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($clientId);
 
         // 2) Draft-Rechnung erstellen
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Delete-Test '.date('d.m.Y H:i:s');
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $clientId,
+            title: 'Delete-Test '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        );
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition Delete',
+            description: 'Position für Delete-Flow',
         );
-        $item->title = 'Testposition Delete';
-        $item->description = 'Position für Delete-Flow';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
 
-        self::assertNotNull($draft->id);
         self::assertSame(InvoiceStatus::DRAFT, $draft->status);
 
         $draftId = $draft->id;
 
         // 3) Löschen
-        $result = $billomat->invoices->delete($draftId);
-
-        self::assertTrue($result);
+        $billomat->invoices->delete($draftId);
 
         // 4) Nachprüfen, dass sie weg ist
         $deleted = $billomat->invoices->get($draftId);
@@ -340,11 +406,11 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] === $clients) {
-            $clientOptions = new ClientCreateOptions();
-
-            $clientOptions->name = $faker->company();
-            $clientOptions->email = $faker->unique()->safeEmail();
-            $clientOptions->countryCode = 'DE';
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+                countryCode: 'DE',
+                email: $faker->unique()->safeEmail(),
+            );
 
             $createdClient = $billomat->clients->create($clientOptions);
             $clientId = $createdClient->id;
@@ -355,44 +421,42 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($clientId);
 
         // 2) Draft-Rechnung erstellen
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Cancel-Test '.date('d.m.Y H:i:s');
-        $invoiceOpts->label = 'Integrationstest Invoice Cancel';
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $clientId,
+            title: 'Cancel-Test '.date('d.m.Y H:i:s'),
+            label: 'Integrationstest Invoice Cancel',
+            currencyCode: 'EUR',
+        );
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition Cancel',
+            description: 'Position für Cancel-Flow',
         );
-        $item->title = 'Testposition Cancel';
-        $item->description = 'Position für Cancel-Flow';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
-
-        self::assertNotNull($draft->id);
 
         $draftId = $draft->id;
 
         // 3) Rechnung zuerst abschließen (cancel geht i.d.R. nur auf nicht-DRAFT)
-        $completedResult = $billomat->invoices->complete($draftId);
-        self::assertTrue($completedResult);
+        $billomat->invoices->complete($draftId);
 
         $completed = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $completed);
 
         // 4) Stornieren
-        $cancelResult = $billomat->invoices->cancel($draftId);
-        self::assertTrue($cancelResult);
+        $billomat->invoices->cancel($draftId);
 
         $cancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $cancelled);
 
         // je nach Billomat: "CANCELED"
-        $this->assertContains(
+        self::assertContains(
             $cancelled->status,
             [InvoiceStatus::CANCELED],
             'Invoice status after cancel() should be CANCELED.'
@@ -410,11 +474,11 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] === $clients) {
-            $clientOptions = new ClientCreateOptions();
-
-            $clientOptions->name = $faker->company();
-            $clientOptions->email = $faker->unique()->safeEmail();
-            $clientOptions->countryCode = 'DE';
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+                countryCode: 'DE',
+                email: $faker->unique()->safeEmail(),
+            );
 
             $createdClient = $billomat->clients->create($clientOptions);
             $clientId = $createdClient->id;
@@ -425,53 +489,50 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertNotNull($clientId);
 
         // 2) Draft-Rechnung erstellen
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Uncancel-Test '.date('d.m.Y H:i:s');
-        $invoiceOpts->label = 'Integrationstest Invoice Uncancel';
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $clientId,
+            title: 'Uncancel-Test '.date('d.m.Y H:i:s'),
+            label: 'Integrationstest Invoice Uncancel',
+            currencyCode: 'EUR',
+        );
 
         $item = new InvoiceItemCreateOptions(
             quantity: 1.0,
-            unitPrice: $faker->randomFloat(2, 20, 100),
+            unitPrice: Money::of((string) $faker->randomFloat(2, 20, 100)),
+            unit: 'Stück',
+            taxRate: 19.0,
+            title: 'Testposition Uncancel',
+            description: 'Position für Uncancel-Flow',
         );
-        $item->title = 'Testposition Uncancel';
-        $item->description = 'Position für Uncancel-Flow';
-        $item->unit = 'Stück';
-        $item->taxRate = 19.0;
 
-        $invoiceOpts->addItem($item);
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
-
-        self::assertNotNull($draft->id);
 
         $draftId = $draft->id;
 
         // 3) Abschließen
-        $completedResult = $billomat->invoices->complete($draftId);
-        self::assertTrue($completedResult);
+        $billomat->invoices->complete($draftId);
 
         // 4) Stornieren
-        $cancelResult = $billomat->invoices->cancel($draftId);
-        self::assertTrue($cancelResult);
+        $billomat->invoices->cancel($draftId);
 
         $cancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $cancelled);
-        $this->assertContains(
+        self::assertContains(
             $cancelled->status,
             [InvoiceStatus::CANCELED],
             'Invoice status after cancel() should be CANCELED.'
         );
 
         // 5) Stornierung zurücknehmen
-        $uncancelResult = $billomat->invoices->uncancel($draftId);
-        self::assertTrue($uncancelResult);
+        $billomat->invoices->uncancel($draftId);
 
         $uncancelled = $billomat->invoices->get($draftId);
         self::assertInstanceOf(Invoice::class, $uncancelled);
 
         // Status sollte nicht mehr CANCELED sein
-        $this->assertNotContains(
+        self::assertNotContains(
             $uncancelled->status,
             [InvoiceStatus::CANCELED],
             'Invoice status after uncancel() should no longer be CANCELED.'
@@ -485,14 +546,28 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $invoiceId = $this->ensureInvoiceId();
 
-        $binary = $billomat->invoices->pdf(
-            id: $invoiceId,
-            rawPdf: true,
-        );
+        $binary = $billomat->invoices->pdfContent(id: $invoiceId);
 
         self::assertIsString($binary);
         self::assertNotSame('', $binary);
         self::assertStringContainsString('PDF', $binary);
+    }
+
+    #[Group('integration')]
+    #[Test]
+    public function canFetchInvoicePdfFromSandboxAsJson(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+        $invoiceId = $this->ensureInvoiceId();
+
+        $pdf = $billomat->invoices->pdf($invoiceId);
+
+        self::assertSame($invoiceId, $pdf->documentId);
+        self::assertSame('application/pdf', $pdf->mimeType);
+        self::assertStringEndsWith('.pdf', $pdf->filename);
+        self::assertSame([], $pdf->extra);
+        self::assertStringStartsWith('%PDF-', $pdf->getBinary());
+        self::assertSame(\strlen($pdf->getBinary()), $pdf->fileSize);
     }
 
     #[Group('integration')]
@@ -505,31 +580,37 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
         // Minimal: wir erzeugen Draft wie in create-test
         $clients = $billomat->clients->list(['per_page' => 1]);
         if ([] === $clients) {
-            $clientOptions = new ClientCreateOptions(name: $faker->company());
-            $clientOptions->email = $faker->unique()->safeEmail();
-            $clientOptions->countryCode = 'DE';
+            $clientOptions = new ClientCreateOptions(
+                name: $faker->company(),
+                countryCode: 'DE',
+                email: $faker->unique()->safeEmail(),
+            );
             $createdClient = $billomat->clients->create($clientOptions);
             $clientId = $createdClient->id;
         } else {
+            self::assertNotNull($clients[0]->id);
             $clientId = $clients[0]->id;
         }
 
-        $invoiceOpts = new InvoiceCreateOptions(clientId: $clientId);
-        $invoiceOpts->currencyCode = 'EUR';
-        $invoiceOpts->title = 'Update-Draft-Test '.date('d.m.Y H:i:s');
+        $invoiceOpts = new InvoiceCreateOptions(
+            clientId: $clientId,
+            title: 'Update-Draft-Test '.date('d.m.Y H:i:s'),
+            currencyCode: 'EUR',
+        );
 
-        $item = new InvoiceItemCreateOptions(1.0, $faker->randomFloat(2, 10, 50));
-        $item->title = 'Update Draft Position';
-        $invoiceOpts->addItem($item);
+        $item = new InvoiceItemCreateOptions(
+            1.0,
+            Money::of((string) $faker->randomFloat(2, 10, 50)),
+            title: 'Update Draft Position',
+        );
+        $invoiceOpts = $invoiceOpts->withItem($item);
 
         $draft = $billomat->invoices->create($invoiceOpts);
-        self::assertNotNull($draft->id);
 
         // Draft bearbeiten: date ändern
         $newDate = new DateTimeImmutable('today');
 
-        $update = new InvoiceUpdateOptions();
-        $update->date = $newDate;
+        $update = new InvoiceUpdateOptions(date: $newDate);
 
         $updated = $billomat->invoices->update($draft->id, $update);
 
@@ -538,6 +619,38 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         // optional: nochmal neu holen
         $fetched = $billomat->invoices->get($draft->id);
+        self::assertNotNull($fetched);
         self::assertSame($newDate->format('Y-m-d'), $fetched->date?->format('Y-m-d'));
+    }
+
+    /**
+     * Jeder group_by-Wert liefert Gruppen mit Summen; das passende Identifier-Feld ist gesetzt,
+     * nur die Gruppe ohne Datum (Entwürfe) hat bei Zeit-Gruppierungen null.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function listGroupedReturnsGroupsForEveryGroupBy(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        foreach (InvoiceGroupBy::cases() as $groupBy) {
+            $groups = $billomat->invoices->listGrouped($groupBy);
+            self::assertNotSame([], $groups, $groupBy->value);
+
+            $identifiers = array_map(static fn (InvoiceGroup $group): mixed => match ($groupBy) {
+                InvoiceGroupBy::CLIENT => $group->clientId,
+                InvoiceGroupBy::STATUS => $group->status,
+                InvoiceGroupBy::DAY => $group->day,
+                InvoiceGroupBy::WEEK => $group->week,
+                InvoiceGroupBy::MONTH => $group->month,
+                InvoiceGroupBy::YEAR => $group->year,
+            }, $groups);
+
+            self::assertNotSame([], array_filter($identifiers, static fn (mixed $value): bool => null !== $value), $groupBy->value);
+            foreach ($groups as $group) {
+                self::assertNotNull($group->totalGross, $groupBy->value);
+                self::assertSame([], $group->extra, $groupBy->value);
+            }
+        }
     }
 }

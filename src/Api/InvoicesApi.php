@@ -7,14 +7,22 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 use Justpilot\Billomat\Model\Enum\InvoiceGroupBy;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Invoice;
+use Justpilot\Billomat\Model\InvoiceComment;
 use Justpilot\Billomat\Model\InvoiceGroup;
-use Justpilot\Billomat\Model\InvoicePdf;
+use Justpilot\Billomat\Model\InvoiceItem;
+use Justpilot\Billomat\Model\InvoicePayment;
+use Justpilot\Billomat\Model\InvoiceTag;
+use Justpilot\Billomat\Model\InvoiceTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Invoices-Ressource.
@@ -26,15 +34,52 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 final class InvoicesApi extends AbstractApi
 {
     /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<InvoiceItem, InvoiceItemCreateOptions, InvoiceItemUpdateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'invoice', InvoiceItem::fromArray(...), InvoiceItemCreateOptions::class, InvoiceItemUpdateOptions::class);
+    }
+
+    /**
+     * Zahlungen, siehe {@see PaymentsApi}.
+     *
+     * @var PaymentsApi<InvoicePayment, InvoicePaymentCreateOptions, InvoicePaymentFilter>
+     */
+    public private(set) PaymentsApi $payments {
+        get => $this->payments ??= new PaymentsApi($this->http, 'invoice', InvoicePayment::fromArray(...), InvoicePaymentCreateOptions::class, InvoicePaymentFilter::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<InvoiceComment, InvoiceCommentCreateOptions, InvoiceCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'invoice', InvoiceComment::fromArray(...), InvoiceCommentCreateOptions::class, InvoiceCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<InvoiceTag, InvoiceTagCloudEntry, InvoiceTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'invoice', InvoiceTag::fromArray(...), InvoiceTagCloudEntry::fromArray(...), InvoiceTagCreateOptions::class);
+    }
+
+    /**
      * Listet Rechnungen mit optionalen Filtern.
      *
      * Entspricht GET /invoices
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Invoice>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(InvoiceFilter|array $filters = []): array
     {
         return $this->listResource('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters);
     }
@@ -46,11 +91,12 @@ final class InvoicesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Invoice>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(InvoiceFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters);
     }
@@ -63,11 +109,12 @@ final class InvoicesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Invoice>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(InvoiceFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/invoices', 'invoices', 'invoice', Invoice::fromArray(...), $filters, $pageSize);
     }
@@ -80,21 +127,66 @@ final class InvoicesApi extends AbstractApi
      * Mehrere Werte werden in der Reihenfolge der Aggregation als CSV gesendet
      * ("client,year" gruppiert zuerst nach Kunde, dann nach Jahr).
      *
-     * @param InvoiceGroupBy|non-empty-list<InvoiceGroupBy> $groupBy
-     * @param array<string, scalar|array|null>              $filters optionale zusätzliche Filter (analog zu list())
+     * @param InvoiceGroupBy|non-empty-list<InvoiceGroupBy>               $groupBy
+     * @param InvoiceFilter|array<string, scalar|array<scalar|null>|null> $filters optionale zusätzliche Filter (analog zu list())
      *
      * @return list<InvoiceGroup>
      */
-    public function listGrouped(InvoiceGroupBy|array $groupBy, array $filters = []): array
+    #[NoDiscard]
+    public function listGrouped(InvoiceGroupBy|array $groupBy, InvoiceFilter|array $filters = []): array
     {
         $values = \is_array($groupBy) ? $groupBy : [$groupBy];
 
         $csv = implode(',', array_map(static fn (InvoiceGroupBy $g): string => $g->value, $values));
 
-        $query = $filters;
+        $query = self::filterQuery($filters);
         $query['group_by'] = $csv;
 
         return $this->listResource('/invoices', 'invoice-groups', 'invoice-group', InvoiceGroup::fromArray(...), $query);
+    }
+
+    /**
+     * Holt einen Rechnungsentwurf mit den Vorgaben, die Billomat aus einer Quelle übernimmt
+     * (GET /invoices/preset), als Create-Options zum Anpassen und Anlegen.
+     *
+     * Quelle ist ein Kunde, ein Angebot, eine Auftragsbestätigung, ein Lieferschein, eine
+     * Rechnung (ergibt eine Korrekturrechnung) oder eine Abo-Rechnung. Billomat dokumentiert
+     * nur `confirmation_id`; die übrigen Quellen funktionieren in der Sandbox, sind aber
+     * undokumentiert und können ohne Ankündigung wegfallen (dann HTTP 400). Billomat übernimmt
+     * Kunde, Adresse, Texte, Vorlage, Zahlungsziel usw., aber **keine Positionen**, auch
+     * nicht beim Anlegen; die überträgt der Aufrufer selbst (z. B. mit {@see ItemsApi::list()}
+     * auf der Quelle und withItem()):
+     *
+     *     $options = $billomat->invoices->preset(confirmationId: 550206);
+     *     $invoice = $billomat->invoices->create($options->withDate(new DateTimeImmutable()));
+     *
+     * Ohne Quelle antwortet Billomat mit HTTP 400 („Neither client nor supplier was set“),
+     * ebenso bei einer ID, die es nicht gibt.
+     *
+     * @throws ValidationException         wenn keine Quelle gesetzt ist oder es sie nicht gibt
+     * @throws UnexpectedResponseException wenn der Entwurf keinen Kunden enthält
+     */
+    #[NoDiscard]
+    public function preset(
+        ?int $clientId = null,
+        ?int $offerId = null,
+        ?int $confirmationId = null,
+        ?int $deliveryNoteId = null,
+        ?int $invoiceId = null,
+        ?int $recurringId = null,
+    ): InvoiceCreateOptions {
+        $query = array_filter([
+            'client_id' => $clientId,
+            'offer_id' => $offerId,
+            'confirmation_id' => $confirmationId,
+            'delivery_note_id' => $deliveryNoteId,
+            'invoice_id' => $invoiceId,
+            'recurring_id' => $recurringId,
+        ], static fn (?int $id): bool => null !== $id);
+
+        $data = $this->getJson('/invoices/preset', $query);
+
+        return InvoiceCreateOptions::fromArray($this->unwrapEnvelope($data, 'invoice', 'fetching invoice preset'));
     }
 
     /**
@@ -102,21 +194,21 @@ final class InvoicesApi extends AbstractApi
      *
      * Entspricht GET /invoices/{id}
      */
+    #[NoDiscard]
     public function get(int $id): ?Invoice
     {
-        $data = $this->getJsonOrNull("/invoices/{$id}");
+        return $this->getResource("/invoices/{$id}", 'invoice', Invoice::fromArray(...), 'fetching invoice');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $invoiceData = $data['invoice'] ?? null;
-
-        if (!\is_array($invoiceData)) {
-            return null;
-        }
-
-        return Invoice::fromArray($invoiceData);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Invoice
+    {
+        return $this->get($id) ?? throw $this->notFound("/invoices/{$id}");
     }
 
     /**
@@ -173,21 +265,19 @@ final class InvoicesApi extends AbstractApi
      * @param int      $id         ID der Rechnung
      * @param int|null $templateId Optionale ID der Vorlage für die PDF-Erzeugung
      */
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
         if (null !== $templateId) {
-            // laut Doku: optionaler Parameter template_id
-            // Wir senden ihn im invoice-Block
+            // In der Sandbox geprüft: Billomat liest template_id aus dem ersten Objekt, der Schlüssel ist egal
+            // ({"invoice": …} wie {"complete": …}); ein flaches {"template_id": …} wird still ignoriert.
             $body['template_id'] = $templateId;
         }
 
         $payload = ['invoice' => $body];
 
         $this->putVoid("/invoices/{$id}/complete", $payload);
-
-        return true;
     }
 
     /**
@@ -197,39 +287,29 @@ final class InvoicesApi extends AbstractApi
      *
      * @throws ValidationException wenn die Rechnung nicht DRAFT ist
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/invoices/{$id}");
-
-        return true;
     }
 
     /**
      * Markiert eine Rechnung als storniert.
      *
      * Entspricht PUT /invoices/{id}/cancel
-     *
-     * @return bool true bei Erfolg
      */
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/invoices/{$id}/cancel");
-
-        return true;
     }
 
     /**
      * Hebt die Stornierung einer Rechnung wieder auf.
      *
      * Entspricht PUT /invoices/{id}/uncancel
-     *
-     * @return bool true bei Erfolg
      */
-    public function uncancel(int $id): bool
+    public function uncancel(int $id): void
     {
         $this->putVoid("/invoices/{$id}/uncancel");
-
-        return true;
     }
 
     /**
@@ -241,13 +321,11 @@ final class InvoicesApi extends AbstractApi
      * (Absender aus den Settings, Empfänger aus den Kunden-Stammdaten,
      * Default-Subject/Body, PDF als Anhang).
      */
-    public function email(int $id, ?InvoiceEmailOptions $options = null): bool
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postVoid("/invoices/{$id}/email", $payload);
-
-        return true;
     }
 
     /**
@@ -257,13 +335,11 @@ final class InvoicesApi extends AbstractApi
      *
      * ⚠️ Kostenpflichtige Aktion.
      */
-    public function mail(int $id, ?InvoiceMailOptions $options = null): bool
+    public function mail(int $id, ?MailOptions $options = null): void
     {
         $payload = ['mail' => $options?->toArray() ?? []];
 
         $this->postVoid("/invoices/{$id}/mail", $payload);
-
-        return true;
     }
 
     /**
@@ -273,13 +349,11 @@ final class InvoicesApi extends AbstractApi
      *
      * @param string $base64Pdf base64-codierter PDF-Inhalt der unterschriebenen Rechnung
      */
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/invoices/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**
@@ -289,54 +363,56 @@ final class InvoicesApi extends AbstractApi
      *
      * Voraussetzungen laut Billomat: Rechnung muss OPEN oder OVERDUE sein.
      */
-    public function encash(int $id): bool
+    public function encash(int $id): void
     {
         $this->putVoid("/invoices/{$id}/encash");
-
-        return true;
     }
 
     /**
-     * Ruft das PDF einer Rechnung ab.
+     * Ruft das PDF einer Rechnung als JSON ab (Metadaten und base64-kodierter Inhalt).
      *
-     * Entspricht GET /invoices/{id}/pdf
-     *
-     * - Optionaler Typ:
-     *   - InvoicePdfType::SIGNED → type=signed
-     *   - InvoicePdfType::PRINT  → type=print
-     *
-     * - Raw-PDF-Modus:
-     *   - $rawPdf = true → format=pdf, Rückgabe ist der binäre PDF-String
-     *   - $rawPdf = false (Default) → JSON-Response mit base64file, Rückgabe ist InvoicePdf-Model
-     *
-     * @return InvoicePdf|string InvoicePdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
+     * Entspricht GET /invoices/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): InvoicePdf|string
+    #[NoDiscard]
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
-        $query = [];
+        $data = $this->getJson("/invoices/{$id}/pdf", self::pdfQuery($type));
 
-        if ($type instanceof InvoicePdfType) {
-            // Enum → API-String (signed / print)
-            $query['type'] = $type->value;
-        }
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching invoice PDF'));
+    }
 
-        // Raw-PDF-Modus: format=pdf → direkt application/pdf
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
+    /**
+     * Ruft das PDF einer Rechnung als binären Inhalt ab (GET /invoices/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/invoices/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
+    }
 
-            $response = $this->http->request('GET', "/invoices/{$id}/pdf", $query);
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /invoices/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/invoices/{$id}", 'invoice');
+    }
 
-            try {
-                // Binärer PDF-Content
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
-        }
-
-        // Standard-Modus: JSON → { "pdf": { ... } }
-        $data = $this->getJson("/invoices/{$id}/pdf", $query);
-
-        return InvoicePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching invoice PDF'));
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /invoices/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/invoices/{$id}", 'invoice', $value);
     }
 }

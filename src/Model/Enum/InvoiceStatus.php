@@ -6,6 +6,8 @@ namespace Justpilot\Billomat\Model\Enum;
 
 enum InvoiceStatus: string
 {
+    use FromApi;
+
     /** Entwurf */
     case DRAFT = 'DRAFT';
 
@@ -20,18 +22,6 @@ enum InvoiceStatus: string
 
     /** storniert */
     case CANCELED = 'CANCELED';
-
-    /**
-     * Convert raw API string into enum.
-     */
-    public static function fromApi(?string $status): ?self
-    {
-        if (null === $status) {
-            return null;
-        }
-
-        return self::tryFrom($status) ?? null;
-    }
 
     public function label(): string
     {

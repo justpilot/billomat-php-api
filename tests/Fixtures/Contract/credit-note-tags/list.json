@@ -1,0 +1,13 @@
+{
+    "credit-note-tags": {
+        "credit-note-tag": {
+            "id": "35092",
+            "name": "Name 3",
+            "credit_note_id": "1794656",
+            "customfield": ""
+        },
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "1"
+    }
+}

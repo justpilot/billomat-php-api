@@ -6,26 +6,29 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\ActivitiesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Activity;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
-use const PHP_URL_QUERY;
 
 #[CoversClass(ActivitiesApi::class)]
 #[CoversClass(Activity::class)]
 #[CoversClass(Page::class)]
 #[CoversClass(PageInfo::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class ActivitiesApiTest extends TestCase
@@ -33,11 +36,11 @@ final class ActivitiesApiTest extends TestCase
     #[Test]
     public function itListsActivitiesAndHandlesEmptyUserAsSystem(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
 
             $body = json_encode([
                 'activity-feed' => [
@@ -68,14 +71,14 @@ final class ActivitiesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
 
         $activities = new ActivitiesApi($http)->list(['resource' => 'invoices']);
 
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
         self::assertSame(
             'https://mycompany.billomat.net/api/activity-feed?resource=invoices',
-            $captured['url']
+            $captured->url
         );
 
         self::assertCount(2, $activities);
@@ -96,7 +99,7 @@ final class ActivitiesApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $activities = new ActivitiesApi($http)->list();
 
         self::assertSame([], $activities);
@@ -126,7 +129,7 @@ final class ActivitiesApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $page = new ActivitiesApi($http)->listPage(['page' => 2, 'per_page' => 50]);
 
         self::assertSame(2, $page->info->page);
@@ -141,9 +144,7 @@ final class ActivitiesApiTest extends TestCase
         $calls = 0;
         $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$calls): MockResponse {
             ++$calls;
-            $query = parse_url($url, PHP_URL_QUERY) ?? '';
-            parse_str($query, $params);
-            $page = (int) ($params['page'] ?? 1);
+            $page = (int) (CapturedRequest::queryParamOf($url, 'page') ?? 1);
 
             $items = match ($page) {
                 1 => array_fill(0, 100, ['resource' => 'invoices', 'id' => 1, 'date' => '2024-01-01T00:00:00+00:00', 'title' => 't', 'text' => 't', 'user_id' => 1]),
@@ -163,7 +164,7 @@ final class ActivitiesApiTest extends TestCase
             );
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $collected = iterator_to_array(new ActivitiesApi($http)->iterateAll());
 
         self::assertCount(101, $collected);

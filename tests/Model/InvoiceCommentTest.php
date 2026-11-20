@@ -32,8 +32,8 @@ final class InvoiceCommentTest extends TestCase
         self::assertSame(123, $comment->invoiceId);
         self::assertSame(42, $comment->userId);
         self::assertSame('Status auf bezahlt gesetzt.', $comment->comment);
-        self::assertSame(InvoiceCommentActionKey::PAYMENT, $comment->actionkey);
-        self::assertSame('PAYMENT', $comment->actionkeyRaw);
+        self::assertSame(InvoiceCommentActionKey::PAYMENT, $comment->actionKey);
+        self::assertSame('PAYMENT', $comment->actionKeyRaw);
         self::assertNotNull($comment->created);
         self::assertSame('2026-01-15', $comment->created->format('Y-m-d'));
     }
@@ -47,8 +47,8 @@ final class InvoiceCommentTest extends TestCase
             'actionkey' => 'SOMETHING_NEW',
         ]);
 
-        self::assertNull($comment->actionkey);
-        self::assertSame('SOMETHING_NEW', $comment->actionkeyRaw);
+        self::assertNull($comment->actionKey);
+        self::assertSame('SOMETHING_NEW', $comment->actionKeyRaw);
     }
 
     #[Test]
@@ -60,8 +60,8 @@ final class InvoiceCommentTest extends TestCase
             'comment' => 'manuell',
         ]);
 
-        self::assertNull($comment->actionkey);
-        self::assertNull($comment->actionkeyRaw);
+        self::assertNull($comment->actionKey);
+        self::assertNull($comment->actionKeyRaw);
     }
 
     #[Test]

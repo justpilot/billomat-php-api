@@ -4,38 +4,49 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
-use Justpilot\Billomat\Api\ClientPropertyValuesApi;
+use Justpilot\Billomat\Api\ClientsApi;
+use Justpilot\Billomat\Api\PropertyValuesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientPropertyValue;
+use Justpilot\Billomat\Model\Enum\PropertyType;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(ClientPropertyValuesApi::class)]
+#[CoversClass(PropertyValuesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(ClientsApi::class)]
 #[CoversClass(ClientPropertyValueCreateOptions::class)]
 #[CoversClass(ClientPropertyValue::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(ListCaster::class)]
 final class ClientPropertyValuesApiTest extends TestCase
 {
     #[Test]
     public function itListsValuesByClient(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'client-property-values' => [
@@ -48,26 +59,26 @@ final class ClientPropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $api = new ClientPropertyValuesApi(new BillomatHttpClient(
-            $mock,
+        $api = new ClientsApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
-        $values = $api->list(['client_id' => 42]);
+        $values = $api->list(filters: ['client_id' => 42]);
 
         self::assertCount(1, $values);
         self::assertSame('Branche', $values[0]->name);
         self::assertSame('IT', $values[0]->value);
-        self::assertStringContainsString('client_id=42', $captured['url']);
+        self::assertStringContainsString('client_id=42', $captured->url);
     }
 
     #[Test]
     public function itCreatesValue(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'client-property-value' => ['id' => 99, 'client_id' => 42, 'client_property_id' => 7, 'value' => 'Logistik'],
@@ -76,19 +87,18 @@ final class ClientPropertyValuesApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 201]);
         });
 
-        $api = new ClientPropertyValuesApi(new BillomatHttpClient(
-            $mock,
+        $api = new ClientsApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
-        $value = $api->create(new ClientPropertyValueCreateOptions(
-            clientId: 42,
+        $value = $api->create(42, new ClientPropertyValueCreateOptions(
             clientPropertyId: 7,
             value: 'Logistik',
         ));
 
         self::assertSame(99, $value->id);
-        self::assertSame('POST', $captured['method']);
+        self::assertSame('POST', $captured->method);
     }
 
     #[Test]
@@ -104,16 +114,16 @@ final class ClientPropertyValuesApiTest extends TestCase
             return new MockResponse('{"errors":{"error":"resource not found"}}', ['http_code' => 404]);
         });
 
-        $api = new ClientPropertyValuesApi(new BillomatHttpClient(
-            $mock,
+        $api = new ClientsApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
         $value = $api->get(5);
         self::assertNotNull($value);
         self::assertSame(42, $value->clientId);
         self::assertSame(7, $value->clientPropertyId);
-        self::assertSame('CHECKBOX', $value->type);
+        self::assertSame(PropertyType::CHECKBOX, $value->type);
 
         self::assertNull($api->get(6));
     }

@@ -5,41 +5,25 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\Unit;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
- * Read-only API-Wrapper für Einheiten.
+ * API-Wrapper für Einheiten.
  */
 final class UnitsApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Unit>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
-        $data = $this->getJson('/units', $filters);
-
-        $node = $data['units']['unit'] ?? [];
-
-        if (null === $node || [] === $node) {
-            return [];
-        }
-
-        if (\is_array($node) && array_is_list($node)) {
-            $rows = $node;
-        } elseif (\is_array($node)) {
-            $rows = [$node];
-        } else {
-            $rows = [];
-        }
-
-        /** @var list<Unit> $models */
-        $models = array_map(Unit::fromArray(...), $rows);
-
-        return $models;
+        return $this->listResource('/units', 'units', 'unit', Unit::fromArray(...), $filters);
     }
 
     /**
@@ -49,10 +33,11 @@ final class UnitsApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Unit>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage('/units', 'units', 'unit', Unit::fromArray(...), $filters);
@@ -66,28 +51,83 @@ final class UnitsApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Unit>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/units', 'units', 'unit', Unit::fromArray(...), $filters, $pageSize);
     }
 
+    #[NoDiscard]
     public function get(int $id): ?Unit
     {
-        $data = $this->getJsonOrNull("/units/{$id}");
+        return $this->getResource("/units/{$id}", 'unit', Unit::fromArray(...), 'fetching unit');
+    }
 
-        if (null === $data) {
-            return null;
-        }
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Unit
+    {
+        return $this->get($id) ?? throw $this->notFound("/units/{$id}");
+    }
 
-        $row = $data['unit'] ?? null;
-        if (!\is_array($row)) {
-            return null;
-        }
+    /**
+     * Legt eine neue Einheit an.
+     */
+    public function create(UnitCreateOptions $options): Unit
+    {
+        $data = $this->postJson('/units', ['unit' => $options->toArray()]);
 
-        return Unit::fromArray($row);
+        return Unit::fromArray($this->unwrapEnvelope($data, 'unit', 'creating unit'));
+    }
+
+    /**
+     * Ändert eine Einheit (PUT /units/{id}).
+     *
+     * Nur die in den Options gesetzten Felder werden gesendet.
+     */
+    public function update(int $id, UnitUpdateOptions $options): Unit
+    {
+        $data = $this->putJson("/units/{$id}", ['unit' => $options->toArray()]);
+
+        return Unit::fromArray($this->unwrapEnvelope($data, 'unit', 'updating unit'));
+    }
+
+    /**
+     * Löscht eine Einheit.
+     */
+    public function delete(int $id): void
+    {
+        $this->deleteVoid("/units/{$id}");
+    }
+
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /units/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/units/{$id}", 'unit');
+    }
+
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /units/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/units/{$id}", 'unit', $value);
     }
 }

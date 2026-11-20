@@ -1,0 +1,8 @@
+{
+    "role": {
+        "name": "Accounting",
+        "invoices": "DELETE",
+        "clients": "READ",
+        "settings_documents": "UPDATE"
+    }
+}

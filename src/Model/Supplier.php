@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Model;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 
 use const DATE_ATOM;
@@ -23,13 +24,59 @@ use const DATE_ATOM;
  */
 final readonly class Supplier
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'created' => true,
+        'name' => true,
+        'client_number' => true,
+        'salutation' => true,
+        'first_name' => true,
+        'last_name' => true,
+        'street' => true,
+        'zip' => true,
+        'city' => true,
+        'state' => true,
+        'country_code' => true,
+        'address' => true,
+        'note' => true,
+        'email' => true,
+        'phone' => true,
+        'fax' => true,
+        'mobile' => true,
+        'www' => true,
+        'tax_number' => true,
+        'vat_number' => true,
+        'bank_account_number' => true,
+        'bank_account_owner' => true,
+        'bank_number' => true,
+        'bank_name' => true,
+        'bank_iban' => true,
+        'bank_swift' => true,
+        'bank_bic' => true,
+        'currency_code' => true,
+        'updated' => true,
+        'customfield' => true,
+        'is_eu_country' => true,
+        'locale' => true,
+        'creditor_account_number' => true,
+        'creditor_identifier' => true,
+        'costs_gross' => true,
+        'costs_net' => true,
+        'supplier-property-values' => true,
+    ];
+
+    /**
+     * @param list<SupplierPropertyValue> $propertyValues
+     * @param array<string, mixed>        $extra
+     */
     public function __construct(
         /** Interne Billomat-ID des Lieferanten. */
-        public ?int $id,
-        /** Erstellungszeitpunkt des Lieferanten. */
-        public ?DateTimeImmutable $created,
+        public int $id,
         /** Firmenname des Lieferanten. */
         public string $name,
+        /** Erstellungszeitpunkt des Lieferanten. */
+        public ?DateTimeImmutable $created = null,
         /** Eigene Kundennummer beim Lieferanten. */
         public ?int $clientNumber = null,
         /** Anrede. */
@@ -99,7 +146,7 @@ final readonly class Supplier
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Sitzt der Lieferant in einem EU-Land? */
         public ?bool $isEuCountry = null,
         /**
@@ -113,9 +160,21 @@ final readonly class Supplier
         /** SEPA-Gläubiger-ID. */
         public ?string $creditorIdentifier = null,
         /** Brutto-Kosten (read-only Auswertungsfeld). */
-        public ?float $costsGross = null,
+        public ?Money $costsGross = null,
         /** Netto-Kosten (read-only Auswertungsfeld). */
-        public ?float $costsNet = null,
+        public ?Money $costsNet = null,
+        /**
+         * Attributwerte des Lieferanten.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert (leer: "").
+         */
+        public array $propertyValues = [],
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -127,9 +186,9 @@ final readonly class Supplier
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             clientNumber: ScalarCaster::toIntOrNull($data['client_number'] ?? null),
             salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
             firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),
@@ -156,13 +215,15 @@ final readonly class Supplier
             bankBic: ScalarCaster::toStringOrNull($data['bank_swift'] ?? $data['bank_bic'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             isEuCountry: ScalarCaster::toBoolOrNull($data['is_eu_country'] ?? null),
             locale: ScalarCaster::toStringOrNull($data['locale'] ?? null),
             creditorAccountNumber: ScalarCaster::toStringOrNull($data['creditor_account_number'] ?? null),
             creditorIdentifier: ScalarCaster::toStringOrNull($data['creditor_identifier'] ?? null),
-            costsGross: ScalarCaster::toFloatOrNull($data['costs_gross'] ?? null),
-            costsNet: ScalarCaster::toFloatOrNull($data['costs_net'] ?? null),
+            costsGross: ScalarCaster::toMoneyOrNull($data['costs_gross'] ?? null),
+            costsNet: ScalarCaster::toMoneyOrNull($data['costs_net'] ?? null),
+            propertyValues: ListCaster::toNestedList($data['supplier-property-values'] ?? null, 'supplier-property-value', 'id', SupplierPropertyValue::fromArray(...)),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -175,7 +236,8 @@ final readonly class Supplier
      */
     public function toArray(): array
     {
-        return [
+        $data = [
+            ...$this->extra,
             'id' => $this->id,
             'created' => $this->created?->format(DATE_ATOM),
             'name' => $this->name,
@@ -205,13 +267,21 @@ final readonly class Supplier
             'bank_bic' => $this->bankBic,
             'currency_code' => $this->currencyCode,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'is_eu_country' => $this->isEuCountry,
             'locale' => $this->locale,
             'creditor_account_number' => $this->creditorAccountNumber,
             'creditor_identifier' => $this->creditorIdentifier,
-            'costs_gross' => $this->costsGross,
-            'costs_net' => $this->costsNet,
+            'costs_gross' => $this->costsGross?->toString(),
+            'costs_net' => $this->costsNet?->toString(),
         ];
+
+        if ([] !== $this->propertyValues) {
+            $data['supplier-property-values'] = [
+                'supplier-property-value' => array_map(static fn (SupplierPropertyValue $item): array => $item->toArray(), $this->propertyValues),
+            ];
+        }
+
+        return $data;
     }
 }

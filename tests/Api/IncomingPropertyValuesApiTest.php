@@ -4,25 +4,33 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Api;
 
+use Justpilot\Billomat\Api\AbstractSubResourceApi;
 use Justpilot\Billomat\Api\IncomingPropertyValueCreateOptions;
-use Justpilot\Billomat\Api\IncomingPropertyValuesApi;
+use Justpilot\Billomat\Api\IncomingsApi;
+use Justpilot\Billomat\Api\PropertyValuesApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\IncomingPropertyValue;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
 
-#[CoversClass(IncomingPropertyValuesApi::class)]
+#[CoversClass(PropertyValuesApi::class)]
+#[CoversClass(AbstractSubResourceApi::class)]
+#[UsesClass(IncomingsApi::class)]
 #[CoversClass(IncomingPropertyValueCreateOptions::class)]
 #[CoversClass(IncomingPropertyValue::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class IncomingPropertyValuesApiTest extends TestCase
@@ -33,7 +41,7 @@ final class IncomingPropertyValuesApiTest extends TestCase
         $captured = [];
 
         $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+            $captured[] = CapturedRequest::of($method, $url);
 
             if ('GET' === $method) {
                 return new MockResponse(
@@ -56,17 +64,16 @@ final class IncomingPropertyValuesApiTest extends TestCase
             );
         });
 
-        $api = new IncomingPropertyValuesApi(new BillomatHttpClient(
-            $mock,
+        $api = new IncomingsApi(new BillomatHttpClient(
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
-        ));
+        ))->propertyValues;
 
-        $values = $api->list(['incoming_id' => 42]);
+        $values = $api->list(filters: ['incoming_id' => 42]);
         self::assertCount(1, $values);
         self::assertSame('Büro', $values[0]->value);
 
-        $created = $api->create(new IncomingPropertyValueCreateOptions(
-            incomingId: 42,
+        $created = $api->create(42, new IncomingPropertyValueCreateOptions(
             incomingPropertyId: 7,
             value: 'IT',
         ));

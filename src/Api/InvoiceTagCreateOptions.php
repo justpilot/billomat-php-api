@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/invoice-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class InvoiceTagCreateOptions
+final readonly class InvoiceTagCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: invoice_id
-         * Typ: INT
-         */
-        public int $invoiceId,
         /**
          * Name des Schlagworts.
          *
@@ -33,6 +26,12 @@ final class InvoiceTagCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -41,7 +40,6 @@ final class InvoiceTagCreateOptions
     public function toArray(): array
     {
         return [
-            'invoice_id' => $this->invoiceId,
             'name' => $this->name,
         ];
     }

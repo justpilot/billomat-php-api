@@ -7,22 +7,27 @@ namespace Justpilot\Billomat\Tests\Model;
 use DateTimeImmutable;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use Justpilot\Billomat\Model\Invoice;
 use Justpilot\Billomat\Model\InvoiceItem;
+use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Model\TaxSummary;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(Invoice::class)]
+#[UsesClass(TaxSummary::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(InvoiceItem::class)]
+#[UsesClass(Money::class)]
 final class InvoiceTest extends TestCase
 {
     #[Test]
@@ -73,14 +78,14 @@ final class InvoiceTest extends TestCase
         self::assertSame(789, $invoice->contactId);
         self::assertSame('RE-2025-0001', $invoice->invoiceNumber);
         self::assertSame('EUR', $invoice->currencyCode);
-        self::assertSame(119.0, $invoice->totalGross);
-        self::assertSame(100.0, $invoice->totalNet);
+        self::assertSame('119', $invoice->totalGross?->toString());
+        self::assertSame('100', $invoice->totalNet?->toString());
 
         self::assertInstanceOf(DateTimeImmutable::class, $invoice->date);
-        self::assertSame('2025-03-01', $invoice->date?->format('Y-m-d'));
+        self::assertSame('2025-03-01', $invoice->date->format('Y-m-d'));
 
         self::assertInstanceOf(DateTimeImmutable::class, $invoice->dueDate);
-        self::assertSame('2025-03-15', $invoice->dueDate?->format('Y-m-d'));
+        self::assertSame('2025-03-15', $invoice->dueDate->format('Y-m-d'));
 
         self::assertInstanceOf(InvoiceStatus::class, $invoice->status);
         self::assertSame(InvoiceStatus::OPEN, $invoice->status);
@@ -99,7 +104,7 @@ final class InvoiceTest extends TestCase
         self::assertSame('Stück', $item->unit);
 
         self::assertSame(2.0, $item->quantity);
-        self::assertSame(50.0, $item->unitPrice);
+        self::assertSame('50', $item->unitPrice->toString());
 
         self::assertSame('USt 19%', $item->taxName);
         self::assertSame(19.0, $item->taxRate);
@@ -109,19 +114,13 @@ final class InvoiceTest extends TestCase
         self::assertSame('Eine Testposition', $item->description);
         self::assertSame('10%', $item->reduction);
 
-        self::assertInstanceOf(InvoiceItemType::class, $item->type);
-        self::assertSame(InvoiceItemType::SERVICE, $item->type);
+        self::assertInstanceOf(ItemType::class, $item->type);
+        self::assertSame(ItemType::SERVICE, $item->type);
 
-        self::assertSame(119.0, $item->totalGross);
-        self::assertSame(100.0, $item->totalNet);
-        self::assertSame(130.0, $item->totalGrossUnreduced);
-        self::assertSame(110.0, $item->totalNetUnreduced);
-
-        self::assertInstanceOf(DateTimeImmutable::class, $item->created);
-        self::assertSame(
-            '2025-03-01T12:00:00+01:00',
-            $item->created?->format('Y-m-d\TH:i:sP')
-        );
+        self::assertSame('119', $item->totalGross?->toString());
+        self::assertSame('100', $item->totalNet?->toString());
+        self::assertSame('130', $item->totalGrossUnreduced?->toString());
+        self::assertSame('110', $item->totalNetUnreduced?->toString());
     }
 
     #[Test]
@@ -175,8 +174,8 @@ final class InvoiceTest extends TestCase
         self::assertSame(1, $item->id);
         self::assertSame(123, $item->invoiceId);
         self::assertSame(1.0, $item->quantity);
-        self::assertSame(100.0, $item->unitPrice);
-        self::assertSame(InvoiceItemType::PRODUCT, $item->type);
+        self::assertSame('100', $item->unitPrice->toString());
+        self::assertSame(ItemType::PRODUCT, $item->type);
     }
 
     #[Test]
@@ -255,22 +254,22 @@ final class InvoiceTest extends TestCase
         self::assertSame(2.0, $invoice->discountRate);
         self::assertInstanceOf(DateTimeImmutable::class, $invoice->discountDate);
         self::assertSame(7, $invoice->discountDays);
-        self::assertSame(2.0, $invoice->discountAmount);
+        self::assertSame('2', $invoice->discountAmount?->toString());
 
         self::assertNull($invoice->title);
         self::assertSame('Projekt 123', $invoice->label);
         self::assertSame($data['intro'], $invoice->intro);
         self::assertSame($data['note'], $invoice->note);
 
-        self::assertSame(107.1, $invoice->totalGross);
-        self::assertSame(90.0, $invoice->totalNet);
+        self::assertSame('107.1', $invoice->totalGross?->toString());
+        self::assertSame('90', $invoice->totalNet?->toString());
         self::assertSame(NetGross::NET, $invoice->netGross);
         self::assertSame('10', $invoice->reduction);
-        self::assertSame(119.0, $invoice->totalGrossUnreduced);
-        self::assertSame(100.0, $invoice->totalNetUnreduced);
+        self::assertSame('119', $invoice->totalGrossUnreduced?->toString());
+        self::assertSame('100', $invoice->totalNetUnreduced?->toString());
 
-        self::assertSame(20.0, $invoice->paidAmount);
-        self::assertSame(99.0, $invoice->openAmount);
+        self::assertSame('20', $invoice->paidAmount?->toString());
+        self::assertSame('99', $invoice->openAmount?->toString());
         self::assertSame('EUR', $invoice->currencyCode);
         self::assertSame(1.0, $invoice->quote);
 
@@ -279,16 +278,15 @@ final class InvoiceTest extends TestCase
         self::assertSame(7, $invoice->confirmationId);
         self::assertNull($invoice->recurringId);
 
-        self::assertSame('CASH,BANK_TRANSFER,PAYPAL', $invoice->paymentTypes);
-        self::assertSame($data['customerportal_url'], $invoice->customerportalUrl);
+        self::assertSame([PaymentType::CASH, PaymentType::BANK_TRANSFER, PaymentType::PAYPAL], $invoice->paymentTypes);
         self::assertNull($invoice->templateId);
 
         // Taxes
         self::assertCount(1, $invoice->taxes);
         $firstTax = $invoice->taxes[0];
-        self::assertSame('MwSt', $firstTax['name']);
-        self::assertSame(19.0, $firstTax['rate']);
-        self::assertSame(19.0, $firstTax['amount']);
+        self::assertSame('MwSt', $firstTax->name);
+        self::assertSame(19.0, $firstTax->rate);
+        self::assertSame('19', $firstTax->amount->toString());
 
         // Items ist in diesem Beispiel leer
         self::assertSame([], $invoice->items);

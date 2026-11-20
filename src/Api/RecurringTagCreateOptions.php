@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/recurring-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class RecurringTagCreateOptions
+final readonly class RecurringTagCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: recurring_id
-         * Typ: INT
-         */
-        public int $recurringId,
         /**
          * Name des Schlagworts.
          *
@@ -33,6 +26,12 @@ final class RecurringTagCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -41,7 +40,6 @@ final class RecurringTagCreateOptions
     public function toArray(): array
     {
         return [
-            'recurring_id' => $this->recurringId,
             'name' => $this->name,
         ];
     }

@@ -15,5 +15,5 @@ return (require __DIR__ . '/shared/comments.php')(
     label: 'einer Auftragsbestätigung',
     parentField: 'confirmation_id',
     specResource: null,
-    docUrl: 'https://www.billomat.com/en/api/confirmations/comments/',
+    docUrl: 'https://www.billomat.com/api/auftragsbestaetigungen/',
 );

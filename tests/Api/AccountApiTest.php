@@ -6,16 +6,20 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Justpilot\Billomat\Api\AccountApi;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -25,18 +29,20 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(AccountQuota::class)]
 #[CoversClass(Client::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(ListCaster::class)]
 final class AccountApiTest extends TestCase
 {
     #[Test]
     public function itFetchesOwnAccountWithPlanAndQuotas(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->method = $method;
+            $captured->url = $url;
 
             $body = json_encode([
                 'client' => [
@@ -59,13 +65,13 @@ final class AccountApiTest extends TestCase
             return new MockResponse($body, ['http_code' => 200]);
         });
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new AccountApi($http);
 
         $account = $api->get();
 
-        self::assertSame('GET', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/clients/myself', $captured['url']);
+        self::assertSame('GET', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/clients/myself', $captured->url);
 
         self::assertSame('XL', $account->plan);
         self::assertSame(12345, $account->client->id);
@@ -99,7 +105,7 @@ final class AccountApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $api = new AccountApi($http);
 
         $account = $api->get();
@@ -126,7 +132,7 @@ final class AccountApiTest extends TestCase
             ['http_code' => 200],
         ));
 
-        $http = new BillomatHttpClient($mock, new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
+        $http = new BillomatHttpClient(new Psr18Client($mock), new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'));
         $account = new AccountApi($http)->get();
 
         self::assertCount(1, $account->quotas);

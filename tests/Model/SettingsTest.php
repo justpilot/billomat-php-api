@@ -16,6 +16,8 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
+use const JSON_THROW_ON_ERROR;
+
 #[CoversClass(Settings::class)]
 #[UsesClass(ScalarCaster::class)]
 #[UsesClass(NumberRangeMode::class)]
@@ -54,6 +56,32 @@ final class SettingsTest extends TestCase
         self::assertSame(14, $settings->dueDays);
         self::assertSame(2.5, $settings->discountRate);
         self::assertTrue($settings->printVersion);
+    }
+
+    #[Test]
+    public function unknownFieldsAreKeptInExtra(): void
+    {
+        $settings = Settings::fromArray([
+            'currency_code' => 'EUR',
+            'price_group2' => 'Händler',
+            'bcc_addresses' => '',
+            'zz_neues_feld' => 'wert',
+        ]);
+
+        // Abgebildete Felder und price_groupN gehören nicht in `extra`.
+        self::assertSame(['zz_neues_feld' => 'wert'], $settings->extra);
+    }
+
+    #[Test]
+    public function contractFixtureHasNoUnmappedFields(): void
+    {
+        $fixture = json_decode((string) file_get_contents(__DIR__.'/../Fixtures/Contract/settings/get.json'), true, flags: JSON_THROW_ON_ERROR);
+        self::assertIsArray($fixture);
+        self::assertIsArray($fixture['settings']);
+
+        /** @var array<string, mixed> $data */
+        $data = $fixture['settings'];
+        self::assertSame([], Settings::fromArray($data)->extra);
     }
 
     #[Test]

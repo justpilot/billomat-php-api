@@ -1,10 +1,10 @@
-<!-- Quelle: https://www.billomat.com/api/account/ -->
+<!-- Source: https://www.billomat.com/api/account/ -->
 
-# Account (Eigene Account-Informationen)
+# Account
 
-API-Wrapper für die eigenen Account-Daten unter `/clients/myself`.
+API wrapper for your own account data at `/clients/myself`.
 
-## Zugriff
+## Access
 
 ```php
 $billomat->account
@@ -12,43 +12,43 @@ $billomat->account
 
 `Justpilot\Billomat\Api\AccountApi`.
 
-## Überblick
+## Overview
 
-Billomat führt den eigenen Account technisch als Spezial-Client. Statt eines eigenen `/account`-Endpunkts wird die Kunden-Schnittstelle mit der reservierten ID `myself` aufgerufen. Im Unterschied zur normalen `GET /clients/{id}` enthält die Antwort zusätzlich den aktuellen **Tarif** (`plan`) und das **Kontingent** (`quotas`).
+Billomat stores your own account as a special client. There is no dedicated `/account` endpoint; instead the clients endpoint is called with the reserved ID `myself`. Unlike a regular `GET /clients/{id}`, the response also contains the current **plan** (`plan`) and the **quotas** (`quotas`).
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
 | `get(): Account` | GET | `/clients/myself` |
 
-Es gibt keinen Write-Pfad — der eigene Account wird ausschließlich gelesen.
+There is no write path; the account is read-only.
 
-## Methode
+## Method
 
 ### `get(): Account`
 
-Liefert die eigenen Account-Informationen als `Account`-Modell.
+Returns your account information as an `Account` model.
 
 ```php
 $account = $billomat->account->get();
 
-echo $account->plan;           // z.B. "XL"
-echo $account->client->name;   // Firmenname
-echo $account->client->email;  // Rechnungs-E-Mail
+echo $account->plan;           // e.g. "XL"
+echo $account->client->name;   // company name
+echo $account->client->email;  // billing e-mail
 
 foreach ($account->quotas as $quota) {
     printf(
-        "%s: %d von %s verbraucht%s\n",
+        "%s: %d of %s used%s\n",
         $quota->entity,
         $quota->used,
         $quota->isUnlimited() ? '∞' : (string) $quota->available,
-        $quota->isUnlimited() ? ' (unbegrenzt)' : '',
+        $quota->isUnlimited() ? ' (unlimited)' : '',
     );
 }
 ```
 
-Per Convenience auch direkt nach Entität abfragbar:
+You can also look up a quota by entity:
 
 ```php
 $storage = $account->quota('storage');
@@ -59,39 +59,39 @@ if ($storage !== null && !$storage->isUnlimited()) {
 }
 ```
 
-## Modell `Account`
+## Model `Account`
 
-`Justpilot\Billomat\Model\Account` — komponiert das bestehende `Client`-Read-Modell mit den Account-spezifischen Feldern.
+`Justpilot\Billomat\Model\Account` — wraps the existing `Client` read model and adds the account-specific fields.
 
-| Feld | Typ | Beschreibung |
+| Field | Type | Description |
 |---|---|---|
-| `client` | `Client` | Vollständiger Kunden-Datensatz (Stammdaten, Adresse, Bankverbindung etc.) |
-| `plan` | `?string` | Tarifname, z.B. `"XL"`, `"S"`, `"Free"` |
-| `quotas` | `list<AccountQuota>` | Kontingent-Liste, pro Entität ein Eintrag |
-| `taxAuthorityNumber` | `?string` | E-Rechnung, nur lesend – siehe Stolpersteine |
-| `facturxFieldsEnabled` | `?bool` | E-Rechnung, nur lesend – siehe Stolpersteine |
+| `client` | `Client` | Full client record (master data, address, bank details, etc.) |
+| `plan` | `?string` | Plan name, e.g. `"XL"`, `"S"`, `"Free"` |
+| `quotas` | `list<AccountQuota>` | Quotas, one entry per entity |
+| `taxAuthorityNumber` | `?string` | E-invoicing, read-only; see Pitfalls |
+| `facturxFieldsEnabled` | `?bool` | E-invoicing, read-only; see Pitfalls |
 
-## Modell `AccountQuota`
+## Model `AccountQuota`
 
-`Justpilot\Billomat\Model\AccountQuota` — ein Kontingent-Eintrag.
+`Justpilot\Billomat\Model\AccountQuota` — one quota entry.
 
-| Feld | Typ | Beschreibung |
+| Field | Type | Description |
 |---|---|---|
-| `entity` | `string` | Bekannte Werte: `documents`, `clients`, `articles`, `storage` |
-| `available` | `int` | Verfügbares Volumen; `-1` markiert „unbegrenzt" |
-| `used` | `int` | Verbrauchtes Volumen (bei `storage` in Bytes) |
+| `entity` | `string` | Known values: `documents`, `clients`, `articles`, `storage` |
+| `available` | `int` | Available volume; `-1` means "unlimited" |
+| `used` | `int` | Used volume (bytes for `storage`) |
 
-Hilfsmethode `isUnlimited(): bool` für die `available === -1`-Konvention.
+Helper `isUnlimited(): bool` checks the `available === -1` convention.
 
-## Stolpersteine
+## Pitfalls
 
-- **E-Rechnung (undokumentiert).** `tax_authority_number` (`$taxAuthorityNumber`), `facturx_fields_enabled` (`$facturxFieldsEnabled`) und `seller_identifier` (über `$account->client->sellerIdentifier`) liefert Billomat in den API-Antworten, beschreibt sie aber nicht in der API-Doku. Das SDK liest sie nur (Typen aus den beobachteten Werten abgeleitet); Schreiben ist mangels Spezifikation nicht vorgesehen.
-- **Kein `/account`-Endpunkt.** Wer den Account-Datensatz allein aus dem Pfad herleiten will, irrt — der Pfad ist `/clients/myself`.
-- **Quota-Liste kann fehlen.** Bei manchen Tarifen liefert Billomat `quotas` gar nicht — dann ist die Liste leer und `quota($entity)` gibt `null` zurück.
-- **`storage` in Bytes, alles andere als Stück.** `available`/`used` haben keine Einheit im Response — bei `storage` sind die Werte in Bytes (Beispiel aus der Doku: `8_740_060` Bytes), bei `documents`/`clients`/`articles` Stück.
-- **`Account` ist kein `Client`.** Bewusst keine Vererbung — wer das volle Kunden-Modell für den eigenen Account braucht, greift auf `$account->client` zu. Alternativ liefert `$billomat->clients->getMyself()` direkt einen `Client` (ohne Plan/Quotas).
+- **E-invoicing (undocumented).** Billomat returns `tax_authority_number` (`$taxAuthorityNumber`), `facturx_fields_enabled` (`$facturxFieldsEnabled`) and `seller_identifier` (via `$account->client->sellerIdentifier`), but the API docs don't describe them. The SDK only reads them (types derived from observed values); writing is not supported because there is no specification.
+- **No `/account` endpoint.** The path is `/clients/myself`.
+- **The quota list can be missing.** For some plans Billomat doesn't send `quotas` at all. The list is then empty and `quota($entity)` returns `null`.
+- **`storage` is in bytes, everything else is a count.** `available`/`used` carry no unit in the response: for `storage` the values are bytes (example from the docs: `8_740_060` bytes), for `documents`/`clients`/`articles` they are counts.
+- **`Account` is not a `Client`.** There is deliberately no inheritance. If you need the full client model for your account, use `$account->client`. Alternatively, `$billomat->clients->getMyself()` returns a `Client` directly (without plan/quotas).
 
-## End-to-End
+## End-to-end
 
 ```php
 use Justpilot\Billomat\BillomatClient;
@@ -102,8 +102,8 @@ $account = $billomat->account->get();
 
 if ($account->plan === 'Free') {
     $documents = $account->quota('documents');
-    if ($documents !== null && $documents->used / $documents->available > 0.9) {
-        // Upgrade nahelegen
+    if ($documents !== null && !$documents->isUnlimited() && $documents->used / $documents->available > 0.9) {
+        // suggest an upgrade
     }
 }
 ```

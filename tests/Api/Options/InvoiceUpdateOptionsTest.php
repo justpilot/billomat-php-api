@@ -7,6 +7,7 @@ namespace Justpilot\Billomat\Tests\Api\Options;
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\InvoiceUpdateOptions;
 use Justpilot\Billomat\Model\Enum\NetGross;
+use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\SupplyDateType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -24,11 +25,12 @@ final class InvoiceUpdateOptionsTest extends TestCase
     #[Test]
     public function itFormatsDatesAsIsoLocalDate(): void
     {
-        $options = new InvoiceUpdateOptions();
-        $options->date = new DateTimeImmutable('2024-05-30T15:42:00');
-        $options->supplyDate = new DateTimeImmutable('2024-05-25');
-        $options->dueDate = new DateTimeImmutable('2024-06-14');
-        $options->discountDate = new DateTimeImmutable('2024-06-07');
+        $options = new InvoiceUpdateOptions(
+            date: new DateTimeImmutable('2024-05-30T15:42:00'),
+            supplyDate: new DateTimeImmutable('2024-05-25'),
+            dueDate: new DateTimeImmutable('2024-06-14'),
+            discountDate: new DateTimeImmutable('2024-06-07'),
+        );
 
         $payload = $options->toArray();
 
@@ -41,9 +43,10 @@ final class InvoiceUpdateOptionsTest extends TestCase
     #[Test]
     public function itSerializesEnumsAsStringValue(): void
     {
-        $options = new InvoiceUpdateOptions();
-        $options->netGross = NetGross::GROSS;
-        $options->supplyDateType = SupplyDateType::DELIVERY_DATE;
+        $options = new InvoiceUpdateOptions(
+            supplyDateType: SupplyDateType::DELIVERY_DATE,
+            netGross: NetGross::GROSS,
+        );
 
         $payload = $options->toArray();
 
@@ -54,12 +57,13 @@ final class InvoiceUpdateOptionsTest extends TestCase
     #[Test]
     public function itPassesScalarFieldsThrough(): void
     {
-        $options = new InvoiceUpdateOptions();
-        $options->clientId = 7;
-        $options->title = 'Korrektur';
-        $options->paymentTypes = 'BANK_TRANSFER,CASH';
-        $options->templateId = 4;
-        $options->quote = 1.1234;
+        $options = new InvoiceUpdateOptions(
+            clientId: 7,
+            title: 'Korrektur',
+            quote: 1.1234,
+            paymentTypes: [PaymentType::BANK_TRANSFER, PaymentType::CASH],
+            templateId: 4,
+        );
 
         $payload = $options->toArray();
 

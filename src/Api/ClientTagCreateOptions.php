@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/client-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ClientTagCreateOptions
+final readonly class ClientTagCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: client_id
-         * Typ: INT
-         */
-        public int $clientId,
         /**
          * Name des Schlagworts.
          *
@@ -33,6 +26,12 @@ final class ClientTagCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -41,7 +40,6 @@ final class ClientTagCreateOptions
     public function toArray(): array
     {
         return [
-            'client_id' => $this->clientId,
             'name' => $this->name,
         ];
     }

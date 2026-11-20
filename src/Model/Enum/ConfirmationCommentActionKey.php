@@ -7,10 +7,12 @@ namespace Justpilot\Billomat\Model\Enum;
 /**
  * Typ eines Confirmation-Kommentars (actionkey).
  *
- * Doku: https://www.billomat.com/en/api/confirmations/comments/
+ * Doku: https://www.billomat.com/api/auftragsbestaetigungen/
  */
 enum ConfirmationCommentActionKey: string
 {
+    use FromApi;
+
     case CREATE = 'CREATE';
     case EDIT = 'EDIT';
     case OPEN = 'OPEN';

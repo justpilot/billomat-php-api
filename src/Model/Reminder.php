@@ -24,10 +24,43 @@ use const DATE_ATOM;
  */
 final readonly class Reminder
 {
-    /** @param list<ReminderItem> $items */
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'invoice_id' => true,
+        'created' => true,
+        'status' => true,
+        'date' => true,
+        'due_days' => true,
+        'due_date' => true,
+        'address' => true,
+        'subject' => true,
+        'label' => true,
+        'intro' => true,
+        'note' => true,
+        'total_gross' => true,
+        'currency_code' => true,
+        'reminder_text_id' => true,
+        'template_id' => true,
+        'reminder-items' => true,
+        'updated' => true,
+        'customfield' => true,
+        'paid_amount' => true,
+        'open_amount' => true,
+        'reminder_level' => true,
+        'reminder_level_name' => true,
+        'is_old' => true,
+    ];
+
+    /**
+     * @param list<ReminderItem>   $items
+     * @param array<string, mixed> $extra
+     */
     public function __construct(
         /** Interne Billomat-ID der Mahnung. */
-        public ?int $id,
+        public int $id,
         /** ID des Kunden. */
         public int $clientId,
         /** ID des Kontakts. */
@@ -36,30 +69,6 @@ final readonly class Reminder
         public ?int $invoiceId = null,
         /** Erstellungszeitpunkt der Mahnung. */
         public ?DateTimeImmutable $created = null,
-        /**
-         * Mahnungsnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `reminder_number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $reminderNumber = null,
-        /**
-         * Laufende Nummer (ohne Präfix).
-         *
-         * @deprecated since 3.1 – Billomat liefert `number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $number = null,
-        /**
-         * Präfix der Mahnungsnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $numberPre = null,
-        /**
-         * Mindestlänge der Mahnungsnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `number_length` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $numberLength = null,
         /** Status der Mahnung. */
         public ?ReminderStatus $status = null,
         /** Mahnungsdatum. */
@@ -83,21 +92,9 @@ final readonly class Reminder
         /** Anmerkungstext. */
         public ?string $note = null,
         /** Gesamtbetrag brutto. */
-        public ?float $totalGross = null,
-        /**
-         * Gesamtbetrag netto.
-         *
-         * @deprecated since 3.1 – Billomat liefert `total_net` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $totalNet = null,
+        public ?Money $totalGross = null,
         /** Währung (ISO-Währungscode). */
         public ?string $currencyCode = null,
-        /**
-         * Umrechnungskurs.
-         *
-         * @deprecated since 3.1 – Billomat liefert `quote` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?float $quote = null,
         /** ID des Mahntextes (Mahnstufe). */
         public ?int $reminderTextId = null,
         /** ID der Vorlage, mit der die Mahnung abgeschlossen wird. */
@@ -107,17 +104,23 @@ final readonly class Reminder
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /** Bereits bezahlter Betrag der Rechnung. */
-        public ?float $paidAmount = null,
+        public ?Money $paidAmount = null,
         /** Offener Betrag der Rechnung. */
-        public ?float $openAmount = null,
+        public ?Money $openAmount = null,
         /** Mahnstufe. */
         public ?int $reminderLevel = null,
         /** Bezeichnung der Mahnstufe. */
         public ?string $reminderLevelName = null,
         /** Von Billomat geliefert, aber nicht dokumentiert. */
         public ?bool $isOld = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -129,15 +132,11 @@ final readonly class Reminder
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            reminderNumber: ScalarCaster::toStringOrNull($data['reminder_number'] ?? null),
-            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
-            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
-            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             status: ReminderStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
@@ -147,20 +146,19 @@ final readonly class Reminder
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
             note: ScalarCaster::toStringOrNull($data['note'] ?? null),
-            totalGross: ScalarCaster::toFloatOrNull($data['total_gross'] ?? null),
-            totalNet: ScalarCaster::toFloatOrNull($data['total_net'] ?? null),
+            totalGross: ScalarCaster::toMoneyOrNull($data['total_gross'] ?? null),
             currencyCode: ScalarCaster::toStringOrNull($data['currency_code'] ?? null),
-            quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             reminderTextId: ScalarCaster::toIntOrNull($data['reminder_text_id'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            items: ListCaster::toList($data['reminder-items']['reminder-item'] ?? null, 'id', ReminderItem::fromArray(...)),
+            items: ListCaster::toNestedList($data['reminder-items'] ?? null, 'reminder-item', 'id', ReminderItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
-            paidAmount: ScalarCaster::toFloatOrNull($data['paid_amount'] ?? null),
-            openAmount: ScalarCaster::toFloatOrNull($data['open_amount'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            paidAmount: ScalarCaster::toMoneyOrNull($data['paid_amount'] ?? null),
+            openAmount: ScalarCaster::toMoneyOrNull($data['open_amount'] ?? null),
             reminderLevel: ScalarCaster::toIntOrNull($data['reminder_level'] ?? null),
             reminderLevelName: ScalarCaster::toStringOrNull($data['reminder_level_name'] ?? null),
             isOld: ScalarCaster::toBoolOrNull($data['is_old'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -174,15 +172,12 @@ final readonly class Reminder
     public function toArray(): array
     {
         $data = [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
             'invoice_id' => $this->invoiceId,
             'created' => $this->created?->format(DATE_ATOM),
-            'reminder_number' => $this->reminderNumber,
-            'number' => $this->number,
-            'number_pre' => $this->numberPre,
-            'number_length' => $this->numberLength,
             'status' => $this->status?->value,
             'date' => $this->date?->format('Y-m-d'),
             'due_days' => $this->dueDays,
@@ -192,16 +187,14 @@ final readonly class Reminder
             'label' => $this->label,
             'intro' => $this->intro,
             'note' => $this->note,
-            'total_gross' => $this->totalGross,
-            'total_net' => $this->totalNet,
+            'total_gross' => $this->totalGross?->toString(),
             'currency_code' => $this->currencyCode,
-            'quote' => $this->quote,
             'reminder_text_id' => $this->reminderTextId,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
-            'paid_amount' => $this->paidAmount,
-            'open_amount' => $this->openAmount,
+            'customfield' => $this->customField,
+            'paid_amount' => $this->paidAmount?->toString(),
+            'open_amount' => $this->openAmount?->toString(),
             'reminder_level' => $this->reminderLevel,
             'reminder_level_name' => $this->reminderLevelName,
             'is_old' => $this->isOld,

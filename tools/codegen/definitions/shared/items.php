@@ -20,7 +20,7 @@ declare(strict_types=1);
  * @param string|null                         $specResource Spec-Slug; null, wenn Billomat die Positionen nicht dokumentiert
  * @param bool                                $withOptions  false, wenn es keine Create-Options gibt (Mahnungen)
  * @param list<string>                        $omit         Felder, die die Ressource nicht kennt
- * @param list<string>                        $deprecated   Felder, die Billomat nicht (mehr) ausliefert
+ * @param list<string>                        $optionsOnly  Felder, die Billomat nicht (mehr) ausliefert (nur noch in den Options)
  * @param array<string, array<string, mixed>> $extra        zusätzliche Felder hinter `customfield`
  */
 return static function (
@@ -31,13 +31,13 @@ return static function (
     string $docUrl,
     bool $withOptions = true,
     array $omit = [],
-    array $deprecated = ['created'],
+    array $optionsOnly = ['created'],
     array $extra = [],
 ): array {
     $path = str_replace('_', '-', substr($parentField, 0, -3)) . '-items';
 
     $fields = [
-        'id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'Interne Billomat-ID der Position.'],
+        'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Position.'],
         // Die Eltern-ID ergänzt die Api-Klasse beim Anlegen, deshalb nicht in den Create-Options.
         $parentField => ['type' => 'int', 'readOnly' => true, 'doc' => 'ID des zugehörigen Dokuments.'],
         'article_id' => ['type' => 'int', 'writable' => true, 'doc' => 'ID des Artikels (falls verknüpft).'],
@@ -48,8 +48,8 @@ return static function (
             'details' => ['Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).'],
         ],
         'unit' => ['type' => 'string', 'writable' => true, 'doc' => 'Einheit (z. B. "Stück", "Stunde").'],
-        'quantity' => ['type' => 'float', 'writable' => true, 'doc' => 'Menge.', 'model' => ['nonNull' => true], 'create' => ['constructor' => true]],
-        'unit_price' => ['type' => 'float', 'writable' => true, 'doc' => 'Einzelpreis.', 'model' => ['nonNull' => true], 'create' => ['constructor' => true]],
+        'quantity' => ['type' => 'float', 'writable' => true, 'doc' => 'Menge.', 'model' => ['required' => true], 'create' => ['constructor' => true]],
+        'unit_price' => ['type' => 'float', 'writable' => true, 'doc' => 'Einzelpreis.', 'model' => ['required' => true], 'create' => ['constructor' => true]],
         'tax_name' => ['type' => 'string', 'writable' => true, 'doc' => 'Steuerbezeichnung (z. B. "MwSt").'],
         'tax_rate' => ['type' => 'float', 'writable' => true, 'doc' => 'Steuerrate in Prozent.'],
         'tax_changed_manually' => [
@@ -61,7 +61,7 @@ return static function (
         'title' => ['type' => 'string', 'writable' => true, 'doc' => 'Titel der Position.'],
         'description' => ['type' => 'string', 'writable' => true, 'doc' => 'Beschreibung der Position.'],
         'reduction' => ['type' => 'string', 'writable' => true, 'doc' => 'Positionsrabatt (absolut oder als Prozentwert, z. B. "10" oder "10%").'],
-        'type' => ['type' => 'string', 'writable' => true, 'enum' => 'InvoiceItemType', 'doc' => 'Typ der Position (Produkt/Dienstleistung).'],
+        'type' => ['type' => 'string', 'writable' => true, 'enum' => 'ItemType', 'doc' => 'Typ der Position (Produkt/Dienstleistung).'],
         'total_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag brutto.'],
         'total_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Gesamtbetrag netto.'],
         'total_gross_unreduced' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Unreduzierter Gesamtbetrag brutto.'],
@@ -70,13 +70,12 @@ return static function (
     ];
     $fields = array_diff_key($fields, array_flip($omit));
 
-    // BC: Alle Kernfelder sind Pflicht-Parameter des Read-Model-Konstruktors.
-    foreach ($fields as $name => $field) {
-        $fields[$name]['model'] = ['required' => true, ...$field['model'] ?? []];
-    }
-    foreach ($deprecated as $name) {
-        $fallback = empty($fields[$name]['model']['nonNull']) ? 'null' : '0.0';
-        $fields[$name]['deprecated'] = "since 3.1 – Billomat liefert `{$name}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `{$fallback}`. Wird in 4.0 entfernt.";
+    foreach ($optionsOnly as $name) {
+        if (!empty($fields[$name]['readOnly'])) {
+            unset($fields[$name]);
+        } else {
+            $fields[$name]['optionsOnly'] = true;
+        }
     }
 
     $fields['customfield'] = ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'];
@@ -99,20 +98,33 @@ return static function (
     ];
 
     if ($withOptions) {
+        // BC: toArray() war schon immer anders sortiert als die Properties.
+        // Ohne die Felder aus $omit (Mahnungspositionen kennen z. B. keinen `type`).
+        $toArray = array_values(array_filter([
+            'type', 'article_id', 'title', 'description', 'quantity', 'unit_price', 'unit', 'tax_name', 'tax_rate',
+            'tax_changed_manually', 'reduction', 'position',
+            ...array_keys(array_filter($extra, static fn (array $f): bool => empty($f['readOnly']))),
+        ], static fn (string $name): bool => isset($fields[$name])));
         $definition['createOptions'] = [
             'class' => $prefix . 'ItemCreateOptions',
             'endpoint' => "POST /api/{$path}",
-            // BC: toArray() war schon immer anders sortiert als die Properties.
-            'toArray' => [
-                'type', 'article_id', 'title', 'description', 'quantity', 'unit_price', 'unit', 'tax_name', 'tax_rate',
-                'tax_changed_manually', 'reduction', 'position',
-                ...array_keys(array_filter($extra, static fn (array $f): bool => empty($f['readOnly']))),
-            ],
+            'toArray' => $toArray,
             'doc' => [
                 "Typisierter Payload für POST /{$path} gemäß Billomat-API",
                 'sowie für eingebettete Positionen beim Anlegen des Dokuments.',
                 '',
                 'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert.',
+            ],
+        ];
+        $definition['updateOptions'] = [
+            'class' => $prefix . 'ItemUpdateOptions',
+            'endpoint' => "PUT /api/{$path}/{id}",
+            'toArray' => $toArray,
+            'doc' => [
+                "Typisierter Payload für PUT /{$path}/{id} (Position bearbeiten).",
+                '',
+                'Nur gesetzte (nicht-null) Felder werden serialisiert (Partial Update);',
+                'Billomat lässt nicht gesendete Felder unverändert.',
             ],
         ];
     } else {

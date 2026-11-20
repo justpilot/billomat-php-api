@@ -7,12 +7,19 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\OfferCommentActionKey;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Offer;
-use Justpilot\Billomat\Model\OfferPdf;
+use Justpilot\Billomat\Model\OfferComment;
+use Justpilot\Billomat\Model\OfferItem;
+use Justpilot\Billomat\Model\OfferTag;
+use Justpilot\Billomat\Model\OfferTagCloudEntry;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Offers-Ressource (Angebote / Estimates).
@@ -27,24 +34,52 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
  *  - DELETE /offers/{id}
  *  - PUT    /offers/{id}/complete
  *  - PUT    /offers/{id}/cancel
+ *  - PUT    /offers/{id}/uncancel
  *  - PUT    /offers/{id}/win
  *  - PUT    /offers/{id}/lose
  *  - PUT    /offers/{id}/clear
- *  - PUT    /offers/{id}/undo (Status zurücksetzen)
+ *  - PUT    /offers/{id}/unclear
  *  - POST   /offers/{id}/email
  *  - GET    /offers/{id}/pdf
- *  - PUT    /offers/{id}/upload-signature
  */
 final class OffersApi extends AbstractApi
 {
     /**
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<OfferItem, OfferItemCreateOptions, OfferItemUpdateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'offer', OfferItem::fromArray(...), OfferItemCreateOptions::class, OfferItemUpdateOptions::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<OfferComment, OfferCommentCreateOptions, OfferCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'offer', OfferComment::fromArray(...), OfferCommentCreateOptions::class, OfferCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<OfferTag, OfferTagCloudEntry, OfferTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'offer', OfferTag::fromArray(...), OfferTagCloudEntry::fromArray(...), OfferTagCreateOptions::class);
+    }
+
+    /**
      * Listet Angebote mit optionalen Filtern.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param OfferFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<Offer>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(OfferFilter|array $filters = []): array
     {
         return $this->listResource('/offers', 'offers', 'offer', Offer::fromArray(...), $filters);
     }
@@ -56,11 +91,12 @@ final class OffersApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param OfferFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<Offer>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(OfferFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/offers', 'offers', 'offer', Offer::fromArray(...), $filters);
     }
@@ -73,11 +109,12 @@ final class OffersApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param OfferFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, Offer>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(OfferFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/offers', 'offers', 'offer', Offer::fromArray(...), $filters, $pageSize);
     }
@@ -85,21 +122,21 @@ final class OffersApi extends AbstractApi
     /**
      * Holt ein einzelnes Angebot, oder null wenn nicht gefunden.
      */
+    #[NoDiscard]
     public function get(int $id): ?Offer
     {
-        $data = $this->getJsonOrNull("/offers/{$id}");
+        return $this->getResource("/offers/{$id}", 'offer', Offer::fromArray(...), 'fetching offer');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $offerData = $data['offer'] ?? null;
-
-        if (!\is_array($offerData)) {
-            return null;
-        }
-
-        return Offer::fromArray($offerData);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): Offer
+    {
+        return $this->get($id) ?? throw $this->notFound("/offers/{$id}");
     }
 
     /**
@@ -135,7 +172,7 @@ final class OffersApi extends AbstractApi
     /**
      * Schließt ein Angebot ab (DRAFT → OPEN, vergibt Angebotsnummer).
      */
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -146,8 +183,6 @@ final class OffersApi extends AbstractApi
         $payload = ['offer' => $body];
 
         $this->putVoid("/offers/{$id}/complete", $payload);
-
-        return true;
     }
 
     /**
@@ -155,104 +190,118 @@ final class OffersApi extends AbstractApi
      *
      * @throws ValidationException wenn das Angebot nicht DRAFT ist
      */
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/offers/{$id}");
-
-        return true;
     }
 
-    /** Storniert ein Angebot. */
-    public function cancel(int $id): bool
+    /** Storniert ein Angebot (Status → CANCELED). */
+    public function cancel(int $id): void
     {
         $this->putVoid("/offers/{$id}/cancel");
-
-        return true;
     }
 
-    /** Markiert ein Angebot als gewonnen (Status → ACCEPTED). */
-    public function win(int $id): bool
+    /** Hebt die Stornierung auf (CANCELED → OPEN). */
+    public function uncancel(int $id): void
+    {
+        $this->putVoid("/offers/{$id}/uncancel");
+    }
+
+    /** Markiert ein Angebot als gewonnen (Status → WON). */
+    public function win(int $id): void
     {
         $this->putVoid("/offers/{$id}/win");
-
-        return true;
     }
 
-    /** Markiert ein Angebot als verloren (Status → REJECTED). */
-    public function lose(int $id): bool
+    /** Markiert ein Angebot als verloren (Status → LOST). */
+    public function lose(int $id): void
     {
         $this->putVoid("/offers/{$id}/lose");
-
-        return true;
-    }
-
-    /** Markiert ein Angebot als erledigt (Status → CLEARED). */
-    public function clear(int $id): bool
-    {
-        $this->putVoid("/offers/{$id}/clear");
-
-        return true;
     }
 
     /**
-     * Setzt einen Status zurück auf OPEN (Rückgängigmachen von win/lose/clear/cancel).
+     * Markiert ein gewonnenes Angebot als abgerechnet (WON → CLEARED).
+     *
+     * Aus OPEN lehnt Billomat das mit „status change not possible“ ab.
      */
-    public function undo(int $id): bool
+    public function clear(int $id): void
     {
-        $this->putVoid("/offers/{$id}/undo");
+        $this->putVoid("/offers/{$id}/clear");
+    }
 
-        return true;
+    /** Nimmt die Abgerechnet-Markierung zurück (CLEARED → WON). */
+    public function unclear(int $id): void
+    {
+        $this->putVoid("/offers/{$id}/unclear");
     }
 
     /** Versendet ein Angebot per E-Mail. */
-    public function email(int $id, ?OfferEmailOptions $options = null): bool
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postVoid("/offers/{$id}/email", $payload);
-
-        return true;
     }
 
     /**
-     * Lädt eine unterschriebene PDF-Version des Angebots hoch.
-     */
-    public function uploadSignature(int $id, string $base64Pdf): bool
-    {
-        $payload = ['upload' => ['base64file' => $base64Pdf]];
-
-        $this->putVoid("/offers/{$id}/upload-signature", $payload);
-
-        return true;
-    }
-
-    /**
-     * Ruft das PDF eines Angebots ab.
+     * Versendet ein Angebot postalisch über den Pixelletter-Service.
      *
-     * @return OfferPdf|string OfferPdf im JSON-Modus oder binärer PDF-Inhalt im Raw-Modus
+     * Entspricht POST /offers/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
      */
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): OfferPdf|string
+    public function mail(int $id, ?MailOptions $options = null): void
     {
-        $query = [];
+        $payload = ['mail' => $options?->toArray() ?? []];
 
-        if ($type instanceof InvoicePdfType) {
-            $query['type'] = $type->value;
-        }
+        $this->postVoid("/offers/{$id}/mail", $payload);
+    }
 
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
+    /**
+     * Ruft das PDF eines Angebots als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /offers/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
+     */
+    #[NoDiscard]
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
+    {
+        $data = $this->getJson("/offers/{$id}/pdf", self::pdfQuery($type));
 
-            $response = $this->http->request('GET', "/offers/{$id}/pdf", $query);
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching offer PDF'));
+    }
 
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
-        }
+    /**
+     * Ruft das PDF eines Angebots als binären Inhalt ab (GET /offers/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/offers/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
+    }
 
-        $data = $this->getJson("/offers/{$id}/pdf", $query);
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /offers/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/offers/{$id}", 'offer');
+    }
 
-        return OfferPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching offer PDF'));
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /offers/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/offers/{$id}", 'offer', $value);
     }
 }

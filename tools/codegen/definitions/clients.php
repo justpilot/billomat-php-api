@@ -23,10 +23,17 @@ declare(strict_types=1);
  *   writable    true = in den Options, obwohl die Spec das Feld nicht beim Anlegen nennt.
  *   deprecated  Text für @deprecated am Read-Model.
  *   enum        Name eines Enums aus src/Model/Enum/ (z. B. 'NetGross') als Typ in Model und Options.
- *   model       ['required' => true]  → Konstruktor-Parameter ohne Default
- *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
- *                                       (Enums: über Enum::fromApi(), braucht zusätzlich 'required')
+ *               Pflicht, wenn die Spec eine feste Wertemenge nennt; false = bewusst String.
+ *   enumList    true = kommaseparierte Werte (z. B. Zahlarten) als list<Enum>.
+ *               Typ `map` mit 'enum': Objekt Schlüssel → Enum-Wert als array<string, Enum>
+ *               (read-only; leere und unbekannte Werte fallen heraus).
+ *   model       ['required' => true]  → Billomat liefert das Feld immer (z. B. `id`): nicht-nullbarer Typ ohne Default;
+ *                                       fehlt es, wirft fromArray() eine UnexpectedResponseException
+ *                                       (nicht für Enums: unbekannte Werte werden immer zu null).
+ *                                       Ohne 'required' ist das Feld nullable; einen stillen Ersatzwert
+ *                                       (''/0/false) gibt es nicht.
  *               ['type' => 'int']     → abweichender Typ im Read-Model
+ *               ['fromApi' => true]   → Enum über Enum::fromApi() statt tryFrom() hydrieren (eigene Toleranz)
  *               ['sources' => [...]]  → Billomat-Felder, die beim Hydrieren der Reihe nach probiert werden
  *               ['property' => 'x']   → abweichender Property-Name im Read-Model
  *               ['key' => 'x']        → abweichender Schlüssel in toArray() des Read-Models
@@ -47,7 +54,9 @@ declare(strict_types=1);
  * 'toArray' => [...] an 'model' oder an den Options legt Auswahl und Reihenfolge der
  * toArray()-Schlüssel fest (Billomat-Feldnamen); ohne die Liste gilt die Feldreihenfolge.
  * 'dateObjects' => true an den Options führt Datumsfelder als DateTimeImmutable statt als String.
- * 'items' => ['class' => …, 'wire' => …, 'item' => …] an den Create-Options erzeugt addItem()/getItems()
+ * 'fromArray' => true (oder eine Liste von Doku-Zeilen) an den Create-Options erzeugt ein statisches
+ * fromArray(), das die Options aus einem Billomat-Datensatz baut (z. B. GET /invoices/preset).
+ * 'items' => ['class' => …, 'wire' => …, 'item' => …] an den Create-Options erzeugt den Konstruktor-Parameter `items` und withItem()
  * und sendet die gesammelten Positionen verschachtelt mit (z. B. invoice-items.invoice-item).
  *
  * Nach Änderungen: composer generate
@@ -93,9 +102,14 @@ return [
         ],
     ],
 
+    'filter' => [
+        'class' => 'ClientFilter',
+        'endpoint' => 'GET /api/clients',
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Kunden.'],
-        'name' => ['model' => ['required' => true, 'nonNull' => true], 'doc' => 'Firmenname des Kunden.'],
+        'name' => ['doc' => 'Firmenname des Kunden; leer bei Privatpersonen.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Kunden.'],
         'client_number' => ['type' => 'string', 'writable' => true, 'doc' => 'Kundennummer (frei wählbar).'],
         'number' => ['doc' => 'Laufende Nummer (ohne Präfix).'],
@@ -119,8 +133,8 @@ return [
         'locale' => ['doc' => 'Gebietsschema des Kunden.', 'details' => ['Beispiel: "de_DE"']],
         'tax_number' => ['doc' => 'Steuernummer.'],
         'vat_number' => ['doc' => 'Umsatzsteuer-ID (USt-IdNr.).'],
-        'tax_rule' => ['doc' => 'Steuerregel.'],
-        'net_gross' => ['doc' => 'Preisbasis.'],
+        'tax_rule' => ['doc' => 'Steuerregel.', 'enum' => 'TaxRule'],
+        'net_gross' => ['doc' => 'Preisbasis.', 'enum' => 'NetGross'],
         'currency_code' => ['doc' => 'Währung des Kunden (ISO-Währungscode).', 'details' => ['Beispiel: "EUR"']],
         'debitor_account_number' => ['doc' => 'Debitorennummer.', 'details' => ['Wird häufig als Referenz zur FIBU verwendet.']],
         'price_group' => [
@@ -128,22 +142,20 @@ return [
             'details' => ['Artikel können mehrere Preise haben – die Preisgruppe legt fest,', 'welcher Preis für den Kunden verwendet wird.'],
         ],
         'archived' => ['doc' => 'Archivierungsstatus.', 'details' => ['true = archiviert, false = aktiv.']],
-        // BC: ClientCreateOptions sendet dunning_run seit jeher immer mit (Default false).
         'dunning_run' => [
             'doc' => 'Automatischer Mahnlauf.',
             'details' => ['true = Kunde wird in automatischem Mahnlauf berücksichtigt.'],
-            'create' => ['nonNull' => true, 'default' => false],
         ],
         'reduction' => ['doc' => 'Rabatt in Prozent.'],
-        'discount_rate_type' => ['doc' => 'Typ des Skonto-Satzes.'],
+        'discount_rate_type' => ['doc' => 'Typ des Skonto-Satzes.', 'enum' => 'ValueType'],
         'discount_rate' => ['doc' => 'Skonto-Satz.'],
-        'discount_days_type' => ['doc' => 'Typ des Skonto-Zeitraums.'],
+        'discount_days_type' => ['doc' => 'Typ des Skonto-Zeitraums.', 'enum' => 'ValueType'],
         'discount_days' => ['doc' => 'Skonto-Tage.'],
-        'due_days_type' => ['doc' => 'Typ der Fälligkeit.'],
+        'due_days_type' => ['doc' => 'Typ der Fälligkeit.', 'enum' => 'ValueType'],
         'due_days' => ['doc' => 'Fälligkeit in Tagen nach Rechnungsdatum.'],
-        'reminder_due_days_type' => ['doc' => 'Typ der Mahnfälligkeit.'],
+        'reminder_due_days_type' => ['doc' => 'Typ der Mahnfälligkeit.', 'enum' => 'ValueType'],
         'reminder_due_days' => ['doc' => 'Mahnfälligkeit in Tagen.'],
-        'offer_validity_days_type' => ['doc' => 'Typ der Angebotsgültigkeit.'],
+        'offer_validity_days_type' => ['doc' => 'Typ der Angebotsgültigkeit.', 'enum' => 'ValueType'],
         'offer_validity_days' => ['doc' => 'Angebotsgültigkeit in Tagen.'],
         'bank_account_owner' => ['doc' => 'Kontoinhaber.'],
         'bank_number' => ['doc' => 'Bankleitzahl.'],
@@ -153,14 +165,13 @@ return [
         'bank_iban' => ['doc' => 'IBAN.'],
         'sepa_mandate' => ['doc' => 'SEPA-Mandatsreferenz.'],
         'sepa_mandate_date' => ['doc' => 'Ausstelldatum des SEPA-Mandats.'],
-        'default_payment_types' => ['doc' => 'Standard-Zahlarten (CSV).', 'details' => ['Beispiel: "CASH,BANK_TRANSFER"']],
-        'enable_customerportal' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Kundenportal aktiviert?'],
-        'customerportal_url' => [
-            'type' => 'string',
-            'readOnly' => true,
-            'doc' => 'Persönliche URL zum Kundenportal.',
-            'deprecated' => 'since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.',
+        'default_payment_types' => [
+            'doc' => 'Standard-Zahlarten.',
+            'details' => ['Billomat überträgt sie kommasepariert, z. B. "CASH,BANK_TRANSFER".'],
+            'enum' => 'PaymentType',
+            'enumList' => true,
         ],
+        'enable_customerportal' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Kundenportal aktiviert?'],
         'revenue_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Brutto-Umsatz (read-only Auswertungsfeld).'],
         'revenue_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Netto-Umsatz (read-only Auswertungsfeld).'],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
@@ -168,5 +179,13 @@ return [
         'facturx_identifier' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Kennung für E-Rechnungen (ZUGFeRD/Factur-X).', 'details' => ['Von Billomat geliefert, aber nicht dokumentiert.']],
         'seller_identifier' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Verkäufer-Kennung für E-Rechnungen (ZUGFeRD/Factur-X).', 'details' => ['Von Billomat geliefert, aber nicht dokumentiert.']],
         'dig_exclude' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Von Billomat geliefert, aber nicht dokumentiert.'],
+        'client-property-values' => [
+            'type' => 'list',
+            'readOnly' => true,
+            'list' => ['class' => 'ClientPropertyValue', 'item' => 'client-property-value'],
+            'model' => ['property' => 'propertyValues'],
+            'doc' => 'Attributwerte des Kunden.',
+            'details' => ['Von Billomat geliefert, aber nicht dokumentiert (leer: "").'],
+        ],
     ],
 ];

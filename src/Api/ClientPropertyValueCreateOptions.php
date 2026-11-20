@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/client-property-values.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class ClientPropertyValueCreateOptions
+final readonly class ClientPropertyValueCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, zu dem der Wert gehört.
-         *
-         * Billomat-Feld: client_id
-         * Typ: INT
-         */
-        public int $clientId,
         /**
          * ID der Eigenschaft.
          *
@@ -40,6 +33,18 @@ final class ClientPropertyValueCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `clientPropertyId`. */
+    public function withClientPropertyId(int $clientPropertyId): self
+    {
+        return clone($this, ['clientPropertyId' => $clientPropertyId]);
+    }
+
+    /** Kopie mit geändertem `value`. */
+    public function withValue(mixed $value): self
+    {
+        return clone($this, ['value' => $value]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -48,7 +53,6 @@ final class ClientPropertyValueCreateOptions
     public function toArray(): array
     {
         return [
-            'client_id' => $this->clientId,
             'client_property_id' => $this->clientPropertyId,
             'value' => $this->value,
         ];

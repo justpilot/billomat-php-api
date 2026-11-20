@@ -55,6 +55,15 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'TemplateFilter',
+        'endpoint' => 'GET /api/templates',
+        'fields' => [
+            'type' => ['enum' => 'TemplateDocumentType'],
+            'template_type' => ['enum' => 'TemplateType'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Vorlage.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Vorlage.'],
@@ -84,7 +93,7 @@ return [
             'details' => ['Im Read-Model nur bei UPLOADED und GET /templates/{id} verfügbar.'],
             'update' => ['skip' => true],
         ],
-        'is_default' => ['doc' => 'Standard-Vorlage für den Dokumenttyp?', 'model' => ['nonNull' => true]],
+        'is_default' => ['doc' => 'Standard-Vorlage für den Dokumenttyp?', 'model' => ['required' => true]],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
         'is_background_available' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Ist ein Hintergrundbild für die Vorlage hinterlegt?'],

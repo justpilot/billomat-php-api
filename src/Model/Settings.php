@@ -10,6 +10,8 @@ use Justpilot\Billomat\Model\Enum\NetGross;
 use Justpilot\Billomat\Model\Enum\NumberRangeMode;
 use Justpilot\Billomat\Model\Enum\TemplateEngine;
 
+use const ARRAY_FILTER_USE_KEY;
+
 /**
  * Account-Einstellungen (GET/PUT /api/settings).
  *
@@ -22,6 +24,76 @@ use Justpilot\Billomat\Model\Enum\TemplateEngine;
  */
 final readonly class Settings
 {
+    /** Billomat-Felder, die das Model abbildet; alle anderen landen in {@see $extra}. */
+    private const array FIELDS = [
+        'bcc_addresses' => true,
+        'net_gross' => true,
+        'number_range_mode' => true,
+        'template_engine' => true,
+        'created' => true,
+        'updated' => true,
+        'bgcolor' => true,
+        'color1' => true,
+        'color2' => true,
+        'color3' => true,
+        'currency_code' => true,
+        'locale' => true,
+        'sepa_creditor_id' => true,
+        'article_number_pre' => true,
+        'article_number_length' => true,
+        'article_number_next' => true,
+        'client_number_pre' => true,
+        'client_number_length' => true,
+        'client_number_next' => true,
+        'invoice_number_pre' => true,
+        'invoice_number_length' => true,
+        'invoice_number_next' => true,
+        'invoice_label' => true,
+        'invoice_intro' => true,
+        'invoice_note' => true,
+        'invoice_filename' => true,
+        'due_days' => true,
+        'discount_rate' => true,
+        'discount_days' => true,
+        'offer_number_pre' => true,
+        'offer_number_length' => true,
+        'offer_number_next' => true,
+        'offer_label' => true,
+        'offer_intro' => true,
+        'offer_note' => true,
+        'offer_filename' => true,
+        'offer_validity_days' => true,
+        'confirmation_number_pre' => true,
+        'confirmation_number_length' => true,
+        'confirmation_number_next' => true,
+        'confirmation_label' => true,
+        'confirmation_intro' => true,
+        'confirmation_note' => true,
+        'confirmation_filename' => true,
+        'credit_note_number_pre' => true,
+        'credit_note_number_length' => true,
+        'credit_note_number_next' => true,
+        'credit_note_label' => true,
+        'credit_note_intro' => true,
+        'credit_note_note' => true,
+        'credit_note_filename' => true,
+        'delivery_note_number_pre' => true,
+        'delivery_note_number_length' => true,
+        'delivery_note_number_next' => true,
+        'delivery_note_label' => true,
+        'delivery_note_intro' => true,
+        'delivery_note_note' => true,
+        'delivery_note_filename' => true,
+        'reminder_filename' => true,
+        'reminder_due_days' => true,
+        'letter_label' => true,
+        'letter_intro' => true,
+        'letter_filename' => true,
+        'print_version' => true,
+        'default_email_sender' => true,
+        'taxation' => true,
+    ];
+
     /**
      * @param array<int,string> $priceGroups
      * @param list<string>      $bccAddresses
@@ -163,8 +235,18 @@ final readonly class Settings
          * BCC-Adressen (in Billomat teils als String/CSV geliefert).
          */
         public array $bccAddresses = [],
-        /** taxation (laut Response vorhanden, Format je nach Account ggf. leer) */
-        public ?string $taxation = null
+        /**
+         * Versteuerungsart, z. B. "TARGET" (Soll-Versteuerung); je nach Account leer.
+         *
+         * Billomat dokumentiert die möglichen Werte nicht, deshalb ein String statt eines Enums.
+         */
+        public ?string $taxation = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * @var array<string, mixed>
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -178,7 +260,7 @@ final readonly class Settings
         // price_group2..n
         $priceGroups = [];
         foreach ($data as $k => $v) {
-            if (\is_string($k) && preg_match('/^price_group(\d+)$/', $k, $m) && \is_string($v)) {
+            if (\is_string($k) && 1 === preg_match('/^price_group(\d+)$/', $k, $m) && \is_string($v)) {
                 $priceGroups[(int) $m[1]] = $v;
             }
         }
@@ -197,10 +279,10 @@ final readonly class Settings
             if (\is_string($tmp)) {
                 $bcc = [$tmp];
             } elseif (\is_array($tmp)) {
-                $bcc = array_values(array_filter(array_map(
-                    static fn ($x): ?string => \is_string($x) ? $x : null,
-                    $tmp
-                )));
+                $bcc = array_values(array_filter(
+                    $tmp,
+                    static fn (mixed $x): bool => \is_string($x) && '' !== $x,
+                ));
             }
         }
 
@@ -284,6 +366,12 @@ final readonly class Settings
             defaultEmailSender: ScalarCaster::toStringOrNull($data['default_email_sender'] ?? null),
             bccAddresses: $bcc,
             taxation: ScalarCaster::toStringOrNull($data['taxation'] ?? null),
+            // price_group2..n bildet $priceGroups ab.
+            extra: array_filter(
+                array_diff_key($data, self::FIELDS),
+                static fn (string|int $key): bool => 1 !== preg_match('/^price_group\d+$/', (string) $key),
+                ARRAY_FILTER_USE_KEY,
+            ),
         );
     }
 }

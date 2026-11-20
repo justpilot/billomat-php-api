@@ -7,12 +7,22 @@ namespace Justpilot\Billomat\Api;
 use Generator;
 use Justpilot\Billomat\Exception\AuthenticationException;
 use Justpilot\Billomat\Exception\HttpException;
+use Justpilot\Billomat\Exception\NotFoundException;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Model\CreditNote;
-use Justpilot\Billomat\Model\CreditNotePdf;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\CreditNoteComment;
+use Justpilot\Billomat\Model\CreditNoteGroup;
+use Justpilot\Billomat\Model\CreditNoteItem;
+use Justpilot\Billomat\Model\CreditNotePayment;
+use Justpilot\Billomat\Model\CreditNoteTag;
+use Justpilot\Billomat\Model\CreditNoteTagCloudEntry;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
+use Justpilot\Billomat\Model\Enum\CreditNoteGroupBy;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use NoDiscard;
 
 /**
  * API-Wrapper für die Billomat-Credit-Notes-Ressource (Gutschriften).
@@ -35,11 +45,48 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 final class CreditNotesApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * Positionen, siehe {@see ItemsApi}.
+     *
+     * @var ItemsApi<CreditNoteItem, CreditNoteItemCreateOptions, CreditNoteItemUpdateOptions>
+     */
+    public private(set) ItemsApi $items {
+        get => $this->items ??= new ItemsApi($this->http, 'credit-note', CreditNoteItem::fromArray(...), CreditNoteItemCreateOptions::class, CreditNoteItemUpdateOptions::class);
+    }
+
+    /**
+     * Zahlungen, siehe {@see PaymentsApi}.
+     *
+     * @var PaymentsApi<CreditNotePayment, CreditNotePaymentCreateOptions, CreditNotePaymentFilter>
+     */
+    public private(set) PaymentsApi $payments {
+        get => $this->payments ??= new PaymentsApi($this->http, 'credit-note', CreditNotePayment::fromArray(...), CreditNotePaymentCreateOptions::class, CreditNotePaymentFilter::class);
+    }
+
+    /**
+     * Kommentare, siehe {@see CommentsApi}.
+     *
+     * @var CommentsApi<CreditNoteComment, CreditNoteCommentCreateOptions, CreditNoteCommentActionKey>
+     */
+    public private(set) CommentsApi $comments {
+        get => $this->comments ??= new CommentsApi($this->http, 'credit-note', CreditNoteComment::fromArray(...), CreditNoteCommentCreateOptions::class, CreditNoteCommentActionKey::class);
+    }
+
+    /**
+     * Schlagworte, siehe {@see TagsApi}.
+     *
+     * @var TagsApi<CreditNoteTag, CreditNoteTagCloudEntry, CreditNoteTagCreateOptions>
+     */
+    public private(set) TagsApi $tags {
+        get => $this->tags ??= new TagsApi($this->http, 'credit-note', CreditNoteTag::fromArray(...), CreditNoteTagCloudEntry::fromArray(...), CreditNoteTagCreateOptions::class);
+    }
+
+    /**
+     * @param CreditNoteFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<CreditNote>
      */
-    public function list(array $filters = []): array
+    #[NoDiscard]
+    public function list(CreditNoteFilter|array $filters = []): array
     {
         return $this->listResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters);
     }
@@ -51,11 +98,12 @@ final class CreditNotesApi extends AbstractApi
      * `@total` aus dem Response-Envelope als {@see PageInfo} zurück. Nützlich
      * für UI mit klassischer "Seite 1/12, 234 Treffer"-Anzeige.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param CreditNoteFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<CreditNote>
      */
-    public function listPage(array $filters = []): Page
+    #[NoDiscard]
+    public function listPage(CreditNoteFilter|array $filters = []): Page
     {
         return $this->listResourcePage('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters);
     }
@@ -68,30 +116,57 @@ final class CreditNotesApi extends AbstractApi
      * Stripe-SDK). Filter werden bei jeder Page-Anfrage mitgesendet; `page`
      * und `per_page` darin werden überschrieben.
      *
-     * @param array<string, scalar|array|null> $filters
+     * @param CreditNoteFilter|array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, CreditNote>
      */
-    public function iterateAll(array $filters = [], int $pageSize = 100): Generator
+    #[NoDiscard]
+    public function iterateAll(CreditNoteFilter|array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource('/credit-notes', 'credit-notes', 'credit-note', CreditNote::fromArray(...), $filters, $pageSize);
     }
 
+    /**
+     * Listet Gutschriften aggregiert nach einem oder mehreren Kriterien.
+     *
+     * Entspricht GET /credit-notes?group_by=...
+     *
+     * Mehrere Werte werden in der Reihenfolge der Aggregation als CSV gesendet
+     * ("client,year" gruppiert zuerst nach Kunde, dann nach Jahr).
+     *
+     * @param CreditNoteGroupBy|non-empty-list<CreditNoteGroupBy>            $groupBy
+     * @param CreditNoteFilter|array<string, scalar|array<scalar|null>|null> $filters optionale zusätzliche Filter (analog zu list())
+     *
+     * @return list<CreditNoteGroup>
+     */
+    #[NoDiscard]
+    public function listGrouped(CreditNoteGroupBy|array $groupBy, CreditNoteFilter|array $filters = []): array
+    {
+        $values = \is_array($groupBy) ? $groupBy : [$groupBy];
+
+        $csv = implode(',', array_map(static fn (CreditNoteGroupBy $g): string => $g->value, $values));
+
+        $query = self::filterQuery($filters);
+        $query['group_by'] = $csv;
+
+        return $this->listResource('/credit-notes', 'credit-note-groups', 'credit-note-group', CreditNoteGroup::fromArray(...), $query);
+    }
+
+    #[NoDiscard]
     public function get(int $id): ?CreditNote
     {
-        $data = $this->getJsonOrNull("/credit-notes/{$id}");
+        return $this->getResource("/credit-notes/{$id}", 'credit-note', CreditNote::fromArray(...), 'fetching credit note');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['credit-note'] ?? null;
-
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return CreditNote::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(int $id): CreditNote
+    {
+        return $this->get($id) ?? throw $this->notFound("/credit-notes/{$id}");
     }
 
     /**
@@ -117,7 +192,7 @@ final class CreditNotesApi extends AbstractApi
         return CreditNote::fromArray($this->unwrapEnvelope($data, 'credit-note', 'updating credit note'));
     }
 
-    public function complete(int $id, ?int $templateId = null): bool
+    public function complete(int $id, ?int $templateId = null): void
     {
         $body = [];
 
@@ -128,74 +203,96 @@ final class CreditNotesApi extends AbstractApi
         $payload = ['credit-note' => $body];
 
         $this->putVoid("/credit-notes/{$id}/complete", $payload);
-
-        return true;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
         $this->deleteVoid("/credit-notes/{$id}");
-
-        return true;
     }
 
-    public function cancel(int $id): bool
+    public function cancel(int $id): void
     {
         $this->putVoid("/credit-notes/{$id}/cancel");
-
-        return true;
     }
 
-    public function uncancel(int $id): bool
+    public function uncancel(int $id): void
     {
         $this->putVoid("/credit-notes/{$id}/uncancel");
-
-        return true;
     }
 
-    public function email(int $id, ?CreditNoteEmailOptions $options = null): bool
+    public function email(int $id, ?EmailOptions $options = null): void
     {
         $payload = ['email' => $options?->toArray() ?? []];
 
         $this->postVoid("/credit-notes/{$id}/email", $payload);
-
-        return true;
     }
 
-    public function uploadSignature(int $id, string $base64Pdf): bool
+    /**
+     * Versendet eine Gutschrift postalisch über den Pixelletter-Service.
+     *
+     * Entspricht POST /credit-notes/{id}/mail.
+     *
+     * ⚠️ Kostenpflichtige Aktion.
+     */
+    public function mail(int $id, ?MailOptions $options = null): void
+    {
+        $payload = ['mail' => $options?->toArray() ?? []];
+
+        $this->postVoid("/credit-notes/{$id}/mail", $payload);
+    }
+
+    public function uploadSignature(int $id, string $base64Pdf): void
     {
         $payload = ['upload' => ['base64file' => $base64Pdf]];
 
         $this->putVoid("/credit-notes/{$id}/upload-signature", $payload);
-
-        return true;
     }
 
     /**
-     * @return CreditNotePdf|string PDF-Model im JSON-Modus, binär im Raw-Modus
+     * Ruft das PDF einer Gutschrift als JSON ab (Metadaten und base64-kodierter Inhalt).
+     *
+     * Entspricht GET /credit-notes/{id}/pdf. Optionaler Typ: `PdfType::SIGNED` (type=signed)
+     * oder `PdfType::PRINT` (type=print). Die rohen Bytes liefert {@see pdfContent()}.
      */
-    public function pdf(int $id, ?InvoicePdfType $type = null, bool $rawPdf = false): CreditNotePdf|string
+    #[NoDiscard]
+    public function pdf(int $id, ?PdfType $type = null): DocumentPdf
     {
-        $query = [];
+        $data = $this->getJson("/credit-notes/{$id}/pdf", self::pdfQuery($type));
 
-        if ($type instanceof InvoicePdfType) {
-            $query['type'] = $type->value;
-        }
+        return DocumentPdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching credit note PDF'));
+    }
 
-        if ($rawPdf) {
-            $query['format'] = 'pdf';
+    /**
+     * Ruft das PDF einer Gutschrift als binären Inhalt ab (GET /credit-notes/{id}/pdf?format=pdf).
+     *
+     * @throws UnexpectedResponseException wenn Billomat kein PDF liefert
+     */
+    #[NoDiscard]
+    public function pdfContent(int $id, ?PdfType $type = null): string
+    {
+        return $this->getPdf("/credit-notes/{$id}/pdf", [...self::pdfQuery($type), 'format' => 'pdf']);
+    }
 
-            $response = $this->http->request('GET', "/credit-notes/{$id}/pdf", $query);
+    /**
+     * Liest das eigene Metadaten-Feld `customfield` (z. B. die ID im eigenen System); null, wenn es leer ist.
+     *
+     * Entspricht GET /credit-notes/{id}/customfield. Doku: https://www.billomat.com/api/grundlagen/eigene-meta-daten/
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getCustomField(int $id): ?string
+    {
+        return $this->fetchCustomField("/credit-notes/{$id}", 'credit-note');
+    }
 
-            try {
-                return $response->getContent();
-            } catch (HttpExceptionInterface $e) {
-                throw $this->mapHttpException($e);
-            }
-        }
-
-        $data = $this->getJson("/credit-notes/{$id}/pdf", $query);
-
-        return CreditNotePdf::fromArray($this->unwrapEnvelope($data, 'pdf', 'fetching credit note PDF'));
+    /**
+     * Setzt das eigene Metadaten-Feld `customfield`; ein leerer String leert es.
+     *
+     * Entspricht PUT /credit-notes/{id}/customfield. Über die Update-Options lässt sich das Feld nicht setzen.
+     */
+    public function setCustomField(int $id, string $value): void
+    {
+        $this->storeCustomField("/credit-notes/{$id}", 'credit-note', $value);
     }
 }

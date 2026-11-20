@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
-use DateTimeImmutable;
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoiceItemType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\InvoiceItem;
+use Justpilot\Billomat\Model\Money;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -15,6 +16,8 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(InvoiceItem::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 final class InvoiceItemTest extends TestCase
 {
     #[Test]
@@ -48,24 +51,32 @@ final class InvoiceItemTest extends TestCase
         self::assertSame(2, $item->position);
         self::assertSame('Stück', $item->unit);
         self::assertSame(3.5, $item->quantity);
-        self::assertSame(49.90, $item->unitPrice);
+        self::assertSame('49.9', $item->unitPrice->toString());
         self::assertSame('MwSt', $item->taxName);
         self::assertSame(19.0, $item->taxRate);
         self::assertTrue($item->taxChangedManually);
         self::assertSame('10%', $item->reduction);
-        self::assertSame(InvoiceItemType::SERVICE, $item->type);
-        self::assertSame(208.05, $item->totalGross);
-        self::assertSame(174.83, $item->totalNet);
-        self::assertInstanceOf(DateTimeImmutable::class, $item->created);
+        self::assertSame(ItemType::SERVICE, $item->type);
+        self::assertSame('208.05', $item->totalGross?->toString());
+        self::assertSame('174.83', $item->totalNet?->toString());
     }
 
     #[Test]
-    public function itDefaultsRequiredQuantityAndPriceToZero(): void
+    public function itRejectsItemWithoutQuantity(): void
     {
-        $item = InvoiceItem::fromArray([]);
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('InvoiceItem without a valid "quantity" field');
 
-        self::assertSame(0.0, $item->quantity);
-        self::assertSame(0.0, $item->unitPrice);
+        InvoiceItem::fromArray(['id' => 1, 'unit_price' => '9.5']);
+    }
+
+    #[Test]
+    public function itRejectsItemWithoutUnitPrice(): void
+    {
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('InvoiceItem without a valid "unit_price" field');
+
+        InvoiceItem::fromArray(['id' => 1, 'quantity' => '1']);
     }
 
     #[Test]
@@ -73,6 +84,7 @@ final class InvoiceItemTest extends TestCase
     {
         // article_id ist optional und wird teils als "" geliefert
         $item = InvoiceItem::fromArray([
+            'id' => 1,
             'quantity' => 1,
             'unit_price' => 10,
             'article_id' => '',
@@ -86,6 +98,7 @@ final class InvoiceItemTest extends TestCase
     {
         // Billomat-Doku lässt zwei Werte zu (SERVICE/PRODUCT); andere Eingaben dürfen nicht aufgespielt werden
         $item = InvoiceItem::fromArray([
+            'id' => 1,
             'quantity' => 1,
             'unit_price' => 1,
             'type' => 'WHATEVER',
@@ -95,21 +108,10 @@ final class InvoiceItemTest extends TestCase
     }
 
     #[Test]
-    public function itHandlesInvalidCreatedGracefully(): void
-    {
-        $item = InvoiceItem::fromArray([
-            'quantity' => 1,
-            'unit_price' => 1,
-            'created' => 'invalid',
-        ]);
-
-        self::assertNull($item->created);
-    }
-
-    #[Test]
     public function toArraySerializesEnumValue(): void
     {
         $item = InvoiceItem::fromArray([
+            'id' => 1,
             'quantity' => 1,
             'unit_price' => 1,
             'type' => 'PRODUCT',

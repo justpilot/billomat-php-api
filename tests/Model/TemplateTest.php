@@ -42,7 +42,7 @@ final class TemplateTest extends TestCase
         self::assertSame(TemplateType::UPLOADED, $template->templateType);
         self::assertSame('Custom Invoice', $template->name);
         self::assertSame(TemplateFormat::DOCX, $template->format);
-        self::assertSame('BASE64==', $template->base64file);
+        self::assertSame('BASE64==', $template->base64File);
         self::assertTrue($template->isDefault);
     }
 
@@ -58,7 +58,7 @@ final class TemplateTest extends TestCase
         ]);
 
         self::assertNull($template->format);
-        self::assertNull($template->base64file);
+        self::assertNull($template->base64File);
         self::assertFalse($template->isDefault);
         self::assertSame(TemplateType::DEFINED, $template->templateType);
     }
@@ -92,6 +92,7 @@ final class TemplateTest extends TestCase
     {
         $template = Template::fromArray([
             'id' => 1,
+            'is_default' => '0',
             'type' => 'BOGUS',
             'template_type' => 'BOGUS',
             'format' => 'jpg',
@@ -105,7 +106,7 @@ final class TemplateTest extends TestCase
     #[Test]
     public function itHandlesInvalidCreatedDateGracefully(): void
     {
-        $template = Template::fromArray(['id' => 1, 'created' => 'invalid']);
+        $template = Template::fromArray(['id' => 1, 'is_default' => '0', 'created' => 'invalid']);
 
         self::assertNull($template->created);
     }

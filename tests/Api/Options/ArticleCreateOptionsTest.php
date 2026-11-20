@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api\Options;
 
 use Justpilot\Billomat\Api\ArticleCreateOptions;
-use Justpilot\Billomat\Model\Enum\ArticleType;
+use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -17,9 +17,11 @@ final class ArticleCreateOptionsTest extends TestCase
     #[Test]
     public function itSerializesTypeAndPurchasePriceNetGrossAsApiStrings(): void
     {
-        $options = new ArticleCreateOptions(title: 'Beratung');
-        $options->type = ArticleType::SERVICE;
-        $options->purchasePriceNetGross = NetGross::NET;
+        $options = new ArticleCreateOptions(
+            title: 'Beratung',
+            type: ItemType::SERVICE,
+            purchasePriceNetGross: NetGross::NET,
+        );
 
         $payload = $options->toArray();
 

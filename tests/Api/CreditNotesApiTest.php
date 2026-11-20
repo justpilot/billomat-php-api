@@ -6,25 +6,29 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
-use Justpilot\Billomat\Api\CreditNoteEmailOptions;
 use Justpilot\Billomat\Api\CreditNoteItemCreateOptions;
 use Justpilot\Billomat\Api\CreditNotesApi;
 use Justpilot\Billomat\Api\CreditNoteUpdateOptions;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\CreditNote;
-use Justpilot\Billomat\Model\CreditNotePdf;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\Enum\PdfType;
+use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -32,25 +36,27 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(CreditNotesApi::class)]
 #[CoversClass(CreditNoteCreateOptions::class)]
 #[CoversClass(CreditNoteUpdateOptions::class)]
-#[CoversClass(CreditNoteEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(CreditNote::class)]
-#[CoversClass(CreditNotePdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(CreditNoteStatus::class)]
 #[UsesClass(CreditNoteItemCreateOptions::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(Money::class)]
 final class CreditNotesApiTest extends TestCase
 {
     #[Test]
     public function itListsCreditNotes(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'credit-notes' => [
@@ -64,7 +70,7 @@ final class CreditNotesApiTest extends TestCase
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -86,8 +92,8 @@ final class CreditNotesApiTest extends TestCase
                     'status' => CreditNoteStatus::OPEN->value,
                     'credit_note_number' => 'GS-2026-0001',
                     'invoice_id' => 42,
-                    'open_amount' => 50.0,
-                    'paid_amount' => 0.0,
+                    'open_amount' => '50',
+                    'paid_amount' => '0',
                 ],
             ], JSON_THROW_ON_ERROR);
 
@@ -95,7 +101,7 @@ final class CreditNotesApiTest extends TestCase
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -105,7 +111,7 @@ final class CreditNotesApiTest extends TestCase
         self::assertSame(CreditNoteStatus::OPEN, $note->status);
         self::assertSame('GS-2026-0001', $note->creditNoteNumber);
         self::assertSame(42, $note->invoiceId);
-        self::assertSame(50.0, $note->openAmount);
+        self::assertSame('50', $note->openAmount?->toString());
     }
 
     #[Test]
@@ -116,7 +122,7 @@ final class CreditNotesApiTest extends TestCase
         ]);
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -126,10 +132,10 @@ final class CreditNotesApiTest extends TestCase
     #[Test]
     public function itCreatesCreditNoteViaPost(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'credit-note' => [
@@ -143,36 +149,37 @@ final class CreditNotesApiTest extends TestCase
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new CreditNoteCreateOptions(clientId: 123);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->invoiceId = 99;
-        $opts->title = 'Korrektur';
+        $opts = new CreditNoteCreateOptions(
+            clientId: 123,
+            date: new DateTimeImmutable('2026-03-01'),
+            title: 'Korrektur',
+            invoiceId: 99,
+        );
 
-        $item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: 50.0);
-        $opts->addItem($item);
+        $item = new CreditNoteItemCreateOptions(quantity: 1.0, unitPrice: Money::of('50'));
+        $opts = $opts->withItem($item);
 
         $created = $api->create($opts);
 
         self::assertSame(777, $created->id);
-        self::assertSame('POST', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/credit-notes', $captured['url']);
+        self::assertSame('POST', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/credit-notes', $captured->url);
 
-        $payload = $this->extractJsonPayload($captured['options']);
-        self::assertSame(99, $payload['credit-note']['invoice_id']);
-        self::assertCount(1, $payload['credit-note']['credit-note-items']['credit-note-item']);
+        self::assertSame(99, $captured->jsonAt('credit-note', 'invoice_id'));
+        self::assertCount(1, $captured->jsonArray('credit-note', 'credit-note-items', 'credit-note-item'));
     }
 
     #[Test]
     public function itUpdatesCreditNote(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'credit-note' => ['id' => 777, 'client_id' => 123, 'title' => 'Geändert'],
@@ -182,17 +189,16 @@ final class CreditNotesApiTest extends TestCase
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new CreditNoteUpdateOptions();
-        $opts->title = 'Geändert';
+        $opts = new CreditNoteUpdateOptions(title: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->title);
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
@@ -200,61 +206,58 @@ final class CreditNotesApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->complete(1, 5));
-        self::assertTrue($api->cancel(2));
-        self::assertTrue($api->uncancel(3));
-        self::assertTrue($api->delete(4));
+        $api->complete(1, 5);
+        $api->cancel(2);
+        $api->uncancel(3);
+        $api->delete(4);
 
-        self::assertSame('https://mycompany.billomat.net/api/credit-notes/1/complete', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/credit-notes/2/cancel', $captured[1]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/credit-notes/3/uncancel', $captured[2]['url']);
-        self::assertSame('DELETE', $captured[3]['method']);
+        self::assertSame('https://mycompany.billomat.net/api/credit-notes/1/complete', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/credit-notes/2/cancel', $captured[1]->url);
+        self::assertSame('https://mycompany.billomat.net/api/credit-notes/3/uncancel', $captured[2]->url);
+        self::assertSame('DELETE', $captured[3]->method);
     }
 
     #[Test]
     public function itEmailsCreditNote(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new CreditNoteEmailOptions();
-        $opts->from = 'me@example.com';
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(from: 'me@example.com', to: ['kunde@example.com']);
 
-        self::assertTrue($api->email(42, $opts));
+        $api->email(42, $opts);
 
-        $payload = $this->extractJsonPayload($captured['options']);
-        self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
+        self::assertSame(['kunde@example.com'], $captured->jsonAt('email', 'recipients', 'to'));
     }
 
     #[Test]
     public function itFetchesCreditNotePdfInJsonMode(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'pdf' => [
@@ -271,80 +274,59 @@ final class CreditNotesApiTest extends TestCase
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(CreditNotePdf::class, $pdf);
-        self::assertSame(240, $pdf->creditNoteId);
+        self::assertSame(240, $pdf->documentId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
-        self::assertSame('https://mycompany.billomat.net/api/credit-notes/240/pdf', $captured['url']);
+        self::assertSame('https://mycompany.billomat.net/api/credit-notes/240/pdf', $captured->url);
     }
 
     #[Test]
     public function itFetchesRawPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             return new MockResponse('%PDF-1.4 RAW%', ['http_code' => 200]);
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, InvoicePdfType::SIGNED, rawPdf: true);
+        $result = $api->pdfContent(777, PdfType::SIGNED);
 
         self::assertIsString($result);
-        self::assertStringContainsString('format=pdf', $captured['url']);
-        self::assertStringContainsString('type=signed', $captured['url']);
+        self::assertStringContainsString('format=pdf', $captured->url);
+        self::assertStringContainsString('type=signed', $captured->url);
     }
 
     #[Test]
     public function itUploadsSignaturePdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
         $base64 = base64_encode('PDF-FAKE');
-        self::assertTrue($api->uploadSignature(555, $base64));
-        self::assertSame('PUT', $captured['method']);
-    }
-
-    /**
-     * @param array<string,mixed> $options
-     *
-     * @return array<string,mixed>|null
-     */
-    private function extractJsonPayload(array $options): ?array
-    {
-        $payload = $options['json'] ?? null;
-
-        if (null === $payload && isset($options['body']) && \is_string($options['body']) && '' !== $options['body']) {
-            $decoded = json_decode($options['body'], true, flags: JSON_THROW_ON_ERROR);
-
-            if (\is_array($decoded)) {
-                return $decoded;
-            }
-        }
-
-        return \is_array($payload) ? $payload : null;
+        $api->uploadSignature(555, $base64);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
@@ -357,7 +339,7 @@ final class CreditNotesApiTest extends TestCase
         ));
 
         $api = new CreditNotesApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

@@ -21,7 +21,6 @@ final class AccountIntegrationTest extends AbstractBillomatIntegrationTestCase
 
         $account = $billomat->account->get();
 
-        self::assertNotNull($account->client->id);
         self::assertNotSame('', $account->client->name);
 
         foreach ($account->quotas as $quota) {

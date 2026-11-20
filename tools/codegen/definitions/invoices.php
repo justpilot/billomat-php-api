@@ -10,7 +10,6 @@ declare(strict_types=1);
  * Nach Änderungen: composer generate
  */
 
-$gone = static fn (string $field): string => "since 3.1 – Billomat liefert `{$field}` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.";
 
 $optionsOrder = static fn (string ...$swap): array => [
     'client_id', 'contact_id', 'address', 'number_pre', 'number', 'number_length', 'date', 'supply_date', 'supply_date_type',
@@ -42,12 +41,14 @@ return [
         'dateObjects' => true,
         'items' => ['class' => 'InvoiceItemCreateOptions', 'wire' => 'invoice-items', 'item' => 'invoice-item'],
         'toArray' => $optionsOrder('currency_code', 'net_gross'),
+        // Für InvoicesApi::preset(): Billomat liefert den Entwurf mit Rechnungs-Feldnamen.
+        'fromArray' => ['Grundlage für {@see InvoicesApi::preset()}: Billomat liefert den Rechnungsentwurf mit diesen Feldnamen.'],
         'doc' => [
             'Typisierter Payload für POST /invoices gemäß Billomat-API.',
             '',
             'Null-Werte bedeuten "nicht gesetzt" und werden beim Serialisieren ignoriert,',
             'sodass Billomat seine Defaults verwenden kann.',
-            'Positionen lassen sich beim Anlegen über addItem() direkt mitsenden.',
+            'Positionen lassen sich beim Anlegen über `items:` bzw. withItem() direkt mitsenden.',
         ],
     ],
 
@@ -66,9 +67,18 @@ return [
     ],
 
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
+    'filter' => [
+        'class' => 'InvoiceFilter',
+        'endpoint' => 'GET /api/invoices',
+        'fields' => [
+            'status' => ['enum' => 'InvoiceStatus'],
+            'payment_type' => ['enum' => 'PaymentType'],
+        ],
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Rechnung.'],
-        'client_id' => ['model' => ['required' => true, 'nonNull' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
+        'client_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Rechnung.'],
         'invoice_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Rechnungsnummer (kann bei DRAFT leer sein).'],
@@ -107,10 +117,11 @@ return [
         'recurring_id' => ['doc' => 'ID der Abo-Rechnung, aus der die Rechnung entstanden ist.'],
         'taxes' => ['type' => 'taxes', 'readOnly' => true, 'doc' => 'Steuerzeilen der Rechnung (Zusammenfassung pro Steuersatz).'],
         'payment_types' => [
-            'doc' => 'Akzeptierte Zahlungsarten (kommasepariert).',
-            'details' => ['Beispiel: "BANK_TRANSFER,CASH"'],
+            'doc' => 'Akzeptierte Zahlungsarten.',
+            'details' => ['Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".'],
+            'enum' => 'PaymentType',
+            'enumList' => true,
         ],
-        'customerportal_url' => ['type' => 'string', 'readOnly' => true, 'doc' => 'URL zum Customer-Portal für diese Rechnung.', 'deprecated' => $gone('customerportal_url')],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Rechnung abgeschlossen wird.'],
         'invoice-items' => [
             'type' => 'list',

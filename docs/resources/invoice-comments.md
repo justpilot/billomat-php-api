@@ -1,111 +1,125 @@
-<!-- Quelle: https://www.billomat.com/api/rechnungen/kommentare/ -->
+<!-- Source: https://www.billomat.com/api/rechnungen/kommentare/ -->
 
 # Invoice Comments (Rechnungskommentare)
 
-API-Wrapper für Kommentare an Rechnungen unter `/invoice-comments`.
+API wrapper for invoice comments at `/invoice-comments`.
 
-## Zugriff
+## Access
 
 ```php
-$billomat->invoiceComments
+$billomat->invoices->comments
 ```
 
-`Justpilot\Billomat\Api\InvoiceCommentsApi`.
+The generic `Justpilot\Billomat\Api\CommentsApi`, typed for `InvoiceComment`, `InvoiceCommentCreateOptions` and `InvoiceCommentActionKey`.
 
-## Überblick
+## Overview
 
-Billomat protokolliert für jede Rechnung einen Strom von Kommentaren — teils system-getrieben (Statuswechsel, Zahlungseingänge, Mailversand), teils manuell durch User. Beide Sorten landen in derselben Ressource und unterscheiden sich nur über das Feld `actionkey`:
+For each invoice, Billomat records a stream of comments: some are system-generated (status changes, received payments, emails sent), some are written manually by users. Both kinds live in the same resource and differ only in the `actionkey` field:
 
-- **System-Kommentare** haben `actionkey` gesetzt (`COMPLETE`, `PAYMENT`, `EMAIL`, …) und `user_id = null`.
-- **Manuelle Kommentare** haben typischerweise kein `actionkey` und eine konkrete `user_id`.
+- **System comments** have `actionkey` set (`COMPLETE`, `PAYMENT`, `EMAIL`, …) and `user_id = null`.
+- **Manual comments** usually have no `actionkey` and a specific `user_id`.
 
-## Endpunkt-Übersicht
+## Endpoints
 
-| Methode | HTTP | Pfad |
+| Method | HTTP | Path |
 |---|---|---|
-| `listByInvoice($invoiceId, $actionKeys?)` | GET | `/invoice-comments?invoice_id={id}` |
-| `get($id)` | GET | `/invoice-comments/{id}` |
-| `create($options)` | POST | `/invoice-comments` |
+| `list($parentId, $filters?)` | GET | `/invoice-comments?invoice_id={id}` |
+| `listPage(…)` / `iterateAll(…, $pageSize?)` | GET | `/invoice-comments?invoice_id={id}` (paginated) |
+| `get($id)` / `getOrFail($id)` | GET | `/invoice-comments/{id}` |
+| `create($parentId, $options)` | POST | `/invoice-comments` |
 | `delete($id)` | DELETE | `/invoice-comments/{id}` |
 
-Es gibt bewusst keine `list()` ohne `invoice_id` — Billomat verlangt den Filter zwingend.
+There is intentionally no `list()` without `invoice_id`; Billomat requires the filter.
 
-## Methoden
+## Methods
 
-### `listByInvoice(int $invoiceId, ?array $actionKeys = null): list<InvoiceComment>`
+### `list(int $parentId, CommentFilter|array $filters = []): list<InvoiceComment>`
 
-Listet alle Kommentare einer Rechnung. Optional kann auf bestimmte ActionKey-Typen gefiltert werden; die Liste wird als CSV an Billomat geschickt.
+Lists all comments of an invoice. `CommentFilter` can optionally filter by `InvoiceCommentActionKey` values (`actionKeys`); the list is sent to Billomat comma-separated (`actionkey=PAYMENT,DUNNING`). Passing a different enum throws an `InvalidArgumentException`.
 
 ```php
+use Justpilot\Billomat\Api\CommentFilter;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 
-// Alle Kommentare
-$all = $billomat->invoiceComments->listByInvoice(98765);
+// All comments
+$all = $billomat->invoices->comments->list(98765);
 
-// Nur Zahlungs- und Mahnungseinträge
-$financial = $billomat->invoiceComments->listByInvoice(
+// Only payment and dunning entries
+$financial = $billomat->invoices->comments->list(
     98765,
-    [InvoiceCommentActionKey::PAYMENT, InvoiceCommentActionKey::DUNNING],
+    new CommentFilter(actionKeys: [InvoiceCommentActionKey::PAYMENT, InvoiceCommentActionKey::DUNNING]),
+);
+
+// Newest first, 20 per page
+$latest = $billomat->invoices->comments->list(
+    98765,
+    new CommentFilter(orderBy: OrderBy::desc('created'), perPage: 20),
 );
 ```
 
-### `get(int $id): ?InvoiceComment`
+`CommentFilter` (`actionKeys`, `orderBy`, `page`, `perPage`, `extra`, plus `withActionKeys(...)` and the other withers) filters, sorts and paginates. `listPage()` and `iterateAll()` take the same arguments (`iterateAll()` additionally `$pageSize`); see [Pagination](../advanced/pagination.md).
 
-Liefert `null` bei 404.
+### `get(int $id): ?InvoiceComment` / `getOrFail(int $id): InvoiceComment`
 
-### `create(InvoiceCommentCreateOptions $options): InvoiceComment`
+`get()` returns `null` on 404; `getOrFail()` throws a `NotFoundException` instead.
+
+### `create(int $parentId, InvoiceCommentCreateOptions $options): InvoiceComment`
 
 ```php
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 
-$comment = $billomat->invoiceComments->create(
+$comment = $billomat->invoices->comments->create(
+    98765,
     new InvoiceCommentCreateOptions(
-        invoiceId: 98765,
-        comment: 'Kunde meldete sich zur Klärung — Rückruf vereinbart 2026-06-05.',
+        comment: 'Client called for clarification; call back scheduled for 2026-06-05.',
     ),
 );
 ```
 
-`actionkey` ist optional und sollte für manuelle Kommentare leer gelassen werden — Billomat befüllt das Feld bei systemischen Aktionen automatisch.
+`actionKey` is optional and should be left empty for manual comments; Billomat fills it automatically for system actions.
 
-### `delete(int $id): bool`
+### `delete(int $id): void`
 
-## Write-Modell: `InvoiceCommentCreateOptions`
+Deletes a comment. Errors are thrown as exceptions.
 
-Konstruktor: `new InvoiceCommentCreateOptions(int $invoiceId, string $comment)`.
+## Write model: `InvoiceCommentCreateOptions`
 
-| Property | Billomat-Feld | Typ | Notes |
+Constructor: `new InvoiceCommentCreateOptions(string $comment, …)`. The object is immutable (`final readonly`) and has a `with*()` method per field. The invoice ID is the first argument of `create()`, which adds it to the payload as `invoice_id`.
+
+| Property | Billomat field | Type | Notes |
 |---|---|---|---|
-| `invoiceId` | `invoice_id` | `int` | Pflicht (Konstruktor) |
-| `comment` | `comment` | `string` | Pflicht (Konstruktor) |
-| `actionkey` | `actionkey` | `?InvoiceCommentActionKey` | Selten manuell zu setzen |
+| `comment` | `comment` | `string` | Required (constructor) |
+| `actionKey` | `actionkey` | `?InvoiceCommentActionKey` | Rarely set manually |
+| `public` | `public` | `?bool` | Visible in the client's activity list (Billomat default: `false`) |
 
-`toArray()` filtert `null`-Werte heraus.
+`toArray()` drops `null` values.
 
-## Read-Modell: `InvoiceComment`
+## Read model: `InvoiceComment`
 
 `final readonly class InvoiceComment`.
 
-| Property | Typ | Notes |
+| Property | Type | Notes |
 |---|---|---|
-| `id` | `?int` | |
+| `id` | `int` | |
 | `invoiceId` | `int` | |
 | `comment` | `?string` | |
 | `created` | `?\DateTimeImmutable` | |
-| `userId` | `?int` | `null` bei System-Kommentaren |
-| `actionkey` | `?InvoiceCommentActionKey` | `null` bei unbekanntem oder fehlendem Wert |
-| `actionkeyRaw` | `?string` | Originaler API-String, auch wenn das Enum den Wert nicht kennt |
-| `public` | `?bool` |  |
-| `byClient` | `?bool` |  |
-| `emailId` | `?int` |  |
-| `clientId` | `?int` |  |
-| `customfield` | `?string` | Freies Zusatzfeld, siehe [Custom-Meta-Attribute](../concepts/custom-meta-attributes.md) |
+| `userId` | `?int` | `null` for system comments |
+| `actionKey` | `?InvoiceCommentActionKey` | `null` for an unknown or missing value |
+| `actionKeyRaw` | `?string` | Original API string, even if the enum doesn't know the value |
+| `public` | `?bool` | |
+| `byClient` | `?bool` | |
+| `emailId` | `?int` | |
+| `clientId` | `?int` | |
+| `customField` | `?string` | Free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md) |
+| `extra` | `array<string, mixed>` | Fields the SDK doesn't map (yet), raw; see [models](../concepts/models.md) |
 
-## Verwendetes Enum: `InvoiceCommentActionKey`
+## Enum: `InvoiceCommentActionKey`
 
-[`InvoiceCommentActionKey`](../../src/Model/Enum/InvoiceCommentActionKey.php) deckt die im API-Output beobachteten ActionKeys ab:
+[`InvoiceCommentActionKey`](../../src/Model/Enum/InvoiceCommentActionKey.php) covers the action keys observed in API output:
 
-| Case | Wire-Wert |
+| Case | Wire value |
 |---|---|
 | `CREATE` | `CREATE` |
 | `EDIT` | `EDIT` |
@@ -120,15 +134,27 @@ Konstruktor: `new InvoiceCommentCreateOptions(int $invoiceId, string $comment)`.
 | `DUNNING` | `DUNNING` |
 | `COMMENT` | `COMMENT` |
 
-Billomat dokumentiert keine geschlossene Liste — falls künftig neue Werte auftauchen, parst das SDK `actionkey` zu `null` und füllt parallel `actionkeyRaw` mit dem Originalstring. Es wird also nichts „verschluckt“.
+Billomat doesn't document a closed list. If new values show up, the SDK sets `actionKey` to `null` and fills `actionKeyRaw` with the original string, so nothing is lost.
 
-## Stolpersteine
+<!-- json-examples:start (generated by tools/generate-json-examples.php, run `composer docs:json`) -->
+## JSON on the wire
 
-- **`invoice_id` ist Pflicht.** Ohne den Filter antwortet Billomat mit 400 — `listByInvoice()` setzt den Filter automatisch.
-- **System-Kommentare nicht überschreiben.** `actionkey` ist primär ein API-Output. Wer dort manuell einen Wert wie `PAYMENT` setzt, kann die Aktivitätsansicht in der Billomat-UI verfälschen.
-- **`delete()` löscht auch System-Kommentare.** Vorsicht beim Aufräumen: System-Einträge sind Teil des Audit-Trails.
+Billomat's API documentation only shows XML. These are the JSON bodies the SDK sends and receives: requests as the SDK serializes them, responses recorded in the Billomat sandbox and anonymized ([contract fixtures](../../tests/Fixtures/Contract)). Billomat sends every value as a string; the read models cast them (see [Read models](../concepts/models.md)).
 
-## End-to-End-Beispiel
+::: code-group
+<<< @/snippets/json/invoice-comments.create.json [POST /invoice-comments]
+<<< @/../tests/Fixtures/Contract/invoice-comments/get.json [GET /invoice-comments/{id} (response)]
+<<< @/../tests/Fixtures/Contract/invoice-comments/list.json [GET /invoice-comments (response)]
+:::
+<!-- json-examples:end -->
+
+## Pitfalls
+
+- **`invoice_id` is required.** Without the filter Billomat responds with 400; `list()` sets it automatically.
+- **Don't fake system comments.** `actionkey` is primarily API output. Setting a value like `PAYMENT` manually can distort the activity view in the Billomat UI.
+- **`delete()` also deletes system comments.** Be careful when cleaning up: system entries are part of the audit trail.
+
+## End-to-end example
 
 ```php
 <?php
@@ -137,6 +163,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\InvoiceCommentCreateOptions;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
@@ -148,28 +175,28 @@ $billomat = BillomatClient::create(
 
 $invoiceId = 98765;
 
-// 1) Manuellen Kommentar anhängen
-$billomat->invoiceComments->create(
+// 1) Add a manual comment
+$billomat->invoices->comments->create(
+    $invoiceId,
     new InvoiceCommentCreateOptions(
-        invoiceId: $invoiceId,
-        comment: 'Kunde wünscht Verlängerung um 14 Tage.',
+        comment: 'Client asks for a 14-day extension.',
     ),
 );
 
-// 2) Komplette Historie anzeigen
-foreach ($billomat->invoiceComments->listByInvoice($invoiceId) as $c) {
+// 2) Show the full history
+foreach ($billomat->invoices->comments->list($invoiceId) as $c) {
     printf(
-        "[%s] %s — %s\n",
+        "[%s] %s: %s\n",
         $c->created?->format('Y-m-d H:i') ?? '???',
-        $c->actionkey?->value ?? ($c->actionkeyRaw ?? 'manual'),
+        $c->actionKey?->value ?? ($c->actionKeyRaw ?? 'manual'),
         $c->comment ?? '',
     );
 }
 
-// 3) Nur Mahn-Historie ausfiltern
-$dunning = $billomat->invoiceComments->listByInvoice(
+// 3) Only the dunning history
+$dunning = $billomat->invoices->comments->list(
     $invoiceId,
-    [InvoiceCommentActionKey::DUNNING],
+    new CommentFilter(actionKeys: [InvoiceCommentActionKey::DUNNING]),
 );
-printf("Mahnungen: %d\n", count($dunning));
+printf("Dunning entries: %d\n", count($dunning));
 ```

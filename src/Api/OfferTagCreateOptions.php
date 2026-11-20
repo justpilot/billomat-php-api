@@ -13,16 +13,9 @@ namespace Justpilot\Billomat\Api;
  * Generiert aus tools/codegen/definitions/offer-tags.php – nicht von Hand bearbeiten,
  * sondern die Definition anpassen und `composer generate` ausführen.
  */
-final class OfferTagCreateOptions
+final readonly class OfferTagCreateOptions implements WriteOptions
 {
     public function __construct(
-        /**
-         * ID des Datensatzes, an dem das Schlagwort hängt.
-         *
-         * Billomat-Feld: offer_id
-         * Typ: INT
-         */
-        public int $offerId,
         /**
          * Name des Schlagworts.
          *
@@ -33,6 +26,12 @@ final class OfferTagCreateOptions
     ) {
     }
 
+    /** Kopie mit geändertem `name`. */
+    public function withName(string $name): self
+    {
+        return clone($this, ['name' => $name]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -41,7 +40,6 @@ final class OfferTagCreateOptions
     public function toArray(): array
     {
         return [
-            'offer_id' => $this->offerId,
             'name' => $this->name,
         ];
     }

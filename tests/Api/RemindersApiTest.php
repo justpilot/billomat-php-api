@@ -5,25 +5,28 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Tests\Api;
 
 use DateTimeImmutable;
+use Justpilot\Billomat\Api\EmailOptions;
 use Justpilot\Billomat\Api\ReminderCreateOptions;
-use Justpilot\Billomat\Api\ReminderEmailOptions;
 use Justpilot\Billomat\Api\RemindersApi;
 use Justpilot\Billomat\Api\ReminderUpdateOptions;
 use Justpilot\Billomat\Config\BillomatConfig;
+use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
-use Justpilot\Billomat\Model\Enum\InvoicePdfType;
+use Justpilot\Billomat\Model\DocumentPdf;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Enum\ReminderStatus;
 use Justpilot\Billomat\Model\Reminder;
-use Justpilot\Billomat\Model\ReminderPdf;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 use const JSON_THROW_ON_ERROR;
@@ -31,11 +34,12 @@ use const JSON_THROW_ON_ERROR;
 #[CoversClass(RemindersApi::class)]
 #[CoversClass(ReminderCreateOptions::class)]
 #[CoversClass(ReminderUpdateOptions::class)]
-#[CoversClass(ReminderEmailOptions::class)]
+#[CoversClass(EmailOptions::class)]
 #[CoversClass(Reminder::class)]
-#[CoversClass(ReminderPdf::class)]
+#[CoversClass(DocumentPdf::class)]
 #[CoversClass(ReminderStatus::class)]
 #[UsesClass(BillomatConfig::class)]
+#[UsesClass(RetryPolicy::class)]
 #[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ListCaster::class)]
@@ -58,7 +62,7 @@ final class RemindersApiTest extends TestCase
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -88,7 +92,7 @@ final class RemindersApiTest extends TestCase
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
@@ -96,16 +100,15 @@ final class RemindersApiTest extends TestCase
 
         self::assertInstanceOf(Reminder::class, $reminder);
         self::assertSame('1. Mahnung', $reminder->subject);
-        self::assertSame('M-2026-0001', $reminder->reminderNumber);
     }
 
     #[Test]
     public function itCreatesReminderViaPost(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             $body = json_encode([
                 'reminder' => [
@@ -120,36 +123,33 @@ final class RemindersApiTest extends TestCase
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ReminderCreateOptions(invoiceId: 42);
-        $opts->date = new DateTimeImmutable('2026-03-01');
-        $opts->dueDays = 7;
-        $opts->subject = '1. Mahnung';
+        $opts = new ReminderCreateOptions(
+            invoiceId: 42,
+            date: new DateTimeImmutable('2026-03-01'),
+            dueDays: 7,
+            subject: '1. Mahnung',
+        );
 
         $reminder = $api->create($opts);
 
         self::assertSame(777, $reminder->id);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(42, $payload['reminder']['invoice_id']);
-        self::assertSame('1. Mahnung', $payload['reminder']['subject']);
-        self::assertSame(7, $payload['reminder']['due_days']);
+        self::assertSame(42, $captured->jsonAt('reminder', 'invoice_id'));
+        self::assertSame('1. Mahnung', $captured->jsonAt('reminder', 'subject'));
+        self::assertSame(7, $captured->jsonAt('reminder', 'due_days'));
     }
 
     #[Test]
     public function itUpdatesReminder(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             $body = json_encode([
                 'reminder' => ['id' => 777, 'client_id' => 123, 'subject' => 'Geändert'],
@@ -159,17 +159,16 @@ final class RemindersApiTest extends TestCase
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ReminderUpdateOptions();
-        $opts->subject = 'Geändert';
+        $opts = new ReminderUpdateOptions(subject: 'Geändert');
 
         $updated = $api->update(777, $opts);
 
         self::assertSame('Geändert', $updated->subject);
-        self::assertSame('PUT', $captured['method']);
+        self::assertSame('PUT', $captured->method);
     }
 
     #[Test]
@@ -177,62 +176,59 @@ final class RemindersApiTest extends TestCase
     {
         $captured = [];
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured[] = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
+            $captured[] = CapturedRequest::of($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->complete(1));
-        self::assertTrue($api->cancel(2));
-        self::assertTrue($api->delete(3));
+        $api->complete(1);
+        $api->cancel(2);
+        $api->delete(3);
+        $api->uncancel(4);
 
-        self::assertSame('https://mycompany.billomat.net/api/reminders/1/complete', $captured[0]['url']);
-        self::assertSame('https://mycompany.billomat.net/api/reminders/2/cancel', $captured[1]['url']);
-        self::assertSame('DELETE', $captured[2]['method']);
+        self::assertSame('https://mycompany.billomat.net/api/reminders/1/complete', $captured[0]->url);
+        self::assertSame('https://mycompany.billomat.net/api/reminders/2/cancel', $captured[1]->url);
+        self::assertSame('DELETE', $captured[2]->method);
+        self::assertSame('PUT', $captured[3]->method);
+        self::assertSame('https://mycompany.billomat.net/api/reminders/4/uncancel', $captured[3]->url);
     }
 
     #[Test]
     public function itEmailsReminder(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url, 'options' => $options];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse('{}', ['http_code' => 200]);
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $opts = new ReminderEmailOptions();
-        $opts->to = ['kunde@example.com'];
+        $opts = new EmailOptions(to: ['kunde@example.com']);
 
-        self::assertTrue($api->email(42, $opts));
+        $api->email(42, $opts);
 
-        $payload = $captured['options']['json'] ?? null;
-        if (null === $payload && isset($captured['options']['body']) && \is_string($captured['options']['body'])) {
-            $payload = json_decode($captured['options']['body'], true, flags: JSON_THROW_ON_ERROR);
-        }
-
-        self::assertSame(['kunde@example.com'], $payload['email']['recipients']['to'] ?? null);
+        self::assertSame(['kunde@example.com'], $captured->jsonAt('email', 'recipients', 'to'));
     }
 
     #[Test]
     public function itFetchesReminderPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             $body = json_encode([
                 'pdf' => [
@@ -249,59 +245,58 @@ final class RemindersApiTest extends TestCase
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
         $pdf = $api->pdf(240);
 
-        self::assertInstanceOf(ReminderPdf::class, $pdf);
-        self::assertSame(240, $pdf->reminderId);
+        self::assertSame(240, $pdf->documentId);
         self::assertStringStartsWith('%PDF-FAKE%', $pdf->getBinary());
     }
 
     #[Test]
     public function itFetchesRawPdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['url'] = $url;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->url = $url;
 
             return new MockResponse('%PDF-1.4 RAW%', ['http_code' => 200]);
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        $result = $api->pdf(777, InvoicePdfType::PRINT, rawPdf: true);
+        $result = $api->pdfContent(777, PdfType::PRINT);
 
         self::assertIsString($result);
-        self::assertStringContainsString('format=pdf', $captured['url']);
-        self::assertStringContainsString('type=print', $captured['url']);
+        self::assertStringContainsString('format=pdf', $captured->url);
+        self::assertStringContainsString('type=print', $captured->url);
     }
 
     #[Test]
     public function itUploadsSignaturePdf(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(static function ($method, $url, $options) use (&$captured): MockResponse {
-            $captured = ['method' => $method, 'url' => $url];
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url);
 
             return new MockResponse('', ['http_code' => 200]);
         });
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 
-        self::assertTrue($api->uploadSignature(555, base64_encode('PDF')));
-        self::assertSame('PUT', $captured['method']);
-        self::assertSame('https://mycompany.billomat.net/api/reminders/555/upload-signature', $captured['url']);
+        $api->uploadSignature(555, base64_encode('PDF'));
+        self::assertSame('PUT', $captured->method);
+        self::assertSame('https://mycompany.billomat.net/api/reminders/555/upload-signature', $captured->url);
     }
 
     #[Test]
@@ -314,7 +309,7 @@ final class RemindersApiTest extends TestCase
         ));
 
         $api = new RemindersApi(new BillomatHttpClient(
-            $mock,
+            new Psr18Client($mock),
             new BillomatConfig('mycompany', 'secret-key'),
         ));
 

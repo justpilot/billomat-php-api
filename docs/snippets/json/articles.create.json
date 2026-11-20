@@ -1,0 +1,8 @@
+{
+    "article": {
+        "title": "Consulting hour",
+        "sales_price": "120",
+        "currency_code": "EUR",
+        "unit": "hours"
+    }
+}

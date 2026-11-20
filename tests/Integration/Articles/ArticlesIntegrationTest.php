@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\ArticleUpdateOptions;
 use Justpilot\Billomat\Model\Article;
 use Justpilot\Billomat\Model\ArticleTag;
 use Justpilot\Billomat\Model\ArticleTagCloudEntry;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -37,20 +38,20 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
         $faker = $this->faker();
 
-        $opts = new ArticleCreateOptions(title: 'Integrationstest-Artikel '.date('His'));
-        $opts->description = 'Auto-Test';
-        $opts->salesPrice = $faker->randomFloat(2, 5, 250);
-        $opts->currencyCode = 'EUR';
-        $opts->unit = 'Stück';
+        $opts = new ArticleCreateOptions(
+            title: 'Integrationstest-Artikel '.date('His'),
+            description: 'Auto-Test',
+            salesPrice: Money::of((string) $faker->randomFloat(2, 5, 250)),
+            currencyCode: 'EUR',
+            unit: 'Stück',
+        );
 
         $article = $billomat->articles->create($opts);
 
-        self::assertNotNull($article->id);
         self::assertNotNull($article->title);
 
         // Update
-        $update = new ArticleUpdateOptions();
-        $update->title = $article->title.' (geändert)';
+        $update = new ArticleUpdateOptions(title: $article->title.' (geändert)');
         $updated = $billomat->articles->update($article->id, $update);
 
         self::assertSame($article->id, $updated->id);
@@ -63,7 +64,7 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($article->id, $fetched->id);
 
         // Cleanup
-        self::assertTrue($billomat->articles->delete($article->id));
+        $billomat->articles->delete($article->id);
         self::assertNull($billomat->articles->get($article->id));
     }
 
@@ -74,29 +75,31 @@ final class ArticlesIntegrationTest extends AbstractBillomatIntegrationTestCase
         $billomat = $this->createBillomatClientOrSkip();
 
         // Artikel anlegen
-        $articleOpts = new ArticleCreateOptions(title: 'Tag-Test-Artikel '.date('His'));
-        $articleOpts->salesPrice = 9.99;
-        $articleOpts->unit = 'Stück';
+        $articleOpts = new ArticleCreateOptions(
+            title: 'Tag-Test-Artikel '.date('His'),
+            salesPrice: Money::of('9.99'),
+            unit: 'Stück',
+        );
         $article = $billomat->articles->create($articleOpts);
 
         try {
             // Tag erstellen
-            $tagOpts = new ArticleTagCreateOptions(articleId: $article->id, name: 'IT-Tag-'.date('His'));
-            $tag = $billomat->articleTags->create($tagOpts);
+            $tagOpts = new ArticleTagCreateOptions(name: 'IT-Tag-'.date('His'));
+            $tag = $billomat->articles->tags->create($article->id, $tagOpts);
 
             self::assertNotNull($tag->id);
 
             // List by article
-            $tags = $billomat->articleTags->listByArticle($article->id);
+            $tags = $billomat->articles->tags->list($article->id);
             self::assertContainsOnlyInstancesOf(ArticleTag::class, $tags);
             self::assertGreaterThanOrEqual(1, \count($tags));
 
             // Cloud
-            $cloud = $billomat->articleTags->cloud();
+            $cloud = $billomat->articles->tags->cloud();
             self::assertContainsOnlyInstancesOf(ArticleTagCloudEntry::class, $cloud);
 
             // Cleanup tag
-            self::assertTrue($billomat->articleTags->delete($tag->id));
+            $billomat->articles->tags->delete($tag->id);
         } finally {
             $billomat->articles->delete($article->id);
         }

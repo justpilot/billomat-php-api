@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Api;
 
-use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Settings;
+use NoDiscard;
 
 /**
  * API-Wrapper für Account-Einstellungen.
@@ -15,15 +15,12 @@ final class SettingsApi extends AbstractApi
     /**
      * GET /settings.
      */
+    #[NoDiscard]
     public function get(): Settings
     {
         $data = $this->getJson('/settings');
 
-        if (!isset($data['settings']) || !\is_array($data['settings'])) {
-            throw new UnexpectedResponseException('Unexpected response from Billomat when fetching settings.');
-        }
-
-        return Settings::fromArray($data['settings']);
+        return Settings::fromArray($this->unwrapEnvelope($data, 'settings', 'fetching settings'));
     }
 
     /**
@@ -39,10 +36,6 @@ final class SettingsApi extends AbstractApi
 
         $data = $this->putJson('/settings', $payload);
 
-        if (!isset($data['settings']) || !\is_array($data['settings'])) {
-            throw new UnexpectedResponseException('Unexpected response from Billomat when updating settings.');
-        }
-
-        return Settings::fromArray($data['settings']);
+        return Settings::fromArray($this->unwrapEnvelope($data, 'settings', 'updating settings'));
     }
 }

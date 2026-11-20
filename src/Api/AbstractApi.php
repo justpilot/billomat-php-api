@@ -5,20 +5,16 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Closure;
-use Deprecated;
 use Generator;
-use Justpilot\Billomat\Exception\AuthenticationException;
-use Justpilot\Billomat\Exception\HttpException as BillomatHttpException;
+use JsonException;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
-use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Justpilot\Billomat\Internal\ScalarCaster;
+use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
-use Throwable;
+use Psr\Http\Message\ResponseInterface;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -29,12 +25,18 @@ use const JSON_THROW_ON_ERROR;
  *  - GET mit JSON-Response
  *  - GET, der bei 404 null zurückgibt
  *  - POST mit JSON-Body und JSON-Response
+ *
+ * @internal Basis der SDK-eigenen APIs, kein Erweiterungspunkt; die Methoden fallen nicht unter die
+ *           BC-Zusage. Endpunkte ohne SDK-Methode gehen über {@see \Justpilot\Billomat\BillomatClient::getHttpClient()}.
  */
 abstract class AbstractApi
 {
     /** Größte Seitengröße, die Billomat für `per_page` akzeptiert. */
     private const int MAX_PAGE_SIZE = 1000;
 
+    /**
+     * @internal API-Objekte kommen über {@see \Justpilot\Billomat\BillomatClient}, z. B. `$billomat->invoices`
+     */
     public function __construct(
         protected readonly BillomatHttpClientInterface $http,
     ) {
@@ -43,7 +45,7 @@ abstract class AbstractApi
     /**
      * Führt einen GET-Request aus und gibt den JSON-Body als Array zurück.
      *
-     * @param array<string, scalar|array|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      *
      * @return array<string,mixed>
      */
@@ -72,6 +74,37 @@ abstract class AbstractApi
     }
 
     /**
+     * Holt einen Einzeldatensatz: null bei 404, sonst das hydrierte Model.
+     *
+     * Eine 2xx-Antwort ohne die erwartete Hülle ist kein „nicht gefunden“, sondern eine
+     * {@see UnexpectedResponseException}.
+     *
+     * @template T of object
+     *
+     * @param string                           $key     erwarteter Wrapper-Key, z. B. "client"
+     * @param Closure(array<string, mixed>): T $hydrate
+     * @param string                           $context beschreibt den Aufrufkontext für die Exception-Message
+     *
+     * @return T|null
+     *
+     * @throws UnexpectedResponseException
+     */
+    protected function getResource(string $path, string $key, Closure $hydrate, string $context): ?object
+    {
+        $data = $this->getJsonOrNull($path);
+
+        return null === $data ? null : $hydrate($this->unwrapEnvelope($data, $key, $context));
+    }
+
+    /**
+     * Exception für {@see getOrFail()}, wenn {@see getJsonOrNull()} null geliefert hat.
+     */
+    protected function notFound(string $path): NotFoundException
+    {
+        return new NotFoundException(\sprintf('Billomat responded with HTTP 404 to GET /%s.', ltrim($path, '/')), 404);
+    }
+
+    /**
      * Führt einen POST-Request mit JSON-Body aus und gibt den JSON-Body als Array zurück.
      *
      * @param array<string,mixed> $body
@@ -91,6 +124,8 @@ abstract class AbstractApi
      * Wird z. B. für PUT /invoices/{id}/complete verwendet.
      *
      * @param array<string,mixed> $body
+     *
+     * @return array<string,mixed>
      */
     protected function putJson(string $path, array $body): array
     {
@@ -100,58 +135,63 @@ abstract class AbstractApi
     }
 
     /**
-     * Führt einen PUT-Request aus und löst HTTP-Fehler (4xx/5xx) in SDK-Exceptions auf.
-     *
-     * Wird für Endpunkte verwendet, deren Body uns nicht interessiert
-     * (z. B. PUT /invoices/{id}/complete, /cancel, /uncancel, …). Wichtig:
-     * {@see ResponseInterface::getStatusCode()}
-     * wirft NICHT bei 4xx/5xx – nur ein Aufruf wie hier (über getContent()
-     * im {@see handleErrors()}-Pfad) materialisiert den HTTP-Fehler und mapped
-     * ihn auf die passende {@see \Justpilot\Billomat\Exception\BillomatException}.
-     *
-     * @param array<string,mixed> $body
-     */
-    protected function putVoid(string $path, array $body = []): void
-    {
-        $response = $this->http->request('PUT', $path, [], $body);
-        $this->handleErrors($response);
-    }
-
-    /**
-     * @param array<string,mixed> $body
-     */
-    #[Deprecated(message: <<<'TXT'
-        since 2.1 use {@see putVoid()} stattdessen. `putEmptyResponse()`
-                     materialisiert die Response NICHT – HTTP-Fehler 4xx/5xx wurden
-                     daher stillschweigend verschluckt, weil
-                     {@see ResponseInterface::getStatusCode()}
-                     nur bei Transport-Fehlern wirft. Wird in 3.0 entfernt.
-        TXT)]
-    protected function putEmptyResponse(string $path, array $body = []): ResponseInterface
-    {
-        return $this->http->request('PUT', $path, [], $body);
-    }
-
-    /**
      * Führt einen POST-Request aus, dessen Response-Body uns nicht interessiert
      * (z. B. POST /invoices/{id}/email, /mail).
      *
      * Billomat antwortet auf diese Aktionen mit 200 OK und leerem Body (Content-Type
-     * `text/html`); die Doku beschreibt keine Antwort. HTTP-Fehler werden trotzdem
-     * als Exception geworfen.
+     * `text/html`); die Doku beschreibt keine Antwort. HTTP-Fehler wirft bereits
+     * {@see BillomatHttpClientInterface::request()}.
      *
      * @param array<string,mixed> $body
      */
     protected function postVoid(string $path, array $body): void
     {
-        $response = $this->http->request('POST', $path, [], $body);
-        $this->handleErrors($response);
+        $this->http->request('POST', $path, [], $body);
+    }
+
+    /**
+     * Führt einen PUT-Request aus, dessen Response-Body uns nicht interessiert
+     * (z. B. PUT /invoices/{id}/complete, /cancel, /uncancel, …).
+     *
+     * HTTP-Fehler wirft bereits {@see BillomatHttpClientInterface::request()}.
+     *
+     * @param array<string,mixed> $body
+     */
+    protected function putVoid(string $path, array $body = []): void
+    {
+        $this->http->request('PUT', $path, [], $body);
     }
 
     protected function deleteVoid(string $path): void
     {
-        $response = $this->http->request('DELETE', $path);
-        $this->handleErrors($response);
+        $this->http->request('DELETE', $path);
+    }
+
+    /**
+     * Liest das `customfield` eines Datensatzes (GET {$path}/customfield); null, wenn es leer ist.
+     *
+     * @param string $path Pfad des Datensatzes, z. B. `/clients/12`
+     * @param string $key  Envelope-Schlüssel, z. B. `client`
+     *
+     * @throws NotFoundException           wenn es den Datensatz nicht gibt (404)
+     * @throws UnexpectedResponseException wenn die Antwort nicht zum Envelope passt
+     */
+    protected function fetchCustomField(string $path, string $key): ?string
+    {
+        $record = $this->unwrapEnvelope($this->getJson("{$path}/customfield"), $key, "fetching custom field of {$key}");
+
+        return ScalarCaster::toStringOrNull($record['customfield'] ?? null);
+    }
+
+    /**
+     * Setzt das `customfield` eines Datensatzes (PUT {$path}/customfield); '' leert es.
+     *
+     * @param string $path Pfad des Datensatzes, z. B. `/clients/12`
+     * @param string $key  Envelope-Schlüssel, z. B. `client`
+     */
+    protected function storeCustomField(string $path, string $key, string $value): void
+    {
+        $this->putVoid("{$path}/customfield", [$key => ['customfield' => $value]]);
     }
 
     /**
@@ -168,32 +208,19 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                           $path     Endpunkt, z. B. "/clients"
-     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param array<string, scalar|array|null> $filters  optionale Query-Filter
+     * @param string                                                   $path     Endpunkt, z. B. "/clients"
+     * @param string                                                   $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                                   $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T                          $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters  optionale Query-Filter
      *
      * @return list<T>
      */
-    protected function listResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = []): array
+    protected function listResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, ListFilter|array $filters = []): array
     {
-        $data = $this->getJson($path, $filters);
+        $data = $this->getJson($path, self::filterQuery($filters));
 
-        $node = $data[$outerKey][$innerKey] ?? null;
-
-        if (null === $node || [] === $node || '' === $node) {
-            return [];
-        }
-
-        if (!\is_array($node)) {
-            return [];
-        }
-
-        /** @var list<array<string,mixed>> $rows */
-        $rows = array_is_list($node) ? $node : [$node];
-
-        return array_map($hydrate, $rows);
+        return array_map($hydrate, self::envelopeRows($data[$outerKey] ?? null, $innerKey));
     }
 
     /**
@@ -206,16 +233,17 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                           $path     Endpunkt, z. B. "/clients"
-     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param array<string, scalar|array|null> $filters  optionale Query-Filter
+     * @param string                                                   $path     Endpunkt, z. B. "/clients"
+     * @param string                                                   $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                                   $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T                          $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters  optionale Query-Filter
      *
      * @return Page<T>
      */
-    protected function listResourcePage(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = []): Page
+    protected function listResourcePage(string $path, string $outerKey, string $innerKey, Closure $hydrate, ListFilter|array $filters = []): Page
     {
+        $filters = self::filterQuery($filters);
         $data = $this->getJson($path, $filters);
 
         $envelope = $data[$outerKey] ?? null;
@@ -223,14 +251,7 @@ abstract class AbstractApi
             $envelope = [];
         }
 
-        $node = $envelope[$innerKey] ?? null;
-        if (null === $node || [] === $node || '' === $node || !\is_array($node)) {
-            $items = [];
-        } else {
-            /** @var list<array<string,mixed>> $rows */
-            $rows = array_is_list($node) ? $node : [$node];
-            $items = array_map($hydrate, $rows);
-        }
+        $items = array_map($hydrate, self::envelopeRows($envelope, $innerKey));
 
         $info = new PageInfo(
             page: ScalarCaster::toIntOrNull($envelope['@page'] ?? $filters['page'] ?? null) ?? 1,
@@ -256,17 +277,18 @@ abstract class AbstractApi
      *
      * @template T of object
      *
-     * @param string                           $path     Endpunkt, z. B. "/clients"
-     * @param string                           $outerKey äußerer Wrapper-Key, z. B. "clients"
-     * @param string                           $innerKey innerer Wrapper-Key, z. B. "client"
-     * @param Closure(array<string,mixed>): T  $hydrate  Hydrator, z. B. Client::fromArray(...)
-     * @param array<string, scalar|array|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
-     * @param int                              $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit), Werte außerhalb werden begrenzt
+     * @param string                                                   $path     Endpunkt, z. B. "/clients"
+     * @param string                                                   $outerKey äußerer Wrapper-Key, z. B. "clients"
+     * @param string                                                   $innerKey innerer Wrapper-Key, z. B. "client"
+     * @param Closure(array<string,mixed>): T                          $hydrate  Hydrator, z. B. Client::fromArray(...)
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters  optionale Query-Filter; `page`/`per_page` werden überschrieben
+     * @param int                                                      $pageSize Items pro Anfrage; 1-1000 (Billomat-Limit), Werte außerhalb werden begrenzt
      *
      * @return Generator<int, T>
      */
-    protected function iterateResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, array $filters = [], int $pageSize = 100): Generator
+    protected function iterateResource(string $path, string $outerKey, string $innerKey, Closure $hydrate, ListFilter|array $filters = [], int $pageSize = 100): Generator
     {
+        $filters = self::filterQuery($filters);
         $pageSize = min(self::MAX_PAGE_SIZE, max(1, $pageSize));
         $page = 1;
 
@@ -294,6 +316,45 @@ abstract class AbstractApi
     }
 
     /**
+     * Normalisiert den inneren Knoten eines Listen-Envelopes auf eine Liste von Datensätzen.
+     *
+     * Ein einzelner Treffer kommt als Objekt statt als Liste, „keine Treffer“ als leerer String
+     * oder leeres Array; Einträge, die keine Datensätze sind, fallen heraus.
+     *
+     * @return list<array<string,mixed>>
+     */
+    protected static function envelopeRows(mixed $envelope, string $innerKey): array
+    {
+        if (!\is_array($envelope)) {
+            return [];
+        }
+
+        $node = $envelope[$innerKey] ?? null;
+        if (!\is_array($node) || [] === $node) {
+            return [];
+        }
+
+        $rows = [];
+        foreach (array_is_list($node) ? $node : [$node] as $row) {
+            if (self::isRecord($row)) {
+                $rows[] = $row;
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Prüft, dass ein dekodierter JSON-Wert ein Objekt (assoziatives Array mit String-Schlüsseln) ist.
+     *
+     * @phpstan-assert-if-true array<string,mixed> $value
+     */
+    protected static function isRecord(mixed $value): bool
+    {
+        return \is_array($value) && array_all($value, static fn (mixed $_, int|string $key): bool => \is_string($key));
+    }
+
+    /**
      * Liest aus einer Billomat-Envelope-Response den eingewickelten Datensatz.
      *
      * Billomat antwortet bei {@code get()}/{@code create()}/{@code update()} mit
@@ -311,89 +372,85 @@ abstract class AbstractApi
     {
         $node = $payload[$key] ?? null;
 
-        if (!\is_array($node)) {
+        if (!self::isRecord($node)) {
             throw new UnexpectedResponseException(\sprintf('Unexpected response from Billomat when %s.', $context));
         }
 
-        /** @var array<string,mixed> $node */
         return $node;
     }
 
     /**
-     * Liest eine JSON-Response und mapped HTTP-Fehler auf SDK-Exceptions.
+     * Dekodiert den JSON-Body einer erfolgreichen Response.
      *
      * @return array<string,mixed>
+     *
+     * @throws UnexpectedResponseException wenn der Body kein JSON-Objekt ist
      */
     private function decodeJsonResponse(ResponseInterface $response): array
     {
         try {
-            $content = $response->getContent(); // wir erwarten 2xx
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
+            $decoded = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new UnexpectedResponseException('Unexpected response from Billomat: the body is not valid JSON.', 0, $e);
         }
 
-        /** @var array<string,mixed> $decoded */
-        $decoded = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
+        if (!self::isRecord($decoded)) {
+            throw new UnexpectedResponseException('Unexpected response from Billomat: expected a JSON object.');
+        }
 
         return $decoded;
     }
 
     /**
-     * Mappt eine Symfony-HttpException auf unsere eigenen Exception-Typen.
-     */
-    protected function mapHttpException(HttpExceptionInterface $e): BillomatHttpException
-    {
-        $symfonyResponse = $e->getResponse();
-        $statusCode = $symfonyResponse->getStatusCode();
-
-        // Roh-Body, falls wir später Details extrahieren wollen
-        $rawBody = null;
-        try {
-            $rawBody = $symfonyResponse->getContent(false);
-        } catch (Throwable) {
-            // ignorieren
-        }
-
-        $message = '' !== $e->getMessage()
-            ? $e->getMessage()
-            : \sprintf('HTTP error from Billomat (status %d)', $statusCode);
-
-        // Grobes Mapping nach Status-Code
-        return match ($statusCode) {
-            401, 403 => new AuthenticationException($message, $statusCode, $rawBody, $e),
-            404 => new NotFoundException($message, $statusCode, $rawBody, $e),
-            400, 422 => new ValidationException($message, $statusCode, $rawBody, $e),
-            default => new BillomatHttpException($message, $statusCode, $rawBody, $e),
-        };
-    }
-
-    /**
-     * Führt nur die Fehlerbehandlung aus, ohne JSON zu dekodieren.
-     *
-     * Wird z.B. von deleteVoid() verwendet, wenn wir keinen JSON-Body erwarten.
-     */
-    private function handleErrors(ResponseInterface $response): void
-    {
-        try {
-            $response->getContent();
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
-        }
-    }
-
-    /**
      * Führt einen GET-Request aus und gibt den Response-Body roh zurück (z. B. für Binary wie /thumb).
      *
-     * @param array<string, scalar|array|null> $query
+     * @param array<string, scalar|array<scalar|null>|null> $query
      */
     protected function getRaw(string $path, array $query = []): string
     {
-        $response = $this->http->request('GET', $path, $query);
+        return (string) $this->http->request('GET', $path, $query)->getBody();
+    }
 
-        try {
-            return $response->getContent(); // 2xx erwartet
-        } catch (HttpExceptionInterface $e) {
-            throw $this->mapHttpException($e);
+    /**
+     * Wandelt einen typisierten Filter in Query-Parameter um; Arrays bleiben unverändert.
+     *
+     * @param ListFilter|array<string, scalar|array<scalar|null>|null> $filters
+     *
+     * @return array<string, scalar|array<scalar|null>|null>
+     */
+    protected static function filterQuery(ListFilter|array $filters): array
+    {
+        return $filters instanceof ListFilter ? $filters->toQuery() : $filters;
+    }
+
+    /**
+     * Query für GET /{dokumente}/{id}/pdf: `type=signed|print`, falls gesetzt.
+     *
+     * @return array<string, string>
+     */
+    protected static function pdfQuery(?PdfType $type): array
+    {
+        return $type instanceof PdfType ? ['type' => $type->value] : [];
+    }
+
+    /**
+     * Wie {@see getRaw()}, prüft aber, dass der Body ein PDF ist.
+     *
+     * Billomat antwortet gelegentlich mit 200 und leerem Body oder einer HTML-/JSON-Seite;
+     * ohne Prüfung landet das unbemerkt als „PDF“ beim Kunden.
+     *
+     * @param array<string, scalar|array<scalar|null>|null> $query
+     *
+     * @throws UnexpectedResponseException bei leerem Body oder fehlendem `%PDF-`-Header
+     */
+    protected function getPdf(string $path, array $query = []): string
+    {
+        $body = $this->getRaw($path, $query);
+
+        if (!str_starts_with($body, '%PDF-')) {
+            throw new UnexpectedResponseException(\sprintf('Unexpected response from Billomat for GET /%s: %s.', ltrim($path, '/'), '' === $body ? 'empty body instead of a PDF' : 'the body is not a PDF'));
         }
+
+        return $body;
     }
 }

@@ -12,11 +12,8 @@ namespace Justpilot\Billomat\Model\Enum;
  */
 enum NumberRangeMode: string
 {
+    use FromApi;
+
     case IGNORE_PREFIX = 'IGNORE_PREFIX';
     case CONSIDER_PREFIX = 'CONSIDER_PREFIX';
-
-    public static function fromApi(?string $value): ?self
-    {
-        return null !== $value ? self::tryFrom($value) : null;
-    }
 }

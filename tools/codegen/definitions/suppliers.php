@@ -44,12 +44,17 @@ return [
         ],
     ],
 
+    'filter' => [
+        'class' => 'SupplierFilter',
+        'endpoint' => 'GET /api/suppliers',
+    ],
+
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Lieferanten.'],
-        'created' => ['type' => 'datetime', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Erstellungszeitpunkt des Lieferanten.'],
+        'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Lieferanten.'],
         'name' => [
             'doc' => 'Firmenname des Lieferanten.',
-            'model' => ['required' => true, 'nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true],
         ],
         // BC: Das Read-Model führt die Kundennummer seit jeher als int, die Spec als ALNUM.
@@ -98,5 +103,13 @@ return [
         'creditor_identifier' => ['doc' => 'SEPA-Gläubiger-ID.'],
         'costs_gross' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Brutto-Kosten (read-only Auswertungsfeld).'],
         'costs_net' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Netto-Kosten (read-only Auswertungsfeld).'],
+        'supplier-property-values' => [
+            'type' => 'list',
+            'readOnly' => true,
+            'list' => ['class' => 'SupplierPropertyValue', 'item' => 'supplier-property-value'],
+            'model' => ['property' => 'propertyValues'],
+            'doc' => 'Attributwerte des Lieferanten.',
+            'details' => ['Von Billomat geliefert, aber nicht dokumentiert (leer: "").'],
+        ],
     ],
 ];

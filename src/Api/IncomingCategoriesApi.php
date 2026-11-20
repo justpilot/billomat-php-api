@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Justpilot\Billomat\Api;
 
 use Generator;
+use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Model\IncomingCategory;
 use Justpilot\Billomat\Pagination\Page;
+use NoDiscard;
 
 /**
  * Read-only API-Wrapper für Eingangsrechnungs-Kategorien.
@@ -19,10 +21,11 @@ use Justpilot\Billomat\Pagination\Page;
 final class IncomingCategoriesApi extends AbstractApi
 {
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return list<IncomingCategory>
      */
+    #[NoDiscard]
     public function list(array $filters = []): array
     {
         return $this->listResource(
@@ -35,10 +38,11 @@ final class IncomingCategoriesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Page<IncomingCategory>
      */
+    #[NoDiscard]
     public function listPage(array $filters = []): Page
     {
         return $this->listResourcePage(
@@ -51,10 +55,11 @@ final class IncomingCategoriesApi extends AbstractApi
     }
 
     /**
-     * @param array<string, scalar|array|null> $filters
+     * @param array<string, scalar|array<scalar|null>|null> $filters
      *
      * @return Generator<int, IncomingCategory>
      */
+    #[NoDiscard]
     public function iterateAll(array $filters = [], int $pageSize = 100): Generator
     {
         yield from $this->iterateResource(
@@ -67,19 +72,20 @@ final class IncomingCategoriesApi extends AbstractApi
         );
     }
 
+    #[NoDiscard]
     public function get(string $id): ?IncomingCategory
     {
-        $data = $this->getJsonOrNull("/incoming-categories/{$id}");
+        return $this->getResource("/incoming-categories/{$id}", 'incoming-category', IncomingCategory::fromArray(...), 'fetching incoming category');
+    }
 
-        if (null === $data) {
-            return null;
-        }
-
-        $row = $data['incoming-category'] ?? null;
-        if (!\is_array($row)) {
-            return null;
-        }
-
-        return IncomingCategory::fromArray($row);
+    /**
+     * Wie {@see get()}, wirft aber eine {@see NotFoundException} statt null zurückzugeben.
+     *
+     * @throws NotFoundException wenn es den Datensatz nicht gibt (404)
+     */
+    #[NoDiscard]
+    public function getOrFail(string $id): IncomingCategory
+    {
+        return $this->get($id) ?? throw $this->notFound("/incoming-categories/{$id}");
     }
 }

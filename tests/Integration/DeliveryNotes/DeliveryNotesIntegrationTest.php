@@ -10,6 +10,7 @@ use Justpilot\Billomat\Api\DeliveryNoteCreateOptions;
 use Justpilot\Billomat\Api\DeliveryNoteItemCreateOptions;
 use Justpilot\Billomat\Model\DeliveryNote;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
+use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Integration\AbstractBillomatIntegrationTestCase;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
@@ -24,19 +25,21 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
         $clients = $billomat->clients->list(['per_page' => 1]);
 
         if ([] !== $clients) {
-            return $clients[0]->id;
+            $id = $clients[0]->id;
+            self::assertNotNull($id);
+
+            return $id;
         }
 
         $faker = $this->faker();
 
-        $opts = new ClientCreateOptions();
-        $opts->name = $faker->company();
-        $opts->email = $faker->unique()->safeEmail();
-        $opts->countryCode = 'DE';
+        $opts = new ClientCreateOptions(
+            name: $faker->company(),
+            countryCode: 'DE',
+            email: $faker->unique()->safeEmail(),
+        );
 
         $created = $billomat->clients->create($opts);
-
-        self::assertNotNull($created->id);
 
         return $created->id;
     }
@@ -61,22 +64,26 @@ final class DeliveryNotesIntegrationTest extends AbstractBillomatIntegrationTest
         $clientId = $this->ensureClientId();
         $faker = $this->faker();
 
-        $opts = new DeliveryNoteCreateOptions(clientId: $clientId);
-        $opts->date = new DateTimeImmutable('today');
-        $opts->title = 'Integrationstest-LS '.date('d.m.Y H:i:s');
+        $opts = new DeliveryNoteCreateOptions(
+            clientId: $clientId,
+            date: new DateTimeImmutable('today'),
+            title: 'Integrationstest-LS '.date('d.m.Y H:i:s'),
+        );
 
-        $item = new DeliveryNoteItemCreateOptions(1.0, $faker->randomFloat(2, 5, 50));
-        $item->title = 'Lieferposition';
-        $item->unit = 'Stück';
+        $item = new DeliveryNoteItemCreateOptions(
+            1.0,
+            Money::of((string) $faker->randomFloat(2, 5, 50)),
+            unit: 'Stück',
+            title: 'Lieferposition',
+        );
 
-        $opts->addItem($item);
+        $opts = $opts->withItem($item);
 
         $note = $billomat->deliveryNotes->create($opts);
 
-        self::assertNotNull($note->id);
         self::assertSame(DeliveryNoteStatus::DRAFT, $note->status);
 
-        self::assertTrue($billomat->deliveryNotes->delete($note->id));
+        $billomat->deliveryNotes->delete($note->id);
         self::assertNull($billomat->deliveryNotes->get($note->id));
     }
 }

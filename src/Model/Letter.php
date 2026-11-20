@@ -21,39 +21,34 @@ use const DATE_ATOM;
  */
 final readonly class Letter
 {
+    /** Billomat-Felder, die das Model abbildet. */
+    private const array FIELDS = [
+        'id' => true,
+        'client_id' => true,
+        'contact_id' => true,
+        'created' => true,
+        'status' => true,
+        'date' => true,
+        'address' => true,
+        'subject' => true,
+        'label' => true,
+        'intro' => true,
+        'template_id' => true,
+        'updated' => true,
+        'customfield' => true,
+        'supplier_id' => true,
+    ];
+
+    /** @param array<string, mixed> $extra */
     public function __construct(
         /** Interne Billomat-ID des Briefs. */
-        public ?int $id,
+        public int $id,
         /** ID des Kunden. */
         public int $clientId,
         /** ID des Kontakts. */
         public ?int $contactId = null,
         /** Erstellungszeitpunkt des Briefs. */
         public ?DateTimeImmutable $created = null,
-        /**
-         * Briefnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `letter_number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $letterNumber = null,
-        /**
-         * Laufende Nummer (ohne Präfix).
-         *
-         * @deprecated since 3.1 – Billomat liefert `number` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $number = null,
-        /**
-         * Präfix der Briefnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `number_pre` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $numberPre = null,
-        /**
-         * Mindestlänge der Briefnummer.
-         *
-         * @deprecated since 3.1 – Billomat liefert `number_length` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?int $numberLength = null,
         /** Status des Briefs. */
         public ?LetterStatus $status = null,
         /** Briefdatum. */
@@ -70,30 +65,24 @@ final readonly class Letter
         public ?string $label = null,
         /** Brieftext. */
         public ?string $intro = null,
-        /**
-         * Anmerkung.
-         *
-         * @deprecated since 3.1 – Billomat liefert `note` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $note = null,
         /** ID der Vorlage, mit der der Brief abgeschlossen wird. */
         public ?int $templateId = null,
-        /**
-         * Persönliche URL zum Kundenportal.
-         *
-         * @deprecated since 3.1 – Billomat liefert `customerportal_url` nicht (mehr) aus (Stand 2026-10), der Wert ist immer `null`. Wird in 4.0 entfernt.
-         */
-        public ?string $customerportalUrl = null,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
-        public ?string $customfield = null,
+        public ?string $customField = null,
         /**
          * ID des Lieferanten.
          *
          * Wird statt `client_id` verwendet, wenn der Brief an einen Lieferanten geht.
          */
         public ?int $supplierId = null,
+        /**
+         * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
+         *
+         * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
+         */
+        public array $extra = [],
     ) {
     }
 
@@ -105,26 +94,21 @@ final readonly class Letter
     public static function fromArray(array $data): self
     {
         return new self(
-            id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
+            id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            letterNumber: ScalarCaster::toStringOrNull($data['letter_number'] ?? null),
-            number: ScalarCaster::toIntOrNull($data['number'] ?? null),
-            numberPre: ScalarCaster::toStringOrNull($data['number_pre'] ?? null),
-            numberLength: ScalarCaster::toIntOrNull($data['number_length'] ?? null),
             status: LetterStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             subject: ScalarCaster::toStringOrNull($data['subject'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             intro: ScalarCaster::toStringOrNull($data['intro'] ?? null),
-            note: ScalarCaster::toStringOrNull($data['note'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
-            customerportalUrl: ScalarCaster::toStringOrNull($data['customerportal_url'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
-            customfield: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
+            customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null),
+            extra: array_diff_key($data, self::FIELDS),
         );
     }
 
@@ -138,25 +122,20 @@ final readonly class Letter
     public function toArray(): array
     {
         return [
+            ...$this->extra,
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
             'created' => $this->created?->format(DATE_ATOM),
-            'letter_number' => $this->letterNumber,
-            'number' => $this->number,
-            'number_pre' => $this->numberPre,
-            'number_length' => $this->numberLength,
             'status' => $this->status?->value,
             'date' => $this->date?->format('Y-m-d'),
             'address' => $this->address,
             'subject' => $this->subject,
             'label' => $this->label,
             'intro' => $this->intro,
-            'note' => $this->note,
             'template_id' => $this->templateId,
-            'customerportal_url' => $this->customerportalUrl,
             'updated' => $this->updated?->format(DATE_ATOM),
-            'customfield' => $this->customfield,
+            'customfield' => $this->customField,
             'supplier_id' => $this->supplierId,
         ];
     }

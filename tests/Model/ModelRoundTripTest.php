@@ -98,7 +98,7 @@ final class ModelRoundTripTest extends TestCase
      * @param class-string $class
      */
     #[Test]
-    #[DataProvider('generatedModels')]
+    #[DataProvider('modelsWithExtra')]
     public function unknownFieldsAreKeptInExtra(string $class): void
     {
         $known = $this->export($this->sample($class, empty: false));
@@ -305,6 +305,20 @@ final class ModelRoundTripTest extends TestCase
     {
         foreach (self::models() as $name => $arguments) {
             if (DocumentPdf::class !== $arguments[0]) {
+                yield $name => $arguments;
+            }
+        }
+    }
+
+    /**
+     * Models mit `$extra`: alle generierten und die handgeschriebenen, die es nachgerüstet haben.
+     *
+     * @return iterable<string, array{class-string}>
+     */
+    public static function modelsWithExtra(): iterable
+    {
+        foreach (self::models() as $name => $arguments) {
+            if (property_exists($arguments[0], 'extra')) {
                 yield $name => $arguments;
             }
         }

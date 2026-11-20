@@ -39,6 +39,7 @@ Every `BillomatException` answers the two questions a caller usually asks, witho
 | `TransportException` (network error, timeout) | `true` | `true` | – |
 | `TransportException` wrapping a PSR-18 `RequestExceptionInterface` (request rejected by the client, never sent) | `false` | `false` | – |
 | `UnexpectedResponseException` (2xx with an unexpected body) | `false` | `true` | – |
+| `InvalidWebhookException` (incoming webhook can't be parsed, no request to Billomat) | `false` | `false` | – |
 
 - **`isTransient()`**: a later attempt may succeed. The SDK's automatic retries are already exhausted at this point; a later retry, e.g. via a queue, makes sense.
 - **`mayHaveBeenProcessed()`**: Billomat may have processed the request despite the error. Before sending the POST again, check via `get()`/`list()` whether the invoice already exists. With `false` (4xx), Billomat definitely rejected the request.

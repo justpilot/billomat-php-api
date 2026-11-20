@@ -14,6 +14,9 @@ use Psr\Http\Message\RequestInterface;
  */
 final readonly class RequestFailed
 {
+    /**
+     * @internal das SDK erzeugt die Events; neue Felder können in einem Minor-Release dazukommen
+     */
     public function __construct(
         public RequestInterface $request,
         public BillomatException $exception,

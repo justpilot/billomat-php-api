@@ -31,7 +31,7 @@ The ID stays `?int` where it is not the key of a resource: tag cloud entries (`*
 
 ## Fields the SDK doesn't know: `extra`
 
-Billomat occasionally adds new fields to its API. Anything a generated model doesn't map (yet) ends up unchanged in `$extra` instead of being lost. Handwritten models such as `Account`, `Settings` or `Activity` have no `$extra` (`DocumentPdf` does).
+Billomat occasionally adds new fields to its API. Anything a generated model doesn't map (yet) ends up unchanged in `$extra` instead of being lost. Handwritten models have it too (`Activity`, `DocumentPdf`, `InboxDocument`, `Role`, `SearchResult`, `Settings`), except `Account` (its `$client` has one), `AccountQuota` and `TaxSummary`.
 
 ```php
 $client = $billomat->clients->getOrFail(7);

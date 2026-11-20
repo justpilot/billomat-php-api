@@ -16,6 +16,8 @@ namespace Justpilot\Billomat\Pagination;
 final readonly class Page
 {
     /**
+     * @internal das SDK erzeugt die Seiten; neue Felder können in einem Minor-Release dazukommen
+     *
      * @param list<T> $items
      */
     public function __construct(

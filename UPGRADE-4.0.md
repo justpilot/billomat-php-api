@@ -89,6 +89,10 @@ These changes need a decision and are not automated. The sections below describe
 - The parent filter of payments and property values: `list(filters: ['invoice_id' => $id])` keeps
   working, `list($id)` is the 4.0 way.
 - E-mail and Pixelletter attachments: the arrays become `Attachment` objects.
+- `InboxDocument` metadata as a key → value map with `InboxDocumentMetadataKey` keys, `documentType` as
+  `InboxDocumentType`.
+- Exceptions you extended or built yourself: the leaf exceptions are `final`, the `HttpException`
+  constructor is `@internal`.
 - `DocumentPdf` throws on missing fields and invalid base64 where the PDF models fell back to `0`/`''`.
 - PSR-18 setup, `MockHttpClient` in tests, exception handling, `#[\NoDiscard]`, `BillomatConfig` validation.
 
@@ -315,6 +319,14 @@ $billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: $key, retry:
 - Exception messages changed to `Billomat responded with HTTP <status> to <METHOD> /<path>. <Billomat error text>`.
   `getPrevious()` is no longer a Symfony exception. Status code and response body are unchanged.
 - A 2xx response whose body is not a JSON object throws `UnexpectedResponseException` instead of `JsonException`.
+- The exceptions below `BillomatException` and `HttpException` are `final`: `AuthenticationException`,
+  `NotFoundException`, `ValidationException`, `RateLimitException`, `TransportException`,
+  `UnexpectedResponseException` and `InvalidWebhookException`. Catch them, don't extend them. The
+  constructor of `HttpException` is `@internal`; to test your error handling, let a mock PSR-18 client
+  return the status code instead of throwing a hand-built exception.
+- `InvalidWebhookException::mayHaveBeenProcessed()` returns `false`: there is no request to Billomat behind it.
+- `BillomatClient::getHttpClient()` returns `BillomatHttpClientInterface` instead of the concrete
+  `BillomatHttpClient`. `request()` is unchanged.
 
 ### `pdf(rawPdf: true)` is `pdfContent()`
 
@@ -836,6 +848,26 @@ if (null === $client->name) { … }
 $label = $client->name ?? trim($client->firstName.' '.$client->lastName);
 ```
 
+### `InboxDocument` metadata is a key → value map
+
+Billomat sends and expects inbox metadata as `{"data": [{"key": "SENDER_NAME", "value": "…"}]}` and
+accepts only the keys listed in its docs. In 3.x and the betas, `InboxDocumentCreateOptions` sent the
+array as is, which Billomat rejected with HTTP 400 ("Unknown meta data field"), and
+`InboxDocument::$metadata` was a `?string` that lost the values. Now both sides are `array<string, string>`
+(key → value), the keys are the cases of `InboxDocumentMetadataKey`, and an unknown key throws
+`InvalidArgumentException` before the request:
+
+```php
+// 3.x / beta (rejected by Billomat)
+new InboxDocumentCreateOptions(…, documentType: 'invoice', metadata: ['vendor' => 'ACME']);
+
+// 4.0
+use Justpilot\Billomat\Model\Enum\InboxDocumentMetadataKey as Key;
+
+new InboxDocumentCreateOptions(…, documentType: InboxDocumentType::INVOICE, metadata: [Key::SENDER_NAME->value => 'ACME']);
+$doc->metadata[Key::SENDER_NAME->value] ?? null;   // array<string, string>, [] without metadata
+```
+
 ### Read-model constructors
 
 If you build read models yourself (e.g. in tests), only the required fields are mandatory and come
@@ -943,6 +975,7 @@ $billomat->offers->list(new OfferFilter(status: [OfferStatus::LOST]));
 | `InvoiceGroup::$status` | `?string` | `?InvoiceStatus` |
 | `FreeText::$type` | `?string` | `?FreeTextType` |
 | `EmailTemplate::$type` | `?string` | `?EmailTemplateType` |
+| `InboxDocument::$documentType`, `InboxDocumentCreateOptions` `documentType` | `?string` | `?InboxDocumentType` |
 
 All enums live in `Justpilot\Billomat\Model\Enum`. Unknown values hydrate to `null`; `->value` gives the
 Billomat string.

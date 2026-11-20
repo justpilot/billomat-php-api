@@ -2,6 +2,19 @@
     "inbox-document": {
         "filename": "receipt.pdf",
         "mimetype": "application/pdf",
-        "base64file": "JVBERi0xLjQK…"
+        "base64file": "JVBERi0xLjQK…",
+        "document_type": "RECEIPT",
+        "metadata": {
+            "data": [
+                {
+                    "key": "SENDER_NAME",
+                    "value": "ACME GmbH"
+                },
+                {
+                    "key": "TOTAL_GROSS",
+                    "value": "119.00"
+                }
+            ]
+        }
     }
 }

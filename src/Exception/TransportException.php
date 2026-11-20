@@ -13,7 +13,7 @@ use Psr\Http\Client\RequestExceptionInterface;
  *
  * Die Exception des PSR-18-Clients steckt in {@see getPrevious()}.
  */
-class TransportException extends BillomatException
+final class TransportException extends BillomatException
 {
     /**
      * `true`, außer der PSR-18-Client hat den Request als ungültig abgelehnt

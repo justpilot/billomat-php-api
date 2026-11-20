@@ -38,6 +38,7 @@ use Justpilot\Billomat\Model\Enum\CreditNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\CreditNoteStatus;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteCommentActionKey;
 use Justpilot\Billomat\Model\Enum\DeliveryNoteStatus;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\Enum\IncomingCommentActionKey;
 use Justpilot\Billomat\Model\Enum\IncomingStatus;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
@@ -133,6 +134,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(EmailTemplate::class)]
 #[CoversClass(FreeText::class)]
 #[CoversClass(InboxDocument::class)]
+#[UsesClass(InboxDocumentType::class)]
 #[CoversClass(Incoming::class)]
 #[CoversClass(IncomingComment::class)]
 #[CoversClass(IncomingPayment::class)]

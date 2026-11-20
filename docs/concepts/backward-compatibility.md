@@ -15,13 +15,13 @@ CI runs [`roave/backward-compatibility-check`](https://github.com/Roave/Backward
 Everything public under `Justpilot\Billomat\` that is not marked `@internal`:
 
 - class, interface and enum names, enum cases,
-- public methods with their parameter names (named arguments are part of the API), types and return types,
+- public methods with their parameter names (named arguments are part of the API), types and return types, including the methods an `*Api` class inherits from the `@internal` base classes (`$billomat->invoices->comments->get()` is covered even though it is declared in `AbstractSubResourceApi`),
 - public properties of read models, filters, options, events and exceptions,
 - the exception hierarchy: an error that throws `ValidationException` today won't throw a different class tomorrow.
 
 ## What is not covered
 
-- **`@internal` code:** `AbstractApi`, `AbstractSubResourceApi`, the constructors of all `*Api` classes, `Justpilot\Billomat\Internal\*`, the `FromApi` trait (the `fromApi()` method on the enums is public) and the `$sleep` test hook of `BillomatHttpClient`'s constructor. Get API objects from `BillomatClient`, never with `new`. For endpoints without an SDK method, use `$billomat->getHttpClient()->request()`.
+- **`@internal` code:** `AbstractApi`, `AbstractSubResourceApi`, the constructors of all `*Api` classes, of the events (`Justpilot\Billomat\Event\*`), of `Page`/`PageInfo` and of `HttpException`, `WebhookEvent::envelopeKey()`, `Justpilot\Billomat\Internal\*`, the `FromApi` trait (the `fromApi()` method on the enums is public) and the `$sleep` test hook of `BillomatHttpClient`'s constructor. The SDK creates events, pages and exceptions itself; their properties and getters are covered, constructing them is not. Get API objects from `BillomatClient`, never with `new`. For endpoints without an SDK method, use `$billomat->getHttpClient()->request()`.
 - **Own implementations of `BillomatHttpClientInterface`.** Calling it is covered; a minor release may add methods to the interface.
 - **Parameter order of constructors** of read models, options and filters. Many of them are generated from the Billomat field list, and a new field may land in the middle. Pass arguments by name: `new InvoiceCreateOptions(clientId: 1, date: $date)`.
 - **Additions**, which may come with any minor release: new classes, methods, optional parameters at the end of a method, read model properties, enum cases and keys in `$extra`. If you `match` over an SDK enum, add a `default` arm, because Billomat extends its value sets from time to time.

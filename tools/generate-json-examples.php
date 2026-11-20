@@ -73,6 +73,8 @@ use Justpilot\Billomat\Model\Enum\PropertyType;
 use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
+use Justpilot\Billomat\Model\Enum\InboxDocumentMetadataKey;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Support\RequiredFields;
 use RuntimeException;
@@ -220,6 +222,8 @@ function requests(): array
             filename: 'receipt.pdf',
             mimeType: 'application/pdf',
             base64File: 'JVBERi0xLjQK…',
+            documentType: InboxDocumentType::RECEIPT,
+            metadata: [InboxDocumentMetadataKey::SENDER_NAME->value => 'ACME GmbH', InboxDocumentMetadataKey::TOTAL_GROSS->value => '119.00'],
         )),
         'taxes.create' => static fn (BillomatClient $b): object => $b->taxes->create(new TaxRateCreateOptions(name: 'VAT reduced', rate: 7.0)),
         'templates.create' => static fn (BillomatClient $b): object => $b->templates->create(new TemplateCreateOptions(

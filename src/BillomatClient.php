@@ -37,6 +37,7 @@ use Justpilot\Billomat\Api\UsersApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Http\BillomatHttpClient;
+use Justpilot\Billomat\Http\BillomatHttpClientInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -194,7 +195,11 @@ final class BillomatClient
         return new self($config, $httpClient, logger: $logger, events: $events);
     }
 
-    public function getHttpClient(): BillomatHttpClient
+    /**
+     * HTTP-Client des SDK, z. B. für Endpunkte ohne eigene SDK-Methode:
+     * `$billomat->getHttpClient()->request('GET', '/units/7')`.
+     */
+    public function getHttpClient(): BillomatHttpClientInterface
     {
         return $this->http;
     }

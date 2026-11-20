@@ -12,7 +12,7 @@ Thanks for contributing to `justpilot/billomat-php-api`. This document describes
 1. Open an issue first (bug fixes included), so scope and approach are agreed on before you write code.
 2. Fork the repository and create a branch with a descriptive name, e.g. `feat/add-articles-resource` or `fix/payment-list-pagination`.
 3. Keep commits small and focused. Commit messages are English, in the imperative ("Add articles list endpoint"); we use [Conventional Commits](https://www.conventionalcommits.org/) prefixes (`feat:`, `fix:`, `docs:`, `test:`, `chore:`, `feat!:` for breaking changes).
-4. Open the pull request against **`4.x`** (the branch for 4.0; `main` only receives 3.x fixes until 4.0 is released). Explain the why, not only the what, and link the issue.
+4. Open the pull request against **`main`** (the 4.x line; security fixes for 3.x go to the `3.x` branch). Explain the why, not only the what, and link the issue.
 5. `composer ci` must pass locally before you request a review.
 
 ## Coding standards
@@ -81,7 +81,7 @@ composer audit            # security audit of the dependencies
 
 **PHPStan:** level max with the bleeding-edge ruleset and without a baseline or `ignoreErrors`, tests included. Fix findings instead of adding `@phpstan-ignore` comments, ignore rules or casts that only silence them.
 
-**Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/4.x --ignore-msi-with-no-mutations` (the last flag keeps a change without any mutants, e.g. only property hooks, from failing with 0 %). The full run on `main`/`4.x` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
+**Infection:** on pull requests CI mutates only the changed lines and requires 90 % MSI; locally: `composer mutate -- --git-diff-lines --git-diff-base=origin/main --ignore-msi-with-no-mutations` (the last flag keeps a change without any mutants, e.g. only property hooks, from failing with 0 %). The full run on `main` uses the thresholds from `infection.json5` (95 %). Infection runs with strict coverage: a test that executes a class outside its `CoversClass`/`UsesClass` attributes is risky and aborts the run.
 
 **Rector vs. PHP-CS-Fixer:** if one tool reverts the other's change, that's a configuration bug; please open an issue instead of committing a workaround.
 

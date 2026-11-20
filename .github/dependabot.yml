@@ -43,3 +43,48 @@ updates:
     labels:
       - dependencies
       - github-actions
+
+  # 3.x bekommt bis 2027-05-31 Sicherheitsfixes.
+  - package-ecosystem: composer
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    target-branch: 3.x
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "chore(deps-3.x)"
+      include: scope
+    labels:
+      - dependencies
+      - composer
+    groups:
+      symfony:
+        patterns:
+          - "symfony/*"
+      dev-tools:
+        patterns:
+          - "phpunit/*"
+          - "phpstan/*"
+          - "friendsofphp/*"
+          - "rector/*"
+          - "infection/*"
+          - "fakerphp/*"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    target-branch: 3.x
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "chore(ci-3.x)"
+      include: scope
+    labels:
+      - dependencies
+      - github-actions

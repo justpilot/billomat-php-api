@@ -1,12 +1,12 @@
 # Billomat PHP SDK
 
-[![CI](https://github.com/justpilot/billomat-php-api/actions/workflows/ci.yml/badge.svg?branch=4.x)](https://github.com/justpilot/billomat-php-api/actions/workflows/ci.yml)
+[![CI](https://github.com/justpilot/billomat-php-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/justpilot/billomat-php-api/actions/workflows/ci.yml)
 [![Packagist Version](https://img.shields.io/packagist/v/justpilot/billomat-php-api)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![Downloads](https://img.shields.io/packagist/dt/justpilot/billomat-php-api)](https://packagist.org/packages/justpilot/billomat-php-api)
 [![PHP](https://img.shields.io/packagist/dependency-v/justpilot/billomat-php-api/php)](https://www.php.net/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
-[![Mutation testing](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fjustpilot%2Fbillomat-php-api%2F4.x)](https://dashboard.stryker-mutator.io/reports/github.com/justpilot/billomat-php-api/4.x)
-[![codecov](https://codecov.io/gh/justpilot/billomat-php-api/branch/4.x/graph/badge.svg)](https://codecov.io/gh/justpilot/billomat-php-api)
+[![Mutation testing](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fjustpilot%2Fbillomat-php-api%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/justpilot/billomat-php-api/main)
+[![codecov](https://codecov.io/gh/justpilot/billomat-php-api/branch/main/graph/badge.svg)](https://codecov.io/gh/justpilot/billomat-php-api)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 
 A modern, fully typed PHP 8.5 SDK for the [Billomat API](https://www.billomat.com/api/): invoices, offers, clients, payments, PDFs and incoming webhooks, on top of any PSR-18 HTTP client.

@@ -149,5 +149,10 @@
     "docs:json": "Schreibt die JSON-Beispiele der Ressourcen-Doku (docs/snippets/json/ und die Abschnitte „JSON on the wire“)",
     "docs:json:check": "Prüft, ob die JSON-Beispiele der Doku aktuell sind",
     "fixtures:record": "Nimmt anonymisierte Contract-Fixtures per GET gegen die Billomat-Sandbox auf (benötigt .env.test.local)"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "4.x-dev"
+    }
   }
 }

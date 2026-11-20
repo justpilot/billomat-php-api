@@ -4,7 +4,7 @@ on:
   pull_request:
     paths: ['**.md', 'docs/**', 'src/**', 'tools/codegen/definitions/**', 'lychee.toml', '.github/workflows/links.yml']
   push:
-    branches: [4.x]
+    branches: [main]
     paths: ['**.md', 'docs/**', 'src/**', 'tools/codegen/definitions/**', 'lychee.toml', '.github/workflows/links.yml']
   # Wöchentlich, damit auch Links auffallen, die ohne Änderung bei uns kaputtgehen.
   schedule:

@@ -12,7 +12,7 @@
         summary: "build/infection/summary.log",
         // Badge nur für vollständige Läufe auf den Haupt-Branches (Push), nicht für PR-Diffs.
         stryker: {
-            badge: "/^(main|4\\.x)$/",
+            badge: "/^main$/",
         },
     },
     tmpDir: "build/infection/tmp",

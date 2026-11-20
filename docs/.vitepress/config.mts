@@ -5,7 +5,7 @@ import { defineConfig, type DefaultTheme } from 'vitepress'
 
 const docsDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const repo = 'https://github.com/justpilot/billomat-php-api'
-const branch = '4.x'
+const branch = 'main'
 
 // Seitentitel aus der ersten H1-Überschrift (vor manchen steht ein Quellkommentar).
 function title(file: string): string {

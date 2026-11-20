@@ -2,7 +2,7 @@ import DefaultTheme from 'vitepress/theme'
 import { h } from 'vue'
 import './custom.css'
 
-// Hinweis-Leiste über der Navigation: Die Website beschreibt 4.x, `main` ist bis zum 4.0-Release noch 3.x.
+// Hinweis-Leiste über der Navigation: Die Website beschreibt 4.x; 3.x ist nur noch im README dokumentiert.
 export default {
   extends: DefaultTheme,
   Layout: () =>
@@ -10,8 +10,10 @@ export default {
       'layout-top': () =>
         h('div', { class: 'version-banner' }, [
           h('span', [
-            'Documentation for 4.0 (beta, API frozen). Using 3.x? See the ',
-            h('a', { href: 'https://github.com/justpilot/billomat-php-api/tree/main#readme' }, 'README on main'),
+            'Documentation for 4.x. Using 3.x? See the ',
+            h('a', { href: 'https://github.com/justpilot/billomat-php-api/tree/v3.4.1#readme' }, '3.x README'),
+            ' and the ',
+            h('a', { href: 'https://github.com/justpilot/billomat-php-api/blob/4.x/UPGRADE-4.0.md' }, 'upgrade guide'),
             '.',
           ]),
         ]),

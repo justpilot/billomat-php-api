@@ -2,11 +2,7 @@
 
 The SDK follows [Semantic Versioning](https://semver.org/). This page says what that covers, so you know which code survives a minor update.
 
-## Release phases of 4.0
-
-- **Alpha** (`4.0.0-alpha.*`): the public API may still change.
-- **Beta** (`4.0.0-beta.*`): the public API is frozen. Betas only get fixes and additions; a break is only made to fix a bug, and it is listed in the CHANGELOG and in [UPGRADE-4.0.md](../../UPGRADE-4.0.md).
-- **Stable** (`4.0.0` and later): breaks only in a new major version.
+From 4.0.0 on, breaking changes only come with a new major version. Minor releases add features, patch releases fix bugs. The breaks between the 4.0 betas and 4.0.0 are listed in [UPGRADE-4.0.md](../../UPGRADE-4.0.md).
 
 CI runs [`roave/backward-compatibility-check`](https://github.com/Roave/BackwardCompatibilityCheck) against the latest 4.x tag on every pull request.
 

@@ -32,7 +32,7 @@ features:
 ---
 
 ```bash
-composer require justpilot/billomat-php-api:^4.0@beta
+composer require justpilot/billomat-php-api
 ```
 
 ```php

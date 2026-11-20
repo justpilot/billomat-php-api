@@ -87,7 +87,7 @@ composer audit            # security audit of the dependencies
 
 ## Please discuss first
 
-- Breaking changes to public classes, methods or properties. On `4.x` they're allowed until 4.0.0, but each needs a CHANGELOG entry and a before/after section in `UPGRADE-4.0.md`.
+- Breaking changes to public classes, methods or properties. They wait for the next major version; open an issue first to discuss them.
 - New dependencies in `composer.json`. Explain why in the PR.
 - Changes to `BillomatHttpClient::buildBillomatQuery()`. Its quirks (literal `+`, `key[]=v` arrays) work around Billomat behaviour; see [docs/advanced/http-layer.md](docs/advanced/http-layer.md).
 
@@ -101,6 +101,6 @@ Add notable changes to the `[Unreleased]` section of `CHANGELOG.md`, grouped by 
 - [ ] Unit tests for new code (`#[Test]`, `#[CoversClass]`)
 - [ ] Generated files changed only via definitions + `composer generate`
 - [ ] New resources: docs under `docs/resources/` and an entry in its README
-- [ ] `CHANGELOG.md` updated (and `UPGRADE-4.0.md` for breaking changes)
+- [ ] `CHANGELOG.md` updated
 - [ ] Code comments in German, identifiers in English
 - [ ] `composer analyse` passes without new ignores

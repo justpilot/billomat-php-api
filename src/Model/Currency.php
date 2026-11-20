@@ -29,7 +29,7 @@ final readonly class Currency
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** ISO-Währungscode (z. B. "EUR"). */
-        public string $code = '',
+        public string $code,
         /** Name der Währung. */
         public ?string $name = null,
         /** Währungssymbol (z. B. "€"). */
@@ -53,7 +53,7 @@ final readonly class Currency
     public static function fromArray(array $data): self
     {
         return new self(
-            code: ScalarCaster::toStringOrNull($data['code'] ?? $data['currency_code'] ?? null) ?? '',
+            code: ScalarCaster::required(ScalarCaster::toStringOrNull($data['code'] ?? $data['currency_code'] ?? null), self::class, 'code'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             symbol: ScalarCaster::toStringOrNull($data['symbol'] ?? null),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),

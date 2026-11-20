@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Internal\ListCaster;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Money;
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TaxSummary::class)]
 #[UsesClass(ListCaster::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 #[UsesClass(Money::class)]
 final class TaxSummaryTest extends TestCase
 {
@@ -82,18 +84,18 @@ final class TaxSummaryTest extends TestCase
     }
 
     #[Test]
-    public function missingOrInvalidFieldsFallBackToEmptyValues(): void
+    public function optionalAmountsAreNullAndNumericNamesAreStrings(): void
     {
-        $tax = TaxSummary::fromArray(['name' => 7, 'amount' => '']);
+        $tax = TaxSummary::fromArray(['name' => 7, 'rate' => '19', 'amount' => '0']);
 
         self::assertSame('7', $tax->name);
-        self::assertSame(0.0, $tax->rate);
+        self::assertSame(19.0, $tax->rate);
         self::assertTrue($tax->amount->isZero());
         self::assertNull($tax->amountNet);
         self::assertNull($tax->amountGrossRounded);
         self::assertSame([
-            'name' => '',
-            'rate' => 0.0,
+            'name' => '7',
+            'rate' => 19.0,
             'amount' => '0',
             'amount_plain' => null,
             'amount_rounded' => null,
@@ -103,7 +105,16 @@ final class TaxSummaryTest extends TestCase
             'amount_gross' => null,
             'amount_gross_plain' => null,
             'amount_gross_rounded' => null,
-        ], TaxSummary::fromArray([])->toArray());
+        ], $tax->toArray());
+    }
+
+    #[Test]
+    public function missingOrEmptyRequiredFieldsThrow(): void
+    {
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('TaxSummary without a valid "amount" field');
+
+        TaxSummary::fromArray(['name' => 'MwSt', 'rate' => '19', 'amount' => '']);
     }
 
     #[Test]

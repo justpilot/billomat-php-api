@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Webhook;
 
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use Justpilot\Billomat\Webhook\WebhookAction;
 use Justpilot\Billomat\Webhook\WebhookEvent;
 use Justpilot\Billomat\Webhook\WebhookPayload;
@@ -53,7 +54,7 @@ final class WebhookEventTest extends TestCase
             $class,
         );
 
-        $payload = WebhookPayload::fromArray($event, [$event->envelopeKey() => ['id' => '7', 'amount' => '1']]);
+        $payload = WebhookPayload::fromArray($event, [$event->envelopeKey() => [...RequiredFields::of($class), 'id' => '7']]);
         $model = $payload->model();
 
         self::assertInstanceOf($class, $model);

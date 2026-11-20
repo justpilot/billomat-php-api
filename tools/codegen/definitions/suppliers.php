@@ -54,7 +54,7 @@ return [
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Lieferanten.'],
         'name' => [
             'doc' => 'Firmenname des Lieferanten.',
-            'model' => ['nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true],
         ],
         // BC: Das Read-Model führt die Kundennummer seit jeher als int, die Spec als ALNUM.

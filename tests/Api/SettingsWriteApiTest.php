@@ -25,6 +25,7 @@ use Justpilot\Billomat\Model\Enum\EmailTemplateType;
 use Justpilot\Billomat\Model\Enum\FreeTextType;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -149,7 +150,7 @@ final class SettingsWriteApiTest extends TestCase
     public function updatePutsOnlyTheGivenFields(Closure $call, string $path, string $key, array $payload): void
     {
         $captured = new CapturedRequest();
-        $model = $call($this->client($captured, (string) json_encode([$key => ['id' => '7']])));
+        $model = $call($this->client($captured, (string) json_encode([$key => [...RequiredFields::ANY, 'id' => '7']])));
 
         self::assertSame('PUT', $captured->method);
         self::assertSame('/api'.$path, $captured->path());

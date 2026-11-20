@@ -77,9 +77,9 @@ final readonly class TaxSummary
     public static function fromArray(array $data): self
     {
         return new self(
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
-            rate: ScalarCaster::toFloatOrNull($data['rate'] ?? null) ?? 0.0,
-            amount: ScalarCaster::toMoneyOrNull($data['amount'] ?? null) ?? Money::zero(),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
+            rate: ScalarCaster::required(ScalarCaster::toFloatOrNull($data['rate'] ?? null), self::class, 'rate'),
+            amount: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['amount'] ?? null), self::class, 'amount'),
             amountPlain: ScalarCaster::toMoneyOrNull($data['amount_plain'] ?? null),
             amountRounded: ScalarCaster::toMoneyOrNull($data['amount_rounded'] ?? null),
             amountNet: ScalarCaster::toMoneyOrNull($data['amount_net'] ?? null),

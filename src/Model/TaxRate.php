@@ -44,15 +44,15 @@ final readonly class TaxRate
          *
          * Beispiel: "MwSt"
          */
-        public string $name = '',
+        public string $name,
         /**
          * Höhe des Steuersatzes in Prozent.
          *
          * Beispiel: 19.0
          */
-        public float $rate = 0.0,
+        public float $rate,
         /** Standard-Steuersatz? */
-        public bool $isDefault = false,
+        public bool $isDefault,
         /** Erstellungszeitpunkt des Steuersatzes. */
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
@@ -83,9 +83,9 @@ final readonly class TaxRate
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
-            rate: ScalarCaster::toFloatOrNull($data['rate'] ?? null) ?? 0.0,
-            isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
+            rate: ScalarCaster::required(ScalarCaster::toFloatOrNull($data['rate'] ?? null), self::class, 'rate'),
+            isDefault: ScalarCaster::required(ScalarCaster::toBoolOrNull($data['is_default'] ?? null), self::class, 'is_default'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),

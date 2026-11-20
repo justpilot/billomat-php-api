@@ -10,10 +10,12 @@ use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Model\Activity;
 use Justpilot\Billomat\Model\Country;
 use Justpilot\Billomat\Model\Currency;
+use Justpilot\Billomat\Model\DocumentPdf;
 use Justpilot\Billomat\Model\InboxDocument;
 use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\Role;
 use Justpilot\Billomat\Model\SearchResult;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -65,6 +67,30 @@ final class ModelRoundTripTest extends TestCase
         $model = $this->sample($class, empty: true);
 
         self::assertEquals($model, $class::fromArray($this->export($model)));
+    }
+
+    /**
+     * Pflichtfelder haben keinen stillen Ersatzwert: fehlt eines oder ist es leer, wirft fromArray().
+     *
+     * @param class-string $class
+     */
+    #[Test]
+    #[DataProvider('modelsWithSingleKeyFields')]
+    public function missingOrEmptyRequiredFieldsThrow(string $class): void
+    {
+        $required = RequiredFields::of($class);
+        self::assertIsObject($class::fromArray($required));
+
+        foreach (array_keys($required) as $field) {
+            foreach ([array_diff_key($required, [$field => true]), [...$required, $field => '']] as $payload) {
+                try {
+                    $class::fromArray($payload);
+                    self::fail(\sprintf('%s accepts a missing or empty "%s".', $class, $field));
+                } catch (UnexpectedResponseException $e) {
+                    self::assertStringContainsString(\sprintf('"%s"', $field), $e->getMessage());
+                }
+            }
+        }
     }
 
     /**
@@ -265,6 +291,21 @@ final class ModelRoundTripTest extends TestCase
             }
 
             yield $name => [$class];
+        }
+    }
+
+    /**
+     * Wie {@see models()} ohne DocumentPdf: Dessen Dokument-ID hat mehrere mögliche Schlüssel
+     * (`invoice_id`, `offer_id`, …), der Pflichtfeld-Test steht in DocumentPdfTest.
+     *
+     * @return iterable<string, array{class-string}>
+     */
+    public static function modelsWithSingleKeyFields(): iterable
+    {
+        foreach (self::models() as $name => $arguments) {
+            if (DocumentPdf::class !== $arguments[0]) {
+                yield $name => $arguments;
+            }
         }
     }
 

@@ -49,7 +49,7 @@ final readonly class OfferComment
         /** Interne ID des Kommentars. */
         public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $offerId = 0,
+        public int $offerId,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -93,7 +93,7 @@ final readonly class OfferComment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null) ?? 0,
+            offerId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['offer_id'] ?? null), self::class, 'offer_id'),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

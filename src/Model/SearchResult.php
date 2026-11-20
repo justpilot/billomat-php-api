@@ -35,7 +35,7 @@ final readonly class SearchResult
     public static function fromArray(array $data): self
     {
         return new self(
-            resource: ScalarCaster::toStringOrNull($data['resource'] ?? null) ?? '',
+            resource: ScalarCaster::required(ScalarCaster::toStringOrNull($data['resource'] ?? null), self::class, 'resource'),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             headline: ScalarCaster::toStringOrNull($data['headline'] ?? null),
             subline: ScalarCaster::toStringOrNull($data['subline'] ?? null),

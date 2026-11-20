@@ -52,7 +52,7 @@ return [
             'type' => 'int',
             'readOnly' => true,
             'doc' => 'ID des Kunden, zu dem der Kontakt gehört.',
-            'model' => ['nonNull' => true],
+            'model' => ['required' => true],
         ],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Kontakts.'],
         'label' => ['doc' => 'Bezeichnung des Kontakts.'],

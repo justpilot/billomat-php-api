@@ -242,6 +242,7 @@ final class TemplatesApiTest extends TestCase
                         'type' => 'INVOICE',
                         'template_type' => 'DEFINED',
                         'name' => 'Standard',
+                        'is_default' => '1',
                     ],
                 ],
             ], JSON_THROW_ON_ERROR),

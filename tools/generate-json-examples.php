@@ -74,6 +74,7 @@ use Justpilot\Billomat\Model\Enum\RecurringAction;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 use Justpilot\Billomat\Model\Enum\TemplateDocumentType;
 use Justpilot\Billomat\Model\Money;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use RuntimeException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Psr18Client;
@@ -321,11 +322,11 @@ function capture(Closure $call): array
         $body = $options['body'] ?? '';
         $captured = [$method, $path, \is_string($body) ? $body : ''];
 
-        // Minimale Antwort, damit die Hydration des Rückgabewerts klappt.
+        // Minimale Antwort mit allen Pflichtfeldern, damit die Hydration des Rückgabewerts klappt.
         $slug = explode('/', $path)[1] ?? '';
         $key = 'settings' === $slug ? 'settings' : (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
 
-        return new MockResponse((string) json_encode([$key => ['id' => '1', 'unit_price' => '0', 'amount' => '0', 'name' => 'x', 'filename' => 'x', 'mime_type' => 'x', 'filesize' => '1', 'created' => '2026-11-02T00:00:00+01:00']]));
+        return new MockResponse((string) json_encode([$key => [...RequiredFields::ANY, 'id' => '1', 'mime_type' => 'x', 'created' => '2026-11-02T00:00:00+01:00']]));
     });
 
     $call(new BillomatClient(new BillomatConfig(billomatId: 'mycompany', apiKey: 'example'), new Psr18Client($mock)));

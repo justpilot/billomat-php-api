@@ -56,6 +56,7 @@ use Justpilot\Billomat\Model\Money;
 use Justpilot\Billomat\Model\ReminderItem;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Pagination\PageInfo;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -276,7 +277,7 @@ final class SubResourceApiTest extends TestCase
     #[DataProvider('sortedLists')]
     public function listsTakeParentIdAndSubResourceFilter(Closure $call, string $path, string $envelope, string $expectedQuery): void
     {
-        $this->respond([$envelope => [(string) preg_replace(['/ies$/', '/s$/'], ['y', ''], $envelope) => [['id' => 1, 'unit_price' => '1'], ['id' => 2, 'unit_price' => '2']]]]);
+        $this->respond([$envelope => [(string) preg_replace(['/ies$/', '/s$/'], ['y', ''], $envelope) => [[...RequiredFields::ANY, 'id' => 1, 'unit_price' => '1'], [...RequiredFields::ANY, 'id' => 2, 'unit_price' => '2']]]]);
 
         $result = $call($this->http(), new SubResourceFilter(orderBy: OrderBy::desc('id'), page: 2));
         $items = match (true) {

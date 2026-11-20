@@ -21,6 +21,8 @@ final class ClientsSelfTest extends AbstractBillomatIntegrationTestCase
         $me = $billomat->clients->getMyself();
 
         self::assertGreaterThan(0, $me->id);
+        // Der eigene Account ist eine Firma; bei Privatkunden wäre `name` null.
+        self::assertNotNull($me->name);
         self::assertNotSame('', trim($me->name));
     }
 }

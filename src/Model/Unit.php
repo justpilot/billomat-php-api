@@ -36,7 +36,7 @@ final readonly class Unit
         /** Interne Billomat-ID der Einheit. */
         public int $id,
         /** Bezeichnung der Einheit. */
-        public string $name = '',
+        public string $name,
         /** Erstellungszeitpunkt der Einheit. */
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
@@ -61,7 +61,7 @@ final readonly class Unit
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),

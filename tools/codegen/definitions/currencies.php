@@ -25,7 +25,7 @@ return [
         'code' => [
             'type' => 'string',
             'readOnly' => true,
-            'model' => ['nonNull' => true, 'sources' => ['code', 'currency_code']],
+            'model' => ['required' => true, 'sources' => ['code', 'currency_code']],
             'doc' => 'ISO-Währungscode (z. B. "EUR").',
         ],
         'name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Name der Währung.'],

@@ -26,7 +26,7 @@ return [
         'code' => [
             'type' => 'string',
             'readOnly' => true,
-            'model' => ['nonNull' => true, 'sources' => ['code', 'country_code']],
+            'model' => ['required' => true, 'sources' => ['code', 'country_code']],
             'doc' => 'ISO-Ländercode (z. B. "DE").',
         ],
         'name' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Name des Landes.'],

@@ -57,11 +57,11 @@ return static function (string $prefix, string $label, string $parentField, stri
                 'type' => 'int',
                 'readOnly' => true,
                 'doc' => 'ID des Datensatzes, zu dem der Wert gehört.',
-                'model' => ['nonNull' => true],
+                'model' => ['required' => true],
             ],
             "{$resource}_property_id" => [
                 'doc' => 'ID der Eigenschaft.',
-                'model' => ['nonNull' => true],
+                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
             'type' => ['type' => 'string', 'enum' => 'PropertyType', 'readOnly' => true, 'doc' => 'Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX).'],

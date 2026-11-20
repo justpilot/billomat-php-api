@@ -16,6 +16,7 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Pagination\Page;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -186,7 +187,7 @@ final class ListPagingTest extends TestCase
      */
     private function page(string $outer, string $inner, array $ids, int $page, int $perPage, int $total): MockResponse
     {
-        $rows = array_map(static fn (int $id): array => ['id' => (string) $id, 'client_id' => '9', 'name' => 'n'.$id], $ids);
+        $rows = array_map(static fn (int $id): array => [...RequiredFields::ANY, 'id' => (string) $id, 'client_id' => '9', 'name' => 'n'.$id], $ids);
 
         return new MockResponse(json_encode([
             $outer => [$inner => $rows, '@page' => (string) $page, '@per_page' => (string) $perPage, '@total' => (string) $total],

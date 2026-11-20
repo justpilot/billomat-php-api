@@ -31,11 +31,11 @@ final readonly class RecurringEmailReceiver
         /** Interne Billomat-ID des Empfängers. */
         public int $id,
         /** ID der Abo-Rechnung. */
-        public int $recurringId = 0,
+        public int $recurringId,
+        /** E-Mail-Adresse. */
+        public string $address,
         /** Empfänger-Typ (To, Cc oder Bcc). */
         public ?RecurringEmailReceiverType $type = null,
-        /** E-Mail-Adresse. */
-        public string $address = '',
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -54,9 +54,9 @@ final readonly class RecurringEmailReceiver
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null) ?? 0,
+            recurringId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['recurring_id'] ?? null), self::class, 'recurring_id'),
+            address: ScalarCaster::required(ScalarCaster::toStringOrNull($data['address'] ?? null), self::class, 'address'),
             type: RecurringEmailReceiverType::fromApi(ScalarCaster::toStringOrNull($data['type'] ?? null)),
-            address: ScalarCaster::toStringOrNull($data['address'] ?? null) ?? '',
             extra: array_diff_key($data, self::FIELDS),
         );
     }

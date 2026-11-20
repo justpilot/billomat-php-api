@@ -42,9 +42,9 @@ final readonly class InboxDocument
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            filename: ScalarCaster::toStringOrNull($data['filename'] ?? null) ?? '',
+            filename: ScalarCaster::required(ScalarCaster::toStringOrNull($data['filename'] ?? null), self::class, 'filename'),
             mimeType: ScalarCaster::toStringOrNull($data['mimetype'] ?? null) ?? 'application/octet-stream',
-            fileSize: ScalarCaster::toIntOrNull($data['filesize'] ?? null) ?? 0,
+            fileSize: ScalarCaster::required(ScalarCaster::toIntOrNull($data['filesize'] ?? null), self::class, 'filesize'),
             base64File: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),

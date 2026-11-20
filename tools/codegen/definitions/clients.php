@@ -29,9 +29,9 @@ declare(strict_types=1);
  *               (read-only; leere und unbekannte Werte fallen heraus).
  *   model       ['required' => true]  → Billomat liefert das Feld immer (z. B. `id`): nicht-nullbarer Typ ohne Default;
  *                                       fehlt es, wirft fromArray() eine UnexpectedResponseException
- *                                       (nicht mit 'nonNull' und nicht für Enums)
- *               ['nonNull' => true]   → nicht-nullbarer Typ, fehlender Wert wird beim Hydrieren zu ''/0/0.0/false
- *                                       (nicht für Enums: unbekannte Werte werden immer zu null)
+ *                                       (nicht für Enums: unbekannte Werte werden immer zu null).
+ *                                       Ohne 'required' ist das Feld nullable; einen stillen Ersatzwert
+ *                                       (''/0/false) gibt es nicht.
  *               ['type' => 'int']     → abweichender Typ im Read-Model
  *               ['fromApi' => true]   → Enum über Enum::fromApi() statt tryFrom() hydrieren (eigene Toleranz)
  *               ['sources' => [...]]  → Billomat-Felder, die beim Hydrieren der Reihe nach probiert werden
@@ -109,7 +109,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Kunden.'],
-        'name' => ['model' => ['nonNull' => true], 'doc' => 'Firmenname des Kunden.'],
+        'name' => ['doc' => 'Firmenname des Kunden; leer bei Privatpersonen.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Kunden.'],
         'client_number' => ['type' => 'string', 'writable' => true, 'doc' => 'Kundennummer (frei wählbar).'],
         'number' => ['doc' => 'Laufende Nummer (ohne Präfix).'],

@@ -51,12 +51,12 @@ return static function (string $prefix, string $label, string $parentField, ?str
                 'type' => 'int',
                 'readOnly' => true,
                 'doc' => 'ID des Datensatzes, an dem das Schlagwort hängt.',
-                'model' => ['nonNull' => true],
+                'model' => ['required' => true],
             ],
             'name' => [
                 ...$writable,
                 'doc' => 'Name des Schlagworts.',
-                'model' => ['nonNull' => true],
+                'model' => ['required' => true],
                 'create' => ['constructor' => true],
             ],
             'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
@@ -78,8 +78,8 @@ return static function (string $prefix, string $label, string $parentField, ?str
 
         'fields' => [
             'id' => ['type' => 'int', 'readOnly' => true, 'doc' => 'Interne Billomat-ID des Schlagworts.'],
-            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['nonNull' => true], 'doc' => 'Name des Schlagworts.'],
-            'count' => ['type' => 'int', 'readOnly' => true, 'model' => ['nonNull' => true], 'doc' => 'Häufigkeit des Schlagworts.'],
+            'name' => ['type' => 'string', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Name des Schlagworts.'],
+            'count' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Häufigkeit des Schlagworts.'],
         ],
     ];
 

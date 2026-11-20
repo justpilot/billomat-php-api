@@ -39,6 +39,8 @@ final readonly class DeliveryNoteItem
     public function __construct(
         /** Interne Billomat-ID der Position. */
         public int $id,
+        /** Menge. */
+        public float $quantity,
         /** ID des zugehörigen Dokuments. */
         public ?int $deliveryNoteId = null,
         /** ID des Artikels (falls verknüpft). */
@@ -51,8 +53,6 @@ final readonly class DeliveryNoteItem
         public ?int $position = null,
         /** Einheit (z. B. "Stück", "Stunde"). */
         public ?string $unit = null,
-        /** Menge. */
-        public float $quantity = 0.0,
         /**
          * Flag, ob die Steuerrate manuell geändert wurde.
          *
@@ -85,11 +85,11 @@ final readonly class DeliveryNoteItem
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            quantity: ScalarCaster::required(ScalarCaster::toFloatOrNull($data['quantity'] ?? null), self::class, 'quantity'),
             deliveryNoteId: ScalarCaster::toIntOrNull($data['delivery_note_id'] ?? null),
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
-            quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),

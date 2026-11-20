@@ -8,6 +8,7 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\UnexpectedResponseException;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -88,7 +89,7 @@ final class GetOrFailTest extends TestCase
             $slug = explode('/', (string) parse_url($url, PHP_URL_PATH))[2] ?? '';
             $key = (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
 
-            return new MockResponse((string) json_encode([$key => ['id' => '7', 'unit_price' => '1', 'amount' => '1']]));
+            return new MockResponse((string) json_encode([$key => RequiredFields::ANY]));
         });
         $billomat = new BillomatClient(new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'), new Psr18Client($mock));
         $api = $this->api($billomat, $resource, $subResource);
@@ -129,7 +130,7 @@ final class GetOrFailTest extends TestCase
     #[Test]
     public function getOrFailOnSubResourcesReturnsTheResource(): void
     {
-        $billomat = self::client(new MockResponse('{"invoice-comment":{"id":"3","comment":"Hallo"}}'));
+        $billomat = self::client(new MockResponse('{"invoice-comment":{"id":"3","invoice_id":"1","comment":"Hallo"}}'));
 
         $comment = $billomat->invoices->comments->getOrFail(3);
 

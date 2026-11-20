@@ -49,7 +49,7 @@ final readonly class InvoiceComment
         /** Interne ID des Kommentars. */
         public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $invoiceId = 0,
+        public int $invoiceId,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -93,7 +93,7 @@ final readonly class InvoiceComment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            invoiceId: ScalarCaster::toIntOrNull($data['invoice_id'] ?? null) ?? 0,
+            invoiceId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['invoice_id'] ?? null), self::class, 'invoice_id'),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

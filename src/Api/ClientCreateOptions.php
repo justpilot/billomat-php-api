@@ -24,7 +24,7 @@ final readonly class ClientCreateOptions implements WriteOptions
 {
     public function __construct(
         /**
-         * Firmenname des Kunden.
+         * Firmenname des Kunden; leer bei Privatpersonen.
          *
          * Billomat-Feld: name
          * Typ: ALNUM

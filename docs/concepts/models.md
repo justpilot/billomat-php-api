@@ -25,6 +25,8 @@ $billomat->invoices->items->create($invoice->id, $item);   // $invoice->id is in
 
 Billomat always sends the ID. If a response doesn't contain a usable one (missing or empty), `fromArray()` throws an `UnexpectedResponseException` naming the model and field (`Unexpected response from Billomat: Invoice without a valid "id" field.`) instead of falling back to `0`. The same applies to `unitPrice` on document items and `amount` on payments. In webhooks, `WebhookPayload::model()` turns this into an `InvalidWebhookException`.
 
+No read model fills a missing value with `0`, `''` or `false`. Fields Billomat always sends are required in the same way (checked against recorded sandbox responses): `clientId` on documents, the parent ID of comments, tags, payments, property values and e-mail receivers, `quantity` on items, `name` and `count` of tags and tag cloud entries, `name` of properties, units, suppliers and tax rates, `rate` and `isDefault` of tax rates, `isDefault` of templates, `code` of countries and currencies, `name`/`rate`/`amount` of a `TaxSummary`, `filename`/`fileSize` of inbox documents, `resource` of activities and search results and the fields of `AccountQuota`. Every other field is nullable; `Client::$name` is `null` for private clients without a company name.
+
 The ID stays `?int` where it is not the key of a resource: tag cloud entries (`*TagCloudEntry`), `Country` and `Currency` (keyed by their code), and the references in `Activity` and `SearchResult`. Other foreign keys such as `InvoiceItem::$invoiceId` stay nullable, too.
 
 ## Fields the SDK doesn't know: `extra`

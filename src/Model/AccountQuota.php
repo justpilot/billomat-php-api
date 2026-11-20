@@ -31,9 +31,9 @@ final readonly class AccountQuota
     public static function fromArray(array $data): self
     {
         return new self(
-            entity: ScalarCaster::toStringOrNull($data['entity'] ?? null) ?? '',
-            available: ScalarCaster::toIntOrNull($data['available'] ?? null) ?? 0,
-            used: ScalarCaster::toIntOrNull($data['used'] ?? null) ?? 0,
+            entity: ScalarCaster::required(ScalarCaster::toStringOrNull($data['entity'] ?? null), self::class, 'entity'),
+            available: ScalarCaster::required(ScalarCaster::toIntOrNull($data['available'] ?? null), self::class, 'available'),
+            used: ScalarCaster::required(ScalarCaster::toIntOrNull($data['used'] ?? null), self::class, 'used'),
         );
     }
 

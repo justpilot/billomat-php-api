@@ -63,7 +63,7 @@ return static fn (string $class, string $label, string $specResource, string $pa
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID des Attributs.'],
         'name' => [
             'doc' => 'Name des Attributs.',
-            'model' => ['nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true],
         ],
         'type' => [

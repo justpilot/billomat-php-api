@@ -41,9 +41,9 @@ final readonly class IncomingPropertyValue
         /** Interne Billomat-ID des Eigenschaftswerts. */
         public int $id,
         /** ID des Datensatzes, zu dem der Wert gehört. */
-        public int $incomingId = 0,
+        public int $incomingId,
         /** ID der Eigenschaft. */
-        public int $incomingPropertyId = 0,
+        public int $incomingPropertyId,
         /** Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX). */
         public ?PropertyType $type = null,
         /** Name der Eigenschaft. */
@@ -74,8 +74,8 @@ final readonly class IncomingPropertyValue
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
-            incomingPropertyId: ScalarCaster::toIntOrNull($data['incoming_property_id'] ?? null) ?? 0,
+            incomingId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['incoming_id'] ?? null), self::class, 'incoming_id'),
+            incomingPropertyId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['incoming_property_id'] ?? null), self::class, 'incoming_property_id'),
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,

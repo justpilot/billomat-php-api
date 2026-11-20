@@ -41,9 +41,9 @@ final readonly class ArticlePropertyValue
         /** Interne Billomat-ID des Eigenschaftswerts. */
         public int $id,
         /** ID des Datensatzes, zu dem der Wert gehört. */
-        public int $articleId = 0,
+        public int $articleId,
         /** ID der Eigenschaft. */
-        public int $articlePropertyId = 0,
+        public int $articlePropertyId,
         /** Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX). */
         public ?PropertyType $type = null,
         /** Name der Eigenschaft. */
@@ -74,8 +74,8 @@ final readonly class ArticlePropertyValue
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null) ?? 0,
-            articlePropertyId: ScalarCaster::toIntOrNull($data['article_property_id'] ?? null) ?? 0,
+            articleId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['article_id'] ?? null), self::class, 'article_id'),
+            articlePropertyId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['article_property_id'] ?? null), self::class, 'article_property_id'),
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,

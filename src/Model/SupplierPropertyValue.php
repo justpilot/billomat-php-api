@@ -41,9 +41,9 @@ final readonly class SupplierPropertyValue
         /** Interne Billomat-ID des Eigenschaftswerts. */
         public int $id,
         /** ID des Datensatzes, zu dem der Wert gehört. */
-        public int $supplierId = 0,
+        public int $supplierId,
         /** ID der Eigenschaft. */
-        public int $supplierPropertyId = 0,
+        public int $supplierPropertyId,
         /** Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX). */
         public ?PropertyType $type = null,
         /** Name der Eigenschaft. */
@@ -74,8 +74,8 @@ final readonly class SupplierPropertyValue
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            supplierId: ScalarCaster::toIntOrNull($data['supplier_id'] ?? null) ?? 0,
-            supplierPropertyId: ScalarCaster::toIntOrNull($data['supplier_property_id'] ?? null) ?? 0,
+            supplierId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['supplier_id'] ?? null), self::class, 'supplier_id'),
+            supplierPropertyId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['supplier_property_id'] ?? null), self::class, 'supplier_property_id'),
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,

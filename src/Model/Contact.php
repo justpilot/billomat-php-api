@@ -54,7 +54,7 @@ final readonly class Contact
         /** Interne Billomat-ID des Kontakts. */
         public int $id,
         /** ID des Kunden, zu dem der Kontakt gehört. */
-        public int $clientId = 0,
+        public int $clientId,
         /** Erstellungszeitpunkt des Kontakts. */
         public ?DateTimeImmutable $created = null,
         /** Bezeichnung des Kontakts. */
@@ -125,7 +125,7 @@ final readonly class Contact
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
+            clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             label: ScalarCaster::toStringOrNull($data['label'] ?? null),
             salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),

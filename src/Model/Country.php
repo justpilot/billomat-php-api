@@ -28,7 +28,7 @@ final readonly class Country
     /** @param array<string, mixed> $extra */
     public function __construct(
         /** ISO-Ländercode (z. B. "DE"). */
-        public string $code = '',
+        public string $code,
         /** Name des Landes. */
         public ?string $name = null,
         /** Interne Billomat-ID des Landes. */
@@ -50,7 +50,7 @@ final readonly class Country
     public static function fromArray(array $data): self
     {
         return new self(
-            code: ScalarCaster::toStringOrNull($data['code'] ?? $data['country_code'] ?? null) ?? '',
+            code: ScalarCaster::required(ScalarCaster::toStringOrNull($data['code'] ?? $data['country_code'] ?? null), self::class, 'code'),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
             extra: array_diff_key($data, self::FIELDS),

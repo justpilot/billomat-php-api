@@ -49,7 +49,7 @@ final readonly class DeliveryNoteComment
         /** Interne ID des Kommentars. */
         public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $deliveryNoteId = 0,
+        public int $deliveryNoteId,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -93,7 +93,7 @@ final readonly class DeliveryNoteComment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            deliveryNoteId: ScalarCaster::toIntOrNull($data['delivery_note_id'] ?? null) ?? 0,
+            deliveryNoteId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['delivery_note_id'] ?? null), self::class, 'delivery_note_id'),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

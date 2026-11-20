@@ -45,7 +45,7 @@ final readonly class IncomingComment
         /** Interne ID des Kommentars. */
         public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $incomingId = 0,
+        public int $incomingId,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -81,7 +81,7 @@ final readonly class IncomingComment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
+            incomingId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['incoming_id'] ?? null), self::class, 'incoming_id'),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

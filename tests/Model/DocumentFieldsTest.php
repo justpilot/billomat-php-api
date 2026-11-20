@@ -37,6 +37,7 @@ use Justpilot\Billomat\Model\Recurring;
 use Justpilot\Billomat\Model\RecurringItem;
 use Justpilot\Billomat\Model\Reminder;
 use Justpilot\Billomat\Model\ReminderItem;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -78,9 +79,6 @@ use PHPUnit\Framework\TestCase;
 #[UsesClass(Money::class)]
 final class DocumentFieldsTest extends TestCase
 {
-    /** Pflichtfelder, die Billomat immer liefert (`id`, bei Positionen `unit_price`, bei Zahlungen `amount`). */
-    private const array REQUIRED = ['id' => '1', 'unit_price' => '1', 'amount' => '1'];
-
     /**
      * Pro Model: `fromArray()`, Rohdaten wie von Billomat (alles Strings) und
      * die erwarteten Property-Werte. Datumswerte werden als `Y-m-d` verglichen.
@@ -155,7 +153,7 @@ final class DocumentFieldsTest extends TestCase
     #[DataProvider('models')]
     public function itHydratesNewFields(Closure $hydrate, array $data, array $expected): void
     {
-        $props = get_object_vars($hydrate([...self::REQUIRED, ...$data]));
+        $props = get_object_vars($hydrate([...RequiredFields::forHydrator($hydrate), ...$data]));
 
         foreach ($expected as $property => $value) {
             $actual = $props[$property];
@@ -179,7 +177,7 @@ final class DocumentFieldsTest extends TestCase
     #[DataProvider('models')]
     public function itExportsNewFieldsInToArray(Closure $hydrate, array $data, array $expected): void
     {
-        $model = $hydrate([...self::REQUIRED, ...$data]);
+        $model = $hydrate([...RequiredFields::forHydrator($hydrate), ...$data]);
         self::assertTrue(method_exists($model, 'toArray'));
         $array = $model->toArray();
         self::assertIsArray($array);
@@ -199,7 +197,7 @@ final class DocumentFieldsTest extends TestCase
     public function itTreatsEmptyValuesAsNull(Closure $hydrate, array $data, array $expected): void
     {
         $empty = array_map(static fn (): string => '', $data);
-        $props = get_object_vars($hydrate([...$empty, ...array_diff_key(self::REQUIRED, $expected)]));
+        $props = get_object_vars($hydrate([...$empty, ...array_diff_key(RequiredFields::forHydrator($hydrate), $expected)]));
 
         foreach (array_keys($expected) as $property) {
             self::assertNull($props[$property], $property);

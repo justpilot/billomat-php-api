@@ -8,6 +8,7 @@ use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
+use Justpilot\Billomat\Tests\Support\RequiredFields;
 use PHPUnit\Framework\Attributes\CoversNamespace;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -83,7 +84,7 @@ final class CustomFieldTest extends TestCase
     public function customFieldMethodsExistExactlyWhereTheModelHasTheField(string $resource, string $subResource, bool $supported): void
     {
         $mock = new MockHttpClient(static fn (string $method, string $url): MockResponse => new MockResponse((string) json_encode([
-            self::envelopeKey($url) => ['id' => '7', 'unit_price' => '1', 'amount' => '1', 'customfield' => 'x'],
+            self::envelopeKey($url) => [...RequiredFields::ANY, 'customfield' => 'x'],
         ])));
         $billomat = new BillomatClient(new BillomatConfig(billomatId: 'mycompany', apiKey: 'k'), new Psr18Client($mock));
         $api = $this->api($billomat, $resource, $subResource);

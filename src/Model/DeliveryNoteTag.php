@@ -32,9 +32,9 @@ final readonly class DeliveryNoteTag
         /** Interne Billomat-ID des Schlagworts. */
         public int $id,
         /** ID des Datensatzes, an dem das Schlagwort hängt. */
-        public int $deliveryNoteId = 0,
+        public int $deliveryNoteId,
         /** Name des Schlagworts. */
-        public string $name = '',
+        public string $name,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customField = null,
         /**
@@ -55,8 +55,8 @@ final readonly class DeliveryNoteTag
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            deliveryNoteId: ScalarCaster::toIntOrNull($data['delivery_note_id'] ?? null) ?? 0,
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            deliveryNoteId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['delivery_note_id'] ?? null), self::class, 'delivery_note_id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );

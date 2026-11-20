@@ -75,7 +75,7 @@ return static function (string $prefix, string $label, string $parentField, stri
                 'type' => 'int',
                 'readOnly' => true,
                 'doc' => 'ID des Dokuments, zu dem die Zahlung gehört.',
-                'model' => ['nonNull' => true],
+                'model' => ['required' => true],
             ],
             'date' => ['doc' => 'Zahlungsdatum.'],
             'amount' => [

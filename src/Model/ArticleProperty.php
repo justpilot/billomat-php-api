@@ -36,7 +36,7 @@ final readonly class ArticleProperty
         /** Interne Billomat-ID des Attributs. */
         public int $id,
         /** Name des Attributs. */
-        public string $name = '',
+        public string $name,
         /**
          * Typ des Attributs.
          *
@@ -67,7 +67,7 @@ final readonly class ArticleProperty
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             defaultValue: ScalarCaster::toStringOrNull($data['default_value'] ?? null),
             isNvl: ScalarCaster::toBoolOrNull($data['is_nvl'] ?? null),

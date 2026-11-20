@@ -47,10 +47,10 @@ final readonly class CreditNotePayment
     public function __construct(
         /** Interne ID der Zahlung. */
         public int $id,
+        /** ID des Dokuments, zu dem die Zahlung gehört. */
+        public int $creditNoteId,
         /** Zahlungsbetrag. */
         public Money $amount,
-        /** ID des Dokuments, zu dem die Zahlung gehört. */
-        public int $creditNoteId = 0,
         /** Zahlungsdatum. */
         public ?DateTimeImmutable $date = null,
         /** Zahlungsart. */
@@ -95,8 +95,8 @@ final readonly class CreditNotePayment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            creditNoteId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null), self::class, 'credit_note_id'),
             amount: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['amount'] ?? null), self::class, 'amount'),
-            creditNoteId: ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null) ?? 0,
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             type: PaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),

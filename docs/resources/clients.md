@@ -288,7 +288,7 @@ Same fields as `ClientCreateOptions`, all optional. Only fields that are not `nu
 | Property | Type | Notes |
 |---|---|---|
 | `id` | `int` | Billomat's internal ID. Always set; a response without it throws `UnexpectedResponseException`. |
-| `name` | `string` | Required, not nullable. |
+| `name` | `?string` | Company name; `null` for private clients without a company name. |
 | `created`, `updated` | `?\DateTimeImmutable` | |
 | `clientNumber` | `?string` | |
 | `number`, `numberLength` | `?int` | |

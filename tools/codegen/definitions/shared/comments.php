@@ -32,7 +32,7 @@ return static function (string $prefix, string $label, string $parentField, ?str
             'type' => 'int',
             'readOnly' => true,
             'doc' => 'ID des Dokuments, an dem der Kommentar hängt.',
-            'model' => ['nonNull' => true],
+            'model' => ['required' => true],
         ],
         'comment' => [...$writable, 'doc' => 'Kommentartext.', 'create' => ['constructor' => true]],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt.'],

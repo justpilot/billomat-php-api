@@ -32,9 +32,9 @@ final readonly class ArticleTag
         /** Interne Billomat-ID des Schlagworts. */
         public int $id,
         /** ID des Datensatzes, an dem das Schlagwort hängt. */
-        public int $articleId = 0,
+        public int $articleId,
         /** Name des Schlagworts. */
-        public string $name = '',
+        public string $name,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customField = null,
         /**
@@ -55,8 +55,8 @@ final readonly class ArticleTag
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null) ?? 0,
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            articleId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['article_id'] ?? null), self::class, 'article_id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );

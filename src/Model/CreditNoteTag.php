@@ -32,9 +32,9 @@ final readonly class CreditNoteTag
         /** Interne Billomat-ID des Schlagworts. */
         public int $id,
         /** ID des Datensatzes, an dem das Schlagwort hängt. */
-        public int $creditNoteId = 0,
+        public int $creditNoteId,
         /** Name des Schlagworts. */
-        public string $name = '',
+        public string $name,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customField = null,
         /**
@@ -55,8 +55,8 @@ final readonly class CreditNoteTag
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            creditNoteId: ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null) ?? 0,
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            creditNoteId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null), self::class, 'credit_note_id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );

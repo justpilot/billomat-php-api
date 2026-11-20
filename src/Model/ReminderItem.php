@@ -39,6 +39,8 @@ final readonly class ReminderItem
     public function __construct(
         /** Interne Billomat-ID der Position. */
         public int $id,
+        /** Menge. */
+        public float $quantity,
         /** Einzelpreis. */
         public Money $unitPrice,
         /** ID des zugehörigen Dokuments. */
@@ -53,8 +55,6 @@ final readonly class ReminderItem
         public ?int $position = null,
         /** Einheit (z. B. "Stück", "Stunde"). */
         public ?string $unit = null,
-        /** Menge. */
-        public float $quantity = 0.0,
         /** Titel der Position. */
         public ?string $title = null,
         /** Beschreibung der Position. */
@@ -83,12 +83,12 @@ final readonly class ReminderItem
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            quantity: ScalarCaster::required(ScalarCaster::toFloatOrNull($data['quantity'] ?? null), self::class, 'quantity'),
             unitPrice: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null), self::class, 'unit_price'),
             reminderId: ScalarCaster::toIntOrNull($data['reminder_id'] ?? null),
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
-            quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
             title: ScalarCaster::toStringOrNull($data['title'] ?? null),
             description: ScalarCaster::toStringOrNull($data['description'] ?? null),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),

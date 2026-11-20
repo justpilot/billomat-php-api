@@ -188,13 +188,14 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
     foreach ($definitionFields as $name => $field) {
         $specField = $specFields[$name] ?? null;
 
-        // Unbekannte Enum-Werte werden zu null; ein Fallback-Fall würde sie still verfälschen.
-        if (!empty($field['enum']) && !empty($field['model']['nonNull'])) {
-            throw new RuntimeException("Enum-Feld '{$name}' kann nicht 'nonNull' sein ({$source}).");
+        // Kein stiller Ersatzwert (0, '', false) im Read-Model: Ein Feld ist entweder `required` (Billomat
+        // liefert es immer, fehlt es, wirft fromArray()) oder nullable.
+        if (\array_key_exists('nonNull', $field['model'] ?? [])) {
+            throw new RuntimeException("'model.nonNull' gibt es nicht mehr: Feld '{$name}' als 'required' markieren oder nullable lassen ({$source}).");
         }
-        // `required` wirft bei fehlendem Wert; ein Fallback (`nonNull`) oder ein unbekannter Enum-Wert passt nicht dazu.
-        if (!empty($field['model']['required']) && (!empty($field['model']['nonNull']) || !empty($field['enum']))) {
-            throw new RuntimeException("Pflichtfeld '{$name}' kann weder 'nonNull' noch ein Enum sein ({$source}).");
+        // `required` wirft bei fehlendem Wert; ein unbekannter Enum-Wert (→ null) passt nicht dazu.
+        if (!empty($field['model']['required']) && !empty($field['enum'])) {
+            throw new RuntimeException("Pflichtfeld '{$name}' kann kein Enum sein ({$source}).");
         }
 
         if (null === $specField && !isset($field['type'])) {
@@ -223,10 +224,6 @@ function resolveFields(array $definitionFields, array $specFields, string $sourc
         // Feste Wertemenge in der Spec: Enum-Klasse angeben oder bewusst mit `'enum' => false` beim String bleiben.
         if (null !== $enum && !\array_key_exists('enum', $field)) {
             $unmapped[] = $name;
-        }
-        // Money::zero() ist kein konstanter Ausdruck und taugt nicht als Konstruktor-Default.
-        if ('money' === ($field['model']['type'] ?? $type) && !empty($field['model']['nonNull'])) {
-            throw new RuntimeException("Betragsfeld '{$name}' kann nicht 'nonNull' sein, 'required' verwenden ({$source}).");
         }
 
         $resolved[] = [
@@ -355,7 +352,7 @@ function renderModel(array $definition, array $fields, string $source): string
         if (isListField($field) || $field['enumList'] || isEnumMap($field)) {
             $out .= ' = []';
         } elseif (!isRequired($field)) {
-            $out .= ' = ' . (empty($field['model']['nonNull']) ? 'null' : nonNullFallback(modelType($field)));
+            $out .= ' = null';
         }
         $out .= ",\n";
     }
@@ -392,11 +389,11 @@ function renderModel(array $definition, array $fields, string $source): string
         $value = match (true) {
             $field['enumList'] => enumListExpression($field, $value),
             isEnumMap($field) => "array_map(static fn ({$field['enumClass']} \$v): string => \$v->value, {$value})",
-            null !== $field['enumClass'] => $value . (empty($field['model']['nonNull']) ? '?->value' : '->value'),
+            null !== $field['enumClass'] => $value . '?->value',
             'date' === modelType($field) => $value . (isRequired($field) ? '->' : '?->') . "format('Y-m-d')",
             'datetime' === modelType($field) => $value . (isRequired($field) ? '->' : '?->') . 'format(DATE_ATOM)',
-            'money' === modelType($field) => $value . (isNonNullable($field) ? '->toString()' : '?->toString()'),
-            $boolAsInt && 'bool' === modelType($field) => boolAsIntExpression($value, isNonNullable($field)),
+            'money' === modelType($field) => $value . (isRequired($field) ? '->toString()' : '?->toString()'),
+            $boolAsInt && 'bool' === modelType($field) => boolAsIntExpression($value, isRequired($field)),
             default => $value,
         };
         // `model.key`: abweichender Schlüssel in toArray() (BC, z. B. nach einer Umbenennung bei Billomat).
@@ -487,29 +484,6 @@ function isRequired(array $field): bool
 }
 
 /**
- * Nicht-nullbarer Typ im Read-Model: Pflichtfeld oder Feld mit Ersatzwert (`model.nonNull`).
- *
- * @param array<string, mixed> $field
- */
-function isNonNullable(array $field): bool
-{
-    return isRequired($field) || !empty($field['model']['nonNull']);
-}
-
-/**
- * Ersatzwert für nicht-nullbare Felder, wenn Billomat nichts liefert.
- */
-function nonNullFallback(string $type): string
-{
-    return match ($type) {
-        'int' => '0',
-        'float' => '0.0',
-        'bool' => 'false',
-        default => "''",
-    };
-}
-
-/**
  * @param array<string, mixed> $field
  */
 function modelTypeHint(array $field): string
@@ -518,7 +492,7 @@ function modelTypeHint(array $field): string
         return 'array';
     }
     if (null !== $field['enumClass']) {
-        return (empty($field['model']['nonNull']) ? '?' : '') . $field['enumClass'];
+        return '?' . $field['enumClass'];
     }
     if (isListField($field)) {
         return 'array';
@@ -534,7 +508,7 @@ function modelTypeHint(array $field): string
         default => modelType($field),
     };
 
-    return isNonNullable($field) ? $type : '?' . $type;
+    return isRequired($field) ? $type : '?' . $type;
 }
 
 /**
@@ -588,8 +562,7 @@ function hydrateExpression(array $field): string
 
     return match (true) {
         isRequired($field) => "ScalarCaster::required({$expression}, self::class, '{$field['wire']}')",
-        empty($field['model']['nonNull']) => $expression,
-        default => $expression . ' ?? ' . nonNullFallback(modelType($field)),
+        default => $expression,
     };
 }
 

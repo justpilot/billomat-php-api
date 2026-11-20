@@ -73,10 +73,10 @@ final readonly class Supplier
     public function __construct(
         /** Interne Billomat-ID des Lieferanten. */
         public int $id,
+        /** Firmenname des Lieferanten. */
+        public string $name,
         /** Erstellungszeitpunkt des Lieferanten. */
         public ?DateTimeImmutable $created = null,
-        /** Firmenname des Lieferanten. */
-        public string $name = '',
         /** Eigene Kundennummer beim Lieferanten. */
         public ?int $clientNumber = null,
         /** Anrede. */
@@ -187,8 +187,8 @@ final readonly class Supplier
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
             clientNumber: ScalarCaster::toIntOrNull($data['client_number'] ?? null),
             salutation: ScalarCaster::toStringOrNull($data['salutation'] ?? null),
             firstName: ScalarCaster::toStringOrNull($data['first_name'] ?? null),

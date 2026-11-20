@@ -48,7 +48,7 @@ return static function (
             'details' => ['Wird beim Anlegen normalerweise automatisch vergeben (anhängen ans Ende).'],
         ],
         'unit' => ['type' => 'string', 'writable' => true, 'doc' => 'Einheit (z. B. "Stück", "Stunde").'],
-        'quantity' => ['type' => 'float', 'writable' => true, 'doc' => 'Menge.', 'model' => ['nonNull' => true], 'create' => ['constructor' => true]],
+        'quantity' => ['type' => 'float', 'writable' => true, 'doc' => 'Menge.', 'model' => ['required' => true], 'create' => ['constructor' => true]],
         'unit_price' => ['type' => 'float', 'writable' => true, 'doc' => 'Einzelpreis.', 'model' => ['required' => true], 'create' => ['constructor' => true]],
         'tax_name' => ['type' => 'string', 'writable' => true, 'doc' => 'Steuerbezeichnung (z. B. "MwSt").'],
         'tax_rate' => ['type' => 'float', 'writable' => true, 'doc' => 'Steuerrate in Prozent.'],

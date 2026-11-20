@@ -92,6 +92,7 @@ final class TemplateTest extends TestCase
     {
         $template = Template::fromArray([
             'id' => 1,
+            'is_default' => '0',
             'type' => 'BOGUS',
             'template_type' => 'BOGUS',
             'format' => 'jpg',
@@ -105,7 +106,7 @@ final class TemplateTest extends TestCase
     #[Test]
     public function itHandlesInvalidCreatedDateGracefully(): void
     {
-        $template = Template::fromArray(['id' => 1, 'created' => 'invalid']);
+        $template = Template::fromArray(['id' => 1, 'is_default' => '0', 'created' => 'invalid']);
 
         self::assertNull($template->created);
     }

@@ -77,6 +77,7 @@ These changes need a decision and are not automated. The sections below describe
 - Enums instead of strings (`taxRule: 'NO_TAX'` → `TaxRule::NO_TAX`), payment types as `list<PaymentType>`,
   `MailOptions::$paperWeight` as `int`.
 - Methods that returned `true` return `void`: rewrite `if ($api->complete($id))` and similar.
+- `Client::$name` is nullable; required fields throw instead of falling back to `0`/`''`.
 - Removed read-model properties, including the fields of `DunningLevel` that `ReminderText` doesn't have
   (`$position`, `$dueDays`, `$charge`, `$interest`).
 - `@template` types for the generic sub-resource classes (`CommentsApi<InvoiceComment, …>`) in your PHPDoc.
@@ -809,6 +810,31 @@ turns this into an `InvalidWebhookException`. Code that hydrates models from its
 fixtures) has to include these fields.
 
 The ID stays `?int` on `*TagCloudEntry`, `Country`, `Currency`, `Activity` and `SearchResult`.
+
+### No silent `0`/`''` fallbacks
+
+In the betas, some non-nullable fields fell back to `0`, `''` or `false` when Billomat sent nothing:
+a missing `client_id` became client `0`, a missing `quantity` became `0.0`. These fields are now
+required like `id`: `fromArray()` throws an `UnexpectedResponseException` when one is missing or
+empty. This affects `clientId` on documents, the parent IDs of comments, tags, payments, property
+values and e-mail receivers, `quantity` on items, `name`/`count` of tags and tag cloud entries,
+`name` of properties, units, suppliers and tax rates, `rate`/`isDefault` of tax rates, `isDefault`
+of templates, `code` of countries and currencies, `TaxSummary::$name`/`$rate`/`$amount`,
+`InboxDocument::$filename`/`$fileSize`, `resource` on `Activity`/`SearchResult` and the fields of
+`AccountQuota`. Billomat sends all of them (checked against recorded sandbox responses), so this only
+matters for code that hydrates models from its own arrays.
+
+`Client::$name` is the exception: it is `?string` now, because Billomat sends an empty name for private
+clients and the SDK used to turn it into `''`:
+
+```php
+// beta
+if ('' === $client->name) { … }
+
+// 4.0
+if (null === $client->name) { … }
+$label = $client->name ?? trim($client->firstName.' '.$client->lastName);
+```
 
 ### Read-model constructors
 

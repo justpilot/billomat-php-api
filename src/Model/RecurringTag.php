@@ -32,9 +32,9 @@ final readonly class RecurringTag
         /** Interne Billomat-ID des Schlagworts. */
         public int $id,
         /** ID des Datensatzes, an dem das Schlagwort hängt. */
-        public int $recurringId = 0,
+        public int $recurringId,
         /** Name des Schlagworts. */
-        public string $name = '',
+        public string $name,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customField = null,
         /**
@@ -55,8 +55,8 @@ final readonly class RecurringTag
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null) ?? 0,
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
+            recurringId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['recurring_id'] ?? null), self::class, 'recurring_id'),
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );

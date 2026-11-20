@@ -41,9 +41,9 @@ final readonly class ClientPropertyValue
         /** Interne Billomat-ID des Eigenschaftswerts. */
         public int $id,
         /** ID des Datensatzes, zu dem der Wert gehört. */
-        public int $clientId = 0,
+        public int $clientId,
         /** ID der Eigenschaft. */
-        public int $clientPropertyId = 0,
+        public int $clientPropertyId,
         /** Typ der Eigenschaft (TEXTFIELD, TEXTAREA oder CHECKBOX). */
         public ?PropertyType $type = null,
         /** Name der Eigenschaft. */
@@ -74,8 +74,8 @@ final readonly class ClientPropertyValue
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
-            clientPropertyId: ScalarCaster::toIntOrNull($data['client_property_id'] ?? null) ?? 0,
+            clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
+            clientPropertyId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_property_id'] ?? null), self::class, 'client_property_id'),
             type: PropertyType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             value: $data['value'] ?? null,

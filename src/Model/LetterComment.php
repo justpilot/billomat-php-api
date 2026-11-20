@@ -49,7 +49,7 @@ final readonly class LetterComment
         /** Interne ID des Kommentars. */
         public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $letterId = 0,
+        public int $letterId,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -93,7 +93,7 @@ final readonly class LetterComment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            letterId: ScalarCaster::toIntOrNull($data['letter_id'] ?? null) ?? 0,
+            letterId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['letter_id'] ?? null), self::class, 'letter_id'),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

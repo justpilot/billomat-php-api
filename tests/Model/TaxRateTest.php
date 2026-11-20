@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Justpilot\Billomat\Tests\Model;
 
+use Justpilot\Billomat\Exception\UnexpectedResponseException;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\TaxRate;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -13,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass(TaxRate::class)]
 #[UsesClass(ScalarCaster::class)]
+#[UsesClass(UnexpectedResponseException::class)]
 final class TaxRateTest extends TestCase
 {
     #[Test]
@@ -48,20 +50,18 @@ final class TaxRateTest extends TestCase
     #[Test]
     public function itTreatsIsDefaultTrueStringAsTrue(): void
     {
-        $tax = TaxRate::fromArray(['id' => 1, 'is_default' => 'true']);
+        $tax = TaxRate::fromArray(['id' => 1, 'name' => 'MwSt', 'rate' => '19', 'is_default' => 'true']);
 
         self::assertTrue($tax->isDefault);
     }
 
     #[Test]
-    public function itDefaultsMissingFields(): void
+    public function itRejectsMissingRequiredFields(): void
     {
-        $tax = TaxRate::fromArray(['id' => 1]);
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('TaxRate without a valid "name" field');
 
-        self::assertSame(1, $tax->id);
-        self::assertSame('', $tax->name);
-        self::assertSame(0.0, $tax->rate);
-        self::assertFalse($tax->isDefault);
+        TaxRate::fromArray(['id' => 1, 'rate' => '19', 'is_default' => '0']);
     }
 
     #[Test]

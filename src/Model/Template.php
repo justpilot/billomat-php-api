@@ -47,6 +47,8 @@ final readonly class Template
     public function __construct(
         /** Interne Billomat-ID der Vorlage. */
         public int $id,
+        /** Standard-Vorlage für den Dokumenttyp? */
+        public bool $isDefault,
         /** Erstellungszeitpunkt der Vorlage. */
         public ?DateTimeImmutable $created = null,
         /** Dokumenttyp, für den die Vorlage gilt. */
@@ -71,8 +73,6 @@ final readonly class Template
          * Im Read-Model nur bei UPLOADED und GET /templates/{id} verfügbar.
          */
         public ?string $base64File = null,
-        /** Standard-Vorlage für den Dokumenttyp? */
-        public bool $isDefault = false,
         /** Zeitpunkt der letzten Änderung. */
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
@@ -97,13 +97,13 @@ final readonly class Template
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            isDefault: ScalarCaster::required(ScalarCaster::toBoolOrNull($data['is_default'] ?? null), self::class, 'is_default'),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             type: TemplateDocumentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             templateType: TemplateType::tryFrom(ScalarCaster::toStringOrNull($data['template_type'] ?? null) ?? ''),
             name: ScalarCaster::toStringOrNull($data['name'] ?? null),
             format: TemplateFormat::tryFrom(ScalarCaster::toStringOrNull($data['format'] ?? null) ?? ''),
             base64File: ScalarCaster::toStringOrNull($data['base64file'] ?? null),
-            isDefault: ScalarCaster::toBoolOrNull($data['is_default'] ?? null) ?? false,
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
             isBackgroundAvailable: ScalarCaster::toBoolOrNull($data['is_background_available'] ?? null),

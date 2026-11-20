@@ -28,12 +28,12 @@ final readonly class IncomingTagCloudEntry
 
     /** @param array<string, mixed> $extra */
     public function __construct(
+        /** Name des Schlagworts. */
+        public string $name,
+        /** Häufigkeit des Schlagworts. */
+        public int $count,
         /** Interne Billomat-ID des Schlagworts. */
         public ?int $id = null,
-        /** Name des Schlagworts. */
-        public string $name = '',
-        /** Häufigkeit des Schlagworts. */
-        public int $count = 0,
         /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
@@ -51,9 +51,9 @@ final readonly class IncomingTagCloudEntry
     public static function fromArray(array $data): self
     {
         return new self(
+            name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
+            count: ScalarCaster::required(ScalarCaster::toIntOrNull($data['count'] ?? null), self::class, 'count'),
             id: ScalarCaster::toIntOrNull($data['id'] ?? null),
-            name: ScalarCaster::toStringOrNull($data['name'] ?? null) ?? '',
-            count: ScalarCaster::toIntOrNull($data['count'] ?? null) ?? 0,
             extra: array_diff_key($data, self::FIELDS),
         );
     }

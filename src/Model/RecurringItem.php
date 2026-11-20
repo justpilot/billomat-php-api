@@ -47,6 +47,8 @@ final readonly class RecurringItem
     public function __construct(
         /** Interne Billomat-ID der Position. */
         public int $id,
+        /** Menge. */
+        public float $quantity,
         /** Einzelpreis. */
         public Money $unitPrice,
         /** ID des zugehörigen Dokuments. */
@@ -61,8 +63,6 @@ final readonly class RecurringItem
         public ?int $position = null,
         /** Einheit (z. B. "Stück", "Stunde"). */
         public ?string $unit = null,
-        /** Menge. */
-        public float $quantity = 0.0,
         /** Steuerbezeichnung (z. B. "MwSt"). */
         public ?string $taxName = null,
         /** Steuerrate in Prozent. */
@@ -109,12 +109,12 @@ final readonly class RecurringItem
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            quantity: ScalarCaster::required(ScalarCaster::toFloatOrNull($data['quantity'] ?? null), self::class, 'quantity'),
             unitPrice: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['unit_price'] ?? null), self::class, 'unit_price'),
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
             articleId: ScalarCaster::toIntOrNull($data['article_id'] ?? null),
             position: ScalarCaster::toIntOrNull($data['position'] ?? null),
             unit: ScalarCaster::toStringOrNull($data['unit'] ?? null),
-            quantity: ScalarCaster::toFloatOrNull($data['quantity'] ?? null) ?? 0.0,
             taxName: ScalarCaster::toStringOrNull($data['tax_name'] ?? null),
             taxRate: ScalarCaster::toFloatOrNull($data['tax_rate'] ?? null),
             taxChangedManually: ScalarCaster::toBoolOrNull($data['tax_changed_manually'] ?? null),

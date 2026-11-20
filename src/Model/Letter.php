@@ -44,7 +44,7 @@ final readonly class Letter
         /** Interne Billomat-ID des Briefs. */
         public int $id,
         /** ID des Kunden. */
-        public int $clientId = 0,
+        public int $clientId,
         /** ID des Kontakts. */
         public ?int $contactId = null,
         /** Erstellungszeitpunkt des Briefs. */
@@ -95,7 +95,7 @@ final readonly class Letter
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            clientId: ScalarCaster::toIntOrNull($data['client_id'] ?? null) ?? 0,
+            clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             status: LetterStatus::tryFrom(ScalarCaster::toStringOrNull($data['status'] ?? null) ?? ''),

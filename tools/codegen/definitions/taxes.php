@@ -57,18 +57,18 @@ return [
         'name' => [
             'doc' => 'Name des Steuersatzes.',
             'details' => ['Beispiel: "MwSt"'],
-            'model' => ['nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true],
         ],
         'rate' => [
             'doc' => 'Höhe des Steuersatzes in Prozent.',
             'details' => ['Beispiel: 19.0'],
-            'model' => ['nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true],
         ],
         'is_default' => [
             'doc' => 'Standard-Steuersatz?',
-            'model' => ['nonNull' => true],
+            'model' => ['required' => true],
             'create' => ['constructor' => true, 'default' => false],
         ],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt des Steuersatzes.'],

@@ -44,7 +44,7 @@ return [
 
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Einheit.'],
-        'name' => ['model' => ['nonNull' => true], 'doc' => 'Bezeichnung der Einheit.', 'create' => ['constructor' => true]],
+        'name' => ['model' => ['required' => true], 'doc' => 'Bezeichnung der Einheit.', 'create' => ['constructor' => true]],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Einheit.'],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],

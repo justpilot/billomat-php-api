@@ -49,7 +49,7 @@ final readonly class CreditNoteComment
         /** Interne ID des Kommentars. */
         public int $id,
         /** ID des Dokuments, an dem der Kommentar hängt. */
-        public int $creditNoteId = 0,
+        public int $creditNoteId,
         /** Kommentartext. */
         public ?string $comment = null,
         /** Erstellungszeitpunkt. */
@@ -93,7 +93,7 @@ final readonly class CreditNoteComment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
-            creditNoteId: ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null) ?? 0,
+            creditNoteId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['credit_note_id'] ?? null), self::class, 'credit_note_id'),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             userId: ScalarCaster::toIntOrNull($data['user_id'] ?? null),

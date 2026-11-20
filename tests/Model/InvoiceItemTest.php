@@ -62,12 +62,12 @@ final class InvoiceItemTest extends TestCase
     }
 
     #[Test]
-    public function itDefaultsMissingQuantityToZero(): void
+    public function itRejectsItemWithoutQuantity(): void
     {
-        $item = InvoiceItem::fromArray(['id' => 1, 'unit_price' => '9.5']);
+        $this->expectException(UnexpectedResponseException::class);
+        $this->expectExceptionMessageIsOrContains('InvoiceItem without a valid "quantity" field');
 
-        self::assertSame(0.0, $item->quantity);
-        self::assertSame('9.5', $item->unitPrice->toString());
+        InvoiceItem::fromArray(['id' => 1, 'unit_price' => '9.5']);
     }
 
     #[Test]
@@ -76,7 +76,7 @@ final class InvoiceItemTest extends TestCase
         $this->expectException(UnexpectedResponseException::class);
         $this->expectExceptionMessageIsOrContains('InvoiceItem without a valid "unit_price" field');
 
-        InvoiceItem::fromArray(['id' => 1]);
+        InvoiceItem::fromArray(['id' => 1, 'quantity' => '1']);
     }
 
     #[Test]

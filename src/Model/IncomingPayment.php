@@ -47,10 +47,10 @@ final readonly class IncomingPayment
     public function __construct(
         /** Interne ID der Zahlung. */
         public int $id,
+        /** ID des Dokuments, zu dem die Zahlung gehört. */
+        public int $incomingId,
         /** Zahlungsbetrag. */
         public Money $amount,
-        /** ID des Dokuments, zu dem die Zahlung gehört. */
-        public int $incomingId = 0,
         /** Zahlungsdatum. */
         public ?DateTimeImmutable $date = null,
         /** Zahlungsart. */
@@ -95,8 +95,8 @@ final readonly class IncomingPayment
     {
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
+            incomingId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['incoming_id'] ?? null), self::class, 'incoming_id'),
             amount: ScalarCaster::required(ScalarCaster::toMoneyOrNull($data['amount'] ?? null), self::class, 'amount'),
-            incomingId: ScalarCaster::toIntOrNull($data['incoming_id'] ?? null) ?? 0,
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             type: PaymentType::tryFrom(ScalarCaster::toStringOrNull($data['type'] ?? null) ?? ''),
             comment: ScalarCaster::toStringOrNull($data['comment'] ?? null),

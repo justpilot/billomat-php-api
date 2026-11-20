@@ -125,7 +125,7 @@ final readonly class EmailOptions implements WriteOptions
             'to' => [] !== $this->to ? $this->to : null,
             'cc' => [] !== $this->cc ? $this->cc : null,
             'bcc' => [] !== $this->bcc ? $this->bcc : null,
-        ], static fn ($v): bool => null !== $v);
+        ], static fn (?array $v): bool => null !== $v);
 
         $data = [
             'email_template_id' => $this->emailTemplateId,
@@ -142,6 +142,6 @@ final readonly class EmailOptions implements WriteOptions
             ];
         }
 
-        return array_filter($data, static fn ($v): bool => null !== $v);
+        return array_filter($data, static fn (int|string|array|null $v): bool => null !== $v);
     }
 }

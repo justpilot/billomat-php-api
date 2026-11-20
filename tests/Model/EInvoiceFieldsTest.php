@@ -9,6 +9,7 @@ use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\Account;
 use Justpilot\Billomat\Model\AccountQuota;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Model\Enum\InboxDocumentType;
 use Justpilot\Billomat\Model\Enum\InvoiceStatus;
 use Justpilot\Billomat\Model\Enum\ItemType;
 use Justpilot\Billomat\Model\Enum\NetGross;
@@ -29,6 +30,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Account::class)]
 #[CoversClass(Invoice::class)]
 #[CoversClass(InboxDocument::class)]
+#[UsesClass(InboxDocumentType::class)]
 #[UsesClass(AccountQuota::class)]
 #[UsesClass(InvoiceStatus::class)]
 #[UsesClass(NetGross::class)]

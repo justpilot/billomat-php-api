@@ -316,7 +316,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 - **No `update()` for tags and property values.** Delete tags and create them again; for property values, another POST with the same `supplier_property_id` overwrites the existing entry.
 - **`address` is read-only.** The field appears in the `Supplier` read model but not in `SupplierCreateOptions`/`SupplierUpdateOptions`; Billomat builds it from `street`/`zip`/`city`/`countryCode`.
 - **`clientNumber` has different types.** You write it as `?string` (your customer number at the supplier); the read model types it as `?int`.
-- **`Supplier::$name` is non-null.** Unlike almost all other fields, `name` is a `string` (not `?string`) in the read model; an empty name yields `''`, not `null`.
+- **`Supplier::$name` is non-null.** Unlike almost all other fields, `name` is a `string` (not `?string`) in the read model; a response with a missing or empty name throws `UnexpectedResponseException`.
 - **`bankBic` arrives as `bank_swift`.** Billomat returns the BIC in the `bank_swift` field; the read model maps it to `bankBic` (falling back to `bank_bic`). On write, `bankBic` and `bankSwift` are sent as separate fields.
 - **Legacy vs. modern bank details.** `bankAccountNumber`/`bankNumber` are the German pre-SEPA fields. For SEPA transfers `bankIban`/`bankBic` matter; you can set both pairs, but Billomat primarily uses IBAN/BIC for transfers.
 - **`currencyCode` as default.** The value is copied to new incoming invoices ([Incomings](incomings.md)) and can be overridden per document there.

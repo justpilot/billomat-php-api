@@ -17,7 +17,7 @@ For invoice totals, open items or payment reconciliation these errors add up, an
 
 All amount fields, among them `unitPrice`, `totalGross`, `totalNet`, `totalGrossUnreduced`, `totalNetUnreduced`, `totalReduction`, `discountAmount`, `openAmount`, `paidAmount`, `amount` (payments and the tax rows in `$invoice->taxes`: `TaxSummary::$amount`, `$amountNet`, `$amountGross` and their `*Plain`/`*Rounded` variants), `total` (reminder items), `salesPrice` to `salesPrice5`, `purchasePrice`, `chargeAmount`, `costsGross`/`costsNet`, `revenueGross`/`revenueNet`, `finapiTransactionAmount` and `InvoiceGroup::$totalGross`/`$totalNet`.
 
-Values that aren't amounts of money stay `float`: `quantity`, `taxRate`, `discountRate`, `rate`, `quote` (exchange rate) and `discountDays`. `reduction` stays a string on the read models, because Billomat allows both amounts and percentages (`"10%"`) there.
+Values that aren't amounts of money stay `float`: `quantity`, `taxRate`, `discountRate`, `rate`, and `quote` (exchange rate). `discountDays` is an `int` (only `Client::$discountDays` is a `float`). `reduction` stays a string on the read models, because Billomat allows both amounts and percentages (`"10%"`) there.
 
 ## Creating amounts
 

@@ -62,6 +62,7 @@ Sub-resources take the parent ID as the first argument and a filter after it. Pa
 ```php
 use Justpilot\Billomat\Api\CommentFilter;
 use Justpilot\Billomat\Api\InvoicePaymentFilter;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\Api\SubResourceFilter;
 use Justpilot\Billomat\Model\Enum\InvoiceCommentActionKey;
 
@@ -82,7 +83,12 @@ $billomat->clients->list(['name' => 'Acme', 'country_code' => 'DE']);
 
 If you only want to know **how many** results a filter matches, send a `HEAD` request instead of `GET` and read the `X-Total-Count` response header. This saves transferring the actual records.
 
-The SDK doesn't expose HEAD directly; if needed, create your own `BillomatHttpClient` with the same `BillomatConfig` and call `request('HEAD', …)`.
+The `*Api` classes have no method for this; send the request through the SDK's HTTP client, which adds authentication, retries and error mapping:
+
+```php
+$response = $billomat->getHttpClient()->request('HEAD', '/invoices', ['status' => 'OPEN']);
+$total = (int) $response->getHeaderLine('X-Total-Count');
+```
 
 ## Sorting — `order_by`
 

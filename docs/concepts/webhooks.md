@@ -129,7 +129,7 @@ The SDK deliberately ships no controller — routing, auth (Basic), idempotency 
 
 | Class | Responsibility |
 |---|---|
-| `WebhookEvent` | Backed enum with all 83 events (`WebhookEvent::INVOICE_PAYMENT_CREATE` = `'invoice_payment.create'`); `resource()`, `action()` (`WebhookAction::CREATE` …), `envelopeKey()` (`'invoice-payment'`), `modelClass()` (`InvoicePayment::class`) |
+| `WebhookEvent` | Backed enum with all 83 events (`WebhookEvent::INVOICE_PAYMENT_CREATE` = `'invoice_payment.create'`); `resource()`, `action()` (`WebhookAction::CREATE` …), `modelClass()` (`InvoicePayment::class`) |
 | `WebhookHeaders` | `fromServerRequest()` (PSR-7) or `fromArray()` (`$_SERVER`, Symfony `HeaderBag::all()`, stored headers) → `event`, `requestId` (int), `webhookId` |
 | `WebhookPayload` | `fromJson()` / `fromArray()` unwraps the envelope; `data` (raw data), `id()`, `int('invoice_id')`, `model()` hydrates the matching model |
 | `InvalidWebhookException` (`Justpilot\Billomat\Exception`) | unknown event, missing header, no JSON, wrong envelope, `model()` on a record without `id` — respond with `4xx` |

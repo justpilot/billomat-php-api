@@ -85,11 +85,11 @@ Constructor: `new TaxRateCreateOptions(string $name, float $rate, bool $isDefaul
 | `rate` | `rate` | `float` | Required, percentage (e.g. `19.0`) |
 | `isDefault` | `is_default` | `bool` | Defaults to `false`. Serialized as `1`/`0`. |
 
+`toArray()` doesn't filter anything here: all three fields are always sent.
+
 ## Write model: `TaxRateUpdateOptions`
 
 All fields are optional named arguments (`?string $name`, `?float $rate`, `?bool $isDefault`); `null` fields are not sent. Like every update options class it accepts `Clear::Field` to send an empty value, which Billomat rejects for these required fields.
-
-`toArray()` doesn't filter anything here — all three fields are always set.
 
 ## Read model: `TaxRate`
 

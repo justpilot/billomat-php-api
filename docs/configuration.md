@@ -11,9 +11,11 @@ use Justpilot\Billomat\BillomatClient;
 
 $billomat = BillomatClient::create(
     billomatId: 'mycompany',
-    apiKey: getenv('BILLOMAT_API_KEY'),
+    apiKey: getenv('BILLOMAT_API_KEY') ?: throw new RuntimeException('BILLOMAT_API_KEY is not set'),
 );
 ```
+
+`getenv()` returns `false` for an unset variable and `apiKey` is a strict `string`, hence the guard; the shorter examples below leave it out.
 
 ### Parameters
 

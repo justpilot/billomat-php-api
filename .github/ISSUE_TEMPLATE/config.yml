@@ -6,6 +6,3 @@ contact_links:
   - name: Billomat API question or bug
     url: https://www.billomat.com/kontakt/
     about: Questions or bugs in the Billomat API itself (not in this SDK) go directly to Billomat.
-  - name: General questions / discussion
-    url: https://github.com/justpilot/billomat-php-api/discussions
-    about: Open questions, best practices or ideas without a concrete issue.

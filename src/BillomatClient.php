@@ -197,7 +197,7 @@ final class BillomatClient
 
     /**
      * HTTP-Client des SDK, z. B. für Endpunkte ohne eigene SDK-Methode:
-     * `$billomat->getHttpClient()->request('GET', '/units/7')`.
+     * `$billomat->getHttpClient()->request('GET', '/some-new-resource/7')`.
      */
     public function getHttpClient(): BillomatHttpClientInterface
     {

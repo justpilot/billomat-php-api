@@ -214,7 +214,7 @@ Errors are thrown as exceptions. After `complete()`:
 
 ### `delete(int $id): void`
 
-Only for `DRAFT` invoices. Otherwise Billomat responds with 422 → `ValidationException`.
+Works in any status: Billomat's API also deletes completed invoices. Use it for drafts; once a document is completed, prefer `cancel()` (see [Pitfalls](#pitfalls)).
 
 ### `cancel(int $id): void` / `uncancel(int $id): void`
 
@@ -287,13 +287,16 @@ Two methods for the same endpoint:
 use Justpilot\Billomat\Model\Enum\PdfType;
 
 // 1) pdf(): JSON with a Base64 PDF
-$pdf = $billomat->invoices->pdf($invoice->id, PdfType::SIGNED);
+$pdf = $billomat->invoices->pdf($invoice->id);
 // $pdf is a DocumentPdf; getBinary() decodes it
 file_put_contents('invoice.pdf', $pdf->getBinary());
 
 // 2) pdfContent(): application/pdf directly, returns the binary content as a string
-$binary = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
+$binary = $billomat->invoices->pdfContent($invoice->id);
 file_put_contents('invoice.pdf', $binary);
+
+// A variant, here the print version without background
+$print = $billomat->invoices->pdfContent($invoice->id, PdfType::PRINT);
 ```
 
 `type` is optional:
@@ -523,7 +526,6 @@ require __DIR__ . '/vendor/autoload.php';
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 
 $billomat = BillomatClient::create(
@@ -561,6 +563,6 @@ printf(
 );
 
 // 4) Save the PDF
-$pdf = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
+$pdf = $billomat->invoices->pdfContent($invoice->id);
 file_put_contents(sprintf('invoice-%d.pdf', $invoice->id), $pdf);
 ```

@@ -43,8 +43,10 @@ There is **no** `update()` and **no** `convertToIncoming()`; the API doesn't sup
 Lists the inbox documents. Filters according to the Billomat docs: `per_page`, `page`, `order_by`. The returned models **don't** contain the Base64 content: `base64File` is `null` in the list response. Call `get()` for the binary content.
 
 ```php
+use Justpilot\Billomat\Api\OrderBy;
+
 $pending = $billomat->inboxDocuments->list([
-    'order_by' => 'created+DESC',
+    'order_by' => OrderBy::desc('created')->toQuery(),
     'per_page' => 50,
 ]);
 ```
@@ -171,6 +173,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Justpilot\Billomat\Api\InboxDocumentCreateOptions;
 use Justpilot\Billomat\Api\IncomingCreateOptions;
+use Justpilot\Billomat\Api\OrderBy;
 use Justpilot\Billomat\BillomatClient;
 
 $billomat = BillomatClient::create(
@@ -192,7 +195,7 @@ printf("Inbox: #%d, %d bytes\n", $doc->id, $doc->fileSize);
 
 // 2) Later: process the inbox. Load each document individually,
 //    turn it into an incoming and remove it from the inbox.
-foreach ($billomat->inboxDocuments->list(['order_by' => 'created+ASC']) as $pending) {
+foreach ($billomat->inboxDocuments->list(['order_by' => OrderBy::asc('created')->toQuery()]) as $pending) {
     $full = $billomat->inboxDocuments->get($pending->id);
     if (null === $full) {
         continue;

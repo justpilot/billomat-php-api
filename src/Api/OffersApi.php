@@ -186,9 +186,8 @@ final class OffersApi extends AbstractApi
     }
 
     /**
-     * Löscht ein Angebot (nur im Status DRAFT erlaubt).
-     *
-     * @throws ValidationException wenn das Angebot nicht DRAFT ist
+     * Löscht ein Angebot. Billomat löscht Angebote in jedem Status; nach `complete()` ist
+     * `cancel()` die bessere Wahl, damit die Nummernfolge lückenlos bleibt.
      */
     public function delete(int $id): void
     {

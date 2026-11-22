@@ -42,6 +42,7 @@ use Justpilot\Billomat\Api\ClientsApi;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Model\Client;
+use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -54,14 +55,12 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 final class MyApiTest extends TestCase
 {
     #[Test]
-    public function it_lists_things(): void
+    public function itListsThings(): void
     {
-        $captured = [];
+        $captured = new CapturedRequest();
 
-        $mock = new MockHttpClient(function (string $method, string $url, array $options) use (&$captured): MockResponse {
-            $captured['method'] = $method;
-            $captured['url'] = $url;
-            $captured['options'] = $options;
+        $mock = new MockHttpClient(static function (string $method, string $url, array $options) use ($captured): MockResponse {
+            $captured->record($method, $url, $options);
 
             return new MockResponse(
                 json_encode(['clients' => ['client' => []]], JSON_THROW_ON_ERROR),
@@ -76,7 +75,8 @@ final class MyApiTest extends TestCase
         $result = $api->list(['per_page' => 50]);
 
         self::assertSame([], $result);
-        self::assertSame('GET', $captured['method']);
+        self::assertSame('GET', $captured->method);
+        self::assertSame(['per_page' => '50'], $captured->query());
         // …more assertions on URL/headers/payload
     }
 }
@@ -84,10 +84,10 @@ final class MyApiTest extends TestCase
 
 Key points:
 
-- **`#[Test]` instead of a `test_` prefix.** Method names read like sentences (`it_lists_clients_and_passes_filters`, `it_creates_a_new_client_via_post`).
+- **`#[Test]` instead of a `test_` prefix.** Method names read like sentences (`itListsClientsAndPassesFilters`, `itCreatesANewClientViaPost`).
 - **`#[CoversClass(Foo::class)]` is required** — the strict PHPUnit configuration enforces it. Repeat the attribute for multiple classes.
 - `BillomatHttpClient` is instantiated **directly** and connected to the mock. `MockHttpClient` is a Symfony client, not a PSR-18 client — hence `new Psr18Client($mock)`. Don't mock `BillomatHttpClient` itself: it contains the query string builder, error mapping and retry logic, which should stay under test.
-- The `$captured` closure trick appears in many places — it allows assertions on method, URL, headers and payload. Because the request goes through PSR-18, `$options['body']` contains the JSON body as a string (check it with `json_decode()`) and `$options['headers']` is a list of `"Name: value"` strings; there is no `'json'` key. Array filters appear in the URL as `key%5B%5D=v`.
+- `Tests\Support\CapturedRequest` records the outgoing request in the mock's callback (`record()`) and allows typed assertions: `->method`, `->url`, `->query()`, `->headers()`, `->body()`, `->jsonAt(…)`, `->jsonArray(…)`. Because the request goes through PSR-18, the raw `$options['body']` contains the JSON body as a string and `$options['headers']` is a list of `"Name: value"` strings; there is no `'json'` key. Array filters appear in the URL as `key%5B%5D=v`.
 - `MockResponse` can also simulate HTTP errors (`['http_code' => 404]`) — useful for exception tests, see `tests/Api/AbstractApiExceptionTest.php` and `tests/Http/BillomatHttpClientErrorTest.php`.
 - For retry tests (429, 502/503/504), pass `BillomatHttpClient` a `sleep:` closure (`Closure(int $ms): void`) that only records the delay — otherwise the test actually waits. `sleep:` is an internal test hook (always pass it by name, it is not covered by the BC promise); in your own tests prefer `retry: RetryPolicy::none()` in the `BillomatConfig`.
 
@@ -147,7 +147,7 @@ composer fixtures:record                          # needs BILLOMAT_ID and BILLOM
 composer fixtures:record -- --cache=/tmp/billomat # keep raw responses outside the repo and reuse them on the next run
 ```
 
-`tools/record-fixtures.php` only sends GET requests: one list per resource (`per_page=3`) and, if the sandbox has data, one single-object GET of the first entry, plus the sub-resources (items, comments, tags, email receivers, contacts) of that entry. A full run takes about 75 requests and stops at 150, well below the sandbox limit of 1000 requests per 15 minutes. It never creates, updates or deletes anything and skips `/clients/myself` and the account endpoint. Resources without data in the sandbox get only a `list.json`; the test picks up new fixtures automatically, a new resource needs an entry in `ContractFixturesTest::calls()`.
+`tools/record-fixtures.php` only sends GET requests: one list per resource (`per_page=3`) and, if the sandbox has data, one single-object GET of the first entry, plus the sub-resources (items, comments, tags, email receivers, contacts) of that entry. A full run takes about 75 requests and stops at 200, well below the sandbox limit of 1000 requests per 15 minutes. It never creates, updates or deletes anything and skips `/clients/myself` and the account endpoint. Resources without data in the sandbox get only a `list.json`; the test picks up new fixtures automatically, a new resource needs an entry in `ContractFixturesTest::calls()`.
 
 With `--cache`, a cached response is used instead of a request, so you can tune the anonymization without hitting the API again. The cache holds unanonymized data: keep it outside the repository and delete it afterwards.
 
@@ -188,19 +188,21 @@ composer refactor:dry    # show Rector suggestions
 composer refactor        # apply Rector suggestions
 composer mutate          # Infection mutation testing (~3 minutes)
 composer generate:check  # fail if generated files under src/ are out of date
+composer docs:json       # regenerate the "JSON on the wire" sections of docs/resources/
+composer docs:json:check # fail if those JSON examples are out of date
 
-composer ci              # lint + analyse + refactor:dry + generate:check + all tests
+composer ci              # lint + analyse + refactor:dry + generate:check + docs:json:check + all tests
 ```
 
 PHPStan runs without a baseline: every finding fails CI and is fixed in the code.
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs these jobs on every push/PR:
+`.github/workflows/ci.yml` runs these jobs on every pull request and on pushes to `main`:
 
-1. **Tests** on PHP 8.5 (required) and 8.6 (experimental, `continue-on-error`).
+1. **Tests** on PHP 8.5 (required, once with Symfony pinned to 8.1 and once with the latest 8.x) and 8.6 (experimental, `continue-on-error`).
 2. **PSR-18 compat** — a smoke test with Guzzle and without Symfony (`.github/compat/guzzle`).
-3. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer generate:check`, `composer audit`.
+3. **Quality** — `composer lint`, `composer analyse`, `composer refactor:dry`, `composer generate:check`, `composer docs:json:check`, `composer audit`.
 4. **Backward compatibility** — [`roave/backward-compatibility-check`](https://github.com/Roave/BackwardCompatibilityCheck) compares the public API against the latest `v4.*` tag. Accepted findings go into `.roave-backward-compatibility-check.xml`; every other BC break fails the job.
 5. **Links** (`.github/workflows/links.yml`, separate workflow) — [lychee](https://lychee.cli.rs) checks the links in `docs/`, the root Markdown files and the Billomat links in the docblocks (`src/`, `tools/codegen/definitions/`), configured in `lychee.toml`. It also runs weekly to catch links that break without a change on our side.
 6. **Mutation testing** — on PRs only the changed lines (`--git-diff-lines`, 90 % MSI); on `main` the full run with the thresholds from `infection.json5`.

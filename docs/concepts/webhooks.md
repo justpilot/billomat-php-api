@@ -166,14 +166,27 @@ http_response_code(202);
 // Worker: the payload is a trigger — reload the current state via the API.
 $payload = WebhookPayload::fromJson(WebhookEvent::from($row['event']), $row['body']);
 
-match ($payload->event) {
-    WebhookEvent::INVOICE_CREATE, WebhookEvent::INVOICE_UPDATE, WebhookEvent::INVOICE_STATUS
-        => $sync->invoice($billomat->invoices->get((int) $payload->id())),
-    WebhookEvent::INVOICE_PAYMENT_CREATE, WebhookEvent::INVOICE_PAYMENT_DELETE
-        => $sync->invoice($billomat->invoices->get((int) $payload->int('invoice_id'))),
-    WebhookEvent::INVOICE_DELETE => $sync->deleteInvoice((int) $payload->id()),
+// Which invoice is this about? id() and int() return null when the field is missing or empty.
+$invoiceId = match ($payload->event) {
+    WebhookEvent::INVOICE_CREATE, WebhookEvent::INVOICE_UPDATE, WebhookEvent::INVOICE_STATUS,
+    WebhookEvent::INVOICE_DELETE => $payload->id(),
+    WebhookEvent::INVOICE_PAYMENT_CREATE, WebhookEvent::INVOICE_PAYMENT_DELETE => $payload->int('invoice_id'),
     default => null,
 };
+
+if (null === $invoiceId) {
+    return; // an event this worker doesn't handle, or a payload without the ID
+}
+
+if (WebhookEvent::INVOICE_DELETE === $payload->event) {
+    $sync->deleteInvoice($invoiceId);
+
+    return;
+}
+
+// get() returns null if the invoice was deleted in the meantime.
+$invoice = $billomat->invoices->get($invoiceId);
+null === $invoice ? $sync->deleteInvoice($invoiceId) : $sync->invoice($invoice);
 ```
 
 `$payload->model()` returns the record as a model (`Invoice`, `InvoicePayment`, …), e.g. for logging. Base decisions on the reloaded state, not on the payload.

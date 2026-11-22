@@ -20,7 +20,8 @@
   justify-content: center;
   height: var(--vp-layout-top-height);
   padding: 0 16px;
-  background: var(--vp-c-warning-soft);
+  /* --vp-c-warning-soft ist halbtransparent: deckenden Seitenhintergrund darunterlegen, sonst scheint der Inhalt beim Scrollen durch. */
+  background: linear-gradient(var(--vp-c-warning-soft), var(--vp-c-warning-soft)), var(--vp-c-bg);
   color: var(--vp-c-text-1);
   font-size: 13px;
   line-height: 20px;

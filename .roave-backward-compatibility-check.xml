@@ -4,5 +4,11 @@
         <!-- Die Rector-Regeln erben von Rectors gescopter PHAR-Klasse, die BetterReflection nicht findet.
              Sie sind Upgrade-Werkzeug, keine Laufzeit-API. -->
         <ignored-regex>#"Rector\\Rector\\AbstractRector" could not be found in the located source#</ignored-regex>
+        <!-- Neue Felder generierter Models/Options landen vor den Schluss-Parametern `$extra` (Models) bzw.
+             `$items` (Create-Options). Das Tool vergleicht Parameter nach Position und meldet deshalb eine
+             Typänderung von `$extra`/`$items`. Die Reihenfolge der Konstruktor-Parameter ist laut
+             docs/concepts/backward-compatibility.md nicht Teil des Versprechens (benannte Argumente);
+             Name und Typ von `$extra`/`$items` selbst bleiben gleich. Freigegeben am 2026-11-22 (#102). -->
+        <ignored-regex>#\[BC\] CHANGED: (Default parameter value for parameter|The parameter) \$(extra|items) of Justpilot\\Billomat\\(Model|Api)\\\w+\#__construct\(\) changed from array#</ignored-regex>
     </baseline>
 </roave-bc-check>

@@ -5,6 +5,7 @@
         "abo-rechnungen": {
             "title": "Abo-Rechnungen",
             "source_url": "https://www.billomat.com/api/abo-rechnungen/",
+            "content_sha256": "0713b117d9edd19812fb547f08200f008905274a2886690362c36c6862310bdb",
             "endpoints": [
                 {
                     "name": "Alle Abo-Rechnungen auflisten",
@@ -353,6 +354,7 @@
         "abo-rechnungen/empfaenger": {
             "title": "E-Mail-Empfänger",
             "source_url": "https://www.billomat.com/api/abo-rechnungen/empfaenger/",
+            "content_sha256": "3cc810e5729e24481e5f5f6405f5e90efdfd0a1c06f72b7f089b7d67b7626c1f",
             "endpoints": [
                 {
                     "name": "Alle E-Mail-Empfänger einer Abo-Rechnung auflisten",
@@ -411,6 +413,7 @@
         "abo-rechnungen/positionen": {
             "title": "Positionen",
             "source_url": "https://www.billomat.com/api/abo-rechnungen/positionen/",
+            "content_sha256": "06fcb42ec347e66b7a2b7cab90e4083d83ad421954ba2490b321db06ff66e9b5",
             "endpoints": [
                 {
                     "name": "Alle Positionen einer Abo-Rechnung auflisten",
@@ -518,6 +521,7 @@
         "abo-rechnungen/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/abo-rechnungen/schlagworte/",
+            "content_sha256": "9d76b5cb0273e50c617245ab6221c71c71e9e1a5bcaa3ee6a5264944d6148b3c",
             "endpoints": [
                 {
                     "name": "Alle Schlagworte auflisten (Tagcloud)",
@@ -565,6 +569,7 @@
         "account": {
             "title": "Account",
             "source_url": "https://www.billomat.com/api/account/",
+            "content_sha256": "b14c00f2970e0abe36ce9d2bc7b98a9b2e8d26065f934b25c721ba889cdf7eeb",
             "endpoints": [
                 {
                     "name": "Informationen zum eigenen Account",
@@ -583,6 +588,7 @@
         "aktivitaeten": {
             "title": "Aktivitäten",
             "source_url": "https://www.billomat.com/api/aktivitaeten/",
+            "content_sha256": "75ba81a9e782409f77a5b8a3db26d7601141582e718324cf81d6b711ad7fc885",
             "endpoints": [
                 {
                     "name": "Aktivitäten auflisten",
@@ -639,6 +645,7 @@
         "angebote": {
             "title": "Angebote",
             "source_url": "https://www.billomat.com/api/angebote/",
+            "content_sha256": "cc608163a3034b4aac1a3a068e91aafdeb6abe260367a2155eca8c13bb451ca2",
             "endpoints": [
                 {
                     "name": "Alle Angebote auflisten",
@@ -985,6 +992,7 @@
         "angebote/kommentare": {
             "title": "Kommentare",
             "source_url": "https://www.billomat.com/api/angebote/kommentare/",
+            "content_sha256": "4803f68a1718bb2087266bd5e628e86812a9ca3ecc3b74dc34aa4eff4d39849b",
             "endpoints": [
                 {
                     "name": "Alle Kommentare eines Angebotes auflisten",
@@ -1041,6 +1049,7 @@
         "angebote/positionen": {
             "title": "Positionen",
             "source_url": "https://www.billomat.com/api/angebote/positionen/",
+            "content_sha256": "87c765e472e94d301284203d1ad11a58bcb9eec35dbf547aa2f7ab658e4ac825",
             "endpoints": [
                 {
                     "name": "Alle Positionen eines Angebotes auflisten",
@@ -1152,6 +1161,7 @@
         "angebote/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/angebote/schlagworte/",
+            "content_sha256": "6ba30c7d0855db5e476aa748ae717333ae67f9f0b62de93e592a0d0e6fd2bde8",
             "endpoints": [
                 {
                     "name": "Alle Schlagworte auflisten (Tagcloud)",
@@ -1199,6 +1209,7 @@
         "artikel": {
             "title": "Artikel",
             "source_url": "https://www.billomat.com/api/artikel/",
+            "content_sha256": "e546c3f850826cc27559a26f7c4c85b6f186c3e407b9be8f32334a293b1e5582",
             "endpoints": [
                 {
                     "name": "Alle Artikel auflisten",
@@ -1382,6 +1393,7 @@
         "artikel/attribute": {
             "title": "Attribute",
             "source_url": "https://www.billomat.com/api/artikel/attribute/",
+            "content_sha256": "18d373945dc8833a6d47ea7ef5bbf5236140bc5a2d99bc85ad61c1bdeca3b885",
             "endpoints": [
                 {
                     "name": "Alle Attribute auflisten",
@@ -1442,6 +1454,7 @@
         "artikel/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/artikel/schlagworte/",
+            "content_sha256": "0e7560fbe18e24795d912687cf4fe5ae831cca3366eea50b748c159add67c146",
             "endpoints": [
                 {
                     "name": "Alle Schlagworte auflisten (Tagcloud)",
@@ -1490,6 +1503,7 @@
         "auftragsbestaetigungen": {
             "title": "Auftragsbestätigungen",
             "source_url": "https://www.billomat.com/api/auftragsbestaetigungen/",
+            "content_sha256": "893e2353525e60d2d822105c83239a7b8b51c9a3657202e0d980e856401fd81d",
             "endpoints": [
                 {
                     "name": "Alle Auftragsbestätigungen auflisten",
@@ -1825,6 +1839,7 @@
         "benutzer": {
             "title": "Benutzer",
             "source_url": "https://www.billomat.com/api/benutzer/",
+            "content_sha256": "c582976559125a8f166ebf7bec32b0b775df957a8b43049fcf655a58e557327e",
             "endpoints": [
                 {
                     "name": "Alle Benutzer auflisten",
@@ -1868,6 +1883,7 @@
         "benutzerdefinierte-attribute-filtern": {
             "title": "Benutzerdefinierte Attribute filtern",
             "source_url": "https://www.billomat.com/api/benutzerdefinierte-attribute-filtern/",
+            "content_sha256": "d0d8b3be9a0240b91ce21e9e7bac58b58d806e1f47a3c1f83a0dd4248582f19d",
             "endpoints": [],
             "filters": [
                 {
@@ -1895,6 +1911,7 @@
         "briefe": {
             "title": "Briefe",
             "source_url": "https://www.billomat.com/api/briefe/",
+            "content_sha256": "295b1df5ea2fe1b1f748fdc3187004bbac173d5c9f1b958890abc1340ffd6dfd",
             "endpoints": [
                 {
                     "name": "Alle Briefe auflisten",
@@ -2145,6 +2162,7 @@
         "eingangsrechnungen": {
             "title": "Eingangsrechnungen",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/",
+            "content_sha256": "e2b1b4f352027af6e3d3e9d3b0bab6f38b2f43a399946efbf5c6d03b8cbac1aa",
             "endpoints": [
                 {
                     "name": "Alle Eingangsrechnungen auflisten",
@@ -2330,6 +2348,7 @@
         "eingangsrechnungen/attribute": {
             "title": "Attribute",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/attribute/",
+            "content_sha256": "f290aeda33c6ffffa3f93ffbae30bee07c42c20bcedc77d9f4a6666afe3f698c",
             "endpoints": [
                 {
                     "name": "Alle Attribute auflisten",
@@ -2389,6 +2408,7 @@
         "eingangsrechnungen/inbox": {
             "title": "Inbox",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/inbox/",
+            "content_sha256": "38cdbc4f0e7562327b8c9d4098f0048c52f1dc81075786bf945525e1b1608f22",
             "endpoints": [
                 {
                     "name": "Alle Inbox-Dokumente auflisten",
@@ -2446,6 +2466,7 @@
         "eingangsrechnungen/kategorien": {
             "title": "Kategorien",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/kategorien/",
+            "content_sha256": "3c7ac49a465c7b837edf30dc47753c35ce67cbb56abe88fdf1a924c957a8e258",
             "endpoints": [
                 {
                     "name": "Alle Kategorien einer Eingangsrechnung auflisten",
@@ -2462,6 +2483,7 @@
         "eingangsrechnungen/kommentare": {
             "title": "Kommentare",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/kommentare/",
+            "content_sha256": "48ad0ae40ddb19d9411e9558c9b4ff18ddd17a58e60cb749179c9b31128fd4bc",
             "endpoints": [
                 {
                     "name": "Alle Kommentare einer Rechnung auflisten",
@@ -2510,6 +2532,7 @@
         "eingangsrechnungen/posten": {
             "title": "Posten",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/posten/",
+            "content_sha256": "3d68aed3b8f1cd2c2180fa27348094e6593d5e445317cc360b68ff24334721f4",
             "endpoints": [
                 {
                     "name": "Alle Posten der Eingangsrechnungen auflisten",
@@ -2648,6 +2671,7 @@
         "eingangsrechnungen/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/schlagworte/",
+            "content_sha256": "0501166b42dc2f17ce49231eb069d09c144ae2319768a6afdb72dda889f0d2d7",
             "endpoints": [
                 {
                     "name": "Alle Schlagwörter auflisten (Tagcloud)",
@@ -2696,6 +2720,7 @@
         "eingangsrechnungen/zahlungen": {
             "title": "Zahlungen",
             "source_url": "https://www.billomat.com/api/eingangsrechnungen/zahlungen/",
+            "content_sha256": "4b95bbe90300195096cbbf83e2768db96af9622c219162808ec0637b618bcf5b",
             "endpoints": [
                 {
                     "name": "Alle Zahlungen auflisten",
@@ -2789,6 +2814,7 @@
         "einstellungen": {
             "title": "Einstellungen",
             "source_url": "https://www.billomat.com/api/einstellungen/",
+            "content_sha256": "7220b8580e3bbd8713bbb144bf8c0601d42268c43cd92a47e050a6a48b2215b3",
             "endpoints": [
                 {
                     "name": "Einstellungen aufrufen",
@@ -3134,6 +3160,7 @@
         "einstellungen/artikel-attribute": {
             "title": "Artikel-Attribute",
             "source_url": "https://www.billomat.com/api/einstellungen/artikel-attribute/",
+            "content_sha256": "b7d45511de2d804caa30e58c0a6af038dbaca01bf56ac45aa28805cb89e1e9fb",
             "endpoints": [
                 {
                     "name": "Alle Artikel-Attribute auflisten",
@@ -3195,6 +3222,7 @@
         "einstellungen/benutzer-attribute": {
             "title": "Benutzer-Attribute",
             "source_url": "https://www.billomat.com/api/einstellungen/benutzer-attribute/",
+            "content_sha256": "a08e02c6e2a26bf48e91836498764dc7fe766982a2bcccda264a3afc7baf383f",
             "endpoints": [
                 {
                     "name": "Alle Benutzer-Attribute auflisten",
@@ -3256,6 +3284,7 @@
         "einstellungen/eingangsrechnung-attribute": {
             "title": "Eingansgrechnung-Attribute",
             "source_url": "https://www.billomat.com/api/einstellungen/eingangsrechnung-attribute/",
+            "content_sha256": "9c386ced5e7e9092e0bb28463992a0df250c6791e03ecb79385be7703bc106d7",
             "endpoints": [
                 {
                     "name": "Alle Eingansgrechnung-Attribute auflisten",
@@ -3317,6 +3346,7 @@
         "einstellungen/einheiten": {
             "title": "Einheiten",
             "source_url": "https://www.billomat.com/api/einstellungen/einheiten/",
+            "content_sha256": "0d9a99223231451fb023b72333a008b95492bc748860a37706eb28b73950a16a",
             "endpoints": [
                 {
                     "name": "Alle Einheiten auflisten",
@@ -3365,6 +3395,7 @@
         "einstellungen/email-vorlagen": {
             "title": "E-Mail-Vorlagen",
             "source_url": "https://www.billomat.com/api/einstellungen/email-vorlagen/",
+            "content_sha256": "bb1f411ce2b796fd83ac35dd9491b5020552d6a795c3fc51cf28529472d8a84f",
             "endpoints": [
                 {
                     "name": "Alle E-Mail-Vorlagen auflisten",
@@ -3440,6 +3471,7 @@
         "einstellungen/freitexte": {
             "title": "Freitexte",
             "source_url": "https://www.billomat.com/api/einstellungen/freitexte/",
+            "content_sha256": "c85cf6739a02a3e99d36f866bf5e0e263d248340f53bc7cc63d9dff8857b32b6",
             "endpoints": [
                 {
                     "name": "Alle Freitexte auflisten",
@@ -3522,6 +3554,7 @@
         "einstellungen/kunden-attribute": {
             "title": "Kunden-Attribute",
             "source_url": "https://www.billomat.com/api/einstellungen/kunden-attribute/",
+            "content_sha256": "06d3f0c2331fafecd70dbe7b9133eb7cc5a879b4c690ba2a21d7935a87e4e9ef",
             "endpoints": [
                 {
                     "name": "Alle Kunden-Attribute auflisten",
@@ -3583,6 +3616,7 @@
         "einstellungen/lieferanten-attribute": {
             "title": "Lieferanten-Attribute",
             "source_url": "https://www.billomat.com/api/einstellungen/lieferanten-attribute/",
+            "content_sha256": "3c8b4acb22a070f91ad0b9d85cfc983091b3767342db663cd4736da5bc0935d9",
             "endpoints": [
                 {
                     "name": "Alle Lieferanten-Attribute auflisten",
@@ -3644,6 +3678,7 @@
         "einstellungen/mahnstufen": {
             "title": "Mahnstufen",
             "source_url": "https://www.billomat.com/api/einstellungen/mahnstufen/",
+            "content_sha256": "40ad9aac36cdc717ac83d40f68021901725a0b05456724a823e8cd464c10a012",
             "endpoints": [
                 {
                     "name": "Alle Mahnstufen auflisten",
@@ -3733,6 +3768,7 @@
         "einstellungen/rollen": {
             "title": "Rollen",
             "source_url": "https://www.billomat.com/api/einstellungen/rollen/",
+            "content_sha256": "e95f47a9efc162c685df0a2029def55d9fd3ec33f7431494a3d741349edefe4e",
             "endpoints": [
                 {
                     "name": "Alle Rollen auflisten",
@@ -3880,6 +3916,7 @@
         "einstellungen/steuerfreie-laender": {
             "title": "Steuerfreie Länder",
             "source_url": "https://www.billomat.com/api/einstellungen/steuerfreie-laender/",
+            "content_sha256": "af82063dd9203de7a83a4d7beffe7b54e1f39dee7fb669bc03cccff3e52e9fb8",
             "endpoints": [
                 {
                     "name": "Alle steuerfreien Länder auflisten",
@@ -3927,6 +3964,7 @@
         "einstellungen/steuersaetze": {
             "title": "Steuersätze",
             "source_url": "https://www.billomat.com/api/einstellungen/steuersaetze/",
+            "content_sha256": "bdebd45f6cd30719995809681e28f6e079140424f5fa7d3e11edc979af8b968f",
             "endpoints": [
                 {
                     "name": "Alle Steuersätze auflisten",
@@ -3981,6 +4019,7 @@
         "einstellungen/vorlagen": {
             "title": "Vorlagen",
             "source_url": "https://www.billomat.com/api/einstellungen/vorlagen/",
+            "content_sha256": "529fb5fdaf9562690ff26d335a5d9caf6e77ff6e138ee716678804c864014bfe",
             "endpoints": [
                 {
                     "name": "Alle Vorlagen auflisten",
@@ -4079,6 +4118,7 @@
         "grundlagen": {
             "title": "Grundlagen",
             "source_url": "https://www.billomat.com/api/grundlagen/",
+            "content_sha256": "c35bf32142d1da0a9106031abc4a06448aa77f81f7b34660cbc49dc7a5069d13",
             "endpoints": [
                 {
                     "name": "RESTful Webservice",
@@ -4115,6 +4155,7 @@
         "grundlagen/api-sicherheit": {
             "title": "Sicherheit",
             "source_url": "https://www.billomat.com/api/grundlagen/api-sicherheit/",
+            "content_sha256": "407150af6204b2984a7fd911ddc69dd370c4a608ad1dc051d481e621fc2477c0",
             "endpoints": [
                 {
                     "name": "Sicherheit",
@@ -4127,6 +4168,7 @@
         "grundlagen/authentifizierung": {
             "title": "Authentifizierung",
             "source_url": "https://www.billomat.com/api/grundlagen/authentifizierung/",
+            "content_sha256": "0465437e196b23d4f5aceada399ce7676fa0a2ff36af87a380ef290f775ad734",
             "endpoints": [
                 {
                     "name": "Authentifizierung",
@@ -4139,6 +4181,7 @@
         "grundlagen/daten-lesen": {
             "title": "Daten lesen",
             "source_url": "https://www.billomat.com/api/grundlagen/daten-lesen/",
+            "content_sha256": "963b92b143982c0ee4c8b6f8694286289e78b25d579248a4608b6526ff8f44d9",
             "endpoints": [
                 {
                     "name": "Daten lesen",
@@ -4151,6 +4194,7 @@
         "grundlagen/daten-schreiben": {
             "title": "Daten schreiben",
             "source_url": "https://www.billomat.com/api/grundlagen/daten-schreiben/",
+            "content_sha256": "6e3fdc1891bee47d67c3c760ed467df5bd07b66572f1cd4b34a0ff4faccac95c",
             "endpoints": [
                 {
                     "name": "Daten schreiben",
@@ -4163,6 +4207,7 @@
         "grundlagen/eigene-meta-daten": {
             "title": "Eigene Meta-Daten",
             "source_url": "https://www.billomat.com/api/grundlagen/eigene-meta-daten/",
+            "content_sha256": "5a0701b698a093f39352b3055bf7153a9e83430819dd71f81555b73351aab167",
             "endpoints": [
                 {
                     "name": "Eigene Meta-Daten",
@@ -4175,6 +4220,7 @@
         "grundlagen/fehler": {
             "title": "Fehler",
             "source_url": "https://www.billomat.com/api/grundlagen/fehler/",
+            "content_sha256": "19c81dc7fb029f34a0319054c241ed541d6883c0f8260a6a44a1c748717beec6",
             "endpoints": [
                 {
                     "name": "Fehler",
@@ -4187,6 +4233,7 @@
         "grundlagen/tools": {
             "title": "Tools",
             "source_url": "https://www.billomat.com/api/grundlagen/tools/",
+            "content_sha256": "378b392472f7791bf6397ac7d5d13db4c8f57efad565d0b096904f68a82b74e3",
             "endpoints": [
                 {
                     "name": "Tools",
@@ -4199,6 +4246,7 @@
         "grundlagen/zugriffsbegrenzung": {
             "title": "Zugriffsbegrenzung",
             "source_url": "https://www.billomat.com/api/grundlagen/zugriffsbegrenzung/",
+            "content_sha256": "5784ef602af1a974f943634339362f5bd70802a4806b58bcf9f2c71f5562d725",
             "endpoints": [
                 {
                     "name": "Zugriffsbegrenzung",
@@ -4211,6 +4259,7 @@
         "gutschriften": {
             "title": "Gutschriften",
             "source_url": "https://www.billomat.com/api/gutschriften/",
+            "content_sha256": "6a4b113a43be0000c9374d0a082f78436c93097c80517ce4ff2dd8b8e2886943",
             "endpoints": [
                 {
                     "name": "Alle Gutschriften auflisten",
@@ -4555,6 +4604,7 @@
         "gutschriften/kommentare": {
             "title": "Kommentare",
             "source_url": "https://www.billomat.com/api/gutschriften/kommentare/",
+            "content_sha256": "250a8f739af0c12ed191ae9e3ec9ef47519909e4d602bf62f13716e146663c1e",
             "endpoints": [
                 {
                     "name": "Alle Kommentare einer Gutschrift auflisten",
@@ -4610,6 +4660,7 @@
         "gutschriften/positionen": {
             "title": "Positionen",
             "source_url": "https://www.billomat.com/api/gutschriften/positionen/",
+            "content_sha256": "7d20d90d36a65305278f97b9aa42e5e9aa3019dc707a56b6fa77afada4b9c131",
             "endpoints": [
                 {
                     "name": "Alle Positionen einer Gutschrift auflisten",
@@ -4714,6 +4765,7 @@
         "gutschriften/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/gutschriften/schlagworte/",
+            "content_sha256": "d530446cd6247ba06de27f7bba99e4dcf66150e0dee301cda278ec4babc88bc8",
             "endpoints": [
                 {
                     "name": "Alle Schlagwörter auflisten (Tagcloud)",
@@ -4761,6 +4813,7 @@
         "gutschriften/zahlungen": {
             "title": "Zahlungen",
             "source_url": "https://www.billomat.com/api/gutschriften/zahlungen/",
+            "content_sha256": "01f39d927a32213ffd539e43869fe82545b9261de2f6c900860999a0fe1da53c",
             "endpoints": [
                 {
                     "name": "Alle Zahlungen auflisten",
@@ -4854,6 +4907,7 @@
         "kunden": {
             "title": "Kunden",
             "source_url": "https://www.billomat.com/api/kunden/",
+            "content_sha256": "e043b80373831f7a98296a86fda1a53d669970f1337daa3ed6bc4ccfc0fd6f13",
             "endpoints": [
                 {
                     "name": "Alle Kunden auflisten",
@@ -5310,6 +5364,7 @@
         "kunden/attribute": {
             "title": "Attribute",
             "source_url": "https://www.billomat.com/api/kunden/attribute/",
+            "content_sha256": "beb608c93f099403b960a3c19e532b3047e05c8e972d80c2fe097fd6af354019",
             "endpoints": [
                 {
                     "name": "Alle Attribute auflisten",
@@ -5369,6 +5424,7 @@
         "kunden/kontakte": {
             "title": "Kontakte",
             "source_url": "https://www.billomat.com/api/kunden/kontakte/",
+            "content_sha256": "7185c1dfceb394fbcf11c5d0628c20c368dc80dea15c7ef4537e7c2e6512c90c",
             "endpoints": [
                 {
                     "name": "Alle Kontakte eines Kunden auflisten",
@@ -5523,6 +5579,7 @@
         "kunden/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/kunden/schlagworte/",
+            "content_sha256": "47aa769487b902720c4a1b36280e1c967ee02bc1ddf9105a6d7ec7a9a9ec300c",
             "endpoints": [
                 {
                     "name": "Alle Schlagworte auflisten (Tagcloud)",
@@ -5570,6 +5627,7 @@
         "laender": {
             "title": "Länder",
             "source_url": "https://www.billomat.com/api/laender/",
+            "content_sha256": "7c5f911739897ac912658824775c592c0beb88f4379acef9d5e042580ccc205a",
             "endpoints": [
                 {
                     "name": "Alle Länder auflisten",
@@ -5593,6 +5651,7 @@
         "lieferanten": {
             "title": "Lieferanten",
             "source_url": "https://www.billomat.com/api/lieferanten/",
+            "content_sha256": "0e7da9aa57c5848f21c0183472ddb2375410bb685c596d05b8d22254f2246b58",
             "endpoints": [
                 {
                     "name": "Alle Lieferanten auflisten",
@@ -5852,6 +5911,7 @@
         "lieferanten/attribute": {
             "title": "Attribute",
             "source_url": "https://www.billomat.com/api/lieferanten/attribute/",
+            "content_sha256": "2f72b7f234f7048a5decc427ac0447a2a5b8c68bfba9bfe733c937f40cb2e61f",
             "endpoints": [
                 {
                     "name": "Alle Attribute auflisten",
@@ -5911,6 +5971,7 @@
         "lieferanten/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/lieferanten/schlagworte/",
+            "content_sha256": "3860639649f8da512e2205a638e4f362885b7dc7ac41f2462f200fbc409c697d",
             "endpoints": [
                 {
                     "name": "Alle Schlagworte auflisten (Tagcloud)",
@@ -5958,6 +6019,7 @@
         "lieferscheine": {
             "title": "Lieferscheine",
             "source_url": "https://www.billomat.com/api/lieferscheine/",
+            "content_sha256": "c4d7159cd9130f53e611a2c112d59e6f5c821179bbb27d16bb072ab9d98b0996",
             "endpoints": [
                 {
                     "name": "Alle Lieferscheine auflisten",
@@ -6253,6 +6315,7 @@
         "mahnungen": {
             "title": "Mahnungen",
             "source_url": "https://www.billomat.com/api/mahnungen/",
+            "content_sha256": "774a7520862216cb6866e1130af5cfa1e0d0891ffb60ce466e391872c74785af",
             "endpoints": [
                 {
                     "name": "Alle Mahnungen auflisten",
@@ -6552,6 +6615,7 @@
         "mahnungen/positionen": {
             "title": "Positionen",
             "source_url": "https://www.billomat.com/api/mahnungen/positionen/",
+            "content_sha256": "93316c61429e9d1c15213129aea02c89429d96f1688695619ecbb84d81b6f046",
             "endpoints": [
                 {
                     "name": "Alle Positionen einer Mahnung auflisten",
@@ -6638,6 +6702,7 @@
         "mahnungen/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/mahnungen/schlagworte/",
+            "content_sha256": "e35618d42a776e9fc714e48e46392f7ebdb734a3bdb269fee5be5de7cf7dca43",
             "endpoints": [
                 {
                     "name": "Alle Schlagwörter auflisten (Tagcloud)",
@@ -6685,6 +6750,7 @@
         "rechnungen": {
             "title": "Rechnungen",
             "source_url": "https://www.billomat.com/api/rechnungen/",
+            "content_sha256": "be4bb021896358985968c8c27e608a8bb015cbeecaa4fe7e8de74a3e877e38e0",
             "endpoints": [
                 {
                     "name": "Alle Rechnungen auflisten",
@@ -7114,6 +7180,7 @@
         "rechnungen/kommentare": {
             "title": "Kommentare",
             "source_url": "https://www.billomat.com/api/rechnungen/kommentare/",
+            "content_sha256": "1fed1dfed3a603961d2abb8d3d49feacd46a37c71452ea9b152229e3cafb364e",
             "endpoints": [
                 {
                     "name": "Alle Kommentare einer Rechnung auflisten",
@@ -7169,6 +7236,7 @@
         "rechnungen/positionen": {
             "title": "Positionen",
             "source_url": "https://www.billomat.com/api/rechnungen/positionen/",
+            "content_sha256": "f4f54fcfddb40bf235fedc300d923f8d39f4eb3cc84bb9a01436312976a01fac",
             "endpoints": [
                 {
                     "name": "Alle Positionen einer Rechnung auflisten",
@@ -7287,6 +7355,7 @@
         "rechnungen/schlagworte": {
             "title": "Schlagworte",
             "source_url": "https://www.billomat.com/api/rechnungen/schlagworte/",
+            "content_sha256": "2bad94ac27680eef620a5308087eaa65d9178ff306f575bb5a925a0680f7b74c",
             "endpoints": [
                 {
                     "name": "Alle Schlagwörter auflisten (Tagcloud)",
@@ -7334,6 +7403,7 @@
         "rechnungen/zahlungen": {
             "title": "Zahlungen",
             "source_url": "https://www.billomat.com/api/rechnungen/zahlungen/",
+            "content_sha256": "7841361272bc8d1734314a3ecd0213425349a6f22dc9984a00a91bb206405089",
             "endpoints": [
                 {
                     "name": "Alle Zahlungen auflisten",
@@ -7430,6 +7500,7 @@
         "suche": {
             "title": "Suche",
             "source_url": "https://www.billomat.com/api/suche/",
+            "content_sha256": "44471d6ef9a842375723af211b320c1cc714e7d2cf53f4c78ea3d787c0c758df",
             "endpoints": [
                 {
                     "name": "Volltextsuche durchführen",
@@ -7471,6 +7542,7 @@
         "waehrungen": {
             "title": "Währungen",
             "source_url": "https://www.billomat.com/api/waehrungen/",
+            "content_sha256": "48917913d43e917e7c8ff43d04365283314bae990ee15323193cfdd482c37dcb",
             "endpoints": [
                 {
                     "name": "Alle Währungen auflisten",
@@ -7494,6 +7566,7 @@
         "webhooks": {
             "title": "Webhooks",
             "source_url": "https://www.billomat.com/api/webhooks/",
+            "content_sha256": "2baacdc9d7be3864db523dfd5c2ac94eb6a063e7adc2f492009e90d8a1e912c4",
             "endpoints": [
                 {
                     "name": "Webhooks",

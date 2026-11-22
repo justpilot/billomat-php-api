@@ -38,6 +38,11 @@
           "type": "string",
           "format": "uri"
         },
+        "content_sha256": {
+          "description": "SHA-256 über den normalisierten Seitentext (ab <h1> bis <footer>, ohne Skripte und Attribute). Ändert sich, sobald Billomat den Text der Seite ändert – auch außerhalb der geparsten Tabellen. Geprüft mit composer extract:spec:check.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
         "endpoints": {
           "type": "array",
           "items": { "$ref": "#/$defs/endpoint" }

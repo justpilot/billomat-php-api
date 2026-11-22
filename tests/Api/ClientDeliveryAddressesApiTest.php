@@ -17,7 +17,6 @@ use Justpilot\Billomat\Config\RetryPolicy;
 use Justpilot\Billomat\Exception\NotFoundException;
 use Justpilot\Billomat\Exception\ValidationException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
-use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientDeliveryAddress;
 use Justpilot\Billomat\Tests\Support\CapturedRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -33,15 +32,15 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 #[CoversClass(ClientDeliveryAddressCreateOptions::class)]
 #[CoversClass(ClientDeliveryAddressUpdateOptions::class)]
 #[CoversClass(ClientDeliveryAddress::class)]
-#[UsesClass(BillomatConfig::class)]
 #[UsesClass(BillomatClient::class)]
 #[UsesClass(ClientsApi::class)]
 #[UsesClass(OrderBy::class)]
 #[UsesClass(SubResourceFilter::class)]
-#[UsesClass(RetryPolicy::class)]
-#[UsesClass(BillomatHttpClient::class)]
-#[UsesClass(ScalarCaster::class)]
-#[UsesNamespace('Justpilot\Billomat\Exception')]
+#[UsesNamespace('Justpilot\\Billomat\\Config')]
+#[UsesNamespace('Justpilot\\Billomat\\Exception')]
+#[UsesNamespace('Justpilot\\Billomat\\Http')]
+#[UsesNamespace('Justpilot\\Billomat\\Internal')]
+#[UsesNamespace('Justpilot\\Billomat\\Pagination')]
 final class ClientDeliveryAddressesApiTest extends TestCase
 {
     /**

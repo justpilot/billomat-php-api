@@ -9,8 +9,23 @@ declare(strict_types=1);
  *
  * Aufruf:
  *   composer extract:spec -- ~/Developer/billomat_fetcher/www.billomat.com/api
+ *   composer extract:spec:check -- ~/Developer/billomat_fetcher/www.billomat.com/api
  *
  * Quelle ist read-only, das Skript verändert sie nicht.
+ *
+ * Jede Ressource bekommt `content_sha256`: einen Hash über den normalisierten
+ * Text der Seite (ab der ersten <h1> bis zum <footer>, ohne Skripte). Er
+ * erfasst auch Änderungen außerhalb der geparsten Tabellen (Hinweise,
+ * Beispiele). Den rohen HTML-Hash nutzen wir bewusst nicht: Cloudflare
+ * verschlüsselt E-Mail-Adressen bei jedem Abruf neu (`data-cfemail`), der
+ * Hash wäre also nie stabil. `Last-Modified` taugt ebenfalls nicht, es
+ * spiegelt nur Cache-Neuaufbauten.
+ *
+ * Ablauf bei Verdacht auf Doku-Änderungen:
+ *   1. Spiegel neu laden (billomat_fetcher/fetch.sh)
+ *   2. composer extract:spec:check -- <spiegel>   → Exit 0: nichts geändert
+ *   3. sonst composer extract:spec -- <spiegel>, Diff von docs/spec/billomat.json
+ *      prüfen, danach composer generate und composer audit:spec
  */
 
 namespace Justpilot\Billomat\Tools;
@@ -33,8 +48,11 @@ main($argv);
 
 function main(array $argv): void
 {
+    $check = in_array('--check', $argv, true);
+    $argv = array_values(array_filter($argv, static fn (string $arg): bool => $arg !== '--check'));
+
     if (count($argv) < 2) {
-        fwrite(STDERR, "Usage: php tools/extract-billomat-spec.php <html-mirror-root>\n");
+        fwrite(STDERR, "Usage: php tools/extract-billomat-spec.php [--check] <html-mirror-root>\n");
         fwrite(STDERR, "       <html-mirror-root> sollte den Ordner enthalten, in dem die\n");
         fwrite(STDERR, "       index.html der Hauptseite und die Ressourcen-Unterordner liegen.\n");
         exit(1);
@@ -59,6 +77,10 @@ function main(array $argv): void
         $payload,
         JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
     );
+
+    if ($check) {
+        exit(checkAgainstExisting($resources, $json . "\n"));
+    }
 
     @mkdir(dirname(OUTPUT_PATH), 0o755, true);
     file_put_contents(OUTPUT_PATH, $json . "\n");
@@ -119,6 +141,7 @@ function parseResourceFile(string $path, string $relativeDir): array
     $resource = [
         'title' => $title,
         'source_url' => BASE_PUBLIC_URL . $relativeDir . '/',
+        'content_sha256' => contentHash($xpath),
         'endpoints' => $endpoints,
     ];
 
@@ -127,6 +150,121 @@ function parseResourceFile(string $path, string $relativeDir): array
     }
 
     return $resource;
+}
+
+/**
+ * SHA-256 über den normalisierten Seitentext ab der ersten <h1> bis zum
+ * <footer>. Nur Textknoten zählen, Attribute (Links, `data-cfemail`) also
+ * nicht; Inhalte von <script>, <style>, <noscript>, <template>, <aside> und
+ * <nav> (Seitenmenü) werden übersprungen. Whitespace wird zusammengefasst.
+ */
+function contentHash(DOMXPath $xpath): string
+{
+    $h1 = $xpath->query('//h1')->item(0);
+    $body = $xpath->query('//body')->item(0);
+    if (!$h1 instanceof DOMElement || !$body instanceof DOMElement) {
+        return hash('sha256', '');
+    }
+
+    $stopAt = $xpath->query('//footer')->item(0);
+    // <aside>/<nav> enthalten das Seitenmenü aller Ressourcen: ein neuer
+    // Menüpunkt würde sonst den Hash jeder Seite ändern.
+    $skipTags = ['script', 'style', 'noscript', 'template', 'aside', 'nav'];
+    $parts = [];
+    $state = ['h1Reached' => false];
+
+    walkDom(
+        $body,
+        static function (DOMNode $node) use (&$parts, &$state, $h1, $stopAt, $skipTags): bool {
+            if ($stopAt instanceof DOMElement && $node === $stopAt) {
+                return false;
+            }
+            if ($node === $h1) {
+                $state['h1Reached'] = true;
+            }
+            if (!$state['h1Reached']) {
+                return true;
+            }
+            if ($node->nodeType !== XML_TEXT_NODE && $node->nodeType !== XML_CDATA_SECTION_NODE) {
+                return true;
+            }
+            for ($cur = $node->parentNode; $cur !== null; $cur = $cur->parentNode) {
+                if ($cur instanceof DOMElement && in_array(strtolower($cur->tagName), $skipTags, true)) {
+                    return true;
+                }
+            }
+            $parts[] = $node->textContent;
+
+            return true;
+        },
+    );
+
+    return hash('sha256', normaliseHeader(implode(' ', $parts)));
+}
+
+/**
+ * Vergleicht die frisch extrahierte Spezifikation mit docs/spec/billomat.json,
+ * ohne zu schreiben. Liefert den Exit-Code (0 = unverändert, 1 = geändert).
+ *
+ * @param array<string, array<string, mixed>> $resources
+ */
+function checkAgainstExisting(array $resources, string $json): int
+{
+    $existingJson = is_file(OUTPUT_PATH) ? file_get_contents(OUTPUT_PATH) : false;
+    if ($existingJson === $json) {
+        fwrite(STDOUT, sprintf("Keine Änderungen: %d Ressourcen entsprechen %s.\n", count($resources), OUTPUT_PATH));
+
+        return 0;
+    }
+
+    $existing = [];
+    if (is_string($existingJson)) {
+        $decoded = json_decode($existingJson, true, flags: JSON_THROW_ON_ERROR);
+        if (is_array($decoded) && is_array($decoded['resources'] ?? null)) {
+            $existing = $decoded['resources'];
+        }
+    }
+
+    $added = array_diff_key($resources, $existing);
+    $removed = array_diff_key($existing, $resources);
+    $changed = [];
+    foreach (array_intersect_key($resources, $existing) as $slug => $resource) {
+        $old = $existing[$slug];
+        $reasons = [];
+        if (($old['content_sha256'] ?? null) !== $resource['content_sha256']) {
+            $reasons[] = isset($old['content_sha256']) ? 'Seitentext' : 'Hash fehlt bisher';
+        }
+        $withoutHash = static function (mixed $r): mixed {
+            if (is_array($r)) {
+                unset($r['content_sha256']);
+            }
+
+            return $r;
+        };
+        if ($withoutHash($old) != $withoutHash($resource)) {
+            $reasons[] = 'Struktur (Endpunkte/Felder/Filter)';
+        }
+        if ($reasons !== []) {
+            $changed[$slug] = $reasons;
+        }
+    }
+
+    fwrite(STDOUT, "Die Billomat-Doku weicht von docs/spec/billomat.json ab:\n");
+    foreach (array_keys($added) as $slug) {
+        fwrite(STDOUT, "  + {$slug} (neue Seite)\n");
+    }
+    foreach (array_keys($removed) as $slug) {
+        fwrite(STDOUT, "  - {$slug} (Seite entfernt)\n");
+    }
+    foreach ($changed as $slug => $reasons) {
+        fwrite(STDOUT, sprintf("  ~ %s (%s)\n", $slug, implode(', ', $reasons)));
+    }
+    if ($added === [] && $removed === [] && $changed === []) {
+        fwrite(STDOUT, "  (nur Formatierung/Metadaten)\n");
+    }
+    fwrite(STDOUT, "Übernehmen mit: composer extract:spec -- <spiegel>\n");
+
+    return 1;
 }
 
 /**

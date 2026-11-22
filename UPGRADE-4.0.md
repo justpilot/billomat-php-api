@@ -178,7 +178,7 @@ camelCase of every other property now; the wire names don't change:
 |---|---|---|
 | `$actionkey`, `$actionkeyRaw`, `withActionkey()` | `$actionKey`, `$actionKeyRaw`, `withActionKey()` | comments and their create options |
 | `$customfield` | `$customField` | most read models |
-| `$base64file`, `withBase64file()` | `$base64File`, `withBase64File()` | `InboxDocument`, `InboxDocumentCreateOptions`, `IncomingCreateOptions`, PDF models |
+| `$base64file`, `withBase64file()` | `$base64File`, `withBase64File()` | `InboxDocument`, `InboxDocumentCreateOptions` (property only), `IncomingCreateOptions`, PDF models |
 
 ```php
 // 3.x
@@ -233,8 +233,9 @@ use Symfony\Component\HttpClient\Psr18Client;
 $billomat = new BillomatClient($config, new Psr18Client(HttpClient::create(['proxy' => 'http://proxy:3128'])));
 ```
 
-`BillomatConfig::$timeout` only applies to the client the SDK creates itself. A client you pass in
-uses its own timeout settings.
+`BillomatConfig::$timeout` only applies to the Symfony client the SDK creates itself when
+`symfony/http-client` is installed. A client you pass in, or one found by discovery, uses its own
+timeout settings.
 
 ### Tests with `MockHttpClient`
 
@@ -274,8 +275,8 @@ their protected methods may change in any release. For an endpoint the SDK doesn
 HTTP client directly; it already adds authentication, retries and error mapping:
 
 ```php
-$response = $billomat->getHttpClient()->request('GET', '/units/7');
-$unit = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+$response = $billomat->getHttpClient()->request('GET', '/some-new-resource/7');
+$data = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
 ```
 
 See [Backward compatibility](docs/concepts/backward-compatibility.md) for what the BC promise covers.
@@ -432,13 +433,13 @@ $billomat->clients->contacts->list(parentId: $id);
 $billomat->search->query('ACME', filters: ['per_page' => 5]);
 ```
 
-These three and `reminderTexts` also have `listPage()` and `iterateAll()` now, and `countries->list()`
+`contacts`, `taxes`, `templates` and `reminderTexts` also have `listPage()` and `iterateAll()` now, and `countries->list()`
 and `currencies->list()` accept filters (`list(['code' => 'DE'])`).
 
 ## Read-only methods are `#[\NoDiscard]`
 
-`get()`, `getMyself()`, `list()`, `listPage()`, `listGrouped()`, `iterateAll()`, `cloud()`,
-`pdf()`, `pdfContent()`, `thumb()`, `avatar()` and `SearchApi::query()` carry `#[\NoDiscard]`. PHP 8.5 emits a warning
+`get()`, `getOrFail()`, `getMyself()`, `getCustomField()`, `list()`, `listPage()`, `listGrouped()`, `iterateAll()`, `cloud()`,
+`pdf()`, `pdfContent()`, `thumb()`, `avatar()`, `invoices->preset()` and `SearchApi::query()` carry `#[\NoDiscard]`. PHP 8.5 emits a warning
 when their result is ignored. This is not a hard break, but test suites that turn warnings into failures
 will notice it. If you call such a method only for its exception (for example to check that a resource
 exists), cast the result to `(void)`:
@@ -508,7 +509,7 @@ $billomat->clients->tags->create($clientId, $options); // see "The parent ID is 
 
 ### One generic class per kind of sub-resource
 
-The 39 classes like `InvoiceCommentsApi` or `ClientTagsApi` are replaced by `CommentsApi`, `TagsApi`,
+The 37 classes like `InvoiceCommentsApi` or `ClientTagsApi` are replaced by `CommentsApi`, `TagsApi`,
 `ItemsApi`, `PaymentsApi`, `PropertiesApi` and `PropertyValuesApi`. Type hints on the old classes have to
 change:
 
@@ -601,8 +602,8 @@ Positional calls change too: `new InvoiceTagCreateOptions($invoiceId, 'VIP')` be
 
 ## Methods that always returned `true` return `void`
 
-`delete()`, `complete()`, `cancel()`, `uncancel()`, `clear()`, `undo()`, `win()`, `lose()`, `email()`,
-`mail()`, `encash()`, `upload()` and `uploadSignature()` never returned `false`; errors were always
+`delete()`, `complete()`, `cancel()`, `uncancel()`, `clear()`, `win()`, `lose()`, `email()`,
+`mail()`, `encash()` and `uploadSignature()` never returned `false`; errors were always
 exceptions. They now return `void`:
 
 ```php
@@ -692,13 +693,13 @@ a copy and leave the original untouched:
 
 ```php
 // 3.x
-if (null !== $from) {
-    $options->from = $from;
+if (null !== $note) {
+    $options->note = $note;
 }
 
 // 4.0
-if (null !== $from) {
-    $options = $options->withFrom($from);
+if (null !== $note) {
+    $options = $options->withNote($note);
 }
 ```
 

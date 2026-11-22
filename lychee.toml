@@ -6,7 +6,6 @@ exclude_path = [
     "docs/.vitepress",
     "docs/spec",
     "docs/audit.md",
-    "docs/roadmap-v4.md",
     "vendor",
     "build",
     "graphify-out",

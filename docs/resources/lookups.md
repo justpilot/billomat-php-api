@@ -23,7 +23,7 @@ $billomat->incomingCategories  // incoming invoice categories (string ID)
 
 `countries`, `currencies`, `users` and `incomingCategories` are read-only. `units`, `emailTemplates`, `freeTexts`, `reminderTexts`, `roles` and `countryTaxes` additionally have `create($options)`, `update($id, $options)` and `delete($id)` (POST/PUT/DELETE on the same paths); the details are on their pages. `countries` and `currencies` only offer `list()`/`listPage()`/`iterateAll()`; the others also have `get($id)`, which returns `null` on 404, and `getOrFail($id)`, which throws `NotFoundException` instead. `UsersApi` additionally has `getMyself()` for the currently authenticated user. For `incomingCategories`, `$id` is a **string** slug (e.g. `goods`), not a number.
 
-The only writable part is the sub-resource `$billomat->users->properties` (custom field definitions for users, see [properties.md](properties.md)).
+`users` itself is read-only, but its sub-resource `$billomat->users->properties` is writable (custom field definitions for users, see [properties.md](properties.md)).
 
 Each of these resources provides master data that other models refer to only by ID or code — e.g. `Recurring::$emailTemplateId`, `Invoice::$currencyCode`, `InvoiceItem::$unit`.
 
@@ -306,7 +306,7 @@ $billomat = BillomatClient::create(
 
 // 1) Who am I?
 $me = $billomat->users->getMyself();
-printf("Logged in as %s %s <%s>\n", $me?->firstName, $me?->lastName, $me?->email);
+printf("Logged in as %s %s <%s>\n", $me->firstName, $me->lastName, $me->email);
 
 // 2) Cache master data
 $countriesByCode = [];
@@ -321,9 +321,7 @@ foreach ($billomat->currencies->list() as $currency) {
 
 $unitsById = [];
 foreach ($billomat->units->list() as $unit) {
-    if (null !== $unit->id) {
-        $unitsById[$unit->id] = $unit;
-    }
+    $unitsById[$unit->id] = $unit;
 }
 
 printf(

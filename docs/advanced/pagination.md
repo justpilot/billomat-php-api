@@ -67,7 +67,7 @@ foreach ($billomat->invoices->iterateAll(filters: $filter, pageSize: 500) as $in
 The iterator stops in two cases:
 
 1. **Preferred:** `PageInfo::hasNextPage()` is `false` because `page >= totalPages()` (Billomat sends `@total`).
-2. **Fallback:** the endpoint sends no `@total` metadata and the current page contains fewer items than `pageSize`. In that case `total` in the `PageInfo` is `null` and `hasNextPage()` optimistically returns `true` — the iterator relies on the `count(items) < pageSize` check.
+2. **Fallback:** the endpoint sends no `@total` metadata and the current page contains fewer items than the `per_page` value of the response. In that case `total` in the `PageInfo` is `null` and `hasNextPage()` optimistically returns `true` — the iterator relies on the `count(items) < perPage` check.
 
 Both cases are safe and stop after the first request for empty endpoints.
 

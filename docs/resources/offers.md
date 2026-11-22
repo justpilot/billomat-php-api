@@ -148,7 +148,7 @@ $billomat->offers->complete($offer->id, templateId: 42);
 
 #### `delete(int $id): void`
 
-Only allowed as a `DRAFT`. For any other status Billomat responds with 422 → `ValidationException`.
+Works in any status: Billomat's API also deletes completed offers. Use it for drafts; once a document is completed, prefer `cancel()` (see [Pitfalls](#pitfalls)).
 
 #### Status transitions
 
@@ -442,7 +442,7 @@ Shared class for sending all document types by email (invoices, offers, confirma
 
 ## Read model: `OfferTag`
 
-`final readonly`. Fields: `id` (`?int`), `offerId` (`int`), `name` (`string`), `customField` (`?string`), `extra`.
+`final readonly`. Fields: `id` (`int`), `offerId` (`int`), `name` (`string`), `customField` (`?string`), `extra`.
 
 ## Read model: `OfferTagCloudEntry`
 

@@ -6,7 +6,6 @@
 [![PHP](https://img.shields.io/packagist/dependency-v/justpilot/billomat-php-api/php)](https://www.php.net/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level_max-brightgreen.svg)](https://phpstan.org/)
 [![Mutation testing](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fjustpilot%2Fbillomat-php-api%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/justpilot/billomat-php-api/main)
-[![codecov](https://codecov.io/gh/justpilot/billomat-php-api/branch/main/graph/badge.svg)](https://codecov.io/gh/justpilot/billomat-php-api)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 
 A modern, fully typed PHP 8.5 SDK for the [Billomat API](https://www.billomat.com/api/): invoices, offers, clients, payments, PDFs and incoming webhooks, on top of any PSR-18 HTTP client.
@@ -23,7 +22,7 @@ composer require justpilot/billomat-php-api
 
 Coming from 3.x? [UPGRADE-4.0.md](UPGRADE-4.0.md) lists every change and ships a Rector set for the mechanical part.
 
-The SDK needs a PSR-18 client and PSR-17 factories. `php-http/discovery` installs one if none is present; otherwise pick one:
+The SDK needs a PSR-18 client and PSR-17 factories. If you allow the `php-http/discovery` Composer plugin, it installs one when none is present; otherwise pick one:
 
 ```bash
 composer require symfony/http-client nyholm/psr7   # or: composer require guzzlehttp/guzzle
@@ -37,10 +36,12 @@ Requirements: PHP 8.5+, `ext-bcmath`, a Billomat account with API access and an 
 use Justpilot\Billomat\Api\InvoiceCreateOptions;
 use Justpilot\Billomat\Api\InvoiceItemCreateOptions;
 use Justpilot\Billomat\BillomatClient;
-use Justpilot\Billomat\Model\Enum\PdfType;
 use Justpilot\Billomat\Model\Money;
 
-$billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: getenv('BILLOMAT_API_KEY'));
+$billomat = BillomatClient::create(
+    billomatId: 'mycompany',
+    apiKey: getenv('BILLOMAT_API_KEY') ?: throw new RuntimeException('BILLOMAT_API_KEY is not set'),
+);
 
 $invoice = $billomat->invoices->create(new InvoiceCreateOptions(
     clientId: 12345,
@@ -49,7 +50,7 @@ $invoice = $billomat->invoices->create(new InvoiceCreateOptions(
 ));
 
 $billomat->invoices->complete($invoice->id);                             // assigns the number
-$pdf = $billomat->invoices->pdfContent($invoice->id, PdfType::SIGNED);
+$pdf = $billomat->invoices->pdfContent($invoice->id);
 file_put_contents("invoice-{$invoice->id}.pdf", $pdf);
 
 echo $billomat->invoices->getOrFail($invoice->id)->totalGross?->format(2, ',', '.'); // "904,40" with 19 % VAT
@@ -63,11 +64,11 @@ More runnable scripts in [examples/](examples/).
 - **Immutable write options** with named arguments and `with*()` withers; `Clear::Field` empties a field on update.
 - **Typed list filters** (`InvoiceFilter`, `ClientFilter`, …) with `OrderBy`, plus `iterateAll()` auto-pagination and `listPage()` metadata.
 - **Nested sub-resources:** `$billomat->invoices->items`, `->payments`, `->comments`, `->tags`, …
-- **Any PSR-18 client** (Symfony, Guzzle, …); runtime dependencies are PSR interfaces only.
+- **Any PSR-18 client** (Symfony, Guzzle, …); runtime dependencies are PSR interfaces only (plus `php-http/discovery`).
 - **Resilient:** automatic retries for 429 (honouring `Retry-After`) and, for GET, 502/503/504 and network errors; errors are classified with `isTransient()` and `mayHaveBeenProcessed()`.
 - **Observable:** optional PSR-3 logging (never headers or bodies) and PSR-14 events per request, retry and failure.
 - **Webhooks:** `WebhookEvent` (all 83 events), `WebhookHeaders` and `WebhookPayload` parse incoming requests into the matching model.
-- **Quality:** PHPStan level max, ~3,000 unit tests, mutation testing (Infection) and integration tests against the Billomat sandbox.
+- **Quality:** PHPStan level max, ~4,500 unit tests, mutation testing (Infection) and integration tests against the Billomat sandbox.
 
 ## Documentation
 

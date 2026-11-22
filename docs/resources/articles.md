@@ -210,7 +210,7 @@ There is no `update()`: delete the tag and create a new one.
 
 The article ID isn't part of the options: pass it as the first argument of `create()`, which adds `article_id` to the payload.
 
-Both values are required and set via the constructor:
+The tag name is required and set via the constructor:
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|

@@ -283,9 +283,8 @@ final class InvoicesApi extends AbstractApi
     /**
      * Löscht eine Rechnung.
      *
-     * Nur Rechnungen im Status DRAFT können gelöscht werden.
-     *
-     * @throws ValidationException wenn die Rechnung nicht DRAFT ist
+     * Billomat löscht Rechnungen in jedem Status, auch abgeschlossene. Für abgeschlossene
+     * Rechnungen ist `cancel()` die bessere Wahl (Aufbewahrungspflicht, lückenlose Nummern).
      */
     public function delete(int $id): void
     {

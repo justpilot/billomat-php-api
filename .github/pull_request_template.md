@@ -19,11 +19,11 @@ Closes #
 - [ ] New feature / additive change
 - [ ] Refactoring / internal cleanup (no behaviour or API change)
 - [ ] Documentation
-- [ ] Breaking change (agreed on in an issue; CHANGELOG + `UPGRADE-4.0.md` entry)
+- [ ] Breaking change (agreed on in an issue; waits for the next major version, 5.0)
 
 ## Checklist
 
-- [ ] `composer ci` passes locally (lint, PHPStan, Rector, `generate:check`, tests)
+- [ ] `composer ci` passes locally (lint, PHPStan, Rector, `generate:check`, `docs:json:check`, tests)
 - [ ] Unit tests for new code (`#[Test]`, `#[CoversClass]`)
 - [ ] Generated files changed only via definitions + `composer generate`
 - [ ] New resources: docs under `docs/resources/` and an entry in its README

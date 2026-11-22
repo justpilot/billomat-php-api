@@ -171,7 +171,7 @@ Attaches a signed PDF to the reminder. Billomat keeps it next to its own PDF: `p
 
 #### `delete(int $id): void`
 
-Only works on reminders in status `DRAFT`.
+Works in any status: Billomat's API also deletes completed reminders. Use it for drafts; once a document is completed, prefer `cancel()` (see [Pitfalls](#pitfalls)).
 
 ### Reminder items
 

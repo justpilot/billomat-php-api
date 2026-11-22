@@ -26,7 +26,7 @@ Every error the SDK throws extends `Justpilot\Billomat\Exception\BillomatExcepti
 | `ValidationException` | `src/Exception/ValidationException.php` | 400/422 — payload rejected, required field missing, invalid value. |
 | `RateLimitException` | `src/Exception/RateLimitException.php` | 429 — rate limit exhausted and the announced wait exceeds `RetryPolicy::$maxDelayMs` (or all attempts are used up). `getRetryAfter()` returns the seconds until the next window. |
 | `TransportException` | `src/Exception/TransportException.php` | No response from Billomat (DNS, connection reset, timeout). The PSR-18 client's exception is available via `getPrevious()`. |
-| `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, but the body doesn't match the expected structure (since 3.2). |
+| `UnexpectedResponseException` | `src/Exception/UnexpectedResponseException.php` | 2xx, but the body doesn't match the expected structure. |
 | `InvalidWebhookException` | `src/Exception/InvalidWebhookException.php` | An incoming webhook request couldn't be parsed (see [Webhooks](concepts/webhooks.md#receiving-webhooks-with-the-sdk)). |
 
 All classes except `BillomatException` and `HttpException` are `final`: catch them, don't extend them. The SDK creates the exceptions itself; their constructors are not part of the [BC promise](concepts/backward-compatibility.md). To test your own error handling, let a mock PSR-18 client return the status code (see [Testing](testing.md)).
@@ -156,7 +156,7 @@ try {
 
 API methods throw an `UnexpectedResponseException` when Billomat responds with 2xx but the body doesn't match the expected structure — e.g. when the wrapper element `client` or `invoice` is missing, or a read model lacks a field Billomat always sends (e.g. `id`; the message names model and field). This is a defensive check and shouldn't happen in practice; if it does, please open an issue with the raw body.
 
-Up to and including 3.1 this was a plain `\RuntimeException`. Since `UnexpectedResponseException` still extends `\RuntimeException` through `BillomatException`, existing `catch (\RuntimeException)` blocks keep working.
+`UnexpectedResponseException` extends `\RuntimeException` through `BillomatException`, so a `catch (\RuntimeException)` block catches it too.
 
 A 2xx body that isn't valid JSON or isn't a JSON object also results in an `UnexpectedResponseException` (the original `\JsonException` is available via `getPrevious()`). PDF downloads (`pdfContent()`) throw it too when the body is empty or doesn't start with `%PDF-`.
 

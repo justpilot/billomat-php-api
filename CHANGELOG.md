@@ -6,6 +6,12 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Changed
+- `main` is the 4.x line now (`dev-main` is aliased to `4.x-dev`); security fixes for 3.x go to the `3.x` branch.
+
+### Fixed
+- Documentation: corrected statements that contradicted the code (rate-limit retries in the phobetor migration guide, `delete()` rules, methods that don't exist on letters and incomings, `id` types, `$extra` coverage), removed `PdfType::SIGNED` from the quickstart examples (Billomat answers 404 without an uploaded signature), and added a sitemap and canonical/Open Graph tags to the docs site.
+
 ## [4.0.0] - 2026-11-20
 
 First stable release of 4.0, a rewrite on PHP 8.5: models and options generated from Billomat's API documentation, any PSR-18 client instead of Symfony HttpClient, amounts as exact `Money`, sub-resources under their parent (`$billomat->invoices->comments`), retries and rate-limit handling, PSR-3 logging and PSR-14 events, and a parser for incoming webhooks. The public API now follows Semantic Versioning: breaking changes only come with 5.0 (see [Backward compatibility](docs/concepts/backward-compatibility.md)).
@@ -231,7 +237,7 @@ See [UPGRADE-4.0.md](UPGRADE-4.0.md) for a step-by-step migration guide.
 ### Removed
 - **Abhängigkeit `symfony/http-foundation`.** Sie wurde nur für die `Response::HTTP_*`-Konstanten im Exception-Mapping gebraucht. Konsumenten installieren dadurch ein Paket weniger und erben keine Sicherheits-Bumps mehr daraus (zuletzt CVE-2026-108082). Wer `symfony/http-foundation` selbst nutzt, muss es im eigenen `composer.json` verlangen.
 
-## [3.1.0] - 2026-10-20
+## [3.1.0] - 2026-10-21
 
 ### Added
 - **`ClientPropertyValuesApi`** (`$billomat->clientPropertyValues`) für `/client-property-values` samt `ClientPropertyValue`-Modell und `ClientPropertyValueCreateOptions`. Werte von Kunden-Attributen ließen sich bisher nicht über das SDK lesen oder setzen; für Artikel, Lieferanten und Eingangsrechnungen gab es das Gegenstück schon.

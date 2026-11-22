@@ -141,7 +141,7 @@ Completes the draft. Assigns the final `confirmation_number` and generates the P
 
 #### `delete(int $id): void`
 
-Only allowed in `DRAFT`; after that, use `cancel()`.
+Works in any status: Billomat's API also deletes completed confirmations. Use it for drafts; once a document is completed, prefer `cancel()` (see [Pitfalls](#pitfalls)).
 
 #### Status transitions
 
@@ -393,7 +393,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 ## Read model: `ConfirmationTag`
 
-`final readonly`. Fields: `id` (`?int`), `confirmationId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
+`final readonly`. Fields: `id` (`int`), `confirmationId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
 
 ## Read model: `ConfirmationTagCloudEntry`
 

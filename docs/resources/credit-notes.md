@@ -225,7 +225,7 @@ Attaches a signed PDF to the credit note. Billomat keeps it next to its own PDF:
 
 #### `delete(int $id): void`
 
-Only works on credit notes in status `DRAFT`.
+Works in any status: Billomat's API also deletes completed credit notes. Use it for drafts; once a document is completed, prefer `cancel()` (see [Pitfalls](#pitfalls)).
 
 ### Credit note items
 

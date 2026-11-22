@@ -230,10 +230,8 @@ file_put_contents("invoice-{$invoiceId}.pdf", (string) $response->getBody());
 
 ```php
 // After
-use Justpilot\Billomat\Model\Enum\PdfType;
-
 $billomat->invoices->complete($invoiceId);
-$pdf = $billomat->invoices->pdfContent($invoiceId, PdfType::SIGNED);
+$pdf = $billomat->invoices->pdfContent($invoiceId);
 file_put_contents("invoice-{$invoiceId}.pdf", $pdf);
 ```
 
@@ -268,17 +266,16 @@ try {
 } catch (NotFoundException $e) {           // 404
 } catch (ValidationException $e) {         // 400, 422
 } catch (AuthenticationException $e) {     // 401, 403
-} catch (HttpException $e) {               // other 4xx/5xx, incl. 429
-    if ($e->getStatusCode() === 429) {
-        // rate limit; inspect $e->getResponseBody() for details
-    }
+} catch (HttpException $e) {               // other 4xx/5xx; 429 is a RateLimitException
 }
 ```
 
-This SDK does not yet ship an automatic rate-limit wait loop equivalent to
-phobetor's `setDoWaitForRateLimitReset(true)`. If you need it, decorate the
-HTTP client (see the [configuration guide](configuration.md#example-logging-requests-and-responses)
-section).
+The equivalent of phobetor's `setDoWaitForRateLimitReset(true)` is built in: on a 429 the SDK
+waits for the time Billomat announces (`Retry-After` / `X-Rate-Limit-Reset`) and tries again, for
+every HTTP method. The default `RetryPolicy` allows 2 retries and waits at most 10 seconds per
+attempt; a `RateLimitException` is only thrown when the retries are used up or the announced wait
+is longer than that cap. Change the limits with `retry: new RetryPolicy(...)` or switch retries off
+with `RetryPolicy::none()`, see the [configuration guide](configuration.md).
 
 ## Property name mapping
 

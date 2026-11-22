@@ -29,7 +29,7 @@ Every Billomat resource is a property on `BillomatClient`; sub-resources hang of
 
 | Resource | Access | Docs |
 |---|---|---|
-| Incoming invoices | `$billomat->incomings`, `->payments`, `->comments`, `->tags`, `->properties`, `->propertyValues` | [incomings.md](incomings.md) |
+| Incoming invoices | `$billomat->incomings`, `->items`, `->payments`, `->comments`, `->tags`, `->properties`, `->propertyValues` | [incomings.md](incomings.md) |
 | Incoming categories | `$billomat->incomingCategories` | [incoming-categories.md](incoming-categories.md) |
 | Inbox documents | `$billomat->inboxDocuments` | [inbox-documents.md](inbox-documents.md) |
 
@@ -46,4 +46,4 @@ Every Billomat resource is a property on `BillomatClient`; sub-resources hang of
 | Roles | `$billomat->roles` | [settings-roles.md](settings-roles.md) |
 | Templates | `$billomat->templates` | [templates.md](templates.md) |
 | E-mail templates, free texts | `$billomat->emailTemplates`, `$billomat->freeTexts` | [settings-email-templates.md](settings-email-templates.md), [settings-free-texts.md](settings-free-texts.md) |
-| Lookups (countries, currencies, units, users, reminder texts) | `$billomat->countries`, `currencies`, `units`, `users`, `reminderTexts` | [lookups.md](lookups.md) |
+| Lookups (countries, currencies, units, users, reminder texts) | `$billomat->countries`, `currencies`, `units`, `users`, `reminderTexts` | [lookups.md](lookups.md), [countries.md](countries.md), [currencies.md](currencies.md), [units](settings-units.md), [users.md](users.md), [reminder levels](settings-reminder-levels.md) |

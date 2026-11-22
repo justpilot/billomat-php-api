@@ -360,7 +360,7 @@ Shared class for sending every document type by email (invoices, offers, confirm
 
 ## Read model: `DeliveryNoteTag`
 
-`final readonly`. Fields: `id` (`?int`), `deliveryNoteId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
+`final readonly`. Fields: `id` (`int`), `deliveryNoteId` (`int`), `name` (`string`), `customField` (`?string`), `extra` (`array`).
 
 ## Read model: `DeliveryNoteTagCloudEntry`
 

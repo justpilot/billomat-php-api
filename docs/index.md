@@ -36,7 +36,10 @@ composer require justpilot/billomat-php-api
 ```
 
 ```php
-$billomat = BillomatClient::create(billomatId: 'mycompany', apiKey: getenv('BILLOMAT_API_KEY'));
+$billomat = BillomatClient::create(
+    billomatId: 'mycompany',
+    apiKey: getenv('BILLOMAT_API_KEY') ?: throw new RuntimeException('BILLOMAT_API_KEY is not set'),
+);
 
 $invoice = $billomat->invoices->getOrFail(42);
 echo $invoice->totalGross?->format(2, ',', '.');

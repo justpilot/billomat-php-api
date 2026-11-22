@@ -324,7 +324,7 @@ Read models: `RecurringTag` (link with `recurringId`) and `RecurringTagCloudEntr
 
 ## Recurring email receivers
 
-Maintains the TO/CC/BCC list for automatic email delivery (`action = EMAIL`). There is no `update()`; delete recipients and create them again.
+Maintains the TO/CC/BCC list for automatic email delivery (`action = EMAIL`).
 
 ```php
 use Justpilot\Billomat\Api\RecurringEmailReceiverCreateOptions;
@@ -361,7 +361,7 @@ Both values are required constructor parameters: `type` (`RecurringEmailReceiver
 
 ### Read model: `RecurringEmailReceiver`
 
-`final readonly`. Fields: `id` (`?int`), `recurringId` (`int`), `type` (`?RecurringEmailReceiverType`, `null` for an unknown value), `address` (`string`), `extra`.
+`final readonly`. Fields: `id` (`int`), `recurringId` (`int`), `type` (`?RecurringEmailReceiverType`, `null` for an unknown value), `address` (`string`), `extra`.
 
 ## Enums
 

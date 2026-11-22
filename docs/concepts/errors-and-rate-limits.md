@@ -2,7 +2,7 @@
 
 # Errors and rate limits
 
-When something goes wrong, Billomat responds with a `4xx`/`5xx` status code and a short plain-text message in the body. This SDK translates that into a small hierarchy of typed exceptions; all of them extend `BillomatException`.
+When something goes wrong, Billomat responds with a `4xx`/`5xx` status code and a short error message in the body. This SDK translates that into a small hierarchy of typed exceptions; all of them extend `BillomatException`.
 
 ## Status code mapping
 
@@ -19,12 +19,11 @@ When something goes wrong, Billomat responds with a `4xx`/`5xx` status code and 
 
 Billomat's error message ends up in the exception message, e.g. `Billomat responded with HTTP 404 to GET /invoices/1. Resource not found`. The raw response body is kept as well (`getResponseBody()`):
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<errors>
-    <error>Resource not found</error>
-</errors>
+```json
+{"errors": {"error": "Resource not found"}}
 ```
+
+The SDK asks for JSON; should Billomat answer with XML anyway (`<errors><error>…</error></errors>`), the message is read from that as well.
 
 ## Classifying errors
 

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, normalize, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, type DefaultTheme } from 'vitepress'
@@ -6,6 +6,7 @@ import { defineConfig, type DefaultTheme } from 'vitepress'
 const docsDir = join(dirname(fileURLToPath(import.meta.url)), '..')
 const repo = 'https://github.com/justpilot/billomat-php-api'
 const branch = 'main'
+const site = 'https://billomat-php.justpilot.io'
 
 // Seitentitel aus der ersten H1-Überschrift (vor manchen steht ein Quellkommentar).
 function title(file: string): string {
@@ -30,9 +31,27 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   // Interne Arbeitsdateien gehören nicht auf die Website.
-  srcExclude: ['spec/**', 'audit.md', 'roadmap-v4.md', '**/node_modules/**'],
+  srcExclude: ['spec/**', 'audit.md', '**/node_modules/**'],
   rewrites: { 'resources/README.md': 'resources/index.md' },
-  head: [['meta', { name: 'theme-color', content: '#3c8772' }]],
+  head: [
+    ['meta', { name: 'theme-color', content: '#3c8772' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'Billomat PHP SDK' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+  ],
+  sitemap: { hostname: site },
+  // Canonical-URL und Open-Graph-Angaben je Seite.
+  transformHead({ pageData, siteData }) {
+    const path = pageData.relativePath.replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '')
+    const url = `${site}/${path}`
+
+    return [
+      ['link', { rel: 'canonical', href: url }],
+      ['meta', { property: 'og:url', content: url }],
+      ['meta', { property: 'og:title', content: pageData.title || siteData.title }],
+      ['meta', { property: 'og:description', content: pageData.description || siteData.description }],
+    ]
+  },
 
   markdown: {
     config(md) {
@@ -44,7 +63,10 @@ export default defineConfig({
           const [path, hash] = href.split('#')
           const target = normalize(join('docs', dirname(env.relativePath), path))
           if (path !== '' && !target.startsWith('docs/')) {
-            tokens[idx].attrSet('href', `${repo}/blob/${branch}/${relative('.', target)}${hash ? `#${hash}` : ''}`)
+            // Verzeichnisse liegen bei GitHub unter tree/, Dateien unter blob/.
+            const file = join(docsDir, '..', target)
+            const kind = existsSync(file) && statSync(file).isDirectory() ? 'tree' : 'blob'
+            tokens[idx].attrSet('href', `${repo}/${kind}/${branch}/${relative('.', target)}${hash ? `#${hash}` : ''}`)
           }
         }
 

@@ -5,7 +5,7 @@ Thanks for contributing to `justpilot/billomat-php-api`. This document describes
 ## Language
 
 - **Code comments and docblocks are German** (with real umlauts: ä/ö/ü/ß). Identifiers (classes, methods, properties) are English.
-- **Everything else is English:** commit messages, pull requests, issues, `CHANGELOG.md`, `UPGRADE-*.md`, README.
+- **Everything else is English:** commit messages, pull requests, issues, new `CHANGELOG.md` entries (the ones up to 3.4.1 are German), `UPGRADE-*.md`, README.
 
 ## Workflow
 
@@ -20,7 +20,7 @@ Thanks for contributing to `justpilot/billomat-php-api`. This document describes
 - **PHP 8.5+.** Use modern language features: `final readonly` classes for read models and options, constructor property promotion, named arguments, enums, `clone()` with properties for withers.
 - **`declare(strict_types=1);`** at the top of every PHP file.
 - **`final`** for API classes, **`final readonly`** for models in `src/Model/` and write options.
-- **PSR-4:** `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`.
+- **PSR-4:** `Justpilot\Billomat\` → `src/`, `Justpilot\Billomat\Tests\` → `tests/`, `Justpilot\Billomat\Rector\` → `rector/src/`.
 - **No global state.** Configuration goes through `BillomatConfig`, HTTP through `BillomatHttpClient` / `BillomatHttpClientInterface`.
 - **Runtime dependencies are PSR interfaces only** (plus `php-http/discovery`). Never add a concrete HTTP client or framework package to `require`.
 - **Amounts are `Money`**, never `float`. Fixed value sets are enums in `src/Model/Enum/` (with the `FromApi` trait).
@@ -58,7 +58,7 @@ Every Billomat resource follows the same pattern; look at `ClientsApi`, `ClientC
 composer test                                       # unit tests (fast, no network)
 composer test:integration                           # integration tests against the sandbox
 composer test:all                                   # both
-composer ci                                         # lint + PHPStan + Rector + generate:check + all tests
+composer ci                                         # lint + PHPStan + Rector + generate:check + docs:json:check + all tests
 vendor/bin/phpunit tests/Api/ClientsApiTest.php     # one file
 vendor/bin/phpunit --filter itListsClients          # one method
 ```
@@ -89,7 +89,7 @@ composer audit            # security audit of the dependencies
 
 - Breaking changes to public classes, methods or properties. They wait for the next major version; open an issue first to discuss them.
 - New dependencies in `composer.json`. Explain why in the PR.
-- Changes to `BillomatHttpClient::buildBillomatQuery()`. Its quirks (literal `+`, `key[]=v` arrays) work around Billomat behaviour; see [docs/advanced/http-layer.md](docs/advanced/http-layer.md).
+- Changes to `BillomatHttpClient::buildBillomatQuery()`. Its quirks (`key[]=v` arrays; `+` encoded as `%2B`, except in `order_by`, where it becomes a space) work around Billomat behaviour; see [docs/advanced/http-layer.md](docs/advanced/http-layer.md).
 
 ## Changelog
 

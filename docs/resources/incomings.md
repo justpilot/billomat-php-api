@@ -26,7 +26,7 @@ An incoming is a supplier invoice: a document someone else issued to your compan
 - **Payments**: via `IncomingPayment` entries. The sum of payments goes into `paidAmount`, the remainder into `openAmount`.
 - **History**: every state change (creation, payment, cancellation, upload, …) automatically creates an `IncomingComment` with the matching `actionkey`.
 
-Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRAFT`, depending on required fields). `$billomat->incomings->payments->create(...)` with `markIncomingAsPaid: true` switches it to `PAID` once the sum matches. `cancel()` sets it to `CANCELED`, `uncancel()` reverts that.
+Lifecycle in practice: `create()` creates a document with status `OPEN` (or `DRAFT`, depending on required fields). `$billomat->incomings->payments->create(...)` with `markIncomingAsPaid: true` switches it to `PAID` once the sum matches. The SDK has no `cancel()`/`uncancel()` for incoming invoices (see below); `CANCELED` is set in the Billomat UI.
 
 ## Endpoint overview
 
@@ -345,7 +345,7 @@ Constructor: `new IncomingItemCreateOptions(Money $total, …)`. The incoming in
 
 ## Write model: `IncomingCommentCreateOptions`
 
-Constructor: `new IncomingCommentCreateOptions(string $comment, ?IncomingCommentActionKey $actionkey = null)`. The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`, which adds `incoming_id` to the payload.
+Constructor: `new IncomingCommentCreateOptions(string $comment, ?IncomingCommentActionKey $actionKey = null)`. The incoming invoice ID isn't part of the options: pass it as the first argument of `create()`, which adds `incoming_id` to the payload.
 
 | Property | Billomat field | Type | Notes |
 |---|---|---|---|
@@ -527,7 +527,7 @@ Billomat's API documentation only shows XML. These are the JSON bodies the SDK s
 ## Pitfalls
 
 - **`base64File` isn't encoded for you.** The string must already be Base64-encoded; passing `file_get_contents()` directly is rejected. Always use `base64_encode(file_get_contents(...))`.
-- **Status is read-only.** You can't set `IncomingStatus` via `IncomingCreateOptions`/`IncomingUpdateOptions`; Billomat derives it from the due date, cancellation and the sum of payments. Status changes happen only via `cancel()`/`uncancel()` and `markIncomingAsPaid` on payments.
+- **Status is read-only.** You can't set `IncomingStatus` via `IncomingCreateOptions`/`IncomingUpdateOptions`; Billomat derives it from the due date, cancellation and the sum of payments. Through the SDK the status only changes via `markIncomingAsPaid` on payments.
 - **`markIncomingAsPaid` is always sent.** Unlike the other optional fields, `IncomingPaymentCreateOptions::toArray()` doesn't filter it out; `false` ends up as `mark_incoming_as_paid=0` in the payload. Leave it unset (`false`) for partial payments.
 - **`tag` node in `cloud()`.** For `GET /incoming-tags` without `incoming_id`, Billomat returns the node `tag` (with `count`), not `incoming-tag`. `$billomat->incomings->tags` handles both paths internally; cloud entries have a different shape than single tags and are hydrated into a separate read model.
 - **`incomingNumber` vs. `number`.** Billomat accepts the supplier's invoice number as `incoming_number` and as `number`, and returns it as `number`. The read model exposes it as `incomingNumber`.

@@ -21,6 +21,8 @@ use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemUpdateOptions;
 use Justpilot\Billomat\Api\ConfirmationTagCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationUpdateOptions;
+use Justpilot\Billomat\Api\ClientDeliveryAddressCreateOptions;
+use Justpilot\Billomat\Api\ClientDeliveryAddressUpdateOptions;
 use Justpilot\Billomat\Api\ContactCreateOptions;
 use Justpilot\Billomat\Api\ContactUpdateOptions;
 use Justpilot\Billomat\Api\CountryTaxCreateOptions;
@@ -136,6 +138,8 @@ use UnitEnum;
 #[CoversClass(ConfirmationItemUpdateOptions::class)]
 #[CoversClass(ConfirmationTagCreateOptions::class)]
 #[CoversClass(ConfirmationUpdateOptions::class)]
+#[CoversClass(ClientDeliveryAddressCreateOptions::class)]
+#[CoversClass(ClientDeliveryAddressUpdateOptions::class)]
 #[CoversClass(ContactCreateOptions::class)]
 #[CoversClass(ContactUpdateOptions::class)]
 #[CoversClass(CountryTaxCreateOptions::class)]

@@ -261,6 +261,15 @@ final readonly class InvoiceCreateOptions implements WriteOptions
          */
         public ?int $freeTextId = null,
         /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).
+         *
+         * Billomat-Feld: client_delivery_address_id
+         * Typ: INT
+         */
+        public ?int $clientDeliveryAddressId = null,
+        /**
          * Positionen, die beim Anlegen mitgesendet werden.
          *
          * @var list<InvoiceItemCreateOptions>
@@ -447,6 +456,12 @@ final readonly class InvoiceCreateOptions implements WriteOptions
         return clone($this, ['freeTextId' => $freeTextId]);
     }
 
+    /** Kopie mit geändertem `clientDeliveryAddressId`. */
+    public function withClientDeliveryAddressId(?int $clientDeliveryAddressId): self
+    {
+        return clone($this, ['clientDeliveryAddressId' => $clientDeliveryAddressId]);
+    }
+
     /** Kopie mit einer zusätzlichen Position. */
     public function withItem(InvoiceItemCreateOptions $item): self
     {
@@ -496,6 +511,7 @@ final readonly class InvoiceCreateOptions implements WriteOptions
             paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, PaymentType::class),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             freeTextId: ScalarCaster::toIntOrNull($data['free_text_id'] ?? null),
+            clientDeliveryAddressId: ScalarCaster::toIntOrNull($data['client_delivery_address_id'] ?? null),
         );
     }
 
@@ -509,6 +525,7 @@ final readonly class InvoiceCreateOptions implements WriteOptions
         $data = array_filter([
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
+            'client_delivery_address_id' => $this->clientDeliveryAddressId,
             'address' => $this->address,
             'number_pre' => $this->numberPre,
             'number' => $this->number,

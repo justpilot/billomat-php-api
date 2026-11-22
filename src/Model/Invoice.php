@@ -79,6 +79,7 @@ final readonly class Invoice
         'facturx_reference' => true,
         'total_reduction' => true,
         'dig_proceeded' => true,
+        'client_delivery_address_id' => true,
     ];
 
     /**
@@ -185,6 +186,12 @@ final readonly class Invoice
         /** Wurde die Rechnung digital weiterverarbeitet? */
         public ?bool $digProceeded = null,
         /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).
+         */
+        public ?int $clientDeliveryAddressId = null,
+        /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
          * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
@@ -247,6 +254,7 @@ final readonly class Invoice
             facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
             totalReduction: ScalarCaster::toMoneyOrNull($data['total_reduction'] ?? null),
             digProceeded: ScalarCaster::toBoolOrNull($data['dig_proceeded'] ?? null),
+            clientDeliveryAddressId: ScalarCaster::toIntOrNull($data['client_delivery_address_id'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -306,6 +314,7 @@ final readonly class Invoice
             'facturx_reference' => $this->facturxReference,
             'total_reduction' => $this->totalReduction?->toString(),
             'dig_proceeded' => $this->digProceeded,
+            'client_delivery_address_id' => $this->clientDeliveryAddressId,
         ];
 
         if ([] !== $this->taxes) {

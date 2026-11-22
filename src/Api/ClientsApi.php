@@ -40,6 +40,15 @@ final class ClientsApi extends AbstractApi
     }
 
     /**
+     * Lieferadressen der Kunden, siehe {@see ClientDeliveryAddressesApi}.
+     *
+     * @experimental wie {@see ClientDeliveryAddressesApi}: Billomat stellt die Endpunkte noch fertig (verbindlich ab 01.01.2027)
+     */
+    public private(set) ClientDeliveryAddressesApi $deliveryAddresses {
+        get => $this->deliveryAddresses ??= new ClientDeliveryAddressesApi($this->http);
+    }
+
+    /**
      * Schlagworte, siehe {@see TagsApi}.
      *
      * @var TagsApi<ClientTag, ClientTagCloudEntry, ClientTagCreateOptions>

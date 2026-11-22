@@ -5,7 +5,7 @@
         "abo-rechnungen": {
             "title": "Abo-Rechnungen",
             "source_url": "https://www.billomat.com/api/abo-rechnungen/",
-            "content_sha256": "0713b117d9edd19812fb547f08200f008905274a2886690362c36c6862310bdb",
+            "content_sha256": "31ec3a81c740483f4faf3e8094d99cd5ad2926a582bfd0b663ea136dabfe8ca0",
             "endpoints": [
                 {
                     "name": "Alle Abo-Rechnungen auflisten",
@@ -74,6 +74,13 @@
                             "name": "contact_id",
                             "type": "INT",
                             "description_de": "ID des Kontakts",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "client_delivery_address_id",
+                            "type": "INT",
+                            "description_de": "ID der Lieferadresse",
                             "default": null,
                             "required": false
                         },
@@ -2156,6 +2163,72 @@
                             "required": false
                         }
                     ]
+                }
+            ]
+        },
+        "e-rechnungen": {
+            "title": "E-Rechnungen",
+            "source_url": "https://www.billomat.com/api/e-rechnungen/",
+            "content_sha256": "956703c7e75f8a411e970c4c14e9f803a3169089a215df802d60e197f5b1d275",
+            "endpoints": [
+                {
+                    "name": "Rechnung validieren",
+                    "method": "GET",
+                    "path": "/api/finax-e-invoice/{id}/validate",
+                    "description_de": "Prüft, ob aus der Rechnung eine gültige E-Rechnung erzeugt werden kann. Die Rechnung wird dabei nur zur Prüfung an den E-Rechnungs-Dienst übergeben: Es wird kein Dokument erzeugt, gespeichert oder zurückgegeben."
+                },
+                {
+                    "name": "Abo-Rechnung validierien",
+                    "method": "GET",
+                    "path": "/api/finax-e-invoice/{id}/validate-recurring",
+                    "description_de": "Prüft, ob aus der Abo-Rechnung gültige E-Rechnungen erzeugt werden können. Die Abo-Rechnung wird dabei nur zur Prüfung an den E-Rechnungs-Dienst übergeben: Es wird kein Dokument erzeugt, gespeichert oder zurückgegeben."
+                },
+                {
+                    "name": "E-Rechnung (XML) einer Rechnung aufrufen",
+                    "method": "GET",
+                    "path": "/api/finax-e-invoice/{id}/xml",
+                    "description_de": "Gibt das CII-XML einer Rechnung zurück. Die Rechnung muss abgeschlossen sein, ihr Status darf also nicht DRAFT sein.",
+                    "fields": [
+                        {
+                            "name": "element_id",
+                            "type": "INT",
+                            "description_de": "ID der Rechnung",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "type",
+                            "type": "ALNUM („e-invoice“, „zugferd“)",
+                            "description_de": "Format des Dokuments",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "filename",
+                            "type": "ALNUM",
+                            "description_de": "Dateiname, unter dem das Dokument angeboten wird",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "url",
+                            "type": "ALNUM",
+                            "description_de": "Download-Link des Dokuments",
+                            "default": null,
+                            "required": false
+                        }
+                    ]
+                },
+                {
+                    "name": "ZUGFeRD-PDF einer Rechnung aufrufen",
+                    "method": "GET",
+                    "path": "/api/finax-e-invoice/{id}/zugferd",
+                    "description_de": "Gibt das ZUGFeRD-PDF einer Rechnung zurück, also das PDF der Rechnung mit eingebettetem CII-XML. Die Rechnung muss abgeschlossen sein, ihr Status darf also nicht DRAFT sein."
+                },
+                {
+                    "name": "Status-Codes",
+                    "method": null,
+                    "path": null
                 }
             ]
         },
@@ -5648,6 +5721,110 @@
                 }
             ]
         },
+        "lieferadressen": {
+            "title": "Lieferadressen",
+            "source_url": "https://www.billomat.com/api/lieferadressen/",
+            "content_sha256": "31ce1da57393129c8be12e9750824c11574d20ef42891dd604c50ffc9ec365d7",
+            "endpoints": [
+                {
+                    "name": "Alle Lieferadressen auflisten",
+                    "method": "GET",
+                    "path": "/api/client-delivery-addresses"
+                },
+                {
+                    "name": "Einzelne Lieferadresse abrufen",
+                    "method": "GET",
+                    "path": "/api/client-delivery-addresses/{id}"
+                },
+                {
+                    "name": "Lieferadresse erstellen",
+                    "method": "POST",
+                    "path": "/api/client-delivery-addresses",
+                    "fields": [
+                        {
+                            "name": "client_id",
+                            "type": "INT",
+                            "description_de": "ID des zur Lieferadresse gehörenden Kunden",
+                            "default": null,
+                            "required": true
+                        },
+                        {
+                            "name": "name",
+                            "type": "ALNUM",
+                            "description_de": "Firmenname",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "street",
+                            "type": "ALNUM",
+                            "description_de": "Straße",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "zip",
+                            "type": "ALNUM",
+                            "description_de": "PLZ",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "city",
+                            "type": "ALNUM",
+                            "description_de": "Ort",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "state",
+                            "type": "ALNUM",
+                            "description_de": "Bundesland, Bezirk, Region",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "country_code",
+                            "type": "Ländercode nach ISO 3166 Alpha-2",
+                            "description_de": "Land",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "first_name",
+                            "type": "ALNUM",
+                            "description_de": "Vorname",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "last_name",
+                            "type": "ALNUM",
+                            "description_de": "Nachname",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "salutation",
+                            "type": "ALNUM",
+                            "description_de": "Anrede",
+                            "default": null,
+                            "required": false
+                        }
+                    ]
+                },
+                {
+                    "name": "Lieferadresse bearbeiten",
+                    "method": "PUT",
+                    "path": "/api/client-delivery-addresses/{id}"
+                },
+                {
+                    "name": "Lieferadresse löschen",
+                    "method": "DELETE",
+                    "path": "/api/client-delivery-addresses/{id}"
+                }
+            ]
+        },
         "lieferanten": {
             "title": "Lieferanten",
             "source_url": "https://www.billomat.com/api/lieferanten/",
@@ -6750,7 +6927,7 @@
         "rechnungen": {
             "title": "Rechnungen",
             "source_url": "https://www.billomat.com/api/rechnungen/",
-            "content_sha256": "be4bb021896358985968c8c27e608a8bb015cbeecaa4fe7e8de74a3e877e38e0",
+            "content_sha256": "eb1beb77ad3731a6bc286462855a31a2a89c8a0cec6d574fdc809e37f628d094",
             "endpoints": [
                 {
                     "name": "Alle Rechnungen auflisten",
@@ -6837,6 +7014,13 @@
                             "name": "contact_id",
                             "type": "INT",
                             "description_de": "ID des Kontakts",
+                            "default": null,
+                            "required": false
+                        },
+                        {
+                            "name": "client_delivery_address_id",
+                            "type": "INT",
+                            "description_de": "ID der Lieferadresse",
                             "default": null,
                             "required": false
                         },
@@ -7173,7 +7357,7 @@
                 {
                     "name": "Rechnung an Inkassodienstleister übergeben",
                     "method": "PUT",
-                    "path": "/api/invoices/{invoiceId}&amp;amp;gt;/encash"
+                    "path": "/api/invoices/{invoiceId}&amp;amp;amp;gt;/encash"
                 }
             ]
         },

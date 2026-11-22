@@ -318,6 +318,7 @@ Constructor: `new InvoiceCreateOptions(int $clientId, …)`. `clientId` is requi
 |---|---|---|
 | `clientId` | `client_id` | `int` (required) |
 | `contactId` | `contact_id` | `?int` |
+| `clientDeliveryAddressId` | `client_delivery_address_id` | `?int` (see [delivery addresses](client-delivery-addresses.md)) |
 | `address` | `address` | `?string` (default: the client's address) |
 | `numberPre` | `number_pre` | `?string` |
 | `number` | `number` | `?int` |
@@ -387,7 +388,7 @@ For partial updates; it has the same fields as `InvoiceCreateOptions` except `it
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `clientId`, `contactId` | same | `int\|Clear\|null` |
+| `clientId`, `contactId`, `clientDeliveryAddressId` | same | `int\|Clear\|null` |
 | `number`, `numberPre`, `numberLength` | same | `int\|Clear\|null`, `string\|Clear\|null`, `int\|Clear\|null` |
 | `date`, `supplyDate`, `dueDate`, `discountDate` | same | `\DateTimeImmutable\|Clear\|null` |
 | `supplyDateType` | `supply_date_type` | `SupplyDateType\|Clear\|null` |
@@ -450,6 +451,7 @@ Payload for `mail()` (Pixelletter), shared by all document types (invoices, offe
 | `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
+| `clientDeliveryAddressId` | `?int` (see [delivery addresses](client-delivery-addresses.md)) |
 | `created` | `?\DateTimeImmutable` |
 | `invoiceNumber` | `?string` (empty for `DRAFT`) |
 | `number`, `numberPre`, `numberLength` | `?int`, `?string`, `?int` |

@@ -23,3 +23,14 @@ Everything public under `Justpilot\Billomat\` that is not marked `@internal`:
 - **Additions**, which may come with any minor release: new classes, methods, optional parameters at the end of a method, read model properties, enum cases and keys in `$extra`. If you `match` over an SDK enum, add a `default` arm, because Billomat extends its value sets from time to time.
 - **Message texts** of exceptions and log entries, and the order of log entries and events. Log levels only change in a minor release, with a CHANGELOG entry.
 - **Billomat's behaviour.** If Billomat stops sending a field, the property stays but becomes `null`; fields Billomat drops for good are removed in the next major version.
+- **`@experimental` code**, see below.
+
+## Experimental API
+
+Billomat sometimes publishes endpoints before they are final. The SDK supports them early, but marks the classes `@experimental` as long as Billomat calls them preliminary. Experimental classes may change in a minor release (renamed fields, changed types, removed methods) when Billomat changes the endpoint; each change gets a CHANGELOG entry. Once Billomat declares the endpoint final, a minor release drops the marker and the class falls under the promise above.
+
+Currently experimental, because Billomat's documentation says the endpoints only become binding on 2027-01-01:
+
+- [Client delivery addresses](../resources/client-delivery-addresses.md): `ClientsApi::$deliveryAddresses`, `ClientDeliveryAddressesApi`, `ClientDeliveryAddress`, `ClientDeliveryAddressCreateOptions`, `ClientDeliveryAddressUpdateOptions`.
+
+The `clientDeliveryAddressId` field on invoices and recurring invoices is a plain ID and covered as usual.

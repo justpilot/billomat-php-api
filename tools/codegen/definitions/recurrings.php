@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 
 $optionsOrder = [
-    'client_id', 'contact_id', 'address', 'number_pre', 'supply_date', 'supply_date_type', 'due_days', 'discount_rate',
+    'client_id', 'contact_id', 'client_delivery_address_id', 'address', 'number_pre', 'supply_date', 'supply_date_type', 'due_days', 'discount_rate',
     'discount_days', 'name', 'title', 'label', 'intro', 'note', 'reduction', 'currency_code', 'net_gross', 'quote',
     'payment_types', 'action', 'cycle_number', 'cycle', 'hour', 'start_date', 'end_date', 'iterations', 'email_sender',
     'email_subject', 'email_message', 'email_template_id', 'free_text_id', 'template_id', 'next_creation_date',
@@ -147,5 +147,10 @@ return [
         'letter_paper_weight' => ['doc' => 'Papiergewicht des Briefs in g/m².'],
         'offer_id' => ['doc' => 'ID des Quell-Angebots.'],
         'confirmation_id' => ['doc' => 'ID der Quell-Auftragsbestätigung.'],
+        // Am Ende statt hinter contact_id: Konstruktor-Positionen der bestehenden Felder bleiben stabil.
+        'client_delivery_address_id' => [
+            'doc' => 'ID der Lieferadresse des Kunden.',
+            'details' => ['Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).'],
+        ],
     ],
 ];

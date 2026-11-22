@@ -48,6 +48,8 @@ declare(strict_types=1);
  * entsteht nur das Read-Model; 'specEndpoint' nennt dann den Endpunkt für den Drift-Abgleich.
  * Ohne 'specResource' (Ressource fehlt in der Billomat-Doku) entfällt der Drift-Abgleich;
  * jedes Feld braucht dann 'type' und 'readOnly' oder 'writable'.
+ * 'experimental' => '<Begründung>' setzt @experimental an Model und Options (Endpunkte, die Billomat
+ * noch als vorläufig bezeichnet; siehe docs/concepts/backward-compatibility.md).
  * Eine Definitionsdatei darf statt einer Definition eine Liste von Definitionen zurückgeben.
  * 'boolAsInt' => true an 'model' oder an den Options gibt Bool-Felder in toArray() als 1/0 aus.
  * 'filterNulls' => true an 'model' lässt Null-Felder in toArray() des Read-Models weg.

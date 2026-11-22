@@ -51,6 +51,9 @@ $mapping = [
     'kunden/attribute' => ['api' => 'PropertyValuesApi', 'model' => 'ClientPropertyValue',
         'createOptions' => 'ClientPropertyValueCreateOptions', 'docFile' => 'properties.md',
         'note' => 'Attribut-Werte (/client-property-values); Definitionen siehe einstellungen/kunden-attribute.'],
+    'lieferadressen' => ['api' => 'ClientDeliveryAddressesApi', 'model' => 'ClientDeliveryAddress',
+        'createOptions' => 'ClientDeliveryAddressCreateOptions', 'updateOptions' => 'ClientDeliveryAddressUpdateOptions',
+        'docFile' => 'client-delivery-addresses.md'],
     'kunden/kontakte' => ['api' => 'ContactsApi', 'model' => 'Contact',
         'createOptions' => 'ContactCreateOptions', 'updateOptions' => 'ContactUpdateOptions',
         'docFile' => 'contacts.md'],
@@ -471,6 +474,7 @@ function filterParentIds(array $fieldNames, string $slug): array
         'zahlungen' => ['invoice_id', 'credit_note_id', 'incoming_id'],
         'empfaenger' => ['recurring_id'],
         'kontakte' => ['client_id'],
+        'lieferadressen' => ['client_id'],
         'attribute' => ['client_id', 'article_id', 'supplier_id', 'incoming_id'],
     ];
 

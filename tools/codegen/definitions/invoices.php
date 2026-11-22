@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 
 $optionsOrder = static fn (string ...$swap): array => [
-    'client_id', 'contact_id', 'address', 'number_pre', 'number', 'number_length', 'date', 'supply_date', 'supply_date_type',
+    'client_id', 'contact_id', 'client_delivery_address_id', 'address', 'number_pre', 'number', 'number_length', 'date', 'supply_date', 'supply_date_type',
     'due_days', 'due_date', 'discount_rate', 'discount_days', 'discount_date', 'title', 'label', 'intro', 'note', 'reduction',
     ...$swap,
     'quote', 'payment_types', 'invoice_id', 'offer_id', 'confirmation_id', 'recurring_id', 'free_text_id', 'template_id',
@@ -136,5 +136,10 @@ return [
         'total_reduction' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Summe der Rabatte.'],
         'dig_proceeded' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Wurde die Rechnung digital weiterverarbeitet?'],
         'free_text_id' => ['optionsOnly' => true, 'doc' => 'ID des Freitextes zur Belegung von title, label, intro und note.'],
+        // Am Ende statt hinter contact_id: Konstruktor-Positionen der bestehenden Felder bleiben stabil.
+        'client_delivery_address_id' => [
+            'doc' => 'ID der Lieferadresse des Kunden.',
+            'details' => ['Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).'],
+        ],
     ],
 ];

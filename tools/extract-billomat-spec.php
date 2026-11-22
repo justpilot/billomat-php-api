@@ -409,7 +409,8 @@ function parseEndpoints(array $nodes): array
                 $line = trim(textContent($node));
                 if (preg_match('/^(GET|POST|PUT|DELETE|PATCH)\s+(\S+)/', $line, $m)) {
                     $current['method'] = $m[1];
-                    $current['path'] = $m[2];
+                    // Billomat schreibt manche Pfade ohne führenden Slash ("api/client-delivery-addresses").
+                    $current['path'] = '/' . ltrim($m[2], '/');
                 }
             }
             // XML-Beispiele werden absichtlich nicht extrahiert

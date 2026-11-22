@@ -176,13 +176,13 @@ final class CustomFieldTest extends TestCase
     }
 
     /**
-     * Envelope-Schlüssel aus dem Pfad: /credit-notes/7 → credit-note, /taxes/7 → tax, /article-properties/7 → article-property.
+     * Envelope-Schlüssel aus dem Pfad: /credit-notes/7 → credit-note, /taxes/7 → tax, /article-properties/7 → article-property, /client-delivery-addresses/7 → client-delivery-address.
      */
     private static function envelopeKey(string $url): string
     {
         $slug = explode('/', (string) parse_url($url, PHP_URL_PATH))[2] ?? '';
 
-        return (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
+        return (string) preg_replace(['/ies$/', '/(x|ss)es$/', '/(?<!s)s$/'], ['y', '$1', ''], $slug);
     }
 
     /**

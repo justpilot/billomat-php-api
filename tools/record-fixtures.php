@@ -54,7 +54,7 @@ const PER_PAGE = 3;
  * `list: false` = Endpunkt liefert ein einzelnes Objekt (Settings).
  */
 const RESOURCES = [
-    'clients' => ['key' => 'client', 'get' => true, 'children' => ['contacts' => 'contact', 'client-tags' => 'tag']],
+    'clients' => ['key' => 'client', 'get' => true, 'children' => ['contacts' => 'contact', 'client-delivery-addresses' => 'client-delivery-address', 'client-tags' => 'tag']],
     'client-properties' => ['key' => 'client-property', 'get' => true],
     'client-property-values' => ['key' => 'client-property-value', 'get' => true],
     'suppliers' => ['key' => 'supplier', 'get' => true, 'children' => ['supplier-tags' => 'tag']],
@@ -129,7 +129,7 @@ const FIELD_KINDS = [
     'email' => 'email', 'bcc_addresses' => 'email', 'sender' => 'email', 'sender_email' => 'email',
     'reply_to' => 'email', 'email_bcc' => 'email', 'email_sender' => 'email', 'bcc' => 'email',
     'phone' => 'phone', 'fax' => 'phone', 'mobile' => 'phone',
-    'street' => 'street', 'zip' => 'zip', 'city' => 'city', 'state' => 'state', 'address' => 'address',
+    'street' => 'street', 'address_line_2' => 'address_line', 'address_line_3' => 'address_line', 'zip' => 'zip', 'city' => 'city', 'state' => 'state', 'address' => 'address',
     'www' => 'url', 'url' => 'url', 'website' => 'url', 'avatar' => 'url', 'public_url' => 'url',
     'bank_name' => 'bank_name', 'bank_iban' => 'iban', 'iban' => 'iban', 'bank_swift' => 'bic', 'bic' => 'bic', 'swift' => 'bic',
     'bank_account_number' => 'digits', 'bank_number' => 'digits', 'creditor_identifier' => 'creditor_id', 'sepa_mandate' => 'text',
@@ -477,6 +477,7 @@ final class Anonymizer
             'sender' => "Firma {$n} GmbH <absender{$n}@example.com>",
             'phone' => \sprintf('+49 30 %07d', $i),
             'street' => "Musterstraße {$n}",
+            'address_line' => "Adresszusatz {$n}",
             'zip' => \sprintf('%05d', 10000 + $i),
             'city' => "Musterstadt {$n}",
             'state' => "Bundesland {$n}",

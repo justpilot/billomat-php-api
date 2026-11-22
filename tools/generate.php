@@ -302,7 +302,7 @@ function renderModel(array $definition, array $fields, string $source): string
         $out .= "\nuse const DATE_ATOM;\n";
     }
 
-    $out .= "\n" . classDoc($definition['model']['doc'], $definition['docUrl'], $source, 'Dokumentation:');
+    $out .= "\n" . classDoc($definition['model']['doc'], $definition['docUrl'], $source, 'Dokumentation:', $definition['experimental'] ?? null);
     $out .= 'final readonly class ' . $definition['model']['class'] . "\n{\n";
     // Listen-Felder brauchen den Element-Typ als @param am Konstruktor.
     // Alle Billomat-Felder, die das Model abbildet; der Rest landet in `extra`.
@@ -613,7 +613,7 @@ function renderOptions(array $definition, array $options, array $fields, string 
     if ([] !== $imports) {
         $out .= "\n";
     }
-    $out .= classDoc($options['doc'], $definition['docUrl'], $source, 'Doku:');
+    $out .= classDoc($options['doc'], $definition['docUrl'], $source, 'Doku:', $definition['experimental'] ?? null);
     $out .= 'final readonly class ' . $options['class'] . " implements WriteOptions\n{\n";
 
     // Pflichtfelder beim Anlegen stehen vorne im Konstruktor, danach alle optionalen Felder.
@@ -854,7 +854,7 @@ function renderFilter(array $definition, array $filter, array $endpoints, string
         'Nicht gesetzte Felder (null bzw. leere Liste) fehlen im Query; Mehrfachwerte',
         'werden kommasepariert gesendet und von Billomat ODER-verknüpft. Weitere',
         'Query-Parameter (z. B. benutzerdefinierte Attribute) gehen über `extra`.',
-    ], $definition['docUrl'], $source, 'Doku:');
+    ], $definition['docUrl'], $source, 'Doku:', $definition['experimental'] ?? null);
     $out .= 'final readonly class ' . $filter['class'] . " implements ListFilter\n{\n";
 
     $out .= "    public function __construct(\n";
@@ -1128,8 +1128,9 @@ function optionsDocLines(array $field, bool $isCreate): array
 
 /**
  * @param list<string> $doc
+ * @param string|null  $experimental Begründung für `@experimental` (Definition-Schlüssel 'experimental'), null = stabil
  */
-function classDoc(array $doc, string $docUrl, string $source, string $urlLabel): string
+function classDoc(array $doc, string $docUrl, string $source, string $urlLabel, ?string $experimental = null): string
 {
     return docBlock([
         ...$doc,
@@ -1139,6 +1140,7 @@ function classDoc(array $doc, string $docUrl, string $source, string $urlLabel):
         '',
         'Generiert aus ' . $source . ' – nicht von Hand bearbeiten,',
         'sondern die Definition anpassen und `composer generate` ausführen.',
+        ...(null === $experimental ? [] : ['', '@experimental ' . $experimental]),
     ], '');
 }
 

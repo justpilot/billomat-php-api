@@ -30,6 +30,7 @@ use Justpilot\Billomat\Api\ClientCreateOptions;
 use Justpilot\Billomat\Api\ClientTagCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationCreateOptions;
 use Justpilot\Billomat\Api\ConfirmationItemCreateOptions;
+use Justpilot\Billomat\Api\ClientDeliveryAddressCreateOptions;
 use Justpilot\Billomat\Api\ContactCreateOptions;
 use Justpilot\Billomat\Api\CountryTaxCreateOptions;
 use Justpilot\Billomat\Api\CreditNoteCreateOptions;
@@ -127,6 +128,14 @@ function requests(): array
             firstName: 'Erika',
             lastName: 'Mustermann',
             email: 'erika@example.com',
+        )),
+        'client-delivery-addresses.create' => static fn (BillomatClient $b): object => $b->clients->deliveryAddresses->create(1001, new ClientDeliveryAddressCreateOptions(
+            label: 'Warehouse Berlin',
+            street: 'Lagerweg 5',
+            zip: '10115',
+            city: 'Berlin',
+            countryCode: 'DE',
+            isDefault: true,
         )),
         'suppliers.create' => static fn (BillomatClient $b): object => $b->suppliers->create(new SupplierCreateOptions(
             name: 'Office Supplies AG',
@@ -277,6 +286,7 @@ function requests(): array
 const PAGES = [
     'clients' => ['clients.create', 'clients/get', 'clients/list'],
     'contacts' => ['contacts.create', 'contacts/get', 'contacts/list'],
+    'client-delivery-addresses' => ['client-delivery-addresses.create', 'client-delivery-addresses/get', 'client-delivery-addresses/list'],
     'suppliers' => ['suppliers.create', 'suppliers/get', 'suppliers/list'],
     'articles' => ['articles.create', 'articles/get', 'articles/list'],
     'client-tags' => ['client-tags.create', 'client-tags/list'],
@@ -328,7 +338,7 @@ function capture(Closure $call): array
 
         // Minimale Antwort mit allen Pflichtfeldern, damit die Hydration des Rückgabewerts klappt.
         $slug = explode('/', $path)[1] ?? '';
-        $key = 'settings' === $slug ? 'settings' : (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
+        $key = 'settings' === $slug ? 'settings' : (string) preg_replace(['/ies$/', '/(x|ss)es$/', '/(?<!s)s$/'], ['y', '$1', ''], $slug);
 
         return new MockResponse((string) json_encode([$key => [...RequiredFields::ANY, 'id' => '1', 'mime_type' => 'x', 'created' => '2026-11-02T00:00:00+01:00']]));
     });

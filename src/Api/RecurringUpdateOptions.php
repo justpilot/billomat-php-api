@@ -318,6 +318,15 @@ final readonly class RecurringUpdateOptions implements WriteOptions
          * Typ: INT
          */
         public int|Clear|null $confirmationId = null,
+        /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).
+         *
+         * Billomat-Feld: client_delivery_address_id
+         * Typ: INT
+         */
+        public int|Clear|null $clientDeliveryAddressId = null,
     ) {
     }
 
@@ -565,6 +574,12 @@ final readonly class RecurringUpdateOptions implements WriteOptions
         return clone($this, ['confirmationId' => $confirmationId]);
     }
 
+    /** Kopie mit geändertem `clientDeliveryAddressId`. */
+    public function withClientDeliveryAddressId(int|Clear|null $clientDeliveryAddressId): self
+    {
+        return clone($this, ['clientDeliveryAddressId' => $clientDeliveryAddressId]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -579,6 +594,7 @@ final readonly class RecurringUpdateOptions implements WriteOptions
             array_filter([
                 'client_id' => $this->clientId,
                 'contact_id' => $this->contactId,
+                'client_delivery_address_id' => $this->clientDeliveryAddressId,
                 'address' => $this->address,
                 'number_pre' => $this->numberPre,
                 'supply_date' => $this->supplyDate instanceof DateTimeImmutable ? $this->supplyDate->format('Y-m-d') : $this->supplyDate,

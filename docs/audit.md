@@ -26,6 +26,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `benutzer` | Benutzer | ✓ | ✓ | — | — | ✓ | Read-only; Billomat exponiert kein POST/PUT/DELETE für /users — Benutzerverwaltung ist UI-only. |
 | `benutzerdefinierte-attribute-filtern` | Benutzerdefinierte Attribute filtern | — | — | — | — | — | Konzept-Doku, kein Api erwartet. |
 | `briefe` | Briefe | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| `e-rechnungen` | E-Rechnungen | ✗ | ✗ | ✗ | ✗ | ✗ | Kein Mapping definiert – Audit-Skript erweitern. |
 | `eingangsrechnungen` | Eingangsrechnungen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `eingangsrechnungen/attribute` | Attribute | ✓ | — | — | — | ✓ |  |
 | `eingangsrechnungen/inbox` | Inbox | ✓ | ✓ | ✓ | — | ✓ |  |
@@ -67,6 +68,7 @@ Legende: ✓ vorhanden · ✗ fehlt · — nicht erwartet
 | `kunden/kontakte` | Kontakte | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `kunden/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |
 | `laender` | Länder | ✓ | ✓ | — | — | ✓ |  |
+| `lieferadressen` | Lieferadressen | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `lieferanten` | Lieferanten | ✓ | ✓ | ✓ | ✓ | ✓ |  |
 | `lieferanten/attribute` | Attribute | ✓ | — | — | — | ✓ |  |
 | `lieferanten/schlagworte` | Schlagworte | ✓ | ✓ | ✓ | — | ✓ |  |

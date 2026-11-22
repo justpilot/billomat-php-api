@@ -339,6 +339,15 @@ final readonly class RecurringCreateOptions implements WriteOptions
          */
         public ?int $confirmationId = null,
         /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).
+         *
+         * Billomat-Feld: client_delivery_address_id
+         * Typ: INT
+         */
+        public ?int $clientDeliveryAddressId = null,
+        /**
          * Positionen, die beim Anlegen mitgesendet werden.
          *
          * @var list<RecurringItemCreateOptions>
@@ -591,6 +600,12 @@ final readonly class RecurringCreateOptions implements WriteOptions
         return clone($this, ['confirmationId' => $confirmationId]);
     }
 
+    /** Kopie mit geändertem `clientDeliveryAddressId`. */
+    public function withClientDeliveryAddressId(?int $clientDeliveryAddressId): self
+    {
+        return clone($this, ['clientDeliveryAddressId' => $clientDeliveryAddressId]);
+    }
+
     /** Kopie mit einer zusätzlichen Position. */
     public function withItem(RecurringItemCreateOptions $item): self
     {
@@ -607,6 +622,7 @@ final readonly class RecurringCreateOptions implements WriteOptions
         $data = array_filter([
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
+            'client_delivery_address_id' => $this->clientDeliveryAddressId,
             'address' => $this->address,
             'number_pre' => $this->numberPre,
             'supply_date' => $this->supplyDate?->format('Y-m-d'),

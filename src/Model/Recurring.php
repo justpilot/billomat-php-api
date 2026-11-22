@@ -87,6 +87,7 @@ final readonly class Recurring
         'letter_paper_weight' => true,
         'offer_id' => true,
         'confirmation_id' => true,
+        'client_delivery_address_id' => true,
     ];
 
     /**
@@ -221,6 +222,12 @@ final readonly class Recurring
         /** ID der Quell-Auftragsbestätigung. */
         public ?int $confirmationId = null,
         /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).
+         */
+        public ?int $clientDeliveryAddressId = null,
+        /**
          * Felder, die Billomat liefert, das SDK aber (noch) nicht abbildet – roh, wie in der Response.
          *
          * Neue Billomat-Felder gehen so nicht verloren; toArray() gibt sie mit aus.
@@ -293,6 +300,7 @@ final readonly class Recurring
             letterPaperWeight: ScalarCaster::toIntOrNull($data['letter_paper_weight'] ?? null),
             offerId: ScalarCaster::toIntOrNull($data['offer_id'] ?? null),
             confirmationId: ScalarCaster::toIntOrNull($data['confirmation_id'] ?? null),
+            clientDeliveryAddressId: ScalarCaster::toIntOrNull($data['client_delivery_address_id'] ?? null),
             extra: array_diff_key($data, self::FIELDS),
         );
     }
@@ -362,6 +370,7 @@ final readonly class Recurring
             'letter_paper_weight' => $this->letterPaperWeight,
             'offer_id' => $this->offerId,
             'confirmation_id' => $this->confirmationId,
+            'client_delivery_address_id' => $this->clientDeliveryAddressId,
         ];
 
         if ([] !== $this->taxes) {

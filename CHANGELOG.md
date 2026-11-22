@@ -6,6 +6,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Added
+- Client delivery addresses (`/client-delivery-addresses`, new in Billomat's API docs): `$billomat->clients->deliveryAddresses` with `list()`/`listPage()`/`iterateAll()`, `get()`/`getOrFail()`, `create()`, `update()` and `delete()`, the read model `ClientDeliveryAddress` and `ClientDeliveryAddressCreateOptions`/`ClientDeliveryAddressUpdateOptions`. Marked `@experimental` until Billomat makes the endpoints binding (2027-01-01), see [Backward compatibility](docs/concepts/backward-compatibility.md#experimental-api) (#102).
+- `clientDeliveryAddressId` on `Invoice`, `Recurring` and their create/update options (`client_delivery_address_id`) (#102).
+
 ### Changed
 - `main` is the 4.x line now (`dev-main` is aliased to `4.x-dev`); security fixes for 3.x go to the `3.x` branch.
 

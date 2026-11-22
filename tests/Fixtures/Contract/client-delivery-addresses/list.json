@@ -1,0 +1,26 @@
+{
+    "client-delivery-addresses": {
+        "client-delivery-address": {
+            "id": "2",
+            "created": "2026-11-22T20:35:22+01:00",
+            "updated": "2026-11-22T20:35:22+01:00",
+            "client_id": "10651661",
+            "label": "Text 2",
+            "name": "Name 2",
+            "salutation": "Frau",
+            "first_name": "Vorname4",
+            "last_name": "Nachname4",
+            "street": "Musterstraße 5",
+            "address_line_2": "Adresszusatz 1",
+            "address_line_3": "Adresszusatz 2",
+            "zip": "10003",
+            "city": "Musterstadt 4",
+            "state": "Bundesland 1",
+            "country_code": "DE",
+            "is_default": "0"
+        },
+        "@page": "1",
+        "@per_page": "3",
+        "@total": "1"
+    }
+}

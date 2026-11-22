@@ -1,0 +1,11 @@
+{
+    "client-delivery-address": {
+        "label": "Warehouse Berlin",
+        "street": "Lagerweg 5",
+        "zip": "10115",
+        "city": "Berlin",
+        "country_code": "DE",
+        "is_default": 1,
+        "client_id": 1001
+    }
+}

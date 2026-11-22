@@ -240,6 +240,15 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
          * Typ: INT
          */
         public int|Clear|null $freeTextId = null,
+        /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Siehe ClientDeliveryAddressesApi ($billomat->clients->deliveryAddresses).
+         *
+         * Billomat-Feld: client_delivery_address_id
+         * Typ: INT
+         */
+        public int|Clear|null $clientDeliveryAddressId = null,
     ) {
     }
 
@@ -421,6 +430,12 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
         return clone($this, ['freeTextId' => $freeTextId]);
     }
 
+    /** Kopie mit geändertem `clientDeliveryAddressId`. */
+    public function withClientDeliveryAddressId(int|Clear|null $clientDeliveryAddressId): self
+    {
+        return clone($this, ['clientDeliveryAddressId' => $clientDeliveryAddressId]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -435,6 +450,7 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
             array_filter([
                 'client_id' => $this->clientId,
                 'contact_id' => $this->contactId,
+                'client_delivery_address_id' => $this->clientDeliveryAddressId,
                 'address' => $this->address,
                 'number_pre' => $this->numberPre,
                 'number' => $this->number,

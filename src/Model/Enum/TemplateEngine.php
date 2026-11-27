@@ -9,4 +9,7 @@ enum TemplateEngine: string
     use FromApi;
 
     case DEFAULT = 'DEFAULT';
+
+    /** Eigene Vorlage; von Billomat geliefert, aber nicht dokumentiert. */
+    case OWN = 'OWN';
 }

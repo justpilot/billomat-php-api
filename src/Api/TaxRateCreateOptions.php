@@ -42,6 +42,30 @@ final readonly class TaxRateCreateOptions implements WriteOptions
          * Default: nein
          */
         public bool $isDefault = false,
+        /**
+         * Umsatzsteuer-Kategorie für E-Rechnungen (Codeliste UNCL5305, z. B. "S", "Z", "E", "AE").
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         *
+         * Billomat-Feld: vat_category_code
+         */
+        public ?string $vatCategoryCode = null,
+        /**
+         * Code des Befreiungsgrunds für E-Rechnungen (Codeliste VATEX, z. B. "VATEX-EU-132").
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         *
+         * Billomat-Feld: vat_exemption_reason_code
+         */
+        public ?string $vatExemptionReasonCode = null,
+        /**
+         * Befreiungsgrund als Text für E-Rechnungen.
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         *
+         * Billomat-Feld: vat_exemption_reason_text
+         */
+        public ?string $vatExemptionReasonText = null,
     ) {
     }
 
@@ -63,6 +87,24 @@ final readonly class TaxRateCreateOptions implements WriteOptions
         return clone($this, ['isDefault' => $isDefault]);
     }
 
+    /** Kopie mit geändertem `vatCategoryCode`. */
+    public function withVatCategoryCode(?string $vatCategoryCode): self
+    {
+        return clone($this, ['vatCategoryCode' => $vatCategoryCode]);
+    }
+
+    /** Kopie mit geändertem `vatExemptionReasonCode`. */
+    public function withVatExemptionReasonCode(?string $vatExemptionReasonCode): self
+    {
+        return clone($this, ['vatExemptionReasonCode' => $vatExemptionReasonCode]);
+    }
+
+    /** Kopie mit geändertem `vatExemptionReasonText`. */
+    public function withVatExemptionReasonText(?string $vatExemptionReasonText): self
+    {
+        return clone($this, ['vatExemptionReasonText' => $vatExemptionReasonText]);
+    }
+
     /**
      * Serialisiert die Options in ein Billomat-Payload-Array.
      *
@@ -70,10 +112,13 @@ final readonly class TaxRateCreateOptions implements WriteOptions
      */
     public function toArray(): array
     {
-        return [
+        return array_filter([
             'name' => $this->name,
             'rate' => $this->rate,
             'is_default' => ($this->isDefault ? 1 : 0),
-        ];
+            'vat_category_code' => $this->vatCategoryCode,
+            'vat_exemption_reason_code' => $this->vatExemptionReasonCode,
+            'vat_exemption_reason_text' => $this->vatExemptionReasonText,
+        ], static fn (mixed $v): bool => null !== $v);
     }
 }

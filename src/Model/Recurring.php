@@ -34,10 +34,15 @@ final readonly class Recurring
         'id' => true,
         'client_id' => true,
         'contact_id' => true,
+        'client_delivery_address_id' => true,
         'created' => true,
         'address' => true,
         'supply_date' => true,
         'supply_date_type' => true,
+        'supply_date_start_fixed' => true,
+        'supply_date_end_fixed' => true,
+        'supply_date_start_formula' => true,
+        'supply_date_end_formula' => true,
         'due_days' => true,
         'discount_rate' => true,
         'discount_days' => true,
@@ -50,6 +55,13 @@ final readonly class Recurring
         'net_gross' => true,
         'quote' => true,
         'payment_types' => true,
+        'bank_iban' => true,
+        'bank_swift' => true,
+        'bank_account_owner' => true,
+        'bank_name' => true,
+        'facturx_reference' => true,
+        'project_reference' => true,
+        'contract_reference' => true,
         'action' => true,
         'cycle_number' => true,
         'cycle' => true,
@@ -102,6 +114,8 @@ final readonly class Recurring
         public int $clientId,
         /** ID des Kontakts. */
         public ?int $contactId = null,
+        /** ID der Lieferadresse des Kunden. */
+        public ?int $clientDeliveryAddressId = null,
         /** Erstellungszeitpunkt der Abo-Rechnung. */
         public ?DateTimeImmutable $created = null,
         /**
@@ -114,6 +128,30 @@ final readonly class Recurring
         public ?DateTimeImmutable $supplyDate = null,
         /** Typ des Liefer-/Leistungsdatums. */
         public ?SupplyDateType $supplyDateType = null,
+        /**
+         * Fester Beginn des Liefer-/Leistungszeitraums.
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         */
+        public ?DateTimeImmutable $supplyDateStartFixed = null,
+        /**
+         * Festes Ende des Liefer-/Leistungszeitraums.
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         */
+        public ?DateTimeImmutable $supplyDateEndFixed = null,
+        /**
+         * Formel für den Beginn des Liefer-/Leistungszeitraums.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert.
+         */
+        public ?string $supplyDateStartFormula = null,
+        /**
+         * Formel für das Ende des Liefer-/Leistungszeitraums.
+         *
+         * Von Billomat geliefert, aber nicht dokumentiert.
+         */
+        public ?string $supplyDateEndFormula = null,
         /** Tage bis zur Fälligkeit der erzeugten Rechnungen. */
         public ?int $dueDays = null,
         /** Skonto in Prozent. */
@@ -142,6 +180,24 @@ final readonly class Recurring
          * Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".
          */
         public array $paymentTypes = [],
+        /**
+         * IBAN einer vom Account abweichenden Bankverbindung für die erzeugten Rechnungen.
+         *
+         * Von Billomat geliefert und angenommen, aber nur bei Rechnungen dokumentiert.
+         */
+        public ?string $bankIban = null,
+        /** BIC der abweichenden Bankverbindung. */
+        public ?string $bankSwift = null,
+        /** Kontoinhaber der abweichenden Bankverbindung (max. 250 Zeichen). */
+        public ?string $bankAccountOwner = null,
+        /** Name der Bank der abweichenden Bankverbindung (max. 100 Zeichen). */
+        public ?string $bankName = null,
+        /** Bestellreferenz bzw. Auftragsnummer des Käufers für E-Rechnungen (max. 32 Zeichen). */
+        public ?string $facturxReference = null,
+        /** Projektreferenz für E-Rechnungen (max. 255 Zeichen). */
+        public ?string $projectReference = null,
+        /** Vertragsreferenz für E-Rechnungen (max. 255 Zeichen). */
+        public ?string $contractReference = null,
         /** Aktion, die bei jedem Lauf ausgeführt wird. */
         public ?RecurringAction $action = null,
         /** Anzahl der Intervall-Einheiten zwischen zwei Läufen. */
@@ -240,10 +296,15 @@ final readonly class Recurring
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
+            clientDeliveryAddressId: ScalarCaster::toIntOrNull($data['client_delivery_address_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
             supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
             supplyDateType: SupplyDateType::tryFrom(ScalarCaster::toStringOrNull($data['supply_date_type'] ?? null) ?? ''),
+            supplyDateStartFixed: ScalarCaster::toDateTimeOrNull($data['supply_date_start_fixed'] ?? null),
+            supplyDateEndFixed: ScalarCaster::toDateTimeOrNull($data['supply_date_end_fixed'] ?? null),
+            supplyDateStartFormula: ScalarCaster::toStringOrNull($data['supply_date_start_formula'] ?? null),
+            supplyDateEndFormula: ScalarCaster::toStringOrNull($data['supply_date_end_formula'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             discountRate: ScalarCaster::toFloatOrNull($data['discount_rate'] ?? null),
             discountDays: ScalarCaster::toIntOrNull($data['discount_days'] ?? null),
@@ -256,6 +317,13 @@ final readonly class Recurring
             netGross: NetGross::tryFrom(ScalarCaster::toStringOrNull($data['net_gross'] ?? null) ?? ''),
             quote: ScalarCaster::toFloatOrNull($data['quote'] ?? null),
             paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, PaymentType::class),
+            bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
+            bankSwift: ScalarCaster::toStringOrNull($data['bank_swift'] ?? null),
+            bankAccountOwner: ScalarCaster::toStringOrNull($data['bank_account_owner'] ?? null),
+            bankName: ScalarCaster::toStringOrNull($data['bank_name'] ?? null),
+            facturxReference: ScalarCaster::toStringOrNull($data['facturx_reference'] ?? null),
+            projectReference: ScalarCaster::toStringOrNull($data['project_reference'] ?? null),
+            contractReference: ScalarCaster::toStringOrNull($data['contract_reference'] ?? null),
             action: RecurringAction::tryFrom(ScalarCaster::toStringOrNull($data['action'] ?? null) ?? ''),
             cycleNumber: ScalarCaster::toIntOrNull($data['cycle_number'] ?? null),
             cycle: RecurringCycle::tryFrom(ScalarCaster::toStringOrNull($data['cycle'] ?? null) ?? ''),
@@ -311,10 +379,15 @@ final readonly class Recurring
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
+            'client_delivery_address_id' => $this->clientDeliveryAddressId,
             'created' => $this->created?->format(DATE_ATOM),
             'address' => $this->address,
             'supply_date' => $this->supplyDate?->format('Y-m-d'),
             'supply_date_type' => $this->supplyDateType?->value,
+            'supply_date_start_fixed' => $this->supplyDateStartFixed?->format('Y-m-d'),
+            'supply_date_end_fixed' => $this->supplyDateEndFixed?->format('Y-m-d'),
+            'supply_date_start_formula' => $this->supplyDateStartFormula,
+            'supply_date_end_formula' => $this->supplyDateEndFormula,
             'due_days' => $this->dueDays,
             'discount_rate' => $this->discountRate,
             'discount_days' => $this->discountDays,
@@ -327,6 +400,13 @@ final readonly class Recurring
             'net_gross' => $this->netGross?->value,
             'quote' => $this->quote,
             'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes)),
+            'bank_iban' => $this->bankIban,
+            'bank_swift' => $this->bankSwift,
+            'bank_account_owner' => $this->bankAccountOwner,
+            'bank_name' => $this->bankName,
+            'facturx_reference' => $this->facturxReference,
+            'project_reference' => $this->projectReference,
+            'contract_reference' => $this->contractReference,
             'action' => $this->action?->value,
             'cycle_number' => $this->cycleNumber,
             'cycle' => $this->cycle?->value,

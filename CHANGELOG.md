@@ -6,6 +6,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Added
+- **Invoices:** the fields Billomat added to its API documentation (November 2026), on `Invoice`, `InvoiceCreateOptions` and `InvoiceUpdateOptions`: `clientDeliveryAddressId`, the service period `supplyDateStart`/`supplyDateEnd`, a bank account per invoice (`bankIban`, `bankSwift`, `bankAccountOwner`, `bankName`) and the e-invoice references `projectReference` and `contractReference`. `facturxReference` can be written now; it was read-only before.
+- **Recurring invoices:** `clientDeliveryAddressId` (documented), plus the bank account, e-invoice references and fixed service period (`supplyDateStartFixed`/`supplyDateEndFixed`) that Billomat returns and accepts without documenting them. The read model also has `supplyDateStartFormula`/`supplyDateEndFormula`. Measured in the sandbox.
+- **Tax rates and units:** the e-invoice codes Billomat returns and accepts without documenting them: `TaxRate::$vatCategoryCode` (UNCL5305), `$vatExemptionReasonCode` (VATEX), `$vatExemptionReasonText` and `Unit::$uneceCode` (UN/ECE Recommendation 20), each also on the create and update options.
+- `TemplateEngine::OWN`, which the sandbox returns in the settings.
+
+### Deprecated
+- `supplyDate` and `supplyDateType` on `Invoice`, `InvoiceCreateOptions` and `InvoiceUpdateOptions`: Billomat's documentation says they are no longer processed. Use `supplyDateStart`/`supplyDateEnd`.
+
 ### Changed
 - `main` is the 4.x line now (`dev-main` is aliased to `4.x-dev`); security fixes for 3.x go to the `3.x` branch.
 

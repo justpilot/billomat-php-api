@@ -45,6 +45,12 @@ return [
     'fields' => [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Einheit.'],
         'name' => ['model' => ['required' => true], 'doc' => 'Bezeichnung der Einheit.', 'create' => ['constructor' => true]],
+        'unece_code' => [
+            'type' => 'string',
+            'writable' => true,
+            'doc' => 'Einheitencode nach UN/ECE Recommendation 20 für E-Rechnungen, z. B. "C62" (Stück) oder "HUR" (Stunde).',
+            'details' => ['Von Billomat geliefert und angenommen, aber nicht dokumentiert.'],
+        ],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Einheit.'],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],

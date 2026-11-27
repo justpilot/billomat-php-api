@@ -40,6 +40,13 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
          */
         public int|Clear|null $contactId = null,
         /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Billomat-Feld: client_delivery_address_id
+         * Typ: INT
+         */
+        public int|Clear|null $clientDeliveryAddressId = null,
+        /**
          * Laufende Nummer (ohne Präfix).
          *
          * Billomat-Feld: number
@@ -75,7 +82,9 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
          * Format: YYYY-MM-DD
          *
          * Billomat-Feld: supply_date
-         * Typ: MIXED (DATE/ALNUM)
+         * Typ: DATE
+         *
+         * @deprecated wird von Billomat nicht mehr verarbeitet; stattdessen supplyDateStart/supplyDateEnd verwenden
          */
         public DateTimeImmutable|Clear|null $supplyDate = null,
         /**
@@ -83,8 +92,28 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
          *
          * Billomat-Feld: supply_date_type
          * Typ: ALNUM („SUPPLY_DATE“, „DELIVERY_DATE“, „SUPPLY_TEXT“, „DELIVERY_TEXT“)
+         *
+         * @deprecated wird von Billomat nicht mehr verarbeitet; stattdessen supplyDateStart/supplyDateEnd verwenden
          */
         public SupplyDateType|Clear|null $supplyDateType = null,
+        /**
+         * Beginn des Liefer-/Leistungszeitraums.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: supply_date_start
+         * Typ: DATE
+         */
+        public DateTimeImmutable|Clear|null $supplyDateStart = null,
+        /**
+         * Ende des Liefer-/Leistungszeitraums.
+         *
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: supply_date_end
+         * Typ: DATE
+         */
+        public DateTimeImmutable|Clear|null $supplyDateEnd = null,
         /**
          * Fälligkeitsdatum.
          *
@@ -227,12 +256,67 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
          */
         public array|Clear $paymentTypes = [],
         /**
+         * IBAN einer vom Account abweichenden Bankverbindung für diese Rechnung.
+         *
+         * Erscheint auf dem PDF und in der E-Rechnung statt der Bankverbindung aus den Einstellungen.
+         * Billomat prüft die Prüfsumme; Pflicht, sobald eines der anderen bank_*-Felder gesetzt ist.
+         * Korrekturrechnungen übernehmen die Bankverbindung der korrigierten Rechnung.
+         *
+         * Billomat-Feld: bank_iban
+         * Typ: ALNUM (IBAN)
+         */
+        public string|Clear|null $bankIban = null,
+        /**
+         * BIC der abweichenden Bankverbindung.
+         *
+         * Billomat-Feld: bank_swift
+         * Typ: ALNUM (BIC)
+         */
+        public string|Clear|null $bankSwift = null,
+        /**
+         * Kontoinhaber der abweichenden Bankverbindung (max. 250 Zeichen).
+         *
+         * Billomat-Feld: bank_account_owner
+         * Typ: ALNUM (max. 250)
+         */
+        public string|Clear|null $bankAccountOwner = null,
+        /**
+         * Name der Bank der abweichenden Bankverbindung (max. 100 Zeichen).
+         *
+         * Billomat-Feld: bank_name
+         * Typ: ALNUM (max. 100)
+         */
+        public string|Clear|null $bankName = null,
+        /**
+         * Projektreferenz für E-Rechnungen (max. 255 Zeichen).
+         *
+         * Billomat-Feld: project_reference
+         * Typ: ALNUM (max. 255)
+         */
+        public string|Clear|null $projectReference = null,
+        /**
+         * Vertragsreferenz für E-Rechnungen (max. 255 Zeichen).
+         *
+         * Billomat-Feld: contract_reference
+         * Typ: ALNUM (max. 255)
+         */
+        public string|Clear|null $contractReference = null,
+        /**
          * ID der Vorlage, mit der die Rechnung abgeschlossen wird.
          *
          * Billomat-Feld: template_id
          * Typ: INT
          */
         public int|Clear|null $templateId = null,
+        /**
+         * Bestellreferenz bzw. Auftragsnummer des Käufers für E-Rechnungen (max. 32 Zeichen).
+         *
+         * Nur verfügbar, wenn facturx_fields_enabled beim eigenen Unternehmen (`$billomat->clients->getMyself()`) aktiv ist.
+         *
+         * Billomat-Feld: facturx_reference
+         * Typ: ALNUM (max. 32)
+         */
+        public string|Clear|null $facturxReference = null,
         /**
          * ID des Freitextes zur Belegung von title, label, intro und note.
          *
@@ -253,6 +337,12 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
     public function withContactId(int|Clear|null $contactId): self
     {
         return clone($this, ['contactId' => $contactId]);
+    }
+
+    /** Kopie mit geändertem `clientDeliveryAddressId`. */
+    public function withClientDeliveryAddressId(int|Clear|null $clientDeliveryAddressId): self
+    {
+        return clone($this, ['clientDeliveryAddressId' => $clientDeliveryAddressId]);
     }
 
     /** Kopie mit geändertem `number`. */
@@ -289,6 +379,18 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
     public function withSupplyDateType(SupplyDateType|Clear|null $supplyDateType): self
     {
         return clone($this, ['supplyDateType' => $supplyDateType]);
+    }
+
+    /** Kopie mit geändertem `supplyDateStart`. */
+    public function withSupplyDateStart(DateTimeImmutable|Clear|null $supplyDateStart): self
+    {
+        return clone($this, ['supplyDateStart' => $supplyDateStart]);
+    }
+
+    /** Kopie mit geändertem `supplyDateEnd`. */
+    public function withSupplyDateEnd(DateTimeImmutable|Clear|null $supplyDateEnd): self
+    {
+        return clone($this, ['supplyDateEnd' => $supplyDateEnd]);
     }
 
     /** Kopie mit geändertem `dueDate`. */
@@ -409,10 +511,52 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
         return clone($this, ['paymentTypes' => $paymentTypes]);
     }
 
+    /** Kopie mit geändertem `bankIban`. */
+    public function withBankIban(string|Clear|null $bankIban): self
+    {
+        return clone($this, ['bankIban' => $bankIban]);
+    }
+
+    /** Kopie mit geändertem `bankSwift`. */
+    public function withBankSwift(string|Clear|null $bankSwift): self
+    {
+        return clone($this, ['bankSwift' => $bankSwift]);
+    }
+
+    /** Kopie mit geändertem `bankAccountOwner`. */
+    public function withBankAccountOwner(string|Clear|null $bankAccountOwner): self
+    {
+        return clone($this, ['bankAccountOwner' => $bankAccountOwner]);
+    }
+
+    /** Kopie mit geändertem `bankName`. */
+    public function withBankName(string|Clear|null $bankName): self
+    {
+        return clone($this, ['bankName' => $bankName]);
+    }
+
+    /** Kopie mit geändertem `projectReference`. */
+    public function withProjectReference(string|Clear|null $projectReference): self
+    {
+        return clone($this, ['projectReference' => $projectReference]);
+    }
+
+    /** Kopie mit geändertem `contractReference`. */
+    public function withContractReference(string|Clear|null $contractReference): self
+    {
+        return clone($this, ['contractReference' => $contractReference]);
+    }
+
     /** Kopie mit geändertem `templateId`. */
     public function withTemplateId(int|Clear|null $templateId): self
     {
         return clone($this, ['templateId' => $templateId]);
+    }
+
+    /** Kopie mit geändertem `facturxReference`. */
+    public function withFacturxReference(string|Clear|null $facturxReference): self
+    {
+        return clone($this, ['facturxReference' => $facturxReference]);
     }
 
     /** Kopie mit geändertem `freeTextId`. */
@@ -435,11 +579,14 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
             array_filter([
                 'client_id' => $this->clientId,
                 'contact_id' => $this->contactId,
+                'client_delivery_address_id' => $this->clientDeliveryAddressId,
                 'address' => $this->address,
                 'number_pre' => $this->numberPre,
                 'number' => $this->number,
                 'number_length' => $this->numberLength,
                 'date' => $this->date instanceof DateTimeImmutable ? $this->date->format('Y-m-d') : $this->date,
+                'supply_date_start' => $this->supplyDateStart instanceof DateTimeImmutable ? $this->supplyDateStart->format('Y-m-d') : $this->supplyDateStart,
+                'supply_date_end' => $this->supplyDateEnd instanceof DateTimeImmutable ? $this->supplyDateEnd->format('Y-m-d') : $this->supplyDateEnd,
                 'supply_date' => $this->supplyDate instanceof DateTimeImmutable ? $this->supplyDate->format('Y-m-d') : $this->supplyDate,
                 'supply_date_type' => $this->supplyDateType instanceof SupplyDateType ? $this->supplyDateType->value : $this->supplyDateType,
                 'due_days' => $this->dueDays,
@@ -456,6 +603,13 @@ final readonly class InvoiceUpdateOptions implements WriteOptions
                 'currency_code' => $this->currencyCode,
                 'quote' => $this->quote,
                 'payment_types' => $this->paymentTypes instanceof Clear ? $this->paymentTypes : ([] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes))),
+                'bank_iban' => $this->bankIban,
+                'bank_swift' => $this->bankSwift,
+                'bank_account_owner' => $this->bankAccountOwner,
+                'bank_name' => $this->bankName,
+                'facturx_reference' => $this->facturxReference,
+                'project_reference' => $this->projectReference,
+                'contract_reference' => $this->contractReference,
                 'invoice_id' => $this->invoiceId,
                 'offer_id' => $this->offerId,
                 'confirmation_id' => $this->confirmationId,

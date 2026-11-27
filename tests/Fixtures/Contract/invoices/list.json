@@ -4,9 +4,10 @@
             {
                 "id": "22808888",
                 "created": "2025-12-31T14:48:32+01:00",
-                "updated": "2025-12-31T15:00:35+01:00",
+                "updated": "2026-11-08T19:57:56+01:00",
                 "client_id": "9347139",
                 "contact_id": "",
+                "client_delivery_address_id": "",
                 "invoice_number": "RE352500001",
                 "number": "1",
                 "number_pre": "RE3525",
@@ -15,6 +16,8 @@
                 "date": "2025-12-31",
                 "supply_date": "2026-01-16",
                 "supply_date_type": "SUPPLY_DATE",
+                "supply_date_start": "",
+                "supply_date_end": "",
                 "due_date": "2026-01-01",
                 "due_days": "1",
                 "address": "Firma 8 GmbH\nMusterstraße 8\n10008 Musterstadt 8",
@@ -38,9 +41,13 @@
                 "paid_amount": "40",
                 "open_amount": "0",
                 "payment_types": "",
+                "bank_iban": "",
+                "bank_swift": "",
+                "bank_account_owner": "",
+                "bank_name": "",
                 "taxes": {
                     "tax": {
-                        "name": "Name 13",
+                        "name": "Name 14",
                         "rate": "19",
                         "amount": "6.39",
                         "amount_plain": "6.39",
@@ -60,6 +67,8 @@
                 "dig_proceeded": "0",
                 "template_id": "971608",
                 "customfield": "",
+                "project_reference": "",
+                "contract_reference": "",
                 "facturx_reference": ""
             },
             {
@@ -68,6 +77,7 @@
                 "updated": "2025-12-31T15:12:02+01:00",
                 "client_id": "9347139",
                 "contact_id": "",
+                "client_delivery_address_id": "",
                 "invoice_number": "RE362500002",
                 "number": "2",
                 "number_pre": "RE3625",
@@ -76,6 +86,8 @@
                 "date": "2025-12-31",
                 "supply_date": "2026-01-09",
                 "supply_date_type": "SUPPLY_DATE",
+                "supply_date_start": "",
+                "supply_date_end": "",
                 "due_date": "2026-01-01",
                 "due_days": "1",
                 "address": "Firma 8 GmbH\nMusterstraße 8\n10008 Musterstadt 8",
@@ -99,9 +111,13 @@
                 "paid_amount": "50",
                 "open_amount": "0",
                 "payment_types": "",
+                "bank_iban": "",
+                "bank_swift": "",
+                "bank_account_owner": "",
+                "bank_name": "",
                 "taxes": {
                     "tax": {
-                        "name": "Name 13",
+                        "name": "Name 14",
                         "rate": "19",
                         "amount": "7.98",
                         "amount_plain": "7.98",
@@ -121,6 +137,8 @@
                 "dig_proceeded": "0",
                 "template_id": "971861",
                 "customfield": "",
+                "project_reference": "",
+                "contract_reference": "",
                 "facturx_reference": ""
             },
             {
@@ -129,6 +147,7 @@
                 "updated": "2025-12-31T15:06:46+01:00",
                 "client_id": "9347139",
                 "contact_id": "",
+                "client_delivery_address_id": "",
                 "invoice_number": "RE3525000003",
                 "number": "3",
                 "number_pre": "RE3525",
@@ -137,6 +156,8 @@
                 "date": "2025-12-31",
                 "supply_date": "",
                 "supply_date_type": "",
+                "supply_date_start": "",
+                "supply_date_end": "",
                 "due_date": "2025-12-31",
                 "due_days": "0",
                 "address": "Firma 8 GmbH\nMusterstraße 8\n10008 Musterstadt 8",
@@ -160,9 +181,13 @@
                 "paid_amount": "-40",
                 "open_amount": "0",
                 "payment_types": "",
+                "bank_iban": "",
+                "bank_swift": "",
+                "bank_account_owner": "",
+                "bank_name": "",
                 "taxes": {
                     "tax": {
-                        "name": "Name 13",
+                        "name": "Name 14",
                         "rate": "19",
                         "amount": "-6.39",
                         "amount_plain": "-6.39",
@@ -182,11 +207,13 @@
                 "dig_proceeded": "0",
                 "template_id": "971608",
                 "customfield": "",
+                "project_reference": "",
+                "contract_reference": "",
                 "facturx_reference": ""
             }
         ],
         "@page": "1",
         "@per_page": "3",
-        "@total": "811"
+        "@total": "1020"
     }
 }

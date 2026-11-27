@@ -36,6 +36,7 @@ final readonly class Invoice
         'id' => true,
         'client_id' => true,
         'contact_id' => true,
+        'client_delivery_address_id' => true,
         'created' => true,
         'invoice_number' => true,
         'number' => true,
@@ -45,6 +46,8 @@ final readonly class Invoice
         'date' => true,
         'supply_date' => true,
         'supply_date_type' => true,
+        'supply_date_start' => true,
+        'supply_date_end' => true,
         'due_date' => true,
         'due_days' => true,
         'address' => true,
@@ -72,6 +75,12 @@ final readonly class Invoice
         'recurring_id' => true,
         'taxes' => true,
         'payment_types' => true,
+        'bank_iban' => true,
+        'bank_swift' => true,
+        'bank_account_owner' => true,
+        'bank_name' => true,
+        'project_reference' => true,
+        'contract_reference' => true,
         'template_id' => true,
         'invoice-items' => true,
         'updated' => true,
@@ -94,6 +103,8 @@ final readonly class Invoice
         public int $clientId,
         /** ID des Kontakts. */
         public ?int $contactId = null,
+        /** ID der Lieferadresse des Kunden. */
+        public ?int $clientDeliveryAddressId = null,
         /** Erstellungszeitpunkt der Rechnung. */
         public ?DateTimeImmutable $created = null,
         /** Rechnungsnummer (kann bei DRAFT leer sein). */
@@ -108,10 +119,22 @@ final readonly class Invoice
         public ?InvoiceStatus $status = null,
         /** Rechnungsdatum. */
         public ?DateTimeImmutable $date = null,
-        /** Liefer-/Leistungsdatum. */
+        /**
+         * Liefer-/Leistungsdatum.
+         *
+         * @deprecated wird von Billomat nicht mehr verarbeitet; stattdessen supplyDateStart/supplyDateEnd verwenden
+         */
         public ?DateTimeImmutable $supplyDate = null,
-        /** Typ des Liefer-/Leistungsdatums. */
+        /**
+         * Typ des Liefer-/Leistungsdatums.
+         *
+         * @deprecated wird von Billomat nicht mehr verarbeitet; stattdessen supplyDateStart/supplyDateEnd verwenden
+         */
         public ?SupplyDateType $supplyDateType = null,
+        /** Beginn des Liefer-/Leistungszeitraums. */
+        public ?DateTimeImmutable $supplyDateStart = null,
+        /** Ende des Liefer-/Leistungszeitraums. */
+        public ?DateTimeImmutable $supplyDateEnd = null,
         /** Fälligkeitsdatum. */
         public ?DateTimeImmutable $dueDate = null,
         /** Tage bis zur Fälligkeit. */
@@ -170,6 +193,24 @@ final readonly class Invoice
          * Billomat überträgt sie kommasepariert, z. B. "BANK_TRANSFER,CASH".
          */
         public array $paymentTypes = [],
+        /**
+         * IBAN einer vom Account abweichenden Bankverbindung für diese Rechnung.
+         *
+         * Erscheint auf dem PDF und in der E-Rechnung statt der Bankverbindung aus den Einstellungen.
+         * Billomat prüft die Prüfsumme; Pflicht, sobald eines der anderen bank_*-Felder gesetzt ist.
+         * Korrekturrechnungen übernehmen die Bankverbindung der korrigierten Rechnung.
+         */
+        public ?string $bankIban = null,
+        /** BIC der abweichenden Bankverbindung. */
+        public ?string $bankSwift = null,
+        /** Kontoinhaber der abweichenden Bankverbindung (max. 250 Zeichen). */
+        public ?string $bankAccountOwner = null,
+        /** Name der Bank der abweichenden Bankverbindung (max. 100 Zeichen). */
+        public ?string $bankName = null,
+        /** Projektreferenz für E-Rechnungen (max. 255 Zeichen). */
+        public ?string $projectReference = null,
+        /** Vertragsreferenz für E-Rechnungen (max. 255 Zeichen). */
+        public ?string $contractReference = null,
         /** ID der Vorlage, mit der die Rechnung abgeschlossen wird. */
         public ?int $templateId = null,
         /** Positionen der Rechnung (nur bei GET /invoices/{id}). */
@@ -178,7 +219,11 @@ final readonly class Invoice
         public ?DateTimeImmutable $updated = null,
         /** Freies Zusatzfeld (siehe Custom-Meta-Attribute). */
         public ?string $customField = null,
-        /** Referenz der Factur-X-/ZUGFeRD-Rechnung. */
+        /**
+         * Bestellreferenz bzw. Auftragsnummer des Käufers für E-Rechnungen (max. 32 Zeichen).
+         *
+         * Nur verfügbar, wenn facturx_fields_enabled beim eigenen Unternehmen (`$billomat->clients->getMyself()`) aktiv ist.
+         */
         public ?string $facturxReference = null,
         /** Summe der Rabatte. */
         public ?Money $totalReduction = null,
@@ -204,6 +249,7 @@ final readonly class Invoice
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             clientId: ScalarCaster::required(ScalarCaster::toIntOrNull($data['client_id'] ?? null), self::class, 'client_id'),
             contactId: ScalarCaster::toIntOrNull($data['contact_id'] ?? null),
+            clientDeliveryAddressId: ScalarCaster::toIntOrNull($data['client_delivery_address_id'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             invoiceNumber: ScalarCaster::toStringOrNull($data['invoice_number'] ?? null),
             number: ScalarCaster::toIntOrNull($data['number'] ?? null),
@@ -213,6 +259,8 @@ final readonly class Invoice
             date: ScalarCaster::toDateTimeOrNull($data['date'] ?? null),
             supplyDate: ScalarCaster::toDateTimeOrNull($data['supply_date'] ?? null),
             supplyDateType: SupplyDateType::tryFrom(ScalarCaster::toStringOrNull($data['supply_date_type'] ?? null) ?? ''),
+            supplyDateStart: ScalarCaster::toDateTimeOrNull($data['supply_date_start'] ?? null),
+            supplyDateEnd: ScalarCaster::toDateTimeOrNull($data['supply_date_end'] ?? null),
             dueDate: ScalarCaster::toDateTimeOrNull($data['due_date'] ?? null),
             dueDays: ScalarCaster::toIntOrNull($data['due_days'] ?? null),
             address: ScalarCaster::toStringOrNull($data['address'] ?? null),
@@ -240,6 +288,12 @@ final readonly class Invoice
             recurringId: ScalarCaster::toIntOrNull($data['recurring_id'] ?? null),
             taxes: ListCaster::toNestedList($data['taxes'] ?? null, 'tax', 'name', TaxSummary::fromArray(...)),
             paymentTypes: ListCaster::toEnumList($data['payment_types'] ?? null, PaymentType::class),
+            bankIban: ScalarCaster::toStringOrNull($data['bank_iban'] ?? null),
+            bankSwift: ScalarCaster::toStringOrNull($data['bank_swift'] ?? null),
+            bankAccountOwner: ScalarCaster::toStringOrNull($data['bank_account_owner'] ?? null),
+            bankName: ScalarCaster::toStringOrNull($data['bank_name'] ?? null),
+            projectReference: ScalarCaster::toStringOrNull($data['project_reference'] ?? null),
+            contractReference: ScalarCaster::toStringOrNull($data['contract_reference'] ?? null),
             templateId: ScalarCaster::toIntOrNull($data['template_id'] ?? null),
             items: ListCaster::toNestedList($data['invoice-items'] ?? null, 'invoice-item', 'id', InvoiceItem::fromArray(...)),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
@@ -265,6 +319,7 @@ final readonly class Invoice
             'id' => $this->id,
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
+            'client_delivery_address_id' => $this->clientDeliveryAddressId,
             'created' => $this->created?->format(DATE_ATOM),
             'invoice_number' => $this->invoiceNumber,
             'number' => $this->number,
@@ -274,6 +329,8 @@ final readonly class Invoice
             'date' => $this->date?->format('Y-m-d'),
             'supply_date' => $this->supplyDate?->format('Y-m-d'),
             'supply_date_type' => $this->supplyDateType?->value,
+            'supply_date_start' => $this->supplyDateStart?->format('Y-m-d'),
+            'supply_date_end' => $this->supplyDateEnd?->format('Y-m-d'),
             'due_date' => $this->dueDate?->format('Y-m-d'),
             'due_days' => $this->dueDays,
             'address' => $this->address,
@@ -300,6 +357,12 @@ final readonly class Invoice
             'confirmation_id' => $this->confirmationId,
             'recurring_id' => $this->recurringId,
             'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes)),
+            'bank_iban' => $this->bankIban,
+            'bank_swift' => $this->bankSwift,
+            'bank_account_owner' => $this->bankAccountOwner,
+            'bank_name' => $this->bankName,
+            'project_reference' => $this->projectReference,
+            'contract_reference' => $this->contractReference,
             'template_id' => $this->templateId,
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customField,

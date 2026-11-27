@@ -25,6 +25,14 @@ final readonly class UnitUpdateOptions implements WriteOptions
          * Typ: ALNUM
          */
         public string|Clear|null $name = null,
+        /**
+         * Einheitencode nach UN/ECE Recommendation 20 für E-Rechnungen, z. B. "C62" (Stück) oder "HUR" (Stunde).
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         *
+         * Billomat-Feld: unece_code
+         */
+        public string|Clear|null $uneceCode = null,
     ) {
     }
 
@@ -32,6 +40,12 @@ final readonly class UnitUpdateOptions implements WriteOptions
     public function withName(string|Clear|null $name): self
     {
         return clone($this, ['name' => $name]);
+    }
+
+    /** Kopie mit geändertem `uneceCode`. */
+    public function withUneceCode(string|Clear|null $uneceCode): self
+    {
+        return clone($this, ['uneceCode' => $uneceCode]);
     }
 
     /**
@@ -47,6 +61,7 @@ final readonly class UnitUpdateOptions implements WriteOptions
             static fn (mixed $v): mixed => $v instanceof Clear ? null : $v,
             array_filter([
                 'name' => $this->name,
+                'unece_code' => $this->uneceCode,
             ], static fn (mixed $v): bool => null !== $v),
         );
     }

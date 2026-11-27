@@ -653,4 +653,60 @@ final class InvoicesIntegrationTest extends AbstractBillomatIntegrationTestCase
             }
         }
     }
+
+    /**
+     * Leistungszeitraum, abweichende Bankverbindung und E-Rechnungs-Referenzen (Billomat-Doku seit November 2026):
+     * Billomat speichert die Felder beim Anlegen und beim Update und liefert sie im Read-Model zurück.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function servicePeriodBankAccountAndReferencesRoundTrip(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $clients = $billomat->clients->list(['per_page' => 1]);
+        if ([] === $clients) {
+            self::markTestSkipped('Die Sandbox braucht mindestens einen Kunden.');
+        }
+
+        $draft = $billomat->invoices->create(new InvoiceCreateOptions(
+            clientId: $clients[0]->id,
+            supplyDateStart: new DateTimeImmutable('2026-11-01'),
+            supplyDateEnd: new DateTimeImmutable('2026-11-30'),
+            bankIban: 'DE89370400440532013000',
+            bankSwift: 'COBADEFFXXX',
+            bankAccountOwner: 'Integrationstest',
+            bankName: 'Testbank',
+            projectReference: 'PRJ-1',
+            contractReference: 'CTR-1',
+        ));
+
+        try {
+            self::assertSame('2026-11-01', $draft->supplyDateStart?->format('Y-m-d'));
+            self::assertSame('2026-11-30', $draft->supplyDateEnd?->format('Y-m-d'));
+            self::assertSame('DE89370400440532013000', $draft->bankIban);
+            self::assertSame('COBADEFFXXX', $draft->bankSwift);
+            self::assertSame('Integrationstest', $draft->bankAccountOwner);
+            self::assertSame('Testbank', $draft->bankName);
+            self::assertSame('PRJ-1', $draft->projectReference);
+            self::assertSame('CTR-1', $draft->contractReference);
+
+            $updated = $billomat->invoices->update($draft->id, new InvoiceUpdateOptions(
+                supplyDateEnd: new DateTimeImmutable('2026-12-31'),
+                bankName: 'Andere Bank',
+                projectReference: 'PRJ-2',
+            ));
+
+            self::assertSame('2026-12-31', $updated->supplyDateEnd?->format('Y-m-d'));
+            self::assertSame('Andere Bank', $updated->bankName);
+            self::assertSame('PRJ-2', $updated->projectReference);
+            self::assertSame('CTR-1', $updated->contractReference);
+            self::assertSame([], array_intersect_key($updated->extra, array_flip([
+                'supply_date_start', 'supply_date_end', 'bank_iban', 'bank_swift', 'bank_account_owner', 'bank_name',
+                'project_reference', 'contract_reference', 'client_delivery_address_id',
+            ])));
+        } finally {
+            $billomat->invoices->delete($draft->id);
+        }
+    }
 }

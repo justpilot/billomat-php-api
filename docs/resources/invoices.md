@@ -318,6 +318,7 @@ Constructor: `new InvoiceCreateOptions(int $clientId, …)`. `clientId` is requi
 |---|---|---|
 | `clientId` | `client_id` | `int` (required) |
 | `contactId` | `contact_id` | `?int` |
+| `clientDeliveryAddressId` | `client_delivery_address_id` | `?int` (the client's delivery address) |
 | `address` | `address` | `?string` (default: the client's address) |
 | `numberPre` | `number_pre` | `?string` |
 | `number` | `number` | `?int` |
@@ -330,10 +331,14 @@ Constructor: `new InvoiceCreateOptions(int $clientId, …)`. `clientId` is requi
 | Property | Billomat field |
 |---|---|
 | `date` | `date` |
-| `supplyDate` | `supply_date` |
-| `supplyDateType` | `supply_date_type` (`SupplyDateType` enum) |
+| `supplyDateStart` | `supply_date_start` |
+| `supplyDateEnd` | `supply_date_end` |
+| `supplyDate` | `supply_date` (deprecated) |
+| `supplyDateType` | `supply_date_type` (`SupplyDateType` enum, deprecated) |
 | `dueDate` | `due_date` |
 | `discountDate` | `discount_date` |
+
+Billomat describes the delivery/service date as a period now: `supplyDateStart` and `supplyDateEnd`. According to its documentation `supply_date` and `supply_date_type` are no longer processed, so the SDK marks them `@deprecated`.
 
 | Property | Billomat field | Type |
 |---|---|---|
@@ -359,6 +364,25 @@ Constructor: `new InvoiceCreateOptions(int $clientId, …)`. `clientId` is requi
 | `netGross` | `net_gross` | `?NetGross` |
 | `quote` | `quote` | `?float` (exchange rate) |
 | `paymentTypes` | `payment_types` | `list<PaymentType>` (Billomat: comma-separated, e.g. `BANK_TRANSFER,CASH`) |
+
+### Bank account
+
+A bank account for this invoice that differs from the one in the account settings. It is printed on the PDF and written into the e-invoice. As soon as one of the fields is set, `bankIban` is required; Billomat validates its checksum. Correction invoices take over the bank account of the corrected invoice.
+
+| Property | Billomat field | Type |
+|---|---|---|
+| `bankIban` | `bank_iban` | `?string` |
+| `bankSwift` | `bank_swift` | `?string` (BIC) |
+| `bankAccountOwner` | `bank_account_owner` | `?string` (max. 250 characters) |
+| `bankName` | `bank_name` | `?string` (max. 100 characters) |
+
+### E-invoice references
+
+| Property | Billomat field | Type |
+|---|---|---|
+| `facturxReference` | `facturx_reference` | `?string`: the buyer's order reference (max. 32 characters); only available if `facturx_fields_enabled` is active for your own company (`$billomat->clients->getMyself()`) |
+| `projectReference` | `project_reference` | `?string` (max. 255 characters) |
+| `contractReference` | `contract_reference` | `?string` (max. 255 characters) |
 
 ### References
 
@@ -387,10 +411,11 @@ For partial updates; it has the same fields as `InvoiceCreateOptions` except `it
 
 | Property | Billomat field | Type |
 |---|---|---|
-| `clientId`, `contactId` | same | `int\|Clear\|null` |
+| `clientId`, `contactId`, `clientDeliveryAddressId` | same | `int\|Clear\|null` |
 | `number`, `numberPre`, `numberLength` | same | `int\|Clear\|null`, `string\|Clear\|null`, `int\|Clear\|null` |
-| `date`, `supplyDate`, `dueDate`, `discountDate` | same | `\DateTimeImmutable\|Clear\|null` |
-| `supplyDateType` | `supply_date_type` | `SupplyDateType\|Clear\|null` |
+| `date`, `supplyDateStart`, `supplyDateEnd`, `dueDate`, `discountDate` | same | `\DateTimeImmutable\|Clear\|null` |
+| `supplyDate` (deprecated) | `supply_date` | `\DateTimeImmutable\|Clear\|null` |
+| `supplyDateType` (deprecated) | `supply_date_type` | `SupplyDateType\|Clear\|null` |
 | `dueDays`, `discountDays` | same | `int\|Clear\|null` |
 | `discountRate` | `discount_rate` | `float\|Clear\|null` |
 | `address`, `title`, `label`, `intro`, `note` | same | `string\|Clear\|null` |
@@ -401,6 +426,8 @@ For partial updates; it has the same fields as `InvoiceCreateOptions` except `it
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | same | `int\|Clear\|null` |
 | `templateId`, `freeTextId` | same | `int\|Clear\|null` |
 | `paymentTypes` | `payment_types` | `list<PaymentType>\|Clear` |
+| `bankIban`, `bankSwift`, `bankAccountOwner`, `bankName` | same | `string\|Clear\|null` |
+| `facturxReference`, `projectReference`, `contractReference` | same | `string\|Clear\|null` |
 
 ## Write model: `EmailOptions`
 
@@ -450,12 +477,14 @@ Payload for `mail()` (Pixelletter), shared by all document types (invoices, offe
 | `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
+| `clientDeliveryAddressId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
 | `invoiceNumber` | `?string` (empty for `DRAFT`) |
 | `number`, `numberPre`, `numberLength` | `?int`, `?string`, `?int` |
 | `status` | `?InvoiceStatus` |
-| `date`, `supplyDate`, `dueDate`, `discountDate` | `?\DateTimeImmutable` |
-| `supplyDateType` | `?SupplyDateType` |
+| `date`, `supplyDateStart`, `supplyDateEnd`, `dueDate`, `discountDate` | `?\DateTimeImmutable` |
+| `supplyDate` (deprecated) | `?\DateTimeImmutable` |
+| `supplyDateType` (deprecated) | `?SupplyDateType` |
 | `dueDays`, `discountDays` | `?int` |
 | `address` | `?string` |
 | `discountRate`, `discountAmount` | `?float`, `?Money` |
@@ -469,10 +498,12 @@ Payload for `mail()` (Pixelletter), shared by all document types (invoices, offe
 | `quote` | `?float` |
 | `invoiceId`, `offerId`, `confirmationId`, `recurringId` | `?int` |
 | `taxes` | `list<TaxSummary>`: tax summary per rate with `name`, `rate`, the tax `amount` and the net/gross amounts it applies to (`amountNet`, `amountGross`, each also as `*Plain` unrounded and `*Rounded`), all `Money` |
+| `bankIban`, `bankSwift`, `bankAccountOwner`, `bankName` | `?string` |
+| `projectReference`, `contractReference` | `?string` |
 | `templateId` | `?int` |
 | `items` | `list<InvoiceItem>`, if the API includes the items (only `GET /invoices/{id}`) |
 | `updated` | `?\DateTimeImmutable` |
-| `facturxReference` | `?string` (e-invoice, read-only, not documented by Billomat) |
+| `facturxReference` | `?string` (buyer's order reference for e-invoices) |
 | `totalReduction` | `?Money` |
 | `digProceeded` | `?bool` |
 | `customField` | `?string` (free extra field, see [custom meta attributes](../concepts/custom-meta-attributes.md)) |

@@ -8,7 +8,7 @@ use Justpilot\Billomat\Model\Enum\PaymentType;
 use Justpilot\Billomat\Model\Enum\RecurringCycle;
 
 /**
- * Typisierter Filter für GET /api/recurrings.
+ * Typisierter Filter für GET /api/recurrings?label=foo.
  *
  * Nicht gesetzte Felder (null bzw. leere Liste) fehlen im Query; Mehrfachwerte
  * werden kommasepariert gesendet und von Billomat ODER-verknüpft. Weitere

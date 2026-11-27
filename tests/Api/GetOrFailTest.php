@@ -84,10 +84,10 @@ final class GetOrFailTest extends TestCase
     #[DataProvider('apis')]
     public function getOrFailReturnsWhatGetReturns(string $resource, string $subResource): void
     {
-        // Envelope-Schlüssel aus dem Pfad: /credit-notes/7 → credit-note, /taxes/7 → tax, /incoming-categories/x → incoming-category.
+        // Envelope-Schlüssel aus dem Pfad: /credit-notes/7 → credit-note, /taxes/7 → tax, /client-delivery-addresses/7 → client-delivery-address, /incoming-categories/x → incoming-category.
         $mock = new MockHttpClient(static function (string $method, string $url): MockResponse {
             $slug = explode('/', (string) parse_url($url, PHP_URL_PATH))[2] ?? '';
-            $key = (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
+            $key = (string) preg_replace(['/ies$/', '/(x|ss)es$/', '/(?<!s)s$/'], ['y', '$1', ''], $slug);
 
             return new MockResponse((string) json_encode([$key => RequiredFields::ANY]));
         });

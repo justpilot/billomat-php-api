@@ -54,7 +54,7 @@ const PER_PAGE = 3;
  * `list: false` = Endpunkt liefert ein einzelnes Objekt (Settings).
  */
 const RESOURCES = [
-    'clients' => ['key' => 'client', 'get' => true, 'children' => ['contacts' => 'contact', 'client-tags' => 'tag']],
+    'clients' => ['key' => 'client', 'get' => true, 'children' => ['contacts' => 'contact', 'client-delivery-addresses' => 'client-delivery-address', 'client-tags' => 'tag']],
     'client-properties' => ['key' => 'client-property', 'get' => true],
     'client-property-values' => ['key' => 'client-property-value', 'get' => true],
     'suppliers' => ['key' => 'supplier', 'get' => true, 'children' => ['supplier-tags' => 'tag']],
@@ -129,7 +129,7 @@ const FIELD_KINDS = [
     'email' => 'email', 'bcc_addresses' => 'email', 'sender' => 'email', 'sender_email' => 'email',
     'reply_to' => 'email', 'email_bcc' => 'email', 'email_sender' => 'email', 'bcc' => 'email',
     'phone' => 'phone', 'fax' => 'phone', 'mobile' => 'phone',
-    'street' => 'street', 'zip' => 'zip', 'city' => 'city', 'state' => 'state', 'address' => 'address',
+    'street' => 'street', 'address_line_2' => 'text', 'address_line_3' => 'text', 'zip' => 'zip', 'city' => 'city', 'state' => 'state', 'address' => 'address',
     'www' => 'url', 'url' => 'url', 'website' => 'url', 'avatar' => 'url', 'public_url' => 'url',
     'bank_name' => 'bank_name', 'bank_iban' => 'iban', 'iban' => 'iban', 'bank_swift' => 'bic', 'bic' => 'bic', 'swift' => 'bic',
     'bank_account_number' => 'digits', 'bank_number' => 'digits', 'creditor_identifier' => 'creditor_id', 'sepa_mandate' => 'text',
@@ -138,7 +138,7 @@ const FIELD_KINDS = [
     'client_number' => 'client_number',
     'note' => 'text', 'notes' => 'text', 'intro' => 'text', 'description' => 'text', 'comment' => 'text', 'text' => 'text',
     'subject' => 'text', 'body' => 'text', 'title' => 'text', 'label' => 'text', 'message' => 'text', 'signature' => 'text',
-    'customfield' => 'text', 'value' => 'text', 'reference' => 'text', 'filename' => 'filename', 'file_name' => 'filename',
+    'customfield' => 'text', 'value' => 'text', 'reference' => 'text', 'project_reference' => 'text', 'contract_reference' => 'text', 'facturx_reference' => 'text', 'filename' => 'filename', 'file_name' => 'filename',
     'base64file' => 'base64', 'file' => 'base64', 'pdf' => 'base64', 'document' => 'base64',
 ];
 

@@ -148,7 +148,7 @@ Constructor: `new RecurringCreateOptions(int $clientId, …)`. `clientId` is req
 |---|---|---|
 | `clientId` | `client_id` | `int` (required) |
 | `contactId` | `contact_id` | `?int` |
-| `clientDeliveryAddressId` | `client_delivery_address_id` | `?int` (the client's delivery address) |
+| `clientDeliveryAddressId` | `client_delivery_address_id` | `?int` (one of the client's [delivery addresses](client-delivery-addresses.md)) |
 | `address` | `address` | `?string` |
 | `numberPre` | `number_pre` | `?string` |
 | `name` | `name` | `?string`, internal name |

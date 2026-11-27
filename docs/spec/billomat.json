@@ -5729,17 +5729,17 @@
                 {
                     "name": "Alle Lieferadressen auflisten",
                     "method": "GET",
-                    "path": "api/client-delivery-addresses"
+                    "path": "/api/client-delivery-addresses"
                 },
                 {
                     "name": "Einzelne Lieferadresse abrufen",
                     "method": "GET",
-                    "path": "api/client-delivery-addresses/{id}"
+                    "path": "/api/client-delivery-addresses/{id}"
                 },
                 {
                     "name": "Lieferadresse erstellen",
                     "method": "POST",
-                    "path": "api/client-delivery-addresses",
+                    "path": "/api/client-delivery-addresses",
                     "fields": [
                         {
                             "name": "client_id",
@@ -5816,12 +5816,12 @@
                 {
                     "name": "Lieferadresse bearbeiten",
                     "method": "PUT",
-                    "path": "api/client-delivery-addresses/{id}"
+                    "path": "/api/client-delivery-addresses/{id}"
                 },
                 {
                     "name": "Lieferadresse löschen",
                     "method": "DELETE",
-                    "path": "api/client-delivery-addresses/{id}"
+                    "path": "/api/client-delivery-addresses/{id}"
                 }
             ]
         },

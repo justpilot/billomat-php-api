@@ -182,7 +182,7 @@ final class CustomFieldTest extends TestCase
     {
         $slug = explode('/', (string) parse_url($url, PHP_URL_PATH))[2] ?? '';
 
-        return (string) preg_replace(['/ies$/', '/(x)es$/', '/s$/'], ['y', '$1', ''], $slug);
+        return (string) preg_replace(['/ies$/', '/(x|ss)es$/', '/(?<!s)s$/'], ['y', '$1', ''], $slug);
     }
 
     /**

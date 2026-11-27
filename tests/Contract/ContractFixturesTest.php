@@ -162,6 +162,7 @@ final class ContractFixturesTest extends TestCase
         return [
             'clients' => ['key' => 'client', 'list' => static fn (BillomatClient $b): array => $b->clients->list(), 'get' => static fn (BillomatClient $b): ?object => $b->clients->get(1)],
             'contacts' => ['key' => 'contact', 'list' => static fn (BillomatClient $b): array => $b->clients->contacts->list(1), 'get' => static fn (BillomatClient $b): ?object => $b->clients->contacts->get(1)],
+            'client-delivery-addresses' => ['key' => 'client-delivery-address', 'list' => static fn (BillomatClient $b): array => $b->clients->deliveryAddresses->list(1), 'get' => static fn (BillomatClient $b): ?object => $b->clients->deliveryAddresses->get(1)],
             'client-tags' => ['key' => 'client-tag', 'list' => static fn (BillomatClient $b): array => $b->clients->tags->list(1), 'get' => static fn (BillomatClient $b): ?object => $b->clients->tags->get(1)],
             'client-properties' => ['key' => 'client-property', 'list' => static fn (BillomatClient $b): array => $b->clients->properties->list(), 'get' => static fn (BillomatClient $b): ?object => $b->clients->properties->get(1)],
             'client-property-values' => ['key' => 'client-property-value', 'list' => static fn (BillomatClient $b): array => $b->clients->propertyValues->list(), 'get' => static fn (BillomatClient $b): ?object => $b->clients->propertyValues->get(1)],

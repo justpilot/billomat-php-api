@@ -12,6 +12,8 @@ use Justpilot\Billomat\Api\ArticleTagCreateOptions;
 use Justpilot\Billomat\Api\ArticleUpdateOptions;
 use Justpilot\Billomat\Api\Clear;
 use Justpilot\Billomat\Api\ClientCreateOptions;
+use Justpilot\Billomat\Api\ClientDeliveryAddressCreateOptions;
+use Justpilot\Billomat\Api\ClientDeliveryAddressUpdateOptions;
 use Justpilot\Billomat\Api\ClientPropertyValueCreateOptions;
 use Justpilot\Billomat\Api\ClientTagCreateOptions;
 use Justpilot\Billomat\Api\ClientUpdateOptions;
@@ -127,6 +129,8 @@ use UnitEnum;
 #[CoversClass(ArticleTagCreateOptions::class)]
 #[CoversClass(ArticleUpdateOptions::class)]
 #[CoversClass(ClientCreateOptions::class)]
+#[CoversClass(ClientDeliveryAddressCreateOptions::class)]
+#[CoversClass(ClientDeliveryAddressUpdateOptions::class)]
 #[CoversClass(ClientPropertyValueCreateOptions::class)]
 #[CoversClass(ClientTagCreateOptions::class)]
 #[CoversClass(ClientUpdateOptions::class)]

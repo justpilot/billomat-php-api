@@ -57,7 +57,7 @@
     "symfony/css-selector": "^8.1",
     "symfony/dom-crawler": "^8.1",
     "symfony/dotenv": "^8.1",
-    "symfony/http-client": "^8.1.11",
+    "symfony/http-client": "^8.1.12",
     "symfony/var-dumper": "^8.1"
   },
   "suggest": {

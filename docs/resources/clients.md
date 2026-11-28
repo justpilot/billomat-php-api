@@ -9,6 +9,7 @@ API wrapper for the Billomat "clients" resource, covering the endpoints under `/
 ```php
 $billomat->clients
 $billomat->clients->contacts        // contact persons of a client, see contacts.md
+$billomat->clients->deliveryAddresses // delivery addresses of a client, see client-delivery-addresses.md
 $billomat->clients->tags            // tags on a client, see client-tags.md
 $billomat->clients->properties      // custom property definitions, see properties.md
 $billomat->clients->propertyValues  // custom property values on a client

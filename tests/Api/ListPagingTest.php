@@ -6,6 +6,7 @@ namespace Justpilot\Billomat\Tests\Api;
 
 use Closure;
 use Generator;
+use Justpilot\Billomat\Api\ClientDeliveryAddressesApi;
 use Justpilot\Billomat\Api\ContactsApi;
 use Justpilot\Billomat\Api\CountriesApi;
 use Justpilot\Billomat\Api\CurrenciesApi;
@@ -34,6 +35,7 @@ use const PHP_URL_PATH;
  * `listPage()`/`iterateAll()` der Ressourcen, die bis 4.0.0-alpha.1 nur `list()` hatten.
  */
 #[CoversClass(ContactsApi::class)]
+#[CoversClass(ClientDeliveryAddressesApi::class)]
 #[CoversClass(TaxesApi::class)]
 #[CoversClass(TemplatesApi::class)]
 #[CoversClass(ReminderTextsApi::class)]
@@ -62,6 +64,7 @@ final class ListPagingTest extends TestCase
         $filter = ['name' => 'x'];
 
         yield 'contacts' => ['/contacts', 'contacts', 'contact', static fn (BillomatClient $b): Page => $b->clients->contacts->listPage(9, $page), static fn (BillomatClient $b): Generator => $b->clients->contacts->iterateAll(9, $filter, 2)];
+        yield 'delivery addresses' => ['/client-delivery-addresses', 'client-delivery-addresses', 'client-delivery-address', static fn (BillomatClient $b): Page => $b->clients->deliveryAddresses->listPage(9, $page), static fn (BillomatClient $b): Generator => $b->clients->deliveryAddresses->iterateAll(9, $filter, 2)];
         yield 'taxes' => ['/taxes', 'taxes', 'tax', static fn (BillomatClient $b): Page => $b->taxes->listPage($page), static fn (BillomatClient $b): Generator => $b->taxes->iterateAll($filter, 2)];
         yield 'templates' => ['/templates', 'templates', 'template', static fn (BillomatClient $b): Page => $b->templates->listPage($page), static fn (BillomatClient $b): Generator => $b->templates->iterateAll($filter, 2)];
         yield 'reminder texts' => ['/reminder-texts', 'reminder-texts', 'reminder-text', static fn (BillomatClient $b): Page => $b->reminderTexts->listPage($page), static fn (BillomatClient $b): Generator => $b->reminderTexts->iterateAll($filter, 2)];
@@ -116,6 +119,7 @@ final class ListPagingTest extends TestCase
     public static function defaultIterators(): iterable
     {
         yield 'contacts' => ['contacts', 'contact', static fn (BillomatClient $b): Generator => $b->clients->contacts->iterateAll(9)];
+        yield 'delivery addresses' => ['client-delivery-addresses', 'client-delivery-address', static fn (BillomatClient $b): Generator => $b->clients->deliveryAddresses->iterateAll(9)];
         yield 'taxes' => ['taxes', 'tax', static fn (BillomatClient $b): Generator => $b->taxes->iterateAll()];
         yield 'templates' => ['templates', 'template', static fn (BillomatClient $b): Generator => $b->templates->iterateAll()];
         yield 'reminder texts' => ['reminder-texts', 'reminder-text', static fn (BillomatClient $b): Generator => $b->reminderTexts->iterateAll()];

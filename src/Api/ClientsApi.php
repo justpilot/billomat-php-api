@@ -40,6 +40,13 @@ final class ClientsApi extends AbstractApi
     }
 
     /**
+     * Lieferadressen der Kunden, siehe {@see ClientDeliveryAddressesApi}.
+     */
+    public private(set) ClientDeliveryAddressesApi $deliveryAddresses {
+        get => $this->deliveryAddresses ??= new ClientDeliveryAddressesApi($this->http);
+    }
+
+    /**
      * Schlagworte, siehe {@see TagsApi}.
      *
      * @var TagsApi<ClientTag, ClientTagCloudEntry, ClientTagCreateOptions>

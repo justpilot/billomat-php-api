@@ -1,0 +1,10 @@
+{
+    "client-delivery-address": {
+        "name": "Example GmbH – Warehouse",
+        "street": "Hafenstraße 1",
+        "zip": "20457",
+        "city": "Hamburg",
+        "country_code": "DE",
+        "client_id": 1001
+    }
+}

@@ -4,5 +4,12 @@
         <!-- Die Rector-Regeln erben von Rectors gescopter PHAR-Klasse, die BetterReflection nicht findet.
              Sie sind Upgrade-Werkzeug, keine Laufzeit-API. -->
         <ignored-regex>#"Rector\\Rector\\AbstractRector" could not be found in the located source#</ignored-regex>
+        <!-- Die Parameterreihenfolge der Konstruktoren von Read-Models, Options und Filtern ist nicht Teil des
+             BC-Versprechens (docs/concepts/backward-compatibility.md): Generierte Felder landen dort, wo sie
+             fachlich hingehören, also auch in der Mitte. Roave vergleicht Parameter nach Position und meldet
+             dann jede verschobene Position. Benannte Argumente sind davon nicht betroffen. -->
+        <ignored-regex>#(The parameter|Default parameter value for parameter) \$\w+ of Justpilot\\Billomat\\(Model\\\w+|Api\\\w+(CreateOptions|UpdateOptions|Filter))\#__construct\(\) changed#</ignored-regex>
+        <!-- Neue Enum-Cases sind laut BC-Versprechen eine Erweiterung (Nutzer brauchen einen default-Arm im match). -->
+        <ignored-regex>#Case Justpilot\\Billomat\\Model\\Enum\\\w+::\w+ was added#</ignored-regex>
     </baseline>
 </roave-bc-check>

@@ -29,6 +29,9 @@ final readonly class TaxRate
         'name' => true,
         'rate' => true,
         'is_default' => true,
+        'vat_category_code' => true,
+        'vat_exemption_reason_code' => true,
+        'vat_exemption_reason_text' => true,
         'created' => true,
         'updated' => true,
         'customfield' => true,
@@ -53,6 +56,24 @@ final readonly class TaxRate
         public float $rate,
         /** Standard-Steuersatz? */
         public bool $isDefault,
+        /**
+         * Umsatzsteuer-Kategorie für E-Rechnungen (Codeliste UNCL5305, z. B. "S", "Z", "E", "AE").
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         */
+        public ?string $vatCategoryCode = null,
+        /**
+         * Code des Befreiungsgrunds für E-Rechnungen (Codeliste VATEX, z. B. "VATEX-EU-132").
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         */
+        public ?string $vatExemptionReasonCode = null,
+        /**
+         * Befreiungsgrund als Text für E-Rechnungen.
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         */
+        public ?string $vatExemptionReasonText = null,
         /** Erstellungszeitpunkt des Steuersatzes. */
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
@@ -86,6 +107,9 @@ final readonly class TaxRate
             name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
             rate: ScalarCaster::required(ScalarCaster::toFloatOrNull($data['rate'] ?? null), self::class, 'rate'),
             isDefault: ScalarCaster::required(ScalarCaster::toBoolOrNull($data['is_default'] ?? null), self::class, 'is_default'),
+            vatCategoryCode: ScalarCaster::toStringOrNull($data['vat_category_code'] ?? null),
+            vatExemptionReasonCode: ScalarCaster::toStringOrNull($data['vat_exemption_reason_code'] ?? null),
+            vatExemptionReasonText: ScalarCaster::toStringOrNull($data['vat_exemption_reason_text'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -109,6 +133,9 @@ final readonly class TaxRate
             'name' => $this->name,
             'rate' => $this->rate,
             'is_default' => ($this->isDefault ? 1 : 0),
+            'vat_category_code' => $this->vatCategoryCode,
+            'vat_exemption_reason_code' => $this->vatExemptionReasonCode,
+            'vat_exemption_reason_text' => $this->vatExemptionReasonText,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customField,

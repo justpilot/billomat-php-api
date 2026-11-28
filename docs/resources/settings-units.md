@@ -91,8 +91,10 @@ Read and write the `customfield`; see [Custom meta attributes](../concepts/custo
 
 | Class | Fields |
 |---|---|
-| `UnitCreateOptions` | `name` (required) |
-| `UnitUpdateOptions` | `name` (`string\|Clear\|null`; `null` = unchanged) |
+| `UnitCreateOptions` | `name` (required), `uneceCode` (`?string`) |
+| `UnitUpdateOptions` | `name`, `uneceCode` (`string\|Clear\|null`; `null` = unchanged) |
+
+`unece_code` is the unit code from UN/ECE Recommendation 20 used in e-invoices (e.g. `C62` piece, `HUR` hour). Billomat returns and accepts it without documenting it.
 
 Both are immutable; change single fields with `withName()`.
 
@@ -104,6 +106,7 @@ Both are immutable; change single fields with `withName()`.
 |---|---|---|
 | `id` | `id` | `int` |
 | `name` | `name` | `string` |
+| `uneceCode` | `unece_code` | `?string` (UN/ECE Recommendation 20 unit code) |
 | `created`, `updated` | `created`, `updated` | `?\DateTimeImmutable` |
 | `customField` | `customfield` | `?string` — free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md) |
 | `extra` | — | `array<string,mixed>`: fields the SDK doesn't map yet, raw (see [Read models](../concepts/models.md)) |

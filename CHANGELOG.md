@@ -6,6 +6,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Added
+- **Invoices:** the fields Billomat added to its API documentation (November 2026), on `Invoice`, `InvoiceCreateOptions` and `InvoiceUpdateOptions`: `clientDeliveryAddressId`, the service period `supplyDateStart`/`supplyDateEnd`, a bank account per invoice (`bankIban`, `bankSwift`, `bankAccountOwner`, `bankName`) and the e-invoice references `projectReference` and `contractReference`. `facturxReference` can be written now; it was read-only before.
+- **Recurring invoices:** `clientDeliveryAddressId` (documented), plus the bank account, e-invoice references and fixed service period (`supplyDateStartFixed`/`supplyDateEndFixed`) that Billomat returns and accepts without documenting them. The read model also has `supplyDateStartFormula`/`supplyDateEndFormula`. Measured in the sandbox.
+- **Tax rates and units:** the e-invoice codes Billomat returns and accepts without documenting them: `TaxRate::$vatCategoryCode` (UNCL5305), `$vatExemptionReasonCode` (VATEX), `$vatExemptionReasonText` and `Unit::$uneceCode` (UN/ECE Recommendation 20), each also on the create and update options.
+- `TemplateEngine::OWN`, which the sandbox returns in the settings.
+
+### Deprecated
+- `supplyDate` and `supplyDateType` on `Invoice`, `InvoiceCreateOptions` and `InvoiceUpdateOptions`: Billomat's documentation says they are no longer processed. Use `supplyDateStart`/`supplyDateEnd`.
+
 ### Security
 - **`symfony/http-client` at least `^8.1.12`** (dev dependency and suggested PSR-18 client). The release fixes CVE-2026-133750 (`CachingHttpClient` shares responses between users), CVE-2026-133757 and CVE-2026-133758 (`NoPrivateNetworkHttpClient` sends credentials to other origins on redirects and ignores the decorated client's options) and CVE-2026-134792 (the proxy header of a request chooses the proxy in CLI workers). The SDK uses none of the affected clients; the floor keeps projects from installing an affected version.
 

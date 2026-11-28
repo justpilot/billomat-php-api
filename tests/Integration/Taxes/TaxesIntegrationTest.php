@@ -79,10 +79,20 @@ final class TaxesIntegrationTest extends AbstractBillomatIntegrationTestCase
         self::assertSame($name.' (umbenannt)', $renamed->name);
         self::assertSame($rate, $billomat->taxes->getOrFail($taxId)->rate);
 
-        // 4) löschen
+        // 4) E-Rechnungs-Codes (von Billomat nicht dokumentiert, aber angenommen)
+        $coded = $billomat->taxes->update($taxId, new TaxRateUpdateOptions(
+            vatCategoryCode: 'E',
+            vatExemptionReasonCode: 'VATEX-EU-132',
+            vatExemptionReasonText: 'Steuerbefreit',
+        ));
+        self::assertSame('E', $coded->vatCategoryCode);
+        self::assertSame('VATEX-EU-132', $coded->vatExemptionReasonCode);
+        self::assertSame('Steuerbefreit', $coded->vatExemptionReasonText);
+
+        // 5) löschen
         $billomat->taxes->delete($taxId);
 
-        // 5) sicherstellen, dass er weg ist (get() gibt null zurück)
+        // 6) sicherstellen, dass er weg ist (get() gibt null zurück)
         $afterDelete = $billomat->taxes->get($taxId);
         self::assertNull($afterDelete);
     }

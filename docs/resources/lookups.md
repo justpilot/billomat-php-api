@@ -102,6 +102,7 @@ $piece = $billomat->units->get(42);
 |---|---|
 | `id` | `int` |
 | `name` | `string` |
+| `uneceCode` | `?string` (UN/ECE Recommendation 20 unit code for e-invoices) |
 | `created`, `updated` | `?\DateTimeImmutable` |
 | `customField` | `?string` (free extra field, see [Custom meta attributes](../concepts/custom-meta-attributes.md)) |
 

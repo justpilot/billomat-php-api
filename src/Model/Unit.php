@@ -26,6 +26,7 @@ final readonly class Unit
     private const array FIELDS = [
         'id' => true,
         'name' => true,
+        'unece_code' => true,
         'created' => true,
         'updated' => true,
         'customfield' => true,
@@ -37,6 +38,12 @@ final readonly class Unit
         public int $id,
         /** Bezeichnung der Einheit. */
         public string $name,
+        /**
+         * Einheitencode nach UN/ECE Recommendation 20 für E-Rechnungen, z. B. "C62" (Stück) oder "HUR" (Stunde).
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         */
+        public ?string $uneceCode = null,
         /** Erstellungszeitpunkt der Einheit. */
         public ?DateTimeImmutable $created = null,
         /** Zeitpunkt der letzten Änderung. */
@@ -62,6 +69,7 @@ final readonly class Unit
         return new self(
             id: ScalarCaster::required(ScalarCaster::toIntOrNull($data['id'] ?? null), self::class, 'id'),
             name: ScalarCaster::required(ScalarCaster::toStringOrNull($data['name'] ?? null), self::class, 'name'),
+            uneceCode: ScalarCaster::toStringOrNull($data['unece_code'] ?? null),
             created: ScalarCaster::toDateTimeOrNull($data['created'] ?? null),
             updated: ScalarCaster::toDateTimeOrNull($data['updated'] ?? null),
             customField: ScalarCaster::toStringOrNull($data['customfield'] ?? null),
@@ -82,6 +90,7 @@ final readonly class Unit
             ...$this->extra,
             'id' => $this->id,
             'name' => $this->name,
+            'unece_code' => $this->uneceCode,
             'created' => $this->created?->format(DATE_ATOM),
             'updated' => $this->updated?->format(DATE_ATOM),
             'customfield' => $this->customField,

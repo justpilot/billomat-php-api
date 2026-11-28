@@ -42,6 +42,13 @@ final readonly class RecurringCreateOptions implements WriteOptions
          */
         public ?int $contactId = null,
         /**
+         * ID der Lieferadresse des Kunden.
+         *
+         * Billomat-Feld: client_delivery_address_id
+         * Typ: INT
+         */
+        public ?int $clientDeliveryAddressId = null,
+        /**
          * Komplette Adresse.
          *
          * Wird ein leerer Wert übergeben, wird die aktuelle Kunden-Adresse verwendet.
@@ -67,6 +74,24 @@ final readonly class RecurringCreateOptions implements WriteOptions
          * Typ: ALNUM („SUPPLY_DATE“, „DELIVERY_DATE“, „SUPPLY_TEXT“, „DELIVERY_TEXT“)
          */
         public ?SupplyDateType $supplyDateType = null,
+        /**
+         * Fester Beginn des Liefer-/Leistungszeitraums.
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: supply_date_start_fixed
+         */
+        public ?DateTimeImmutable $supplyDateStartFixed = null,
+        /**
+         * Festes Ende des Liefer-/Leistungszeitraums.
+         *
+         * Von Billomat geliefert und angenommen, aber nicht dokumentiert.
+         * Format: YYYY-MM-DD
+         *
+         * Billomat-Feld: supply_date_end_fixed
+         */
+        public ?DateTimeImmutable $supplyDateEndFixed = null,
         /**
          * Tage bis zur Fälligkeit der erzeugten Rechnungen.
          *
@@ -170,6 +195,50 @@ final readonly class RecurringCreateOptions implements WriteOptions
          * @var list<PaymentType>
          */
         public array $paymentTypes = [],
+        /**
+         * IBAN einer vom Account abweichenden Bankverbindung für die erzeugten Rechnungen.
+         *
+         * Von Billomat geliefert und angenommen, aber nur bei Rechnungen dokumentiert.
+         *
+         * Billomat-Feld: bank_iban
+         */
+        public ?string $bankIban = null,
+        /**
+         * BIC der abweichenden Bankverbindung.
+         *
+         * Billomat-Feld: bank_swift
+         */
+        public ?string $bankSwift = null,
+        /**
+         * Kontoinhaber der abweichenden Bankverbindung (max. 250 Zeichen).
+         *
+         * Billomat-Feld: bank_account_owner
+         */
+        public ?string $bankAccountOwner = null,
+        /**
+         * Name der Bank der abweichenden Bankverbindung (max. 100 Zeichen).
+         *
+         * Billomat-Feld: bank_name
+         */
+        public ?string $bankName = null,
+        /**
+         * Bestellreferenz bzw. Auftragsnummer des Käufers für E-Rechnungen (max. 32 Zeichen).
+         *
+         * Billomat-Feld: facturx_reference
+         */
+        public ?string $facturxReference = null,
+        /**
+         * Projektreferenz für E-Rechnungen (max. 255 Zeichen).
+         *
+         * Billomat-Feld: project_reference
+         */
+        public ?string $projectReference = null,
+        /**
+         * Vertragsreferenz für E-Rechnungen (max. 255 Zeichen).
+         *
+         * Billomat-Feld: contract_reference
+         */
+        public ?string $contractReference = null,
         /**
          * Aktion, die bei jedem Lauf ausgeführt wird.
          *
@@ -359,6 +428,12 @@ final readonly class RecurringCreateOptions implements WriteOptions
         return clone($this, ['contactId' => $contactId]);
     }
 
+    /** Kopie mit geändertem `clientDeliveryAddressId`. */
+    public function withClientDeliveryAddressId(?int $clientDeliveryAddressId): self
+    {
+        return clone($this, ['clientDeliveryAddressId' => $clientDeliveryAddressId]);
+    }
+
     /** Kopie mit geändertem `address`. */
     public function withAddress(?string $address): self
     {
@@ -375,6 +450,18 @@ final readonly class RecurringCreateOptions implements WriteOptions
     public function withSupplyDateType(?SupplyDateType $supplyDateType): self
     {
         return clone($this, ['supplyDateType' => $supplyDateType]);
+    }
+
+    /** Kopie mit geändertem `supplyDateStartFixed`. */
+    public function withSupplyDateStartFixed(?DateTimeImmutable $supplyDateStartFixed): self
+    {
+        return clone($this, ['supplyDateStartFixed' => $supplyDateStartFixed]);
+    }
+
+    /** Kopie mit geändertem `supplyDateEndFixed`. */
+    public function withSupplyDateEndFixed(?DateTimeImmutable $supplyDateEndFixed): self
+    {
+        return clone($this, ['supplyDateEndFixed' => $supplyDateEndFixed]);
     }
 
     /** Kopie mit geändertem `dueDays`. */
@@ -457,6 +544,48 @@ final readonly class RecurringCreateOptions implements WriteOptions
     public function withPaymentTypes(array $paymentTypes): self
     {
         return clone($this, ['paymentTypes' => $paymentTypes]);
+    }
+
+    /** Kopie mit geändertem `bankIban`. */
+    public function withBankIban(?string $bankIban): self
+    {
+        return clone($this, ['bankIban' => $bankIban]);
+    }
+
+    /** Kopie mit geändertem `bankSwift`. */
+    public function withBankSwift(?string $bankSwift): self
+    {
+        return clone($this, ['bankSwift' => $bankSwift]);
+    }
+
+    /** Kopie mit geändertem `bankAccountOwner`. */
+    public function withBankAccountOwner(?string $bankAccountOwner): self
+    {
+        return clone($this, ['bankAccountOwner' => $bankAccountOwner]);
+    }
+
+    /** Kopie mit geändertem `bankName`. */
+    public function withBankName(?string $bankName): self
+    {
+        return clone($this, ['bankName' => $bankName]);
+    }
+
+    /** Kopie mit geändertem `facturxReference`. */
+    public function withFacturxReference(?string $facturxReference): self
+    {
+        return clone($this, ['facturxReference' => $facturxReference]);
+    }
+
+    /** Kopie mit geändertem `projectReference`. */
+    public function withProjectReference(?string $projectReference): self
+    {
+        return clone($this, ['projectReference' => $projectReference]);
+    }
+
+    /** Kopie mit geändertem `contractReference`. */
+    public function withContractReference(?string $contractReference): self
+    {
+        return clone($this, ['contractReference' => $contractReference]);
     }
 
     /** Kopie mit geändertem `action`. */
@@ -607,10 +736,13 @@ final readonly class RecurringCreateOptions implements WriteOptions
         $data = array_filter([
             'client_id' => $this->clientId,
             'contact_id' => $this->contactId,
+            'client_delivery_address_id' => $this->clientDeliveryAddressId,
             'address' => $this->address,
             'number_pre' => $this->numberPre,
             'supply_date' => $this->supplyDate?->format('Y-m-d'),
             'supply_date_type' => $this->supplyDateType?->value,
+            'supply_date_start_fixed' => $this->supplyDateStartFixed?->format('Y-m-d'),
+            'supply_date_end_fixed' => $this->supplyDateEndFixed?->format('Y-m-d'),
             'due_days' => $this->dueDays,
             'discount_rate' => $this->discountRate,
             'discount_days' => $this->discountDays,
@@ -624,6 +756,13 @@ final readonly class RecurringCreateOptions implements WriteOptions
             'net_gross' => $this->netGross?->value,
             'quote' => $this->quote,
             'payment_types' => [] === $this->paymentTypes ? null : implode(',', array_map(static fn (PaymentType $v): string => $v->value, $this->paymentTypes)),
+            'bank_iban' => $this->bankIban,
+            'bank_swift' => $this->bankSwift,
+            'bank_account_owner' => $this->bankAccountOwner,
+            'bank_name' => $this->bankName,
+            'facturx_reference' => $this->facturxReference,
+            'project_reference' => $this->projectReference,
+            'contract_reference' => $this->contractReference,
             'action' => $this->action?->value,
             'cycle_number' => $this->cycleNumber,
             'cycle' => $this->cycle?->value,

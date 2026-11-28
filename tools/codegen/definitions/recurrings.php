@@ -12,9 +12,11 @@ declare(strict_types=1);
 
 
 $optionsOrder = [
-    'client_id', 'contact_id', 'address', 'number_pre', 'supply_date', 'supply_date_type', 'due_days', 'discount_rate',
+    'client_id', 'contact_id', 'client_delivery_address_id', 'address', 'number_pre', 'supply_date', 'supply_date_type',
+    'supply_date_start_fixed', 'supply_date_end_fixed', 'due_days', 'discount_rate',
     'discount_days', 'name', 'title', 'label', 'intro', 'note', 'reduction', 'currency_code', 'net_gross', 'quote',
-    'payment_types', 'action', 'cycle_number', 'cycle', 'hour', 'start_date', 'end_date', 'iterations', 'email_sender',
+    'payment_types', 'bank_iban', 'bank_swift', 'bank_account_owner', 'bank_name', 'facturx_reference', 'project_reference',
+    'contract_reference', 'action', 'cycle_number', 'cycle', 'hour', 'start_date', 'end_date', 'iterations', 'email_sender',
     'email_subject', 'email_message', 'email_template_id', 'free_text_id', 'template_id', 'next_creation_date',
     'email_filename', 'email_bcc', 'letter_color', 'letter_duplex', 'letter_paper_weight', 'offer_id', 'confirmation_id',
 ];
@@ -64,7 +66,7 @@ return [
     // Die Reihenfolge entspricht den Konstruktor-Parametern des Read-Models (BC für positionale Aufrufe).
     'filter' => [
         'class' => 'RecurringFilter',
-        'endpoint' => 'GET /api/recurrings',
+        'endpoint' => 'GET /api/recurrings?label=foo',
         'fields' => [
             'payment_type' => ['enum' => 'PaymentType'],
             'cycle' => ['enum' => 'RecurringCycle'],
@@ -75,11 +77,16 @@ return [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Abo-Rechnung.'],
         'client_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
+        'client_delivery_address_id' => ['doc' => 'ID der Lieferadresse des Kunden.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Abo-Rechnung.'],
         'address' => ['doc' => 'Komplette Adresse.', 'details' => ['Wird ein leerer Wert übergeben, wird die aktuelle Kunden-Adresse verwendet.']],
         // BC: Die Spec erlaubt auch Freitext (MIXED), das SDK führt das Feld als Datum.
         'supply_date' => ['type' => 'date', 'doc' => 'Liefer-/Leistungsdatum.'],
         'supply_date_type' => ['enum' => 'SupplyDateType', 'doc' => 'Typ des Liefer-/Leistungsdatums.'],
+        'supply_date_start_fixed' => ['type' => 'date', 'writable' => true, 'doc' => 'Fester Beginn des Liefer-/Leistungszeitraums.', 'details' => ['Von Billomat geliefert und angenommen, aber nicht dokumentiert.']],
+        'supply_date_end_fixed' => ['type' => 'date', 'writable' => true, 'doc' => 'Festes Ende des Liefer-/Leistungszeitraums.', 'details' => ['Von Billomat geliefert und angenommen, aber nicht dokumentiert.']],
+        'supply_date_start_formula' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Formel für den Beginn des Liefer-/Leistungszeitraums.', 'details' => ['Von Billomat geliefert, aber nicht dokumentiert.']],
+        'supply_date_end_formula' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Formel für das Ende des Liefer-/Leistungszeitraums.', 'details' => ['Von Billomat geliefert, aber nicht dokumentiert.']],
         'due_days' => ['doc' => 'Tage bis zur Fälligkeit der erzeugten Rechnungen.'],
         'discount_rate' => ['create' => ['type' => 'int'], 'update' => ['type' => 'int'], 'doc' => 'Skonto in Prozent.'],
         'discount_days' => ['doc' => 'Skontofrist in Tagen.'],
@@ -98,6 +105,13 @@ return [
             'enum' => 'PaymentType',
             'enumList' => true,
         ],
+        'bank_iban' => ['type' => 'string', 'writable' => true, 'doc' => 'IBAN einer vom Account abweichenden Bankverbindung für die erzeugten Rechnungen.', 'details' => ['Von Billomat geliefert und angenommen, aber nur bei Rechnungen dokumentiert.']],
+        'bank_swift' => ['type' => 'string', 'writable' => true, 'doc' => 'BIC der abweichenden Bankverbindung.'],
+        'bank_account_owner' => ['type' => 'string', 'writable' => true, 'doc' => 'Kontoinhaber der abweichenden Bankverbindung (max. 250 Zeichen).'],
+        'bank_name' => ['type' => 'string', 'writable' => true, 'doc' => 'Name der Bank der abweichenden Bankverbindung (max. 100 Zeichen).'],
+        'facturx_reference' => ['type' => 'string', 'writable' => true, 'doc' => 'Bestellreferenz bzw. Auftragsnummer des Käufers für E-Rechnungen (max. 32 Zeichen).'],
+        'project_reference' => ['type' => 'string', 'writable' => true, 'doc' => 'Projektreferenz für E-Rechnungen (max. 255 Zeichen).'],
+        'contract_reference' => ['type' => 'string', 'writable' => true, 'doc' => 'Vertragsreferenz für E-Rechnungen (max. 255 Zeichen).'],
         'action' => ['enum' => 'RecurringAction', 'doc' => 'Aktion, die bei jedem Lauf ausgeführt wird.'],
         'cycle_number' => ['doc' => 'Anzahl der Intervall-Einheiten zwischen zwei Läufen.'],
         'cycle' => ['enum' => 'RecurringCycle', 'doc' => 'Intervall-Einheit (z. B. monatlich).'],

@@ -249,4 +249,40 @@ final class RecurringsIntegrationTest extends AbstractBillomatIntegrationTestCas
             $billomat->recurrings->delete($recurring->id);
         }
     }
+
+    /**
+     * Bankverbindung, E-Rechnungs-Referenzen und fester Leistungszeitraum: Billomat dokumentiert sie nur bei
+     * Rechnungen, speichert sie aber auch bei Abo-Rechnungen.
+     */
+    #[Group('integration')]
+    #[Test]
+    public function bankAccountReferencesAndFixedServicePeriodRoundTrip(): void
+    {
+        $billomat = $this->createBillomatClientOrSkip();
+
+        $created = $billomat->recurrings->create($this->buildSafeDraft($billomat)
+            ->withBankIban('DE89370400440532013000')
+            ->withBankName('Testbank')
+            ->withFacturxReference('PO-1')
+            ->withProjectReference('PRJ-1')
+            ->withContractReference('CTR-1')
+            ->withSupplyDateStartFixed(new DateTimeImmutable('2027-01-01'))
+            ->withSupplyDateEndFixed(new DateTimeImmutable('2027-01-31')));
+
+        try {
+            self::assertSame('DE89370400440532013000', $created->bankIban);
+            self::assertSame('Testbank', $created->bankName);
+            self::assertSame('PO-1', $created->facturxReference);
+            self::assertSame('PRJ-1', $created->projectReference);
+            self::assertSame('CTR-1', $created->contractReference);
+            self::assertSame('2027-01-01', $created->supplyDateStartFixed?->format('Y-m-d'));
+            self::assertSame('2027-01-31', $created->supplyDateEndFixed?->format('Y-m-d'));
+
+            $updated = $billomat->recurrings->update($created->id, new RecurringUpdateOptions(contractReference: 'CTR-2'));
+            self::assertSame('CTR-2', $updated->contractReference);
+            self::assertSame('PRJ-1', $updated->projectReference);
+        } finally {
+            $billomat->recurrings->delete($created->id);
+        }
+    }
 }

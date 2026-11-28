@@ -13,9 +13,10 @@ use PHPUnit\Framework\TestCase;
 final class TemplateEngineTest extends TestCase
 {
     #[Test]
-    public function itExposesDefaultCase(): void
+    public function itExposesItsCases(): void
     {
         self::assertSame('DEFAULT', TemplateEngine::DEFAULT->value);
+        self::assertSame('OWN', TemplateEngine::OWN->value);
     }
 
     #[Test]
@@ -24,5 +25,6 @@ final class TemplateEngineTest extends TestCase
         self::assertNull(TemplateEngine::fromApi(null));
         self::assertNull(TemplateEngine::fromApi('BOGUS'));
         self::assertSame(TemplateEngine::DEFAULT, TemplateEngine::fromApi('DEFAULT'));
+        self::assertSame(TemplateEngine::OWN, TemplateEngine::fromApi('OWN'));
     }
 }

@@ -1118,6 +1118,9 @@ function optionsDocLines(array $field, bool $isCreate): array
     if ($isCreate && null !== $field['specDefault']) {
         $lines[] = 'Default: ' . $field['specDefault'];
     }
+    if (null !== $field['deprecated']) {
+        $lines = [...$lines, '', '@deprecated ' . $field['deprecated']];
+    }
 
     return $lines;
 }

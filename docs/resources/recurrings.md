@@ -148,6 +148,7 @@ Constructor: `new RecurringCreateOptions(int $clientId, …)`. `clientId` is req
 |---|---|---|
 | `clientId` | `client_id` | `int` (required) |
 | `contactId` | `contact_id` | `?int` |
+| `clientDeliveryAddressId` | `client_delivery_address_id` | `?int` (the client's delivery address) |
 | `address` | `address` | `?string` |
 | `numberPre` | `number_pre` | `?string` |
 | `name` | `name` | `?string`, internal name |
@@ -170,9 +171,27 @@ Constructor: `new RecurringCreateOptions(int $clientId, …)`. `clientId` is req
 |---|---|---|
 | `supplyDate` | `supply_date` | `?\DateTimeImmutable` |
 | `supplyDateType` | `supply_date_type` | `?SupplyDateType` |
+| `supplyDateStartFixed` | `supply_date_start_fixed` | `?\DateTimeImmutable` |
+| `supplyDateEndFixed` | `supply_date_end_fixed` | `?\DateTimeImmutable` |
 | `dueDays` | `due_days` | `?int` |
 | `discountRate` | `discount_rate` | `?int` |
 | `discountDays` | `discount_days` | `?int` |
+
+Billomat returns and accepts `supply_date_start_fixed` and `supply_date_end_fixed` (a fixed delivery/service period) without documenting them. The read model also has `supplyDateStartFormula` and `supplyDateEndFormula`; their format is undocumented, so the SDK doesn't send them.
+
+### Bank account and e-invoice references
+
+Billomat documents these fields only for [invoices](invoices.md#bank-account), but returns and accepts them on recurring invoices as well.
+
+| Property | Billomat field | Type |
+|---|---|---|
+| `bankIban` | `bank_iban` | `?string` (required as soon as another `bank*` field is set) |
+| `bankSwift` | `bank_swift` | `?string` (BIC) |
+| `bankAccountOwner` | `bank_account_owner` | `?string` (max. 250 characters) |
+| `bankName` | `bank_name` | `?string` (max. 100 characters) |
+| `facturxReference` | `facturx_reference` | `?string` (buyer's order reference, max. 32 characters) |
+| `projectReference` | `project_reference` | `?string` (max. 255 characters) |
+| `contractReference` | `contract_reference` | `?string` (max. 255 characters) |
 
 ### Recurrence
 
@@ -229,9 +248,12 @@ Has the same fields as `RecurringCreateOptions`, but `clientId` is optional (for
 | `id` | `int` |
 | `clientId` | `int` |
 | `contactId` | `?int` |
+| `clientDeliveryAddressId` | `?int` |
 | `created` | `?\DateTimeImmutable` |
 | `address` | `?string` |
 | `supplyDate`, `startDate`, `endDate` | `?\DateTimeImmutable` |
+| `supplyDateStartFixed`, `supplyDateEndFixed` | `?\DateTimeImmutable` |
+| `supplyDateStartFormula`, `supplyDateEndFormula` | `?string` |
 | `supplyDateType` | `?SupplyDateType` |
 | `dueDays`, `discountRate`, `discountDays` | `?int`, `?float`, `?int` |
 | `name`, `title`, `label`, `intro`, `note`, `reduction` | `?string` |
@@ -239,6 +261,8 @@ Has the same fields as `RecurringCreateOptions`, but `clientId` is optional (for
 | `paymentTypes` | `list<PaymentType>` (unknown values are dropped) |
 | `netGross` | `?NetGross` |
 | `quote` | `?float` |
+| `bankIban`, `bankSwift`, `bankAccountOwner`, `bankName` | `?string` |
+| `facturxReference`, `projectReference`, `contractReference` | `?string` |
 | `action`, `cycle` | `?RecurringAction`, `?RecurringCycle` |
 | `cycleNumber`, `hour`, `iterations`, `counter` | `?int` |
 | `lastCreationDate`, `nextCreationDate` | `?\DateTimeImmutable` |

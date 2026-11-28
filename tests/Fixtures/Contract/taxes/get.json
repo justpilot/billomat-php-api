@@ -2,9 +2,12 @@
     "tax": {
         "id": "271923",
         "created": "2025-12-24T22:59:58+01:00",
-        "updated": "2025-12-24T22:59:58+01:00",
-        "name": "Name 13",
+        "updated": "2026-11-08T19:58:04+01:00",
+        "name": "Name 14",
         "rate": "0",
+        "vat_category_code": "",
+        "vat_exemption_reason_code": "",
+        "vat_exemption_reason_text": "",
         "is_default": "0",
         "can_delete": "0",
         "customfield": ""

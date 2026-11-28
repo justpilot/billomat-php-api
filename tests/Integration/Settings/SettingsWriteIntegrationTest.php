@@ -39,10 +39,13 @@ final class SettingsWriteIntegrationTest extends AbstractBillomatIntegrationTest
         $billomat = $this->createBillomatClientOrSkip();
         $name = 'IT-Einheit '.bin2hex(random_bytes(3));
 
-        $unit = $billomat->units->create(new UnitCreateOptions(name: $name));
+        $unit = $billomat->units->create(new UnitCreateOptions(name: $name, uneceCode: 'H87'));
         try {
             self::assertSame($name, $unit->name);
-            self::assertSame($name.'-u', $billomat->units->update($unit->id, new UnitUpdateOptions(name: $name.'-u'))->name);
+            self::assertSame('H87', $unit->uneceCode);
+            $updated = $billomat->units->update($unit->id, new UnitUpdateOptions(name: $name.'-u', uneceCode: 'C62'));
+            self::assertSame($name.'-u', $updated->name);
+            self::assertSame('C62', $updated->uneceCode);
         } finally {
             $billomat->units->delete($unit->id);
         }

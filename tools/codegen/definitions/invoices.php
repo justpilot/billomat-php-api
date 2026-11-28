@@ -12,10 +12,11 @@ declare(strict_types=1);
 
 
 $optionsOrder = static fn (string ...$swap): array => [
-    'client_id', 'contact_id', 'address', 'number_pre', 'number', 'number_length', 'date', 'supply_date', 'supply_date_type',
-    'due_days', 'due_date', 'discount_rate', 'discount_days', 'discount_date', 'title', 'label', 'intro', 'note', 'reduction',
+    'client_id', 'contact_id', 'client_delivery_address_id', 'address', 'number_pre', 'number', 'number_length', 'date',
+    'supply_date_start', 'supply_date_end', 'supply_date', 'supply_date_type', 'due_days', 'due_date', 'discount_rate', 'discount_days', 'discount_date', 'title', 'label', 'intro', 'note', 'reduction',
     ...$swap,
-    'quote', 'payment_types', 'invoice_id', 'offer_id', 'confirmation_id', 'recurring_id', 'free_text_id', 'template_id',
+    'quote', 'payment_types', 'bank_iban', 'bank_swift', 'bank_account_owner', 'bank_name', 'facturx_reference',
+    'project_reference', 'contract_reference', 'invoice_id', 'offer_id', 'confirmation_id', 'recurring_id', 'free_text_id', 'template_id',
 ];
 
 return [
@@ -80,6 +81,7 @@ return [
         'id' => ['type' => 'int', 'readOnly' => true, 'model' => ['required' => true], 'doc' => 'Interne Billomat-ID der Rechnung.'],
         'client_id' => ['model' => ['required' => true], 'create' => ['constructor' => true], 'doc' => 'ID des Kunden.'],
         'contact_id' => ['doc' => 'ID des Kontakts.'],
+        'client_delivery_address_id' => ['doc' => 'ID der Lieferadresse des Kunden.'],
         'created' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Erstellungszeitpunkt der Rechnung.'],
         'invoice_number' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Rechnungsnummer (kann bei DRAFT leer sein).'],
         'number' => ['doc' => 'Laufende Nummer (ohne Präfix).'],
@@ -88,8 +90,10 @@ return [
         'status' => ['type' => 'string', 'readOnly' => true, 'enum' => 'InvoiceStatus', 'doc' => 'Status der Rechnung, z. B. DRAFT, OPEN, PAID.'],
         'date' => ['doc' => 'Rechnungsdatum.'],
         // BC: Die Spec erlaubt auch Freitext (MIXED), das SDK führt das Feld als Datum.
-        'supply_date' => ['type' => 'date', 'doc' => 'Liefer-/Leistungsdatum.'],
-        'supply_date_type' => ['enum' => 'SupplyDateType', 'doc' => 'Typ des Liefer-/Leistungsdatums.'],
+        'supply_date' => ['type' => 'date', 'doc' => 'Liefer-/Leistungsdatum.', 'deprecated' => 'wird von Billomat nicht mehr verarbeitet; stattdessen supplyDateStart/supplyDateEnd verwenden'],
+        'supply_date_type' => ['enum' => 'SupplyDateType', 'doc' => 'Typ des Liefer-/Leistungsdatums.', 'deprecated' => 'wird von Billomat nicht mehr verarbeitet; stattdessen supplyDateStart/supplyDateEnd verwenden'],
+        'supply_date_start' => ['doc' => 'Beginn des Liefer-/Leistungszeitraums.'],
+        'supply_date_end' => ['doc' => 'Ende des Liefer-/Leistungszeitraums.'],
         'due_date' => ['doc' => 'Fälligkeitsdatum.'],
         'due_days' => ['doc' => 'Tage bis zur Fälligkeit.'],
         'address' => ['doc' => 'Vollständige Rechnungsadresse (formatiert).'],
@@ -122,6 +126,19 @@ return [
             'enum' => 'PaymentType',
             'enumList' => true,
         ],
+        'bank_iban' => [
+            'doc' => 'IBAN einer vom Account abweichenden Bankverbindung für diese Rechnung.',
+            'details' => [
+                'Erscheint auf dem PDF und in der E-Rechnung statt der Bankverbindung aus den Einstellungen.',
+                'Billomat prüft die Prüfsumme; Pflicht, sobald eines der anderen bank_*-Felder gesetzt ist.',
+                'Korrekturrechnungen übernehmen die Bankverbindung der korrigierten Rechnung.',
+            ],
+        ],
+        'bank_swift' => ['doc' => 'BIC der abweichenden Bankverbindung.'],
+        'bank_account_owner' => ['doc' => 'Kontoinhaber der abweichenden Bankverbindung (max. 250 Zeichen).'],
+        'bank_name' => ['doc' => 'Name der Bank der abweichenden Bankverbindung (max. 100 Zeichen).'],
+        'project_reference' => ['doc' => 'Projektreferenz für E-Rechnungen (max. 255 Zeichen).'],
+        'contract_reference' => ['doc' => 'Vertragsreferenz für E-Rechnungen (max. 255 Zeichen).'],
         'template_id' => ['doc' => 'ID der Vorlage, mit der die Rechnung abgeschlossen wird.'],
         'invoice-items' => [
             'type' => 'list',
@@ -132,7 +149,10 @@ return [
         ],
         'updated' => ['type' => 'datetime', 'readOnly' => true, 'doc' => 'Zeitpunkt der letzten Änderung.'],
         'customfield' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Freies Zusatzfeld (siehe Custom-Meta-Attribute).'],
-        'facturx_reference' => ['type' => 'string', 'readOnly' => true, 'doc' => 'Referenz der Factur-X-/ZUGFeRD-Rechnung.'],
+        'facturx_reference' => [
+            'doc' => 'Bestellreferenz bzw. Auftragsnummer des Käufers für E-Rechnungen (max. 32 Zeichen).',
+            'details' => ['Nur verfügbar, wenn facturx_fields_enabled beim eigenen Unternehmen (`$billomat->clients->getMyself()`) aktiv ist.'],
+        ],
         'total_reduction' => ['type' => 'float', 'readOnly' => true, 'doc' => 'Summe der Rabatte.'],
         'dig_proceeded' => ['type' => 'bool', 'readOnly' => true, 'doc' => 'Wurde die Rechnung digital weiterverarbeitet?'],
         'free_text_id' => ['optionsOnly' => true, 'doc' => 'ID des Freitextes zur Belegung von title, label, intro und note.'],

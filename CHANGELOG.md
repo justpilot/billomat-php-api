@@ -6,6 +6,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 
+### Security
+- **`symfony/http-client` at least `^8.1.12`** (dev dependency and suggested PSR-18 client). The release fixes CVE-2026-133750 (`CachingHttpClient` shares responses between users), CVE-2026-133757 and CVE-2026-133758 (`NoPrivateNetworkHttpClient` sends credentials to other origins on redirects and ignores the decorated client's options) and CVE-2026-134792 (the proxy header of a request chooses the proxy in CLI workers). The SDK uses none of the affected clients; the floor keeps projects from installing an affected version.
+
 ### Changed
 - `main` is the 4.x line now (`dev-main` is aliased to `4.x-dev`); security fixes for 3.x go to the `3.x` branch.
 

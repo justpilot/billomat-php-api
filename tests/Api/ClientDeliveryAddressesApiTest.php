@@ -14,6 +14,7 @@ use Justpilot\Billomat\Api\SubResourceFilter;
 use Justpilot\Billomat\BillomatClient;
 use Justpilot\Billomat\Config\BillomatConfig;
 use Justpilot\Billomat\Config\RetryPolicy;
+use Justpilot\Billomat\Exception\HttpException;
 use Justpilot\Billomat\Http\BillomatHttpClient;
 use Justpilot\Billomat\Internal\ScalarCaster;
 use Justpilot\Billomat\Model\ClientDeliveryAddress;
@@ -39,6 +40,7 @@ use const JSON_THROW_ON_ERROR;
 #[UsesClass(OrderBy::class)]
 #[UsesClass(SubResourceFilter::class)]
 #[UsesClass(RetryPolicy::class)]
+#[UsesClass(HttpException::class)]
 #[UsesClass(BillomatHttpClient::class)]
 #[UsesClass(ScalarCaster::class)]
 final class ClientDeliveryAddressesApiTest extends TestCase
